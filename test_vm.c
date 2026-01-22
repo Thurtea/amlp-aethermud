@@ -15,6 +15,8 @@
 
 #include "vm.h"
 #include "object.h"
+#include "array.h"
+#include "mapping.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -903,7 +905,7 @@ void test_make_array(void) {
     vm_execute(vm);
     
     VMValue result = vm->stack->values[0];
-    test_assert(result.type == VALUE_ARRAY && result.data.array_value->size == 3, 
+    test_assert(result.type == VALUE_ARRAY && array_length(result.data.array_value) == 3, 
                 "Expected array with 3 elements");
     
     vm_free(vm);
@@ -958,7 +960,7 @@ void test_make_mapping(void) {
     vm_execute(vm);
     
     VMValue result = vm->stack->values[0];
-    test_assert(result.type == VALUE_MAPPING && result.data.mapping_value->size == 2, 
+    test_assert(result.type == VALUE_MAPPING && mapping_size(result.data.mapping_value) == 2, 
                 "Expected mapping with 2 entries");
     
     vm_free(vm);

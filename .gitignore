@@ -1,15 +1,18 @@
-# Session documentation
-session-docs/
-
 # Build artifacts
+build/
 *.o
-test_lexer
-test_parser
-test_vm
-test_object
-test_gc
-test_efun
-test_array
-test_mapping
-driver
 *.log
+
+# Backup files
+*.old
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

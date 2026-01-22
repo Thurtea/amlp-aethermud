@@ -1,174 +1,142 @@
 # Makefile for LPC MUD Driver
-# Builds the driver with all components
+# Standard C project structure with src/, tests/, build/ directories
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -O2 -std=c99
+CFLAGS = -Wall -Wextra -Werror -g -O2 -std=c99 -Isrc
 LDFLAGS = -lm
 
-# Source files
-DRIVER_SRCS = driver.c lexer.c parser.c vm.c codegen.c object.c gc.c efun.c array.c mapping.c
-DRIVER_OBJS = $(DRIVER_SRCS:.c=.o)
+# Directories
+SRC_DIR = src
+TEST_DIR = tests
+BUILD_DIR = build
 
-TEST_SRCS = test_lexer.c lexer.c
-TEST_OBJS = $(TEST_SRCS:.c=.o)
+# Source files (in src/)
+DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/vm.c $(SRC_DIR)/codegen.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c
+DRIVER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(DRIVER_SRCS))
 
-PARSER_TEST_SRCS = test_parser.c lexer.c parser.c
-PARSER_TEST_OBJS = $(PARSER_TEST_SRCS:.c=.o)
+TEST_LEXER_SRCS = $(TEST_DIR)/test_lexer.c $(SRC_DIR)/lexer.c
+TEST_LEXER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_LEXER_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_LEXER_SRCS)))
 
-VM_TEST_SRCS = test_vm.c vm.c object.c array.c mapping.c gc.c
-VM_TEST_OBJS = $(VM_TEST_SRCS:.c=.o)
+TEST_PARSER_SRCS = $(TEST_DIR)/test_parser.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c
+TEST_PARSER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_PARSER_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_PARSER_SRCS)))
 
-OBJECT_TEST_SRCS = test_object.c object.c vm.c array.c mapping.c gc.c
-OBJECT_TEST_OBJS = $(OBJECT_TEST_SRCS:.c=.o)
+TEST_VM_SRCS = $(TEST_DIR)/test_vm.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c
+TEST_VM_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_VM_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_VM_SRCS)))
 
-GC_TEST_SRCS = test_gc.c gc.c
-GC_TEST_OBJS = $(GC_TEST_SRCS:.c=.o)
+TEST_OBJECT_SRCS = $(TEST_DIR)/test_object.c $(SRC_DIR)/object.c $(SRC_DIR)/vm.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c
+TEST_OBJECT_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_OBJECT_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_OBJECT_SRCS)))
 
-EFUN_TEST_SRCS = test_efun.c efun.c vm.c object.c array.c mapping.c gc.c
-EFUN_TEST_OBJS = $(EFUN_TEST_SRCS:.c=.o)
+TEST_GC_SRCS = $(TEST_DIR)/test_gc.c $(SRC_DIR)/gc.c
+TEST_GC_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_GC_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_GC_SRCS)))
 
-ARRAY_TEST_SRCS = test_array.c array.c mapping.c vm.c object.c gc.c
-ARRAY_TEST_OBJS = $(ARRAY_TEST_SRCS:.c=.o)
+TEST_EFUN_SRCS = $(TEST_DIR)/test_efun.c $(SRC_DIR)/efun.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c
+TEST_EFUN_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_EFUN_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_EFUN_SRCS)))
 
-MAPPING_TEST_SRCS = test_mapping.c mapping.c array.c vm.c object.c gc.c
-MAPPING_TEST_OBJS = $(MAPPING_TEST_SRCS:.c=.o)
+TEST_ARRAY_SRCS = $(TEST_DIR)/test_array.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c
+TEST_ARRAY_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_ARRAY_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_ARRAY_SRCS)))
+
+TEST_MAPPING_SRCS = $(TEST_DIR)/test_mapping.c $(SRC_DIR)/mapping.c $(SRC_DIR)/array.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c
+TEST_MAPPING_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_MAPPING_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_MAPPING_SRCS)))
 
 # Build targets
-all: driver test_lexer test_parser test_vm test_object test_gc test_efun test_array test_mapping
+all: $(BUILD_DIR)/driver $(BUILD_DIR)/test_lexer $(BUILD_DIR)/test_parser $(BUILD_DIR)/test_vm $(BUILD_DIR)/test_object $(BUILD_DIR)/test_gc $(BUILD_DIR)/test_efun $(BUILD_DIR)/test_array $(BUILD_DIR)/test_mapping
 
-driver: $(DRIVER_OBJS)
+$(BUILD_DIR)/driver: $(DRIVER_OBJS)
 	@echo "[Linking] Building driver executable..."
-	$(CC) $(CFLAGS) -o driver $(DRIVER_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] Driver built successfully!"
 
-test_lexer: $(TEST_OBJS)
+$(BUILD_DIR)/test_lexer: $(TEST_LEXER_OBJS)
 	@echo "[Linking] Building lexer test..."
-	$(CC) $(CFLAGS) -o test_lexer $(TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] Lexer test built successfully!"
 
-test_parser: $(PARSER_TEST_OBJS)
+$(BUILD_DIR)/test_parser: $(TEST_PARSER_OBJS)
 	@echo "[Linking] Building parser test..."
-	$(CC) $(CFLAGS) -o test_parser $(PARSER_TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] Parser test built successfully!"
 
-test_vm: $(VM_TEST_OBJS)
+$(BUILD_DIR)/test_vm: $(TEST_VM_OBJS)
 	@echo "[Linking] Building VM test..."
-	$(CC) $(CFLAGS) -o test_vm $(VM_TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] VM test built successfully!"
 
-test_object: $(OBJECT_TEST_OBJS)
+$(BUILD_DIR)/test_object: $(TEST_OBJECT_OBJS)
 	@echo "[Linking] Building object test..."
-	$(CC) $(CFLAGS) -o test_object $(OBJECT_TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] Object test built successfully!"
 
-test_gc: $(GC_TEST_OBJS)
+$(BUILD_DIR)/test_gc: $(TEST_GC_OBJS)
 	@echo "[Linking] Building GC test..."
-	$(CC) $(CFLAGS) -o test_gc $(GC_TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] GC test built successfully!"
 
-test_efun: $(EFUN_TEST_OBJS)
+$(BUILD_DIR)/test_efun: $(TEST_EFUN_OBJS)
 	@echo "[Linking] Building efun test..."
-	$(CC) $(CFLAGS) -o test_efun $(EFUN_TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] Efun test built successfully!"
 
-test_array: $(ARRAY_TEST_OBJS)
+$(BUILD_DIR)/test_array: $(TEST_ARRAY_OBJS)
 	@echo "[Linking] Building array test..."
-	$(CC) $(CFLAGS) -o test_array $(ARRAY_TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] Array test built successfully!"
 
-test_mapping: $(MAPPING_TEST_OBJS)
+$(BUILD_DIR)/test_mapping: $(TEST_MAPPING_OBJS)
 	@echo "[Linking] Building mapping test..."
-	$(CC) $(CFLAGS) -o test_mapping $(MAPPING_TEST_OBJS) $(LDFLAGS)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "[Success] Mapping test built successfully!"
 
 # Object file compilation rules
-driver.o: driver.c lexer.h parser.h vm.h
-	@echo "[Compiling] driver.c"
-	$(CC) $(CFLAGS) -c driver.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo "[Compiling] $<"
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-lexer.o: lexer.c lexer.h
-	@echo "[Compiling] lexer.c"
-	$(CC) $(CFLAGS) -c lexer.c
-
-parser.o: parser.c parser.h lexer.h
-	@echo "[Compiling] parser.c"
-	$(CC) $(CFLAGS) -c parser.c
-
-vm.o: vm.c vm.h lexer.h parser.h object.h
-	@echo "[Compiling] vm.c"
-	$(CC) $(CFLAGS) -c vm.c
-
-codegen.o: codegen.c codegen.h vm.h parser.h
-	@echo "[Compiling] codegen.c"
-	$(CC) $(CFLAGS) -c codegen.c
-
-object.o: object.c object.h vm.h
-	@echo "[Compiling] object.c"
-	$(CC) $(CFLAGS) -c object.c
-
-gc.o: gc.c gc.h
-	@echo "[Compiling] gc.c"
-	$(CC) $(CFLAGS) -c gc.c
-
-efun.o: efun.c efun.h vm.h
-	@echo "[Compiling] efun.c"
-	$(CC) $(CFLAGS) -c efun.c
-
-test_lexer.o: test_lexer.c lexer.h
-	@echo "[Compiling] test_lexer.c"
-	$(CC) $(CFLAGS) -c test_lexer.c
-
-test_parser.o: test_parser.c parser.h lexer.h
-	@echo "[Compiling] test_parser.c"
-	$(CC) $(CFLAGS) -c test_parser.c
-
-test_vm.o: test_vm.c vm.h object.h
-	@echo "[Compiling] test_vm.c"
-	$(CC) $(CFLAGS) -c test_vm.c
-
-test_object.o: test_object.c object.h vm.h
-	@echo "[Compiling] test_object.c"
-	$(CC) $(CFLAGS) -c test_object.c
-
-test_array.o: test_array.c array.h vm.h gc.h
-	@echo "[Compiling] test_array.c"
-	$(CC) $(CFLAGS) -c test_array.c
-
-test_mapping.o: test_mapping.c mapping.h array.h vm.h gc.h
-	@echo "[Compiling] test_mapping.c"
-	$(CC) $(CFLAGS) -c test_mapping.c
+$(BUILD_DIR)/%.o: $(TEST_DIR)/%.c
+	@echo "[Compiling] $<"
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Test targets
-test: test_lexer test_parser test_vm test_object test_gc test_efun test_array test_mapping
+test: $(BUILD_DIR)/test_lexer $(BUILD_DIR)/test_parser $(BUILD_DIR)/test_vm $(BUILD_DIR)/test_object $(BUILD_DIR)/test_gc $(BUILD_DIR)/test_efun $(BUILD_DIR)/test_array $(BUILD_DIR)/test_mapping
 	@echo ""
 	@echo "====== Running Lexer Tests ======"
-	./test_lexer
+	$(BUILD_DIR)/test_lexer
 	@echo ""
 	@echo "====== Running Parser Tests ======"
-	./test_parser
+	$(BUILD_DIR)/test_parser
 	@echo ""
 	@echo "====== Running VM Tests ======"
-	./test_vm
+	$(BUILD_DIR)/test_vm
 	@echo ""
 	@echo "====== Running Object Tests ======"
-	./test_object
+	$(BUILD_DIR)/test_object
 	@echo ""
 	@echo "====== Running GC Tests ======"
-	./test_gc
+	$(BUILD_DIR)/test_gc
 	@echo ""
 	@echo "====== Running Efun Tests ======"
-	./test_efun
+	$(BUILD_DIR)/test_efun
 	@echo ""
 	@echo "====== Running Array Tests ======"
-	./test_array
+	$(BUILD_DIR)/test_array
 	@echo ""
 	@echo "====== Running Mapping Tests ======"
-	./test_mapping
+	$(BUILD_DIR)/test_mapping
 
 # Clean build artifacts
 clean:
 	@echo "[Cleaning] Removing build artifacts..."
-	rm -f *.o driver test_lexer test_parser test_vm test_object test_gc test_efun test_array test_mapping
+	rm -rf $(BUILD_DIR)
 	@echo "[Success] Cleaned!"
 
 # Clean everything including tests
@@ -186,6 +154,10 @@ help:
 	@echo "  test_parser   - Build parser test program"
 	@echo "  test_vm       - Build VM test program"
 	@echo "  test_object   - Build object system test program"
+	@echo "  test_gc       - Build GC test program"
+	@echo "  test_efun     - Build efun test program"
+	@echo "  test_array    - Build array test program"
+	@echo "  test_mapping  - Build mapping test program"
 	@echo "  test          - Run all tests"
 	@echo "  clean         - Remove build artifacts"
 	@echo "  distclean     - Remove all generated files"

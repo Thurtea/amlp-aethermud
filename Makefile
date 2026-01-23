@@ -20,10 +20,10 @@ TEST_LEXER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)
 TEST_PARSER_SRCS = $(TEST_DIR)/test_parser.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c
 TEST_PARSER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_PARSER_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_PARSER_SRCS)))
 
-TEST_VM_SRCS = $(TEST_DIR)/test_vm.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c
+TEST_VM_SRCS = $(TEST_DIR)/test_vm.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c
 TEST_VM_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_VM_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_VM_SRCS)))
 
-TEST_OBJECT_SRCS = $(TEST_DIR)/test_object.c $(SRC_DIR)/object.c $(SRC_DIR)/vm.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c
+TEST_OBJECT_SRCS = $(TEST_DIR)/test_object.c $(SRC_DIR)/object.c $(SRC_DIR)/vm.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c
 TEST_OBJECT_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_OBJECT_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_OBJECT_SRCS)))
 
 TEST_GC_SRCS = $(TEST_DIR)/test_gc.c $(SRC_DIR)/gc.c
@@ -32,22 +32,22 @@ TEST_GC_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,
 TEST_EFUN_SRCS = $(TEST_DIR)/test_efun.c $(SRC_DIR)/efun.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c
 TEST_EFUN_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_EFUN_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_EFUN_SRCS)))
 
-TEST_ARRAY_SRCS = $(TEST_DIR)/test_array.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c
+TEST_ARRAY_SRCS = $(TEST_DIR)/test_array.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c
 TEST_ARRAY_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_ARRAY_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_ARRAY_SRCS)))
 
-TEST_MAPPING_SRCS = $(TEST_DIR)/test_mapping.c $(SRC_DIR)/mapping.c $(SRC_DIR)/array.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c
+TEST_MAPPING_SRCS = $(TEST_DIR)/test_mapping.c $(SRC_DIR)/mapping.c $(SRC_DIR)/array.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c
 TEST_MAPPING_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_MAPPING_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_MAPPING_SRCS)))
 
-TEST_COMPILER_SRCS = $(TEST_DIR)/test_compiler.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c
+TEST_COMPILER_SRCS = $(TEST_DIR)/test_compiler.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/efun.c
 TEST_COMPILER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_COMPILER_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_COMPILER_SRCS)))
 
-TEST_PROGRAM_SRCS = $(TEST_DIR)/test_program.c $(SRC_DIR)/program.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c
+TEST_PROGRAM_SRCS = $(TEST_DIR)/test_program.c $(SRC_DIR)/program.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c
 TEST_PROGRAM_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_PROGRAM_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_PROGRAM_SRCS)))
 
-TEST_SIMUL_EFUN_SRCS = $(TEST_DIR)/test_simul_efun.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c
+TEST_SIMUL_EFUN_SRCS = $(TEST_DIR)/test_simul_efun.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/efun.c
 TEST_SIMUL_EFUN_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_SIMUL_EFUN_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_SIMUL_EFUN_SRCS)))
 
-TEST_VM_EXECUTION_SRCS = $(TEST_DIR)/test_vm_execution.c $(SRC_DIR)/compiler.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/program.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c
+TEST_VM_EXECUTION_SRCS = $(TEST_DIR)/test_vm_execution.c $(SRC_DIR)/compiler.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/program.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/efun.c
 TEST_VM_EXECUTION_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%,$(TEST_VM_EXECUTION_SRCS))) $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(TEST_DIR)/%,$(TEST_VM_EXECUTION_SRCS)))
 
 # Build targets

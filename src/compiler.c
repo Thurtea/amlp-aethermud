@@ -31,6 +31,7 @@ typedef struct {
         uint16_t offset;
         uint8_t arg_count;
         uint8_t local_count;
+        ASTNode *ast_node;  /* Pointer to function declaration AST */
     } *functions;
     size_t function_count;
     size_t function_capacity;
@@ -143,11 +144,12 @@ static void compiler_add_error(compiler_state_t *state, compile_error_t type,
 
 /**
  * Add function to program
- * Phase 7 Iteration 2: Will be used when integrating codegen
- 
+ */
 static void compiler_add_function(compiler_state_t *state, const char *name,
                                  uint16_t offset, uint8_t arg_count,
-                                 uint8_t local_count) {
+                                 uint8_t local_count, ASTNode *ast_node) {
+    if (!state || !name) return;
+
     if (state->function_count >= state->function_capacity) {
         state->function_capacity *= 2;
         state->functions = realloc(state->functions,
@@ -160,14 +162,15 @@ static void compiler_add_function(compiler_state_t *state, const char *name,
     state->functions[index].offset = offset;
     state->functions[index].arg_count = arg_count;
     state->functions[index].local_count = local_count;
+    state->functions[index].ast_node = ast_node;
 }
-*/
 
 /**
  * Add global variable to program
- * Phase 7 Iteration 2: Will be used when integrating codegen
- 
+ */
 static void compiler_add_global(compiler_state_t *state, const char *name) {
+    if (!state || !name) return;
+
     if (state->global_count >= state->global_capacity) {
         state->global_capacity *= 2;
         state->globals = realloc(state->globals,
@@ -177,15 +180,17 @@ static void compiler_add_global(compiler_state_t *state, const char *name) {
     int index = state->global_count++;
     state->globals[index].name = malloc(strlen(name) + 1);
     strcpy(state->globals[index].name, name);
-    state->globals[index].value.type = VALUE_NULL;
+    state->globals[index].value.type = VALUE_INT;
+    state->globals[index].value.data.int_value = 0;
 }
-*/
 
 /**
  * Add constant to program
- * Phase 7 Iteration 2: Will be used when integrating codegen
- 
+ */
+static void compiler_add_constant(compiler_state_t *state, VMValue value) __attribute__((unused));
 static void compiler_add_constant(compiler_state_t *state, VMValue value) {
+    if (!state) return;
+
     if (state->constant_count >= state->constant_capacity) {
         state->constant_capacity *= 2;
         state->constants = realloc(state->constants,
@@ -194,7 +199,6 @@ static void compiler_add_constant(compiler_state_t *state, VMValue value) {
     
     state->constants[state->constant_count++] = value;
 }
-*/
 
 /**
  * Emit bytecode
@@ -223,19 +227,314 @@ static void compiler_emit(compiler_state_t *state, uint8_t byte, int line) {
 }
 
 /**
- * Compile lexical tokens to bytecode
- * This is a stub that will be expanded in Phase 7 iteration 2
+ * Forward declarations for recursive bytecode generation
+ */
+static void compiler_codegen_statement(compiler_state_t *state, ASTNode *node);
+static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node);
+
+/**
+ * Generate bytecode for an expression
+ * Leaves the value on the stack
+ */
+static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) {
+    if (!state || !node) {
+        return;
+    }
+
+    switch (node->type) {
+        case NODE_LITERAL_NUMBER: {
+            LiteralNumberNode *num = (LiteralNumberNode *)node->data;
+            if (num->is_float) {
+                compiler_emit(state, OP_PUSH_FLOAT, node->line);
+                // Encode float value as bytes (simplified: store as bits)
+                double val = num->float_value;
+                uint64_t bits;
+                memcpy(&bits, &val, sizeof(double));
+                for (int i = 0; i < 8; i++) {
+                    compiler_emit(state, (bits >> (i * 8)) & 0xFF, node->line);
+                }
+            } else {
+                compiler_emit(state, OP_PUSH_INT, node->line);
+                // Encode int value as 8 bytes (64-bit)
+                long val = num->int_value;
+                for (int i = 0; i < 8; i++) {
+                    compiler_emit(state, (val >> (i * 8)) & 0xFF, node->line);
+                }
+            }
+            break;
+        }
+
+        case NODE_LITERAL_STRING: {
+            LiteralStringNode *str = (LiteralStringNode *)node->data;
+            if (str && str->value) {
+                compiler_emit(state, OP_PUSH_STRING, node->line);
+                // Store string length (2 bytes)
+                size_t len = strlen(str->value);
+                compiler_emit(state, len & 0xFF, node->line);
+                compiler_emit(state, (len >> 8) & 0xFF, node->line);
+                // Store string bytes
+                for (size_t i = 0; i < len; i++) {
+                    compiler_emit(state, (unsigned char)str->value[i], node->line);
+                }
+            }
+            break;
+        }
+
+        case NODE_IDENTIFIER: {
+            IdentifierNode *id = (IdentifierNode *)node->data;
+            if (id && id->name) {
+                compiler_emit(state, OP_LOAD_GLOBAL, node->line);
+                // Emit global index (simplified: use first 2 bytes for index)
+                compiler_emit(state, 0, node->line);
+                compiler_emit(state, 0, node->line);
+            }
+            break;
+        }
+
+        case NODE_FUNCTION_CALL: {
+            FunctionCallNode *call = (FunctionCallNode *)node->data;
+            if (call && call->function_name) {
+                // Emit arguments first
+                for (int i = 0; i < call->argument_count; i++) {
+                    compiler_codegen_expression(state, call->arguments[i]);
+                }
+                // Emit call instruction
+                compiler_emit(state, OP_CALL, node->line);
+                compiler_emit(state, call->argument_count & 0xFF, node->line);
+                // Function name length and bytes
+                size_t len = strlen(call->function_name);
+                compiler_emit(state, len & 0xFF, node->line);
+                for (size_t i = 0; i < len; i++) {
+                    compiler_emit(state, (unsigned char)call->function_name[i], node->line);
+                }
+            }
+            break;
+        }
+
+        case NODE_BINARY_OP: {
+            BinaryOpNode *binop = (BinaryOpNode *)node->data;
+            if (binop && binop->left && binop->right && binop->operator) {
+                // Emit left operand
+                compiler_codegen_expression(state, binop->left);
+                // Emit right operand
+                compiler_codegen_expression(state, binop->right);
+                
+                // Emit appropriate opcode based on operator
+                if (strcmp(binop->operator, "+") == 0) {
+                    compiler_emit(state, OP_ADD, node->line);
+                } else if (strcmp(binop->operator, "-") == 0) {
+                    compiler_emit(state, OP_SUB, node->line);
+                } else if (strcmp(binop->operator, "*") == 0) {
+                    compiler_emit(state, OP_MUL, node->line);
+                } else if (strcmp(binop->operator, "/") == 0) {
+                    compiler_emit(state, OP_DIV, node->line);
+                } else if (strcmp(binop->operator, "%") == 0) {
+                    compiler_emit(state, OP_MOD, node->line);
+                } else if (strcmp(binop->operator, "==") == 0) {
+                    compiler_emit(state, OP_EQ, node->line);
+                } else if (strcmp(binop->operator, "!=") == 0) {
+                    compiler_emit(state, OP_NE, node->line);
+                } else if (strcmp(binop->operator, "<") == 0) {
+                    compiler_emit(state, OP_LT, node->line);
+                } else if (strcmp(binop->operator, ">") == 0) {
+                    compiler_emit(state, OP_GT, node->line);
+                } else if (strcmp(binop->operator, "<=") == 0) {
+                    compiler_emit(state, OP_LE, node->line);
+                } else if (strcmp(binop->operator, ">=") == 0) {
+                    compiler_emit(state, OP_GE, node->line);
+                } else if (strcmp(binop->operator, "&&") == 0) {
+                    compiler_emit(state, OP_AND, node->line);
+                } else if (strcmp(binop->operator, "||") == 0) {
+                    compiler_emit(state, OP_OR, node->line);
+                }
+            }
+            break;
+        }
+
+        case NODE_UNARY_OP: {
+            UnaryOpNode *unop = (UnaryOpNode *)node->data;
+            if (unop && unop->operand && unop->operator) {
+                compiler_codegen_expression(state, unop->operand);
+                if (strcmp(unop->operator, "-") == 0) {
+                    compiler_emit(state, OP_NEG, node->line);
+                } else if (strcmp(unop->operator, "!") == 0) {
+                    compiler_emit(state, OP_NOT, node->line);
+                }
+            }
+            break;
+        }
+
+        default:
+            // Unsupported expression type - push null as placeholder
+            compiler_emit(state, OP_PUSH_NULL, node->line);
+            break;
+    }
+}
+
+/**
+ * Generate bytecode for a statement
+ */
+static void compiler_codegen_statement(compiler_state_t *state, ASTNode *node) {
+    if (!state || !node) {
+        return;
+    }
+
+    switch (node->type) {
+        case NODE_BLOCK: {
+            BlockNode *block = (BlockNode *)node->data;
+            if (block) {
+                for (int i = 0; i < block->statement_count; i++) {
+                    compiler_codegen_statement(state, block->statements[i]);
+                }
+            }
+            break;
+        }
+
+        case NODE_RETURN_STATEMENT: {
+            ReturnStatementNode *ret = (ReturnStatementNode *)node->data;
+            if (ret && ret->value) {
+                compiler_codegen_expression(state, ret->value);
+            } else {
+                compiler_emit(state, OP_PUSH_NULL, node->line);
+            }
+            compiler_emit(state, OP_RETURN, node->line);
+            break;
+        }
+
+        case NODE_EXPRESSION_STATEMENT: {
+            // Just evaluate the expression and pop the result
+            if (node->data) {
+                ASTNode *expr = (ASTNode *)node->data;
+                compiler_codegen_expression(state, expr);
+                compiler_emit(state, OP_POP, node->line);
+            }
+            break;
+        }
+
+        case NODE_IF_STATEMENT: {
+            IfStatementNode *ifstmt = (IfStatementNode *)node->data;
+            if (ifstmt && ifstmt->condition && ifstmt->then_statement) {
+                // Generate condition bytecode
+                compiler_codegen_expression(state, ifstmt->condition);
+                
+                // Emit jump-if-false (placeholder offset, will need patching)
+                int jump_false_addr = state->bytecode_len;
+                compiler_emit(state, OP_JUMP_IF_FALSE, node->line);
+                compiler_emit(state, 0, node->line);  // Offset placeholder
+                compiler_emit(state, 0, node->line);
+                
+                // Generate then-branch bytecode
+                compiler_codegen_statement(state, ifstmt->then_statement);
+                
+                // If there's an else branch, jump over it
+                int jump_end_addr = -1;
+                if (ifstmt->else_statement) {
+                    jump_end_addr = state->bytecode_len;
+                    compiler_emit(state, OP_JUMP, node->line);
+                    compiler_emit(state, 0, node->line);  // Offset placeholder
+                    compiler_emit(state, 0, node->line);
+                }
+                
+                // Patch the jump-false offset
+                int false_target = state->bytecode_len;
+                state->bytecode[jump_false_addr + 1] = false_target & 0xFF;
+                state->bytecode[jump_false_addr + 2] = (false_target >> 8) & 0xFF;
+                
+                // Generate else-branch if present
+                if (ifstmt->else_statement) {
+                    compiler_codegen_statement(state, ifstmt->else_statement);
+                    
+                    // Patch the jump-end offset
+                    int end_target = state->bytecode_len;
+                    state->bytecode[jump_end_addr + 1] = end_target & 0xFF;
+                    state->bytecode[jump_end_addr + 2] = (end_target >> 8) & 0xFF;
+                }
+            }
+            break;
+        }
+
+        default:
+            // Unhandled statement type - silently skip
+            break;
+    }
+}
+
+/**
+ * Compile bytecode from AST
+ * Generates real bytecode for all functions in the program
  */
 static compile_error_t compiler_generate_bytecode(compiler_state_t *state,
                                                   ASTNode *ast) {
-    if (!ast) {
+    if (!state || !ast || ast->type != NODE_PROGRAM) {
         return COMPILE_SUCCESS;
     }
-    
-    // For now, just generate a simple RETURN instruction
-    compiler_emit(state, OP_RETURN, 1);
-    
+
+    // Generate bytecode for each registered function
+    for (size_t i = 0; i < state->function_count; i++) {
+        if (!state->functions[i].ast_node) {
+            continue;
+        }
+
+        ASTNode *decl = state->functions[i].ast_node;
+        FunctionDeclNode *fn = (FunctionDeclNode *)decl->data;
+        if (!fn || !fn->body) {
+            continue;
+        }
+
+        // Record offset for this function
+        state->functions[i].offset = (uint16_t)state->bytecode_len;
+
+        // Generate bytecode for function body
+        if (fn->body->type == NODE_BLOCK) {
+            compiler_codegen_statement(state, fn->body);
+        } else {
+            compiler_codegen_statement(state, fn->body);
+        }
+
+        // Ensure function ends with return (if not already present)
+        if (state->bytecode_len == 0 || state->bytecode[state->bytecode_len - 1] != OP_RETURN) {
+            compiler_emit(state, OP_PUSH_NULL, fn->body->line);
+            compiler_emit(state, OP_RETURN, fn->body->line);
+        }
+    }
+
+    // If no bytecode was generated, emit a minimal program (just return)
+    if (state->bytecode_len == 0) {
+        compiler_emit(state, OP_PUSH_NULL, 1);
+        compiler_emit(state, OP_RETURN, 1);
+    }
+
     return state->error_count > 0 ? COMPILE_ERROR_SEMANTIC : COMPILE_SUCCESS;
+}
+
+/**
+ * Extract top-level metadata (functions, globals) from AST
+ */
+static void compiler_extract_metadata(compiler_state_t *state, ASTNode *ast) {
+    if (!state || !ast) return;
+
+    if (ast->type != NODE_PROGRAM) {
+        return;
+    }
+
+    ProgramNode *prog = (ProgramNode *)ast->data;
+    if (!prog) return;
+
+    for (int i = 0; i < prog->declaration_count; i++) {
+        ASTNode *decl = prog->declarations[i];
+        if (!decl) continue;
+
+        if (decl->type == NODE_FUNCTION_DECL) {
+            FunctionDeclNode *fn = (FunctionDeclNode *)decl->data;
+            if (!fn || !fn->name) continue;
+            uint8_t arg_count = (fn->parameter_count < 0) ? 0 : (fn->parameter_count > 255 ? 255 : (uint8_t)fn->parameter_count);
+            compiler_add_function(state, fn->name, /* offset */ 0, arg_count, /* local_count */ 0, decl);
+        } else if (decl->type == NODE_VARIABLE_DECL) {
+            VariableDeclNode *var = (VariableDeclNode *)decl->data;
+            if (!var || !var->name) continue;
+            compiler_add_global(state, var->name);
+        }
+    }
 }
 
 /**
@@ -266,6 +565,9 @@ static Program* compiler_compile_internal(const char *source, const char *filena
     }
     
     ASTNode *ast = parser_parse(parser);
+    
+    // Collect top-level metadata (functions/globals) before codegen
+    compiler_extract_metadata(state, ast);
     
     // Note: Parser errors are tracked via parser->error_count
     // Phase 7 Iteration 2: Expand parser to collect detailed error info
@@ -340,7 +642,7 @@ static Program* compiler_compile_internal(const char *source, const char *filena
         strcpy(prog->error_info.message, state->errors[0].message);
     } else {
         prog->error_info = (compile_error_info_t){
-            .filename = NULL,
+            .filename = prog->filename,
             .line = 0,
             .column = 0,
             .message = NULL

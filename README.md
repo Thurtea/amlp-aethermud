@@ -32,13 +32,18 @@ make clean
 make all
 ```
 
+**Styled Build** (with progress bars and colored output):
+```bash
+make build-ui
+```
+
 ### Test
 
 ```bash
 make test
 ```
 
-Runs 8 comprehensive test suites with 220 tests (565 assertions).
+Runs 11 comprehensive test suites with 500+ tests and assertions.
 
 ### Run Driver
 

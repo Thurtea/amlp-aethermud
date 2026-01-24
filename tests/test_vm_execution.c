@@ -243,10 +243,11 @@ void test_globals() {
 void test_bytecode_decoder() {
     TEST_START("bytecode_decoder");
     
-    /* Create simple bytecode: PUSH_INT 42, HALT */
+    /* Create simple bytecode: PUSH_INT 42, HALT
+     * Format: 1 byte opcode + 8 bytes int operand (little-endian) */
     uint8_t bytecode[] = {
         OP_PUSH_INT,
-        0x00, 0x00, 0x00, 0x2A,  /* 42 in big-endian */
+        0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 42 in little-endian (8 bytes) */
         OP_HALT
     };
     

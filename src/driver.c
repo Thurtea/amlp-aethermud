@@ -638,17 +638,20 @@ static void show_usage(const char *program_name) {
     printf("AMLP Driver - LPC MUD Compiler\n");
     printf("Usage: %s <command> [arguments]\n\n", program_name);
     printf("Commands:\n");
-    printf("  compile <file.c>   Compile LPC file and show results\n");
-    printf("  ast <file.c>       Parse and display Abstract Syntax Tree\n");
-    printf("  bytecode <file.c>  Compile and disassemble bytecode\n");
-    printf("  run <file.c>       Compile and execute bytecode\n");
-    printf("  help               Show this help message\n");
+    printf("  compile <file.c>     Compile LPC file and show results\n");
+    printf("  ast <file.c>         Parse and display Abstract Syntax Tree\n");
+    printf("  bytecode <file.c>    Compile and disassemble bytecode\n");
+    printf("  run <file.c>         Compile and execute bytecode\n");
+    printf("  load_master <file.c> Load master object for persistent VM\n");
+    printf("  test_master          Test loaded master object\n");
+    printf("  interactive          Enter interactive mode\n");
+    printf("  help                 Show this help message\n");
     printf("\n");
     printf("Examples:\n");
     printf("  %s compile tests/lpc/hello.c\n", program_name);
-    printf("  %s ast tests/lpc/math.c\n", program_name);
-    printf("  %s bytecode tests/lpc/strings.c\n", program_name);
-    printf("  %s run tests/lpc/simple.c\n", program_name);
+    printf("  %s load_master /home/thurtea/amlp-library/master.c\n", program_name);
+    printf("  %s test_master\n", program_name);
+    printf("  %s interactive\n", program_name);
     printf("\n");
 }
 

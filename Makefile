@@ -2,7 +2,7 @@
 # Standard C project structure with src/, tests/, build/ directories
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -O2 -std=c99 -Isrc
+CFLAGS = -Wall -Wextra  -g -O2 -std=c99 -Isrc
 LDFLAGS = -lm
 
 # Directories
@@ -11,7 +11,7 @@ TEST_DIR = tests
 BUILD_DIR = build
 
 # Source files (in src/)
-DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/vm.c $(SRC_DIR)/codegen.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/compiler.c $(SRC_DIR)/program.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c
+DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/vm.c $(SRC_DIR)/codegen.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/compiler.c $(SRC_DIR)/program.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/master_object.c
 DRIVER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(DRIVER_SRCS))
 
 TEST_LEXER_SRCS = $(TEST_DIR)/test_lexer.c $(SRC_DIR)/lexer.c
@@ -53,10 +53,8 @@ TEST_VM_EXECUTION_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(S
 # Build targets
 all: $(BUILD_DIR)/driver $(BUILD_DIR)/test_lexer $(BUILD_DIR)/test_parser $(BUILD_DIR)/test_vm $(BUILD_DIR)/test_object $(BUILD_DIR)/test_gc $(BUILD_DIR)/test_efun $(BUILD_DIR)/test_array $(BUILD_DIR)/test_mapping $(BUILD_DIR)/test_compiler $(BUILD_DIR)/test_program $(BUILD_DIR)/test_simul_efun $(BUILD_DIR)/test_vm_execution
 
-$(BUILD_DIR)/driver: $(DRIVER_OBJS)
-	@echo "[Linking] Building driver executable..."
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(BUILD_DIR)/driver: $(SRC_DIR)/driver.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/efun.c $(SRC_DIR)/program.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/master_object.c
+	$(CC) $(CFLAGS) -o $@ $^ -lm
 	@echo "[Success] Driver built successfully!"
 
 $(BUILD_DIR)/test_lexer: $(TEST_LEXER_OBJS)

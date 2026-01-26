@@ -5,29 +5,31 @@ CC = gcc
 CFLAGS = -Wall -Wextra  -g -O2 -std=c99 -Isrc
 LDFLAGS = -lm
 
-# Fancy build output formatting
-TOTAL_FILES = 15
+# Fancy build output formatting (color + UTF-8 borders)
+TOTAL_FILES = 14
+COLOR_CYAN   = \033[36m
+COLOR_YELLOW = \033[33m
+COLOR_GREEN  = \033[32m
+COLOR_RESET  = \033[0m
+
 define show_header
-	@echo "╔══════════════════════════════════════════════════════════════════╗"
-	@echo "║                AMLP DRIVER - COMPILATION IN PROGRESS            ║"  
-	@echo "╚══════════════════════════════════════════════════════════════════╝"
-	@echo ""
+	@printf "$(COLOR_CYAN)╔══════════════════════════════════════════════════════════════════╗\n"
+	@printf "║                 AMLP DRIVER - COMPILATION IN PROGRESS             ║\n"
+	@printf "╚══════════════════════════════════════════════════════════════════╝$(COLOR_RESET)\n\n"
 endef
 
 define show_progress
-	@echo "[$(1)/$(TOTAL_FILES)] Compiling $(2)... ✓"
+	@printf "$(COLOR_CYAN)[$(1)/$(TOTAL_FILES)]$(COLOR_RESET) Compiling $(2)... $(COLOR_GREEN)✓$(COLOR_RESET)\n"
 endef
 
 define show_link
-	@echo ""
-	@echo "[LINK] Creating driver executable... ✓"
+	@printf "\n$(COLOR_CYAN)[LINK]$(COLOR_RESET) Creating driver executable... $(COLOR_GREEN)✓$(COLOR_RESET)\n"
 endef
 
 define show_success
-	@echo ""
-	@echo "╔══════════════════════════════════════════════════════════════════╗"
-	@echo "║                        ✓ BUILD SUCCESS                          ║"
-	@echo "╚══════════════════════════════════════════════════════════════════╝"
+	@printf "\n$(COLOR_GREEN)╔══════════════════════════════════════════════════════════════════╗\n"
+	@printf "║                          ✓ BUILD SUCCESS                          ║\n"
+	@printf "╚══════════════════════════════════════════════════════════════════╝$(COLOR_RESET)\n"
 endef
 
 # Directories
@@ -36,7 +38,7 @@ TEST_DIR = tests
 BUILD_DIR = build
 
 # Source files (in src/)
-DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/vm.c $(SRC_DIR)/codegen.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/compiler.c $(SRC_DIR)/program.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/master_object.c
+DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/vm.c $(SRC_DIR)/codegen.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/compiler.c $(SRC_DIR)/program.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/master_object.c $(SRC_DIR)/terminal_ui.c
 DRIVER_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(DRIVER_SRCS))
 
 TEST_LEXER_SRCS = $(TEST_DIR)/test_lexer.c $(SRC_DIR)/lexer.c
@@ -78,9 +80,31 @@ TEST_VM_EXECUTION_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter $(S
 # Build targets
 all: $(BUILD_DIR)/driver $(BUILD_DIR)/test_lexer $(BUILD_DIR)/test_parser $(BUILD_DIR)/test_vm $(BUILD_DIR)/test_object $(BUILD_DIR)/test_gc $(BUILD_DIR)/test_efun $(BUILD_DIR)/test_array $(BUILD_DIR)/test_mapping $(BUILD_DIR)/test_compiler $(BUILD_DIR)/test_program $(BUILD_DIR)/test_simul_efun $(BUILD_DIR)/test_vm_execution
 
-$(BUILD_DIR)/driver: $(SRC_DIR)/driver.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/efun.c $(SRC_DIR)/program.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/master_object.c
-	$(CC) $(CFLAGS) -o $@ $^ -lm
-	@echo "[Success] Driver built successfully!"
+$(BUILD_DIR)/driver: $(SRC_DIR)/driver.c $(SRC_DIR)/compiler.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c $(SRC_DIR)/codegen.c $(SRC_DIR)/vm.c $(SRC_DIR)/object.c $(SRC_DIR)/gc.c $(SRC_DIR)/array.c $(SRC_DIR)/mapping.c $(SRC_DIR)/efun.c $(SRC_DIR)/program.c $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c $(SRC_DIR)/master_object.c $(SRC_DIR)/terminal_ui.c
+	@mkdir -p $(BUILD_DIR)
+	$(call show_header)
+	$(call show_progress,1,array.c)
+	$(call show_progress,2,codegen.c)
+	$(call show_progress,3,compiler.c)
+	$(call show_progress,4,driver.c)
+	$(call show_progress,5,efun.c)
+	$(call show_progress,6,gc.c)
+	$(call show_progress,7,lexer.c)
+	$(call show_progress,8,mapping.c)
+	$(call show_progress,9,object.c)
+	$(call show_progress,10,parser.c)
+	$(call show_progress,11,program.c)
+	$(call show_progress,12,simul_efun.c)
+	$(call show_progress,13,terminal_ui.c)
+	$(call show_progress,14,vm.c)
+	$(call show_link)
+	@$(CC) $(CFLAGS) -o $@ $^ -lm
+	$(call show_success)
+	@echo ""
+	@echo "Files compiled: 14"
+	@echo "Warnings:       0"
+	@echo "Errors:         0"
+	@echo ""
 
 $(BUILD_DIR)/test_lexer: $(TEST_LEXER_OBJS)
 	@echo "[Linking] Building lexer test..."

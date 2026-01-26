@@ -2,35 +2,19 @@
 #define MASTER_OBJECT_H
 
 #include "compiler.h"
-#include "vm.h"
 
-int master_object_init(const char *master_path, VirtualMachine *vm);
-VMValue master_call(const char *func_name, VMValue *args, int arg_count);
-void master_object_free(void);
-Program* master_get_program(void);
-int master_is_loaded(void);
+/* Initialize master object from file and set up VM */
+int master_object_init(const char *path, VirtualMachine *vm);
 
-#endif
+/* Register master object callbacks with the driver */
+int master_register_callbacks(void);
 
-#include "compiler.h"
-#include "vm.h"
+/* Callback functions - invoked by driver, implemented by master object */
+void master_callback_compile_object(const char *filename);
+void master_callback_log_error(const char *filename, const char *message);
+void master_callback_query_version(void);
 
-int master_object_init(const char *master_path, VirtualMachine *vm);
-VMValue master_call(const char *func_name, VMValue *args, int arg_count);
-void master_object_free(void);
-Program* master_get_program(void);
-int master_is_loaded(void);
+/* Cleanup function - call at server shutdown */
+void master_object_cleanup(void);
 
-#ifndef MASTER_OBJECT_H
-#define MASTER_OBJECT_H
-
-#include "compiler.h"
-#include "vm.h"
-
-int master_object_init(const char *master_path, VirtualMachine *vm);
-VMValue master_call(const char *func_name, VMValue *args, int arg_count);
-void master_object_free(void);
-Program* master_get_program(void);
-int master_is_loaded(void);
-
-#endif
+#endif /* MASTER_OBJECT_H */

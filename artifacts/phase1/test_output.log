@@ -1,0 +1,277 @@
+======================================================================
+ AMLP MUD - COMPREHENSIVE TEST SUITE
+======================================================================
+
+======================================================================
+ TEST 1: ADMIN USER (First Player)
+======================================================================
+
+============================================================
+LOGGING IN AS: TestAdmin
+============================================================
+
+
+╔═══════════════════════════════════════╗
+║    AMLP Driver - Development Server   ║
+║             Version 0.1.0             ║
+╚═══════════════════════════════════════╝
+
+Welcome to the AMLP MUD!
+
+Enter your name: 
+
+Welcome, TestAdmin! You appear to be new here.
+Choose a password: 
+Confirm password: 
+
+Character created successfully!
+As the first player, you have been granted Admin privileges.
+You materialize in the starting room.
+
+> 
+
+----------------------------------------------------------------------
+ Testing Standard Commands
+----------------------------------------------------------------------
+
+> help
+Available commands:
+  help                 - Show this help
+  look / l             - Look at your surroundings
+  inventory / i        - Check your inventory
+  say <message>        - Say something
+  emote <action>       - Perform an emote
+  who                  - List players online
+  stats                - Show your character stats
+  quit / logout        - Disconnect
+
+Movement: north, south, east, west, up, down (or n, s, e, w, u, d)
+
+WIZARD COMMANDS (Level 1+):
+  goto <room>         - Teleport to a room
+  clone <object>      - Clone an object
+
+ADMIN COMMANDS (Level 2):
+  promote <player> <level> - Promote player (0=player, 1=wizard, 2=admin)
+  users                     - Show detailed user list
+  shutdown [delay]          - Shutdown server (optional delay in seconds)
+
+> 
+  ✓ Expected: commands
+
+> look
+You are in the starting room.
+This is a simple test environment for the AMLP driver.
+Obvious exits: none yet
+
+> 
+
+> who
+Players online:
+  TestAdmin            [Admin](idle: 0 seconds)
+
+Total: 1 player
+
+> 
+  ✓ Expected: player
+
+> stats
+Your stats:
+  Name: TestAdmin
+  Privilege Level: 2 (Admin)
+  Level: 1
+  HP: 100/100
+  Strength: 10
+  Dexterity: 10
+  Intelligence: 10
+
+> 
+
+----------------------------------------------------------------------
+ Testing Wiztool Commands
+----------------------------------------------------------------------
+
+> wiz help
+Unknown command: wiz
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: Wiztool Commands
+
+> pwd
+Unknown command: pwd
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: Current directory:
+
+> ls
+Unknown command: ls
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: Contents of
+
+> cd /lib
+Unknown command: cd
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: Changed directory
+
+> pwd
+Unknown command: pwd
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: /lib
+
+> ls
+Unknown command: ls
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: std
+
+> cd std
+Unknown command: cd
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: Changed directory
+
+> ls
+Unknown command: ls
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: player
+
+> eval 2 + 2
+Unknown command: eval
+Type 'help' for available commands.
+
+> 
+  ✗ Expected: int: 4
+
+> quit
+
+Goodbye, TestAdmin!
+
+
+======================================================================
+ TEST 2: NORMAL PLAYER (Second Player)
+======================================================================
+
+============================================================
+LOGGING IN AS: TestPlayer
+============================================================
+
+
+╔═══════════════════════════════════════╗
+║    AMLP Driver - Development Server   ║
+║             Version 0.1.0             ║
+╚═══════════════════════════════════════╝
+
+Welcome to the AMLP MUD!
+
+Enter your name: 
+
+Welcome, TestPlayer! You appear to be new here.
+Choose a password: 
+Confirm password: 
+
+Character created successfully!
+You materialize in the starting room.
+
+> 
+
+----------------------------------------------------------------------
+ Testing Standard Commands
+----------------------------------------------------------------------
+
+> help
+Available commands:
+  help                 - Show this help
+  look / l             - Look at your surroundings
+  inventory / i        - Check your inventory
+  say <message>        - Say something
+  emote <action>       - Perform an emote
+  who                  - List players online
+  stats                - Show your character stats
+  quit / logout        - Disconnect
+
+Movement: north, south, east, west, up, down (or n, s, e, w, u, d)
+
+> 
+  ✓ Expected: commands
+
+> look
+You are in the starting room.
+This is a simple test environment for the AMLP driver.
+Obvious exits: none yet
+
+> 
+
+> who
+Players online:
+  TestPlayer           (idle: 0 seconds)
+
+Total: 1 player
+
+> 
+  ✓ Expected: player
+
+> stats
+Your stats:
+  Name: TestPlayer
+  Privilege Level: 0 (Player)
+  Level: 1
+  HP: 100/100
+  Strength: 10
+  Dexterity: 10
+  Intelligence: 10
+
+> 
+
+----------------------------------------------------------------------
+ Testing Wiztool Access (Should Fail)
+----------------------------------------------------------------------
+
+> wiz help
+Unknown command: wiz
+Type 'help' for available commands.
+
+> 
+  ✓ Correctly denied wiztool access
+
+> cd /lib
+Unknown command: cd
+Type 'help' for available commands.
+
+> 
+  ✓ Correctly denied cd command
+
+> quit
+
+Goodbye, TestPlayer!
+
+
+======================================================================
+ TEST SUMMARY
+======================================================================
+
+Admin Wiztool Commands:
+  ✗ wiz help
+  ✗ pwd
+  ✗ ls
+  ✗ cd /lib
+  ✗ pwd
+  ✗ ls
+  ✗ cd std
+  ✗ ls
+  ✗ eval 2 + 2
+
+Admin Tests: 0/9 passed
+
+⚠️  SOME TESTS FAILED - 9 issues found

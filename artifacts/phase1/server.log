@@ -1,0 +1,565 @@
+Warning: Some efuns failed to register
+========================================
+  AMLP-MUD Server Starting
+========================================
+[Server] Port: 3000
+[Server] Max connections: 64
+
+[Server] Initializing virtual machine...
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[  OK  ] VM initialized
+[Server] Initializing efun registry...
+[Efun] Initialized registry (capacity: 64)
+[  OK  ] Efun registry initialized
+[Server] Initializing garbage collector...
+[GC] Initialized (capacity: 256)
+[  OK  ] GC initialized
+
+[Server] Loading master object...
+[Server] Master path: ./lib/secure/master.c
+[Master] Found master at: ./lib/secure/master.c
+[Master] Master object verified
+[  OK  ] Master object initialized
+[Server] Registering driver callbacks...
+[Master] Callbacks registered (master object active)
+[  OK  ] Callbacks registered
+
+[Server] Creating server socket...
+[  OK  ] Socket bound to port 3000
+
+========================================
+  Server Ready - Accepting Connections
+========================================
+Connect with: telnet localhost 3000
+Stop server with: Ctrl+C
+
+[Server] Player connected from 127.0.0.1 (slot 0)
+[Server] Player disconnected (slot 0)
+[Server] Player connected from 127.0.0.1 (slot 0)
+[Player 0] Thurtea
+[Player 0] look
+[Player 0] help
+[Server] Player connected from 127.0.0.1 (slot 1)
+[Player 1] TestUser
+[Player 1] look
+[Player 1] quit
+[Server] Player quit (slot 1)
+
+[Server] Received shutdown signal, stopping...
+
+[Server] Shutting down...
+[Master] Cleanup complete
+[Server] Shutdown complete
+Warning: Some efuns failed to register
+========================================
+  AMLP-MUD Server Starting
+========================================
+[Server] Port: 3000
+[Server] Max connections: 64
+
+[Server] Initializing virtual machine...
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[  OK  ] VM initialized
+[Server] Initializing efun registry...
+[Efun] Initialized registry (capacity: 64)
+[  OK  ] Efun registry initialized
+[Server] Initializing garbage collector...
+[GC] Initialized (capacity: 256)
+[  OK  ] GC initialized
+
+[Server] Loading master object...
+[Server] Master path: ./lib/secure/master.c
+[Master] Found master at: ./lib/secure/master.c
+[Master] Master object verified
+[  OK  ] Master object initialized
+[Server] Registering driver callbacks...
+[Master] Callbacks registered (master object active)
+[  OK  ] Callbacks registered
+
+[Server] Creating server socket...
+[  OK  ] Socket bound to port 3000
+
+========================================
+  Server Ready - Accepting Connections
+========================================
+Connect with: telnet localhost 3000
+Stop server with: Ctrl+C
+
+[Server] Player connected from 127.0.0.1 (slot 0)
+[Player 0] TestUser
+[Player 0] look
+[Player 0] quit
+[Server] Player quit (slot 0)
+
+[Server] Received shutdown signal, stopping...
+
+[Server] Shutting down...
+[Master] Cleanup complete
+[Server] Shutdown complete
+Warning: Some efuns failed to register
+========================================
+  AMLP-MUD Server Starting
+========================================
+[Server] Port: 3000
+[Server] Max connections: 64
+
+[Server] Initializing virtual machine...
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[  OK  ] VM initialized
+[Server] Initializing efun registry...
+[Efun] Initialized registry (capacity: 64)
+[  OK  ] Efun registry initialized
+[Server] Initializing garbage collector...
+[GC] Initialized (capacity: 256)
+[  OK  ] GC initialized
+
+[Server] Loading master object...
+[Server] Master path: ./lib/secure/master.c
+[Master] Found master at: ./lib/secure/master.c
+[Master] Master object verified
+[  OK  ] Master object initialized
+[Server] Registering driver callbacks...
+[Master] Callbacks registered (master object active)
+[  OK  ] Callbacks registered
+
+[Server] Creating server socket...
+[  OK  ] Soc[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object from: lib/secure/master.c
+[Server] VM initialized successfully
+[Server] Listening on port 3000
+[Server] Master object: lib/secure/master.c
+[Server] Ready for connections (Ctrl+C to shutdown)
+
+[Server] New connection from 127.0.0.1 on slot 0 (fd 4)
+[Server] New connection from 127.0.0.1 on slot 1 (fd 5)
+[Server] Client on slot 1 disconnected
+
+[Server] Received shutdown signal, cleaning up...
+
+[Server] Shutting down...
+[Server] Cleaning up master object...
+[Server] Freeing VM...
+[Server] Shutdown complete
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[Master] Found master at: lib/secure/master.c
+[Master] Master object verified
+[Master] Cleanup complete
+[GC] Freeing garbage collector...
+[GC] Final statistics:
+  Total allocated: 0 bytes
+  Total freed: 0 bytes
+  Collections: 0
+[VM] Virtual machine freed
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object from: lib/secure/master.c
+[Server] VM initialized successfully
+[Server] Listening on port 3000
+[Server] Master object: lib/secure/master.c
+[Server] Ready for connections (Ctrl+C to shutdown)
+
+[Server] New connection from 127.0.0.1 on slot 0 (fd 4)
+[Server] New connection from 127.0.0.1 on slot 1 (fd 5)
+[Server] Client on slot 1 disconnected
+[Server] Client on slot 0 disconnected
+[Server] New connection from 127.0.0.1 on slot 0 (fd 4)
+[Server] ERROR: select() failed: Bad file descriptor
+
+[Server] Shutting down...
+[Server] Cleaning up master object...
+[Server] Freeing VM...
+[Server] Shutdown complete
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[Master] Found master at: lib/secure/master.c
+[Master] Master object verified
+[Master] Cleanup complete
+[GC] Freeing garbage collector...
+[GC] Final statistics:
+  Total allocated: 0 bytes
+  Total freed: 0 bytes
+  Collections: 0
+[VM] Virtual machine freed
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.c
+[Server] VM initialized successfully
+[Server] Listening on port 3000
+[Server] Ready for connections
+
+[Server] New connection slot 0 from 127.0.0.1
+[Server] New connection slot 1 from 127.0.0.1
+[Server] Closing slot 1
+
+[Server] Received shutdown signal
+
+[Server] Shutting down...
+[Server] Cleaning up VM...
+[Server] Shutdown complete
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[Master] Found master at: lib/secure/master.c
+[Master] Master object verified
+[Master] Cleanup complete
+[GC] Freeing garbage collector...
+[GC] Final statistics:
+  Total allocated: 0 bytes
+  Total freed: 0 bytes
+  Collections: 0
+[VM] Virtual machine freed
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.c
+[Server] VM initialized successfully
+[Server] Listening on port 3000
+[Server] Ready for connections
+
+[Server] New connection slot 0 from 127.0.0.1
+[Server] Creating player object for: testadmin
+[Server] Calling player command: stats
+[Server] Calling player command: help
+[Server] Calling player command: who
+[Server] Calling player command: quit
+[Server] Closing slot 0
+
+[Server] Received shutdown signal
+
+[Server] Shutting down...
+[Server] Cleaning up VM...
+[Server] Shutdown complete
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[Master] Found master at: lib/secure/master.c
+[Master] Master object verified
+[Master] Cleanup complete
+[GC] Freeing garbage collector...
+[GC] Final statistics:
+  Total allocated: 0 bytes
+  Total freed: 0 bytes
+  Collections: 0
+[VM] Virtual machine freed
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.c
+[Server] VM initialized successfully
+[Server] Listening on port 3000
+[Server] Ready for connections
+
+[Server] New connection slot 0 from 127.0.0.1
+[Server] Disconnect slot 0
+[Server] New connection slot 0 from 127.0.0.1
+
+[Server] Received shutdown signal
+
+[Server] Shutting down...
+[Server] Cleaning up VM...
+[Server] Shutdown complete
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[Master] Found master at: lib/secure/master.c
+[Master] Master object verified
+[Master] Cleanup complete
+[GC] Freeing garbage collector...
+[GC] Final statistics:
+  Total allocated: 0 bytes
+  Total freed: 0 bytes
+  Collections: 0
+[VM] Virtual machine freed
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.lpc
+[Server] VM initialized successfully
+[Server] Telnet listening on port 3000
+[Server] WebSocket listening on port 3001
+[Server] Ready for connections
+
+[Server] Telnet connection slot 0 from 127.0.0.1
+[Server] Creating player object for: thurtea
+[Server] First player created: thurtea (privilege: Admin)
+[Server] Calling player command: l
+[Server] Calling player command: help
+[Server] Calling player command: i
+[Server] Calling player command: emote waves
+[Server] Calling player command: stats
+[Server] Calling player command: say hello
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestAdmin
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd /lib
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd std
+[Server] Calling player command: ls
+[Server] Calling player command: eval 2 + 2
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestPlayer
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: cd /lib
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestAdmin
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd /lib
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd std
+[Server] Calling player command: ls
+[Server] Calling player command: eval 2 + 2
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestPlayer
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: cd /lib
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestAdmin
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd /lib
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd std
+[Server] Calling player command: ls
+[Server] Calling player command: eval 2 + 2
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestPlayer
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: cd /lib
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestAdmin
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd /lib
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd std
+[Server] Calling player command: ls
+[Server] Calling player command: eval 2 + 2
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Telnet connection slot 1 from 127.0.0.1
+[Server] Creating player object for: TestPlayer
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Timeout disconnect: thurtea (slot 0)
+[Server] Closing slot 0
+[Server] Calling player command: cd /lib
+[Server] Calling player command: quit
+[Server] Closing slot 1
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.lpc
+[Server] VM initialized successfully
+[Server] ERROR: bind() failed: Address already in use
+[Server] Cleaning up VM...
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[Master] Found master at: lib/secure/master.lpc
+[Master] Master object verified
+[Master] Cleanup complete
+[GC] Freeing garbage collector...
+[GC] Final statistics:
+  Total allocated: 0 bytes
+  Total freed: 0 bytes
+  Collections: 0
+[VM] Virtual machine freed
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.lpc
+[Server] VM initialized successfully
+[Server] ERROR: bind() failed: Address already in use
+[Server] Cleaning up VM...
+[Efun] Initialized registry (capacity: 64)
+[Efun] Registered 24 standard efuns
+[GC] Initialized (capacity: 256)
+[VM] Virtual machine initialized
+[Master] Found master at: lib/secure/master.lpc
+[Master] Master object verified
+[Master] Cleanup complete
+[GC] Freeing garbage collector...
+[GC] Final statistics:
+  Total allocated: 0 bytes
+  Total freed: 0 bytes
+  Collections: 0
+[VM] Virtual machine freed
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.lpc
+[Server] VM initialized successfully
+[Server] Telnet listening on port 3000
+[Server] WebSocket listening on port 3001
+[Server] Ready for connections
+
+[Server] WebSocket connection slot 0 from 127.0.0.1
+[Server] WebSocket handshake complete for slot
+[Server] WebSocket close received
+[Server] Closing slot 0
+[Server] Telnet connection slot 0 from 127.0.0.1
+[Server] Creating player object for: TestAdmin
+[Server] First player created: TestAdmin (privilege: Admin)
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd /lib
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd std
+[Server] Calling player command: ls
+[Server] Calling player command: eval 2 + 2
+[Server] Calling player command: quit
+[Server] Closing slot 0
+[Server] Telnet connection slot 0 from 127.0.0.1
+[Server] Creating player object for: TestPlayer
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: cd /lib
+[Server] Calling player command: quit
+[Server] Closing slot 0
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.lpc
+[Server] VM initialized successfully
+[Server] Telnet listening on port 3000
+[Server] WebSocket listening on port 3001
+[Server] Ready for connections
+
+[Server] Telnet connection slot 0 from 127.0.0.1
+[Server] Creating player object for: TestAdmin
+[Server] First player created: TestAdmin (privilege: Admin)
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd /lib
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd std
+[Server] Calling player command: ls
+[Server] Calling player command: eval 2 + 2
+[Server] Calling player command: quit
+[Server] Closing slot 0
+[Server] Telnet connection slot 0 from 127.0.0.1
+[Server] Creating player object for: TestPlayer
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: cd /lib
+[Server] Calling player command: quit
+[Server] Closing slot 0
+[Server] Initializing VM...
+Warning: Some efuns failed to register
+[Server] Loading master object: lib/secure/master.lpc
+[Server] VM initialized successfully
+[Server] Telnet listening on port 3000
+[Server] WebSocket listening on port 3001
+[Server] Ready for connections
+
+[Server] Telnet connection slot 0 from 127.0.0.1
+[Server] Creating player object for: TestAdmin
+[Server] First player created: TestAdmin (privilege: Admin)
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd /lib
+[Server] Calling player command: pwd
+[Server] Calling player command: ls
+[Server] Calling player command: cd std
+[Server] Calling player command: ls
+[Server] Calling player command: eval 2 + 2
+[Server] Calling player command: quit
+[Server] Closing slot 0
+[Server] Telnet connection slot 0 from 127.0.0.1
+[Server] Creating player object for: TestPlayer
+[Server] Calling player command: help
+[Server] Calling player command: look
+[Server] Calling player command: who
+[Server] Calling player command: stats
+[Server] Calling player command: wiz help
+[Server] Calling player command: cd /lib
+[Server] Calling player command: quit
+[Server] Closing slot 0

@@ -39,40 +39,36 @@ driver: $(BUILD_DIR)/driver
 $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	@mkdir -p $(BUILD_DIR)
 	@printf "\n"
-	@printf "$(C_CYAN)╔══════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)$(C_BOLD)              AMLP MUD DRIVER - BUILD IN PROGRESS                     $(C_RESET)$(C_CYAN)║$(C_RESET)\n"
-	@printf "$(C_CYAN)╠══════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)                                                                      $(C_CYAN)║$(C_RESET)\n"
+	@printf "$(C_CYAN)╔════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
+	@printf "$(C_CYAN)║$(C_RESET)$(C_BOLD)                  AMLP MUD DRIVER - BUILD IN PROGRESS                  $(C_RESET)$(C_CYAN)║$(C_RESET)\n"
+	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
+	@printf "$(C_CYAN)║                                                                        ║$(C_RESET)\n"
 	@count=0; \
 	for src in $(DRIVER_SRCS); do \
 		count=$$((count + 1)); \
 		name=$$(basename $$src); \
-		printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[%2d/$(TOTAL_FILES)]$(C_RESET) Compiling %-38s $(C_GREEN)✓$(C_RESET)     $(C_CYAN)║$(C_RESET)\n" $$count "$$name"; \
+		printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[%2d/$(TOTAL_FILES)]$(C_RESET) Compiling %-46s $(C_GREEN)✓$(C_RESET)   $(C_CYAN)║$(C_RESET)\n" $$count "$$name"; \
 	done
-	@printf "$(C_CYAN)║$(C_RESET)                                                                      $(C_CYAN)║$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[LINK]$(C_RESET)  Creating driver executable...                        $(C_GREEN)✓$(C_RESET)     $(C_CYAN)║$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)                                                                      $(C_CYAN)║$(C_RESET)\n"
+	@printf "$(C_CYAN)║                                                                        ║$(C_RESET)\n"
+	@printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[LINK]$(C_RESET)  Creating driver executable...                           $(C_GREEN)✓$(C_RESET)   $(C_CYAN)║$(C_RESET)\n"
+	@printf "$(C_CYAN)║                                                                        ║$(C_RESET)\n"
 	@# Actually compile and capture warnings
 	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) 2>$(BUILD_DIR)/.warnings.txt; \
 	status=$$?; \
-	warns=$$(grep -c "warning:" $(BUILD_DIR)/.warnings.txt 2>/dev/null || echo 0); \
-	errs=$$(grep -c "error:" $(BUILD_DIR)/.warnings.txt 2>/dev/null || echo 0); \
-	if [ $$status -eq 0 ]; then \
-		printf "$(C_CYAN)╠══════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_GREEN)║                         ✓ BUILD SUCCESSFUL                           ║$(C_RESET)\n"; \
-		printf "$(C_CYAN)╠══════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_CYAN)║$(C_RESET)  Files compiled: %-52d $(C_CYAN)║$(C_RESET)\n" $(TOTAL_FILES); \
-		if [ $$warns -gt 0 ]; then \
-			printf "$(C_CYAN)║$(C_RESET)  Warnings:       $(C_YELLOW)%-52d$(C_RESET) $(C_CYAN)║$(C_RESET)\n" $$warns; \
-		else \
-			printf "$(C_CYAN)║$(C_RESET)  Warnings:       %-52d $(C_CYAN)║$(C_RESET)\n" 0; \
-		fi; \
-		printf "$(C_CYAN)║$(C_RESET)  Errors:          %-52d $(C_CYAN)║$(C_RESET)\n" 0; \
-		printf "$(C_CYAN)╚══════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+	warns=$$(grep -c "warning:" $(BUILD_DIR)/.warnings.txt 2>/dev/null | head -1 || echo 0); \
+	warns=$${warns:-0}; \
+	if [ "$$status" -eq 0 ]; then \
+		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
+		printf "$(C_GREEN)║                           ✓ BUILD SUCCESSFUL                           ║$(C_RESET)\n"; \
+		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
+		printf "$(C_CYAN)║$(C_RESET)  Files compiled: %-54d$(C_CYAN)║$(C_RESET)\n" $(TOTAL_FILES); \
+		printf "$(C_CYAN)║$(C_RESET)  Warnings:       %-54d$(C_CYAN)║$(C_RESET)\n" $$warns; \
+		printf "$(C_CYAN)║$(C_RESET)  Errors:         %-54d$(C_CYAN)║$(C_RESET)\n" 0; \
+		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
 	else \
-		printf "$(C_CYAN)╠══════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_RED)║                          ✗ BUILD FAILED                              ║$(C_RESET)\n"; \
-		printf "$(C_CYAN)╚══════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
+		printf "$(C_RED)║                             ✗ BUILD FAILED                             ║$(C_RESET)\n"; \
+		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
 		printf "\n$(C_RED)Errors:$(C_RESET)\n"; \
 		cat $(BUILD_DIR)/.warnings.txt; \
 		exit 1; \

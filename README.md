@@ -133,7 +133,3 @@ This is an educational project demonstrating compiler construction, VM design, a
 ## License
 
 MIT License - See LICENSE for details
-
----
-
-**Status:** Production-ready | **Build:** Zero warnings | **Tests:** 100% passing

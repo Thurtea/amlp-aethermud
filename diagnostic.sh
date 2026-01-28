@@ -23,21 +23,21 @@ check_file() {
 }
 
 # Critical files
-check_file "lib/secure/master.c"
-check_file "lib/secure/simul_efun.c"
-check_file "lib/std/wiztool.c"
-check_file "lib/std/player.c"
-check_file "lib/daemon/command.c"
+check_file "lib/secure/master.lpc"
+check_file "lib/secure/simul_efun.lpc"
+check_file "lib/std/wiztool.lpc"
+check_file "lib/std/player.lpc"
+check_file "lib/daemon/command.lpc"
 check_file "lib/include/globals.h"
 
-# Check for leftover .lpc files
+# Check for stray .c files (we use .lpc for the mudlib)
 echo ""
-lpc_count=$(find lib -name "*.lpc" 2>/dev/null | wc -l)
-if [ $lpc_count -gt 0 ]; then
-    echo "  ⚠️  WARNING: Found $lpc_count .lpc files (should be .c)"
-    echo "     Run: find lib -name '*.lpc' -type f"
+c_count=$(find lib -name "*.c" 2>/dev/null | wc -l)
+if [ $c_count -gt 0 ]; then
+    echo "  ⚠️  WARNING: Found $c_count .c files (should be .lpc for the mudlib)"
+    echo "     Run: find lib -name '*.c' -type f"
 else
-    echo "  ✓ No .lpc files found (good!)"
+    echo "  ✓ No stray .c files found in lib (good)"
 fi
 
 echo ""
@@ -65,26 +65,26 @@ echo " 3. Content Checks"
 echo "═══════════════════════════════════════════════════════════════"
 
 # Check if player.c has wiztool integration
-if grep -q "query_wiztool" lib/std/player.c 2>/dev/null; then
-    echo "  ✓ player.c has wiztool integration"
+if grep -q "query_wiztool" lib/std/player.lpc 2>/dev/null; then
+    echo "  ✓ player.lpc has wiztool integration"
 else
-    echo "  ✗ player.c missing wiztool integration"
+    echo "  ✗ player.lpc missing wiztool integration"
     echo "    (needs query_wiztool() function)"
 fi
 
 # Check if player.c routes commands
-if grep -q "COMMAND_D" lib/std/player.c 2>/dev/null; then
-    echo "  ✓ player.c routes to command daemon"
+if grep -q "COMMAND_D" lib/std/player.lpc 2>/dev/null; then
+    echo "  ✓ player.lpc routes to command daemon"
 else
-    echo "  ✗ player.c missing COMMAND_D routing"
+    echo "  ✗ player.lpc missing COMMAND_D routing"
     echo "    (needs to call COMMAND_D in process_input)"
 fi
 
 # Check if master.c loads daemons
-if grep -q "daemon/command" lib/secure/master.c 2>/dev/null; then
-    echo "  ✓ master.c loads command daemon"
+if grep -q "daemon/command" lib/secure/master.lpc 2>/dev/null; then
+    echo "  ✓ master.lpc loads command daemon"
 else
-    echo "  ✗ master.c doesn't load command daemon"
+    echo "  ✗ master.lpc doesn't load command daemon"
 fi
 
 echo ""
@@ -112,13 +112,13 @@ echo "════════════════════════�
 # Check for common syntax issues
 error_count=0
 
-if grep -n "\.lpc" lib/secure/master.c 2>/dev/null | grep -v "^Binary" | head -3; then
-    echo "  ⚠️  master.c references .lpc files"
+if grep -n "\.lpc" lib/secure/master.lpc 2>/dev/null | grep -v "^Binary" | head -3; then
+    echo "  ⚠️  master.lpc references other .lpc files (normal)"
     ((error_count++))
 fi
 
-if ! grep -q "#include.*globals" lib/std/player.c 2>/dev/null; then
-    echo "  ⚠️  player.c missing #include <globals.h>"
+if ! grep -q "#include.*globals" lib/std/player.lpc 2>/dev/null; then
+    echo "  ⚠️  player.lpc missing #include <globals.h>"
     ((error_count++))
 fi
 
@@ -132,7 +132,7 @@ echo " SUMMARY"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
 
-if [ -f lib/secure/master.c ] && [ -f lib/std/wiztool.c ] && [ -f lib/daemon/command.c ]; then
+if [ -f lib/secure/master.lpc ] && [ -f lib/std/wiztool.lpc ] && [ -f lib/daemon/command.lpc ]; then
     echo "✓ Core files present"
     echo ""
     echo "Next steps:"
@@ -142,10 +142,10 @@ if [ -f lib/secure/master.c ] && [ -f lib/std/wiztool.c ] && [ -f lib/daemon/com
 else
     echo "✗ Missing critical files"
     echo ""
-    echo "Need to copy implementation files:"
-    echo "  cp /home/claude/command_daemon.c lib/daemon/command.c"
-    echo "  cp /home/claude/wiztool.c lib/std/wiztool.c"
-    echo "  cp /home/claude/master.c lib/secure/master.c"
+    echo "Need to copy implementation files (use .lpc versions):" 
+    echo "  cp /home/claude/command_daemon.lpc lib/daemon/command.lpc"
+    echo "  cp /home/claude/wiztool.lpc lib/std/wiztool.lpc"
+    echo "  cp /home/claude/master.lpc lib/secure/master.lpc"
     echo "  cp /home/claude/globals.h lib/include/globals.h"
 fi
 

@@ -39,19 +39,19 @@ driver: $(BUILD_DIR)/driver
 $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	@mkdir -p $(BUILD_DIR)
 	@printf "\n"
-	@printf "$(C_CYAN)╔════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)$(C_BOLD)                  AMLP MUD DRIVER - BUILD IN PROGRESS                  $(C_RESET)$(C_CYAN)║$(C_RESET)\n"
-	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
-	@printf "$(C_CYAN)║                                                                        ║$(C_RESET)\n"
+	@printf "$(C_CYAN)╔════════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
+	@printf "$(C_CYAN)║$(C_RESET)$(C_BOLD)                   AMLP MUD DRIVER - BUILD IN PROGRESS                   $(C_RESET)$(C_CYAN)║$(C_RESET)\n"
+	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
+	@printf "$(C_CYAN)║                                                                                ║$(C_RESET)\n"
 	@count=0; \
 	for src in $(DRIVER_SRCS); do \
 		count=$$((count + 1)); \
 		name=$$(basename $$src); \
-		printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[%2d/$(TOTAL_FILES)]$(C_RESET) Compiling %-46s $(C_GREEN)✓$(C_RESET)   $(C_CYAN)║$(C_RESET)\n" $$count "$$name"; \
+		printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[%2d/$(TOTAL_FILES)]$(C_RESET) Compiling %-54s $(C_GREEN)✓$(C_RESET) $(C_CYAN)║$(C_RESET)\n" $$count "$$name"; \
 	done
-	@printf "$(C_CYAN)║                                                                        ║$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[LINK]$(C_RESET)  Creating driver executable...                           $(C_GREEN)✓$(C_RESET)   $(C_CYAN)║$(C_RESET)\n"
-	@printf "$(C_CYAN)║                                                                        ║$(C_RESET)\n"
+	@printf "$(C_CYAN)║                                                                                ║$(C_RESET)\n"
+	@printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[LINK]$(C_RESET)  Creating driver executable...                                 $(C_GREEN)✓$(C_RESET) $(C_CYAN)║$(C_RESET)\n"
+	@printf "$(C_CYAN)║                                                                                ║$(C_RESET)\n"
 	@# Actually compile and capture warnings
 	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) 2>$(BUILD_DIR)/.warnings.txt; \
 	status=$$?; \

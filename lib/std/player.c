@@ -1,3 +1,4 @@
+#include <globals.h>
 // lib/std/player.c - Base Player Object with Privilege System
 // 
 // Privilege Levels:
@@ -174,7 +175,7 @@ mixed process_command(string cmd) {
     
     // Route command to command daemon
     // The command daemon will check wiztool first, then other sources
-    object cmd_daemon = load_object("/daemon/command");
+    object cmd_daemon = load_object(COMMAND_D);
     if (cmd_daemon) {
         return cmd_daemon->execute_command(this_object(), cmd);
     }

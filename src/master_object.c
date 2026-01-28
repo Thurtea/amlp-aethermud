@@ -44,7 +44,7 @@ int master_object_init(const char *path, VirtualMachine *vm) {
     }
     
     if (!fp) {
-        fprintf(stderr, "[WARNING] No master.c file found\n");
+        fprintf(stderr, "[WARNING] No master.lpc file found\n");
         fprintf(stderr, "[INFO] Server will run with limited functionality\n");
         master_loaded = 0;
         return 0;
@@ -63,15 +63,15 @@ int master_object_init(const char *path, VirtualMachine *vm) {
 
 static char *find_master_file(void) {
     const char *search_paths[] = {
-        "./lib/secure/master.c",
-        "../lib/secure/master.c",
+        "./lib/secure/master.lpc",
+        "../lib/secure/master.lpc",
         NULL
     };
     
     const char *mudlib_path = getenv("AMLP_MUDLIB");
     if (mudlib_path) {
         char env_path[512];
-        snprintf(env_path, sizeof(env_path), "%s/lib/secure/master.c", mudlib_path);
+        snprintf(env_path, sizeof(env_path), "%s/lib/secure/master.lpc", mudlib_path);
         
         if (access(env_path, R_OK) == 0) {
             char *result = malloc(strlen(env_path) + 1);

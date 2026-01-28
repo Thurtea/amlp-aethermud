@@ -23,6 +23,7 @@ private int last_login;
 private int total_login_time;
 private int level;           /* Character level */
 private int experience;      /* Experience points */
+private object wiztool;      /* Wiztool for wizards/admins */
 
 /* Character creation data */
 private string race_selected;
@@ -54,6 +55,11 @@ void setup_player(string player_name, string pass_hash) {
     set_short(player_name + " the " + title);
     set_long("This is " + player_name + ", a " + title + ".\n");
     last_login = time();
+    
+    // Attach wiztool for wizards and admins
+    if (privilege_level >= 1) {
+        attach_wiztool();
+    }
 }
 
 // Level and experience
@@ -126,103 +132,55 @@ void set_privilege_level(int level) {
 
 string query_privilege_title() { return title; }
 
+// Wiztool functions
+void attach_wiztool() {
+    if (wiztool) {
+        // Already have one
+        return;
+    }
+    
+    wiztool = clone_object("/std/wiztool");
+    if (wiztool) {
+        wiztool->attach(this_object());
+    }
+}
+
+void detach_wiztool() {
+    if (wiztool) {
+        wiztool->detach();
+        destruct(wiztool);
+        wiztool = 0;
+    }
+}
+
+object query_wiztool() {
+    return wiztool;
+}
+
+void force_me(string cmd) {
+    if (!cmd || cmd == "") return;
+    process_command(cmd);
+}
+
+int query_privilege() {
+    return privilege_level;
+}
+
 // Command processing - CRITICAL FUNCTION
 mixed process_command(string cmd) {
-    string verb, args;
-    
     if (!cmd || cmd == "") {
         return "Empty command.\n";
     }
     
-    // Parse command into verb and arguments
-    if (sscanf(cmd, "%s %s", verb, args) != 2) {
-        verb = cmd;
-        args = "";
+    // Route command to command daemon
+    // The command daemon will check wiztool first, then other sources
+    object cmd_daemon = load_object("/daemon/command");
+    if (cmd_daemon) {
+        return cmd_daemon->execute_command(this_object(), cmd);
     }
     
-    verb = lower_case(verb);
-    
-    // Route to command handlers
-    switch(verb) {
-        case "look":
-        case "l":
-            return cmd_look(args);
-        
-        case "inventory":
-        case "i":
-            return cmd_inventory();
-        
-        case "say":
-            return cmd_say(args);
-        
-        case "emote":
-            return cmd_emote(args);
-        
-        case "ooc":
-            return cmd_ooc(args);
-        
-        case "who":
-            return cmd_who();
-        
-        case "stats":
-            return cmd_stats();
-        
-        // Wizard commands
-        case "goto":
-            if (!is_wizard()) return "You don't have permission to use that command.\n";
-            return cmd_goto(args);
-        
-        case "clone":
-            if (!is_wizard()) return "You don't have permission to use that command.\n";
-            return cmd_clone(args);
-        
-        // Admin commands
-        case "promote":
-            if (!is_admin()) return "You don't have permission to use that command.\n";
-            return cmd_promote(args);
-        
-        case "shutdown":
-            if (!is_admin()) return "You don't have permission to use that command.\n";
-            return cmd_shutdown(args);
-        
-        case "users":
-            if (!is_admin()) return "You don't have permission to use that command.\n";
-            return cmd_users();
-        
-        // New roleplay commands - handled by separate command objects
-        case "languages":
-        case "language":
-        case "skills":
-        case "manifest":
-        case "cast":
-        case "introduce":
-        case "remember":
-        case "forget":
-            return execute_cmd_file(verb, args);
-        
-        // Movement
-        case "north":
-        case "n":
-            return cmd_move("north");
-        case "south":
-        case "s":
-            return cmd_move("south");
-        case "east":
-        case "e":
-            return cmd_move("east");
-        case "west":
-        case "w":
-            return cmd_move("west");
-        case "up":
-        case "u":
-            return cmd_move("up");
-        case "down":
-        case "d":
-            return cmd_move("down");
-        
-        default:
-            return "Unknown command: " + verb + "\nType 'help' for available commands.\n";
-    }
+    // Fallback if command daemon not available
+    return "Command system not initialized.\n";
 }
 
 // Command implementations
@@ -612,6 +570,11 @@ void restore_data(mapping data) {
     last_login = data["last_login"];
     total_login_time = data["total_login_time"];
     
+    // Attach wiztool if wizard/admin
+    if (privilege_level >= 1) {
+        attach_wiztool();
+    }
+    
     /* Palladium stats */
     if (data["stats"]) set_all_stats(data["stats"]);
     if (data["hp"]) set_hp(data["hp"]);
@@ -651,4 +614,12 @@ void restore_data(mapping data) {
     set_name(name);
     set_real_name(name);
     set_short(name + " the " + title);
+}
+
+// Cleanup on removal
+void remove() {
+    if (wiztool) {
+        detach_wiztool();
+    }
+    ::remove();
 }

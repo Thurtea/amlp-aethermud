@@ -1,6 +1,6 @@
 # AMLP Driver
 
-A production-ready LPC MUD driver written from scratch in C. Complete lexer, parser, VM, garbage collector, and object system with comprehensive test coverage.
+LPC MUD driver written from scratch in C.
 
 ## Features
 
@@ -93,19 +93,6 @@ make test            # Run all test suites
 make clean           # Remove build artifacts
 ```
 
-## Test Results
-
-| Suite | Tests | Assertions | Status |
-|-------|-------|------------|--------|
-| Lexer | 20 | 41 | PASS |
-| Parser | 40 | 97 | PASS |
-| VM | 47 | 146 | PASS |
-| Object | 16 | 33 | PASS |
-| GC | 23 | 52 | PASS |
-| Efun | 28 | 57 | PASS |
-| Array | 23 | 70 | PASS |
-| Mapping | 23 | 69 | PASS |
-| **Total** | **220** | **565** | **100%** |
 
 ## Documentation
 

@@ -34,7 +34,7 @@
 #define BUFFER_SIZE 4096
 #define INPUT_BUFFER_SIZE 2048
 #define DEFAULT_PORT 3000
-#define DEFAULT_MASTER_PATH "lib/secure/master.c"
+#define DEFAULT_MASTER_PATH "lib/secure/master.lpc"
 #define SESSION_TIMEOUT 1800  /* 30 minutes */
 
 /* Player session states */
@@ -243,7 +243,7 @@ void send_prompt(PlayerSession *session) {
             send_to_player(session,
                 "\r\n"
                 "╔═══════════════════════════════════════╗\r\n"
-                "║    AMLP Driver - Development Server    ║\r\n"
+                "║    AMLP Driver - Development Server   ║\r\n"
                 "║             Version 0.1.0             ║\r\n"
                 "╚═══════════════════════════════════════╝\r\n"
                 "\r\n"

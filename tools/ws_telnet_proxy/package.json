@@ -1,0 +1,14 @@
+{
+  "name": "amlp-ws-telnet-proxy",
+  "version": "0.1.0",
+  "description": "WebSocket to Telnet proxy for AMLP driver (ws -> telnet)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
+  },
+  "author": "amlp-helper",
+  "license": "MIT"
+}

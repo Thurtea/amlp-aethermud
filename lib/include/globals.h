@@ -1,51 +1,74 @@
-// AMLP-MUD Global Definitions
+// /lib/include/globals.h
+// Global definitions for AMLP MUD
 
 #ifndef __GLOBALS_H__
 #define __GLOBALS_H__
 
-// Directory paths
-#define DIR_STD     "/std"
-#define DIR_CMDS    "/cmds"
-#define DIR_CLONE   "/clone"
-#define DIR_SINGLE  "/single"
-#define DIR_DAEMON  "/daemon"
-#define DIR_DOMAINS "/domains"
-#define DIR_SECURE  "/secure"
-#define DIR_SAVE    "/save"
-#define DIR_LOG     "/log"
-#define DIR_DATA    "/data"
-#define DIR_ADMINCMDS "/cmds/admin"
+// === DAEMON SHORTCUTS ===
+#define COMMAND_D       "/daemon/command"
+#define LOGIN_D         "/daemon/login"
+#define CHARGEN_D       "/daemon/chargen"
+#define SKILLS_D        "/daemon/skills"
+#define LANGUAGES_D     "/daemon/languages"
+#define PSIONICS_D      "/daemon/psionics"
+#define SPELLS_D        "/daemon/spells"
 
-// Core objects
-#define LOGIN_OB   "/clone/login"
-#define USER_OB    "/clone/user"
-#define VOID_OB    "/domains/start/room/void"
-#define START_ROOM "/domains/start/room/welcome"
+// === STANDARD PATHS ===
+#define DAEMON          "/std/daemon"
+#define ROOM            "/std/room"
+#define OBJECT          "/std/object"
+#define LIVING          "/std/living"
+#define PLAYER          "/std/player"
+#define WIZTOOL         "/std/wiztool"
 
-// Security UIDs
-#define ROOT_UID     "Root"
-#define BACKBONE_UID "Backbone"
+// === PRIVILEGE LEVELS ===
+#define PRIV_PLAYER     0
+#define PRIV_WIZARD     1
+#define PRIV_ADMIN      2
+#define PRIV_ROOT       3
 
-// Simul efuns
-#define SIMUL_EFUN_FILE "/single/simul_efun"
+// === COLOR CODES (ANSI) ===
+#define ANSI_RESET      "\x1b[0m"
+#define ANSI_BOLD       "\x1b[1m"
+#define ANSI_DIM        "\x1b[2m"
+#define ANSI_UNDERLINE  "\x1b[4m"
 
-// Command prefix
-#define CMD_PREFIX "/cmds/"
-#define ADMIN_CMD_PREFIX "/cmds/admin/"
+#define ANSI_BLACK      "\x1b[30m"
+#define ANSI_RED        "\x1b[31m"
+#define ANSI_GREEN      "\x1b[32m"
+#define ANSI_YELLOW     "\x1b[33m"
+#define ANSI_BLUE       "\x1b[34m"
+#define ANSI_MAGENTA    "\x1b[35m"
+#define ANSI_CYAN       "\x1b[36m"
+#define ANSI_WHITE      "\x1b[37m"
 
-// Message classes
-#define M_STATUS "status"
-#define M_SAY    "say"
-#define M_SHOUT  "shout"
+// Color shortcuts (MUD style)
+#define %^RESET%^       ANSI_RESET
+#define %^BOLD%^        ANSI_BOLD
+#define %^RED%^         ANSI_RED
+#define %^GREEN%^       ANSI_GREEN
+#define %^YELLOW%^      ANSI_YELLOW
+#define %^BLUE%^        ANSI_BLUE
+#define %^MAGENTA%^     ANSI_MAGENTA
+#define %^CYAN%^        ANSI_CYAN
+#define %^WHITE%^       ANSI_WHITE
 
-// Wizard levels
-#define PLAYER_LEVEL 0
-#define WIZARD_LEVEL 1
-#define ADMIN_LEVEL  2
+// === RETURN CODES ===
+#define SUCCESS         1
+#define FAILURE         0
 
-// Default values
-#define DEFAULT_RACE "human"
-#define DEFAULT_LANGUAGE "american"
-#define DEFAULT_FLUENCY 98
+// === OBJECT TYPES ===
+#define OBJ_ROOM        "room"
+#define OBJ_LIVING      "living"
+#define OBJ_ITEM        "item"
+#define OBJ_WEAPON      "weapon"
+#define OBJ_ARMOR       "armor"
+#define OBJ_CONTAINER   "container"
 
-#endif
+// === DIRECTORY STRUCTURE ===
+#define DIR_SAVE        "/save"
+#define DIR_PLAYERS     "/save/players"
+#define DIR_LOG         "/log"
+#define DIR_DATA        "/data"
+
+#endif // __GLOBALS_H__

@@ -14,7 +14,7 @@
  * 
  * Default telnet port: 3000
  * Default WebSocket port: 3001
- * Default master: lib/secure/master.c
+ * Default master: lib/secure/master.lpc
  */
 
 #define _GNU_SOURCE  /* for memmem(), strcasestr() */
@@ -47,7 +47,7 @@
 #define WS_BUFFER_SIZE 65536
 #define DEFAULT_PORT 3000
 #define DEFAULT_WS_PORT 3001
-#define DEFAULT_MASTER_PATH "lib/secure/master.c"
+#define DEFAULT_MASTER_PATH "lib/secure/master.lpc"
 #define SESSION_TIMEOUT 1800  /* 30 minutes */
 
 /* Connection types */
@@ -295,7 +295,7 @@ void send_prompt(PlayerSession *session) {
             send_to_player(session,
                 "\r\n"
                 "╔═══════════════════════════════════════╗\r\n"
-                "║    AMLP Driver - Development Server    ║\r\n"
+                "║    AMLP Driver - Development Server   ║\r\n"
                 "║             Version 0.1.0             ║\r\n"
                 "╚═══════════════════════════════════════╝\r\n"
                 "\r\n"

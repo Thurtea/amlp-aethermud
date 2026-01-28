@@ -22,13 +22,13 @@ DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c \
 # Count source files
 TOTAL_FILES = $(words $(DRIVER_SRCS))
 
-# Colors
-C_CYAN    = \033[36m
-C_GREEN   = \033[32m
-C_YELLOW  = \033[33m
-C_RED     = \033[31m
-C_RESET   = \033[0m
-C_BOLD    = \033[1m
+# Colors (disabled to avoid ANSI length issues; plain box used)
+C_CYAN    =
+C_GREEN   =
+C_YELLOW  =
+C_RED     =
+C_RESET   =
+C_BOLD    =
 
 # Default target - just build the driver
 .PHONY: all driver tests clean distclean help test
@@ -39,37 +39,37 @@ driver: $(BUILD_DIR)/driver
 $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	@mkdir -p $(BUILD_DIR)
 	@printf "\n"
-	@printf "$(C_CYAN)╔════════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)$(C_BOLD)                   AMLP MUD DRIVER - BUILD IN PROGRESS                   $(C_RESET)$(C_CYAN)║$(C_RESET)\n"
-	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
-	@printf "$(C_CYAN)║                                                                                ║$(C_RESET)\n"
+	@printf "╔════════════════════════════════════════════════════════════════════════════╗\n"
+	@printf "║                   AMLP MUD DRIVER - BUILD IN PROGRESS                     ║\n"
+	@printf "╠════════════════════════════════════════════════════════════════════════════╣\n"
+	@printf "║                                                                            ║\n"
 	@count=0; \
 	for src in $(DRIVER_SRCS); do \
 		count=$$((count + 1)); \
 		name=$$(basename $$src); \
-		printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[%2d/$(TOTAL_FILES)]$(C_RESET) Compiling %-54s $(C_GREEN)✓$(C_RESET)$(C_CYAN)║$(C_RESET)\n" $$count "$$name"; \
+		printf "║  [%2d/$(TOTAL_FILES)] Compiling %-54s   ║\n" $$count "$$name"; \
 	done
-	@printf "$(C_CYAN)║                                                                                ║$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)  $(C_CYAN)[LINK]$(C_RESET)  Creating driver executable...                                 $(C_GREEN)✓$(C_RESET)$(C_CYAN)║$(C_RESET)\n"
-	@printf "$(C_CYAN)║                                                                                ║$(C_RESET)\n"
+	@printf "║                                                                            ║\n"
+	@printf "║  [LINK]  Creating driver executable...                                 ║\n"
+	@printf "║                                                                            ║\n"
 	@# Actually compile and capture warnings
 	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) 2>$(BUILD_DIR)/.warnings.txt; \
 	status=$$?; \
 	warns=$$(grep -c "warning:" $(BUILD_DIR)/.warnings.txt 2>/dev/null | head -1 || echo 0); \
 	warns=$${warns:-0}; \
 	if [ "$$status" -eq 0 ]; then \
-		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_GREEN)║                      ✓ BUILD SUCCESSFUL                                       $(C_RESET)$(C_CYAN)║$(C_RESET)\n"; \
-		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_CYAN)║$(C_RESET)  Files compiled: %-66d$(C_CYAN)║$(C_RESET)\n" $(TOTAL_FILES); \
-		printf "$(C_CYAN)║$(C_RESET)  Warnings:       %-66d$(C_CYAN)║$(C_RESET)\n" $$warns; \
-		printf "$(C_CYAN)║$(C_RESET)  Errors:         %-66d$(C_CYAN)║$(C_RESET)\n" 0; \
-		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
+		printf "║                      BUILD SUCCESSFUL                                    ║\n"; \
+		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
+		printf "║  Files compiled: %-66d║\n" $(TOTAL_FILES); \
+		printf "║  Warnings:       %-66d║\n" $$warns; \
+		printf "║  Errors:         %-66d║\n" 0; \
+		printf "╚════════════════════════════════════════════════════════════════════════════╝\n"; \
 	else \
-		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_RED)║                         ✗ BUILD FAILED                                      $(C_RESET)$(C_CYAN)║$(C_RESET)\n"; \
-		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
-		printf "\n$(C_RED)Errors:$(C_RESET)\n"; \
+		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
+		printf "║                         ✗ BUILD FAILED                                  ║\n"; \
+		printf "╚════════════════════════════════════════════════════════════════════════════╝\n"; \
+		printf "\nErrors:\n"; \
 		cat $(BUILD_DIR)/.warnings.txt; \
 		exit 1; \
 	fi

@@ -58,17 +58,17 @@ $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	warns=$$(grep -c "warning:" $(BUILD_DIR)/.warnings.txt 2>/dev/null | head -1 || echo 0); \
 	warns=$${warns:-0}; \
 	if [ "$$status" -eq 0 ]; then \
-		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_GREEN)║                           ✓ BUILD SUCCESSFUL                           ║$(C_RESET)\n"; \
-		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_CYAN)║$(C_RESET)  Files compiled: %-54d$(C_CYAN)║$(C_RESET)\n" $(TOTAL_FILES); \
-		printf "$(C_CYAN)║$(C_RESET)  Warnings:       %-54d$(C_CYAN)║$(C_RESET)\n" $$warns; \
-		printf "$(C_CYAN)║$(C_RESET)  Errors:         %-54d$(C_CYAN)║$(C_RESET)\n" 0; \
-		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
+		printf "$(C_GREEN)║                      ✓ BUILD SUCCESSFUL                                       $(C_RESET)$(C_CYAN)║$(C_RESET)\n"; \
+		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
+		printf "$(C_CYAN)║$(C_RESET)  Files compiled: %-66d$(C_CYAN)║$(C_RESET)\n" $(TOTAL_FILES); \
+		printf "$(C_CYAN)║$(C_RESET)  Warnings:       %-66d$(C_CYAN)║$(C_RESET)\n" $$warns; \
+		printf "$(C_CYAN)║$(C_RESET)  Errors:         %-66d$(C_CYAN)║$(C_RESET)\n" 0; \
+		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
 	else \
-		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		printf "$(C_RED)║                             ✗ BUILD FAILED                             ║$(C_RESET)\n"; \
-		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+		printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
+		printf "$(C_RED)║                         ✗ BUILD FAILED                                      $(C_RESET)$(C_CYAN)║$(C_RESET)\n"; \
+		printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
 		printf "\n$(C_RED)Errors:$(C_RESET)\n"; \
 		cat $(BUILD_DIR)/.warnings.txt; \
 		exit 1; \

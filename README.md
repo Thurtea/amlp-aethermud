@@ -24,6 +24,40 @@ make test
 ./build/driver
 ```
 
+## Quick Start for MUD Admins
+
+Want to run a live MUD server? See the [Administrator Guide](docs/ADMIN_GUIDE.md) for complete setup instructions.
+
+**Basic Setup:**
+
+```bash
+# Build the server
+make clean && make all
+
+# Start the MUD server on port 3000
+./mud.ctl start
+
+# Check server status
+./mud.ctl status
+
+# Connect and create first admin account
+telnet localhost 3000
+```
+
+**Key Features:**
+- First player automatically gets admin privileges
+- Three privilege levels: Player (0), Wizard (1), Admin (2)
+- Use `promote <player> <level>` to grant privileges
+- Supports telnet and Mudlet clients
+- Full server management via `mud.ctl` script
+
+See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) for detailed instructions on:
+- Port configuration
+- Privilege system
+- Connecting with telnet/Mudlet
+- Server management commands
+- Troubleshooting
+
 ## Project Stats
 
 - **11,249 lines** of C code (6,500 core + 4,700 tests)
@@ -75,6 +109,7 @@ make clean           # Remove build artifacts
 
 ## Documentation
 
+- [Administrator Guide](docs/ADMIN_GUIDE.md) - Complete server setup and management
 - [Development Guide](docs/DEVELOPMENT.md) - Detailed phase documentation
 - [Build Summary](docs/BUILD_SUMMARY.md) - Build system details
 - [VM Implementation](docs/VM_IMPLEMENTATION_SUMMARY.md) - VM architecture

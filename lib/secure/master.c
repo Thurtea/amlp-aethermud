@@ -20,6 +20,18 @@ void create() {
     
     // Step 3: Set up directories
     init_directories();
+
+    /* Test: attempt to load a small test clone to exercise compile/load/clone
+     * This helps validate that clone_object/load_object and the compiler
+     * + program_loader path work at runtime. Remove when no longer needed. */
+    catch {
+        object t = load_object("/test/clone_test");
+        if (t) {
+            write("[MASTER TEST] Loaded test clone: " + file_name(t) + "\n");
+        } else {
+            write("[MASTER TEST] Failed to load test clone.\n");
+        }
+    };
     
     write("Master object initialized successfully.\n");
 }

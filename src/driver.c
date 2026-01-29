@@ -161,23 +161,25 @@ void* create_player_object(const char *username, const char *password_hash __att
 VMValue call_player_command(void *player_obj, const char *command) {
     VMValue result;
     result.type = VALUE_NULL;
-    
-    if (!player_obj || !global_vm) {
+
+    if (!player_obj || !global_vm || !command) {
         return result;
     }
-    
+
     fprintf(stderr, "[Server] Calling player command: %s\n", command);
-    
-    /* TODO: Implement when object system is ready
-     *
-     * VMValue cmd_arg = vm_value_create_string(command);
-     * vm_push_value(global_vm, cmd_arg);
-     * 
-     * result = object_call_method((Object*)player_obj, "process_command", &cmd_arg, 1);
-     * 
-     * vm_value_free(&cmd_arg);
-     */
-    
+
+    // Cast player_obj to obj_t*
+    obj_t *obj = (obj_t *)player_obj;
+
+    // Prepare argument (command string)
+    VMValue cmd_arg = vm_value_create_string(command);
+
+    // Call process_command on the player object
+    result = obj_call_method(global_vm, obj, "process_command", &cmd_arg, 1);
+
+    // Clean up
+    vm_value_free(&cmd_arg);
+
     return result;
 }
 

@@ -48,6 +48,8 @@ typedef struct PlayerSession {
     
     /* Character generation and game state */
     ChargenState chargen_state;
+    int chargen_page;        /* Current page for paginated menus */
+    int chargen_temp_choice; /* Temporary storage for menu selection */
     Character character;
     Room *current_room;
 } PlayerSession;

@@ -150,6 +150,17 @@ void room_remove_player(Room *room, PlayerSession *player) {
     }
 }
 
+/* Broadcast message to all players in room (optionally excluding one) */
+void room_broadcast(Room *room, const char *message, PlayerSession *exclude) {
+    if (!room || !message) return;
+    
+    for (int i = 0; i < room->num_players; i++) {
+        if (room->players[i] != exclude && room->players[i]->username) {
+            send_to_player(room->players[i], "%s", message);
+        }
+    }
+}
+
 /* Look command */
 void cmd_look(PlayerSession *sess, const char *args) {
     if (!sess || !sess->current_room) {
@@ -159,12 +170,12 @@ void cmd_look(PlayerSession *sess, const char *args) {
     
     Room *room = sess->current_room;
     
-    send_to_player(sess, "\n\033[1;36m%s\033[0m\n", room->name);
+    send_to_player(sess, "\n%s\n", room->name);
     send_to_player(sess, "%s\n", room->description);
     
     /* List other players */
     if (room->num_players > 1) {
-        send_to_player(sess, "\n\033[1;33mAlso here:\033[0m\n");
+        send_to_player(sess, "\nAlso here:\n");
         for (int i = 0; i < room->num_players; i++) {
             if (room->players[i] != sess && room->players[i]->username) {
                 send_to_player(sess, "  - %s\n", room->players[i]->username);
@@ -173,7 +184,7 @@ void cmd_look(PlayerSession *sess, const char *args) {
     }
     
     /* List exits */
-    send_to_player(sess, "\n\033[1;32mExits:\033[0m ");
+    send_to_player(sess, "\nExits: ");
     int has_exit = 0;
     if (room->exits.north >= 0) { send_to_player(sess, "north "); has_exit = 1; }
     if (room->exits.south >= 0) { send_to_player(sess, "south "); has_exit = 1; }

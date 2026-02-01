@@ -438,8 +438,26 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
     
     if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "logout") == 0) {
+        /* Auto-save before quitting */
+        send_to_player(session, "\r\nSaving your character...\r\n");
+        if (save_character(session)) {
+            send_to_player(session, " Character saved.\r\n");
+        } else {
+            send_to_player(session, " Warning: Failed to save character.\r\n");
+        }
+        
         result.type = VALUE_STRING;
         result.data.string_value = strdup("quit");
+        return result;
+    }
+    
+    if (strcmp(cmd, "save") == 0) {
+        if (save_character(session)) {
+            send_to_player(session, " Character saved successfully.\r\n");
+        } else {
+            send_to_player(session, " Failed to save character.\r\n");
+        }
+        result.type = VALUE_NULL;
         return result;
     }
     
@@ -456,7 +474,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             "  emote <action>       - Perform an emote\r\n"
             "  who                  - List players online\r\n"
             "  stats                - Show your character stats\r\n"
-            "  quit / logout        - Disconnect\r\n"
+            "  save                 - Save your character\r\n"
+            "  quit / logout        - Save and disconnect\r\n"
             "\r\nMovement: north, south, east, west, up, down (or n, s, e, w, u, d)\r\n");
         
         if (session->privilege_level >= 1) {
@@ -674,6 +693,96 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
     
+    /* Wizard commands */
+    if (strcmp(cmd, "goto") == 0) {
+        if (session->privilege_level < 1) {
+            result.type = VALUE_STRING;
+            result.data.string_value = strdup("You don't have permission to use that command.\r\n");
+            return result;
+        }
+        
+        if (!args || *args == '\0') {
+            result.type = VALUE_STRING;
+            result.data.string_value = strdup(
+                "Usage: goto <room_id>\r\n"
+                "Available rooms: 0=Void, 1=Chi-Town Plaza, 2=Coalition HQ, 3=Merchant District\r\n");
+            return result;
+        }
+        
+        int room_id = atoi(args);
+        Room *target_room = room_get_by_id(room_id);
+        
+        if (!target_room) {
+            result.type = VALUE_STRING;
+            result.data.string_value = strdup("Invalid room ID.\r\n");
+            return result;
+        }
+        
+        /* Remove from current room */
+        if (session->current_room) {
+            room_remove_player(session->current_room, session);
+            
+            char leave_msg[256];
+            snprintf(leave_msg, sizeof(leave_msg), 
+                    "%s vanishes in a puff of smoke.\r\n", session->username);
+            room_broadcast(session->current_room, leave_msg, NULL);
+        }
+        
+        /* Add to target room */
+        session->current_room = target_room;
+        room_add_player(target_room, session);
+        
+        char arrive_msg[256];
+        snprintf(arrive_msg, sizeof(arrive_msg), 
+                "%s appears in a puff of smoke.\r\n", session->username);
+        room_broadcast(target_room, arrive_msg, session);
+        
+        /* Show new room */
+        cmd_look(session, "");
+        
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "clone") == 0) {
+        if (session->privilege_level < 1) {
+            result.type = VALUE_STRING;
+            result.data.string_value = strdup("You don't have permission to use that command.\r\n");
+            return result;
+        }
+        
+        if (!args || *args == '\0') {
+            result.type = VALUE_STRING;
+            result.data.string_value = strdup(
+                "Usage: clone <object>\r\n"
+                "Available objects: sword, shield, potion\r\n");
+            return result;
+        }
+        
+        char msg[512];
+        if (strcmp(args, "sword") == 0) {
+            snprintf(msg, sizeof(msg), 
+                    "You conjure a gleaming sword from thin air!\r\n"
+                    "The sword materializes in your hands.\r\n");
+        } else if (strcmp(args, "shield") == 0) {
+            snprintf(msg, sizeof(msg), 
+                    "You conjure a sturdy shield from thin air!\r\n"
+                    "The shield materializes on your arm.\r\n");
+        } else if (strcmp(args, "potion") == 0) {
+            snprintf(msg, sizeof(msg), 
+                    "You conjure a health potion from thin air!\r\n"
+                    "The potion appears in a small glass vial.\r\n");
+        } else {
+            snprintf(msg, sizeof(msg), 
+                    "Unknown object: %s\r\n"
+                    "Available objects: sword, shield, potion\r\n", args);
+        }
+        
+        result.type = VALUE_STRING;
+        result.data.string_value = strdup(msg);
+        return result;
+    }
+    
     if (strcmp(cmd, "shutdown") == 0) {
         if (session->privilege_level < 2) {
             result.type = VALUE_STRING;
@@ -746,26 +855,57 @@ void process_login_state(PlayerSession *session, const char *input) {
             
             strncpy(session->username, start, sizeof(session->username) - 1);
             
-            /* For now, always treat as new user */
-            send_to_player(session, 
-                "\r\nWelcome, %s! You appear to be new here.\r\n", 
-                session->username);
-            session->state = STATE_NEW_PASSWORD;
+            /* Check if character exists */
+            if (character_exists(session->username)) {
+                send_to_player(session, 
+                    "\r\nWelcome back, %s!\r\n", 
+                    session->username);
+                session->state = STATE_GET_PASSWORD;
+            } else {
+                send_to_player(session, 
+                    "\r\nWelcome, %s! You appear to be new here.\r\n", 
+                    session->username);
+                session->state = STATE_NEW_PASSWORD;
+            }
             send_prompt(session);
             break;
             
         case STATE_GET_PASSWORD:
-            send_to_player(session, "\r\nWelcome back, %s!\r\n", session->username);
-            session->state = STATE_PLAYING;
+            /* TODO: Verify password hash */
             
-            send_to_player(session, "\r\nYou materialize in the starting room.\r\n");
-            send_prompt(session);
-            
-            /* Announce login */
-            char login_msg[256];
-            snprintf(login_msg, sizeof(login_msg), 
-                    "%s has entered the game.\r\n", session->username);
-            broadcast_message(login_msg, session);
+            /* Load existing character */
+            if (load_character(session, session->username)) {
+                send_to_player(session, "\r\nWelcome back!\r\n");
+                send_to_player(session, "Your character has been restored.\r\n\r\n");
+                
+                session->state = STATE_PLAYING;
+                
+                /* Add player to their saved room */
+                if (session->current_room) {
+                    room_add_player(session->current_room, session);
+                } else {
+                    /* Fallback to start room if load failed */
+                    Room *start = room_get_start();
+                    if (start) {
+                        session->current_room = start;
+                        room_add_player(start, session);
+                    }
+                }
+                
+                /* Show room description */
+                cmd_look(session, "");
+                send_prompt(session);
+                
+                /* Announce login */
+                char login_msg[256];
+                snprintf(login_msg, sizeof(login_msg), 
+                        "%s has entered the game.\r\n", session->username);
+                broadcast_message(login_msg, session);
+            } else {
+                send_to_player(session, 
+                    "\r\nError loading character. Please contact an administrator.\r\n");
+                session->state = STATE_DISCONNECTING;
+            }
             break;
             
         case STATE_NEW_PASSWORD:
@@ -817,13 +957,6 @@ void process_login_state(PlayerSession *session, const char *input) {
             memset(session->password_buffer, 0, sizeof(session->password_buffer));
             session->state = STATE_CHARGEN;
             chargen_init(session);
-            
-            /* Announce login */
-            char create_msg[256];
-            snprintf(create_msg, sizeof(create_msg), 
-                    "%s has entered the game for the first time!\r\n", 
-                    session->username);
-            broadcast_message(create_msg, session);
             break;
             
         default:

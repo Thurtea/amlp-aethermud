@@ -40,6 +40,7 @@ void room_remove_player(Room *room, PlayerSession *player);
 void room_add_item(Room *room, InventoryItem *item);
 InventoryItem* room_find_item(Room *room, const char *name);
 void room_remove_item(Room *room, InventoryItem *item);
+void room_broadcast(Room *room, const char *message, PlayerSession *exclude);
 
 /* Room commands */
 void cmd_look(PlayerSession *sess, const char *args);

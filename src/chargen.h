@@ -60,4 +60,9 @@ void chargen_complete(PlayerSession *sess);
 /* Commands */
 void cmd_stats(PlayerSession *sess, const char *args);
 
+/* Character persistence */
+int save_character(PlayerSession *sess);
+int load_character(PlayerSession *sess, const char *username);
+int character_exists(const char *username);
+
 #endif /* CHARGEN_H */

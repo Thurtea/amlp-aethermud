@@ -480,6 +480,278 @@ static OCCSkillPackage OCC_SKILL_PACKAGES[] = {
         .num_skills = 5,
         .starting_isp = 5,
         .starting_ppe = 5
+    },
+    
+    /* ========== NEW AETHERMUD OCCs (35-64) ========== */
+    
+    /* 35: Atlantean Nomad */
+    {
+        .skill_ids = {HAND_TO_HAND, SURVIVAL, TRACKING, LITERACY, WP_SWORD},
+        .skill_percentages = {60, 65, 55, 70, 60},
+        .num_skills = 5,
+        .starting_isp = 10,
+        .starting_ppe = 15
+    },
+    
+    /* 36: Atlantean Slave */
+    {
+        .skill_ids = {HAND_TO_HAND, SURVIVAL, FIRST_AID, MECHANICS, LITERACY},
+        .skill_percentages = {55, 50, 45, 40, 55},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 10
+    },
+    
+    /* 37: Ninja Juicer */
+    {
+        .skill_ids = {HAND_TO_HAND, ACROBATICS, WP_SWORD, TRACKING, WP_PISTOL},
+        .skill_percentages = {80, 75, 70, 60, 65},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 38: Delphi Juicer */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_RIFLE, COMPUTER_OPS, ELECTRONICS, LITERACY},
+        .skill_percentages = {70, 70, 60, 55, 65},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 39: Hyperion Juicer */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_RIFLE, WP_SWORD, ACROBATICS, SURVIVAL},
+        .skill_percentages = {80, 75, 70, 65, 55},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 40: CS Ranger */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_RIFLE, SURVIVAL, TRACKING, FIRST_AID},
+        .skill_percentages = {65, 70, 65, 60, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 41: CS Technical Officer */
+    {
+        .skill_ids = {COMPUTER_OPS, ELECTRONICS, MECHANICS, LITERACY, WP_PISTOL},
+        .skill_percentages = {70, 65, 60, 65, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 42: Air Warlock */
+    {
+        .skill_ids = {MAGIC_NOVICE, LITERACY, SURVIVAL, WP_PISTOL, HAND_TO_HAND},
+        .skill_percentages = {75, 65, 50, 40, 35},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 35
+    },
+    
+    /* 43: Tattooed Man */
+    {
+        .skill_ids = {HAND_TO_HAND, MAGIC_NOVICE, WP_SWORD, ACROBATICS, SURVIVAL},
+        .skill_percentages = {70, 70, 65, 60, 55},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 30
+    },
+    
+    /* 44: Nega-Psychic */
+    {
+        .skill_ids = {PSIONICS_NOVICE, LITERACY, COMPUTER_OPS, HAND_TO_HAND, WP_PISTOL},
+        .skill_percentages = {65, 60, 50, 45, 45},
+        .num_skills = 5,
+        .starting_isp = 30,
+        .starting_ppe = 5
+    },
+    
+    /* 45: Cyber-Doc */
+    {
+        .skill_ids = {PARAMEDIC, FIRST_AID, COMPUTER_OPS, ELECTRONICS, LITERACY},
+        .skill_percentages = {80, 75, 60, 55, 70},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 46: Kittani Field Mechanic */
+    {
+        .skill_ids = {MECHANICS, ELECTRONICS, COMPUTER_OPS, HAND_TO_HAND, WP_RIFLE},
+        .skill_percentages = {75, 70, 65, 50, 55},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 47: NGR Mechanic */
+    {
+        .skill_ids = {MECHANICS, ELECTRONICS, COMPUTER_OPS, LITERACY, HAND_TO_HAND},
+        .skill_percentages = {70, 65, 60, 65, 45},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 48: Master Assassin */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_PISTOL, ACROBATICS, TRACKING, WP_SWORD},
+        .skill_percentages = {80, 75, 70, 65, 70},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 49: Kittani Warrior */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_RIFLE, WP_SWORD, ACROBATICS, SURVIVAL},
+        .skill_percentages = {70, 70, 65, 60, 55},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 50: NGR Soldier */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_RIFLE, WP_PISTOL, FIRST_AID, SURVIVAL},
+        .skill_percentages = {65, 70, 60, 50, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 51: Knight (Europe) */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_SWORD, ACROBATICS, LITERACY, SURVIVAL},
+        .skill_percentages = {70, 75, 60, 60, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 10
+    },
+    
+    /* 52: Royal Knight */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_SWORD, ACROBATICS, LITERACY, WP_PISTOL},
+        .skill_percentages = {75, 80, 65, 70, 60},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 15
+    },
+    
+    /* 53: Professional Thief */
+    {
+        .skill_ids = {ACROBATICS, HAND_TO_HAND, WP_PISTOL, ELECTRONICS, COMPUTER_OPS},
+        .skill_percentages = {70, 60, 55, 60, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 54: Forger */
+    {
+        .skill_ids = {LITERACY, COMPUTER_OPS, ELECTRONICS, HAND_TO_HAND, WP_PISTOL},
+        .skill_percentages = {80, 70, 60, 45, 45},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 55: Smuggler */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_PISTOL, COMPUTER_OPS, MECHANICS, SURVIVAL},
+        .skill_percentages = {60, 65, 55, 55, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 56: Freelance Spy */
+    {
+        .skill_ids = {ACROBATICS, HAND_TO_HAND, WP_PISTOL, COMPUTER_OPS, ELECTRONICS},
+        .skill_percentages = {65, 65, 60, 65, 55},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 57: ISS Peacekeeper */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_PISTOL, WP_RIFLE, FIRST_AID, COMPUTER_OPS},
+        .skill_percentages = {70, 65, 65, 50, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 58: ISS Specter */
+    {
+        .skill_ids = {HAND_TO_HAND, ACROBATICS, WP_PISTOL, ELECTRONICS, TRACKING},
+        .skill_percentages = {75, 70, 70, 60, 60},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 59: NTSET Protector */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_RIFLE, WP_PISTOL, COMPUTER_OPS, FIRST_AID},
+        .skill_percentages = {70, 70, 65, 55, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 60: Pirate (S.A.) */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_PISTOL, WP_SWORD, SWIMMING, SURVIVAL},
+        .skill_percentages = {65, 65, 60, 70, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 61: Sailor (S.A.) */
+    {
+        .skill_ids = {SWIMMING, HAND_TO_HAND, SURVIVAL, MECHANICS, WP_PISTOL},
+        .skill_percentages = {75, 55, 55, 50, 50},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
+    },
+    
+    /* 62: Gifted Gypsy */
+    {
+        .skill_ids = {MAGIC_NOVICE, LITERACY, HAND_TO_HAND, SURVIVAL, TRACKING},
+        .skill_percentages = {70, 65, 50, 55, 50},
+        .num_skills = 5,
+        .starting_isp = 10,
+        .starting_ppe = 25
+    },
+    
+    /* 63: Sunaj Assassin (Limited) */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_SWORD, ACROBATICS, WP_PISTOL, TRACKING},
+        .skill_percentages = {85, 80, 75, 70, 70},
+        .num_skills = 5,
+        .starting_isp = 15,
+        .starting_ppe = 20
+    },
+    
+    /* 64: Maxi-Man (Limited) */
+    {
+        .skill_ids = {HAND_TO_HAND, WP_RIFLE, WP_PISTOL, ACROBATICS, SURVIVAL},
+        .skill_percentages = {80, 75, 70, 70, 60},
+        .num_skills = 5,
+        .starting_isp = 5,
+        .starting_ppe = 5
     }
 };
 
@@ -487,7 +759,7 @@ static OCCSkillPackage OCC_SKILL_PACKAGES[] = {
 
 SkillDef ALL_SKILLS[TOTAL_SKILLS];
 int NUM_SKILLS = TOTAL_SKILLS;
-OCCSkillPackage OCC_PACKAGES[35];
+OCCSkillPackage OCC_PACKAGES[65];
 
 /* ========== INITIALIZATION ========== */
 
@@ -500,11 +772,11 @@ void skill_init(void) {
     }
     
     /* Copy OCC packages */
-    for (i = 0; i < 35; i++) {
+    for (i = 0; i < 65; i++) {
         OCC_PACKAGES[i] = OCC_SKILL_PACKAGES[i];
     }
     
-    fprintf(stderr, "[Skills] Initialized %d skills for 35 OCCs\n", TOTAL_SKILLS);
+    fprintf(stderr, "[Skills] Initialized %d skills for 65 OCCs\n", TOTAL_SKILLS);
 }
 
 /* ========== SKILL LOOKUPS ========== */

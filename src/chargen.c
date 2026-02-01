@@ -18,98 +18,220 @@ extern void send_to_player(PlayerSession *session, const char *format, ...);
 /* ========== COMPLETE RACE AND OCC DATABASE ========== */
 
 
-/* ALL 51 RIFTS EARTH RACES */
+/* MERGED RACE DATABASE - Rifts + AetherMUD (72 Total) */
 const RaceOCCInfo ALL_RACES[] = {
+    /* Core Humanoid Races */
     {"Human", "Baseline race, adaptable and determined"},
     {"Elf", "Graceful and magical, attuned to nature"},
     {"Dwarf", "Stout and resilient, master craftsmen"},
-    {"Dragon Hatchling", "Young but powerful, magical beings"},
-    {"Adult Dragon", "Massive draconic being of immense power"},
-    {"Ancient Dragon", "Millenia-old dragon of legendary might"},
-    {"Brod kill", "Demon-cursed mutant with supernatural strength"},
-    {"Burster", "Psychic with pyrokinetic abilities"},
-    {"Cat Girl", "Feline humanoid, agile and curious"},
-    {"Changeling", "Shapeshifting fae creature"},
-    {"Cosmo-Knight", "Cosmic guardian with stellar powers"},
-    {"D-Bee", "Dimensional being from another reality"},
-    {"Deevil", "Lesser demon from dark dimensions"},
-    {"Demon", "Powerful supernatural evil entity"},
-    {"Dog Boy", "Canine mutant bred by Coalition"},
-    {"Dragon Juicer", "Dragon blood-enhanced super soldier"},
-    {"Eandroth", "Insectoid alien warrior race"},
-    {"Gargoyle", "Stone-skinned supernatural creature"},
-   {"Gnome", "Small magical being, tech-savvy"},
-    {"Goblin", "Small cunning supernatural creature"},
-    {"Godling", "Offspring of divine beings"},
+    {"Gnome", "Small magical being, tech-savvy"},
     {"Halfling", "Small folk, lucky and brave"},
-    {"Hobgoblin", "Larger, fierce goblinoid"},
-    {"Mega-Juicer", "Ultra-enhanced combat juicer"},
-    {"Mind Bleeder", "Psychic vampire, drains ISP"},
-    {"Mind Melter", "Master psychic, multiple disciplines"},
-    {"Minion", "Bio-wizard creation, enslaved"},
-    {"Minotaur", "Bull-headed warrior of great strength"},
-    {"Mutant Animal", "Uplifted animal with human intelligence"},
-    {"Nightbane", "Shape-shifter between human/monster"},
-    {"Noli", "Four-armed alien symbiote race"},
-    {"Ogre", "Large brutish humanoid"},
     {"Orc", "Savage warrior race"},
-    {"Promethean", "Artificial life, seeking humanity"},
+    {"Goblin", "Small cunning supernatural creature"},
+    {"Hobgoblin", "Larger, fierce goblinoid"},
+    {"Ogre", "Large brutish humanoid"},
+    {"Troll", "Regenerating savage humanoid"},
+    {"Minotaur", "Bull-headed warrior of great strength"},
+    
+    /* Atlantean Types */
+    {"Atlantean", "Dimensional traveler with tattoo magic"},
+    {"True Atlantean", "Pure-blood Atlantean lineage"},
+    
+    /* Giant Races */
+    {"Algor Frost Giant", "Ice-dwelling giant of the north"},
+    {"Nimro Fire Giant", "Flame-wielding massive warrior"},
+    {"Jotan", "Stone giant, master of earth"},
+    {"Titan", "Divine giant of legendary power"},
+    
+    /* Dragons (All Types) */
+    {"Fire Dragon", "Ancient wyrm of flame and destruction"},
+    {"Ice Dragon", "Frost wyrm of the frozen wastes"},
+    {"Great Horned Dragon", "Massive horned draconic lord"},
+    {"Thunder Lizard Dragon", "Storm-calling dragon beast"},
+    {"Dragon Hatchling", "Young but powerful dragon"},
+    {"Adult Dragon", "Mature draconic being"},
+    {"Ancient Dragon", "Millenia-old legendary wyrm"},
+    {"Thorny Dragon", "Spiked dragon variant"},
+    
+    /* Fae & Supernatural */
+    {"Changeling", "Shapeshifting fae creature"},
+    {"Common Faerie", "Tiny winged fae being"},
+    {"Common Pixie", "Mischievous tiny fae"},
+    {"Frost Pixie", "Ice-aligned pixie variant"},
+    {"Green Wood Faerie", "Forest-dwelling fae guardian"},
+    {"Night-Elves Faerie", "Dark fae of the shadows"},
+    {"Silver Bells Faerie", "Musical enchanting faerie"},
+    {"Tree Sprite", "Nature spirit of the woods"},
+    {"Water Sprite", "Aquatic elemental spirit"},
+    {"Brownie", "Helpful household fae"},
+    {"Bogie", "Mischievous shadow fae"},
+    
+    /* Bestial & Shapeshifters */
+    {"Dog Boy", "Canine mutant bred by Coalition"},
+    {"Bearman", "Ursine humanoid warrior"},
+    {"Kankoran", "Wolf-kin nomadic hunter"},
+    {"Rahu-man", "Tiger-folk warrior race"},
+    {"Ratling", "Cunning rat-like humanoid"},
+    {"Werewolf", "Shapeshifting wolf-human"},
+    {"Werebear", "Shapeshifting bear-human"},
+    {"Weretiger", "Shapeshifting tiger-human"},
+    {"Wolfen", "Noble lupine warrior race"},
+    {"Cat Girl", "Feline humanoid, agile and curious"},
+    {"Mutant Animal", "Uplifted animal with intelligence"},
+    
+    /* Avian & Exotic */
+    {"Gargoyle", "Stone-skinned supernatural guardian"},
+    {"Gurgoyle", "Aquatic gargoyle variant"},
+    {"Hawrke Duhk", "Hawk-folk aerial warrior"},
+    {"Hawrk-ka", "Elite hawk-rider variant"},
+    {"Equinoid", "Horse-kin centauroid race"},
+    
+    /* Psychic & Psionic RCCs */
+    {"Burster", "Pyrokinetic psychic warrior"},
+    {"Mind Melter", "Master psychic, multiple disciplines"},
+    {"Conservator", "Psionic defender of nature"},
+    {"Psi-Stalker", "Anti-magic psionic hunter (CS)"},
+    {"Wild Psi-Stalker", "Feral psionic hunter"},
     {"Psi-Ghost", "Psychic entity, telekinetic mastery"},
-    {"Psi-Healer", "Psychic specialized in healing"},
-    {"Psi-Stalker", "Psychic hunter, magic-sensing mutant"},
+    {"Psi-Healer", "Psychic healing specialist"},
+    {"Mind Bleeder", "Psychic vampire, drains ISP"},
+    
+    /* Supernatural & Undead */
+    {"Vampire", "Undead blood drinker"},
+    {"Secondary Vampire", "Lesser vampire spawn"},
+    {"Wild Vampire", "Feral uncontrolled vampire"},
+    {"Demon", "Powerful supernatural evil entity"},
+    {"Deevil", "Lesser demon from dark dimensions"},
+    {"Basilisk", "Serpentine gaze-weapon creature"},
+    {"Nightbane", "Shape-shifter between human/monster"},
+    {"Godling", "Offspring of divine beings"},
+    
+    /* Dimensional & Alien */
+    {"D-Bee", "Dimensional being from another reality"},
+    {"Coyle", "Alien symbiote shapeshifter"},
+    {"Noli", "Four-armed alien symbiote race"},
+    {"Eandroth", "Insectoid alien warrior race"},
     {"Quick-Flex", "Incredibly fast alien species"},
-    {"Simvan", "Monster-riding nomadic warrior"},
+    {"Trimadore", "Crystalline energy being"},
+    {"Uteni", "Fur-covered peaceful alien"},
+    {"Promethean", "Artificial life seeking humanity"},
+    
+    /* Specialized & Unique */
+    {"Brodkill", "Demon-cursed mutant super-soldier"},
+    {"Cosmo-Knight", "Cosmic guardian with stellar powers"},
+    {"Dragon Juicer", "Dragon blood-enhanced soldier"},
+    {"Mega-Juicer", "Ultra-enhanced combat juicer"},
+    {"Titan Juicer", "Massive juicer, extended lifespan"},
+    {"Pogtal - Dragon Slayer", "Anti-dragon specialist race"},
+    
+    /* Splugorth Slaves & Minions */
     {"Splugorth", "Ancient evil intelligence"},
     {"Splugorth Minion", "Enslaved warrior of Splugorth"},
     {"Splynn Slave", "Enslaved from dimensional market"},
-    {"Thorny Dragon", "Spiked dragon variant"},
-    {"Titan Juicer", "Massive juicer, extended lifespan"},
-    {"Trimadore", "Crystalline energy being"},
-    {"Troll", "Regenerating savage humanoid"},
-    {"True Atlantean", "Dimensional traveler, tattoo magic"},
-    {"Uteni", "Fur-covered peaceful alien"},
-    {"Vampire", "Undead blood drinker"},
-    {"Werewolf", "Shapeshifting wolf-human"},
-    {"Wolfen", "Noble lupine warrior race"}
+    {"Minion", "Bio-wizard creation, enslaved"},
+    
+    /* Special */
+    {"Simvan", "Monster-riding nomadic warrior"}
 };
 
-/* ALL 35 RIFTS EARTH OCCs */
+/* MERGED OCC DATABASE - Rifts + AetherMUD (65 Total) */
 const RaceOCCInfo ALL_OCCS[] = {
+    /* Atlantean Specialists */
+    {"Atlantean Nomad", "Wandering Atlantean explorer"},
+    {"Atlantean Slave", "Enslaved Atlantean survivor"},
+    
+    /* Combat & Military OCCs */
     {"Cyber-Knight", "Techno-warrior with psionic powers"},
+    {"Juicer", "Chemical-enhanced super soldier"},
+    {"Ninja Juicer", "Stealth-enhanced juicer assassin"},
+    {"Delphi Juicer", "Intelligence-boosted juicer variant"},
+    {"Hyperion Juicer", "Enhanced strength juicer type"},
+    {"Crazy", "Augmented insane super soldier"},
+    {"Headhunter", "Bounty hunter, armor specialist"},
+    {"Glitter Boy Pilot", "Elite powered armor operator"},
+    {"Full Conversion Borg", "Complete cyborg conversion"},
+    {"Special Forces", "Elite military operative (Merc)"},
+    
+    /* Coalition States Military */
+    {"CS Grunt", "Coalition infantry soldier"},
+    {"CS Ranger", "Coalition wilderness specialist"},
+    {"CS Military Specialist", "Coalition technical expert"},
+    {"CS SAMAS RPA Pilot", "Coalition flying armor pilot"},
+    {"CS Technical Officer", "Coalition tech specialist"},
+    
+    /* Magic Users */
     {"Ley Line Walker", "Master of magical energies"},
-    {"Rogue Scientist", "Tech expert and inventor"},
+    {"Line Walker", "Ley line manipulator"},
+    {"Warlock", "Elemental pact magic user"},
+    {"Air Warlock", "Air elemental magic specialist"},
+    {"Mystic", "Spiritual magic user"},
     {"Techno-Wizard", "Blend of magic and technology"},
     {"Battle Magus", "Combat mage, magic and weapons"},
     {"Biomancer", "Life magic specialist"},
-    {"Body Fixer", "Cybernetic doctor and surgeon"},
-    {"Burster", "Pyrokinetic psychic warrior"},
-    {"City Rat", "Urban survivor, street smart"},
-    {"Cosmo-Knight", "Cosmic power armor knight"},
-    {"Crazy", "Augmented insane super soldier"},
-    {"Dragon Hatchling RCC", "Young dragon racial class"},
-    {"Elemental Fusionist", "Combines elemental magic"},
-    {"Full Conversion Borg", "Complete cyborg conversion"},
-    {"Headhunter", "Bounty hunter, armor specialist"},
-    {"Juicer", "Chemical-enhanced super soldier"},
-    {"Line Walker", "Ley line manipulator"},
-    {"Mercenary", "Professional soldier for hire"},
-    {"Mind Melter", "Master psychic disciplines"},
-    {"Mystic", "Spiritual magic user"},
     {"Necromancer", "Death magic practitioner"},
-    {"Operator", "Mechanical genius, vehicle expert"},
-    {"Power Armor Pilot", "Elite mech pilot"},
-    {"Psi-Healer", "Psychic healing specialist"},
-    {"Psi-Stalker", "Anti-magic psionic hunter"},
-    {"Robot Pilot", "Giant robot operator"},
-    {"Rogue Scholar", "Knowledge seeker, multi-skilled"},
-    {"Sea Titan", "Ocean-based warrior"},
-    {"Shifter", "Dimensional magic specialist"},
-    {"Special Forces", "Elite military operative"},
     {"Stone Master", "Earth and stone magic user"},
     {"Temporal Wizard", "Time magic specialist"},
+    {"Shifter", "Dimensional magic specialist"},
+    {"Elemental Fusionist", "Combines elemental magic"},
+    {"Tattooed Man", "Tattoo magic warrior"},
+    
+    /* Psychics */
+    {"Mind Melter", "Master psychic disciplines"},
+    {"Burster", "Pyrokinetic psychic warrior"},
+    {"Psi-Healer", "Psychic healing specialist"},
+    {"Psi-Stalker", "Anti-magic psionic hunter"},
+    {"Nega-Psychic", "Psychic nullifier"},
+    
+    /* Technical & Medical */
+    {"Body Fixer", "Cybernetic doctor and surgeon"},
+    {"Cyber-Doc", "Advanced cybernetics specialist"},
+    {"Operator", "Mechanical genius, vehicle expert"},
+    {"Rogue Scientist", "Tech expert and inventor"},
+    {"Rogue Scholar", "Knowledge seeker, multi-skilled"},
+    {"Kittani Field Mechanic", "Alien tech specialist"},
+    {"NGR Mechanic", "New German Republic technician"},
+    
+    /* Wilderness & Survival */
+    {"Wilderness Scout", "Tracker and survivalist"},
     {"Vagabond", "Jack-of-all-trades wanderer"},
-    {"Warlock", "Elemental pact magic user"},
-    {"Wilderness Scout", "Tracker and survivalist"}
+    {"City Rat", "Urban survivor, street smart"},
+    
+    /* Specialized Soldiers */
+    {"Bounty Hunter", "Professional manhunter"},
+    {"Master Assassin", "Elite silent killer"},
+    {"Kittani Warrior", "Alien combat specialist"},
+    {"NGR Soldier", "New German Republic trooper"},
+    {"Knight", "European noble warrior"},
+    {"Royal Knight", "Elite European knight"},
+    
+    /* Criminal & Underworld */
+    {"Professional Thief", "Master burglar and pickpocket"},
+    {"Forger", "Document and art counterfeiter"},
+    {"Smuggler", "Black market transporter"},
+    {"Freelance Spy", "Independent intelligence agent"},
+    
+    /* ISS (Iron Star Security) */
+    {"ISS Peacekeeper", "Iron Star law enforcer"},
+    {"ISS Specter", "Iron Star covert operative"},
+    {"NTSET Protector", "NTSET security specialist"},
+    
+    /* Naval & Piracy */
+    {"Pirate", "South American sea raider"},
+    {"Sailor", "South American seaman"},
+    
+    /* Special & Unique */
+    {"Gifted Gypsy", "Fortune-telling wanderer"},
+    {"Sunaj Assassin", "Elite Atlantean assassin (Limited)"},
+    {"Maxi-Man", "Bio-enhanced super soldier (Limited)"},
+    {"Cosmo-Knight", "Cosmic power armor knight"},
+    {"Power Armor Pilot", "Elite mech pilot"},
+    {"Robot Pilot", "Giant robot operator"},
+    {"Sea Titan", "Ocean-based warrior"},
+    {"Dragon Hatchling RCC", "Young dragon racial class"},
+    {"Anarchist", "Anti-establishment rebel"},
+    {"Horror Factor", "Fear-inducing specialist"},
+    {"Mercenary", "Professional soldier for hire"},
+    {"Palmer", "Dimensional traveler"}
 };
 
 #define NUM_RACES (sizeof(ALL_RACES) / sizeof(RaceOCCInfo))

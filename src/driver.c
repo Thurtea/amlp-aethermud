@@ -154,8 +154,9 @@ void* create_player_object(const char *username, const char *password_hash __att
      * }
      */
     
-    /* Attempt to clone a minimal LPC user object via efun: clone_object("/clone/simple_user_min") */
-    VMValue path = vm_value_create_string("/clone/simple_user_min");
+    /* Clone a simplified player object via efun: clone_object("/std/player_working") */
+    /* Note: Full /std/player.lpc requires mapping literal support in parser */
+    VMValue path = vm_value_create_string("/std/player_working");
     VMValue res = efun_call(global_vm->efun_registry, global_vm, "clone_object", &path, 1);
     vm_value_free(&path);
 

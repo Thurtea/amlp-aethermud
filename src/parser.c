@@ -175,8 +175,14 @@ static char* parser_parse_type(Parser *parser) {
         return strdup("mixed");
     }
 
-    /* Handle array types (e.g., int[]) */
-    if (parser_match(parser, TOKEN_LBRACKET)) {
+    /* Handle pointer/array types (e.g., string*, int[]) */
+    if (parser_match(parser, TOKEN_OPERATOR) && strcmp(parser->previous_token.value, "*") == 0) {
+        /* Pointer type (string* = array of strings in LPC) */
+        char *array_type = malloc(strlen(type_str) + 3);
+        sprintf(array_type, "%s[]", type_str);
+        free(type_str);
+        type_str = array_type;
+    } else if (parser_match(parser, TOKEN_LBRACKET)) {
         parser_expect(parser, TOKEN_RBRACKET);
         char *array_type = malloc(strlen(type_str) + 3);
         sprintf(array_type, "%s[]", type_str);
@@ -648,6 +654,31 @@ static ASTNode* parser_parse_statement(Parser *parser) {
  * Parse a declaration (function or variable)
  */
 static ASTNode* parser_parse_declaration(Parser *parser) {
+    /* Check for type modifiers (private, public, protected, static) */
+    int is_private = 0;
+    int is_public = 0;
+    int is_protected = 0;
+    int is_static = 0;
+
+    while (parser_check(parser, TOKEN_KEYWORD)) {
+        if (strcmp(parser->current_token.value, "private") == 0) {
+            is_private = 1;
+            parser_advance(parser);
+        } else if (strcmp(parser->current_token.value, "public") == 0) {
+            is_public = 1;
+            parser_advance(parser);
+        } else if (strcmp(parser->current_token.value, "protected") == 0) {
+            is_protected = 1;
+            parser_advance(parser);
+        } else if (strcmp(parser->current_token.value, "static") == 0) {
+            is_static = 1;
+            parser_advance(parser);
+        } else {
+            /* Not a modifier, must be the type */
+            break;
+        }
+    }
+
     char *type = parser_parse_type(parser);
     int line = parser->previous_token.line_number;
     int column = parser->previous_token.column_number;
@@ -668,8 +699,8 @@ static ASTNode* parser_parse_declaration(Parser *parser) {
         func->name = name;
         func->parameters = NULL;
         func->parameter_count = 0;
-        func->is_private = 0;
-        func->is_static = 0;
+        func->is_private = is_private || is_protected;  /* Use captured modifiers */
+        func->is_static = is_static;
 
         /* Parse parameters (allow empty list) */
         if (!parser_check(parser, TOKEN_RPAREN)) {
@@ -697,8 +728,8 @@ static ASTNode* parser_parse_declaration(Parser *parser) {
     VariableDeclNode *var = malloc(sizeof(VariableDeclNode));
     var->type = type;
     var->name = name;
-    var->is_private = 0;
-    var->is_static = 0;
+    var->is_private = is_private || is_protected;  /* Use captured modifiers */
+    var->is_static = is_static;
     var->initializer = NULL;
 
     if (parser_match(parser, TOKEN_OPERATOR) && strcmp(parser->previous_token.value, "=") == 0) {
@@ -749,6 +780,24 @@ ASTNode* parser_parse(Parser *parser) {
     prog_node->data = program;
 
     while (!parser_check(parser, TOKEN_EOF)) {
+        /* Handle inherit statements */
+        if (parser_check(parser, TOKEN_KEYWORD) && 
+            strcmp(parser->current_token.value, "inherit") == 0) {
+            parser_advance(parser);  /* Skip 'inherit' */
+            
+            /* Expect a string path like "/std/object" */
+            if (parser_check(parser, TOKEN_STRING)) {
+                /* Log the inherit for now, full implementation later */
+                fprintf(stderr, "[Parser] Inherit statement: %s\n", parser->current_token.value);
+                parser_advance(parser);
+            } else {
+                parser_error(parser, "Expected string path after 'inherit'");
+            }
+            
+            parser_expect(parser, TOKEN_SEMICOLON);
+            continue;
+        }
+        
         ASTNode *decl = parser_parse_declaration(parser);
         if (decl) {
             program_node_add_declaration(program, decl);

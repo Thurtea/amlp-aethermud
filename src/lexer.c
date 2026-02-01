@@ -426,6 +426,17 @@ Token lexer_get_next_token(Lexer *lexer) {
             continue;
         }
 
+        /* Skip preprocessor directives (#include, #define, etc) */
+        if (ch == '#') {
+            while (!lexer_is_at_end(lexer) && lexer_current_char(lexer) != '\n') {
+                lexer_advance(lexer);
+            }
+            if (!lexer_is_at_end(lexer)) {
+                lexer_advance(lexer);  /* Skip the newline */
+            }
+            continue;
+        }
+
         /* Check for specific delimiters */
         switch (ch) {
             case '(':

@@ -1115,6 +1115,107 @@ VMValue efun_file_name(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_string(o->name);
 }
 
+/* ========== Additional Object Efuns ========== */
+
+VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count != 1 || args[0].type != VALUE_STRING) return vm_value_create_null();
+    
+    const char *path = args[0].data.string_value;
+    if (!path) return vm_value_create_null();
+    
+    /* Try to find or load object from path
+     * For now, return null - full implementation requires file I/O + compilation */
+    fprintf(stderr, "[Efun] load_object: requested %s (not yet implemented)\n", path);
+    return vm_value_create_null();
+}
+
+VMValue efun_all_inventory(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_null();
+    if (!vm || !vm->gc) return vm_value_create_null();
+    
+    obj_t *container = (obj_t *)args[0].data.object_value;
+    if (!container) return vm_value_create_null();
+    
+    /* Build array of all objects with this container as environment */
+    array_t *result = array_new(vm->gc, 8);
+    if (!result) return vm_value_create_null();
+    
+    ObjManager *mgr = get_global_obj_manager();
+    if (mgr) {
+        for (int i = 0; i < mgr->object_count; i++) {
+            obj_t *obj = mgr->objects[i];
+            if (obj) {
+                VMValue env = obj_get_prop(obj, "environment");
+                if (env.type == VALUE_OBJECT && env.data.object_value == container) {
+                    VMValue obj_val;
+                    obj_val.type = VALUE_OBJECT;
+                    obj_val.data.object_value = obj;
+                    array_push(result, obj_val);
+                }
+            }
+        }
+    }
+    
+    VMValue v;
+    v.type = VALUE_ARRAY;
+    v.data.array_value = result;
+    return v;
+}
+
+VMValue efun_users(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)args; (void)arg_count;
+    
+    if (!vm || !vm->gc) return vm_value_create_null();
+    
+    /* Return array of all active player objects
+     * For now, return empty array - requires session tracking */
+    array_t *result = array_new(vm->gc, 8);
+    if (!result) return vm_value_create_null();
+    
+    VMValue v;
+    v.type = VALUE_ARRAY;
+    v.data.array_value = result;
+    return v;
+}
+
+VMValue efun_function_exists(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count < 1) return vm_value_create_int(0);
+    if (args[0].type != VALUE_STRING) return vm_value_create_int(0);
+    
+    const char *func_name = args[0].data.string_value;
+    obj_t *target = NULL;
+    
+    if (arg_count >= 2 && args[1].type == VALUE_OBJECT) {
+        target = (obj_t *)args[1].data.object_value;
+    }
+    
+    if (!target) return vm_value_create_int(0);
+    
+    /* Check if function exists in target object */
+    VMFunction *method = obj_get_method(target, func_name);
+    return vm_value_create_int(method != NULL ? 1 : 0);
+}
+
+VMValue efun_enable_commands(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    /* Stub: commands enabled by default for player objects */
+    return vm_value_create_int(1);
+}
+
+VMValue efun_add_action(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    /* Stub: action registration for command processing */
+    return vm_value_create_int(1);
+}
+
+VMValue efun_query_verb(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    /* Stub: would return current command verb */
+    return vm_value_create_string("");
+}
+
 /* ========== Utility Functions ========== */
 
 int efun_register_all(EfunRegistry *registry) {
@@ -1173,6 +1274,13 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "move_object", efun_move_object, 2, 2, "int move_object(object, object)");
     efun_register(registry, "this_player", efun_this_player, 0, 0, "object this_player()");
     efun_register(registry, "file_name", efun_file_name, 1, 1, "string file_name(object)");
+    efun_register(registry, "load_object", efun_load_object, 1, 1, "object load_object(string)");
+    efun_register(registry, "all_inventory", efun_all_inventory, 1, 1, "object* all_inventory(object)");
+    efun_register(registry, "users", efun_users, 0, 0, "object* users()");
+    efun_register(registry, "function_exists", efun_function_exists, 1, 2, "int function_exists(string, object)");
+    efun_register(registry, "enable_commands", efun_enable_commands, 0, 0, "int enable_commands()");
+    efun_register(registry, "add_action", efun_add_action, 2, 3, "int add_action(string, string)");
+    efun_register(registry, "query_verb", efun_query_verb, 0, 0, "string query_verb()");
     efun_register(registry, "write", efun_write, 1, 1, "int write(mixed)");
     efun_register(registry, "printf", efun_printf, 1, -1, "int printf(string, ...)");
     count += 2;

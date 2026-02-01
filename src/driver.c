@@ -41,6 +41,7 @@
 #include "efun.h"
 #include "skills.h"
 #include "combat.h"
+#include "item.h"
 #include "websocket.h"
 #include "session.h"
 #include "object.h"
@@ -548,8 +549,38 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
     
     if (strcmp(cmd, "inventory") == 0 || strcmp(cmd, "i") == 0) {
-        result.type = VALUE_STRING;
-        result.data.string_value = strdup("You are carrying nothing.\r\n");
+        cmd_inventory(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "equip") == 0 || strcmp(cmd, "eq") == 0 || strcmp(cmd, "wield") == 0 || strcmp(cmd, "wear") == 0) {
+        cmd_equip(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "unequip") == 0 || strcmp(cmd, "uneq") == 0 || strcmp(cmd, "remove") == 0) {
+        cmd_unequip(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "worn") == 0 || strcmp(cmd, "equipment") == 0 || strcmp(cmd, "eq") == 0) {
+        cmd_worn(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "get") == 0 || strcmp(cmd, "take") == 0) {
+        cmd_get(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "drop") == 0) {
+        cmd_drop(session, args ? args : "");
+        result.type = VALUE_NULL;
         return result;
     }
     
@@ -1317,6 +1348,9 @@ int main(int argc, char **argv) {
     
     /* Initialize combat system */
     combat_init();
+    
+    /* Initialize item system */
+    item_init();
     
     for (int i = 0; i < MAX_CLIENTS; i++) {
         sessions[i] = NULL;

@@ -1,5 +1,6 @@
 #include "combat.h"
 #include "skills.h"
+#include "item.h"
 #include "session_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -404,13 +405,30 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
         return result;
     }
     
-    // Calculate damage (2d6 base melee + PS bonus)
+    // Calculate damage using equipped weapon or bare hands
+    int damage_dice = 2;
+    int damage_sides = 6;
+    int weapon_bonus = 0;
+    bool is_mega_damage = false;
+    
+    if (attacker->character && attacker->character->equipment.weapon_primary) {
+        Item *weapon = attacker->character->equipment.weapon_primary;
+        if (weapon->type == ITEM_WEAPON_MELEE) {
+            damage_dice = weapon->stats.damage_dice;
+            damage_sides = weapon->stats.damage_sides;
+            weapon_bonus = weapon->stats.damage_bonus;
+            is_mega_damage = weapon->stats.is_mega_damage;
+        }
+    }
+    
+    // Calculate PS bonus for melee
     int ps_bonus = 0;
     if (attacker->character && attacker->character->stats.ps > 15) {
         ps_bonus = (attacker->character->stats.ps - 15) / 5 + 1;
     }
     
-    result.damage = combat_calculate_damage(2, 6, ps_bonus);
+    result.damage = combat_calculate_damage(damage_dice, damage_sides, ps_bonus + weapon_bonus);
+    result.is_mega_damage = is_mega_damage;
     
     // Double damage on critical hit
     if (result.is_critical) {
@@ -482,8 +500,24 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
         return result;
     }
     
-    // Calculate damage (3d6 base ranged, no PS bonus)
-    result.damage = combat_calculate_damage(3, 6, 0);
+    // Calculate damage using equipped weapon or default
+    int damage_dice = 2;
+    int damage_sides = 6;
+    int weapon_bonus = 0;
+    bool is_mega_damage = false;
+    
+    if (attacker->character && attacker->character->equipment.weapon_primary) {
+        Item *weapon = attacker->character->equipment.weapon_primary;
+        if (weapon->type == ITEM_WEAPON_RANGED) {
+            damage_dice = weapon->stats.damage_dice;
+            damage_sides = weapon->stats.damage_sides;
+            weapon_bonus = weapon->stats.damage_bonus;
+            is_mega_damage = weapon->stats.is_mega_damage;
+        }
+    }
+    
+    result.damage = combat_calculate_damage(damage_dice, damage_sides, weapon_bonus);
+    result.is_mega_damage = is_mega_damage;
     
     // Double damage on critical hit
     if (result.is_critical) {
@@ -611,8 +645,26 @@ void combat_apply_damage(CombatParticipant *target, DamageResult *dmg) {
     
     int damage_remaining = dmg->damage;
     
-    // Apply to SDC first
-    if (target->character->sdc > 0) {
+    // Check if target has armor equipped
+    Item *armor = target->character->equipment.armor;
+    if (armor && armor->current_durability > 0) {
+        // Apply damage to armor first
+        if (damage_remaining >= armor->current_durability) {
+            int armor_absorbed = armor->current_durability;
+            armor->current_durability = 0;
+            damage_remaining -= armor_absorbed;
+            
+            char msg[256];
+            snprintf(msg, sizeof(msg), "\033[1;33m%s's armor is destroyed!\033[0m\n", target->name);
+            combat_send_to_participant(target, msg);
+        } else {
+            armor->current_durability -= damage_remaining;
+            damage_remaining = 0;
+        }
+    }
+    
+    // If damage remains after armor, apply to SDC
+    if (damage_remaining > 0 && target->character->sdc > 0) {
         if (damage_remaining >= target->character->sdc) {
             dmg->sdc_damage = target->character->sdc;
             damage_remaining -= target->character->sdc;

@@ -51,6 +51,7 @@ typedef struct {
     int damage;                           // Total damage dealt
     bool is_critical;                     // Critical hit flag
     bool is_kill;                         // Target killed flag
+    bool is_mega_damage;                  // MDC weapon flag (Phase 4)
     int sdc_damage;                       // Damage to SDC
     int hp_damage;                        // Damage to HP
 } DamageResult;

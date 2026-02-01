@@ -2,6 +2,7 @@
 #define CHARGEN_H
 
 #include <stddef.h>
+#include "item.h"
 
 /* Forward declare from session_internal.h */
 typedef struct PlayerSession PlayerSession;
@@ -53,6 +54,10 @@ typedef struct {
     /* Skills system (Phase 2) */
     PlayerSkill skills[20];     /* Max 20 skills per character */
     int num_skills;             /* Number of skills learned */
+    
+    /* Equipment & Inventory system (Phase 4) */
+    Inventory inventory;        /* Carried items */
+    EquipmentSlots equipment;   /* Equipped items */
 } Character;
 
 /* Chargen initialization */
@@ -76,6 +81,14 @@ void cmd_strike(PlayerSession *sess, const char *args);
 void cmd_shoot(PlayerSession *sess, const char *args);
 void cmd_dodge(PlayerSession *sess, const char *args);
 void cmd_flee(PlayerSession *sess, const char *args);
+
+/* Item commands (Phase 4) */
+void cmd_inventory(PlayerSession *sess, const char *args);
+void cmd_equip(PlayerSession *sess, const char *args);
+void cmd_unequip(PlayerSession *sess, const char *args);
+void cmd_worn(PlayerSession *sess, const char *args);
+void cmd_get(PlayerSession *sess, const char *args);
+void cmd_drop(PlayerSession *sess, const char *args);
 
 /* Character persistence */
 int save_character(PlayerSession *sess);

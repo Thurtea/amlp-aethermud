@@ -375,6 +375,49 @@ void chargen_complete(PlayerSession *sess) {
     sess->chargen_state = CHARGEN_COMPLETE;
     sess->state = STATE_PLAYING;
     
+    /* Initialize inventory and equipment (Phase 4) */
+    inventory_init(&sess->character.inventory, sess->character.stats.ps);
+    equipment_init(&sess->character.equipment);
+    
+    /* Add starting equipment based on OCC */
+    /* Combat OCCs get weapon + armor */
+    if (strcasestr(sess->character.occ, "Juicer") || 
+        strcasestr(sess->character.occ, "Cyber-Knight") ||
+        strcasestr(sess->character.occ, "CS ") ||
+        strcasestr(sess->character.occ, "Ranger") ||
+        strcasestr(sess->character.occ, "Soldier") ||
+        strcasestr(sess->character.occ, "Merc")) {
+        /* Give Vibro-Blade + Light EBA */
+        Item *weapon = item_create(1); /* Vibro-Blade */
+        Item *armor = item_create(27); /* Light EBA */
+        if (weapon) {
+            inventory_add(&sess->character.inventory, weapon);
+            equipment_equip(&sess->character, sess, weapon);
+        }
+        if (armor) {
+            inventory_add(&sess->character.inventory, armor);
+            equipment_equip(&sess->character, sess, armor);
+        }
+    }
+    /* Magic OCCs get staff + healing potion */
+    else if (strcasestr(sess->character.occ, "Walker") ||
+             strcasestr(sess->character.occ, "Warlock") ||
+             strcasestr(sess->character.occ, "Mystic") ||
+             strcasestr(sess->character.occ, "Wizard")) {
+        Item *staff = item_create(24); /* TW Fire Bolt Staff */
+        Item *potion = item_create(40); /* Healing Potion */
+        if (staff) {
+            inventory_add(&sess->character.inventory, staff);
+            equipment_equip(&sess->character, sess, staff);
+        }
+        if (potion) inventory_add(&sess->character.inventory, potion);
+    }
+    /* All characters get basic supplies */
+    Item *ration = item_create(48); /* Food Ration */
+    Item *water = item_create(49); /* Water Canteen */
+    if (ration) inventory_add(&sess->character.inventory, ration);
+    if (water) inventory_add(&sess->character.inventory, water);
+    
     /* Place player in starting room */
     Room *start = room_get_start();
     if (start) {
@@ -389,7 +432,7 @@ void chargen_complete(PlayerSession *sess) {
     /* Auto-save new character */
     send_to_player(sess, "\nSaving your character...\n");
     if (save_character(sess)) {
-        send_to_player(sess, " Character saved!\n");
+        send_to_player(sess, "✓ Character saved!\n");
     } else {
         send_to_player(sess, " Warning: Failed to save character.\n");
     }
@@ -1142,4 +1185,92 @@ int load_character(PlayerSession *sess, const char *username) {
             username, filepath, time(NULL) - saved_time);
     
     return 1;
+}
+
+/* ========== ITEM COMMANDS (Phase 4) ========== */
+
+/* Display inventory */
+void cmd_inventory(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    inventory_display(sess);
+}
+
+/* Equip an item from inventory */
+void cmd_equip(PlayerSession *sess, const char *args) {
+    if (!sess || !args || !*args) {
+        send_to_player(sess, "Equip what? Try 'equip <item name>'\n");
+        return;
+    }
+    
+    Character *ch = &sess->character;
+    Item *item = inventory_find(&ch->inventory, args);
+    
+    if (!item) {
+        send_to_player(sess, "You don't have that item in your inventory.\n");
+        return;
+    }
+    
+    if (item->is_equipped) {
+        send_to_player(sess, "You are already wearing/wielding that item.\n");
+        return;
+    }
+    
+    if (equipment_equip(ch, sess, item)) {
+        send_to_player(sess, "You equip %s.\n", item->name);
+    } else {
+        send_to_player(sess, "You can't equip that right now.\n");
+    }
+}
+
+/* Unequip an item */
+void cmd_unequip(PlayerSession *sess, const char *args) {
+    if (!sess || !args || !*args) {
+        send_to_player(sess, "Unequip what? Try 'unequip <slot>' (weapon, armor, secondary)\n");
+        return;
+    }
+    
+    Character *ch = &sess->character;
+    Item *item = equipment_unequip(ch, args);
+    
+    if (item) {
+        send_to_player(sess, "You unequip %s.\n", item->name);
+    } else {
+        send_to_player(sess, "Nothing equipped in that slot.\n");
+    }
+}
+
+/* Display equipped items */
+void cmd_worn(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    equipment_display(sess);
+}
+
+/* Get/pick up item (stub - would need room items) */
+void cmd_get(PlayerSession *sess, const char *args) {
+    if (!sess || !args || !*args) {
+        send_to_player(sess, "Get what? Try 'get <item name>'\n");
+        return;
+    }
+    
+    send_to_player(sess, "There is no '%s' here to pick up.\n", args);
+    /* TODO: Implement room items in future phase */
+}
+
+/* Drop item (stub - would need room items) */
+void cmd_drop(PlayerSession *sess, const char *args) {
+    if (!sess || !args || !*args) {
+        send_to_player(sess, "Drop what? Try 'drop <item name>'\n");
+        return;
+    }
+    
+    Character *ch = &sess->character;
+    Item *item = inventory_remove(&ch->inventory, args);
+    
+    if (item) {
+        send_to_player(sess, "You drop %s.\n", item->name);
+        item_free(item); /* For now, just destroy it */
+        /* TODO: Add to room items in future phase */
+    } else {
+        send_to_player(sess, "You don't have that item.\n");
+    }
 }

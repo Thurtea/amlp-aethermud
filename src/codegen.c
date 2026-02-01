@@ -415,6 +415,19 @@ int codegen_compile_expression(CodeGenerator *cg, ASTNode *node) {
             break;
         }
         
+        case NODE_LITERAL_MAPPING: {
+            MappingLiteralNode *mapping = (MappingLiteralNode*)node->data;
+            /* Push key-value pairs onto stack in reverse order */
+            for (int i = mapping->pair_count - 1; i >= 0; i--) {
+                /* Push key first, then value */
+                if (codegen_compile_expression(cg, mapping->keys[i]) < 0) return -1;
+                if (codegen_compile_expression(cg, mapping->values[i]) < 0) return -1;
+            }
+            /* Emit OP_MAKE_MAPPING with pair count */
+            codegen_emit_int(cg, OP_MAKE_MAPPING, mapping->pair_count);
+            break;
+        }
+        
         case NODE_IDENTIFIER: {
             IdentifierNode *ident = (IdentifierNode*)node->data;
             Symbol *sym = symbol_table_lookup(cg->symbol_table, ident->name);

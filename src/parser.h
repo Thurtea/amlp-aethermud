@@ -42,6 +42,8 @@ typedef enum {
     NODE_MEMBER_ACCESS,             /* Member access (obj->member) */
     NODE_LITERAL_NUMBER,            /* Numeric literal */
     NODE_LITERAL_STRING,            /* String literal */
+    NODE_LITERAL_ARRAY,             /* Array literal */
+    NODE_LITERAL_MAPPING,           /* Mapping literal ([ key: value, ... ]) */
     NODE_IDENTIFIER,                /* Identifier */
     NODE_CAST,                      /* Type cast ((int)x) */
     
@@ -179,6 +181,14 @@ typedef struct {
 typedef struct {
     char *value;
 } LiteralStringNode;
+
+/* Mapping literal node - represents ([ key: value, ... ]) */
+typedef struct {
+    ASTNode **keys;                 /* Array of key expressions */
+    ASTNode **values;               /* Array of value expressions */
+    int pair_count;
+    int capacity;
+} MappingLiteralNode;
 
 /* Identifier node */
 typedef struct {

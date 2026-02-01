@@ -226,8 +226,53 @@ static ASTNode* parser_parse_primary(Parser *parser) {
         id_node->name = strdup(parser->previous_token.value);
         node->data = id_node;
     } else if (parser_match(parser, TOKEN_LPAREN)) {
-        node = parser_parse_expression(parser);
-        parser_expect(parser, TOKEN_RPAREN);
+        /* Check for mapping literal: ([ ... ]) */
+        if (parser_check(parser, TOKEN_LBRACKET)) {
+            parser_advance(parser);  /* consume [ */
+            
+            node = ast_node_create(NODE_LITERAL_MAPPING, line, column);
+            MappingLiteralNode *mapping = malloc(sizeof(MappingLiteralNode));
+            mapping->keys = malloc(sizeof(ASTNode*) * 10);
+            mapping->values = malloc(sizeof(ASTNode*) * 10);
+            mapping->pair_count = 0;
+            mapping->capacity = 10;
+            
+            /* Parse key-value pairs: key: value, ... */
+            if (!parser_check(parser, TOKEN_RBRACKET)) {
+                do {
+                    /* Parse key expression */
+                    ASTNode *key = parser_parse_expression(parser);
+                    
+                    /* Expect colon */
+                    parser_expect(parser, TOKEN_COLON);
+                    
+                    /* Parse value expression */
+                    ASTNode *value = parser_parse_expression(parser);
+                    
+                    /* Resize if needed */
+                    if (mapping->pair_count >= mapping->capacity) {
+                        mapping->capacity *= 2;
+                        mapping->keys = realloc(mapping->keys, sizeof(ASTNode*) * mapping->capacity);
+                        mapping->values = realloc(mapping->values, sizeof(ASTNode*) * mapping->capacity);
+                    }
+                    
+                    mapping->keys[mapping->pair_count] = key;
+                    mapping->values[mapping->pair_count] = value;
+                    mapping->pair_count++;
+                    
+                } while (parser_match(parser, TOKEN_COMMA));
+            }
+            
+            /* Expect closing ]) */
+            parser_expect(parser, TOKEN_RBRACKET);
+            parser_expect(parser, TOKEN_RPAREN);
+            
+            node->data = mapping;
+        } else {
+            /* Regular parenthesized expression */
+            node = parser_parse_expression(parser);
+            parser_expect(parser, TOKEN_RPAREN);
+        }
     } else {
         char msg[256];
         snprintf(msg, sizeof(msg), "Unexpected token: %s", parser->current_token.value);
@@ -872,6 +917,17 @@ void ast_node_free(ASTNode *node) {
             free(str);
             break;
         }
+        case NODE_LITERAL_MAPPING: {
+            MappingLiteralNode *mapping = (MappingLiteralNode*)node->data;
+            for (int i = 0; i < mapping->pair_count; i++) {
+                ast_node_free(mapping->keys[i]);
+                ast_node_free(mapping->values[i]);
+            }
+            free(mapping->keys);
+            free(mapping->values);
+            free(mapping);
+            break;
+        }
         case NODE_IDENTIFIER: {
             IdentifierNode *id = (IdentifierNode*)node->data;
             free(id->name);
@@ -904,6 +960,8 @@ const char* ast_node_to_string(ASTNodeType type) {
         case NODE_FUNCTION_CALL:    return "FUNCTION_CALL";
         case NODE_LITERAL_NUMBER:   return "LITERAL_NUMBER";
         case NODE_LITERAL_STRING:   return "LITERAL_STRING";
+        case NODE_LITERAL_ARRAY:    return "LITERAL_ARRAY";
+        case NODE_LITERAL_MAPPING:  return "LITERAL_MAPPING";
         case NODE_IDENTIFIER:       return "IDENTIFIER";
         default:                    return "UNKNOWN";
     }

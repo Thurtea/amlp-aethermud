@@ -266,10 +266,10 @@ void chargen_init(PlayerSession *sess) {
     sess->chargen_temp_choice = 0;
     
     send_to_player(sess, "\n");
-    send_to_player(sess, "╔═══════════════════════════════════════╗\n");
-    send_to_player(sess, "║      CHARACTER CREATION SYSTEM       ║\n");
-    send_to_player(sess, "║        Rifts Earth - 109 P.A.        ║\n");
-    send_to_player(sess, "╚═══════════════════════════════════════╝\n");
+    send_to_player(sess, "=========================================\n");
+    send_to_player(sess, "      CHARACTER CREATION SYSTEM\n");
+    send_to_player(sess, "        Rifts Earth - 109 P.A.\n");
+    send_to_player(sess, "=========================================\n");
     send_to_player(sess, "\n");
     
     /* Display first page of races */
@@ -334,31 +334,31 @@ void chargen_display_stats(PlayerSession *sess) {
     Character *ch = &sess->character;
     
     send_to_player(sess, "\n");
-    send_to_player(sess, "╔═══════════════════════════════════════════════════════╗\n");
-    send_to_player(sess, "║              YOUR CHARACTER SHEET                    ║\n");
-    send_to_player(sess, "╠═══════════════════════════════════════════════════════╣\n");
-    send_to_player(sess, "║  Name: %-45s ║\n", sess->username);
-    send_to_player(sess, "║  Race: %-20s  O.C.C.: %-17s ║\n", ch->race, ch->occ);
-    send_to_player(sess, "╠═══════════════════════════════════════════════════════╣\n");
-    send_to_player(sess, "║  ATTRIBUTES                                          ║\n");
-    send_to_player(sess, "║  IQ: %-3d   ME: %-3d   MA: %-3d   PS: %-3d             ║\n",
+    send_to_player(sess, "=======================================================\n");
+    send_to_player(sess, "              YOUR CHARACTER SHEET\n");
+    send_to_player(sess, "-------------------------------------------------------\n");
+    send_to_player(sess, "  Name: %s\n", sess->username);
+    send_to_player(sess, "  Race: %-20s  O.C.C.: %s\n", ch->race, ch->occ);
+    send_to_player(sess, "-------------------------------------------------------\n");
+    send_to_player(sess, "  ATTRIBUTES\n");
+    send_to_player(sess, "  IQ: %-3d   ME: %-3d   MA: %-3d   PS: %-3d\n",
                   ch->stats.iq, ch->stats.me, ch->stats.ma, ch->stats.ps);
-    send_to_player(sess, "║  PP: %-3d   PE: %-3d   PB: %-3d   SPD: %-3d            ║\n",
+    send_to_player(sess, "  PP: %-3d   PE: %-3d   PB: %-3d   SPD: %-3d\n",
                   ch->stats.pp, ch->stats.pe, ch->stats.pb, ch->stats.spd);
-    send_to_player(sess, "╠═══════════════════════════════════════════════════════╣\n");
-    send_to_player(sess, "║  HP: %-3d/%-3d    S.D.C.: %-3d/%-3d                     ║\n",
+    send_to_player(sess, "-------------------------------------------------------\n");
+    send_to_player(sess, "  HP: %-3d/%-3d    S.D.C.: %-3d/%-3d\n",
                   ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
     
     if (ch->psionics.isp_max > 0) {
-        send_to_player(sess, "║  I.S.P.: %-3d/%-3d (Psionic Energy)                  ║\n",
+        send_to_player(sess, "  I.S.P.: %-3d/%-3d (Psionic Energy)\n",
                       ch->psionics.isp_current, ch->psionics.isp_max);
     }
     if (ch->magic.ppe_max > 0) {
-        send_to_player(sess, "║  P.P.E.: %-3d/%-3d (Magical Energy)                  ║\n",
+        send_to_player(sess, "  P.P.E.: %-3d/%-3d (Magical Energy)\n",
                       ch->magic.ppe_current, ch->magic.ppe_max);
     }
     
-    send_to_player(sess, "╚═══════════════════════════════════════════════════════╝\n");
+    send_to_player(sess, "=======================================================\n");
 }
 
 /* Complete character generation */

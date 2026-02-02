@@ -245,10 +245,10 @@ void send_prompt(PlayerSession *session) {
         case STATE_CONNECTING:
             send_to_player(session,
                 "\r\n"
-                "╔═══════════════════════════════════════╗\r\n"
-                "║    AMLP Driver - Development Server   ║\r\n"
-                "║             Version 0.1.0             ║\r\n"
-                "╚═══════════════════════════════════════╝\r\n"
+                "=========================================\r\n"
+                "    AMLP Driver - Development Server\r\n"
+                "             Version 0.1.0\r\n"
+                "=========================================\r\n"
                 "\r\n"
                 "Welcome to the AMLP MUD!\r\n"
                 "\r\n"

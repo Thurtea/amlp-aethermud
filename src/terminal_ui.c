@@ -17,13 +17,13 @@
 #define SCREEN_CLEAR  "\033[2J\033[H"
 #define CURSOR_HOME   "\033[H"
 
-// UTF-8 Box Drawing Characters (double-line style)
-#define BOX_TL "╔"  // Top-left
-#define BOX_TR "╗"  // Top-right
-#define BOX_BL "╚"  // Bottom-left
-#define BOX_BR "╝"  // Bottom-right
-#define BOX_H  "═"  // Horizontal
-#define BOX_V  "║"  // Vertical
+// ASCII Box Drawing Characters
+#define BOX_TL "="  // Top-left
+#define BOX_TR "="  // Top-right
+#define BOX_BL "="  // Bottom-left
+#define BOX_BR "="  // Bottom-right
+#define BOX_H  "="  // Horizontal
+#define BOX_V  "|"  // Vertical
 
 // Progress bar characters
 #define PROGRESS_FILLED "█"
@@ -134,9 +134,9 @@ void tui_warning_box(const char** warnings, int count) {
     
     printf("\n");
     printf(COLOR_YELLOW COLOR_BOLD);
-    printf("╔════════════════════════════════════════════════════════════════╗\n");
-    printf("║ ⚠  WARNINGS (%d)%*s║\n", count, 48 - (count >= 10 ? 2 : 1), "");
-    printf("╚════════════════════════════════════════════════════════════════╝\n");
+    printf("================================================================\n");
+    printf(" ⚠  WARNINGS (%d)\n", count);
+    printf("================================================================\n");
     printf(COLOR_RESET);
     
     for (int i = 0; i < count; i++) {
@@ -151,9 +151,9 @@ void tui_error_box(const char** errors, int count) {
     
     printf("\n");
     printf(COLOR_RED COLOR_BOLD);
-    printf("╔════════════════════════════════════════════════════════════════╗\n");
-    printf("║ ✗  ERRORS (%d)%*s║\n", count, 50 - (count >= 10 ? 2 : 1), "");
-    printf("╚════════════════════════════════════════════════════════════════╝\n");
+    printf("================================================================\n");
+    printf(" ✗  ERRORS (%d)\n", count);
+    printf("================================================================\n");
     printf(COLOR_RESET);
     
     for (int i = 0; i < count; i++) {
@@ -168,15 +168,15 @@ void tui_summary(int files, int warnings, int errors, float time_sec) {
     
     if (errors == 0) {
         printf(COLOR_GREEN COLOR_BOLD);
-        printf("╔════════════════════════════════════════════════════════════════╗\n");
-        printf("║ ✓  BUILD SUCCESSFUL%*s║\n", 44, "");
-        printf("╚════════════════════════════════════════════════════════════════╝\n");
+        printf("================================================================\n");
+        printf(" ✓  BUILD SUCCESSFUL\n");
+        printf("================================================================\n");
         printf(COLOR_RESET);
     } else {
         printf(COLOR_RED COLOR_BOLD);
-        printf("╔════════════════════════════════════════════════════════════════╗\n");
-        printf("║ ✗  BUILD FAILED%*s║\n", 48, "");
-        printf("╚════════════════════════════════════════════════════════════════╝\n");
+        printf("================================================================\n");
+        printf(" ✗  BUILD FAILED\n");
+        printf("================================================================\n");
         printf(COLOR_RESET);
     }
     

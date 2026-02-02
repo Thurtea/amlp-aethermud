@@ -40,6 +40,10 @@ typedef enum {
     TOKEN_DOT,                  /* . */
     TOKEN_COLON,                /* : */
     
+    /* Array literals */
+    TOKEN_ARRAY_START,          /* ({ */
+    TOKEN_ARRAY_END,            /* }) */
+    
     /* Special */
     TOKEN_EOF,                  /* End of file */
     TOKEN_ERROR                 /* Lexical error */

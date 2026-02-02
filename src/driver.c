@@ -76,6 +76,7 @@ static int first_player_created = 0;  /* Track if first player has logged in */
 void handle_shutdown_signal(int sig);
 int initialize_vm(const char *master_path);
 void cleanup_vm(void);
+int test_parse_file(const char *filename);  /* ADD THIS LINE */
 void init_session(PlayerSession *session, int fd, const char *ip, ConnectionType conn_type);
 void free_session(PlayerSession *session);
 void handle_session_input(PlayerSession *session, const char *input);
@@ -1352,8 +1353,47 @@ int setup_ws_listener(int port) {
     return ws_fd;
 }
 
+/* Test mode: parse a single file and report results */
+int test_parse_file(const char *filename) {
+    fprintf(stderr, "[Parser Test] File: %s\n", filename);
+    fprintf(stderr, "[Parser Test] Initializing compiler...\n");
+    
+    /* Initialize VM (needed for compiler) */
+    global_vm = vm_init();
+    if (!global_vm) {
+        fprintf(stderr, "[Parser Test] FAILED: Could not initialize VM\n");
+        return 1;
+    }
+    
+    /* Attempt to compile the file */
+    fprintf(stderr, "[Parser Test] Compiling...\n");
+    Program *prog = compiler_compile_file(filename);
+    
+    if (!prog) {
+        fprintf(stderr, "[Parser Test] FAILED: Compilation failed\n");
+        vm_free(global_vm);
+        return 1;
+    }
+    
+    fprintf(stderr, "[Parser Test] SUCCESS: File parsed successfully\n");
+    fprintf(stderr, "[Parser Test] Functions found: %zu\n", prog->function_count);
+    fprintf(stderr, "[Parser Test] Bytecode size: %zu bytes\n", prog->bytecode_len);
+    
+    /* Clean up */
+    program_free(prog);
+    vm_free(global_vm);
+    
+    return 0;
+}
+
 /* Main server */
 int main(int argc, char **argv) {
+    /* ADD THIS BLOCK AT THE START OF main() */
+    /* Check for --parse-test mode */
+    if (argc >= 3 && strcmp(argv[1], "--parse-test") == 0) {
+        return test_parse_file(argv[2]);
+    }
+    
     int port = DEFAULT_PORT;
     int ws_port = DEFAULT_WS_PORT;
     const char *master_path = DEFAULT_MASTER_PATH;

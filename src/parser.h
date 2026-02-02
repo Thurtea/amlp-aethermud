@@ -132,6 +132,8 @@ typedef struct {
 /* Function call node */
 typedef struct {
     char *function_name;            /* Name of function being called */
+    ASTNode *object;                /* Optional object for method calls (obj->method()) */
+    int is_parent_call;             /* 1 if :: prefix (parent method call), 0 otherwise */
     ASTNode **arguments;            /* Array of argument expressions */
     int argument_count;
     int capacity;
@@ -170,6 +172,12 @@ typedef struct {
     char *member;
 } MemberAccessNode;
 
+/* Type cast node ((type)expression) */
+typedef struct {
+    char *target_type;              /* Type to cast to (string, int, object, etc.) */
+    ASTNode *expression;            /* Expression being cast */
+} CastNode;
+
 /* Literal number node */
 typedef struct {
     long int_value;
@@ -182,6 +190,13 @@ typedef struct {
     char *value;
 } LiteralStringNode;
 
+/* Array literal node - represents ({ element1, element2, ... }) */
+typedef struct {
+    ASTNode **elements;             /* Array of element expressions */
+    int element_count;
+    int capacity;
+} ArrayLiteralNode;
+
 /* Mapping literal node - represents ([ key: value, ... ]) */
 typedef struct {
     ASTNode **keys;                 /* Array of key expressions */
@@ -193,6 +208,7 @@ typedef struct {
 /* Identifier node */
 typedef struct {
     char *name;
+    int is_parent_call;  /* 1 if prefixed with ::, 0 otherwise */
 } IdentifierNode;
 
 /* ========== Parser Structure ========== */

@@ -284,6 +284,8 @@ static Token lexer_read_operator(Lexer *lexer) {
         (ch == '>' && next == '=') ||
         (ch == '+' && next == '+') ||
         (ch == '-' && next == '-') ||
+        (ch == '-' && next == '>') ||  /* Arrow operator -> */
+        (ch == ':' && next == ':') ||  /* Scope resolution :: */
         (ch == '+' && next == '=') ||
         (ch == '-' && next == '=') ||
         (ch == '*' && next == '=') ||
@@ -437,6 +439,23 @@ Token lexer_get_next_token(Lexer *lexer) {
             continue;
         }
 
+        /* Check for array literal delimiters */
+        if (ch == '(' && lexer_peek_char(lexer, 1) == '{') {
+            int start_line = lexer->line_number;
+            int start_col = lexer->column_number;
+            lexer_advance(lexer);  /* Skip '(' */
+            lexer_advance(lexer);  /* Skip '{' */
+            return make_token(TOKEN_ARRAY_START, "({", start_line, start_col);
+        }
+        
+        if (ch == '}' && lexer_peek_char(lexer, 1) == ')') {
+            int start_line = lexer->line_number;
+            int start_col = lexer->column_number;
+            lexer_advance(lexer);  /* Skip '}' */
+            lexer_advance(lexer);  /* Skip ')' */
+            return make_token(TOKEN_ARRAY_END, "})", start_line, start_col);
+        }
+
         /* Check for specific delimiters */
         switch (ch) {
             case '(':
@@ -470,6 +489,14 @@ Token lexer_get_next_token(Lexer *lexer) {
                 lexer_advance(lexer);
                 return make_token(TOKEN_DOT, ".", lexer->line_number, lexer->column_number - 1);
             case ':':
+                /* Check for scope resolution operator :: */
+                if (lexer_peek_char(lexer, 1) == ':') {
+                    int start_line = lexer->line_number;
+                    int start_col = lexer->column_number;
+                    lexer_advance(lexer);  /* Skip first ':' */
+                    lexer_advance(lexer);  /* Skip second ':' */
+                    return make_token(TOKEN_OPERATOR, "::", start_line, start_col);
+                }
                 lexer_advance(lexer);
                 return make_token(TOKEN_COLON, ":", lexer->line_number, lexer->column_number - 1);
             case '"':
@@ -555,6 +582,8 @@ const char* token_type_to_string(TokenType type) {
         case TOKEN_COMMA:       return "COMMA";
         case TOKEN_DOT:         return "DOT";
         case TOKEN_COLON:       return "COLON";
+        case TOKEN_ARRAY_START: return "ARRAY_START";
+        case TOKEN_ARRAY_END:   return "ARRAY_END";
         case TOKEN_EOF:         return "EOF";
         case TOKEN_ERROR:       return "ERROR";
         default:                return "UNKNOWN";

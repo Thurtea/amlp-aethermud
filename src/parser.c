@@ -23,7 +23,7 @@ static void parser_expect(Parser *parser, TokenType type);
 static void parser_error(Parser *parser, const char *message);
 static void parser_synchronize(Parser *parser);
 
-static ASTNode* parser_parse_declaration(Parser *parser);
+static ASTNode* parser_parse_declaration(Parser *parser, ProgramNode *program);
 static ASTNode* parser_parse_statement(Parser *parser);
 static ASTNode* parser_parse_expression(Parser *parser);
 static ASTNode* parser_parse_assignment(Parser *parser);
@@ -203,6 +203,15 @@ static ASTNode* parser_parse_primary(Parser *parser) {
     int line = parser->current_token.line_number;
     int column = parser->current_token.column_number;
 
+    /* Check for scope resolution operator :: (parent method call) */
+    int is_parent_call = 0;
+    if (parser_check(parser, TOKEN_OPERATOR) && 
+        parser->current_token.value && 
+        strcmp(parser->current_token.value, "::") == 0) {
+        is_parent_call = 1;
+        parser_advance(parser);  /* Consume '::' */
+    }
+
     if (parser_match(parser, TOKEN_NUMBER)) {
         node = ast_node_create(NODE_LITERAL_NUMBER, line, column);
         LiteralNumberNode *num_node = malloc(sizeof(LiteralNumberNode));
@@ -220,11 +229,40 @@ static ASTNode* parser_parse_primary(Parser *parser) {
         LiteralStringNode *str_node = malloc(sizeof(LiteralStringNode));
         str_node->value = strdup(parser->previous_token.value);
         node->data = str_node;
-    } else if (parser_match(parser, TOKEN_IDENTIFIER)) {
+    } else if (parser_match(parser, TOKEN_IDENTIFIER) || parser_match(parser, TOKEN_KEYWORD)) {
         node = ast_node_create(NODE_IDENTIFIER, line, column);
         IdentifierNode *id_node = malloc(sizeof(IdentifierNode));
         id_node->name = strdup(parser->previous_token.value);
+        id_node->is_parent_call = is_parent_call;  /* Mark parent call */
         node->data = id_node;
+    } else if (parser_match(parser, TOKEN_ARRAY_START)) {
+        /* Array literal: ({ element1, element2, ... }) */
+        node = ast_node_create(NODE_LITERAL_ARRAY, line, column);
+        ArrayLiteralNode *array = malloc(sizeof(ArrayLiteralNode));
+        array->elements = malloc(sizeof(ASTNode*) * 10);
+        array->element_count = 0;
+        array->capacity = 10;
+        
+        /* Parse array elements */
+        if (!parser_check(parser, TOKEN_ARRAY_END)) {
+            do {
+                /* Parse element expression */
+                ASTNode *element = parser_parse_assignment(parser);
+                
+                /* Resize if needed */
+                if (array->element_count >= array->capacity) {
+                    array->capacity *= 2;
+                    array->elements = realloc(array->elements, sizeof(ASTNode*) * array->capacity);
+                }
+                
+                array->elements[array->element_count++] = element;
+                
+            } while (parser_match(parser, TOKEN_COMMA));
+        }
+        
+        /* Expect closing }) */
+        parser_expect(parser, TOKEN_ARRAY_END);
+        node->data = array;
     } else if (parser_match(parser, TOKEN_LPAREN)) {
         /* Check for mapping literal: ([ ... ]) */
         if (parser_check(parser, TOKEN_LBRACKET)) {
@@ -300,12 +338,15 @@ static ASTNode* parser_parse_postfix(Parser *parser) {
             if (node->type == NODE_IDENTIFIER) {
                 IdentifierNode *id = (IdentifierNode*)node->data;
                 fcall->function_name = strdup(id->name);
+                fcall->is_parent_call = id->is_parent_call;  /* Preserve parent call flag */
                 free(id);
                 free(node);
             } else {
                 fcall->function_name = strdup("unknown");
+                fcall->is_parent_call = 0;
             }
 
+            fcall->object = NULL;  /* Regular function call, not a method call */
             fcall->arguments = malloc(sizeof(ASTNode*) * 10);
             fcall->argument_count = 0;
             fcall->capacity = 10;
@@ -346,6 +387,57 @@ static ASTNode* parser_parse_postfix(Parser *parser) {
             member->member = strdup(parser->previous_token.value);
             member_node->data = member;
             node = member_node;
+        } else if (parser->current_token.type == TOKEN_OPERATOR &&
+                   parser->current_token.value &&
+                   strcmp(parser->current_token.value, "->") == 0) {
+            /* Arrow operator (method call): object->method() */
+            int line = parser->current_token.line_number;
+            int column = parser->current_token.column_number;
+            parser_advance(parser);  /* consume '->' */
+            
+            /* Expect method name */
+            Token method_name = parser->current_token;
+            parser_expect(parser, TOKEN_IDENTIFIER);
+            
+            /* Check if followed by parentheses (method call) */
+            if (parser_match(parser, TOKEN_LPAREN)) {
+                /* Method call: object->method(args) */
+                ASTNode *call_node = ast_node_create(NODE_FUNCTION_CALL, line, column);
+                FunctionCallNode *fcall = malloc(sizeof(FunctionCallNode));
+                
+                /* Create method name with object context */
+                fcall->function_name = strdup(method_name.value);
+                fcall->object = node;  /* Store the object being called */
+                fcall->is_parent_call = 0;  /* This is a method call, not parent call */
+                
+                /* Parse arguments */
+                fcall->arguments = malloc(sizeof(ASTNode*) * 10);
+                fcall->argument_count = 0;
+                fcall->capacity = 10;
+                
+                if (!parser_check(parser, TOKEN_RPAREN)) {
+                    do {
+                        ASTNode *arg = parser_parse_assignment(parser);
+                        if (fcall->argument_count >= fcall->capacity) {
+                            fcall->capacity *= 2;
+                            fcall->arguments = realloc(fcall->arguments, sizeof(ASTNode*) * fcall->capacity);
+                        }
+                        fcall->arguments[fcall->argument_count++] = arg;
+                    } while (parser_match(parser, TOKEN_COMMA));
+                }
+                
+                parser_expect(parser, TOKEN_RPAREN);
+                call_node->data = fcall;
+                node = call_node;
+            } else {
+                /* Property access: object->property (no parentheses) */
+                ASTNode *member_node = ast_node_create(NODE_MEMBER_ACCESS, line, column);
+                MemberAccessNode *member = malloc(sizeof(MemberAccessNode));
+                member->object = node;
+                member->member = strdup(method_name.value);
+                member_node->data = member;
+                node = member_node;
+            }
         } else {
             break;
         }
@@ -358,6 +450,54 @@ static ASTNode* parser_parse_postfix(Parser *parser) {
  * Parse unary expressions (prefix ++, --, -, !, etc.)
  */
 static ASTNode* parser_parse_unary(Parser *parser) {
+    /* Check for type cast: (type)expression */
+    if (parser->current_token.type == TOKEN_LPAREN) {
+        /* Look ahead to see if this is a type cast */
+        Token saved = parser->current_token;
+        parser_advance(parser);  /* Skip ( */
+        
+        /* Check if next token is a type keyword */
+        if (parser->current_token.type == TOKEN_KEYWORD) {
+            const char *kw = parser->current_token.value;
+            if (strcmp(kw, "string") == 0 || strcmp(kw, "int") == 0 || 
+                strcmp(kw, "object") == 0 || strcmp(kw, "mixed") == 0 ||
+                strcmp(kw, "mapping") == 0 || strcmp(kw, "void") == 0 ||
+                strcmp(kw, "float") == 0 || strcmp(kw, "status") == 0) {
+                
+                int line = saved.line_number;
+                int column = saved.column_number;
+                char *type_name = strdup(kw);
+                parser_advance(parser);  /* Skip type keyword */
+                
+                /* Expect closing paren */
+                if (parser->current_token.type != TOKEN_RPAREN) {
+                    free(type_name);
+                    parser_error(parser, "Expected ')' after cast type");
+                    return NULL;
+                }
+                parser_advance(parser);  /* Skip ) */
+                
+                /* Parse the expression being cast */
+                ASTNode *expr = parser_parse_unary(parser);
+                if (!expr) {
+                    free(type_name);
+                    return NULL;
+                }
+                
+                /* Create cast node */
+                ASTNode *cast_node = ast_node_create(NODE_CAST, line, column);
+                CastNode *cast = malloc(sizeof(CastNode));
+                cast->target_type = type_name;
+                cast->expression = expr;
+                cast_node->data = cast;
+                return cast_node;
+            }
+        }
+        
+        /* Not a type cast, restore position and continue */
+        parser->current_token = saved;
+    }
+    
     if (parser->current_token.type == TOKEN_OPERATOR) {
         const char *op_str = parser->current_token.value;
         if (strcmp(op_str, "-") == 0 || strcmp(op_str, "!") == 0 || 
@@ -611,8 +751,98 @@ static ASTNode* parser_parse_block(Parser *parser) {
  * Parse a statement
  */
 static ASTNode* parser_parse_statement(Parser *parser) {
+    /* Local variable declaration - check if starts with a type keyword */
+    if (parser_check(parser, TOKEN_KEYWORD)) {
+        const char *word = parser->current_token.value;
+        /* Check if it's a type keyword (not a statement keyword) */
+        if (strcmp(word, "int") == 0 || strcmp(word, "string") == 0 || 
+            strcmp(word, "object") == 0 || strcmp(word, "mixed") == 0 ||
+            strcmp(word, "float") == 0 || strcmp(word, "mapping") == 0 ||
+            strcmp(word, "void") == 0 || strcmp(word, "status") == 0) {
+            
+            char *type = parser_parse_type(parser);
+            int line = parser->previous_token.line_number;
+            int column = parser->previous_token.column_number;
+            
+            if (!parser_match(parser, TOKEN_IDENTIFIER)) {
+                parser_error(parser, "Expected identifier after type");
+                free(type);
+                return NULL;
+            }
+            
+            char *name = strdup(parser->previous_token.value);
+            
+            /* Parse first variable */
+            ASTNode *var_node = ast_node_create(NODE_VARIABLE_DECL, line, column);
+            VariableDeclNode *var = malloc(sizeof(VariableDeclNode));
+            var->type = strdup(type);
+            var->name = name;
+            var->is_private = 0;
+            var->is_static = 0;
+            var->initializer = NULL;
+            
+            if (parser_match(parser, TOKEN_OPERATOR) && strcmp(parser->previous_token.value, "=") == 0) {
+                var->initializer = parser_parse_expression(parser);
+            }
+            
+            var_node->data = var;
+            
+            /* Check for comma-separated additional variables */
+            if (parser_match(parser, TOKEN_COMMA)) {
+                /* Need to create a block to hold multiple declarations */
+                ASTNode *block_node = ast_node_create(NODE_BLOCK, line, column);
+                BlockNode *block = malloc(sizeof(BlockNode));
+                block->statements = malloc(sizeof(ASTNode*) * 10);
+                block->statement_count = 0;
+                block->capacity = 10;
+                block_node->data = block;
+                
+                /* Add first variable */
+                block->statements[block->statement_count++] = var_node;
+                
+                /* Parse remaining variables */
+                do {
+                    if (!parser_match(parser, TOKEN_IDENTIFIER)) {
+                        parser_error(parser, "Expected identifier after comma");
+                        break;
+                    }
+                    
+                    ASTNode *next_var_node = ast_node_create(NODE_VARIABLE_DECL, line, column);
+                    VariableDeclNode *next_var = malloc(sizeof(VariableDeclNode));
+                    next_var->type = strdup(type);
+                    next_var->name = strdup(parser->previous_token.value);
+                    next_var->is_private = 0;
+                    next_var->is_static = 0;
+                    next_var->initializer = NULL;
+                    
+                    if (parser_match(parser, TOKEN_OPERATOR) && strcmp(parser->previous_token.value, "=") == 0) {
+                        next_var->initializer = parser_parse_expression(parser);
+                    }
+                    
+                    next_var_node->data = next_var;
+                    
+                    if (block->statement_count >= block->capacity) {
+                        block->capacity *= 2;
+                        block->statements = realloc(block->statements, sizeof(ASTNode*) * block->capacity);
+                    }
+                    block->statements[block->statement_count++] = next_var_node;
+                    
+                } while (parser_match(parser, TOKEN_COMMA));
+                
+                parser_expect(parser, TOKEN_SEMICOLON);
+                free(type);
+                return block_node;
+            } else {
+                parser_expect(parser, TOKEN_SEMICOLON);
+                free(type);
+                return var_node;
+            }
+        }
+    }
+    
     /* If statement */
-    if (parser_match(parser, TOKEN_KEYWORD) && strcmp(parser->previous_token.value, "if") == 0) {
+    if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "if") == 0) {
+        parser_advance(parser);  /* Consume 'if' */
         int line = parser->previous_token.line_number;
         int column = parser->previous_token.column_number;
         parser_expect(parser, TOKEN_LPAREN);
@@ -623,7 +853,8 @@ static ASTNode* parser_parse_statement(Parser *parser) {
         if_stmt->then_statement = parser_parse_statement(parser);
         
         if_stmt->else_statement = NULL;
-        if (parser_match(parser, TOKEN_KEYWORD) && strcmp(parser->previous_token.value, "else") == 0) {
+        if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "else") == 0) {
+            parser_advance(parser);  /* Consume 'else' */
             if_stmt->else_statement = parser_parse_statement(parser);
         }
         
@@ -632,7 +863,8 @@ static ASTNode* parser_parse_statement(Parser *parser) {
     }
 
     /* While loop */
-    if (parser_match(parser, TOKEN_KEYWORD) && strcmp(parser->previous_token.value, "while") == 0) {
+    if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "while") == 0) {
+        parser_advance(parser);  /* Consume 'while' */
         int line = parser->previous_token.line_number;
         int column = parser->previous_token.column_number;
         parser_expect(parser, TOKEN_LPAREN);
@@ -646,7 +878,8 @@ static ASTNode* parser_parse_statement(Parser *parser) {
     }
 
     /* Return statement */
-    if (parser_match(parser, TOKEN_KEYWORD) && strcmp(parser->previous_token.value, "return") == 0) {
+    if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "return") == 0) {
+        parser_advance(parser);  /* Consume 'return' */
         int line = parser->previous_token.line_number;
         int column = parser->previous_token.column_number;
         ASTNode *ret_node = ast_node_create(NODE_RETURN_STATEMENT, line, column);
@@ -664,7 +897,8 @@ static ASTNode* parser_parse_statement(Parser *parser) {
     }
 
     /* Break statement */
-    if (parser_match(parser, TOKEN_KEYWORD) && strcmp(parser->previous_token.value, "break") == 0) {
+    if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "break") == 0) {
+        parser_advance(parser);  /* Consume 'break' */
         int line = parser->previous_token.line_number;
         int column = parser->previous_token.column_number;
         parser_expect(parser, TOKEN_SEMICOLON);
@@ -672,7 +906,8 @@ static ASTNode* parser_parse_statement(Parser *parser) {
     }
 
     /* Continue statement */
-    if (parser_match(parser, TOKEN_KEYWORD) && strcmp(parser->previous_token.value, "continue") == 0) {
+    if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "continue") == 0) {
+        parser_advance(parser);  /* Consume 'continue' */
         int line = parser->previous_token.line_number;
         int column = parser->previous_token.column_number;
         parser_expect(parser, TOKEN_SEMICOLON);
@@ -698,7 +933,7 @@ static ASTNode* parser_parse_statement(Parser *parser) {
 /**
  * Parse a declaration (function or variable)
  */
-static ASTNode* parser_parse_declaration(Parser *parser) {
+static ASTNode* parser_parse_declaration(Parser *parser, ProgramNode *program) {
     /* Check for type modifiers (private, public, protected, static) */
     int is_private = 0;
     int is_public = 0;
@@ -769,21 +1004,47 @@ static ASTNode* parser_parse_declaration(Parser *parser) {
     }
 
     /* Variable declaration */
-    ASTNode *var_node = ast_node_create(NODE_VARIABLE_DECL, line, column);
-    VariableDeclNode *var = malloc(sizeof(VariableDeclNode));
-    var->type = type;
-    var->name = name;
-    var->is_private = is_private || is_protected;  /* Use captured modifiers */
-    var->is_static = is_static;
-    var->initializer = NULL;
+    ASTNode *first_var_node = NULL;
+    
+    /* Parse comma-separated variable declarations: int a, b = 5, c; */
+    do {
+        ASTNode *var_node = ast_node_create(NODE_VARIABLE_DECL, line, column);
+        VariableDeclNode *var = malloc(sizeof(VariableDeclNode));
+        var->type = strdup(type);  /* Each var gets its own copy */
+        var->name = name;
+        var->is_private = is_private || is_protected;
+        var->is_static = is_static;
+        var->initializer = NULL;
 
-    if (parser_match(parser, TOKEN_OPERATOR) && strcmp(parser->previous_token.value, "=") == 0) {
-        var->initializer = parser_parse_expression(parser);
-    }
+        if (parser_match(parser, TOKEN_OPERATOR) && strcmp(parser->previous_token.value, "=") == 0) {
+            var->initializer = parser_parse_expression(parser);
+        }
+
+        var_node->data = var;
+        
+        /* Add to program node (for additional variables) */
+        if (first_var_node) {
+            program_node_add_declaration(program, var_node);
+        } else {
+            first_var_node = var_node;  /* Return the first one */
+        }
+        
+        /* Check for comma (more variables) */
+        if (parser_match(parser, TOKEN_COMMA)) {
+            /* Parse next variable name */
+            if (!parser_match(parser, TOKEN_IDENTIFIER)) {
+                parser_error(parser, "Expected identifier after comma");
+                break;
+            }
+            name = strdup(parser->previous_token.value);
+        } else {
+            break;  /* No more variables */
+        }
+    } while (1);
 
     parser_expect(parser, TOKEN_SEMICOLON);
-    var_node->data = var;
-    return var_node;
+    free(type);  /* Free the original type string */
+    return first_var_node;
 }
 
 /* ========== Public API ========== */
@@ -843,7 +1104,7 @@ ASTNode* parser_parse(Parser *parser) {
             continue;
         }
         
-        ASTNode *decl = parser_parse_declaration(parser);
+        ASTNode *decl = parser_parse_declaration(parser, program);
         if (decl) {
             program_node_add_declaration(program, decl);
         } else if (parser->error_recovery_mode) {
@@ -917,6 +1178,15 @@ void ast_node_free(ASTNode *node) {
             free(str);
             break;
         }
+        case NODE_LITERAL_ARRAY: {
+            ArrayLiteralNode *array = (ArrayLiteralNode*)node->data;
+            for (int i = 0; i < array->element_count; i++) {
+                ast_node_free(array->elements[i]);
+            }
+            free(array->elements);
+            free(array);
+            break;
+        }
         case NODE_LITERAL_MAPPING: {
             MappingLiteralNode *mapping = (MappingLiteralNode*)node->data;
             for (int i = 0; i < mapping->pair_count; i++) {
@@ -926,6 +1196,13 @@ void ast_node_free(ASTNode *node) {
             free(mapping->keys);
             free(mapping->values);
             free(mapping);
+            break;
+        }
+        case NODE_CAST: {
+            CastNode *cast = (CastNode*)node->data;
+            free(cast->target_type);
+            ast_node_free(cast->expression);
+            free(cast);
             break;
         }
         case NODE_IDENTIFIER: {
@@ -956,6 +1233,7 @@ const char* ast_node_to_string(ASTNodeType type) {
         case NODE_RETURN_STATEMENT: return "RETURN_STATEMENT";
         case NODE_BINARY_OP:        return "BINARY_OP";
         case NODE_UNARY_OP:         return "UNARY_OP";
+        case NODE_CAST:             return "CAST";
         case NODE_ASSIGNMENT:       return "ASSIGNMENT";
         case NODE_FUNCTION_CALL:    return "FUNCTION_CALL";
         case NODE_LITERAL_NUMBER:   return "LITERAL_NUMBER";

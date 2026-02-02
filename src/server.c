@@ -28,6 +28,8 @@
 #include "vm.h"
 #include "compiler.h"
 #include "master_object.h"
+#include "psionics.h"
+#include "magic.h"
 /* #include "object.h" */
 
 #define MAX_CLIENTS 100
@@ -83,6 +85,7 @@ void send_prompt(PlayerSession *session);
 VMValue execute_command(PlayerSession *session, const char *command);
 void broadcast_message(const char *message, PlayerSession *exclude);
 void check_session_timeouts(void);
+void game_tick_all_players(void);
 void* create_player_object(const char *username, const char *password_hash);
 VMValue call_player_command(void *player_obj, const char *command);
 
@@ -816,6 +819,23 @@ void check_session_timeouts(void) {
     }
 }
 
+/* Game tick for all active players - handles meditation, recovery, etc */
+void game_tick_all_players(void) {
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (!sessions[i] || sessions[i]->state != STATE_PLAYING) continue;
+        
+        struct Character *ch = &sessions[i]->character;
+        
+        /* Update psionic abilities - ISP recovery and meditation */
+        psionics_power_tick(ch);
+        psionics_meditate_tick(ch);
+        
+        /* Update magic abilities - PPE recovery and meditation */
+        magic_spell_tick(ch);
+        magic_meditate_tick(ch);
+    }
+}
+
 /* Main server */
 int main(int argc, char **argv) {
     int port = DEFAULT_PORT;
@@ -879,6 +899,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "[Server] Ready for connections\n\n");
     
     time_t last_timeout_check = time(NULL);
+    time_t last_game_tick = time(NULL);
     
     while (server_running) {
         fd_set read_fds;
@@ -963,6 +984,13 @@ int main(int argc, char **argv) {
         }
         
         time_t now = time(NULL);
+        
+        /* Game ticks every 6 seconds (10 ticks per minute) */
+        if (now - last_game_tick >= 6) {
+            game_tick_all_players();
+            last_game_tick = now;
+        }
+        
         if (now - last_timeout_check > 60) {
             check_session_timeouts();
             last_timeout_check = now;

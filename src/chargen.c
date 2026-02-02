@@ -323,15 +323,8 @@ void chargen_roll_stats(PlayerSession *sess) {
     ch->sdc = 20;
     ch->max_sdc = 20;
     
-    /* ISP/PPE based on OCC (simplified for now) */
-    if (strcmp(ch->occ, "Cyber-Knight") == 0) {
-        ch->max_isp = 30 + (ch->stats.me / 2);
-        ch->isp = ch->max_isp;
-    }
-    if (strcmp(ch->occ, "Ley Line Walker") == 0) {
-        ch->max_ppe = 60 + (ch->stats.pe * 2);
-        ch->ppe = ch->max_ppe;
-    }
+    /* ISP/PPE will be calculated in psionics_init_abilities() and magic_init_abilities() */
+    /* These are called in chargen_complete() */
 }
 
 /* Display character stats */
@@ -356,13 +349,13 @@ void chargen_display_stats(PlayerSession *sess) {
     send_to_player(sess, "║  HP: %-3d/%-3d    S.D.C.: %-3d/%-3d                     ║\n",
                   ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
     
-    if (ch->max_isp > 0) {
+    if (ch->psionics.isp_max > 0) {
         send_to_player(sess, "║  I.S.P.: %-3d/%-3d (Psionic Energy)                  ║\n",
-                      ch->isp, ch->max_isp);
+                      ch->psionics.isp_current, ch->psionics.isp_max);
     }
-    if (ch->max_ppe > 0) {
+    if (ch->magic.ppe_max > 0) {
         send_to_player(sess, "║  P.P.E.: %-3d/%-3d (Magical Energy)                  ║\n",
-                      ch->ppe, ch->max_ppe);
+                      ch->magic.ppe_current, ch->magic.ppe_max);
     }
     
     send_to_player(sess, "╚═══════════════════════════════════════════════════════╝\n");
@@ -378,6 +371,14 @@ void chargen_complete(PlayerSession *sess) {
     /* Initialize inventory and equipment (Phase 4) */
     inventory_init(&sess->character.inventory, sess->character.stats.ps);
     equipment_init(&sess->character.equipment);
+    
+    /* Initialize psionics and magic (Phase 5) */
+    psionics_init_abilities(&sess->character);
+    magic_init_abilities(&sess->character);
+    
+    /* Add starting powers and spells based on OCC */
+    psionics_add_starting_powers(&sess->character, sess->character.occ);
+    magic_add_starting_spells(&sess->character, sess->character.occ);
     
     /* Add starting equipment based on OCC */
     /* Combat OCCs get weapon + armor */
@@ -1046,10 +1047,10 @@ int save_character(PlayerSession *sess) {
     fwrite(&ch->max_hp, sizeof(int), 1, f);
     fwrite(&ch->sdc, sizeof(int), 1, f);
     fwrite(&ch->max_sdc, sizeof(int), 1, f);
-    fwrite(&ch->isp, sizeof(int), 1, f);
-    fwrite(&ch->max_isp, sizeof(int), 1, f);
-    fwrite(&ch->ppe, sizeof(int), 1, f);
-    fwrite(&ch->max_ppe, sizeof(int), 1, f);
+    fwrite(&ch->psionics.isp_current, sizeof(int), 1, f);
+    fwrite(&ch->psionics.isp_max, sizeof(int), 1, f);
+    fwrite(&ch->magic.ppe_current, sizeof(int), 1, f);
+    fwrite(&ch->magic.ppe_max, sizeof(int), 1, f);
     
     /* Write current room ID */
     int room_id = sess->current_room ? sess->current_room->id : 0;
@@ -1160,10 +1161,10 @@ int load_character(PlayerSession *sess, const char *username) {
     fread(&ch->max_hp, sizeof(int), 1, f);
     fread(&ch->sdc, sizeof(int), 1, f);
     fread(&ch->max_sdc, sizeof(int), 1, f);
-    fread(&ch->isp, sizeof(int), 1, f);
-    fread(&ch->max_isp, sizeof(int), 1, f);
-    fread(&ch->ppe, sizeof(int), 1, f);
-    fread(&ch->max_ppe, sizeof(int), 1, f);
+    fread(&ch->psionics.isp_current, sizeof(int), 1, f);
+    fread(&ch->psionics.isp_max, sizeof(int), 1, f);
+    fread(&ch->magic.ppe_current, sizeof(int), 1, f);
+    fread(&ch->magic.ppe_max, sizeof(int), 1, f);
     
     /* Read current room ID */
     int room_id;
@@ -1273,4 +1274,94 @@ void cmd_drop(PlayerSession *sess, const char *args) {
     } else {
         send_to_player(sess, "You don't have that item.\n");
     }
+}
+
+/* =============== PHASE 5: PSIONICS & MAGIC COMMANDS =============== */
+
+/* Use a psionic power */
+void cmd_use_power(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    
+    if (!args || !*args) {
+        send_to_player(sess, "Use what power? Try 'use <power name>'\n");
+        psionics_display_powers(sess);
+        return;
+    }
+    
+    Character *ch = &sess->character;
+    PsionicPower *power = psionics_find_power_by_name(args);
+    
+    if (!power) {
+        send_to_player(sess, "Unknown psionic power '%s'.\n", args);
+        return;
+    }
+    
+    /* Try to activate power */
+    psionics_activate_power(sess, ch, power->id, "");
+}
+
+/* Display known psionic powers */
+void cmd_powers(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    psionics_display_powers(sess);
+}
+
+/* Display ISP status */
+void cmd_isp(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    psionics_display_isp(sess);
+}
+
+/* Cast a magic spell */
+void cmd_cast(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    
+    if (!args || !*args) {
+        send_to_player(sess, "Cast what spell? Try 'cast <spell name>'\n");
+        magic_display_spells(sess);
+        return;
+    }
+    
+    Character *ch = &sess->character;
+    MagicSpell *spell = magic_find_spell_by_name(args);
+    
+    if (!spell) {
+        send_to_player(sess, "Unknown spell '%s'.\n", args);
+        return;
+    }
+    
+    /* Try to start casting */
+    magic_start_casting(sess, ch, spell->id, "");
+}
+
+/* Display known spells */
+void cmd_spells(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    magic_display_spells(sess);
+}
+
+/* Display PPE status */
+void cmd_ppe(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    magic_display_ppe(sess);
+}
+
+/* Meditate to recover ISP/PPE */
+void cmd_meditate(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    
+    Character *ch = &sess->character;
+    
+    if (ch->psionics.is_meditating || ch->magic.is_meditating) {
+        send_to_player(sess, "You're already meditating.\n");
+        return;
+    }
+    
+    /* Start meditation for both systems */
+    ch->psionics.is_meditating = true;
+    ch->psionics.meditation_rounds_active = 1;
+    ch->magic.is_meditating = true;
+    ch->magic.meditation_rounds_active = 1;
+    
+    send_to_player(sess, "You begin to meditate, centering yourself...\n");
 }

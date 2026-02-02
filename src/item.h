@@ -4,8 +4,7 @@
 #include <stdbool.h>
 
 /* Forward declarations to avoid circular includes */
-struct Character;
-struct PlayerSession;
+typedef struct PlayerSession PlayerSession;
 
 /* Item Types */
 typedef enum {
@@ -102,16 +101,16 @@ Item* inventory_find(Inventory *inv, const char *item_name);
 int inventory_get_weight(Inventory *inv);
 bool inventory_can_carry(Inventory *inv, int additional_weight);
 void inventory_free(Inventory *inv);
-void inventory_display(struct PlayerSession *sess);
+void inventory_display(PlayerSession *sess);
 
 /* Equipment Functions */
 void equipment_init(EquipmentSlots *eq);
-bool equipment_equip(struct Character *ch, struct PlayerSession *sess, Item *item);
+bool equipment_equip(struct Character *ch, PlayerSession *sess, Item *item);
 Item* equipment_unequip(struct Character *ch, const char *slot_name);
 void equipment_get_bonuses(EquipmentSlots *eq, int *strike, int *parry, int *dodge, int *ar);
 bool equipment_can_equip(struct Character *ch, Item *item);
 void equipment_free(EquipmentSlots *eq);
-void equipment_display(struct PlayerSession *sess);
+void equipment_display(PlayerSession *sess);
 
 /* Item Database */
 #define TOTAL_ITEM_TEMPLATES 50

@@ -42,6 +42,8 @@
 #include "skills.h"
 #include "combat.h"
 #include "item.h"
+#include "psionics.h"
+#include "magic.h"
 #include "websocket.h"
 #include "session.h"
 #include "object.h"
@@ -580,6 +582,50 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     
     if (strcmp(cmd, "drop") == 0) {
         cmd_drop(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    /* Psionics commands (Phase 5) */
+    if (strcmp(cmd, "use") == 0) {
+        cmd_use_power(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "powers") == 0 || strcmp(cmd, "abilities") == 0) {
+        cmd_powers(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "isp") == 0 || strcmp(cmd, "inner_strength") == 0) {
+        cmd_isp(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    /* Magic commands (Phase 5) */
+    if (strcmp(cmd, "cast") == 0) {
+        cmd_cast(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "spells") == 0 || strcmp(cmd, "grimoire") == 0) {
+        cmd_spells(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "ppe") == 0 || strcmp(cmd, "ppp") == 0) {
+        cmd_ppe(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+    
+    if (strcmp(cmd, "meditate") == 0) {
+        cmd_meditate(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
@@ -1351,6 +1397,12 @@ int main(int argc, char **argv) {
     
     /* Initialize item system */
     item_init();
+    
+    /* Initialize psionics system (Phase 5) */
+    psionics_init();
+    
+    /* Initialize magic system (Phase 5) */
+    magic_init();
     
     for (int i = 0; i < MAX_CLIENTS; i++) {
         sessions[i] = NULL;

@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 #include "item.h"
+#include "psionics.h"
+#include "magic.h"
 
 /* Forward declare from session_internal.h */
 typedef struct PlayerSession PlayerSession;
@@ -36,7 +38,7 @@ typedef struct {
 } CharacterStats;
 
 /* Character data */
-typedef struct {
+typedef struct Character {
     char *race;
     char *occ;
     int level;
@@ -45,10 +47,6 @@ typedef struct {
     int max_hp;
     int sdc;
     int max_sdc;
-    int isp;   /* Inner Strength Points (psionics) */
-    int max_isp;
-    int ppe;   /* Potential Psychic Energy (magic) */
-    int max_ppe;
     CharacterStats stats;
     
     /* Skills system (Phase 2) */
@@ -58,6 +56,12 @@ typedef struct {
     /* Equipment & Inventory system (Phase 4) */
     Inventory inventory;        /* Carried items */
     EquipmentSlots equipment;   /* Equipped items */
+    
+    /* Psionics system (Phase 5) */
+    PsionicAbilities psionics;  /* Psionic powers and ISP pool */
+    
+    /* Magic system (Phase 5) */
+    MagicAbilities magic;       /* Magic spells and PPE pool */
 } Character;
 
 /* Chargen initialization */
@@ -89,6 +93,17 @@ void cmd_unequip(PlayerSession *sess, const char *args);
 void cmd_worn(PlayerSession *sess, const char *args);
 void cmd_get(PlayerSession *sess, const char *args);
 void cmd_drop(PlayerSession *sess, const char *args);
+
+/* Psionics commands (Phase 5) */
+void cmd_use_power(PlayerSession *sess, const char *args);
+void cmd_powers(PlayerSession *sess, const char *args);
+void cmd_isp(PlayerSession *sess, const char *args);
+
+/* Magic commands (Phase 5) */
+void cmd_cast(PlayerSession *sess, const char *args);
+void cmd_spells(PlayerSession *sess, const char *args);
+void cmd_ppe(PlayerSession *sess, const char *args);
+void cmd_meditate(PlayerSession *sess, const char *args);
 
 /* Character persistence */
 int save_character(PlayerSession *sess);

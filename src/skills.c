@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include "skills.h"
+#include "session_internal.h"
 
 /* External declarations */
 extern void send_to_player(PlayerSession *session, const char *format, ...);

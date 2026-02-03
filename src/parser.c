@@ -27,6 +27,7 @@ static ASTNode* parser_parse_declaration(Parser *parser, ProgramNode *program);
 static ASTNode* parser_parse_statement(Parser *parser);
 static ASTNode* parser_parse_expression(Parser *parser);
 static ASTNode* parser_parse_assignment(Parser *parser);
+static ASTNode* parser_parse_ternary(Parser *parser);
 static ASTNode* parser_parse_logical_or(Parser *parser);
 static ASTNode* parser_parse_logical_and(Parser *parser);
 static ASTNode* parser_parse_equality(Parser *parser);
@@ -681,10 +682,36 @@ static ASTNode* parser_parse_logical_or(Parser *parser) {
 }
 
 /**
+ * Parse ternary conditional expressions (condition ? true_expr : false_expr)
+ */
+static ASTNode* parser_parse_ternary(Parser *parser) {
+    ASTNode *node = parser_parse_logical_or(parser);
+
+    if (parser->current_token.type == TOKEN_QUESTION) {
+        int line = parser->current_token.line_number;
+        int column = parser->current_token.column_number;
+        parser_advance(parser);  /* Consume '?' */
+
+        ASTNode *ternary_node = ast_node_create(NODE_TERNARY_OP, line, column);
+        TernaryOpNode *ternary = malloc(sizeof(TernaryOpNode));
+        ternary->condition = node;
+        ternary->true_expr = parser_parse_expression(parser);
+        
+        parser_expect(parser, TOKEN_COLON);
+        
+        ternary->false_expr = parser_parse_ternary(parser);
+        ternary_node->data = ternary;
+        return ternary_node;
+    }
+
+    return node;
+}
+
+/**
  * Parse assignment expressions (=, +=, -=, etc.)
  */
 static ASTNode* parser_parse_assignment(Parser *parser) {
-    ASTNode *node = parser_parse_logical_or(parser);
+    ASTNode *node = parser_parse_ternary(parser);
 
     if (parser->current_token.type == TOKEN_OPERATOR) {
         const char *op = parser->current_token.value;
@@ -875,6 +902,125 @@ static ASTNode* parser_parse_statement(Parser *parser) {
         while_stmt->body = parser_parse_statement(parser);
         while_node->data = while_stmt;
         return while_node;
+    }
+
+    /* Switch statement */
+    if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "switch") == 0) {
+        parser_advance(parser);  /* Consume 'switch' */
+        int line = parser->previous_token.line_number;
+        int column = parser->previous_token.column_number;
+        parser_expect(parser, TOKEN_LPAREN);
+        
+        ASTNode *switch_node = ast_node_create(NODE_SWITCH_STATEMENT, line, column);
+        SwitchStatementNode *switch_stmt = malloc(sizeof(SwitchStatementNode));
+        switch_stmt->expression = parser_parse_expression(parser);
+        switch_stmt->cases = malloc(sizeof(ASTNode*) * 10);
+        switch_stmt->case_count = 0;
+        switch_stmt->capacity = 10;
+        
+        parser_expect(parser, TOKEN_RPAREN);
+        parser_expect(parser, TOKEN_LBRACE);
+        
+        /* Parse case and default labels */
+        while (!parser_check(parser, TOKEN_RBRACE) && !parser_check(parser, TOKEN_EOF)) {
+            if (parser_check(parser, TOKEN_KEYWORD)) {
+                if (strcmp(parser->current_token.value, "case") == 0) {
+                    parser_advance(parser);  /* Consume 'case' */
+                    int case_line = parser->previous_token.line_number;
+                    int case_column = parser->previous_token.column_number;
+                    
+                    ASTNode *case_node = ast_node_create(NODE_CASE_LABEL, case_line, case_column);
+                    CaseLabelNode *case_label = malloc(sizeof(CaseLabelNode));
+                    case_label->value = parser_parse_expression(parser);
+                    case_label->statements = malloc(sizeof(ASTNode*) * 10);
+                    case_label->statement_count = 0;
+                    case_label->capacity = 10;
+                    case_label->is_default = 0;
+                    
+                    parser_expect(parser, TOKEN_COLON);
+                    
+                    /* Parse statements until next case/default/closing brace */
+                    while (!parser_check(parser, TOKEN_RBRACE) && !parser_check(parser, TOKEN_EOF)) {
+                        if (parser_check(parser, TOKEN_KEYWORD) &&
+                            (strcmp(parser->current_token.value, "case") == 0 ||
+                             strcmp(parser->current_token.value, "default") == 0)) {
+                            break;
+                        }
+                        
+                        ASTNode *stmt = parser_parse_statement(parser);
+                        if (stmt) {
+                            if (case_label->statement_count >= case_label->capacity) {
+                                case_label->capacity *= 2;
+                                case_label->statements = realloc(case_label->statements, 
+                                                                sizeof(ASTNode*) * case_label->capacity);
+                            }
+                            case_label->statements[case_label->statement_count++] = stmt;
+                        }
+                    }
+                    
+                    case_node->data = case_label;
+                    
+                    if (switch_stmt->case_count >= switch_stmt->capacity) {
+                        switch_stmt->capacity *= 2;
+                        switch_stmt->cases = realloc(switch_stmt->cases, 
+                                                     sizeof(ASTNode*) * switch_stmt->capacity);
+                    }
+                    switch_stmt->cases[switch_stmt->case_count++] = case_node;
+                    
+                } else if (strcmp(parser->current_token.value, "default") == 0) {
+                    parser_advance(parser);  /* Consume 'default' */
+                    int default_line = parser->previous_token.line_number;
+                    int default_column = parser->previous_token.column_number;
+                    
+                    ASTNode *default_node = ast_node_create(NODE_DEFAULT_LABEL, default_line, default_column);
+                    CaseLabelNode *default_label = malloc(sizeof(CaseLabelNode));
+                    default_label->value = NULL;  /* Default has no value */
+                    default_label->statements = malloc(sizeof(ASTNode*) * 10);
+                    default_label->statement_count = 0;
+                    default_label->capacity = 10;
+                    default_label->is_default = 1;
+                    
+                    parser_expect(parser, TOKEN_COLON);
+                    
+                    /* Parse statements until closing brace */
+                    while (!parser_check(parser, TOKEN_RBRACE) && !parser_check(parser, TOKEN_EOF)) {
+                        if (parser_check(parser, TOKEN_KEYWORD) &&
+                            (strcmp(parser->current_token.value, "case") == 0 ||
+                             strcmp(parser->current_token.value, "default") == 0)) {
+                            break;
+                        }
+                        
+                        ASTNode *stmt = parser_parse_statement(parser);
+                        if (stmt) {
+                            if (default_label->statement_count >= default_label->capacity) {
+                                default_label->capacity *= 2;
+                                default_label->statements = realloc(default_label->statements, 
+                                                                   sizeof(ASTNode*) * default_label->capacity);
+                            }
+                            default_label->statements[default_label->statement_count++] = stmt;
+                        }
+                    }
+                    
+                    default_node->data = default_label;
+                    
+                    if (switch_stmt->case_count >= switch_stmt->capacity) {
+                        switch_stmt->capacity *= 2;
+                        switch_stmt->cases = realloc(switch_stmt->cases, 
+                                                     sizeof(ASTNode*) * switch_stmt->capacity);
+                    }
+                    switch_stmt->cases[switch_stmt->case_count++] = default_node;
+                    
+                } else {
+                    break;  /* Some other keyword, exit loop */
+                }
+            } else {
+                break;  /* Not a keyword, exit loop */
+            }
+        }
+        
+        parser_expect(parser, TOKEN_RBRACE);
+        switch_node->data = switch_stmt;
+        return switch_node;
     }
 
     /* Return statement */
@@ -1172,6 +1318,37 @@ void ast_node_free(ASTNode *node) {
             free(binop);
             break;
         }
+        case NODE_TERNARY_OP: {
+            TernaryOpNode *ternary = (TernaryOpNode*)node->data;
+            ast_node_free(ternary->condition);
+            ast_node_free(ternary->true_expr);
+            ast_node_free(ternary->false_expr);
+            free(ternary);
+            break;
+        }
+        case NODE_SWITCH_STATEMENT: {
+            SwitchStatementNode *switch_stmt = (SwitchStatementNode*)node->data;
+            ast_node_free(switch_stmt->expression);
+            for (int i = 0; i < switch_stmt->case_count; i++) {
+                ast_node_free(switch_stmt->cases[i]);
+            }
+            free(switch_stmt->cases);
+            free(switch_stmt);
+            break;
+        }
+        case NODE_CASE_LABEL:
+        case NODE_DEFAULT_LABEL: {
+            CaseLabelNode *case_label = (CaseLabelNode*)node->data;
+            if (case_label->value) {
+                ast_node_free(case_label->value);
+            }
+            for (int i = 0; i < case_label->statement_count; i++) {
+                ast_node_free(case_label->statements[i]);
+            }
+            free(case_label->statements);
+            free(case_label);
+            break;
+        }
         case NODE_LITERAL_STRING: {
             LiteralStringNode *str = (LiteralStringNode*)node->data;
             free(str->value);
@@ -1230,9 +1407,15 @@ const char* ast_node_to_string(ASTNodeType type) {
         case NODE_BLOCK:            return "BLOCK";
         case NODE_IF_STATEMENT:     return "IF_STATEMENT";
         case NODE_WHILE_LOOP:       return "WHILE_LOOP";
+        case NODE_SWITCH_STATEMENT: return "SWITCH_STATEMENT";
+        case NODE_CASE_LABEL:       return "CASE_LABEL";
+        case NODE_DEFAULT_LABEL:    return "DEFAULT_LABEL";
         case NODE_RETURN_STATEMENT: return "RETURN_STATEMENT";
+        case NODE_BREAK_STATEMENT:  return "BREAK_STATEMENT";
+        case NODE_CONTINUE_STATEMENT: return "CONTINUE_STATEMENT";
         case NODE_BINARY_OP:        return "BINARY_OP";
         case NODE_UNARY_OP:         return "UNARY_OP";
+        case NODE_TERNARY_OP:       return "TERNARY_OP";
         case NODE_CAST:             return "CAST";
         case NODE_ASSIGNMENT:       return "ASSIGNMENT";
         case NODE_FUNCTION_CALL:    return "FUNCTION_CALL";

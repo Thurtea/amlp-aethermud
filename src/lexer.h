@@ -39,6 +39,7 @@ typedef enum {
     TOKEN_COMMA,                /* , */
     TOKEN_DOT,                  /* . */
     TOKEN_COLON,                /* : */
+    TOKEN_QUESTION,             /* ? */
     
     /* Array literals */
     TOKEN_ARRAY_START,          /* ({ */

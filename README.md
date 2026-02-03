@@ -1,122 +1,158 @@
 # AMLP Driver
 
-LPC MUD driver written from scratch in C.
+A modern LPC MUD driver written from scratch in C, featuring a complete LPC implementation with lexer, parser, bytecode compiler, and stack-based virtual machine.
 
-## Features
+## Overview
 
-- **Complete LPC Implementation** - Lexer, parser, bytecode compiler, stack-based VM
-- **Garbage Collection** - Reference-counted mark-and-sweep with automatic memory management
-- **Object System** - Full OOP support with methods and inheritance
-- **Data Structures** - GC-aware arrays and mappings (hash maps)
-- **24 Built-in Functions** - String, array, math, type checking, and I/O efuns
-- **220 Tests Passing** - 565 assertions, 100% pass rate, zero warnings
+AMLP Driver is a high-performance MUD (Multi-User Dungeon) driver that interprets LPC (Lars Pensjö C) code. It provides a complete object-oriented environment with garbage collection, dynamic arrays, mappings, and a rich set of built-in functions for game development.
+
+**Key Features:**
+- Complete LPC compiler and bytecode VM
+- Garbage-collected object system
+- Native support for `.lpc` file extension
+- Real-time compilation and object loading
+- Telnet and websocket connectivity
+- Comprehensive character creation system
 
 ## Quick Start
 
 ```bash
-# Build
-make clean && make all
+# Build the driver
+make clean && make driver
 
-# Test
-make test
-
-# Run
-./build/driver
-```
-
-## Quick Start for MUD Admins
-
-Want to run a live MUD server? See the [Administrator Guide](docs/ADMIN_GUIDE.md) for complete setup instructions.
-
-**Basic Setup:**
-
-```bash
-# Build the server
-make clean && make all
-
-# Start the MUD server on port 3000
+# Start the MUD server
 ./mud.ctl start
 
-# Check server status
-./mud.ctl status
-
-# Connect and create first admin account
+# Connect to your MUD
 telnet localhost 3000
 ```
 
-**Key Features:**
-- First player automatically gets admin privileges
-- Three privilege levels: Player (0), Wizard (1), Admin (2)
-- Use `promote <player> <level>` to grant privileges
-- Supports telnet and Mudlet clients
-- Full server management via `mud.ctl` script
-
-See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) for detailed instructions on:
-- Port configuration
-- Privilege system
-- Connecting with telnet/Mudlet
-- Server management commands
-- Troubleshooting
-
-## Project Stats
-
-- **11,249 lines** of C code (6,500 core + 4,700 tests)
-- **220 tests** with 565 assertions, 100% passing
-- **Zero warnings** with `-Wall -Wextra -Werror`
-- **Phase 6 complete** - Arrays & mappings implemented
-
-## Architecture
+## Project Structure
 
 ```
-src/
-├── lexer.{h,c}      # Tokenization (50+ token types)
-├── parser.{h,c}     # Recursive descent parser (25+ AST nodes)
-├── codegen.{h,c}    # Bytecode generation
-├── vm.{h,c}         # Stack-based VM (40+ opcodes)
-├── object.{h,c}     # Object system with method dispatch
-├── gc.{h,c}         # Reference-counted garbage collector
-├── efun.{h,c}       # 24 built-in functions
-├── array.{h,c}      # Dynamic arrays
-├── mapping.{h,c}    # Hash maps
-└── driver.c         # Main entry point
-
-tests/               # Comprehensive test suites
-lib/                 # LPC standard library
+amlp-driver/
+├── src/              # C source code (driver implementation)
+│   ├── lexer.c       # LPC tokenization
+│   ├── parser.c      # Recursive descent parser
+│   ├── codegen.c     # Bytecode generation
+│   ├── vm.c          # Stack-based virtual machine
+│   ├── object.c      # Object system
+│   ├── gc.c          # Garbage collector
+│   └── efun.c        # Built-in functions
+├── lib/              # LPC mudlib (symlink to ../amlp-library)
+├── docs/             # Documentation
+├── config/           # Configuration files
+└── mud.ctl           # Server control script
 ```
 
-## Build Targets
+## LPC File Extension
+
+This driver uses the `.lpc` extension for all LPC library files, clearly distinguishing them from C driver code. For proper syntax highlighting in VS Code, use the [AMLP LPC Extension](../lpc-extension).
+
+**Installation:**
+```bash
+# Copy the extension to VS Code
+cp -r lpc-extension ~/.vscode/extensions/
+
+# Restart VS Code
+# Your .lpc files will now have proper syntax highlighting!
+```
+
+## Usage
+
+### Server Management
 
 ```bash
-make all             # Build driver and all tests
-make driver          # Build driver only
-make test            # Run all test suites
-make clean           # Remove build artifacts
+./mud.ctl start      # Start the MUD server
+./mud.ctl stop       # Stop the server
+./mud.ctl restart    # Restart the server
+./mud.ctl status     # Check server status
 ```
 
+### Configuration
+
+Edit `config/runtime.conf` to customize:
+- Port numbers (default: 3000 for telnet, 3001 for websocket)
+- Mudlib location
+- Master object path
+- Security settings
+
+### Connecting
+
+**Telnet:**
+```bash
+telnet localhost 3000
+```
+
+**Mudlet/TinTin++:**
+- Host: localhost
+- Port: 3000
+
+First player to connect receives admin privileges automatically.
+
+## Development
+
+### Building from Source
+
+**Requirements:**
+- GCC 4.9+ or Clang
+- GNU Make
+- POSIX-compliant system (Linux, macOS, WSL)
+
+**Build:**
+```bash
+make clean           # Clean previous builds
+make driver          # Build driver only
+make all             # Build driver and utilities
+```
+
+### LPC Development
+
+Create rooms, objects, and NPCs using LPC:
+
+```lpc
+// lib/domains/myworld/rooms/entry.lpc
+inherit "/std/room";
+
+void create() {
+    ::create();
+    set_short("The Entrance");
+    set_long("You stand at the entrance to a grand adventure.");
+    add_exit("north", "/domains/myworld/rooms/hall");
+}
+```
+
+See [docs/WIZTOOL.md](docs/WIZTOOL.md) for in-game building tools.
 
 ## Documentation
 
-- [Administrator Guide](docs/ADMIN_GUIDE.md) - Complete server setup and management
-- [Wiztool Guide](docs/WIZTOOL.md) - In-game building and object creation
-- [Development Guide](docs/DEVELOPMENT.md) - Detailed phase documentation
-- [Build Summary](docs/BUILD_SUMMARY.md) - Build system details
-- [VM Implementation](docs/VM_IMPLEMENTATION_SUMMARY.md) - VM architecture
+- [Administrator Guide](docs/ADMIN_GUIDE.md) - Server setup and management
+- [Wiztool Guide](docs/WIZTOOL.md) - In-game building commands
+- [Development Guide](docs/DEVELOPMENT.md) - Technical implementation details
+
+## Architecture
+
+The driver implements a complete LPC environment:
+- **Lexer** - Tokenizes LPC source code
+- **Parser** - Builds abstract syntax trees
+- **Compiler** - Generates bytecode
+- **VM** - Executes bytecode in a stack-based virtual machine
+- **Object System** - Manages LPC objects with inheritance
+- **Garbage Collector** - Reference-counted memory management
+- **Efuns** - Built-in functions for strings, arrays, math, I/O
 
 ## Contributing
 
-This is an educational project demonstrating compiler construction, VM design, and garbage collection. Contributions welcome for:
-
-- Additional efuns and language features
-- Performance optimizations
-- Extended test coverage
-- Documentation improvements
-
-## Requirements
-
-- GCC 4.9+ or Clang
-- GNU Make
-- Standard C library (POSIX)
+Contributions are welcome! This project demonstrates:
+- Compiler construction techniques
+- Virtual machine design
+- Garbage collection implementation
+- Network protocol handling
 
 ## License
 
 MIT License - See LICENSE for details
+
+---
+
+**Version:** 0.7.0 | **Status:** Active Development | **Language:** C + LPC

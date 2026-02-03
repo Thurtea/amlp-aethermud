@@ -1,11 +1,22 @@
+# Development and historical files
+archive/
+artifacts/
+
 # Build artifacts
 build/
 *.o
-*.log
+
+# Runtime files
+logs/
+save/
+*.pid
 
 # Backup files
+*.backup
+*.bak
 *.old
 *~
+lib.bak/
 
 # Editor files
 .vscode/
@@ -16,54 +27,3 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
-
-# Session and development documentation (keep in docs/ only)
-/summary-*.md
-/SESSION_*.md
-/HANDOFF*.md
-/PHASE*.md
-/PHASE*.txt
-/PROMPT*.txt
-/MILESTONE*.md
-/COMPLETION*.txt
-/INTEGRATION*.md
-/DEVELOPER*.md
-/NEXT_SESSION*.md
-/WINDOWS*.md
-/WSL*.md
-/REFERENCE*.md
-/*.md.backup
-
-# Internal documentation directories
-docs/sessions/
-docs/handoff/
-docs/phases/
-docs/PHASE*.txt
-docs/PHASE*.md
-docs/STATUS_REPORT.md
-docs/COMPLETION*.txt
-docs/MILESTONE*.md
-docs/PROMPT*.txt
-docs/REFERENCE*.md
-docs/INTEGRATION*.md
-docs/WINDOWS*.md
-docs/WSL*.md
-docs/NEXT_SESSION*.md
-docs/summary-*.md
-docs/SESSION_*.md
-
-# Process and control files
-*.pid
-*.ctl
-
-# Disallow development diagnostics, test scripts, and backups
-diagnostic.sh
-manual_test.sh
-robust_mud_test.py
-CURRENT_STATUS.md
-backup_*.tar.gz
-
-# Files the user requested ignored
-QUICK_TEST.md
-tomorrow-01-28.md
-artifacts/

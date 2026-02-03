@@ -499,6 +499,9 @@ Token lexer_get_next_token(Lexer *lexer) {
                 }
                 lexer_advance(lexer);
                 return make_token(TOKEN_COLON, ":", lexer->line_number, lexer->column_number - 1);
+            case '?':
+                lexer_advance(lexer);
+                return make_token(TOKEN_QUESTION, "?", lexer->line_number, lexer->column_number - 1);
             case '"':
             case '\'':
                 return lexer_read_string(lexer, ch);
@@ -582,6 +585,7 @@ const char* token_type_to_string(TokenType type) {
         case TOKEN_COMMA:       return "COMMA";
         case TOKEN_DOT:         return "DOT";
         case TOKEN_COLON:       return "COLON";
+        case TOKEN_QUESTION:    return "QUESTION";
         case TOKEN_ARRAY_START: return "ARRAY_START";
         case TOKEN_ARRAY_END:   return "ARRAY_END";
         case TOKEN_EOF:         return "EOF";

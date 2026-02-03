@@ -36,6 +36,7 @@ typedef enum {
     /* Expressions */
     NODE_BINARY_OP,                 /* Binary operation (a + b) */
     NODE_UNARY_OP,                  /* Unary operation (-a, !a) */
+    NODE_TERNARY_OP,                /* Ternary operation (a ? b : c) */
     NODE_ASSIGNMENT,                /* Assignment (a = b) */
     NODE_FUNCTION_CALL,             /* Function call */
     NODE_ARRAY_ACCESS,              /* Array access (arr[i]) */
@@ -124,6 +125,23 @@ typedef struct {
     ASTNode *body;
 } ForLoopNode;
 
+/* Switch statement node */
+typedef struct {
+    ASTNode *expression;            /* Expression being switched on */
+    ASTNode **cases;                /* Array of case label nodes */
+    int case_count;
+    int capacity;
+} SwitchStatementNode;
+
+/* Case label node (includes both case and default) */
+typedef struct {
+    ASTNode *value;                 /* Case value (NULL for default) */
+    ASTNode **statements;           /* Statements in this case */
+    int statement_count;
+    int capacity;
+    int is_default;                 /* 1 if default case, 0 otherwise */
+} CaseLabelNode;
+
 /* Return statement node */
 typedef struct {
     ASTNode *value;                 /* Optional return value expression */
@@ -152,6 +170,13 @@ typedef struct {
     char *operator;                 /* Operator (-, !, ~, etc.) */
     int is_prefix;                  /* 1 for prefix (++i), 0 for postfix (i++) */
 } UnaryOpNode;
+
+/* Ternary operation node (condition ? true_expr : false_expr) */
+typedef struct {
+    ASTNode *condition;
+    ASTNode *true_expr;
+    ASTNode *false_expr;
+} TernaryOpNode;
 
 /* Assignment node */
 typedef struct {

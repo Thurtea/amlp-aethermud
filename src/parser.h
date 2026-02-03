@@ -24,6 +24,7 @@ typedef enum {
     NODE_IF_STATEMENT,              /* if statement */
     NODE_WHILE_LOOP,                /* while loop */
     NODE_FOR_LOOP,                  /* for loop */
+    NODE_FOREACH_LOOP,              /* foreach loop */
     NODE_DO_WHILE,                  /* do-while loop */
     NODE_SWITCH_STATEMENT,          /* switch statement */
     NODE_CASE_LABEL,                /* case label */
@@ -124,6 +125,17 @@ typedef struct {
     ASTNode *increment;
     ASTNode *body;
 } ForLoopNode;
+
+/* Foreach loop node */
+typedef struct {
+    char *key_type;                 /* Optional key type (for mappings) */
+    char *key_name;                 /* Optional key name (for mappings) */
+    char *value_type;               /* Value type */
+    char *value_name;               /* Value name */
+    ASTNode *collection;            /* Collection expression */
+    ASTNode *body;                  /* Loop body */
+    int has_key;                    /* 1 if key/value form, 0 if value-only */
+} ForeachLoopNode;
 
 /* Switch statement node */
 typedef struct {

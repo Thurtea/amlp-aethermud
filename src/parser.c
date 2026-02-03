@@ -38,6 +38,7 @@ static ASTNode* parser_parse_unary(Parser *parser);
 static ASTNode* parser_parse_postfix(Parser *parser);
 static ASTNode* parser_parse_primary(Parser *parser);
 static ASTNode* parser_parse_block(Parser *parser);
+static ASTNode* parser_parse_foreach(Parser *parser);
 static char* parser_parse_type(Parser *parser);
 
 static ASTNode* ast_node_create(ASTNodeType type, int line, int column);
@@ -246,7 +247,7 @@ static ASTNode* parser_parse_primary(Parser *parser) {
         
         /* Parse array elements */
         if (!parser_check(parser, TOKEN_ARRAY_END)) {
-            do {
+            while (1) {
                 /* Parse element expression */
                 ASTNode *element = parser_parse_assignment(parser);
                 
@@ -257,8 +258,14 @@ static ASTNode* parser_parse_primary(Parser *parser) {
                 }
                 
                 array->elements[array->element_count++] = element;
-                
-            } while (parser_match(parser, TOKEN_COMMA));
+
+                if (!parser_match(parser, TOKEN_COMMA)) {
+                    break;
+                }
+                if (parser_check(parser, TOKEN_ARRAY_END)) {
+                    break;
+                }
+            }
         }
         
         /* Expect closing }) */
@@ -278,7 +285,7 @@ static ASTNode* parser_parse_primary(Parser *parser) {
             
             /* Parse key-value pairs: key: value, ... */
             if (!parser_check(parser, TOKEN_RBRACKET)) {
-                do {
+                while (1) {
                     /* Parse key expression */
                     ASTNode *key = parser_parse_expression(parser);
                     
@@ -298,8 +305,14 @@ static ASTNode* parser_parse_primary(Parser *parser) {
                     mapping->keys[mapping->pair_count] = key;
                     mapping->values[mapping->pair_count] = value;
                     mapping->pair_count++;
-                    
-                } while (parser_match(parser, TOKEN_COMMA));
+
+                    if (!parser_match(parser, TOKEN_COMMA)) {
+                        break;
+                    }
+                    if (parser_check(parser, TOKEN_RBRACKET)) {
+                        break;
+                    }
+                }
             }
             
             /* Expect closing ]) */
@@ -439,6 +452,21 @@ static ASTNode* parser_parse_postfix(Parser *parser) {
                 member_node->data = member;
                 node = member_node;
             }
+        } else if (parser->current_token.type == TOKEN_OPERATOR &&
+                   (strcmp(parser->current_token.value, "++") == 0 ||
+                    strcmp(parser->current_token.value, "--") == 0)) {
+            int line = parser->current_token.line_number;
+            int column = parser->current_token.column_number;
+            const char *op = parser->current_token.value;
+            parser_advance(parser);
+
+            ASTNode *unary_node = ast_node_create(NODE_UNARY_OP, line, column);
+            UnaryOpNode *unary = malloc(sizeof(UnaryOpNode));
+            unary->operator = strdup(op);
+            unary->operand = node;
+            unary->is_prefix = 0;
+            unary_node->data = unary;
+            node = unary_node;
         } else {
             break;
         }
@@ -453,50 +481,42 @@ static ASTNode* parser_parse_postfix(Parser *parser) {
 static ASTNode* parser_parse_unary(Parser *parser) {
     /* Check for type cast: (type)expression */
     if (parser->current_token.type == TOKEN_LPAREN) {
-        /* Look ahead to see if this is a type cast */
-        Token saved = parser->current_token;
-        parser_advance(parser);  /* Skip ( */
-        
-        /* Check if next token is a type keyword */
-        if (parser->current_token.type == TOKEN_KEYWORD) {
-            const char *kw = parser->current_token.value;
+        Token next = lexer_peek_token(parser->lexer);
+        if (next.type == TOKEN_KEYWORD) {
+            const char *kw = next.value;
             if (strcmp(kw, "string") == 0 || strcmp(kw, "int") == 0 || 
                 strcmp(kw, "object") == 0 || strcmp(kw, "mixed") == 0 ||
                 strcmp(kw, "mapping") == 0 || strcmp(kw, "void") == 0 ||
                 strcmp(kw, "float") == 0 || strcmp(kw, "status") == 0) {
                 
-                int line = saved.line_number;
-                int column = saved.column_number;
-                char *type_name = strdup(kw);
-                parser_advance(parser);  /* Skip type keyword */
+                int line = parser->current_token.line_number;
+                int column = parser->current_token.column_number;
+                parser_advance(parser);  /* Consume '(' */
+                parser_advance(parser);  /* Consume type keyword */
                 
-                /* Expect closing paren */
                 if (parser->current_token.type != TOKEN_RPAREN) {
-                    free(type_name);
                     parser_error(parser, "Expected ')' after cast type");
+                    if (next.value) free(next.value);
                     return NULL;
                 }
-                parser_advance(parser);  /* Skip ) */
+                parser_advance(parser);  /* Consume ')' */
                 
-                /* Parse the expression being cast */
                 ASTNode *expr = parser_parse_unary(parser);
                 if (!expr) {
-                    free(type_name);
+                    if (next.value) free(next.value);
                     return NULL;
                 }
                 
-                /* Create cast node */
                 ASTNode *cast_node = ast_node_create(NODE_CAST, line, column);
                 CastNode *cast = malloc(sizeof(CastNode));
-                cast->target_type = type_name;
+                cast->target_type = strdup(kw);
                 cast->expression = expr;
                 cast_node->data = cast;
+                if (next.value) free(next.value);
                 return cast_node;
             }
         }
-        
-        /* Not a type cast, restore position and continue */
-        parser->current_token = saved;
+        if (next.value) free(next.value);
     }
     
     if (parser->current_token.type == TOKEN_OPERATOR) {
@@ -775,6 +795,75 @@ static ASTNode* parser_parse_block(Parser *parser) {
 }
 
 /**
+ * Parse a foreach statement
+ */
+static ASTNode* parser_parse_foreach(Parser *parser) {
+    parser_advance(parser);  /* Consume 'foreach' */
+    int line = parser->previous_token.line_number;
+    int column = parser->previous_token.column_number;
+
+    parser_expect(parser, TOKEN_LPAREN);
+
+    char *first_type = parser_parse_type(parser);
+    if (!parser_match(parser, TOKEN_IDENTIFIER)) {
+        parser_error(parser, "Expected identifier in foreach");
+        free(first_type);
+        return NULL;
+    }
+    char *first_name = strdup(parser->previous_token.value);
+
+    char *second_type = NULL;
+    char *second_name = NULL;
+    int has_key = 0;
+
+    if (parser_match(parser, TOKEN_COMMA)) {
+        has_key = 1;
+        second_type = parser_parse_type(parser);
+        if (!parser_match(parser, TOKEN_IDENTIFIER)) {
+            parser_error(parser, "Expected identifier in foreach");
+            free(first_type);
+            free(first_name);
+            free(second_type);
+            return NULL;
+        }
+        second_name = strdup(parser->previous_token.value);
+    }
+
+    if (parser_check(parser, TOKEN_COLON)) {
+        parser_advance(parser);
+    } else if (parser_check(parser, TOKEN_KEYWORD) &&
+               strcmp(parser->current_token.value, "in") == 0) {
+        parser_advance(parser);
+    } else {
+        parser_error(parser, "Expected ':' or 'in' in foreach");
+    }
+
+    ASTNode *collection = parser_parse_expression(parser);
+    parser_expect(parser, TOKEN_RPAREN);
+
+    ASTNode *body = parser_parse_statement(parser);
+
+    ASTNode *foreach_node = ast_node_create(NODE_FOREACH_LOOP, line, column);
+    ForeachLoopNode *foreach_stmt = malloc(sizeof(ForeachLoopNode));
+    foreach_stmt->has_key = has_key;
+    if (has_key) {
+        foreach_stmt->key_type = first_type;
+        foreach_stmt->key_name = first_name;
+        foreach_stmt->value_type = second_type;
+        foreach_stmt->value_name = second_name;
+    } else {
+        foreach_stmt->key_type = NULL;
+        foreach_stmt->key_name = NULL;
+        foreach_stmt->value_type = first_type;
+        foreach_stmt->value_name = first_name;
+    }
+    foreach_stmt->collection = collection;
+    foreach_stmt->body = body;
+    foreach_node->data = foreach_stmt;
+    return foreach_node;
+}
+
+/**
  * Parse a statement
  */
 static ASTNode* parser_parse_statement(Parser *parser) {
@@ -902,6 +991,11 @@ static ASTNode* parser_parse_statement(Parser *parser) {
         while_stmt->body = parser_parse_statement(parser);
         while_node->data = while_stmt;
         return while_node;
+    }
+
+    /* Foreach loop */
+    if (parser_check(parser, TOKEN_KEYWORD) && strcmp(parser->current_token.value, "foreach") == 0) {
+        return parser_parse_foreach(parser);
     }
 
     /* Switch statement */
@@ -1349,6 +1443,17 @@ void ast_node_free(ASTNode *node) {
             free(case_label);
             break;
         }
+        case NODE_FOREACH_LOOP: {
+            ForeachLoopNode *foreach_stmt = (ForeachLoopNode*)node->data;
+            free(foreach_stmt->key_type);
+            free(foreach_stmt->key_name);
+            free(foreach_stmt->value_type);
+            free(foreach_stmt->value_name);
+            ast_node_free(foreach_stmt->collection);
+            ast_node_free(foreach_stmt->body);
+            free(foreach_stmt);
+            break;
+        }
         case NODE_LITERAL_STRING: {
             LiteralStringNode *str = (LiteralStringNode*)node->data;
             free(str->value);
@@ -1407,6 +1512,7 @@ const char* ast_node_to_string(ASTNodeType type) {
         case NODE_BLOCK:            return "BLOCK";
         case NODE_IF_STATEMENT:     return "IF_STATEMENT";
         case NODE_WHILE_LOOP:       return "WHILE_LOOP";
+        case NODE_FOREACH_LOOP:     return "FOREACH_LOOP";
         case NODE_SWITCH_STATEMENT: return "SWITCH_STATEMENT";
         case NODE_CASE_LABEL:       return "CASE_LABEL";
         case NODE_DEFAULT_LABEL:    return "DEFAULT_LABEL";

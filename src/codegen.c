@@ -111,6 +111,44 @@ void symbol_table_free(SymbolTable *table) {
     free(table);
 }
 
+static int codegen_alloc_local(CodeGenerator *cg, const char *name, int add_symbol) {
+    if (!cg || !cg->current_function) return -1;
+    int idx = cg->current_function->local_var_count;
+    cg->current_function->local_var_count++;
+    if (add_symbol && name) {
+        symbol_table_add(cg->symbol_table, name, SYMBOL_VARIABLE, idx);
+    }
+    return idx;
+}
+
+static void codegen_push_break(CodeGenerator *cg, int target) {
+    if (!cg) return;
+    if (cg->break_depth >= cg->break_capacity) {
+        cg->break_capacity = cg->break_capacity * 2 + 1;
+        cg->break_stack = xrealloc(cg->break_stack, sizeof(int) * cg->break_capacity);
+    }
+    cg->break_stack[cg->break_depth++] = target;
+}
+
+static void codegen_pop_break(CodeGenerator *cg) {
+    if (!cg || cg->break_depth <= 0) return;
+    cg->break_depth--;
+}
+
+static void codegen_push_continue(CodeGenerator *cg, int target) {
+    if (!cg) return;
+    if (cg->continue_depth >= cg->continue_capacity) {
+        cg->continue_capacity = cg->continue_capacity * 2 + 1;
+        cg->continue_stack = xrealloc(cg->continue_stack, sizeof(int) * cg->continue_capacity);
+    }
+    cg->continue_stack[cg->continue_depth++] = target;
+}
+
+static void codegen_pop_continue(CodeGenerator *cg) {
+    if (!cg || cg->continue_depth <= 0) return;
+    cg->continue_depth--;
+}
+
 /* ========== Code Generator Implementation ========== */
 
 CodeGenerator* codegen_init(VirtualMachine *vm) {
@@ -125,6 +163,12 @@ CodeGenerator* codegen_init(VirtualMachine *vm) {
     cg->loop_start = -1;
     cg->loop_end = -1;
     cg->in_loop = 0;
+    cg->break_stack = xmalloc(sizeof(int) * 16);
+    cg->break_depth = 0;
+    cg->break_capacity = 16;
+    cg->continue_stack = xmalloc(sizeof(int) * 16);
+    cg->continue_depth = 0;
+    cg->continue_capacity = 16;
     cg->error_count = 0;
     return cg;
 }
@@ -206,6 +250,18 @@ int codegen_emit_string(CodeGenerator *cg, OpCode opcode, const char *operand) {
     func->instructions[addr].opcode = opcode;
     func->instructions[addr].operand.string_operand = xstrdup(operand);
     func->instruction_count++;
+    return addr;
+}
+
+static int codegen_emit_call(CodeGenerator *cg, const char *name, int arg_count, int target) {
+    if (!cg || !cg->current_function) return -1;
+    int addr = codegen_emit_opcode(cg, OP_CALL);
+    if (addr < 0) return -1;
+    cg->current_function->instructions[addr].operand.call_operand.arg_count = arg_count;
+    cg->current_function->instructions[addr].operand.call_operand.target = target;
+    if (name) {
+        cg->current_function->instructions[addr].operand.call_operand.name = xstrdup(name);
+    }
     return addr;
 }
 
@@ -327,6 +383,68 @@ static int codegen_compile_unary_op(CodeGenerator *cg, UnaryOpNode *node) {
     if (!cg || !node) return -1;
     
     ASTNode *operand = (ASTNode*)node->operand;
+
+    if (strcmp(node->operator, "++") == 0 || strcmp(node->operator, "--") == 0) {
+        int is_inc = strcmp(node->operator, "++") == 0;
+        int delta_op = is_inc ? OP_ADD : OP_SUB;
+
+        if (operand->type == NODE_IDENTIFIER) {
+            IdentifierNode *ident = (IdentifierNode*)operand->data;
+            Symbol *sym = symbol_table_lookup(cg->symbol_table, ident->name);
+            if (!sym) {
+                codegen_error(cg, "Undefined variable in increment");
+                return -1;
+            }
+
+            codegen_emit_int(cg, OP_LOAD_LOCAL, sym->index);
+            if (!node->is_prefix) {
+                codegen_emit_opcode(cg, OP_DUP);
+            }
+            codegen_emit_int(cg, OP_PUSH_INT, 1);
+            codegen_emit_opcode(cg, delta_op);
+            if (node->is_prefix) {
+                codegen_emit_opcode(cg, OP_DUP);
+            }
+            codegen_emit_int(cg, OP_STORE_LOCAL, sym->index);
+            return 0;
+        }
+
+        if (operand->type == NODE_ARRAY_ACCESS) {
+            ArrayAccessNode *arr = (ArrayAccessNode*)operand->data;
+            int arr_idx = codegen_alloc_local(cg, NULL, 0);
+            int idx_idx = codegen_alloc_local(cg, NULL, 0);
+            int val_idx = codegen_alloc_local(cg, NULL, 0);
+
+            if (codegen_compile_node(cg, arr->array) < 0) return -1;
+            codegen_emit_int(cg, OP_STORE_LOCAL, arr_idx);
+            if (codegen_compile_node(cg, arr->index) < 0) return -1;
+            codegen_emit_int(cg, OP_STORE_LOCAL, idx_idx);
+
+            codegen_emit_int(cg, OP_LOAD_LOCAL, arr_idx);
+            codegen_emit_int(cg, OP_LOAD_LOCAL, idx_idx);
+            codegen_emit_opcode(cg, OP_INDEX_ARRAY);
+
+            if (!node->is_prefix) {
+                codegen_emit_opcode(cg, OP_DUP);
+            }
+            codegen_emit_int(cg, OP_PUSH_INT, 1);
+            codegen_emit_opcode(cg, delta_op);
+            if (node->is_prefix) {
+                codegen_emit_opcode(cg, OP_DUP);
+            }
+            codegen_emit_int(cg, OP_STORE_LOCAL, val_idx);
+
+            codegen_emit_int(cg, OP_LOAD_LOCAL, arr_idx);
+            codegen_emit_int(cg, OP_LOAD_LOCAL, idx_idx);
+            codegen_emit_int(cg, OP_LOAD_LOCAL, val_idx);
+            codegen_emit_opcode(cg, OP_STORE_ARRAY);
+            return 0;
+        }
+
+        codegen_error(cg, "Unsupported operand for increment/decrement");
+        return -1;
+    }
+
     if (codegen_compile_node(cg, operand) < 0) return -1;
     
     if (strcmp(node->operator, "-") == 0) {
@@ -378,11 +496,15 @@ static int codegen_compile_function_call(CodeGenerator *cg, FunctionCallNode *no
         if (codegen_compile_node(cg, node->arguments[i]) < 0) return -1;
     }
     
-    /* Look up function or emit call by name */
+    /* Emit call by name (efuns) or index if known */
     Symbol *func_sym = symbol_table_lookup(cg->symbol_table, node->function_name);
-    int func_idx = func_sym ? func_sym->index : -1;
+    int func_idx = (func_sym && func_sym->type == SYMBOL_FUNCTION) ? func_sym->index : -1;
     
-    codegen_emit_int(cg, OP_CALL, func_idx);
+    if (func_idx >= 0) {
+        codegen_emit_call(cg, NULL, node->argument_count, func_idx);
+    } else {
+        codegen_emit_call(cg, node->function_name, node->argument_count, -1);
+    }
     return 0;
 }
 
@@ -448,6 +570,20 @@ int codegen_compile_expression(CodeGenerator *cg, ASTNode *node) {
         case NODE_UNARY_OP: {
             UnaryOpNode *unop = (UnaryOpNode*)node->data;
             return codegen_compile_unary_op(cg, unop);
+        }
+
+        case NODE_TERNARY_OP: {
+            TernaryOpNode *ternary = (TernaryOpNode*)node->data;
+            if (codegen_compile_node(cg, ternary->condition) < 0) return -1;
+            int false_label = codegen_create_label(cg, "ternary_false");
+            int end_label = codegen_create_label(cg, "ternary_end");
+            codegen_emit_jump(cg, OP_JUMP_IF_FALSE, false_label);
+            if (codegen_compile_node(cg, ternary->true_expr) < 0) return -1;
+            codegen_emit_jump(cg, OP_JUMP, end_label);
+            codegen_mark_label(cg, false_label);
+            if (codegen_compile_node(cg, ternary->false_expr) < 0) return -1;
+            codegen_mark_label(cg, end_label);
+            break;
         }
         
         case NODE_ASSIGNMENT: {
@@ -528,6 +664,8 @@ static int codegen_compile_while_loop(CodeGenerator *cg, WhileLoopNode *node) {
     cg->loop_start = loop_start;
     cg->loop_end = loop_end;
     cg->in_loop = 1;
+    codegen_push_break(cg, loop_end);
+    codegen_push_continue(cg, loop_start);
     
     /* Mark loop start */
     codegen_mark_label(cg, loop_start);
@@ -550,6 +688,164 @@ static int codegen_compile_while_loop(CodeGenerator *cg, WhileLoopNode *node) {
     cg->loop_start = prev_loop_start;
     cg->loop_end = prev_loop_end;
     cg->in_loop = prev_in_loop;
+    codegen_pop_continue(cg);
+    codegen_pop_break(cg);
+    return 0;
+}
+
+static int codegen_compile_switch_statement(CodeGenerator *cg, SwitchStatementNode *node) {
+    if (!cg || !node) return -1;
+
+    int expr_idx = codegen_alloc_local(cg, NULL, 0);
+    if (codegen_compile_node(cg, node->expression) < 0) return -1;
+    codegen_emit_int(cg, OP_STORE_LOCAL, expr_idx);
+
+    int end_label = codegen_create_label(cg, "switch_end");
+    codegen_push_break(cg, end_label);
+
+    int *case_labels = xmalloc(sizeof(int) * node->case_count);
+    int default_label = -1;
+
+    for (int i = 0; i < node->case_count; i++) {
+        CaseLabelNode *case_label = (CaseLabelNode*)node->cases[i]->data;
+        case_labels[i] = codegen_create_label(cg, case_label->is_default ? "switch_default" : "switch_case");
+        if (case_label->is_default) {
+            default_label = case_labels[i];
+        }
+    }
+
+    for (int i = 0; i < node->case_count; i++) {
+        CaseLabelNode *case_label = (CaseLabelNode*)node->cases[i]->data;
+        if (case_label->is_default) continue;
+
+        codegen_emit_int(cg, OP_LOAD_LOCAL, expr_idx);
+        if (codegen_compile_node(cg, case_label->value) < 0) {
+            free(case_labels);
+            return -1;
+        }
+        codegen_emit_opcode(cg, OP_EQ);
+        codegen_emit_jump(cg, OP_JUMP_IF_TRUE, case_labels[i]);
+    }
+
+    if (default_label >= 0) {
+        codegen_emit_jump(cg, OP_JUMP, default_label);
+    } else {
+        codegen_emit_jump(cg, OP_JUMP, end_label);
+    }
+
+    for (int i = 0; i < node->case_count; i++) {
+        CaseLabelNode *case_label = (CaseLabelNode*)node->cases[i]->data;
+        codegen_mark_label(cg, case_labels[i]);
+        for (int j = 0; j < case_label->statement_count; j++) {
+            if (codegen_compile_node(cg, case_label->statements[j]) < 0) {
+                free(case_labels);
+                return -1;
+            }
+        }
+    }
+
+    codegen_mark_label(cg, end_label);
+    codegen_pop_break(cg);
+    free(case_labels);
+    return 0;
+}
+
+static int codegen_compile_foreach_loop(CodeGenerator *cg, ForeachLoopNode *node) {
+    if (!cg || !node) return -1;
+
+    SymbolTable *prev_table = cg->symbol_table;
+    cg->symbol_table = symbol_table_create(prev_table);
+
+    int key_idx = -1;
+    int value_idx = -1;
+    if (node->has_key) {
+        key_idx = codegen_alloc_local(cg, node->key_name, 1);
+        value_idx = codegen_alloc_local(cg, node->value_name, 1);
+    } else {
+        value_idx = codegen_alloc_local(cg, node->value_name, 1);
+    }
+
+    int collection_idx = codegen_alloc_local(cg, NULL, 0);
+    int index_idx = codegen_alloc_local(cg, NULL, 0);
+    int length_idx = codegen_alloc_local(cg, NULL, 0);
+    int keys_idx = node->has_key ? codegen_alloc_local(cg, NULL, 0) : -1;
+
+    if (codegen_compile_node(cg, node->collection) < 0) {
+        symbol_table_free(cg->symbol_table);
+        cg->symbol_table = prev_table;
+        return -1;
+    }
+    codegen_emit_int(cg, OP_STORE_LOCAL, collection_idx);
+
+    if (node->has_key) {
+        codegen_emit_int(cg, OP_LOAD_LOCAL, collection_idx);
+        codegen_emit_call(cg, "keys", 1, -1);
+        codegen_emit_int(cg, OP_STORE_LOCAL, keys_idx);
+
+        codegen_emit_int(cg, OP_LOAD_LOCAL, keys_idx);
+        codegen_emit_call(cg, "sizeof", 1, -1);
+        codegen_emit_int(cg, OP_STORE_LOCAL, length_idx);
+    } else {
+        codegen_emit_int(cg, OP_LOAD_LOCAL, collection_idx);
+        codegen_emit_call(cg, "sizeof", 1, -1);
+        codegen_emit_int(cg, OP_STORE_LOCAL, length_idx);
+    }
+
+    codegen_emit_int(cg, OP_PUSH_INT, 0);
+    codegen_emit_int(cg, OP_STORE_LOCAL, index_idx);
+
+    int loop_start = codegen_create_label(cg, "foreach_start");
+    int loop_continue = codegen_create_label(cg, "foreach_continue");
+    int loop_end = codegen_create_label(cg, "foreach_end");
+
+    codegen_push_break(cg, loop_end);
+    codegen_push_continue(cg, loop_continue);
+
+    codegen_mark_label(cg, loop_start);
+    codegen_emit_int(cg, OP_LOAD_LOCAL, index_idx);
+    codegen_emit_int(cg, OP_LOAD_LOCAL, length_idx);
+    codegen_emit_opcode(cg, OP_LT);
+    codegen_emit_jump(cg, OP_JUMP_IF_FALSE, loop_end);
+
+    if (node->has_key) {
+        codegen_emit_int(cg, OP_LOAD_LOCAL, keys_idx);
+        codegen_emit_int(cg, OP_LOAD_LOCAL, index_idx);
+        codegen_emit_opcode(cg, OP_INDEX_ARRAY);
+        codegen_emit_int(cg, OP_STORE_LOCAL, key_idx);
+
+        codegen_emit_int(cg, OP_LOAD_LOCAL, collection_idx);
+        codegen_emit_int(cg, OP_LOAD_LOCAL, key_idx);
+        codegen_emit_opcode(cg, OP_INDEX_MAPPING);
+        codegen_emit_int(cg, OP_STORE_LOCAL, value_idx);
+    } else {
+        codegen_emit_int(cg, OP_LOAD_LOCAL, collection_idx);
+        codegen_emit_int(cg, OP_LOAD_LOCAL, index_idx);
+        codegen_emit_opcode(cg, OP_INDEX_ARRAY);
+        codegen_emit_int(cg, OP_STORE_LOCAL, value_idx);
+    }
+
+    if (codegen_compile_node(cg, node->body) < 0) {
+        codegen_pop_continue(cg);
+        codegen_pop_break(cg);
+        symbol_table_free(cg->symbol_table);
+        cg->symbol_table = prev_table;
+        return -1;
+    }
+
+    codegen_mark_label(cg, loop_continue);
+    codegen_emit_int(cg, OP_LOAD_LOCAL, index_idx);
+    codegen_emit_int(cg, OP_PUSH_INT, 1);
+    codegen_emit_opcode(cg, OP_ADD);
+    codegen_emit_int(cg, OP_STORE_LOCAL, index_idx);
+
+    codegen_emit_jump(cg, OP_JUMP, loop_start);
+    codegen_mark_label(cg, loop_end);
+
+    codegen_pop_continue(cg);
+    codegen_pop_break(cg);
+
+    symbol_table_free(cg->symbol_table);
+    cg->symbol_table = prev_table;
     return 0;
 }
 
@@ -606,10 +902,36 @@ int codegen_compile_statement(CodeGenerator *cg, ASTNode *node) {
             WhileLoopNode *whilestmt = (WhileLoopNode*)node->data;
             return codegen_compile_while_loop(cg, whilestmt);
         }
+
+        case NODE_SWITCH_STATEMENT: {
+            SwitchStatementNode *sw = (SwitchStatementNode*)node->data;
+            return codegen_compile_switch_statement(cg, sw);
+        }
+
+        case NODE_FOREACH_LOOP: {
+            ForeachLoopNode *foreach_stmt = (ForeachLoopNode*)node->data;
+            return codegen_compile_foreach_loop(cg, foreach_stmt);
+        }
         
         case NODE_RETURN_STATEMENT: {
             ReturnStatementNode *ret = (ReturnStatementNode*)node->data;
             return codegen_compile_return_statement(cg, ret);
+        }
+
+        case NODE_BREAK_STATEMENT: {
+            if (cg->break_depth <= 0) {
+                codegen_error(cg, "break outside loop or switch");
+                return -1;
+            }
+            return codegen_emit_jump(cg, OP_JUMP, cg->break_stack[cg->break_depth - 1]);
+        }
+
+        case NODE_CONTINUE_STATEMENT: {
+            if (cg->continue_depth <= 0) {
+                codegen_error(cg, "continue outside loop");
+                return -1;
+            }
+            return codegen_emit_jump(cg, OP_JUMP, cg->continue_stack[cg->continue_depth - 1]);
         }
         
         case NODE_BLOCK: {
@@ -773,6 +1095,9 @@ void codegen_free(CodeGenerator *cg) {
         free(cg->current_function->instructions);
         free(cg->current_function);
     }
+
+    free(cg->break_stack);
+    free(cg->continue_stack);
     
     free(cg);
 }

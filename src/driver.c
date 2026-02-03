@@ -154,8 +154,8 @@ void* create_player_object(const char *username, const char *password_hash __att
     
     fprintf(stderr, "[Server] Creating LPC player object for: %s\n", username);
     
-    /* Clone /std/player_simple object (simplified version for Phase 2) */
-    VMValue path_value = vm_value_create_string("/std/player_simple");
+    /* Clone full /std/player object */
+    VMValue path_value = vm_value_create_string("/std/player");
     VMValue result = efun_clone_object(global_vm, &path_value, 1);
     
     if (result.type != VALUE_OBJECT || !result.data.object_value) {

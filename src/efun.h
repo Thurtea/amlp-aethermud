@@ -104,6 +104,7 @@ VMValue efun_trim(VirtualMachine *vm, VMValue *args, int arg_count);
 /* ========== Standard Efuns: Array Functions ========== */
 
 VMValue efun_sizeof(VirtualMachine *vm, VMValue *args, int arg_count);
+VMValue efun_keys(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_arrayp(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_sort_array(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_reverse_array(VirtualMachine *vm, VMValue *args, int arg_count);

@@ -392,6 +392,23 @@ VMValue efun_sizeof(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_int(0);
 }
 
+VMValue efun_keys(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    (void)arg_count;
+
+    if (args[0].type != VALUE_MAPPING) {
+        return vm_value_create_null();
+    }
+
+    array_t *arr = mapping_keys(args[0].data.mapping_value);
+    if (!arr) return vm_value_create_null();
+
+    VMValue result;
+    result.type = VALUE_ARRAY;
+    result.data.array_value = arr;
+    return result;
+}
+
 VMValue efun_arrayp(VirtualMachine *vm, VMValue *args, int arg_count) {
     (void)vm;
     (void)arg_count;
@@ -1307,10 +1324,11 @@ int efun_register_all(EfunRegistry *registry) {
     
     /* Array functions */
     efun_register(registry, "sizeof", efun_sizeof, 1, 1, "int sizeof(mixed)");
+    efun_register(registry, "keys", efun_keys, 1, 1, "mixed* keys(mapping)");
     efun_register(registry, "arrayp", efun_arrayp, 1, 1, "int arrayp(mixed)");
     efun_register(registry, "sort_array", efun_sort_array, 1, 1, "mixed* sort_array(mixed*)");
     efun_register(registry, "reverse_array", efun_reverse_array, 1, 1, "mixed* reverse_array(mixed*)");
-    count += 4;
+    count += 5;
     
     /* Math functions */
     efun_register(registry, "abs", efun_abs, 1, 1, "mixed abs(mixed)");

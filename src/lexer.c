@@ -34,7 +34,7 @@ static Token make_token(TokenType type, const char *value, int line, int column)
 
 static const char *keywords[] = {
     "void", "int", "mixed", "string", "object", "mapping",
-    "if", "else", "while", "for", "do", "switch", "case", "default", "break", "continue",
+    "if", "else", "while", "for", "do", "foreach", "in", "switch", "case", "default", "break", "continue",
     "return", "function", "inherit", "private", "public", "protected", "static",
     "define", "ifdef", "ifndef", "endif", "include",
     "create", "init", "heart_beat", "die", "reset",

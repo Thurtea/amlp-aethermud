@@ -70,6 +70,14 @@ typedef struct {
     int loop_start;
     int loop_end;
     int in_loop;
+
+    /* Break/continue target stacks */
+    int *break_stack;
+    int break_depth;
+    int break_capacity;
+    int *continue_stack;
+    int continue_depth;
+    int continue_capacity;
     
     /* Error tracking */
     int error_count;

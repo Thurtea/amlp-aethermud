@@ -86,7 +86,7 @@ The library includes a comprehensive character creation system:
 
 **Occupations (OCCs):**
 - 48+ character classes including warriors, mages, psychics, and technology users
-- Palladium Rifts RPG inspired occupational character classes
+- Rifts RPG inspired occupational character classes
 
 ## Commands
 

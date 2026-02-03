@@ -1,0 +1,12 @@
+testlpc
+pass123
+pass123 
+stats
+chat Testing LPC phase 2!
+tell testlpc Hello from new LPC!
+shout Can anyone hear me?
+exits
+examine room
+whisper testlpc Secret message
+inventory
+quit

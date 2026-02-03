@@ -152,39 +152,33 @@ void cleanup_vm(void) {
 void* create_player_object(const char *username, const char *password_hash __attribute__((unused))) {
     if (!global_vm) return NULL;
     
-    fprintf(stderr, "[Server] Creating player object for: %s\n", username);
+    fprintf(stderr, "[Server] Creating LPC player object for: %s\n", username);
     
-    /* TODO: Implement when object system is ready
-     * 
-     * VMValue path = vm_value_create_string("/std/player");
-     * vm_push_value(global_vm, path);
-     * 
-     * VMValue result = master_call("clone_object", &path, 1);
-     * 
-     * if (result.type == VALUE_OBJECT) {
-     *     Object *player = result.data.object_value;
-     *     
-     *     // Call setup_player(username, password_hash)
-     *     VMValue args[2];
-     *     args[0] = vm_value_create_string(username);
-     *     args[1] = vm_value_create_string(password_hash);
-     *     
-     *     object_call_method(player, "setup_player", args, 2);
-     *     
-     *     vm_value_free(&args[0]);
-     *     vm_value_free(&args[1]);
-     *     
-     *     return player;
-     * }
-     */
+    /* Clone /std/player_simple object (simplified version for Phase 2) */
+    VMValue path_value = vm_value_create_string("/std/player_simple");
+    VMValue result = efun_clone_object(global_vm, &path_value, 1);
     
-    /* TEMPORARY: Bypass LPC object system until parser is fixed
-     * Return a non-NULL pointer as a placeholder to allow character creation testing */
-    fprintf(stderr, "[Server] BYPASS MODE: Creating stub player object (LPC parser disabled)\n");
-    fprintf(stderr, "[Server] Player: %s will use C-level session only\n", username ? username : "unknown");
+    if (result.type != VALUE_OBJECT || !result.data.object_value) {
+        fprintf(stderr, "[Server] ERROR: Failed to clone /std/player for %s\n", username);
+        return NULL;
+    }
     
-    /* Return a placeholder pointer (just needs to be non-NULL for now) */
-    return (void *)0x1;
+    obj_t *player_obj = (obj_t *)result.data.object_value;
+    fprintf(stderr, "[Server] Player object cloned successfully: %s\n", 
+            player_obj->name ? player_obj->name : "<unnamed>");
+    
+    /* Call setup_player(username, password_hash) */
+    VMValue setup_args[2];
+    setup_args[0] = vm_value_create_string(username);
+    setup_args[1] = vm_value_create_string(password_hash ? password_hash : "");
+    
+    VMValue setup_result = obj_call_method(global_vm, player_obj, "setup_player", setup_args, 2);
+    (void)setup_result;  /* Ignore result */
+    
+    fprintf(stderr, "[Server] Player object initialized for %s (methods: %d)\n", 
+            username, player_obj->method_count);
+    
+    return (void *)player_obj;
 }
 
 /* Call player object's process_command method */
@@ -199,14 +193,6 @@ VMValue call_player_command(void *player_obj, const char *command) {
     fprintf(stderr, "[Server] Calling player command: %s\n", command);
 
     // Cast player_obj to obj_t*
-    /* Guard: during early development a non-pointer sentinel (1) is
-     * returned from create_player_object(). Do not attempt to treat
-     * that sentinel as a real object pointer. Return a null result so
-     * execute_command will fall back to built-in handlers. */
-    if (player_obj == (void*)1) {
-        return result;
-    }
-
     obj_t *obj = (obj_t *)player_obj;
 
     // Prepare argument (command string)
@@ -1347,6 +1333,17 @@ void process_login_state(PlayerSession *session, const char *input) {
             if (load_character(session, session->username)) {
                 send_to_player(session, "\r\nWelcome back!\r\n");
                 send_to_player(session, "Your character has been restored.\r\n\r\n");
+                
+                /* Create LPC player object for existing character */
+                session->player_object = create_player_object(
+                    session->username,
+                    "");  /* Password hash not needed for existing players */
+                
+                if (!session->player_object) {
+                    fprintf(stderr, "[Server] WARNING: Failed to create LPC player object for %s\n",
+                            session->username);
+                    /* Continue anyway - C commands will still work */
+                }
                 
                 session->state = STATE_PLAYING;
                 

@@ -1,0 +1,12 @@
+thurtea
+password
+stats
+chat Testing hybrid approach!
+tell thurtea Hello
+shout Loud message!
+exits
+examine room
+whisper thurtea Secret
+inventory
+who
+quit

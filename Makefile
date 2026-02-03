@@ -36,7 +36,7 @@ DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/server.c $(SRC_DIR)/lexer.c $(SRC_D
               $(SRC_DIR)/websocket.c $(SRC_DIR)/session.c \
               $(SRC_DIR)/room.c $(SRC_DIR)/chargen.c $(SRC_DIR)/skills.c \
               $(SRC_DIR)/combat.c $(SRC_DIR)/item.c $(SRC_DIR)/psionics.c \
-              $(SRC_DIR)/magic.c
+              $(SRC_DIR)/magic.c $(SRC_DIR)/wiz_tools.c
 
 # Count source files
 TOTAL_FILES = $(words $(DRIVER_SRCS))

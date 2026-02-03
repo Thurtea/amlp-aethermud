@@ -523,109 +523,15 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 
                 send_to_player(sess, "\nYou selected: \033[1;32m%s\033[0m\n\n", ch->race);
                 
-                /* Move to OCC selection */
-                sess->chargen_state = CHARGEN_OCC_SELECT;
-                sess->chargen_page = 0;  /* Reset page for OCC */
+                /* Set placeholder OCC - will be assigned by wizard */
+                ch->occ = strdup("Awaiting Wizard Assignment");
                 
-                int total_pages = (NUM_OCCS + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                send_to_player(sess, "=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n", 
-                               sess->chargen_page + 1, total_pages);
+                send_to_player(sess, "Your O.C.C. will be assigned by a wizard.\n");
+                send_to_player(sess, "Please send a 'tell' to a wizard requesting an O.C.C.\n\n");
                 
-                int start = 0;
-                int end = ITEMS_PER_PAGE;
-                if (end > NUM_OCCS) end = NUM_OCCS;
-                
-                for (int i = start; i < end; i++) {
-                    send_to_player(sess, "  %2d. %s - %s\n", 
-                                  i + 1, ALL_OCCS[i].name, ALL_OCCS[i].desc);
-                }
-                
-                send_to_player(sess, "\n");
-                if (end < NUM_OCCS) {
-                    send_to_player(sess, "  Type 'n' for next page\n");
-                }
-                send_to_player(sess, "\nEnter choice (1-%d): ", NUM_OCCS);
-            } else {
-                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", NUM_RACES);
-            }
-            break;
-            
-        case CHARGEN_OCC_SELECT:
-            /* Handle pagination */
-            if (input[0] == 'n' || input[0] == 'N') {
-                int total_pages = (NUM_OCCS + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                if (sess->chargen_page < total_pages - 1) {
-                    sess->chargen_page++;
-                    /* Redisplay */
-                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n", 
-                                   sess->chargen_page + 1, total_pages);
-                    
-                    int start = sess->chargen_page * ITEMS_PER_PAGE;
-                    int end = start + ITEMS_PER_PAGE;
-                    if (end > NUM_OCCS) end = NUM_OCCS;
-                    
-                    for (int i = start; i < end; i++) {
-                        send_to_player(sess, "  %2d. %s - %s\n", 
-                                      i + 1, ALL_OCCS[i].name, ALL_OCCS[i].desc);
-                    }
-                    
-                    send_to_player(sess, "\n");
-                    if (sess->chargen_page > 0) {
-                        send_to_player(sess, "  Type 'p' for previous page\n");
-                    }
-                    if (end < NUM_OCCS) {
-                        send_to_player(sess, "  Type 'n' for next page\n");
-                    }
-                    send_to_player(sess, "\nEnter choice (1-%d): ", NUM_OCCS);
-                } else {
-                    send_to_player(sess, "Already on last page.\nEnter choice (1-%d): ", NUM_OCCS);
-                }
-                return;
-            }
-            
-            if (input[0] == 'p' || input[0] == 'P') {
-                if (sess->chargen_page > 0) {
-                    sess->chargen_page--;
-                    /* Redisplay */
-                    int total_pages = (NUM_OCCS + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n", 
-                                   sess->chargen_page + 1, total_pages);
-                    
-                    int start = sess->chargen_page * ITEMS_PER_PAGE;
-                    int end = start + ITEMS_PER_PAGE;
-                    if (end > NUM_OCCS) end = NUM_OCCS;
-                    
-                    for (int i = start; i < end; i++) {
-                        send_to_player(sess, "  %2d. %s - %s\n", 
-                                      i + 1, ALL_OCCS[i].name, ALL_OCCS[i].desc);
-                    }
-                    
-                    send_to_player(sess, "\n");
-                    if (sess->chargen_page > 0) {
-                        send_to_player(sess, "  Type 'p' for previous page\n");
-                    }
-                    if (end < NUM_OCCS) {
-                        send_to_player(sess, "  Type 'n' for next page\n");
-                    }
-                    send_to_player(sess, "\nEnter choice (1-%d): ", NUM_OCCS);
-                } else {
-                    send_to_player(sess, "Already on first page.\nEnter choice (1-%d): ", NUM_OCCS);
-                }
-                return;
-            }
-            
-            /* Handle selection */
-            if (choice >= 1 && choice <= NUM_OCCS) {
-                ch->occ = strdup(ALL_OCCS[choice - 1].name);
-                
-                send_to_player(sess, "\nYou selected: \033[1;32m%s\033[0m\n\n", ch->occ);
-                
-                /* Assign OCC-specific skills */
-                occ_assign_skills(sess, ch->occ);
-                
-                send_to_player(sess, "Getting your starting skills...\n");
                 send_to_player(sess, "Rolling your attributes...\n");
                 
+                /* Skip OCC selection - go directly to stats */
                 chargen_roll_stats(sess);
                 chargen_display_stats(sess);
                 
@@ -633,8 +539,14 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 send_to_player(sess, "\n");
                 send_to_player(sess, "Accept these stats? (yes/reroll): ");
             } else {
-                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", NUM_OCCS);
+                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", NUM_RACES);
             }
+            break;
+            
+        case CHARGEN_OCC_SELECT:
+            /* OCC selection disabled - wizards assign OCCs via wiz-tools instead */
+            send_to_player(sess, "O.C.C. selection is handled by game administrators.\n");
+            send_to_player(sess, "Please contact a wizard for your O.C.C. assignment.\n");
             break;
             
         case CHARGEN_STATS_CONFIRM:

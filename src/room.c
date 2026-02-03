@@ -171,29 +171,56 @@ void cmd_look(PlayerSession *sess, const char *args) {
     Room *room = sess->current_room;
     
     send_to_player(sess, "\n%s\n", room->name);
-    send_to_player(sess, "%s\n", room->description);
+    send_to_player(sess, "%s", room->description);
     
-    /* List other players */
+    /* List exits */
+    int exit_count = 0;
+    char *exit_dirs[6];
+    
+    if (room->exits.north >= 0) exit_dirs[exit_count++] = "north";
+    if (room->exits.south >= 0) exit_dirs[exit_count++] = "south";
+    if (room->exits.east >= 0) exit_dirs[exit_count++] = "east";
+    if (room->exits.west >= 0) exit_dirs[exit_count++] = "west";
+    if (room->exits.up >= 0) exit_dirs[exit_count++] = "up";
+    if (room->exits.down >= 0) exit_dirs[exit_count++] = "down";
+    
+    if (exit_count == 0) {
+        send_to_player(sess, "\033[1;32mThere are no exits.\033[0m\n");
+    } else if (exit_count == 1) {
+        send_to_player(sess, "\033[1;32mThere is one exit: %s\033[0m\n", exit_dirs[0]);
+    } else {
+        send_to_player(sess, "\033[1;32mThere are %d exits: ", exit_count);
+        for (int i = 0; i < exit_count; i++) {
+            send_to_player(sess, "%s", exit_dirs[i]);
+            if (i < exit_count - 1) {
+                send_to_player(sess, ", ");
+            }
+        }
+        send_to_player(sess, "\033[0m\n");
+    }
+    
+    /* List other players by race (until introduced) */
     if (room->num_players > 1) {
-        send_to_player(sess, "\nAlso here:\n");
         for (int i = 0; i < room->num_players; i++) {
-            if (room->players[i] != sess && room->players[i]->username) {
-                send_to_player(sess, "  - %s\n", room->players[i]->username);
+            if (room->players[i] != sess && room->players[i]->character.race) {
+                const char *race = room->players[i]->character.race;
+                /* Determine article (a/an) based on first letter */
+                char article = 'A';
+                if (race[0] == 'A' || race[0] == 'E' || race[0] == 'I' || 
+                    race[0] == 'O' || race[0] == 'U' ||
+                    race[0] == 'a' || race[0] == 'e' || race[0] == 'i' || 
+                    race[0] == 'o' || race[0] == 'u') {
+                    article = 'n';
+                }
+                
+                if (article == 'n') {
+                    send_to_player(sess, "An %s is standing around.\n", race);
+                } else {
+                    send_to_player(sess, "A %s is standing around.\n", race);
+                }
             }
         }
     }
-    
-    /* List exits */
-    send_to_player(sess, "\nExits: ");
-    int has_exit = 0;
-    if (room->exits.north >= 0) { send_to_player(sess, "north "); has_exit = 1; }
-    if (room->exits.south >= 0) { send_to_player(sess, "south "); has_exit = 1; }
-    if (room->exits.east >= 0) { send_to_player(sess, "east "); has_exit = 1; }
-    if (room->exits.west >= 0) { send_to_player(sess, "west "); has_exit = 1; }
-    if (room->exits.up >= 0) { send_to_player(sess, "up "); has_exit = 1; }
-    if (room->exits.down >= 0) { send_to_player(sess, "down "); has_exit = 1; }
-    if (!has_exit) send_to_player(sess, "none");
-    send_to_player(sess, "\n");
 }
 
 /* Move command */

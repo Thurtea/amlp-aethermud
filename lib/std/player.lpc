@@ -187,19 +187,36 @@ int query_privilege() {
 
 // Command processing - CRITICAL FUNCTION
 mixed process_command(string cmd) {
-    if (!cmd || cmd == "") {
+    // DEBUG: Check what we actually received
+    write("[DEBUG] process_command START\n");
+    
+    if (!cmd) {
+        write("[DEBUG] cmd is NULL\n");
         return "Empty command.\n";
     }
     
-    // Route command to command daemon
-    // The command daemon will check wiztool first, then other sources
-    object cmd_daemon = load_object(COMMAND_D);
-    if (cmd_daemon) {
-        return cmd_daemon->execute_command(this_object(), cmd);
+    if (cmd == "") {
+        write("[DEBUG] cmd is empty string\n");
+        return "Empty command.\n";
     }
     
-    // Fallback if command daemon not available
-    return "Command system not initialized.\n";
+    write("[DEBUG] cmd = '" + cmd + "'\n");
+    write("[DEBUG] strlen = " + strlen(cmd) + "\n");
+    
+    // Route command to command daemon
+    object cmd_daemon = load_object(COMMAND_D);
+    if (!cmd_daemon) {
+        write("[DEBUG] Command daemon FAILED to load!\n");
+        return "Command system not initialized.\n";
+    }
+    
+    write("[DEBUG] Calling command daemon...\n");
+    int result = cmd_daemon->execute_command(this_object(), cmd);
+    write("[DEBUG] Command daemon returned: " + result + "\n");
+    
+    // Commands handle their own output via write/tell_object
+    // Return empty string to driver to signal output already sent
+    return "";
 }
 
 // Command implementations

@@ -135,20 +135,26 @@ int execute_command(object player, string input) {
         tell_object(player, "[DEBUG] Player does NOT have wiztool object loaded");
     }
     
-    // Priority 2: Check player's local commands (skills, abilities)
+    // Priority 2: Check add_action registered commands
+    if (function_exists("try_action", player)) {
+        result = player->try_action(verb, args);
+        if (result) return 1;
+    }
+    
+    // Priority 3: Check player's local commands (skills, abilities)
     if (function_exists("local_command", player)) {
         result = player->local_command(verb, args);
         if (result) return 1;
     }
     
-    // Priority 3: Check environment commands (room-specific)
+    // Priority 4: Check environment commands (room-specific)
     room = environment(player);
     if (room && function_exists("local_command", room)) {
         result = room->local_command(verb, args);
         if (result) return 1;
     }
     
-    // Priority 4: Check global command registry
+    // Priority 5: Check global command registry
     if (commands[verb]) {
         if (verb == "wiztool" || verb == "wiz") {
             tell_object(player, "[DEBUG] Found in global registry: " + commands[verb]);
@@ -159,7 +165,7 @@ int execute_command(object player, string input) {
         tell_object(player, "[DEBUG] Available commands: " + implode(keys(commands), ", "));
     }
     
-    // Priority 5: Try to find command in search paths
+    // Priority 6: Try to find command in search paths
     result = search_command_paths(player, verb, args);
     if (result) return 1;
     

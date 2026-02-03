@@ -11,6 +11,11 @@ string real_name;
 mapping languages;
 string primary_language;
 
+// Action registry for add_action/enable_commands
+private int commands_enabled;
+private mapping actions;  // Maps verb -> ({ function, flags })
+private string current_verb;  // The verb currently being processed
+
 void create() {
     // Initialize base object fields directly
     // (not calling ::create() due to scope resolution bug in AMLP)
@@ -27,6 +32,11 @@ void create() {
     real_name = "";
     languages = ([ ]);
     primary_language = "";
+    
+    // Action registry init
+    commands_enabled = 0;
+    actions = ([ ]);
+    current_verb = "";
 }
 
 int query_hp() {
@@ -84,4 +94,110 @@ void set_primary_language(string lang) {
 
 string query_primary_language() {
     return primary_language;
+}
+
+//=============================================================================
+// Action Registry System (add_action/enable_commands)
+//=============================================================================
+
+// Enable command processing for this object
+void enable_commands() {
+    commands_enabled = 1;
+}
+
+// Disable command processing for this object
+void disable_commands() {
+    commands_enabled = 0;
+}
+
+// Check if commands are enabled
+int query_commands_enabled() {
+    return commands_enabled;
+}
+
+// Add an action (register a function to handle specific verbs)
+// Usage: add_action("function_name", "verb")
+//        add_action("function_name") // Matches all verbs, function gets full command
+void add_action(string func, string verb) {
+    if (!actions) actions = ([ ]);
+    
+    if (!verb || verb == "") {
+        // No verb means match all commands
+        actions[""] = ({ func, 1 }); // Flag 1 = catch-all
+    } else {
+        actions[verb] = ({ func, 0 }); // Flag 0 = specific verb
+    }
+}
+
+// Remove an action
+void remove_action(string verb) {
+    if (actions && verb) {
+        map_delete(actions, verb);
+    }
+}
+
+// Query all actions
+mapping query_actions() {
+    return actions ? actions : ([ ]);
+}
+
+// Get the verb currently being processed
+string query_verb() {
+    return current_verb;
+}
+
+// Set the current verb (called by command daemon during dispatch)
+void set_verb(string verb) {
+    current_verb = verb;
+}
+
+// Try to execute an action for a given command
+// Returns 1 if an action was found and executed, 0 otherwise
+int try_action(string verb, string args) {
+    if (!commands_enabled || !actions) {
+        return 0;
+    }
+    
+    mixed action_data;
+    string func;
+    int is_catchall;
+    
+    // First try exact verb match
+    if (actions[verb]) {
+        action_data = actions[verb];
+        func = action_data[0];
+        is_catchall = action_data[1];
+        
+        // Set current verb for query_verb()
+        current_verb = verb;
+        
+        // Call the function
+        if (function_exists(func, this_object())) {
+            int result = call_other(this_object(), func, args);
+            current_verb = "";
+            return result;
+        }
+    }
+    
+    // Try catch-all action (verb = "")
+    if (actions[""]) {
+        action_data = actions[""];
+        func = action_data[0];
+        
+        // For catch-all, pass the full command including verb
+        current_verb = verb;
+        string full_cmd = verb;
+        if (args && args != "") {
+            full_cmd += " " + args;
+        }
+        
+        if (function_exists(func, this_object())) {
+            int result = call_other(this_object(), func, full_cmd);
+            current_verb = "";
+            return result;
+        }
+    }
+    
+    current_verb = "";
+    return 0;
 }

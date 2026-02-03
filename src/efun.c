@@ -610,15 +610,27 @@ VMValue efun_write(VirtualMachine *vm, VMValue *args, int arg_count) {
     (void)vm;
     (void)arg_count;
     
+    // Convert argument to string
+    char buffer[1024];
     if (args[0].type == VALUE_STRING) {
-        printf("%s", args[0].data.string_value);
+        snprintf(buffer, sizeof(buffer), "%s", args[0].data.string_value);
     } else if (args[0].type == VALUE_INT) {
-        printf("%ld", args[0].data.int_value);
+        snprintf(buffer, sizeof(buffer), "%ld", args[0].data.int_value);
     } else if (args[0].type == VALUE_FLOAT) {
-        printf("%g", args[0].data.float_value);
+        snprintf(buffer, sizeof(buffer), "%g", args[0].data.float_value);
+    } else {
+        buffer[0] = '\0';
     }
     
-    fflush(stdout);
+    // Try to send to current player's session if available
+    void *player_obj = get_current_player_object();
+    if (player_obj) {
+        send_message_to_player_session(player_obj, buffer);
+    } else {
+        // Fallback to stdout for non-player contexts
+        printf("%s", buffer);
+        fflush(stdout);
+    }
     
     return vm_value_create_int(1);
 }
@@ -661,7 +673,10 @@ VMValue efun_tell_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         return vm_value_create_int(0);
     }
 
-    /* Call object's receive_message method if available */
+    /* Try direct session send first (more efficient) */
+    send_message_to_player_session(target, message);
+    
+    /* Also call object's receive_message method if available for compatibility */
     VMValue arg = vm_value_create_string(message);
     VMValue res = obj_call_method(vm, target, "receive_message", &arg, 1);
     vm_value_free(&arg);

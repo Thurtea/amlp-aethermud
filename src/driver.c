@@ -92,6 +92,7 @@ void check_session_timeouts(void);
 void* create_player_object(const char *username, const char *password_hash);
 VMValue call_player_command(void *player_obj, const char *command);
 int setup_ws_listener(int port);
+PlayerSession* find_session_for_player(void *player_obj);
 
 /* Filesystem command functions (implemented in server.c) */
 int cmd_ls_filesystem(PlayerSession *session, const char *args);
@@ -187,16 +188,21 @@ VMValue call_player_command(void *player_obj, const char *command) {
     result.type = VALUE_NULL;
 
     if (!player_obj || !global_vm || !command) {
+        fprintf(stderr, "[Server] call_player_command: NULL parameter (obj=%p, vm=%p, cmd=%p)\n",
+                player_obj, global_vm, (void*)command);
         return result;
     }
 
-    fprintf(stderr, "[Server] Calling player command: %s\n", command);
+    fprintf(stderr, "[Server] Calling player command: '%s' (len=%zu)\n", command, strlen(command));
 
     // Cast player_obj to obj_t*
     obj_t *obj = (obj_t *)player_obj;
 
     // Prepare argument (command string)
     VMValue cmd_arg = vm_value_create_string(command);
+    fprintf(stderr, "[Server] DEBUG: Created VMValue string: type=%d, ptr=%p, value='%s'\n",
+            cmd_arg.type, (void*)cmd_arg.data.string_value, 
+            cmd_arg.data.string_value ? cmd_arg.data.string_value : "(null)");
 
     /* Debug: check whether object exposes process_command */
     VMFunction *m = obj_get_method(obj, "process_command");
@@ -281,6 +287,29 @@ void free_session(PlayerSession *session) {
 }
 
 /* Send formatted output to player */
+/* Find the session associated with a player object */
+PlayerSession* find_session_for_player(void *player_obj) {
+    if (!player_obj) return NULL;
+    
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (sessions[i] && sessions[i]->player_object == player_obj) {
+            return sessions[i];
+        }
+    }
+    
+    return NULL;
+}
+
+/* Send a message to a player's session */
+void send_message_to_player_session(void *player_obj, const char *message) {
+    if (!player_obj || !message) return;
+    
+    PlayerSession *session = find_session_for_player(player_obj);
+    if (session) {
+        send_to_player(session, "%s", message);
+    }
+}
+
 void send_to_player(PlayerSession *session, const char *format, ...) {
     if (!session || session->fd <= 0) return;
     

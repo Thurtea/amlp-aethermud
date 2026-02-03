@@ -31,7 +31,7 @@ telnet localhost 3000
 
 ```
 amlp-driver/
-├── src/              # C source code (driver implementation)
+├── src/              # C source code 
 │   ├── lexer.c       # LPC tokenization
 │   ├── parser.c      # Recursive descent parser
 │   ├── codegen.c     # Bytecode generation
@@ -39,7 +39,7 @@ amlp-driver/
 │   ├── object.c      # Object system
 │   ├── gc.c          # Garbage collector
 │   └── efun.c        # Built-in functions
-├── lib/              # LPC mudlib (symlink to ../amlp-library)
+├── lib/              # LPC mudlib 
 ├── docs/             # Documentation
 ├── config/           # Configuration files
 └── mud.ctl           # Server control script

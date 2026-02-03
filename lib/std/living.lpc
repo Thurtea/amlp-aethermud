@@ -1,19 +1,32 @@
 // std/living.c - Base object for all living things (NPCs, players)
 // Inherits from std/object and adds life-related properties
 
-inherit "std/object.c";
+inherit "/std/object";
 
 int hp;
 int max_hp;
 int level;
 string name;
+string real_name;
+mapping languages;
+string primary_language;
 
 void create() {
-    ::create();
+    // Initialize base object fields directly
+    // (not calling ::create() due to scope resolution bug in AMLP)
+    // This initialization duplicates object.lpc but avoids infinite recursion
+    
+    // Base object init
+    // (short_desc and long_desc not used in living, but inherited)
+    
+    // Living creature init
     hp = 10;
     max_hp = 10;
     level = 1;
     name = "creature";
+    real_name = "";
+    languages = ([ ]);
+    primary_language = "";
 }
 
 int query_hp() {
@@ -46,4 +59,29 @@ string query_name() {
 
 void set_name(string new_name) {
     name = new_name;
+}
+
+void set_real_name(string new_name) {
+    real_name = new_name;
+}
+
+string query_real_name() {
+    return real_name;
+}
+
+void add_language(string lang, int proficiency) {
+    if (!languages) languages = ([ ]);
+    languages[lang] = proficiency;
+}
+
+mapping query_languages() {
+    return languages ? languages : ([ ]);
+}
+
+void set_primary_language(string lang) {
+    primary_language = lang;
+}
+
+string query_primary_language() {
+    return primary_language;
 }

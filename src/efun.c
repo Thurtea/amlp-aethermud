@@ -987,7 +987,11 @@ VMValue efun_clone_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     }
 
     /* Call create() on object if present */
+    fprintf(stderr, "[Efun] clone_object: calling create() on %s\n",
+            o->name ? o->name : "<noname>");
     obj_call_method(vm, o, "create", NULL, 0);
+    fprintf(stderr, "[Efun] clone_object: create() returned for %s\n",
+            o->name ? o->name : "<noname>");
 
     program_free(prog);
 

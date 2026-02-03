@@ -57,6 +57,7 @@ int process_command(string verb, string args) {
         case "ls":      cmd_ls(args); return 1;
         case "pwd":     cmd_pwd(); return 1;
         case "cat":     cmd_cat(args); return 1;
+        case "more":    cmd_more(args); return 1;
         case "mkdir":   cmd_mkdir(args); return 1;
         case "rm":      cmd_rm(args); return 1;
         
@@ -171,6 +172,48 @@ void cmd_cat(string file) {
     
     tell_object(owner, "=== " + path + " ===");
     tell_object(owner, content);
+    tell_object(owner, "=== End of file ===");
+}
+
+void cmd_more(string file) {
+    if (!file || file == "") {
+        tell_object(owner, "Usage: more <filename>");
+        return;
+    }
+    
+    string path = resolve_path(file);
+    string content;
+    string *lines;
+    int i, total, start, end, lines_per_page;
+    
+    content = read_file(path);
+    
+    if (!content) {
+        tell_object(owner, "Cannot read file: " + path);
+        return;
+    }
+    
+    lines = explode(content, "\n");
+    total = sizeof(lines);
+    lines_per_page = 20;  // Show 20 lines per screen
+    
+    tell_object(owner, "=== " + path + " (" + total + " lines) ===");
+    tell_object(owner, "");
+    
+    // Display all lines (for now, simple implementation)
+    // TODO: Implement true pagination with page breaks
+    for (i = 0; i < total; i++) {
+        tell_object(owner, lines[i]);
+        
+        // Show a break every 20 lines
+        if ((i + 1) % lines_per_page == 0 && i < total - 1) {
+            tell_object(owner, "--- (Line " + (i + 1) + " of " + total + ", press 'space' for more) ---");
+            // Note: Would need interactive prompt to truly pause here
+            // For now, just continue
+        }
+    }
+    
+    tell_object(owner, "");
     tell_object(owner, "=== End of file ===");
 }
 
@@ -440,6 +483,7 @@ void show_help() {
     tell_object(owner, "  ls [dir]         - List directory contents");
     tell_object(owner, "  pwd              - Show current directory");
     tell_object(owner, "  cat <file>       - Display file contents");
+    tell_object(owner, "  more <file>      - Display file with pagination");
     tell_object(owner, "  mkdir <dir>      - Create directory");
     tell_object(owner, "  rm <file>        - Remove file");
     

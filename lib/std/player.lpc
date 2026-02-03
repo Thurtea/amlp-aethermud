@@ -32,11 +32,25 @@ private string occ_selected;
 
 // Initialization
 void create() {
-    ::create();
+    // Initialize parent class fields directly to avoid scope resolution bug
+    // (AMLP parser marks ::parent_call but codegen doesn't implement it)
+    
+    // Base object init  
+    // (short_desc and long_desc inherited but not used)
+    
+    // Living creature init
+    hp = 10;
+    max_hp = 10;
+    level = 1;
+    name = "player";
+    real_name = "";
+    languages = ([ ]);
+    primary_language = "";
+    
+    // Player-specific init
     inventory = ({ });
     privilege_level = 0;  // Default to player
     title = "Player";
-    level = 1;
     experience = 0;
     
     // Set real name for introduction system

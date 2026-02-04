@@ -1,0 +1,119 @@
+/*
+ * /lib/cmds/admin/setocc.lpc
+ * 
+ * Wizard command to assign an OCC to a player
+ * Useful for RCC characters who can optionally take an OCC
+ * 
+ * Usage:
+ *   setocc <player> <occ>
+ */
+
+int cmd(string args) {
+    object wiz, target;
+    string player_name, occ_name;
+    
+    wiz = this_player();
+    
+    // Check wizard privileges
+    if (wiz->query_privilege_level() < 1) {
+        write("You don't have permission to use this command.\n");
+        return 1;
+    }
+    
+    // Parse arguments
+    if (!args || args == "" || sscanf(args, "%s %s", player_name, occ_name) != 2) {
+        write("Usage: setocc <player> <occ>\n");
+        write("\nAssigns an Occupational Character Class to a player.\n");
+        write("This is typically used for RCC races that can optionally take an OCC.\n");
+        write("\nExamples:\n");
+        write("  setocc dragonplayer ley_line_walker\n");
+        write("  setocc atlantean tattoo_warrior\n");
+        return 1;
+    }
+    
+    // Find target player
+    target = find_living(player_name);
+    
+    if (!target) {
+        // Try to find target in current room
+        target = present(player_name, environment(wiz));
+    }
+    
+    if (!target || !living(target)) {
+        write("Player '" + player_name + "' not found.\n");
+        return 1;
+    }
+    
+    // Verify it's a player
+    if (!interactive(target)) {
+        write(target->query_cap_name() + " is not a player.\n");
+        return 1;
+    }
+    
+    occ_name = lower_case(occ_name);
+    
+    // Try to load the OCC
+    string occ_path = "/occs/" + occ_name;
+    object occ_obj;
+    
+    catch {
+        occ_obj = load_object(occ_path);
+    };
+    
+    if (!occ_obj) {
+        write("OCC '" + occ_name + "' not found.\n");
+        write("Tried: " + occ_path + "\n");
+        return 1;
+    }
+    
+    // Get OCC information
+    string occ_full_name = occ_obj->query_occ_name();
+    
+    // Set the OCC on the target
+    target->set_occ(occ_name);
+    
+    // Apply OCC bonuses/skills/abilities
+    if (function_exists("apply_occ_bonuses", target)) {
+        target->apply_occ_bonuses();
+    }
+    
+    // Notify wizard
+    write("You have assigned the " + occ_full_name + " OCC to " + target->query_cap_name() + ".\n");
+    
+    // Notify target
+    tell_object(target, "\n" + wiz->query_cap_name() + " has assigned you the " + 
+                occ_full_name + " Occupational Character Class!\n");
+    tell_object(target, "Type 'score' to see your updated character sheet.\n");
+    
+    // Log it
+    write_file("/log/admin.log", 
+               sprintf("[%s] %s assigned OCC '%s' to %s\n",
+                       ctime(time()), wiz->query_name(), occ_full_name, target->query_name()));
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"SETOCC - Assign an OCC to a player\n\n"
+"Usage:\n"
+"  setocc <player> <occ>    Assign an OCC to a player\n\n"
+"This command allows wizards to assign an Occupational Character Class\n"
+"(OCC) to a player. This is primarily used for Racial Character Classes\n"
+"(RCCs) that can optionally take an OCC for additional abilities.\n\n"
+"For example:\n"
+"  - Dragon Hatchlings (RCC) can take Ley Line Walker (OCC)\n"
+"  - Atlanteans (Human/RCC hybrid) can take Tattoo Warrior (OCC)\n"
+"  - Adult Dragons (RCC) can take Cyber-Knight (OCC)\n\n"
+"When an RCC takes an OCC, they gain:\n"
+"  - Additional skills from the OCC\n"
+"  - OCC-specific abilities\n"
+"  - Enhanced progression path\n\n"
+"Examples:\n"
+"  setocc dragonchar ley_line_walker\n"
+"  setocc atlanteanchar tattoo_warrior\n"
+"  setocc juicerchar cyber_knight\n\n"
+"Available OCCs depend on the race. Check the race description for\n"
+"compatible OCCs, or use 'wiz ls /occs' to see all OCCs.\n\n"
+"See also: PROMOTE, DEMOTE, GRANTSKILL\n";
+}

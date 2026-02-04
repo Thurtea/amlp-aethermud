@@ -37,6 +37,12 @@ private mapping equipped;  // Slots: right_hand, left_hand, head, body, hands, f
 // Skills tracking
 private mapping skills;  // Maps skill name -> proficiency value (0-100)
 
+// Prompt customization
+private string custom_prompt;  // Custom prompt format
+
+// Atlantean tattoo magic
+private mapping tattoos;  // Maps tattoo name -> tattoo data
+
 // Initialization
 void create() {
     // Initialize parent class fields directly to avoid scope resolution bug
@@ -62,6 +68,8 @@ void create() {
     experience = 0;
     equipped = ([ ]);  // Initialize equipment mapping
     skills = ([ ]);    // Initialize skills mapping
+    custom_prompt = "> ";  // Default prompt
+    tattoos = ([ ]);   // Initialize tattoos mapping
     
     // Set real name for introduction system
     set_real_name("");
@@ -878,6 +886,91 @@ void restore_data(mapping data) {
     set_name(name);
     set_real_name(name);
     set_short(name + " the " + title);
+}
+
+//=============================================================================
+// Prompt Customization System
+//=============================================================================
+
+void set_prompt(string prompt) {
+    custom_prompt = prompt;
+}
+
+string query_prompt() {
+    return custom_prompt;
+}
+
+string get_formatted_prompt() {
+    if (!custom_prompt || custom_prompt == "") {
+        return "> ";
+    }
+    
+    string result = custom_prompt;
+    
+    // Replace format codes
+    result = replace_string(result, "%n", query_name());
+    result = replace_string(result, "%N", capitalize(query_name()));
+    result = replace_string(result, "%l", "" + query_level());
+    result = replace_string(result, "%h", "" + query_hp());
+    result = replace_string(result, "%H", "" + query_max_hp());
+    result = replace_string(result, "%s", "" + query_sdc());
+    result = replace_string(result, "%S", "" + query_max_sdc());
+    result = replace_string(result, "%m", "" + query_mdc());
+    result = replace_string(result, "%M", "" + query_max_mdc());
+    result = replace_string(result, "%p", "" + query_ppe());
+    result = replace_string(result, "%P", "" + query_max_ppe());
+    result = replace_string(result, "%i", "" + query_isp());
+    result = replace_string(result, "%I", "" + query_max_isp());
+    result = replace_string(result, "%%", "%");
+    
+    // Room-based codes
+    object env = query_environment();
+    if (env) {
+        if (function_exists("query_room_name", env)) {
+            result = replace_string(result, "%r", env->query_room_name());
+        }
+        if (function_exists("query_short", env)) {
+            result = replace_string(result, "%R", env->query_short());
+        }
+    }
+    
+    // Directory code (wizards only)
+    if (privilege_level >= 1 && wiztool) {
+        if (function_exists("query_cwd", wiztool)) {
+            result = replace_string(result, "%d", wiztool->query_cwd());
+        }
+    }
+    
+    return result;
+}
+
+//=============================================================================
+// Atlantean Tattoo Magic System
+//=============================================================================
+
+void add_tattoo(string tattoo_name) {
+    if (!tattoos) tattoos = ([ ]);
+    tattoos[tattoo_name] = 1;
+}
+
+void remove_tattoo(string tattoo_name) {
+    if (!tattoos) return;
+    map_delete(tattoos, tattoo_name);
+}
+
+int query_tattoo(string tattoo_name) {
+    if (!tattoos) return 0;
+    return tattoos[tattoo_name] ? 1 : 0;
+}
+
+string *query_tattoos() {
+    if (!tattoos) return ({ });
+    return keys(tattoos);
+}
+
+int query_tattoo_count() {
+    if (!tattoos) return 0;
+    return sizeof(keys(tattoos));
 }
 
 // Cleanup on removal

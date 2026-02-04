@@ -525,6 +525,21 @@ int process_stats_roll(object player, string cmd, string arg) {
     if (cmd == "yes" || cmd == "y" || cmd == "accept") {
         data["state"] = STATE_OCC;
         tell_object(player, "\nAttributes accepted!\n\n");
+        
+        // Check if this is an RCC that can optionally take an OCC
+        object race = load_race(data["race"]);
+        if (race && race->query_is_rcc() && race->query_can_have_occ()) {
+            tell_object(player, "\n<<< RCC NOTICE >>>\n");
+            tell_object(player, race->query_race_name() + " is a Racial Character Class (R.C.C.).\n");
+            tell_object(player, "You may function as " + race->query_race_name() + " without an O.C.C.,\n");
+            tell_object(player, "or optionally select an O.C.C. for additional abilities.\n\n");
+            string rcc_desc = race->query_rcc_description();
+            if (rcc_desc && rcc_desc != "") {
+                tell_object(player, rcc_desc + "\n\n");
+            }
+            tell_object(player, "Type 'skip' to continue as R.C.C. only, or choose an O.C.C. below.\n\n");
+        }
+        
         tell_object(player, get_occ_selection_menu(data["race"]));
         return 1;
     }
@@ -554,6 +569,22 @@ int process_stats_roll(object player, string cmd, string arg) {
 int process_occ_input(object player, string cmd, string arg) {
     string pname = player->query_name();
     mapping data = player_creation[pname];
+    
+    // Allow RCCs to skip OCC selection
+    if (cmd == "skip" || cmd == "none") {
+        object race = load_race(data["race"]);
+        if (!race || !race->query_is_rcc() || !race->query_can_have_occ()) {
+            tell_object(player, "Your race must select an O.C.C.\n");
+            return 1;
+        }
+        
+        // Skip OCC, go directly to alignment
+        data["occ"] = 0;  // No OCC selected
+        data["state"] = STATE_ALIGNMENT;
+        tell_object(player, "\nContinuing as R.C.C. without additional O.C.C.\n\n");
+        tell_object(player, get_alignment_menu(data["race"]));
+        return 1;
+    }
     
     if (cmd == "occ" || cmd == "class" || cmd == "info" || cmd == "look") {
         if (!arg || arg == "") {

@@ -31,10 +31,21 @@ void create() {
     // Racial abilities: breath (minor), claw attack bonus
     set_racial_abilities(({ "breath_fire", "natural_claws" }));
 
+    // RCC designation - Dragon Hatchlings are an RCC but can take an OCC
+    set_is_rcc(1);
+    set_can_have_occ(1);
+    set_rcc_description(
+        "Dragon Hatchlings are a Racial Character Class with inherent draconic\n"
+        "powers including breath weapons, natural armor, and enhanced strength.\n"
+        "However, young dragons can still learn professions and may take an OCC\n"
+        "such as Ley Line Walker, Cyber-Knight, or Techno-Wizard to gain\n"
+        "additional abilities and skills."
+    );
+
     // Occupation (OCC) guidance: allow most martial and magic occs but prefer scout/dragonkin
     set_allowed_occs(({ }));
     set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
+    set_recommended_occs(({ "ley_line_walker", "cyber_knight", "city_rat" }));
 
     // Starting resources: small talisman and a few coins
     set_starting_equipment(({ "/obj/items/talisman_small" }));

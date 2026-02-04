@@ -50,6 +50,18 @@ void create() {
         "dodge": 1
     ]));
     
+    // RCC designation - Dog Boys are a Racial Character Class
+    set_is_rcc(1);
+    set_can_have_occ(1);  // Some rogue Dog Boys may learn additional skills/professions
+    set_rcc_description(
+        "Dog Boys are an R.C.C. (Racial Character Class) and possess their own "
+        "unique abilities as supernatural trackers and hunters. While Coalition "
+        "Dog Boys typically serve without additional training, rogues and "
+        "freelancers sometimes adopt other O.C.C.s to expand their skillset. "
+        "Recommended O.C.C.s for Dog Boys include: psi_stalker, wilderness_scout, "
+        "or headhunter."
+    );
+    
     // Naturally tough
     set_natural_sdc(25);   // +25 racial SDC
     set_natural_armor(0);

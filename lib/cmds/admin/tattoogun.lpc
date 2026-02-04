@@ -1,0 +1,188 @@
+/*
+ * /lib/cmds/admin/tattoogun.lpc
+ * 
+ * RP Wizard tool to grant magical tattoos to Atlanteans
+ * In Rifts lore, Atlantean Tattoo Magic is very specific and powerful
+ * 
+ * Usage:
+ *   tattoogun <atlantean> <tattoo_name>
+ */
+
+// Common Atlantean magical tattoos
+#define TATTOO_PATH "/std/tattoos/"
+
+mapping tattoo_database = ([
+    "heart_pierced_by_swords": "Heart Pierced by Swords - +2 vs. horror factor",
+    "eyes_of_knowledge": "Eyes of Knowledge - See invisible, nightvision",
+    "flaming_sword": "Flaming Sword - Summon 3d6 MD flaming blade",
+    "phoenix": "Phoenix - Resurrection once per 24 hours",
+    "dragon": "Dragon - Summon a small dragon familiar",
+    "chains": "Chains - Bind and restrain enemies",
+    "cat": "Black Cat - Enhanced agility and night vision",
+    "snake": "Serpent - Poison resistance and bite attack",
+    "wings": "Angel Wings - Fly at 60 mph for 20 minutes",
+    "skull": "Death's Head - Fear aura, 4d6 HD",
+    "rose": "Rose of Protection - Natural AR 14, +20 SDC",
+    "lightning_bolt": "Lightning Bolt - Ranged 4d6 MD attack",
+    "thorns": "Crown of Thorns - Damaging aura to attackers",
+    "fortress": "Fortress - Create temporary stone wall",
+    "sun": "Sun - Light and heat generation",
+    "moon": "Moon - Illusions and shadow manipulation",
+    "warrior": "Warrior - +1 strike, parry, and dodge"
+]);
+
+int cmd(string args) {
+    object wiz, target;
+    string player_name, tattoo_name;
+    
+    wiz = this_player();
+    
+    // Check wizard privileges
+    if (wiz->query_privilege_level() < 1) {
+        write("You don't have permission to use this command.\n");
+        return 1;
+    }
+    
+    // Parse arguments
+    if (!args || args == "") {
+        write("Usage: tattoogun <atlantean> <tattoo_name>\n");
+        write("\nGrants a magical tattoo to an Atlantean character.\n");
+        write("\nAvailable Tattoos:\n");
+        
+        string *keys = keys(tattoo_database);
+        foreach (string key : keys) {
+            write("  " + key + "\n    -> " + tattoo_database[key] + "\n");
+        }
+        
+        write("\nExamples:\n");
+        write("  tattoogun atlanteanchar flaming_sword\n");
+        write("  tattoogun marcus phoenix\n");
+        return 1;
+    }
+    
+    // Parse player and tattoo
+    if (sscanf(args, "%s %s", player_name, tattoo_name) != 2) {
+        write("Usage: tattoogun <atlantean> <tattoo_name>\n");
+        return 1;
+    }
+    
+    // Find target player
+    target = find_living(player_name);
+    
+    if (!target) {
+        // Try to find target in current room
+        target = present(player_name, environment(wiz));
+    }
+    
+    if (!target || !living(target)) {
+        write("Player '" + player_name + "' not found.\n");
+        return 1;
+    }
+    
+    // Verify it's a player
+    if (!interactive(target)) {
+        write(target->query_cap_name() + " is not a player.\n");
+        return 1;
+    }
+    
+    // Verify target is Atlantean or Tattoo Warrior
+    string race = target->query_race();
+    string occ = target->query_occ();
+    
+    if (race != "atlantean" && race != "true_atlantean" && occ != "tattoo_warrior") {
+        write(target->query_cap_name() + " is not an Atlantean or Tattoo Warrior.\n");
+        write("Magical tattoos can only be applied to those with Atlantean blood.\n");
+        return 1;
+    }
+    
+    tattoo_name = lower_case(tattoo_name);
+    
+    // Check if tattoo exists in database
+    if (!tattoo_database[tattoo_name]) {
+        write("Unknown tattoo: " + tattoo_name + "\n");
+        write("Type 'tattoogun' with no arguments to see available tattoos.\n");
+        return 1;
+    }
+    
+    // Check if player already has this tattoo
+    if (target->query_tattoo(tattoo_name)) {
+        write(target->query_cap_name() + " already has the " + tattoo_name + " tattoo.\n");
+        return 1;
+    }
+    
+    // Grant the tattoo
+    target->add_tattoo(tattoo_name);
+    
+    string tattoo_desc = tattoo_database[tattoo_name];
+    
+    // Notify wizard
+    write("\nYou activate the mystical tattoo gun and inscribe the " + 
+          tattoo_name + " tattoo onto " + target->query_cap_name() + ".\n");
+    write("The magical ink glows briefly before settling into their skin.\n");
+    write("Tattoo: " + tattoo_desc + "\n");
+    
+    // Notify target
+    tell_object(target, "\n" + wiz->query_cap_name() + " approaches with an ancient tattoo gun...\n");
+    tell_object(target, "The mystical needles inscribe glowing patterns on your skin!\n");
+    tell_object(target, "You feel the magic surge through you as the tattoo takes hold.\n");
+    tell_object(target, "\nYou have received: " + tattoo_desc + "\n");
+    tell_object(target, "Type 'tattoos' to see all your magical tattoos.\n");
+    
+    // Tell the room
+    object env = environment(target);
+    if (env) {
+        object *inv = all_inventory(env);
+        foreach (object ob : inv) {
+            if (ob != wiz && ob != target && living(ob)) {
+                tell_object(ob, wiz->query_cap_name() + " uses a mystical tattoo gun on " + 
+                           target->query_cap_name() + ".\n");
+                tell_object(ob, "Glowing magical patterns appear on " + 
+                           target->query_cap_name() + "'s skin!\n");
+            }
+        }
+    }
+    
+    // Log it
+    write_file("/log/rpwiz.log", 
+               sprintf("[%s] %s granted tattoo '%s' to %s\n",
+                       ctime(time()), wiz->query_name(), tattoo_name, target->query_name()));
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"TATTOOGUN - Grant magical tattoos to Atlanteans\n\n"
+"Usage:\n"
+"  tattoogun <atlantean> <tattoo_name>\n\n"
+"This mystical tool allows RP wizards to inscribe magical tattoos onto\n"
+"Atlantean characters or Tattoo Warriors. These are not mere decorations,\n"
+"but sources of real magical power in the Rifts universe.\n\n"
+"Magical tattoos grant various abilities:\n"
+"  - Combat enhancements\n"
+"  - Magical powers\n"
+"  - Summonable weapons\n"
+"  - Defensive abilities\n"
+"  - Utility powers\n\n"
+"Each Atlantean can normally have 6-10 tattoos total, depending on their\n"
+"level and training. Tattoo Warriors can have more.\n\n"
+"Examples:\n"
+"  tattoogun atlanteanchar flaming_sword\n"
+"    (Grants ability to summon a 3d6 MD flaming weapon)\n\n"
+"  tattoogun marcus phoenix\n"
+"    (Grants resurrection ability - use once per 24 hours)\n\n"
+"  tattoogun sarah wings\n"
+"    (Grants ability to fly at 60 mph for 20 minutes)\n\n"
+"IMPORTANT NOTES:\n"
+"- Tattoos are permanent and cannot be easily removed\n"
+"- Only grant tattoos as rewards for significant RP achievements\n"
+"- Consider the character's level and experience\n"
+"- Powerful tattoos (phoenix, dragon) should be rare rewards\n"
+"- Atlanteans traditionally receive tattoos through ritual and training\n\n"
+"In roleplay, describe the tattooing process:\n"
+"  The ancient needles etch glowing patterns...\n"
+"  Mystical energy flows through the ink...\n"
+"  The tattoo pulses with arcane power...\n\n"
+"Type 'tattoogun' with no arguments to see all available tattoos.\n\n"
+"See also: GRANTSKILL, SETOCC\n";
+}

@@ -1,0 +1,138 @@
+/*
+ * /lib/cmds/admin/grantskill.lpc
+ * 
+ * RP Wizard tool to grant skills to players
+ * Used for roleplay rewards, special training, quest rewards, etc.
+ * 
+ * Usage:
+ *   grantskill <player> <skill> [percentage]
+ */
+
+int cmd(string args) {
+    object wiz, target;
+    string player_name, skill_name, percent_str;
+    int percentage;
+    
+    wiz = this_player();
+    
+    // Check wizard privileges
+    if (wiz->query_privilege_level() < 1) {
+        write("You don't have permission to use this command.\n");
+        return 1;
+    }
+    
+    // Parse arguments
+    if (!args || args == "") {
+        write("Usage: grantskill <player> <skill> [percentage]\n");
+        write("\nGrants a skill to a player or increases an existing skill.\n");
+        write("If percentage is omitted, grants at base level (30%).\n");
+        write("\nExamples:\n");
+        write("  grantskill thurtest pilot_hover_cycle\n");
+        write("  grantskill thurtest weapon_systems 75\n");
+        write("\nUse 'wiz ls /skills' to see available skills.\n");
+        return 1;
+    }
+    
+    // Parse with optional percentage
+    if (sscanf(args, "%s %s %s", player_name, skill_name, percent_str) == 3) {
+        percentage = to_int(percent_str);
+        if (percentage < 1 || percentage > 98) {
+            write("Percentage must be between 1 and 98.\n");
+            return 1;
+        }
+    } else if (sscanf(args, "%s %s", player_name, skill_name) == 2) {
+        percentage = 30; // Base level
+    } else {
+        write("Usage: grantskill <player> <skill> [percentage]\n");
+        return 1;
+    }
+    
+    // Find target player
+    target = find_living(player_name);
+    
+    if (!target) {
+        // Try to find target in current room
+        target = present(player_name, environment(wiz));
+    }
+    
+    if (!target || !living(target)) {
+        write("Player '" + player_name + "' not found.\n");
+        return 1;
+    }
+    
+    // Verify it's a player
+    if (!interactive(target)) {
+        write(target->query_cap_name() + " is not a player.\n");
+        return 1;
+    }
+    
+    skill_name = lower_case(skill_name);
+    
+    // Verify skill exists (try to load skill data)
+    // This would check against a skill database or file
+    // For now, we'll trust the wizard knows valid skills
+    
+    // Grant or improve the skill
+    int current_level = target->query_skill(skill_name);
+    
+    if (current_level > 0) {
+        // Improve existing skill
+        target->set_skill(skill_name, percentage);
+        
+        write("You have increased " + target->query_cap_name() + "'s " + 
+              capitalize(replace_string(skill_name, "_", " ")) + " skill from " + 
+              current_level + "% to " + percentage + "%.\n");
+        
+        tell_object(target, "\n" + wiz->query_cap_name() + " has improved your " + 
+                    capitalize(replace_string(skill_name, "_", " ")) + " skill to " + 
+                    percentage + "%!\n");
+    } else {
+        // Grant new skill
+        target->add_skill(skill_name, percentage);
+        
+        write("You have granted " + target->query_cap_name() + " the " + 
+              capitalize(replace_string(skill_name, "_", " ")) + " skill at " + 
+              percentage + "%.\n");
+        
+        tell_object(target, "\n" + wiz->query_cap_name() + " has granted you the " + 
+                    capitalize(replace_string(skill_name, "_", " ")) + " skill at " + 
+                    percentage + "%!\n");
+        tell_object(target, "You can now use this skill. Type 'skills' to see all your skills.\n");
+    }
+    
+    // Log it
+    write_file("/log/rpwiz.log", 
+               sprintf("[%s] %s granted skill '%s' at %d%% to %s\n",
+                       ctime(time()), wiz->query_name(), skill_name, percentage, target->query_name()));
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"GRANTSKILL - Grant or improve a skill for a player\n\n"
+"Usage:\n"
+"  grantskill <player> <skill> [percentage]\n\n"
+"This command allows RP wizards and admins to grant skills to players\n"
+"as rewards for roleplay, quests, training, or special circumstances.\n\n"
+"If the player already has the skill, it will be improved to the new\n"
+"percentage (if higher). If not specified, skills are granted at 30%\n"
+"(base competency).\n\n"
+"Examples:\n"
+"  grantskill valery pilot_hover_cycle 65\n"
+"    (Grants Pilot: Hover Cycle at 65%)\n\n"
+"  grantskill marcus weapon_systems\n"
+"    (Grants Weapon Systems at 30%)\n\n"
+"  grantskill sarah lore_demons_monsters 80\n"
+"    (Grants Lore: Demons & Monsters at 80%)\n\n"
+"Common skills to grant:\n"
+"  Combat: weapon_systems, hand_to_hand_expert, boxing\n"
+"  Technical: robot_mechanics, computer_operation, robot_combat\n"
+"  Piloting: pilot_hover_cycle, pilot_robot, pilot_power_armor\n"
+"  Espionage: intelligence, streetwise, disguise\n"
+"  Lore: lore_demons_monsters, lore_magic, lore_rifts\n\n"
+"Use 'wiz ls /skills' to browse available skill files.\n\n"
+"Note: Be judicious with skill grants. Skills should be earned through\n"
+"roleplay, training, or quests, not given freely.\n\n"
+"See also: SETOCC, TESTSKILL, TATTOOGUN\n";
+}

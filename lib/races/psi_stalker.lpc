@@ -45,6 +45,17 @@ void create() {
         "ma": -1      // Mental Affinity -1 (cold, predatory)
     ]));
     
+    // RCC designation - Psi-Stalkers are a Racial Character Class
+    set_is_rcc(1);
+    set_can_have_occ(1);  // Can adopt additional training/professions
+    set_rcc_description(
+        "Psi-Stalkers are an R.C.C. (Racial Character Class) with innate supernatural "
+        "hunting abilities and powerful psionics. While they function perfectly well as "
+        "Psi-Stalkers alone, some adopt additional O.C.C.s to broaden their skillset. "
+        "Note: Psi-Stalkers CANNOT select magic-using O.C.C.s due to their anti-magic nature. "
+        "Recommended O.C.C.s: headhunter, wilderness_scout, vagabond, cyber_knight."
+    );
+    
     // Combat bonuses - superior hunters
     set_combat_bonuses(([
         "initiative": 1,

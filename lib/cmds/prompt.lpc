@@ -1,0 +1,110 @@
+/*
+ * /lib/cmds/prompt.lpc
+ * 
+ * Customize your command prompt
+ * Supports various format codes like directory, HP, level, etc.
+ * 
+ * Usage:
+ *   prompt <format>
+ *   prompt reset
+ *   prompt help
+ */
+
+int cmd(string args) {
+    object player = this_player();
+    string new_prompt;
+    
+    if (!args || args == "") {
+        string current = player->query_prompt();
+        if (!current || current == "") {
+            current = "> ";
+        }
+        write("Current prompt: " + current + "\n");
+        write("Type 'prompt help' for formatting options.\n");
+        return 1;
+    }
+    
+    args = lower_case(args);
+    
+    // Help
+    if (args == "help") {
+        write(
+"PROMPT - Customize your command prompt\n\n"
+"Usage:\n"
+"  prompt <format>    Set your prompt to a custom format\n"
+"  prompt reset       Reset to default (> )\n"
+"  prompt help        Show this help\n\n"
+"Format Codes:\n"
+"  %n  - Your character name\n"
+"  %N  - Your capitalized name\n"
+"  %l  - Your level\n"
+"  %h  - Current HP\n"
+"  %H  - Maximum HP\n"
+"  %s  - Current SDC\n"
+"  %S  - Maximum SDC\n"
+"  %m  - Current MDC (if applicable)\n"
+"  %M  - Maximum MDC (if applicable)\n"
+"  %p  - Current PPE\n"
+"  %P  - Maximum PPE\n"
+"  %i  - Current ISP\n"
+"  %I  - Maximum ISP\n"
+"  %d  - Current directory (wizards only)\n"
+"  %r  - Current room name\n"
+"  %R  - Current room short\n"
+"  %%  - Literal % symbol\n\n"
+"Examples:\n"
+"  prompt >                          (Classic)\n"
+"  prompt [%h/%H HP] >               (Shows health)\n"
+"  prompt %n@%r >                    (Name and room)\n"
+"  prompt [Lvl %l] >                 (Level display)\n"
+"  prompt %d >                       (Directory - wizards)\n"
+"  prompt [%h HP %p PPE] >           (Health and magic)\n"
+"  prompt reset                      (Back to default)\n\n"
+"Tips:\n"
+"  - Keep prompts short for readability\n"
+"  - Use brackets [] or other markers for clarity\n"
+"  - Test your prompt before committing to it\n"
+"  - Popular format: [%h/%H HP] >\n"
+        );
+        return 1;
+    }
+    
+    // Reset
+    if (args == "reset" || args == "default") {
+        player->set_prompt("> ");
+        write("Prompt reset to default: > \n");
+        return 1;
+    }
+    
+    // Set custom prompt
+    // Note: args already contains the full custom prompt string
+    player->set_prompt(args + " ");
+    
+    // Show example
+    write("Prompt set. Example: " + player->get_formatted_prompt() + "\n");
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"PROMPT - Customize your command prompt\n\n"
+"Usage:\n"
+"  prompt <format>    Set custom prompt\n"
+"  prompt reset       Reset to default\n"
+"  prompt help        Show format codes\n\n"
+"The prompt is the text displayed before your input. Customize it\n"
+"to show character status, location, or other useful information.\n\n"
+"Popular formats:\n"
+"  prompt >                    Classic simple prompt\n"
+"  prompt [%h HP] >            Show current health\n"
+"  prompt [%h/%H HP] >         Show health with maximum\n"
+"  prompt %d >                 Show directory (wizards)\n"
+"  prompt [Lvl %l] >           Show level\n\n"
+"Type 'prompt help' for a complete list of format codes.\n\n"
+"Examples from other MUDs:\n"
+"  Lima MUD style:     /domains/town/square >\n"
+"  Dead Souls style:   <100/100hp 50/50sp> >\n"
+"  DikuMUD style:      [12 HP 10 MP] >\n\n"
+"See also: SCORE, CONFIG\n";
+}

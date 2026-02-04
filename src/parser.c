@@ -380,13 +380,38 @@ static ASTNode* parser_parse_postfix(Parser *parser) {
             call_node->data = fcall;
             node = call_node;
         } else if (parser_match(parser, TOKEN_LBRACKET)) {
-            /* Array access */
+            /* Array access or range slice */
             int line = parser->previous_token.line_number;
             int column = parser->previous_token.column_number;
             ASTNode *access_node = ast_node_create(NODE_ARRAY_ACCESS, line, column);
             ArrayAccessNode *arr_access = malloc(sizeof(ArrayAccessNode));
             arr_access->array = node;
-            arr_access->index = parser_parse_expression(parser);
+            arr_access->end_index = NULL;
+            arr_access->is_range = 0;
+            
+            /* Check for range operator: array[start..end], array[..end], array[start..] */
+            if (parser_check(parser, TOKEN_RANGE)) {
+                /* array[..end] or array[..] */
+                parser_advance(parser);  /* consume .. */
+                arr_access->index = NULL;  /* No start index */
+                arr_access->is_range = 1;
+                if (!parser_check(parser, TOKEN_RBRACKET)) {
+                    arr_access->end_index = parser_parse_expression(parser);
+                }
+            } else {
+                /* Parse first expression (index or range start) */
+                arr_access->index = parser_parse_expression(parser);
+                
+                /* Check if this is a range */
+                if (parser_match(parser, TOKEN_RANGE)) {
+                    arr_access->is_range = 1;
+                    /* Check for end expression */
+                    if (!parser_check(parser, TOKEN_RBRACKET)) {
+                        arr_access->end_index = parser_parse_expression(parser);
+                    }
+                }
+            }
+            
             parser_expect(parser, TOKEN_RBRACKET);
             access_node->data = arr_access;
             node = access_node;

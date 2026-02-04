@@ -87,6 +87,9 @@ typedef enum {
     /* Object Operations */
     OP_CALL_METHOD,     /* Call object method with n arguments */
     
+    /* String/Array operations */
+    OP_SLICE_RANGE,     /* Slice array/string: pop end, pop start, pop array, push slice */
+    
     /* Special */
     OP_HALT,            /* Stop execution */
     OP_PRINT,           /* Print top of stack (debugging) */

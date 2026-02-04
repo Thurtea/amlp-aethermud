@@ -846,6 +846,77 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             return vm_push_value(vm, result);
         }
         
+        case OP_SLICE_RANGE: {
+            /* Pop end, start, array/string from stack */
+            VMValue end_val = vm_pop_value(vm);
+            VMValue start_val = vm_pop_value(vm);
+            VMValue arr_val = vm_pop_value(vm);
+            
+            int start = (start_val.type == VALUE_INT) ? start_val.data.int_value : 0;
+            int end = (end_val.type == VALUE_INT) ? end_val.data.int_value : -1;
+            
+            /* Handle string slicing */
+            if (arr_val.type == VALUE_STRING) {
+                const char *str = arr_val.data.string_value;
+                int len = str ? strlen(str) : 0;
+                
+                /* Normalize indices */
+                if (start < 0) start = 0;
+                if (end < 0 || end >= len) end = len - 1;
+                if (start > end) {
+                    /* Empty string */
+                    VMValue result;
+                    result.type = VALUE_STRING;
+                    result.data.string_value = gc_strdup(vm->gc, "");
+                    return vm_push_value(vm, result);
+                }
+                
+                /* Create substring */
+                int slice_len = end - start + 1;
+                char *slice = gc_malloc(vm->gc, slice_len + 1);
+                strncpy(slice, str + start, slice_len);
+                slice[slice_len] = '\0';
+                
+                VMValue result;
+                result.type = VALUE_STRING;
+                result.data.string_value = slice;
+                return vm_push_value(vm, result);
+            }
+            
+            /* Handle array slicing */
+            if (arr_val.type == VALUE_ARRAY) {
+                array_t *arr = (array_t *)arr_val.data.array_value;
+                int len = array_size(arr);
+                
+                /* Normalize indices */
+                if (start < 0) start = 0;
+                if (end < 0 || end >= len) end = len - 1;
+                if (start > end) {
+                    /* Empty array */
+                    array_t *new_arr = array_new(vm->gc, 0);
+                    VMValue result;
+                    result.type = VALUE_ARRAY;
+                    result.data.array_value = new_arr;
+                    return vm_push_value(vm, result);
+                }
+                
+                /* Create slice array */
+                int slice_len = end - start + 1;
+                array_t *new_arr = array_new(vm->gc, slice_len);
+                for (int i = 0; i < slice_len; i++) {
+                    VMValue elem = array_get(arr, start + i);
+                    array_set(new_arr, i, elem);
+                }
+                
+                VMValue result;
+                result.type = VALUE_ARRAY;
+                result.data.array_value = new_arr;
+                return vm_push_value(vm, result);
+            }
+            
+            return -1;  /* Invalid type for slicing */
+        }
+        
         case OP_STORE_ARRAY: {
             VMValue val = vm_pop_value(vm);
             VMValue idx_val = vm_pop_value(vm);
@@ -1151,6 +1222,7 @@ static const char* opcode_name(OpCode opcode) {
         case OP_MAKE_ARRAY: return "MAKE_ARRAY";
         case OP_INDEX_ARRAY: return "INDEX_ARRAY";
         case OP_STORE_ARRAY: return "STORE_ARRAY";
+        case OP_SLICE_RANGE: return "SLICE_RANGE";
         case OP_MAKE_MAPPING: return "MAKE_MAPPING";
         case OP_INDEX_MAPPING: return "INDEX_MAPPING";
         case OP_STORE_MAPPING: return "STORE_MAPPING";

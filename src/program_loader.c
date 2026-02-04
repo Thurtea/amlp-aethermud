@@ -154,6 +154,7 @@ int program_loader_decode_instruction(const uint8_t *bytecode, size_t offset, VM
         case OP_RSHIFT:
         case OP_RETURN:
         case OP_INDEX_ARRAY:
+        case OP_SLICE_RANGE:
         case OP_STORE_ARRAY:
         case OP_INDEX_MAPPING:
         case OP_STORE_MAPPING:

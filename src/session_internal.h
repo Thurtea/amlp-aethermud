@@ -36,6 +36,7 @@ typedef struct PlayerSession {
     WSState ws_state;
     char username[64];
     char password_buffer[128];
+    char password_hash[128];      /* Stored password hash for verification */
     char input_buffer[INPUT_BUFFER_SIZE];
     size_t input_length;
     uint8_t ws_buffer[WS_BUFFER_SIZE];

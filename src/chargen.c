@@ -927,6 +927,11 @@ int save_character(PlayerSession *sess) {
     /* Write privilege level */
     fwrite(&sess->privilege_level, sizeof(int), 1, f);
     
+    /* Write password hash (for security) */
+    size_t hash_len = strlen(sess->password_hash);
+    fwrite(&hash_len, sizeof(size_t), 1, f);
+    fwrite(sess->password_hash, 1, hash_len, f);
+    
     /* Write character data */
     Character *ch = &sess->character;
     
@@ -1032,6 +1037,17 @@ int load_character(PlayerSession *sess, const char *username) {
     
     /* Read privilege level */
     fread(&sess->privilege_level, sizeof(int), 1, f);
+    
+    /* Read password hash (for authentication) */
+    size_t hash_len = 0;
+    fread(&hash_len, sizeof(size_t), 1, f);
+    if (hash_len > 0 && hash_len < sizeof(sess->password_hash)) {
+        fread(sess->password_hash, 1, hash_len, f);
+        sess->password_hash[hash_len] = '\0';
+    } else {
+        sess->password_hash[0] = '\0';
+        if (hash_len > 0) fseek(f, hash_len, SEEK_CUR);  /* Skip invalid data */
+    }
     
     /* Read character data */
     Character *ch = &sess->character;

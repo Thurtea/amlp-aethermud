@@ -483,6 +483,14 @@ Token lexer_get_next_token(Lexer *lexer) {
                 lexer_advance(lexer);
                 return make_token(TOKEN_COMMA, ",", lexer->line_number, lexer->column_number - 1);
             case '.':
+                /* Check for range operator .. */
+                if (lexer_peek_char(lexer, 1) == '.') {
+                    int start_line = lexer->line_number;
+                    int start_col = lexer->column_number;
+                    lexer_advance(lexer);  /* Skip first '.' */
+                    lexer_advance(lexer);  /* Skip second '.' */
+                    return make_token(TOKEN_RANGE, "..", start_line, start_col);
+                }
                 if (isdigit(lexer_peek_char(lexer, 1))) {
                     return lexer_read_number(lexer);
                 }
@@ -584,6 +592,7 @@ const char* token_type_to_string(TokenType type) {
         case TOKEN_SEMICOLON:   return "SEMICOLON";
         case TOKEN_COMMA:       return "COMMA";
         case TOKEN_DOT:         return "DOT";
+        case TOKEN_RANGE:       return "RANGE";
         case TOKEN_COLON:       return "COLON";
         case TOKEN_QUESTION:    return "QUESTION";
         case TOKEN_ARRAY_START: return "ARRAY_START";

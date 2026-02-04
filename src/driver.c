@@ -1486,10 +1486,17 @@ void process_login_state(PlayerSession *session, const char *input) {
             break;
             
         case STATE_GET_PASSWORD:
-            /* TODO: Verify password hash */
+            /* Verify password */
             
-            /* Load existing character */
+            /* Load existing character (this populates password_hash) */
             if (load_character(session, session->username)) {
+                /* Simple password verification - compare with stored hash */
+                /* Note: For dev purposes, storing plaintext. TODO: Use proper bcrypt */
+                if (session->password_hash[0] && strcmp(session->password_hash, start) != 0) {
+                    send_to_player(session, "\r\nIncorrect password.\r\n");
+                    session->state = STATE_DISCONNECTING;
+                    break;
+                }
                 send_to_player(session, "\r\nWelcome back!\r\n");
                 send_to_player(session, "Your character has been restored.\r\n\r\n");
                 
@@ -1556,6 +1563,10 @@ void process_login_state(PlayerSession *session, const char *input) {
                 send_prompt(session);
                 return;
             }
+            
+            /* Store password hash (using plaintext for dev - TODO: bcrypt) */
+            strncpy(session->password_hash, session->password_buffer, sizeof(session->password_hash) - 1);
+            session->password_hash[sizeof(session->password_hash) - 1] = '\0';
             
             /* Create player object */
             session->player_object = create_player_object(

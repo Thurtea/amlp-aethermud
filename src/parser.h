@@ -200,7 +200,9 @@ typedef struct {
 /* Array access node */
 typedef struct {
     ASTNode *array;                 /* Expression returning array */
-    ASTNode *index;                 /* Index expression */
+    ASTNode *index;                 /* Index expression (or start of range) */
+    ASTNode *end_index;             /* End of range (for .. operator), NULL for single access */
+    int is_range;                   /* 1 if this is a range access (array[start..end]), 0 otherwise */
 } ArrayAccessNode;
 
 /* Member access node (object->member) */

@@ -38,6 +38,7 @@ typedef enum {
     TOKEN_SEMICOLON,            /* ; */
     TOKEN_COMMA,                /* , */
     TOKEN_DOT,                  /* . */
+    TOKEN_RANGE,                /* .. (range operator for array slicing) */
     TOKEN_COLON,                /* : */
     TOKEN_QUESTION,             /* ? */
     

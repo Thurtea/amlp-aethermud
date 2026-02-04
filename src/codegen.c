@@ -511,6 +511,30 @@ static int codegen_compile_function_call(CodeGenerator *cg, FunctionCallNode *no
 static int codegen_compile_array_access(CodeGenerator *cg, ArrayAccessNode *node) {
     if (!cg || !node) return -1;
     
+    /* Check if this is a range operation */
+    if (node->is_range) {
+        /* Range slice: array[start..end] */
+        if (codegen_compile_node(cg, node->array) < 0) return -1;
+        
+        /* Push start index (or 0 if NULL) */
+        if (node->index) {
+            if (codegen_compile_node(cg, node->index) < 0) return -1;
+        } else {
+            codegen_emit_int(cg, OP_PUSH_INT, 0);
+        }
+        
+        /* Push end index (or  -1 if NULL, meaning end of array) */
+        if (node->end_index) {
+            if (codegen_compile_node(cg, node->end_index) < 0) return -1;
+        } else {
+            codegen_emit_int(cg, OP_PUSH_INT, -1);
+        }
+        
+        codegen_emit_opcode(cg, OP_SLICE_RANGE);
+        return 0;
+    }
+    
+    /* Simple index access */
     if (codegen_compile_node(cg, node->array) < 0) return -1;
     if (codegen_compile_node(cg, node->index) < 0) return -1;
     codegen_emit_opcode(cg, OP_INDEX_ARRAY);

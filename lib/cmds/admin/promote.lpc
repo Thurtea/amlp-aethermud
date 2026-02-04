@@ -1,0 +1,122 @@
+// /lib/cmds/admin/promote.lpc
+// Promote command - Grant wizard/admin privileges to a player
+//
+// Usage: promote <player> <level>
+// Levels: 0 = Player, 1 = Wizard, 2 = Admin
+//
+// Admins can promote to any level
+// Wizards can only promote to Wizard (level 1)
+
+#include <globals.h>
+
+int main(string arg) {
+    object user, target;
+    string target_name, level_str;
+    int new_level, user_level;
+    
+    user = previous_object();
+    user_level = user->query_privilege_level();
+    
+    // Check if user has permission
+    if (user_level < PRIV_WIZARD) {
+        tell_object(user, "You must be at least a Wizard to use this command.\n");
+        return 1;
+    }
+    
+    // Parse arguments
+    if (!arg || arg == "") {
+        tell_object(user, "Usage: promote <player> <level>\n");
+        tell_object(user, "Levels: 0 = Player, 1 = Wizard, 2 = Admin\n");
+        return 1;
+    }
+    
+    if (sscanf(arg, "%s %s", target_name, level_str) != 2) {
+        tell_object(user, "Usage: promote <player> <level>\n");
+        tell_object(user, "Levels: 0 = Player, 1 = Wizard, 2 = Admin\n");
+        return 1;
+    }
+    
+    // Validate level
+    new_level = to_int(level_str);
+    if (new_level < 0 || new_level > 2) {
+        tell_object(user, "Invalid level. Use 0 (Player), 1 (Wizard), or 2 (Admin).\n");
+        return 1;
+    }
+    
+    // Wizards can only promote to Wizard level
+    if (user_level == PRIV_WIZARD && new_level != PRIV_WIZARD) {
+        tell_object(user, "Wizards can only promote players to Wizard level.\n");
+        tell_object(user, "You need Admin privileges to set other levels.\n");
+        return 1;
+    }
+    
+    // Find target player (must be online)
+    target_name = lower_case(target_name);
+    target = find_player(target_name);
+    
+    if (!target) {
+        tell_object(user, "Player not found: " + target_name + "\n");
+        tell_object(user, "Note: Player must be online to promote.\n");
+        return 1;
+    }
+    
+    // Get current level for feedback
+    int old_level = target->query_privilege_level();
+    
+    // Set new privilege level
+    target->set_privilege_level(new_level);
+    
+    // Save the change
+    if (function_exists("save_player", target)) {
+        target->save_player();
+    }
+    
+    // Convert level numbers to names for display
+    string level_names = ({ "Player", "Wizard", "Admin" });
+    string new_title = level_names[new_level];
+    string old_title = level_names[old_level];
+    
+    // Notify the user who performed the action
+    if (old_level == new_level) {
+        tell_object(user, target_name + " is already " + new_title + ".\n");
+    } else if (new_level > old_level) {
+        tell_object(user, "Promoted " + target_name + " from " + old_title + 
+                    " to " + new_title + ".\n");
+    } else {
+        tell_object(user, "Demoted " + target_name + " from " + old_title + 
+                    " to " + new_title + ".\n");
+    }
+    
+    // Notify the target player
+    if (old_level != new_level) {
+        tell_object(target, "\n*** Your privilege level has been changed! ***\n");
+        tell_object(target, "Old level: " + old_title + "\n");
+        tell_object(target, "New level: " + new_title + "\n");
+        
+        if (new_level >= PRIV_WIZARD) {
+            tell_object(target, "\nType 'wiz help' for wizard commands.\n");
+        }
+        tell_object(target, "\n");
+    }
+    
+    return 1;
+}
+
+string query_help() {
+    return 
+"PROMOTE - Grant wizard or admin privileges to a player\n\n"
+"Usage:\n"
+"  promote <player> <level>\n\n"
+"Levels:\n"
+"  0 = Player (normal user)\n"
+"  1 = Wizard (builder access, basic admin tools)\n"
+"  2 = Admin (full system access)\n\n"
+"Restrictions:\n"
+"  - Wizards can only promote players to Wizard level (1)\n"
+"  - Admins can promote to any level\n"
+"  - Target player must be online\n\n"
+"Examples:\n"
+"  promote thurtest 1          Grant Wizard privileges\n"
+"  promote jane 2              Grant Admin privileges (Admin only)\n\n"
+"See also: demote, who\n";
+}

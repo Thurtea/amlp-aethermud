@@ -3,11 +3,40 @@
 
 inherit "/std/object";
 
+// Phase 1, Step 1a: HP and SDC variables
 int hp;
 int max_hp;
+int sdc;              // Structural Damage Capacity
+int max_sdc;
+
+// Phase 1, Step 1b: MDC variables
+int mdc;              // Mega-Damage Capacity (1 MDC = 100 SDC)
+int max_mdc;
+
+// Phase 1, Step 1c: Health type flag
+int health_type;      // 0 = SDC creature (uses HP+SDC), 1 = MDC creature (uses MDC only)
+
+// Phase 2, Step 3a: Creature size
+int creature_size;    // 0=Tiny, 1=Small, 2=Medium, 3=Large, 4=Huge
+
+// Introduction system - track who knows this character's name
+mapping introduced_to;  // Maps object -> 1 when introduced
+
+// Position system - custom RP position string
+string position_desc;   // Custom position for room descriptions (e.g., "is sitting by the fire.")
+
+// Combat system - track combat state
+object combat_target;    // Current enemy
+int combat_round;        // Combat round counter
+int attacks_this_round;  // Number of attacks used
+int max_attacks;         // Max attacks per round
+int combat_heartbeat_id; // Callout ID for combat rounds
+
+// Other living attributes
 int level;
 string name;
 string real_name;
+string race_name;
 mapping languages;
 string primary_language;
 
@@ -24,14 +53,30 @@ void create() {
     // Base object init
     // (short_desc and long_desc not used in living, but inherited)
     
-    // Living creature init
+    // Living creature init - Phase 1, Step 1: Initialize health system
     hp = 10;
     max_hp = 10;
+    sdc = 0;
+    max_sdc = 0;
+    mdc = 0;
+    max_mdc = 0;
+    health_type = 0;  // Default: SDC creature (HP+SDC)
+    creature_size = 2;  // Phase 2, Step 3a: Default medium size
     level = 1;
     name = "creature";
     real_name = "";
+    race_name = "";
+    introduced_to = ([ ]);  // Initialize introduction tracking
+    position_desc = "is standing around.";  // Default position
     languages = ([ ]);
     primary_language = "";
+    
+    // Combat system init
+    combat_target = 0;
+    combat_round = 0;
+    attacks_this_round = 0;
+    max_attacks = 1;  // Default 1 attack per round
+    combat_heartbeat_id = 0;
     
     // Action registry init
     commands_enabled = 0;
@@ -53,6 +98,383 @@ int query_max_hp() {
 
 void set_max_hp(int new_max) {
     max_hp = new_max;
+}
+
+// Phase 1, Step 2a: SDC query functions
+int query_sdc() {
+    return sdc;
+}
+
+int query_max_sdc() {
+    return max_sdc;
+}
+
+// Phase 1, Step 2b: MDC query functions and health type
+int query_mdc() {
+    return mdc;
+}
+
+int query_max_mdc() {
+    return max_mdc;
+}
+
+int query_health_type() {
+    return health_type;  // 0 = SDC creature, 1 = MDC creature
+}
+
+// Phase 1, Step 2c: Combined health query
+// Returns total effective health in SDC equivalents for comparison
+int query_total_health() {
+    if (health_type == 1) {
+        // MDC creature: 1 MDC = 100 SDC
+        return mdc * 100;
+    } else {
+        // SDC creature: HP + SDC
+        return hp + sdc;
+    }
+}
+
+// Phase 1, Step 3a: SDC setter functions
+void set_sdc(int new_sdc) {
+    sdc = new_sdc;
+    if (sdc < 0) sdc = 0;
+    if (sdc > max_sdc) sdc = max_sdc;
+}
+
+void set_max_sdc(int new_max) {
+    max_sdc = new_max;
+    if (max_sdc < 0) max_sdc = 0;
+}
+
+// Phase 1, Step 3b: MDC setter functions and health type
+void set_mdc(int new_mdc) {
+    mdc = new_mdc;
+    if (mdc < 0) mdc = 0;
+    if (mdc > max_mdc) mdc = max_mdc;
+}
+
+void set_max_mdc(int new_max) {
+    max_mdc = new_max;
+    if (max_mdc < 0) max_mdc = 0;
+}
+
+void set_health_type(int type) {
+    health_type = type;  // 0 = SDC, 1 = MDC
+}
+
+// Phase 1, Step 3c: Health initialization helper
+// Sets up a creature's health system based on type
+void init_health(int type, int hit_points, int struct_damage, int mega_damage) {
+    health_type = type;
+    
+    if (type == 0) {
+        // SDC creature
+        max_hp = hit_points;
+        hp = hit_points;
+        max_sdc = struct_damage;
+        sdc = struct_damage;
+        max_mdc = 0;
+        mdc = 0;
+    } else {
+        // MDC creature
+        max_mdc = mega_damage;
+        mdc = mega_damage;
+        max_hp = 0;
+        hp = 0;
+        max_sdc = 0;
+        sdc = 0;
+    }
+}
+
+// Phase 1, Step 4a / Phase 3, Step 1: Take damage function (handles armor, MDC/SDC/HP)
+// damage_type: 0 = SDC damage, 1 = MDC damage
+// Returns 1 if creature dies, 0 if still alive
+int take_damage(int amount, int damage_type) {
+    if (amount <= 0) return 0;
+    
+    int original_damage = amount;
+    
+    // Phase 3, Step 1a: Check for worn armor first (body armor protects against most damage)
+    mapping equipped = query_equipped();
+    object body_armor = 0;
+    
+    if (equipped && equipped["body"]) {
+        body_armor = equipped["body"];
+    }
+    
+    if (body_armor) {
+        int is_mdc_armor = body_armor->query_property("is_mdc_armor");
+        
+        // Phase 3, Step 1b: Armor absorbs damage
+        if (is_mdc_armor && damage_type == 1) {
+            // MDC armor vs MDC damage
+            if (!body_armor->is_armor_broken()) {
+                // Armor absorbs the damage
+                body_armor->damage_armor(amount);
+                
+                if (body_armor->is_armor_broken()) {
+                    // Phase 3, Step 1c: Armor just broke!
+                    tell_object(this_object(), "%^RED%^Your armor shatters under the impact!%^RESET%^\n");
+                }
+                
+                return 0;  // Armor absorbed all damage
+            }
+            // If armor is broken, damage passes through
+        } else if (!is_mdc_armor && damage_type == 0) {
+            // SDC armor vs SDC damage
+            if (!body_armor->is_armor_broken()) {
+                int armor_rating = body_armor->query_armor_rating();
+                
+                // AR provides chance to deflect/reduce damage
+                if (armor_rating > 0) {
+                    // Simple damage reduction: AR reduces damage by percentage
+                    int reduction = (amount * armor_rating) / 100;
+                    if (reduction > amount / 2) reduction = amount / 2;  // Cap at 50%
+                    amount -= reduction;
+                }
+                
+                // Armor takes some of the damage
+                int armor_damage_taken = (original_damage - amount);
+                if (armor_damage_taken > 0) {
+                    body_armor->damage_armor(armor_damage_taken);
+                    
+                    if (body_armor->is_armor_broken()) {
+                        tell_object(this_object(), "%^YELLOW%^Your armor falls apart!%^RESET%^\n");
+                    }
+                }
+            }
+        } else if (is_mdc_armor && damage_type == 0) {
+            // SDC damage to MDC armor - no effect on armor or wearer
+            return 0;
+        } else if (!is_mdc_armor && damage_type == 1) {
+            // MDC damage vs SDC armor - armor provides no protection
+            // Damage passes through, armor is destroyed
+            body_armor->damage_armor(99999);  // Instantly destroy SDC armor
+            tell_object(this_object(), "%^RED%^Your armor is completely destroyed by the mega-damage!%^RESET%^\n");
+            // Damage continues to creature below
+        }
+    }
+    
+    // Apply remaining damage to creature
+    if (health_type == 1) {
+        // MDC creature
+        if (damage_type == 1) {
+            // MDC damage to MDC creature
+            mdc -= amount;
+            if (mdc < 0) mdc = 0;
+        } else {
+            // SDC damage to MDC creature - no effect!
+            // SDC weapons cannot harm MDC creatures
+            return 0;
+        }
+    } else {
+        // SDC creature
+        if (damage_type == 1) {
+            // MDC damage to SDC creature - devastating!
+            // 1 MDC = 100 SDC, instantly kills most SDC creatures
+            int sdc_damage = amount * 100;
+            
+            // Apply to SDC first
+            if (sdc > 0) {
+                if (sdc >= sdc_damage) {
+                    sdc -= sdc_damage;
+                    sdc_damage = 0;
+                } else {
+                    sdc_damage -= sdc;
+                    sdc = 0;
+                }
+            }
+            
+            // Overflow to HP
+            if (sdc_damage > 0) {
+                hp -= sdc_damage;
+                if (hp < 0) hp = 0;
+            }
+        } else {
+            // SDC damage to SDC creature
+            // Apply to SDC first
+            if (sdc > 0) {
+                if (sdc >= amount) {
+                    sdc -= amount;
+                } else {
+                    amount -= sdc;
+                    sdc = 0;
+                    // Overflow to HP
+                    hp -= amount;
+                    if (hp < 0) hp = 0;
+                }
+            } else {
+                // No SDC left, apply to HP
+                hp -= amount;
+                if (hp < 0) hp = 0;
+            }
+        }
+    }
+    
+    // Check if creature died
+    if (!is_alive()) {
+        return 1;
+    }
+    
+    return 0;
+}
+
+// Phase 1, Step 4b: Heal damage function
+// heal_type: 0 = normal healing (HP+SDC), 1 = MDC repair
+void heal_damage(int amount, int heal_type) {
+    if (amount <= 0) return;
+    
+    if (health_type == 1) {
+        // MDC creature - only MDC repair works
+        if (heal_type == 1) {
+            mdc += amount;
+            if (mdc > max_mdc) mdc = max_mdc;
+        }
+    } else {
+        // SDC creature - normal healing
+        if (heal_type == 0) {
+            // Heal HP first
+            if (hp < max_hp) {
+                int hp_needed = max_hp - hp;
+                if (amount <= hp_needed) {
+                    hp += amount;
+                    amount = 0;
+                } else {
+                    hp = max_hp;
+                    amount -= hp_needed;
+                }
+            }
+            
+            // Overflow to SDC
+            if (amount > 0 && sdc < max_sdc) {
+                sdc += amount;
+                if (sdc > max_sdc) sdc = max_sdc;
+            }
+        }
+    }
+}
+
+// Phase 1, Step 4c: Status check functions
+int is_alive() {
+    if (health_type == 1) {
+        return mdc > 0;
+    } else {
+        return hp > 0;  // Character dies when HP reaches 0
+    }
+}
+
+int is_wounded() {
+    if (health_type == 1) {
+        return mdc < max_mdc;
+    } else {
+        return (hp < max_hp || sdc < max_sdc);
+    }
+}
+
+// Get health percentage (0-100)
+int query_health_percent() {
+    if (health_type == 1) {
+        if (max_mdc <= 0) return 100;
+        return (mdc * 100) / max_mdc;
+    } else {
+        int total = max_hp + max_sdc;
+        if (total <= 0) return 100;
+        int current = hp + sdc;
+        return (current * 100) / total;
+    }
+}
+
+// Get health status string
+string query_health_status() {
+    int percent = query_health_percent();
+    
+    if (percent >= 100) return "perfect";
+    if (percent >= 90) return "slightly wounded";
+    if (percent >= 75) return "wounded";
+    if (percent >= 50) return "badly wounded";
+    if (percent >= 25) return "critically wounded";
+    if (percent > 0) return "near death";
+    return "dead";
+}
+
+// Phase 2, Step 3b: Creature size query/set functions
+int query_creature_size() {
+    return creature_size;
+}
+
+void set_creature_size(int s) {
+    if (s < 0) s = 0;
+    if (s > 4) s = 4;
+    creature_size = s;
+}
+
+string query_creature_size_name() {
+    string *size_names = ({ "tiny", "small", "medium", "large", "huge" });
+    if (creature_size >= 0 && creature_size < sizeof(size_names)) {
+        return size_names[creature_size];
+    }
+    return "medium";
+}
+
+// Phase 2, Step 3c: Size compatibility check for armor
+// Returns 1 if armor can be worn, 0 if size mismatch
+int can_wear_size(object armor) {
+    if (!armor) return 0;
+    
+    int armor_size = armor->query_size();
+    
+    // Exact size match is always OK
+    if (armor_size == creature_size) return 1;
+    
+    // One size difference might work with penalties
+    // (Future: implement adjustment penalties)
+    if (armor_size == creature_size - 1 || armor_size == creature_size + 1) {
+        return 0;  // For now, require exact match
+    }
+    
+    return 0;  // Size mismatch
+}
+
+// Phase 4, Step 2a/2b: Override query_short to check for appearance-modifying armor
+string query_short() {
+    mapping equipped = query_equipped();
+    object body_armor;
+    
+    // Phase 4, Step 2a: Check for worn armor with appearance override
+    if (equipped && equipped["body"]) {
+        body_armor = equipped["body"];
+        
+        if (function_exists("query_property", body_armor)) {
+            string appearance = body_armor->query_property("appearance_override");
+            
+            if (appearance && appearance != "") {
+                // Phase 4, Step 2b: Return modified description
+                return appearance;
+            }
+        }
+    }
+    
+    // Phase 4, Step 2c: Check for cloak/back slot (secondary appearance layer)
+    if (equipped && equipped["back"]) {
+        object cloak = equipped["back"];
+        
+        if (function_exists("query_property", cloak)) {
+            string appearance = cloak->query_property("appearance_override");
+            
+            if (appearance && appearance != "") {
+                return appearance;
+            }
+        }
+    }
+    
+    // No appearance override, return default (race-based)
+    string race_name = query_race_name();
+    
+    if (race_name && race_name != "") {
+        return race_name;
+    }
+    
+    return name;  // Fallback to name
 }
 
 int query_level() {
@@ -77,6 +499,101 @@ void set_real_name(string new_name) {
 
 string query_real_name() {
     return real_name;
+string query_race() {
+    return race_name;
+}
+
+void set_race(string r) {
+    race_name = r;
+}
+
+//=============================================================================
+// Introduction System
+//=============================================================================
+
+// Introduce yourself to another person
+void introduce_to(object ob) {
+    if (!ob || !living(ob)) return;
+    
+    if (!introduced_to) introduced_to = ([ ]);
+    introduced_to[ob] = 1;
+    
+    // Mutual introduction - they learn our name too
+    if (function_exists("set_introduced", ob)) {
+        ob->set_introduced(this_object());
+    }
+}
+
+// Mark that someone knows us (called by their introduce_to)
+void set_introduced(object ob) {
+    if (!ob) return;
+    if (!introduced_to) introduced_to = ([ ]);
+    introduced_to[ob] = 1;
+}
+
+// Check if we've introduced ourselves to someone
+int query_introduced(object ob) {
+    if (!ob) return 0;
+    if (!introduced_to) return 0;
+    return introduced_to[ob] ? 1 : 0;
+}
+
+// Get the name that an observer sees for this character
+// Returns actual name if introduced or if observer is admin/wizard
+// Otherwise returns race description like "a human" or "an elf"
+string query_introduction_name(object observer) {
+    // Wizards and admins always see real names
+    if (observer && function_exists("query_wizard_level", observer)) {
+        if (observer->query_wizard_level() > 0) {
+            string n = query_real_name();
+            if (!n || n == "") n = query_name();
+            return n;
+        }
+    }
+    
+    // Check if introduced
+    if (observer && introduced_to && introduced_to[observer]) {
+        string n = query_real_name();
+        if (!n || n == "") n = query_name();
+        return n;
+    }
+    
+    // Not introduced - show race description
+    string race = query_race();
+    if (!race || race == "") race = "creature";
+    
+    // Add article (a/an) based on first letter
+    string first = race[0..0];
+    string article = "a";
+    if (first == "a" || first == "e" || first == "i" || first == "o" || first == "u" ||
+        first == "A" || first == "E" || first == "I" || first == "O" || first == "U") {
+        article = "an";
+    }
+    
+    return article + " " + race;
+}
+
+//=============================================================================
+// Position System (for RP)
+//=============================================================================
+
+// Set custom position description
+void set_position(string pos) {
+    if (!pos || pos == "") {
+        position_desc = "is standing around.";  // Reset to default
+    } else {
+        position_desc = pos;
+    }
+}
+
+// Get position description
+string query_position() {
+    return position_desc ? position_desc : "is standing around.";
+}
+
+// Reset position to default (called on movement, combat, etc.)
+void reset_position() {
+    position_desc = "is standing around.";
 }
 
 void add_language(string lang, int proficiency) {
@@ -94,6 +611,104 @@ void set_primary_language(string lang) {
 
 string query_primary_language() {
     return primary_language;
+}
+
+// Get capitalized name for display
+string query_cap_name() {
+    string n;
+    
+    // Try real name first
+    if (real_name && real_name != "") {
+        n = real_name;
+    } else if (name && name != "") {
+        n = name;
+    } else {
+        n = "someone";
+    }
+    
+    // Capitalize first letter
+    if (sizeof(n) > 0) {
+        return upper_case(n[0..0]) + n[1..];
+    }
+    
+    return n;
+}
+
+// Get race name for query_race_name()
+string query_race_name() {
+    return race_name ? race_name : "unknown";
+}
+
+// Query stats (basic default implementation)
+// Player.lpc may override this with actual character stats
+int query_stat(string stat) {
+    // Return default stats for NPCs/basic living things
+    // Player.lpc should override this
+    stat = upper_case(stat);
+    
+    switch (stat) {
+        case "IQ": return 10;
+        case "ME": return 10;
+        case "MA": return 10;
+        case "PS": return 10 + (level / 2);  // Slightly stronger with level
+        case "PP": return 10 + (level / 2);  // Slightly more agile with level
+        case "PE": return 10 + (level / 2) ;  // More endurance with level
+        case "PB": return 10;
+        case "SPD": return 10;
+        default: return 10;
+    }
+}
+
+// Death handler
+void die(object killer) {
+    string death_msg;
+    
+    if (killer) {
+        death_msg = query_cap_name() + " has been slain by " + killer->query_cap_name() + "!\n";
+    } else {
+        death_msg = query_cap_name() + " has died!\n";
+    }
+    
+    tell_room(environment(this_object()), death_msg);
+    
+    // For NPCs, destruct them
+    if (!interactive(this_object())) {
+        // Drop inventory
+        object *inv = all_inventory(this_object());
+        foreach (object item : inv) {
+            if (item) {
+                item->move(environment(this_object()));
+            }
+        }
+        
+        // Remove from game after 2 seconds
+        call_out("remove_corpse", 2);
+    } else {
+        // For players, handle respawn
+        tell_object(this_object(), "\nYou have died!\n\n");
+        tell_object(this_object(), "Respawning...\n");
+        
+        // Restore health
+        set_hp(query_max_hp());
+        set_sdc(query_max_sdc());
+        
+        // Move to respawn location
+        object respawn = load_object("/domains/start/void");
+        if (respawn) {
+            move(respawn);
+            tell_object(this_object(), "\nYou awaken in a strange place...\n\n");
+            call_other(this_object(), "cmd_look", "");
+        }
+    }
+}
+
+// Remove corpse (for NPCs)
+void remove_corpse() {
+    if (this_object()) {
+        tell_room(environment(this_object()), 
+                  "The corpse of " + query_cap_name() + " fades away.\n");
+        destruct(this_object());
+    }
 }
 
 //=============================================================================
@@ -200,4 +815,270 @@ int try_action(string verb, string args) {
     
     current_verb = "";
     return 0;
+}
+//=============================================================================
+// Combat System
+//=============================================================================
+
+// Get current combat target
+object query_combat_target() {
+    return combat_target;
+}
+
+// Set combat target (starts combat)
+void set_combat_target(object target) {
+    combat_target = target;
+    
+    if (target) {
+        // Start combat heartbeat if not already running
+        if (!combat_heartbeat_id) {
+            combat_round = 1;
+            attacks_this_round = 0;
+            combat_heartbeat_id = call_out("combat_heartbeat", 3);  // 3 second rounds
+        }
+    } else {
+        // End combat
+        if (combat_heartbeat_id) {
+            remove_call_out(combat_heartbeat_id);
+            combat_heartbeat_id = 0;
+        }
+        combat_round = 0;
+        attacks_this_round = 0;
+    }
+}
+
+// Check if in combat
+int in_combat() {
+    return combat_target && living(combat_target) ? 1 : 0;
+}
+
+// Combat heartbeat - called every round
+void combat_heartbeat() {
+    combat_heartbeat_id = 0;
+    
+    // Check if still in combat
+    if (!combat_target || !living(combat_target)) {
+        set_combat_target(0);
+        return;
+    }
+    
+    // Check if target is in same room
+    if (environment(this_object()) != environment(combat_target)) {
+        tell_object(this_object(), "Your target has fled!\n");
+        set_combat_target(0);
+        return;
+    }
+    
+    // Check if either combatant is dead
+    if (!is_alive() || !combat_target->is_alive()) {
+        set_combat_target(0);
+        return;
+    }
+    
+    // Increment round
+    combat_round++;
+    attacks_this_round = 0;
+    
+    // Auto-attack if not a player (NPCs auto-attack)
+    if (!interactive(this_object())) {
+        perform_attack(combat_target);
+    }
+    
+    // Schedule next heartbeat
+    combat_heartbeat_id = call_out("combat_heartbeat", 3);
+}
+
+// Perform a combat attack
+int perform_attack(object target) {
+    if (!target || !living(target)) {
+        return 0;
+    }
+    
+    // Check if we have attacks remaining
+    if (attacks_this_round >= max_attacks) {
+        tell_object(this_object(), "You have no attacks remaining this round.\n");
+        return 0;
+    }
+    
+    attacks_this_round++;
+    
+    // Roll to hit (1d20 + bonuses)
+    int roll = random(20) + 1;
+    int strike_bonus = query_strike_bonus();
+    int total = roll + strike_bonus;
+    
+    // Target number is 8 (base difficulty)
+    int target_number = 8;
+    
+    // Critical hit
+    if (roll == 20) {
+        int damage = calculate_damage() * 2;
+        apply_attack_damage(target, damage, 1);  // 1 = critical
+        return 1;
+    }
+    
+    // Critical miss
+    if (roll == 1) {
+        tell_object(this_object(), "You fumble your attack!\n");
+        tell_room(environment(this_object()), 
+                  query_cap_name() + " fumbles an attack!\n", 
+                  ({ this_object() }));
+        return 1;
+    }
+    
+    // Check if hit
+    if (total < target_number) {
+        tell_object(this_object(), 
+                    "You swing at " + target->query_cap_name() + " but miss! " +
+                    "(Rolled " + roll + "+" + strike_bonus + "=" + total + " vs " + target_number + ")\n");
+        tell_object(target,
+                    query_cap_name() + " swings at you but misses!\n");
+        tell_room(environment(this_object()),
+                  query_cap_name() + " swings at " + target->query_cap_name() + " but misses!\n",
+                  ({ this_object(), target }));
+        return 1;
+    }
+    
+    // Hit! Calculate damage
+    int damage = calculate_damage();
+    apply_attack_damage(target, damage, 0);  // 0 = normal hit
+    
+    return 1;
+}
+
+// Calculate strike bonus
+int query_strike_bonus() {
+    int bonus = 0;
+    
+    // Add PP bonus (dexterity)
+    int pp = query_stat("PP");
+    if (pp > 15) {
+        bonus += (pp - 15) / 3;
+    }
+    
+    // Add level bonus
+    bonus += level / 4;
+    
+    // Check for weapon bonuses
+    object weapon = query_wielded();
+    if (weapon && function_exists("query_strike_bonus", weapon)) {
+        bonus += weapon->query_strike_bonus();
+    }
+    
+    return bonus;
+}
+
+// Calculate damage
+int calculate_damage() {
+    int damage;
+    int dice, sides;
+    
+    // Check for wielded weapon
+    object weapon = query_wielded();
+    if (weapon && function_exists("query_damage", weapon)) {
+        dice = weapon->query_damage_dice();
+        sides = weapon->query_damage_sides();
+    } else {
+        // Bare hands - 1d4
+        dice = 1;
+        sides = 4;
+    }
+    
+    // Roll damage
+    damage = 0;
+    for (int i = 0; i < dice; i++) {
+        damage += random(sides) + 1;
+    }
+    
+    // Add PS bonus for melee
+    int ps = query_stat("PS");
+    if (ps > 15) {
+        damage += (ps - 15) / 3 + 1;
+    }
+    
+    return damage > 0 ? damage : 1;
+}
+
+// Apply damage to target
+void apply_attack_damage(object target, int damage, int is_critical) {
+    string attacker_name = query_cap_name();
+    string target_name = target->query_cap_name();
+    
+    if (is_critical) {
+        tell_object(this_object(),
+                    "CRITICAL HIT! You strike " + 
+                    target_name + " for " + damage + " damage!\n");
+        tell_object(target,
+                    "CRITICAL HIT! " +
+                    attacker_name + " strikes you for " + damage + " damage!\n");
+        tell_room(environment(this_object()),
+                  "CRITICAL HIT! " +
+                  attacker_name + " strikes " + target_name + " for " + damage + " damage!\n",
+                  ({ this_object(), target }));
+    } else {
+        tell_object(this_object(),
+                    "You strike " + target_name + " for " + damage + " damage!\n");
+        tell_object(target,
+                    attacker_name + " strikes you for " + damage + " damage!\n");
+        tell_room(environment(this_object()),
+                  attacker_name + " strikes " + target_name + " for " + damage + " damage!\n",
+                  ({ this_object(), target }));
+    }
+    
+    // Apply damage (SDC damage type = 0)
+    int killed = target->take_damage(damage, 0);
+    
+    if (killed) {
+        tell_object(this_object(),
+                    "\n>>> " + target_name + " has been defeated! <<<\n\n");
+        tell_room(environment(this_object()),
+                  "\n>>> " + target_name + " has been defeated! <<<\n\n",
+                  ({ this_object() }));
+        
+        // End combat for both
+        set_combat_target(0);
+        if (function_exists("set_combat_target", target)) {
+            target->set_combat_target(0);
+        }
+        
+        // Handle death
+        if (function_exists("die", target)) {
+            target->die(this_object());
+        }
+    }
+}
+
+// Get combat status string
+string query_combat_status() {
+    if (!in_combat()) {
+        return "You are not in combat.\n";
+    }
+    
+    string result = "";
+    result += "=== COMBAT STATUS ===\n";
+    result += "Target: " + combat_target->query_cap_name() + "\n";
+    result += "Round: " + combat_round + "\n";
+    result += "Attacks used: " + attacks_this_round + "/" + max_attacks + "\n";
+    result += "Your health: " + query_hp() + "/" + query_max_hp() + " HP";
+    
+    if (query_max_sdc() > 0) {
+        result += ", " + query_sdc() + "/" + query_max_sdc() + " SDC";
+    }
+    
+    result += "\nTarget health: ";
+    int target_hp_pct = (combat_target->query_hp() * 100) / combat_target->query_max_hp();
+    if (target_hp_pct >= 90) {
+        result += "Healthy";
+    } else if (target_hp_pct >= 70) {
+        result += "Slightly wounded";
+    } else if (target_hp_pct >= 40) {
+        result += "Wounded";
+    } else if (target_hp_pct >= 20) {
+        result += "Badly wounded";
+    } else {
+        result += "Near death";
+    }
+    result += "\n";
+    
+    return result;
 }

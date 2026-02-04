@@ -9,6 +9,7 @@
 
 #include "object.h"
 #include "vm.h"
+#include "debug.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -284,14 +285,14 @@ VMValue obj_call_method(VirtualMachine *vm, obj_t *obj, const char *method_name,
     /* Find the method */
     VMFunction *method = obj_get_method(obj, method_name);
     if (!method) {
-        fprintf(stderr, "[Object] Method '%s' not found in object '%s'\n", 
+        DEBUG_LOG_OBJ("Method '%s' not found in object '%s'",
                 method_name, obj->name);
         return vm_value_create_null();
     }
     
     /* Verify argument count */
     if (arg_count != method->param_count) {
-        fprintf(stderr, "[Object] Method '%s' expects %d arguments, got %d\n",
+        DEBUG_LOG_OBJ("Method '%s' expects %d arguments, got %d",
                 method_name, method->param_count, arg_count);
         return vm_value_create_null();
     }
@@ -302,23 +303,15 @@ VMValue obj_call_method(VirtualMachine *vm, obj_t *obj, const char *method_name,
 
     /* Push arguments onto stack (in call order) */
     for (int i = 0; i < arg_count; i++) {
-        fprintf(stderr, "[Object] ARG %d: type=%d", i, args[i].type);
-        if (args[i].type == VALUE_STRING) {
-            fprintf(stderr, " ptr=%p len=%zu", 
-                    (void*)args[i].data.string_value,
-                    args[i].data.string_value ? strlen(args[i].data.string_value) : 0);
-            if (args[i].data.string_value) {
-                fprintf(stderr, " value='%s'", args[i].data.string_value);
-            }
-        }
-        fprintf(stderr, "\n");
+        DEBUG_LOG_PARAM("ARG %d: type=%d ptr=%p", i, args[i].type,
+                args[i].type == VALUE_STRING ? (void*)args[i].data.string_value : NULL);
         
         vm_push_value(vm, args[i]);
         
         /* Verify it was pushed correctly */
         if (vm->stack->top > 0) {
             VMValue pushed = vm->stack->values[vm->stack->top - 1];
-            fprintf(stderr, "[Object]   Pushed to stack[%d]: type=%d ptr=%p\n", 
+            DEBUG_LOG_PARAM("Pushed to stack[%d]: type=%d ptr=%p",
                     vm->stack->top - 1, pushed.type,
                     pushed.type == VALUE_STRING ? (void*)pushed.data.string_value : NULL);
         }
@@ -334,7 +327,7 @@ VMValue obj_call_method(VirtualMachine *vm, obj_t *obj, const char *method_name,
     }
     
     if (method_idx == -1) {
-        fprintf(stderr, "[Object] Method '%s' not found in VM function table\n", method_name);
+        DEBUG_LOG_OBJ("Method '%s' not found in VM function table", method_name);
         return vm_value_create_null();
     }
     

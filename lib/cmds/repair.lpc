@@ -1,0 +1,193 @@
+// /lib/cmds/repair.lpc
+// Phase 3, Step 4: Armor repair command (requires Operator skill)
+
+#include <globals.h>
+
+int main(string arg) {
+    object user, item, room;
+    int skill_check, repair_amount;
+    
+    user = previous_object();
+    room = user->query_environment();
+    
+    if (!arg || arg == "") {
+        tell_object(user, "Repair what?\n");
+        tell_object(user, "Usage: repair <armor>\n");
+        return 1;
+    }
+    
+    // Find item in inventory or room
+    item = present(arg, user);
+    
+    if (!item) {
+        item = present(arg, room);
+    }
+    
+    if (!item) {
+        tell_object(user, "You don't see that here.\n");
+        return 1;
+    }
+    
+    // Check if item is armor
+    if (!function_exists("query_armor_max_damage", item)) {
+        tell_object(user, "That's not armor.\n");
+        return 1;
+    }
+    
+    int max_dmg = item->query_armor_max_damage();
+    
+    if (max_dmg <= 0) {
+        tell_object(user, "That can't be repaired.\n");
+        return 1;
+    }
+    
+    int current_dmg = item->query_armor_damage();
+    
+    if (current_dmg <= 0) {
+        tell_object(user, "That armor doesn't need repairs.\n");
+        return 1;
+    }
+    
+    // Check if armor is MDC or SDC
+    int is_mdc = item->query_property("is_mdc_armor");
+    string skill_name;
+    int base_difficulty;
+    
+    if (is_mdc) {
+        // Phase 3, Step 4b: MDC armor requires special skills
+        skill_name = "mdc_armor_repair";
+        base_difficulty = 70;  // Harder to repair MDC armor
+        
+        // Check for required skill
+        if (!function_exists("query_skill", user)) {
+            tell_object(user, "You don't have the technical knowledge to repair M.D.C. armor.\n");
+            tell_object(user, "This requires specialized training in mega-damage materials.\n");
+            return 1;
+        }
+        
+        int skill_value = user->query_skill(skill_name);
+        
+        if (!skill_value || skill_value <= 0) {
+            tell_object(user, "You don't have the M.D.C. Armor Repair skill.\n");
+            tell_object(user, "Only trained technicians can repair mega-damage materials.\n");
+            return 1;
+        }
+        
+        // Phase 3, Step 4c: Skill check for MDC repair
+        int roll = random(100) + 1;
+        
+        if (roll > skill_value) {
+            tell_object(user, "%^YELLOW%^You attempt to repair the armor but fail to make any progress.%^RESET%^\n");
+            tell_object(user, "The mega-damage materials are too complex for you to work with right now.\n");
+            return 1;
+        }
+        
+        // Success! Repair 1d6 M.D.C.
+        repair_amount = random(6) + 1;
+        item->repair_armor(repair_amount);
+        
+        tell_object(user, sprintf("%^GREEN%^You successfully repair %d M.D.C. on the armor!%^RESET%^\n", 
+                    repair_amount));
+        
+        if (item->query_armor_damage() > 0) {
+            int remaining_dmg = item->query_armor_damage();
+            tell_object(user, sprintf("The armor still needs %d more M.D.C. repaired.\n", remaining_dmg));
+        } else {
+            tell_object(user, "%^BOLD%^%^GREEN%^The armor is fully repaired!%^RESET%^\n");
+        }
+        
+    } else {
+        // Phase 3, Step 4a: SDC armor is easier to repair
+        skill_name = "mechanical_engineer";
+        base_difficulty = 40;  // Easier to repair SDC armor
+        
+        // Check for Operator or Mechanical Engineer skill (more common)
+        int skill_value = 0;
+        
+        if (function_exists("query_skill", user)) {
+            skill_value = user->query_skill(skill_name);
+            
+            if (!skill_value || skill_value <= 0) {
+                skill_value = user->query_skill("operator");
+            }
+            
+            if (!skill_value || skill_value <= 0) {
+                skill_value = user->query_skill("basic_mechanics");
+            }
+        }
+        
+        if (!skill_value || skill_value <= 0) {
+            // Anyone can attempt basic SDC armor repair, but poorly
+            tell_object(user, "%^YELLOW%^You attempt a crude repair without proper training...%^RESET%^\n");
+            
+            int roll = random(100) + 1;
+            
+            if (roll > 30) {  // Only 30% chance without skill
+                tell_object(user, "You fail to repair the armor.\n");
+                return 1;
+            }
+            
+            // Minimal repair
+            repair_amount = random(3) + 1;
+        } else {
+            // Skilled repair
+            int roll = random(100) + 1;
+            
+            if (roll > skill_value) {
+                tell_object(user, "You attempt to repair the armor but your work doesn't hold.\n");
+                return 1;
+            }
+            
+            // Success! Repair 2d6 S.D.C.
+            repair_amount = random(6) + random(6) + 2;
+        }
+        
+        item->repair_armor(repair_amount);
+        
+        tell_object(user, sprintf("%^GREEN%^You repair %d S.D.C. on the armor.%^RESET%^\n", 
+                    repair_amount));
+        
+        if (item->query_armor_damage() > 0) {
+            int remaining_dmg = item->query_armor_damage();
+            tell_object(user, sprintf("The armor still needs %d more S.D.C. repaired.\n", remaining_dmg));
+        } else {
+            tell_object(user, "%^BOLD%^%^GREEN%^The armor is fully repaired!%^RESET%^\n");
+        }
+    }
+    
+    // Tell room
+    if (room) {
+        object *people = all_inventory(room);
+        foreach (object person in people) {
+            if (living(person) && person != user) {
+                tell_object(person, sprintf("%s repairs some armor.\n",
+                    capitalize(user->query_name())));
+            }
+        }
+    }
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"REPAIR - Repair damaged armor\n\n"
+"Usage:\n"
+"  repair <armor>    Attempt to repair damaged armor\n\n"
+"Armor requires different skills to repair:\n\n"
+"S.D.C. Armor:\n"
+"  - Can be repaired with Mechanical Engineer, Operator,\n"
+"    or Basic Mechanics skills\n"
+"  - Unskilled attempts possible but rarely successful\n"
+"  - Restores 2d6 S.D.C. on success\n\n"
+"M.D.C. Armor:\n"
+"  - Requires M.D.C. Armor Repair skill (specialized)\n"
+"  - Cannot be repaired without proper training\n"
+"  - Restores 1d6 M.D.C. on success\n"
+"  - Much more difficult to repair\n\n"
+"Examples:\n"
+"  repair armor\n"
+"  repair helmet\n\n"
+"Note: Examine your armor to see its current condition.\n\n"
+"See also: EXAMINE, EQUIPMENT\n";
+}

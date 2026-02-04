@@ -5,6 +5,7 @@
 #include <time.h>
 #include "skills.h"
 #include "session_internal.h"
+#include "debug.h"
 
 /* External declarations */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
@@ -777,7 +778,7 @@ void skill_init(void) {
         OCC_PACKAGES[i] = OCC_SKILL_PACKAGES[i];
     }
     
-    fprintf(stderr, "[Skills] Initialized %d skills for 65 OCCs\n", TOTAL_SKILLS);
+    DEBUG_LOG("Initialized %ld skills for 65 OCCs", TOTAL_SKILLS);
 }
 
 /* ========== SKILL LOOKUPS ========== */

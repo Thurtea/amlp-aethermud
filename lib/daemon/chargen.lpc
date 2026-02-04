@@ -941,6 +941,14 @@ void finalize_character(object player) {
     // Set the real name for introduction system
     player->set_real_name(capitalize(pname));
     
+    // Set race name for introduction system (for "a human", "an elf", etc.)
+    if (race) {
+        string race_name = race->query_race_name();
+        if (race_name && race_name != "") {
+            player->set_race(race_name);
+        }
+    }
+    
     // =========================================================
     // Race/OCC specific bonuses
     // =========================================================

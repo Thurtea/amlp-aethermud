@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define MAX_ROOMS 100
 
@@ -204,19 +205,27 @@ void cmd_look(PlayerSession *sess, const char *args) {
         for (int i = 0; i < room->num_players; i++) {
             if (room->players[i] != sess && room->players[i]->character.race) {
                 const char *race = room->players[i]->character.race;
+                
+                /* Convert race name to lowercase for display */
+                char lowercase_race[128];
+                int j;
+                for (j = 0; race[j] && j < 127; j++) {
+                    lowercase_race[j] = tolower((unsigned char)race[j]);
+                }
+                lowercase_race[j] = '\0';
+                
                 /* Determine article (a/an) based on first letter */
                 char article = 'A';
-                if (race[0] == 'A' || race[0] == 'E' || race[0] == 'I' || 
-                    race[0] == 'O' || race[0] == 'U' ||
-                    race[0] == 'a' || race[0] == 'e' || race[0] == 'i' || 
-                    race[0] == 'o' || race[0] == 'u') {
+                if (lowercase_race[0] == 'a' || lowercase_race[0] == 'e' || 
+                    lowercase_race[0] == 'i' || lowercase_race[0] == 'o' || 
+                    lowercase_race[0] == 'u') {
                     article = 'n';
                 }
                 
                 if (article == 'n') {
-                    send_to_player(sess, "An %s is standing around.\n", race);
+                    send_to_player(sess, "An %s is standing around.\n", lowercase_race);
                 } else {
-                    send_to_player(sess, "A %s is standing around.\n", race);
+                    send_to_player(sess, "A %s is standing around.\n", lowercase_race);
                 }
             }
         }

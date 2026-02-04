@@ -115,6 +115,72 @@ int main(string arg) {
         }
     }
     
+    // Phase 3, Step 3c: Show detailed armor information
+    if (function_exists("query_armor_max_damage", target)) {
+        int max_dmg = target->query_armor_max_damage();
+        
+        if (max_dmg > 0) {
+            output += "\n%^BOLD%^=== ARMOR DETAILS ===%^RESET%^\n";
+            
+            // Armor type
+            int is_mdc = target->query_property("is_mdc_armor");
+            if (is_mdc) {
+                output += "Type: %^CYAN%^M.D.C. Armor%^RESET%^ (Mega-Damage Capacity)\n";
+            } else {
+                output += "Type: S.D.C. Armor (Structural Damage Capacity)\n";
+            }
+            
+            // Size
+            if (function_exists("query_size_name", target)) {
+                output += sprintf("Size: %s\n", capitalize(target->query_size_name()));
+            }
+            
+            // Armor Rating
+            int ar = target->query_armor_rating();
+            if (ar > 0) {
+                output += sprintf("Armor Rating: %d (damage reduction)\n", ar);
+            }
+            
+            // Durability/Condition
+            int current_dmg = target->query_armor_damage();
+            int remaining = max_dmg - current_dmg;
+            int condition = target->query_armor_condition();
+            
+            if (is_mdc) {
+                output += sprintf("M.D.C.: %d / %d ", remaining, max_dmg);
+            } else {
+                output += sprintf("S.D.C.: %d / %d ", remaining, max_dmg);
+            }
+            
+            // Condition status with color
+            if (condition >= 90) {
+                output += "%^GREEN%^(Perfect)%^RESET%^\n";
+            } else if (condition >= 70) {
+                output += "%^GREEN%^(Good)%^RESET%^\n";
+            } else if (condition >= 50) {
+                output += "%^YELLOW%^(Worn)%^RESET%^\n";
+            } else if (condition >= 25) {
+                output += "%^YELLOW%^(Damaged)%^RESET%^\n";
+            } else if (condition > 0) {
+                output += "%^RED%^(Critical - needs immediate repair!)%^RESET%^\n";
+            } else {
+                output += "%^RED%^(BROKEN - provides NO protection!)%^RESET%^\n";
+            }
+            
+            // Armor slot
+            string slot = target->query_property("armor_slot");
+            if (slot) {
+                output += sprintf("Protects: %s\n", slot);
+            }
+            
+            // Material
+            string material = target->query_property("material");
+            if (material) {
+                output += sprintf("Material: %s\n", material);
+            }
+        }
+    }
+    
     tell_object(user, output);
     return 1;
 }

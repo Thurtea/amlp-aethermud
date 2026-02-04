@@ -1,0 +1,42 @@
+// /lib/single/armor/plate_armor_large.lpc
+// Phase 2, Step 5b: Heavy plate armor for large races (ogres, titans, etc.)
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    
+    set_id("armor");
+    add_id("plate");
+    add_id("plate armor");
+    add_id("large armor");
+    add_id("heavy armor");
+    
+    short_desc = "a large suit of plate armor";
+    long_desc = "This massive suit of plate armor is designed for large humanoids "
+                "such as ogres or titans. The thick metal plates provide excellent "
+                "protection but are incredibly heavy and cumbersome.";
+    
+    // Phase 2, Step 5b: Size properties
+    set_size(3);  // Large size
+    
+    // Phase 2, Step 2a: Armor rating
+    set_armor_rating(16);  // Heavy armor, AR 16
+    
+    // Phase 2, Step 2b: Durability
+    set_armor_max_damage(120);  // Very durable, 120 SDC
+    
+    // Phase 2, Step 2c: Armor slot
+    set_property("armor_slot", "body");
+    set_property("armor_type", "heavy");
+    set_property("material", "steel");
+    
+    // Phase 4, Step 1: Appearance override (knight in shining armor)
+    set_property("appearance_override", "knight in plate armor");
+    set_property("article_override", "A");
+    set_property("title_override", "Armored Knight");
+    
+    // Physical properties
+    weight = 35000;  // 35 kg (very heavy for large creatures)
+    value = 800;     // 800 credits
+}

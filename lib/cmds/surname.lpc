@@ -1,0 +1,145 @@
+// /lib/cmds/surname.lpc
+// Phase 5, Step 4: Surname command - choose surname at level 10+
+
+#include <globals.h>
+
+int main(string arg) {
+    object user;
+    int level;
+    string current_surname;
+    
+    user = previous_object();
+    level = user->query_level();
+    current_surname = user->query_surname();
+    
+    // Check if no argument - show current surname
+    if (!arg || arg == "") {
+        if (current_surname && current_surname != "") {
+            tell_object(user, "Your surname is: " + current_surname + "\n");
+            tell_object(user, sprintf("Your full name is: %s\n", user->query_full_name()));
+        } else {
+            if (level >= 10) {
+                tell_object(user, "You have not chosen a surname yet.\n");
+                tell_object(user, "Usage: surname <your chosen surname>\n");
+            } else {
+                tell_object(user, sprintf("You must reach level 10 to earn a surname. (Currently level %d)\n", level));
+            }
+        }
+        return 1;
+    }
+    
+    // Check if player has reached level 10
+    if (level < 10) {
+        tell_object(user, sprintf("You must reach level 10 to earn a surname. (Currently level %d)\n", level));
+        tell_object(user, "Surnames are reserved for experienced adventurers who have proven themselves.\n");
+        return 1;
+    }
+    
+    // Check if player already has a surname
+    if (current_surname && current_surname != "") {
+        tell_object(user, "You already have a surname: " + current_surname + "\n");
+        tell_object(user, "Surnames cannot be changed once chosen.\n");
+        tell_object(user, "Your reputation and legacy are tied to this name.\n");
+        return 1;
+    }
+    
+    // Validate surname
+    string new_surname = arg;
+    
+    // Remove leading/trailing whitespace
+    while (new_surname && new_surname[0] == ' ') {
+        new_surname = new_surname[1..];
+    }
+    
+    int len = strlen(new_surname);
+    while (len > 0 && new_surname[len-1] == ' ') {
+        new_surname = new_surname[0..len-2];
+        len = strlen(new_surname);
+    }
+    
+    // Check length
+    if (len < 2) {
+        tell_object(user, "Your surname must be at least 2 characters long.\n");
+        return 1;
+    }
+    
+    if (len > 20) {
+        tell_object(user, "Your surname cannot be longer than 20 characters.\n");
+        return 1;
+    }
+    
+    // Check for valid characters (letters, hyphens, apostrophes only)
+    for (int i = 0; i < len; i++) {
+        int c = new_surname[i];
+        
+        // Allow a-z, A-Z, hyphen, apostrophe, space
+        if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && 
+            c != '-' && c != '\'' && c != ' ') {
+            tell_object(user, "Surnames can only contain letters, hyphens, apostrophes, and spaces.\n");
+            tell_object(user, sprintf("Invalid character: '%c'\n", c));
+            return 1;
+        }
+    }
+    
+    // Capitalize first letter
+    if (new_surname[0] >= 'a' && new_surname[0] <= 'z') {
+        new_surname[0] = new_surname[0] - 32;  // Convert to uppercase
+    }
+    
+    // Set the surname
+    user->set_surname(new_surname);
+    
+    // Announce to user
+    tell_object(user, "\n%^BOLD%^%^GREEN%^========================================%^RESET%^\n");
+    tell_object(user, sprintf("%^BOLD%^%^GREEN%^   %s %s%^RESET%^\n", 
+                user->query_name(), new_surname));
+    tell_object(user, "%^BOLD%^%^GREEN%^========================================%^RESET%^\n\n");
+    tell_object(user, "Your surname has been set!\n");
+    tell_object(user, sprintf("You are now known as: %s\n", user->query_full_name()));
+    tell_object(user, "\nThis surname will be remembered throughout the lands.\n");
+    tell_object(user, "Let your deeds bring honor to this name!\n\n");
+    
+    // Save the change
+    if (function_exists("save_player_data", user)) {
+        user->save_player_data();
+    }
+    
+    // Announce to room
+    object room = user->query_environment();
+    
+    if (room) {
+        object *people = all_inventory(room);
+        foreach (object person in people) {
+            if (living(person) && person != user) {
+                tell_object(person, sprintf("\n%^BOLD%^%s has taken the surname '%s'!%^RESET%^\n",
+                    capitalize(user->query_name()), new_surname));
+            }
+        }
+    }
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"SURNAME - Choose your surname (Level 10+)\n\n"
+"Usage:\n"
+"  surname               Show your current surname\n"
+"  surname <name>        Set your surname (one time only)\n\n"
+"Surnames are earned at level 10 and represent your character's\n"
+"legacy and reputation. Once chosen, surnames CANNOT be changed,\n"
+"so choose carefully!\n\n"
+"Surname Rules:\n"
+"  - Must be 2-20 characters long\n"
+"  - Can only contain letters, hyphens, apostrophes, and spaces\n"
+"  - First letter will be automatically capitalized\n"
+"  - Cannot be changed once set\n\n"
+"Examples:\n"
+"  surname Ironheart\n"
+"  surname von Richter\n"
+"  surname O'Brien\n"
+"  surname the Bold\n\n"
+"Your full name will be displayed as: <Firstname> <Surname>\n\n"
+"This is a permanent choice that defines your character's identity!\n\n"
+"See also: STATS, WHO\n";
+}

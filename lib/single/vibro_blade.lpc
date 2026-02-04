@@ -1,0 +1,30 @@
+// Vibro-Blade - Standard melee weapon
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("vibro-blade");
+    set_id("blade");
+    set_id_alt("vibro");
+    set_short("a vibro-blade");
+    set_long(
+        "This is a high-frequency vibrating blade, standard issue for many "
+        "mercenaries and soldiers. The molecular-edged blade vibrates at "
+        "ultrasonic frequencies, allowing it to cut through most materials. "
+        "A blue glow runs along the edge when activated.\n"
+    );
+    
+    set_type("weapon");
+    set_property("weapon_type", "melee");
+    set_property("damage_dice", 2);
+    set_property("damage_sides", 6);
+    set_property("damage_bonus", 2);
+    set_property("strike_bonus", 1);
+    
+    set_weight(3);
+    set_value(5000);
+}
+
+int query_damage_dice() { return query_property("damage_dice"); }
+int query_damage_sides() { return query_property("damage_sides"); }
+int query_strike_bonus() { return query_property("strike_bonus"); }

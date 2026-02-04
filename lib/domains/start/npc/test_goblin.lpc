@@ -1,0 +1,48 @@
+// /lib/domains/start/npc/test_goblin.lpc - Simple test enemy for combat
+
+inherit "/std/living";
+
+void create() {
+    ::create();
+    
+    set_name("goblin");
+    set_real_name("Goblin Raider");
+    set_race("goblin");
+    
+    set_short("a goblin raider");
+    set_long(
+        "This is a nasty-looking goblin, about four feet tall with greenish skin\n"
+        "and sharp teeth. It wears tattered leather armor and carries a crude sword.\n"
+        "Its beady eyes glitter with malice.\n"
+    );
+    
+    // Combat stats
+    set_level(3);
+    set_max_hp(25);
+    set_hp(25);
+    set_max_sdc(30);
+    set_sdc(30);
+    
+    // Stats (weak enemy)
+    // The query_stat override in living.lpc will handle these
+    
+    enable_commands();
+}
+
+void die(object killer) {
+    tell_room(environment(this_object()), 
+              "The goblin raider falls to the ground, defeated!\n");
+    
+    // Drop some loot (placeholder for now)
+    tell_room(environment(this_object()), 
+              "The goblin's crude equipment scatters on the ground.\n");
+    
+    // Remove after a delay
+    call_out("remove_corpse", 3);
+}
+
+void remove_corpse() {
+    tell_room(environment(this_object()), 
+              "The goblin's corpse dissolves into nothing.\n");
+    destruct(this_object());
+}

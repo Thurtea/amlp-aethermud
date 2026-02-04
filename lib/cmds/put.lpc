@@ -1,0 +1,153 @@
+/*
+ * /lib/cmds/put.lpc - Drop items on the ground (AetherMUD convention)
+ */
+
+#include <globals.h>
+
+int main(string arg) {
+    object user, room, item;
+    
+    user = previous_object();
+    room = user->query_environment();
+    
+    if (!arg || arg == "") {
+        tell_object(user, "Put down what?\n");
+        return 1;
+    }
+    
+    if (!room) {
+        tell_object(user, "You are nowhere.\n");
+        return 1;
+    }
+    
+    // Handle "put all"
+    if (arg == "all") {
+        object *inv = all_inventory(user);
+        int count = 0;
+        string *dropped_names = ({ });
+        
+        if (!inv || sizeof(inv) == 0) {
+            tell_object(user, "You're not carrying anything.\n");
+            return 1;
+        }
+        
+        foreach (object obj in inv) {
+            // Check if item can be dropped
+            if (function_exists("query_no_drop", obj) && obj->query_no_drop()) {
+                continue; // Skip cursed or no-drop items
+            }
+            
+            // Check if item is equipped (wielded or worn)
+            if (function_exists("query_wielded", obj) && obj->query_wielded()) {
+                continue; // Can't drop wielded items
+            }
+            if (function_exists("query_worn", obj) && obj->query_worn()) {
+                continue; // Can't drop worn items
+            }
+            
+            // Move item to room
+            if (function_exists("move", obj)) {
+                obj->move(room);
+            } else {
+                move_object(obj, room);
+            }
+            
+            string item_name = "something";
+            if (function_exists("query_short", obj)) {
+                item_name = obj->query_short() || item_name;
+            }
+            if (item_name == "something" && function_exists("query_name", obj)) {
+                item_name = obj->query_name() || item_name;
+            }
+            dropped_names += ({ item_name });
+            count++;
+        }
+        
+        if (count > 0) {
+            tell_object(user, sprintf("You put down %d item%s.\n", 
+                count, (count == 1 ? "" : "s")));
+            
+            // Tell room
+            object *people = all_inventory(room);
+            foreach (object person in people) {
+                if (living(person) && person != user) {
+                    tell_object(person, sprintf("%s puts down everything they were carrying.\n",
+                        capitalize(user->query_name())));
+                }
+            }
+        } else {
+            tell_object(user, "You have nothing you can put down.\n");
+        }
+        
+        return 1;
+    }
+    
+    // Find specific item in inventory
+    item = present(arg, user);
+    
+    if (!item) {
+        tell_object(user, "You don't have that.\n");
+        return 1;
+    }
+    
+    // Check if item can be dropped
+    if (function_exists("query_no_drop", item) && item->query_no_drop()) {
+        tell_object(user, "You can't put that down.\n");
+        return 1;
+    }
+    
+    // Check if item is wielded
+    if (function_exists("query_wielded", item) && item->query_wielded()) {
+        tell_object(user, "You must unwield it first.\n");
+        return 1;
+    }
+    
+    // Check if item is worn
+    if (function_exists("query_worn", item) && item->query_worn()) {
+        tell_object(user, "You must remove it first.\n");
+        return 1;
+    }
+    
+    // Move item to room
+    if (function_exists("move", item)) {
+        item->move(room);
+    } else {
+        move_object(item, room);
+    }
+    
+    string item_name = "something";
+    if (function_exists("query_short", item)) {
+        item_name = item->query_short() || item_name;
+    }
+    if (item_name == "something" && function_exists("query_name", item)) {
+        item_name = item->query_name() || item_name;
+    }
+    
+    tell_object(user, sprintf("You put down %s.\n", item_name));
+    
+    // Tell room
+    object *people = all_inventory(room);
+    foreach (object person in people) {
+        if (living(person) && person != user) {
+            tell_object(person, sprintf("%s puts down %s.\n",
+                capitalize(user->query_name()), item_name));
+        }
+    }
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"PUT - Put down items from your inventory\n\n"
+"Usage:\n"
+"  put <item>     Put down an item\n"
+"  put all        Put down all items\n\n"  
+"Examples:\n"
+"  put sword\n"
+"  put all\n\n"
+"You cannot put down items that are wielded or worn - you must\n"
+"unwield or remove them first. Some items (like quest items) \n"
+"cannot be dropped at all.\n\n"
+"See also: take, give, inventory, wield, wear\n";
+}

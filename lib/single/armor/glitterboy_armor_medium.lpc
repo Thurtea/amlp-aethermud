@@ -1,0 +1,48 @@
+// /lib/single/armor/glitterboy_armor_medium.lpc
+// Phase 4, Step 4c: Glitter Boy power armor (iconic Rifts armor)
+// Famous chrome-plated laser-reflective power armor
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    
+    set_id("armor");
+    add_id("glitterboy");
+    add_id("glitter boy");
+    add_id("gb armor");
+    add_id("power armor");
+    add_id("chrome armor");
+    
+    short_desc = "Glitter Boy power armor";
+    long_desc = "This is the legendary Glitter Boy power armor - a towering suit of "
+                "chrome-plated mega-damage armor. The reflective surface gleams brilliantly, "
+                "designed to deflect laser fire. The suit includes the famous boom gun, "
+                "a shoulder-mounted rail gun capable of devastating firepower. "
+                "Glitter Boy armor is one of the most recognizable and feared sights on Rifts Earth.";
+    
+    // Phase 2: Size properties
+    set_size(2);  // Medium size (standard human, but makes wearer 10 feet tall)
+    
+    // Phase 2: Armor rating
+    set_armor_rating(18);  // Excellent natural AR
+    
+    // Phase 2: Durability (MDC armor - Glitter Boys are TOUGH)
+    set_armor_max_damage(770);  // 770 M.D.C. - one of the toughest armors!
+    
+    set_property("armor_slot", "body");
+    set_property("armor_type", "heavy");
+    set_property("material", "mdc_chrome");
+    set_property("is_mdc_armor", 1);
+    set_property("armor_class", "power_armor");
+    set_property("laser_reflective", 1);  // Special property: reflects lasers
+    
+    // Phase 4, Step 4c: Appearance override - iconic look
+    set_property("appearance_override", "towering Glitter Boy");
+    set_property("article_override", "A");
+    set_property("title_override", "Glitter Boy Pilot");
+    
+    // Physical properties
+    weight = 80000;   // 80 kg (very heavy power armor)
+    value = 450000;   // 450,000 credits (extremely expensive and rare)
+}

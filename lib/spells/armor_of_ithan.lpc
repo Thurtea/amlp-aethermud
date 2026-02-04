@@ -1,0 +1,115 @@
+/*
+ * /lib/spells/armor_of_ithan.lpc - Armor of Ithan spell
+ *
+ * Creates a protective energy field around the caster
+ * Level 2 spell for defensive magic
+ */
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_id("armor_of_ithan");
+    set_spell_name("Armor of Ithan");
+    set_spell_desc(
+        "One of the most famous defensive spells in all of magic, the Armor "
+        "of Ithan creates an invisible force field of psycho-kinetic energy "
+        "that surrounds and protects the caster. The field absorbs 10 MDC "
+        "per level of the caster, providing excellent protection against both "
+        "physical and energy attacks.\n\n"
+        "The armor is invisible but can be felt as a slight resistance when "
+        "touched. It does not hinder movement or spell casting. When struck, "
+        "the field crackles with blue-white energy before absorbing the impact.\n\n"
+        "Duration: 3 minutes (12 melees) per level of experience."
+    );
+    
+    set_spell_level(2);
+    set_ppe_cost(10);
+    
+    set_duration_type(2);    /* Per caster level */
+    set_base_duration(3);    /* 3 minutes per level */
+    
+    set_range_type(0);       /* Self */
+    set_base_range(0);
+    
+    set_incantation("Scutum invisibile, me protege!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({  }));
+    set_casting_time(1);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+    
+    /* Check if already has armor active */
+    if (caster->query_property("armor_of_ithan_active")) {
+        tell_object(caster, "You already have an Armor of Ithan active!\n");
+        return 0;
+    }
+    
+    /* Calculate MDC based on caster level */
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    
+    int mdc_amount = 10 * caster_level;
+    int duration_minutes = 3 * caster_level;
+    
+    /* Set the armor properties */
+    caster->set_property("armor_of_ithan_active", 1);
+    caster->set_property("armor_of_ithan_mdc", mdc_amount);
+    caster->set_property("armor_of_ithan_max_mdc", mdc_amount);
+    caster->set_property("armor_of_ithan_duration", duration_minutes);
+    
+    /* Display messages */
+    tell_object(caster,
+        "You speak the words of power and gesture dramatically!\n" +
+        "An invisible force field springs into existence around you, " +
+        "crackling with protective energy.\n" +
+        "Armor of Ithan: " + mdc_amount + " MDC\n" +
+        "Duration: " + duration_minutes + " minutes\n");
+    
+    /* Notify room */
+    object env = environment(caster);
+    if (env) {
+        object *inv = all_inventory(env);
+        foreach (object ob : inv) {
+            if (ob != caster && living(ob)) {
+                tell_object(ob,
+                    caster->query_cap_name() +
+                    " gestures and blue-white energy crackles around them briefly!\n");
+            }
+        }
+    }
+    
+    /* Schedule removal - duration is in minutes */
+    int seconds = duration_minutes * 60;
+    call_out("remove_armor", seconds, caster);
+    
+    return 1;
+}
+
+/*
+ * Called when the spell wears off
+ */
+void remove_armor(object caster) {
+    if (!caster) return;
+    
+    if (caster->query_property("armor_of_ithan_active")) {
+        int remaining_mdc = caster->query_property("armor_of_ithan_mdc");
+        
+        caster->remove_property("armor_of_ithan_active");
+        caster->remove_property("armor_of_ithan_mdc");
+        caster->remove_property("armor_of_ithan_max_mdc");
+        caster->remove_property("armor_of_ithan_duration");
+        
+        if (remaining_mdc > 0) {
+            tell_object(caster, 
+                "Your Armor of Ithan fades away, having protected you well.\n");
+        } else {
+            tell_object(caster,
+                "Your Armor of Ithan shatters, depleted of all energy!\n");
+        }
+    }
+}

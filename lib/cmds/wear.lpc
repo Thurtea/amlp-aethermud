@@ -37,6 +37,20 @@ int main(string arg) {
         return 1;
     }
     
+    // Phase 2, Step 4a: Check size compatibility
+    if (function_exists("can_wear_size", user) && function_exists("query_size", item)) {
+        if (!user->can_wear_size(item)) {
+            // Phase 2, Step 4b: Size mismatch error message
+            string item_size = item->query_size_name();
+            string user_size = user->query_creature_size_name();
+            
+            tell_object(user, sprintf("That %s armor is too %s for you!\n",
+                item_size, (item->query_size() < user->query_creature_size() ? "small" : "large")));
+            tell_object(user, sprintf("You need %s-sized equipment.\n", user_size));
+            return 1;
+        }
+    }
+    
     // Check if slot is available
     mapping equipped = user->query_equipped();
     

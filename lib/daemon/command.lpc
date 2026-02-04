@@ -66,8 +66,10 @@ void init_commands() {
     commands["help"] = "/cmds/help";
     
     // Actions
-    commands["get"] = "/cmds/get";
-    commands["drop"] = "/cmds/drop";
+    commands["take"] = "/cmds/take";
+    commands["put"] = "/cmds/put";
+    commands["get"] = "/cmds/take";  // Alias for take
+    commands["drop"] = "/cmds/put";  // Alias for put
     commands["give"] = "/cmds/give";
     
     // Equipment
@@ -75,11 +77,19 @@ void init_commands() {
     commands["wield"] = "/cmds/wield";
     commands["remove"] = "/cmds/remove";
     commands["unwield"] = "/cmds/unwield";
+    commands["repair"] = "/cmds/repair";  // Phase 3, Step 4
     
     // Character development
     commands["skills"] = "/cmds/skills";
     commands["languages"] = "/cmds/languages";
     commands["cast"] = "/cmds/cast";
+    commands["surname"] = "/cmds/surname";  // Phase 5, Step 4
+    
+    // Social/introduction
+    commands["introduce"] = "/cmds/introduce";
+    commands["greet"] = "/cmds/introduce";  // Alias for introduce
+    commands["remember"] = "/cmds/remember";
+    commands["position"] = "/cmds/position";  // RP position
     
     // System
     commands["quit"] = "/cmds/quit";
@@ -89,6 +99,7 @@ void init_commands() {
     // Admin commands (will check privilege)
     commands["shutdown"] = "/cmds/admin/shutdown";
     commands["promote"] = "/cmds/admin/promote";
+    commands["demote"] = "/cmds/admin/demote";
     commands["users"] = "/cmds/admin/users";
     
     // Wizard tool commands
@@ -97,6 +108,7 @@ void init_commands() {
     commands["goto"] = "/cmds/admin/goto";
     commands["clone"] = "/cmds/admin/clone";
     commands["stat"] = "/cmds/admin/stat";
+    commands["testskill"] = "/cmds/admin/testskill";
 }
 
 // Main command execution function

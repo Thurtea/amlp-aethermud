@@ -1,0 +1,119 @@
+/*
+ * /lib/spells/heal_wounds.lpc - Heal Wounds spell
+ *
+ * Restores HP and SDC to injured targets
+ * Level 3 spell for healing magic
+ */
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_id("heal_wounds");
+    set_spell_name("Heal Wounds");
+    set_spell_desc(
+        "A fundamental healing spell that channels magical energy to close "
+        "wounds and restore vitality. The caster places their hands on the "
+        "target (or themselves) and channels positive energy, causing cuts "
+        "to seal and bruises to fade. The spell restores 2d6 Hit Points or "
+        "SDC to the target.\n\n"
+        "The target feels warmth spreading through their body as injuries "
+        "knit back together. While not as powerful as psych healing abilities, "
+        "this spell is reliable and requires no special mindset."
+    );
+    
+    set_spell_level(3);
+    set_ppe_cost(10);
+    
+    set_duration_type(0);    /* Instant */
+    set_base_duration(0);
+    
+    set_range_type(1);       /* Touch */
+    set_base_range(0);
+    
+    set_incantation("Vulnus sanare, corpus renovare!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({  }));
+    set_casting_time(1);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster || !target) return 0;
+    
+    /* Check if target is in same environment */
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+    
+    /* Check if target is living */
+    if (!living(target)) {
+        tell_object(caster, "You can only heal living beings!\n");
+        return 0;
+    }
+    
+    /* Check if target needs healing */
+    if (target->query_hp() >= target->query_max_hp() && 
+        target->query_sdc() >= target->query_max_sdc()) {
+        tell_object(caster, target->query_cap_name() + " is already at full health!\n");
+        return 0;
+    }
+    
+    /* Roll healing - 2d6 */
+    int healing = random(6) + 1 + random(6) + 1;
+    
+    /* Store starting values */
+    int old_hp = target->query_hp();
+    int old_sdc = target->query_sdc();
+    
+    /* Apply healing */
+    target->heal_damage(healing, 0);  /* 0 = normal healing (not MDC repair) */
+    
+    /* Calculate actual healing done */
+    int healed_hp = target->query_hp() - old_hp;
+    int healed_sdc = target->query_sdc() - old_sdc;
+    int total_healed = healed_hp + healed_sdc;
+    
+    /* Display messages */
+    if (caster == target) {
+        tell_object(caster,
+            "You channel healing energy into yourself!\n" +
+            "Warmth floods through your body as wounds seal and pain fades.\n" +
+            "Restored: " + total_healed + " health\n");
+    } else {
+        tell_object(caster,
+            "You place your hands on " + target->query_cap_name() + 
+            " and channel healing energy!\n" +
+            "Restored: " + total_healed + " health\n");
+        
+        tell_object(target,
+            caster->query_cap_name() +
+            " touches you and healing warmth flows through your body!\n" +
+            "Your wounds close and your strength returns.\n" +
+            "Healed: " + total_healed + " health\n");
+    }
+    
+    /* Tell room */
+    object env = environment(caster);
+    if (env) {
+        object *inv = all_inventory(env);
+        foreach (object ob : inv) {
+            if (ob != caster && ob != target && living(ob)) {
+                if (caster == target) {
+                    tell_object(ob,
+                        caster->query_cap_name() +
+                        "'s wounds glow with golden light and begin to close.\n");
+                } else {
+                    tell_object(ob,
+                        caster->query_cap_name() +
+                        " places hands on " + target->query_cap_name() +
+                        ", and golden light flows into them.\n");
+                }
+            }
+        }
+    }
+    
+    return 1;
+}

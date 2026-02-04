@@ -1,6 +1,7 @@
 #include "item.h"
 #include "chargen.h"
 #include "session_internal.h"
+#include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,7 @@ Item ITEM_TEMPLATES[TOTAL_ITEM_TEMPLATES];
 
 /* Initialize item system and database */
 void item_init(void) {
-    fprintf(stderr, "[Items] Initializing item system...\n");
+    DEBUG_LOG("Initializing item system...");
     
     /* ========== MELEE WEAPONS (0-9) ========== */
     
@@ -378,13 +379,13 @@ void item_init(void) {
         .stats = {.damage_dice = 0, .damage_sides = 0}
     };
     
-    fprintf(stderr, "[Items] Initialized %d item templates\n", TOTAL_ITEM_TEMPLATES);
+    DEBUG_LOG("Initialized %d item templates", TOTAL_ITEM_TEMPLATES);
 }
 
 /* Create a new item instance from template */
 Item* item_create(int template_id) {
     if (template_id < 0 || template_id >= TOTAL_ITEM_TEMPLATES) {
-        fprintf(stderr, "[Items] Invalid template ID: %d\n", template_id);
+        ERROR_LOG("Invalid template ID: %d", template_id);
         return NULL;
     }
     

@@ -11,6 +11,7 @@
 #include "vm.h"
 #include "efun.h"
 #include "object.h"
+#include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,7 +53,7 @@ static char *vm_string_create(const char *value, size_t len) {
 VirtualMachine* vm_init(void) {
     VirtualMachine *vm = (VirtualMachine *)malloc(sizeof(VirtualMachine));
     if (!vm) {
-        fprintf(stderr, "Fatal: Memory allocation failed for VM\n");
+        FATAL_LOG("Memory allocation failed for VM");
         return NULL;
     }
 
@@ -77,11 +78,11 @@ VirtualMachine* vm_init(void) {
     
     vm->efun_registry = efun_init();
     if (!vm->efun_registry) {
-        fprintf(stderr, "Warning: Efun registry initialization failed\n");
+        WARN_LOG("Efun registry initialization failed");
     } else {
         /* Register all built-in efuns */
         if (efun_register_all(vm->efun_registry) != 0) {
-            fprintf(stderr, "Warning: Some efuns failed to register\n");
+            WARN_LOG("Some efuns failed to register");
         }
     }
     
@@ -111,7 +112,7 @@ VirtualMachine* vm_init(void) {
 
     vm->gc = gc_init();
     if (!vm->gc) {
-        fprintf(stderr, "Fatal: GC initialization failed for VM\n");
+        FATAL_LOG("GC initialization failed for VM");
         vm_free(vm);
         return NULL;
     }
@@ -127,7 +128,7 @@ VirtualMachine* vm_init(void) {
  */
 int vm_load_program(VirtualMachine *vm, ASTNode *program) {
     if (!vm || !program) {
-        fprintf(stderr, "Error: Invalid VM or program\n");
+        ERROR_LOG("Invalid VM or program");
         return -1;
     }
 
@@ -392,7 +393,7 @@ int vm_push_value(VirtualMachine *vm, VMValue value) {
     if (!vm || !vm->stack) return -1;
     
     if (vm->stack->top >= vm->stack->capacity) {
-        fprintf(stderr, "Stack overflow\n");
+        ERROR_LOG("Stack overflow");
         return -1;
     }
     
@@ -642,11 +643,11 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         
         case OP_LOAD_LOCAL: {
             if (!vm->current_frame) {
-                fprintf(stderr, "[VM] OP_LOAD_LOCAL ERROR: No current frame!\n");
+                ERROR_LOG("OP_LOAD_LOCAL: No current frame");
                 return -1;
             }
             
-            fprintf(stderr, "[VM] OP_LOAD_LOCAL called in function: %s\n", 
+            DEBUG_LOG_VM("OP_LOAD_LOCAL called in function: %s",
                     vm->current_frame->function ? vm->current_frame->function->name : "(null)");
             
             int idx = instr->operand.int_operand;
@@ -656,14 +657,14 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
              * Total valid indices: [0..param_count+local_var_count-1] */
             int total_vars = vm->current_frame->function->param_count + vm->current_frame->function->local_var_count;
             if (idx < 0 || idx >= total_vars) {
-                fprintf(stderr, "[VM] OP_LOAD_LOCAL ERROR: idx=%d out of bounds (total_vars=%d, params=%d, locals=%d)\n",
+                DEBUG_LOG_VM("OP_LOAD_LOCAL: idx=%d out of bounds (total_vars=%d, params=%d, locals=%d)",
                         idx, total_vars, vm->current_frame->function->param_count, vm->current_frame->function->local_var_count);
                 return -1;
             }
             
             /* Validate frame state */
             if (!vm->current_frame->local_variables) {
-                fprintf(stderr, "[VM] OP_LOAD_LOCAL ERROR: No local_variables array in frame!\n");
+                DEBUG_LOG_VM("OP_LOAD_LOCAL: No local_variables array in frame");
                 return -1;
             }
             
@@ -671,27 +672,12 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             
             /* Debug ALL OP_LOAD_LOCAL in process_command */
             if (strcmp(vm->current_frame->function->name, "process_command") == 0) {
-                fprintf(stderr, "[VM] OP_LOAD_LOCAL idx=%d in %s: type=%d", 
-                        idx, vm->current_frame->function->name, v.type);
-                if (idx < vm->current_frame->function->param_count) {
-                    fprintf(stderr, " (PARAM %d/%d)", idx+1, vm->current_frame->function->param_count);
-                } else {
-                    fprintf(stderr, " (LOCAL %d)", idx - vm->current_frame->function->param_count);
-                }
-                if (v.type == VALUE_STRING) {
-                    fprintf(stderr, " ptr=%p", (void*)v.data.string_value);
-                    if (v.data.string_value) {
-                        fprintf(stderr, " value='%s'", v.data.string_value);
-                    } else {
-                        fprintf(stderr, " (NULL STRING POINTER!)");
-                    }
-                }
-                fprintf(stderr, " frame=%p local_vars=%p\n", 
-                        (void*)vm->current_frame, (void*)vm->current_frame->local_variables);
+                DEBUG_LOG_VM("OP_LOAD_LOCAL idx=%d in %s: type=%d (PARAM/LOCAL check), ptr=%p",
+                        idx, vm->current_frame->function->name, v.type, (void*)v.data.string_value);
                 
                 /* Warn if parameter is NULL */
                 if (v.type == VALUE_NULL && idx < vm->current_frame->function->param_count) {
-                    fprintf(stderr, "[VM] ERROR: Parameter %d is NULL! Frame corruption?\n", idx);
+                    WARN_LOG("Parameter %d is NULL in process_command! Frame corruption?", idx);
                 }
             }
             
@@ -707,7 +693,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
              * Total valid indices: [0..param_count+local_var_count-1] */
             int total_vars = vm->current_frame->function->param_count + vm->current_frame->function->local_var_count;
             if (idx < 0 || idx >= total_vars) {
-                fprintf(stderr, "[VM] OP_STORE_LOCAL ERROR: idx=%d out of bounds (total_vars=%d, params=%d, locals=%d)\n",
+                DEBUG_LOG_VM("OP_STORE_LOCAL: idx=%d out of bounds (total_vars=%d, params=%d, locals=%d)",
                         idx, total_vars, vm->current_frame->function->param_count, vm->current_frame->function->local_var_count);
                 return -1;
             }
@@ -825,7 +811,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
                     }
                 }
                 
-                fprintf(stderr, "[VM] OP_CALL: Unknown function: %s\n", func_name);
+                DEBUG_LOG_VM("OP_CALL: Unknown function: %s", func_name);
                 return -1;
             } else {
                 int func_idx = instr->operand.call_operand.target;
@@ -935,7 +921,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             if (arg_count > (int)(sizeof(args_buffer) / sizeof(args_buffer[0]))) {
                 args = (VMValue *)malloc(sizeof(VMValue) * arg_count);
                 if (!args) {
-                    fprintf(stderr, "[VM] OP_CALL_METHOD: out of memory for %d args\n", arg_count);
+                    DEBUG_LOG_VM("OP_CALL_METHOD: out of memory for %d args", arg_count);
                     vm_push_value(vm, vm_value_create_null());
                     return -1;
                 }
@@ -949,7 +935,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             VMValue obj_val = vm_pop_value(vm);
 
             if (method_val.type != VALUE_STRING || !method_val.data.string_value) {
-                fprintf(stderr, "[VM] OP_CALL_METHOD: method name must be string\n");
+                DEBUG_LOG_VM("OP_CALL_METHOD: method name must be string");
                 vm_value_free(&method_val);
                 for (int i = 0; i < arg_count; i++) {
                     vm_value_free(&args[i]);
@@ -960,7 +946,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             }
 
             if (obj_val.type != VALUE_OBJECT || !obj_val.data.object_value) {
-                fprintf(stderr, "[VM] OP_CALL_METHOD: invalid object reference\n");
+                DEBUG_LOG_VM("OP_CALL_METHOD: invalid object reference");
                 vm_value_free(&method_val);
                 for (int i = 0; i < arg_count; i++) {
                     vm_value_free(&args[i]);
@@ -987,7 +973,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         }
         
         default:
-            fprintf(stderr, "Unknown opcode: %d\n", instr->opcode);
+            ERROR_LOG("Unknown opcode: %d", instr->opcode);
             return -1;
     }
 }
@@ -1029,13 +1015,13 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
      * Local variables are stored in local_variables[param_count..param_count+local_var_count-1]
      * Previous code allocated only local_var_count space, causing buffer overflow when params > 0 */
     int total_vars = func->param_count + func->local_var_count;
-    fprintf(stderr, "[VM] ALLOCATION DEBUG: func->param_count=%d, func->local_var_count=%d, total_vars=%d, size=%zu bytes\n",
+    DEBUG_LOG_VM("ALLOCATION: func->param_count=%d, func->local_var_count=%d, total_vars=%d, size=%zu bytes",
             func->param_count, func->local_var_count, total_vars, sizeof(VMValue) * total_vars);
     
     CallFrame *frame = (CallFrame *)malloc(sizeof(CallFrame));
     frame->function = func;
     frame->local_variables = (VMValue *)malloc(sizeof(VMValue) * total_vars);
-    fprintf(stderr, "[VM] ALLOCATION DEBUG: allocated frame->local_variables=%p\n", (void*)frame->local_variables);
+    DEBUG_LOG_VM("Allocated frame->local_variables=%p", (void*)frame->local_variables);
     frame->instruction_pointer = 0;
     frame->stack_base = vm->stack->top - arg_count;
     frame->prev = vm->current_frame;
@@ -1050,21 +1036,16 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
     for (int i = 0; i < arg_count; i++) {
         frame->local_variables[i] = vm->stack->values[frame->stack_base + i];
         vm_value_addref(&frame->local_variables[i]);
-        fprintf(stderr, "[VM] DEBUG: Copied param %d from stack[%d] to local[%d]: type=%d", 
-                i, frame->stack_base + i, i, frame->local_variables[i].type);
-        if (frame->local_variables[i].type == VALUE_STRING) {
-            fprintf(stderr, " str_ptr=%p value='%s'", 
-                    (void*)frame->local_variables[i].data.string_value,
-                    frame->local_variables[i].data.string_value ? frame->local_variables[i].data.string_value : "(null)");
-        }
-        fprintf(stderr, "\n");
+        DEBUG_LOG_VM("Copied param %d from stack[%d] to local[%d]: type=%d (str_ptr=%p)",
+                i, frame->stack_base + i, i, frame->local_variables[i].type,
+                (void*)frame->local_variables[i].data.string_value);
     }
     
     vm->current_frame = frame;
     
     /* Debug: Print frame state before execution */
     if (strcmp(func->name, "process_command") == 0) {
-        fprintf(stderr, "[VM] FRAME SETUP for %s: frame=%p local_vars=%p param_count=%d local_count=%d\n",
+        DEBUG_LOG_VM("FRAME SETUP for %s: frame=%p local_vars=%p param_count=%d local_count=%d",
                 func->name, (void*)frame, (void*)frame->local_variables, 
                 func->param_count, func->local_var_count);
         /* Enable instruction tracing for this function */
@@ -1079,7 +1060,7 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
         
         /* Debug EVERY instruction in process_command */
         if (strcmp(func->name, "process_command") == 0) {
-            fprintf(stderr, "[VM] [%s] IP=%d opcode=%d\n", 
+            DEBUG_LOG_VM("[%s] IP=%d opcode=%d",
                     func->name, frame->instruction_pointer - 1, instr->opcode);
         }
         

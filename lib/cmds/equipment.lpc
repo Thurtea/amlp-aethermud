@@ -47,6 +47,32 @@ int main(string arg) {
             if (item) {
                 string item_name = item->query_short() || item->query_name() || "something";
                 output += item_name;
+                
+                // Phase 3, Step 3a: Show armor condition
+                if (function_exists("query_armor_max_damage", item)) {
+                    int max_dmg = item->query_armor_max_damage();
+                    if (max_dmg > 0) {
+                        int condition = item->query_armor_condition();
+                        string condition_str;
+                        
+                        if (condition >= 90) {
+                            condition_str = "%^GREEN%^[Perfect]%^RESET%^";
+                        } else if (condition >= 70) {
+                            condition_str = "%^GREEN%^[Good]%^RESET%^";
+                        } else if (condition >= 50) {
+                            condition_str = "%^YELLOW%^[Worn]%^RESET%^";
+                        } else if (condition >= 25) {
+                            condition_str = "%^YELLOW%^[Damaged]%^RESET%^";
+                        } else if (condition > 0) {
+                            condition_str = "%^RED%^[Critical]%^RESET%^";
+                        } else {
+                            condition_str = "%^RED%^[BROKEN]%^RESET%^";
+                        }
+                        
+                        output += " " + condition_str;
+                    }
+                }
+                
                 count++;
             } else {
                 output += "<empty>";

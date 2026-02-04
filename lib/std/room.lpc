@@ -41,3 +41,98 @@ mapping query_exits() {
 string *query_exit_dirs() {
     return keys(exits);
 }
+// Generate the description shown when a player looks at the room
+string look() {
+    string desc = "";
+    object *contents;
+    object *living_things = ({ });
+    object *items = ({ });
+    
+    // Add short description with color
+    desc += "\033[1;36m" + query_short() + "\033[0m\n";
+    
+    // Add long description
+    desc += query_long() + "\n";
+    
+    // Get room contents
+    contents = all_inventory(this_object());
+    
+    if (contents && sizeof(contents) > 0) {
+        // Separate living creatures from items
+        foreach (object ob : contents) {
+            if (living(ob)) {
+                living_things += ({ ob });
+            } else {
+                items += ({ ob });
+            }
+        }
+        
+        // List living creatures (players and NPCs)
+        if (sizeof(living_things) > 0) {
+            desc += "\n";
+            foreach (object liv : living_things) {
+                string person_desc;
+                string position;
+                
+                // Get the name as this observer should see it
+                if (function_exists("query_introduction_name", liv)) {
+                    person_desc = liv->query_introduction_name(this_player());
+                } else {
+                    // Fallback if introduction system not available
+                    person_desc = liv->query_name ? liv->query_name() : "someone";
+                }
+                
+                // Get position description
+                if (function_exists("query_position", liv)) {
+                    position = liv->query_position();
+                } else {
+                    position = "is here.";
+                }
+                
+                // Capitalize first letter
+                if (person_desc && sizeof(person_desc) > 0) {
+                    person_desc = capitalize(person_desc);
+                }
+                
+                desc += "  " + person_desc + " " + position + "\n";
+            }
+        }
+        
+        // List items on the ground
+        if (sizeof(items) > 0) {
+            desc += "\n";
+            foreach (object item : items) {
+                string item_desc;
+                
+                if (function_exists("query_short", item)) {
+                    item_desc = item->query_short();
+                } else {
+                    item_desc = "something";
+                }
+                
+                // Capitalize first letter
+                if (item_desc && sizeof(item_desc) > 0) {
+                    item_desc = capitalize(item_desc);
+                }
+                
+                desc += "  " + item_desc + " is here.\n";
+            }
+        }
+    }
+    
+    // List exits if any
+    if (exits && sizeof(exits) > 0) {
+        string *dirs = keys(exits);
+        desc += "\n\033[1;32mExits:\033[0m ";
+        
+        for (int i = 0; i < sizeof(dirs); i++) {
+            desc += dirs[i];
+            if (i < sizeof(dirs) - 1) {
+                desc += ", ";
+            }
+        }
+        desc += "\n";
+    }
+    
+    return desc;
+}

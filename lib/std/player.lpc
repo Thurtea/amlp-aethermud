@@ -18,6 +18,7 @@ private string name;
 private string password_hash;
 private int privilege_level;
 private string title;
+private string surname;      // Phase 5, Step 2a: Earned at level 10
 private object *inventory;
 private object environment;
 private int last_login;
@@ -29,6 +30,12 @@ private object wiztool;      // Wiztool for wizards/admins
 // Character creation data
 private string race_selected;
 private string occ_selected;
+
+// Equipment tracking
+private mapping equipped;  // Slots: right_hand, left_hand, head, body, hands, feet, etc.
+
+// Skills tracking
+private mapping skills;  // Maps skill name -> proficiency value (0-100)
 
 // Initialization
 void create() {
@@ -51,7 +58,10 @@ void create() {
     inventory = ({ });
     privilege_level = 0;  // Default to player
     title = "Player";
+    surname = "";        // Phase 5, Step 2a: No surname at creation
     experience = 0;
+    equipped = ([ ]);  // Initialize equipment mapping
+    skills = ([ ]);    // Initialize skills mapping
     
     // Set real name for introduction system
     set_real_name("");
@@ -91,6 +101,25 @@ void add_experience(int exp) {
         needed = level * 1000;
         tell_object(this_object(), 
             "\n*** LEVEL UP! You are now level " + level + "! ***\n\n");
+        
+        // Phase 5, Step 3: Award surname at level 10
+        if (level == 10 && (!surname || surname == "")) {
+            tell_object(this_object(),
+                "\n%^BOLD%^%^YELLOW%^========================================%^RESET%^\n");
+            tell_object(this_object(),
+                "%^BOLD%^%^YELLOW%^   YOU HAVE EARNED A SURNAME!%^RESET%^\n");
+            tell_object(this_object(),
+                "%^BOLD%^%^YELLOW%^========================================%^RESET%^\n\n");
+            tell_object(this_object(),
+                "You have reached level 10 and earned the right to a surname!\n\n");
+            tell_object(this_object(),
+                "Use the 'surname' command to choose your surname.\n");
+            tell_object(this_object(),
+                "Type: surname <your chosen surname>\n\n");
+            tell_object(this_object(),
+                "Choose wisely - this will be your legacy throughout the lands!\n\n");
+        }
+        
         on_level_up();
     }
 }
@@ -125,6 +154,7 @@ int query_privilege_level() { return privilege_level; }
 int is_player() { return privilege_level == 0; }
 int is_wizard() { return privilege_level >= 1; }
 int is_admin() { return privilege_level >= 2; }
+int query_wizard_level() { return privilege_level; }  // For introduction system
 
 void set_privilege_level(int level) {
     if (level < 0 || level > 2) return;
@@ -147,6 +177,30 @@ void set_privilege_level(int level) {
 }
 
 string query_privilege_title() { return title; }
+
+// Phase 5, Step 2b: Surname query/set functions
+string query_surname() {
+    return surname ? surname : "";
+}
+
+void set_surname(string new_surname) {
+    surname = new_surname;
+    
+    // Update short description to include surname
+    if (surname && surname != "") {
+        set_short(name + " " + surname + " the " + title);
+    } else {
+        set_short(name + " the " + title);
+    }
+}
+
+// Phase 5, Step 2c: Full name with surname
+string query_full_name() {
+    if (surname && surname != "") {
+        return name + " " + surname;
+    }
+    return name;
+}
 
 // Wiztool functions
 // Attach a wiztool to this player (optionally use provided object)
@@ -183,6 +237,162 @@ void force_me(string cmd) {
 
 int query_privilege() {
     return privilege_level;
+}
+
+//=============================================================================
+// Equipment System
+//=============================================================================
+
+// Query what's equipped in all slots
+mapping query_equipped() {
+    return equipped ? equipped : ([ ]);
+}
+
+// Check what's equipped in a specific slot
+object query_equipped_slot(string slot) {
+    if (!equipped) return 0;
+    return equipped[slot];
+}
+
+// Equip an item in a slot
+int equip(object item, string slot) {
+    if (!item || !slot) return 0;
+    
+    // Check if slot is already occupied
+    if (equipped && equipped[slot]) {
+        return 0;  // Slot full
+    }
+    
+    // Check if item is in inventory
+    object *inv = all_inventory(this_object());
+    int found = 0;
+    foreach (object obj in inv) {
+        if (obj == item) {
+            found = 1;
+            break;
+        }
+    }
+    
+    if (!found) {
+        return 0;  // Don't have the item
+    }
+    
+    // Initialize mapping if needed
+    if (!equipped) equipped = ([ ]);
+    
+    // Equip the item
+    equipped[slot] = item;
+    
+    // Set wielded/worn status on the item
+    if (slot == "right_hand" || slot == "left_hand") {
+        if (function_exists("set_wielded", item)) {
+            item->set_wielded(1);
+        }
+    } else {
+        if (function_exists("set_worn", item)) {
+            item->set_worn(1);
+        }
+    }
+    
+    return 1;
+}
+
+// Unequip an item from a slot
+int unequip(string slot) {
+    if (!equipped || !slot) return 0;
+    
+    object item = equipped[slot];
+    if (!item) return 0;  // Nothing equipped there
+    
+    // Remove from slot
+    map_delete(equipped, slot);
+    
+    // Clear wielded/worn status on the item
+    if (slot == "right_hand" || slot == "left_hand") {
+        if (function_exists("set_wielded", item)) {
+            item->set_wielded(0);
+        }
+    } else {
+        if (function_exists("set_worn", item)) {
+            item->set_worn(0);
+        }
+    }
+    
+    return 1;
+}
+
+// Check if player is wielding anything
+object query_wielded() {
+    if (!equipped) return 0;
+    if (equipped["right_hand"]) return equipped["right_hand"];
+    if (equipped["left_hand"]) return equipped["left_hand"];
+    return 0;
+}
+
+// Get list of all worn items (armor/clothing)
+object *query_worn() {
+    object *worn = ({ });
+    if (!equipped) return worn;
+    
+    string *armor_slots = ({ "head", "body", "hands", "feet", "legs", "arms" });
+    foreach (string slot in armor_slots) {
+        if (equipped[slot]) {
+            worn += ({ equipped[slot] });
+        }
+    }
+    
+    return worn;
+}
+
+//=============================================================================
+// Skills System
+//=============================================================================
+
+// Add or update a skill
+void add_skill(string skill_name, int proficiency, int is_occ_skill) {
+    if (!skills) skills = ([ ]);
+    if (!skill_name) return;
+    
+    // Clamp proficiency to 0-100
+    if (proficiency < 0) proficiency = 0;
+    if (proficiency > 100) proficiency = 100;
+    
+    skills[skill_name] = proficiency;
+}
+
+// Set skills from a mapping (used during restore)
+void set_skills(mapping skill_map) {
+    if (skill_map) {
+        skills = skill_map;
+    }
+}
+
+// Query skill value
+int query_skill(string skill_name) {
+    if (!skills || !skill_name) return 0;
+    return skills[skill_name] ? skills[skill_name] : 0;
+}
+
+// Query all skills
+mapping query_all_skills() {
+    return skills ? skills : ([ ]);
+}
+
+// Placeholder functions for compatibility
+mapping query_primary_skills() {
+    return ([ ]);
+}
+
+mapping query_secondary_skills() {
+    return ([ ]);
+}
+
+void set_primary_skills(mapping m) {
+    // Placeholder
+}
+
+void set_secondary_skills(mapping m) {
+    // Placeholder
 }
 
 // Command processing - CRITICAL FUNCTION
@@ -338,6 +548,12 @@ string cmd_stats() {
     
     result += "========================================\n";
     result += "  " + name + " - " + title + "\n";
+    
+    // Phase 5, Step 5a: Show surname if present
+    if (surname && surname != "") {
+        result += "  Surname: " + surname + "\n";
+    }
+    
     result += "========================================\n";
     
     // Basic info
@@ -346,11 +562,20 @@ string cmd_stats() {
                      query_race_name(), query_occ_id() ? query_occ_id() : "None");
     result += "----------------------------------------\n";
     
-    // Health
-    result += sprintf("HP: %d/%d     S.D.C.: %d/%d     M.D.C.: %d/%d\n", 
-                     query_hp(), query_max_hp(),
-                     query_sdc(), query_max_sdc(),
-                     query_mdc(), query_max_mdc());
+    // Phase 1, Step 5b: Enhanced health display
+    result += "HEALTH (" + query_health_status() + ")\n";
+    
+    if (query_health_type() == 1) {
+        // MDC creature
+        result += sprintf("M.D.C.: %d/%d (Mega-Damage Creature)\n",
+                         query_mdc(), query_max_mdc());
+    } else {
+        // SDC creature
+        result += sprintf("Hit Points: %d/%d\n", query_hp(), query_max_hp());
+        if (query_max_sdc() > 0) {
+            result += sprintf("S.D.C.: %d/%d\n", query_sdc(), query_max_sdc());
+        }
+    }
     
     // ISP and PPE
     if (query_psionic_category() != "none" || query_spell_caster_level() > 0) {
@@ -552,6 +777,7 @@ mapping save_data() {
         "password_hash": password_hash,
         "privilege_level": privilege_level,
         "title": title,
+        "surname": surname,  // Phase 5, Step 5b: Save surname
         "level": level,
         "experience": experience,
         "last_login": last_login,
@@ -565,6 +791,7 @@ mapping save_data() {
         "max_sdc": query_max_sdc(),
         "mdc": query_mdc(),
         "max_mdc": query_max_mdc(),
+        "health_type": query_health_type(),  // Phase 1, Step 5c
         
         // Race/OCC
         "race_id": query_race_id(),
@@ -600,6 +827,7 @@ void restore_data(mapping data) {
     password_hash = data["password_hash"];
     privilege_level = data["privilege_level"];
     title = data["title"];
+    surname = data["surname"];  // Phase 5, Step 5c: Restore surname
     level = data["level"] || 1;
     experience = data["experience"] || 0;
     last_login = data["last_login"];
@@ -618,6 +846,7 @@ void restore_data(mapping data) {
     if (data["max_sdc"]) set_max_sdc(data["max_sdc"]);
     if (data["mdc"]) set_mdc(data["mdc"]);
     if (data["max_mdc"]) set_max_mdc(data["max_mdc"]);
+    if (data["health_type"]) set_health_type(data["health_type"]);  // Phase 1, Step 5c
     
     // Race/OCC
     if (data["race_id"]) set_race_id(data["race_id"]);

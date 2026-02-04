@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "debug.h"
 #include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -884,7 +885,7 @@ int character_exists(const char *username) {
 /* Save character to disk */
 int save_character(PlayerSession *sess) {
     if (!sess || !sess->username[0]) {
-        fprintf(stderr, "[Save] Error: Invalid session\n");
+        ERROR_LOG("Invalid session");
         return 0;
     }
     
@@ -905,7 +906,7 @@ int save_character(PlayerSession *sess) {
     /* Open file for writing */
     FILE *f = fopen(filepath, "wb");
     if (!f) {
-        fprintf(stderr, "[Save] Failed to open %s for writing: %s\n", 
+        ERROR_LOG("Failed to open %s for writing: %s", 
                 filepath, strerror(errno));
         return 0;
     }
@@ -974,14 +975,14 @@ int save_character(PlayerSession *sess) {
     
     fclose(f);
     
-    fprintf(stderr, "[Save] Character '%s' saved to %s\n", sess->username, filepath);
+    INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
     return 1;
 }
 
 /* Load character from disk */
 int load_character(PlayerSession *sess, const char *username) {
     if (!sess || !username || !username[0]) {
-        fprintf(stderr, "[Load] Error: Invalid parameters\n");
+        ERROR_LOG("Invalid parameters");
         return 0;
     }
     
@@ -992,14 +993,14 @@ int load_character(PlayerSession *sess, const char *username) {
     /* Check if file exists */
     FILE *f = fopen(filepath, "rb");
     if (!f) {
-        fprintf(stderr, "[Load] No save file found for '%s'\n", username);
+        DEBUG_LOG("No save file found for '%s'", username);
         return 0;  /* New player, need to create character */
     }
     
     /* Read and validate magic number */
     uint32_t magic;
     if (fread(&magic, sizeof(uint32_t), 1, f) != 1 || magic != 0x414D4C50) {
-        fprintf(stderr, "[Load] Invalid save file format for '%s'\n", username);
+        ERROR_LOG("Invalid save file format for '%s'", username);
         fclose(f);
         return 0;
     }
@@ -1007,13 +1008,13 @@ int load_character(PlayerSession *sess, const char *username) {
     /* Read version */
     uint16_t version;
     if (fread(&version, sizeof(uint16_t), 1, f) != 1) {
-        fprintf(stderr, "[Load] Failed to read version for '%s'\n", username);
+        ERROR_LOG("Failed to read version for '%s'", username);
         fclose(f);
         return 0;
     }
     
     if (version != 1) {
-        fprintf(stderr, "[Load] Unsupported save file version %d for '%s'\n", 
+        ERROR_LOG("Unsupported save file version %d for '%s'", 
                 version, username);
         fclose(f);
         return 0;
@@ -1022,7 +1023,7 @@ int load_character(PlayerSession *sess, const char *username) {
     /* Read username */
     size_t name_len;
     if (fread(&name_len, sizeof(size_t), 1, f) != 1 || name_len >= sizeof(sess->username)) {
-        fprintf(stderr, "[Load] Invalid username length for '%s'\n", username);
+        ERROR_LOG("Invalid username length for '%s'", username);
         fclose(f);
         return 0;
     }
@@ -1094,7 +1095,7 @@ int load_character(PlayerSession *sess, const char *username) {
         sess->current_room = room_get_start();  /* Fallback to start room */
     }
     
-    fprintf(stderr, "[Load] Character '%s' loaded from %s (saved %ld seconds ago)\n", 
+    INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)", 
             username, filepath, time(NULL) - saved_time);
     
     return 1;

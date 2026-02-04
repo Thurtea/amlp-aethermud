@@ -30,6 +30,20 @@ int main(string arg) {
         return 1;
     }
     
+    // Phase 2, Step 4a: Check size compatibility for weapons
+    if (function_exists("can_wear_size", user) && function_exists("query_size", item)) {
+        if (!user->can_wear_size(item)) {
+            // Phase 2, Step 4b: Size mismatch error
+            string item_size = item->query_size_name();
+            string user_size = user->query_creature_size_name();
+            
+            tell_object(user, sprintf("That %s weapon is too %s for you to wield!\n",
+                item_size, (item->query_size() < user->query_creature_size() ? "small" : "large")));
+            tell_object(user, sprintf("You need %s-sized equipment.\n", user_size));
+            return 1;
+        }
+    }
+    
     // Determine slot (right hand by default)
     slot = "right_hand";
     

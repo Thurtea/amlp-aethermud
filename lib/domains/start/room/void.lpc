@@ -16,4 +16,5 @@ void create() {
     );
     
     add_exit("welcome", DIR_DOMAINS + "/start/room/welcome");
+    add_exit("arena", "/domains/start/room/combat_arena");
 }

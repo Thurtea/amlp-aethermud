@@ -1,0 +1,37 @@
+// Urban Warrior Armor - Light body armor
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("urban warrior armor");
+    set_id("armor");
+    set_id_alt("urban");
+    set_short("urban warrior light armor");
+    set_long(
+        "This is lightweight body armor designed for urban combat. It provides "
+        "50 M.D.C. of protection and is made of composite ceramics and mega-damage "
+        "fabrics. The black armor is form-fitting and allows excellent mobility.\n"
+    );
+    
+    set_type("armor");
+    set_property("armor_type", "body");
+    set_property("armor_rating", 50);
+    set_property("is_mdc_armor", 1);
+    set_property("max_durability", 50);
+    set_property("current_durability", 50);
+    
+    set_weight(15);
+    set_value(15000);
+}
+
+int query_armor_rating() { return query_property("armor_rating"); }
+int is_armor_broken() { 
+    return query_property("current_durability") <= 0;
+}
+
+void damage_armor(int damage) {
+    int current = query_property("current_durability");
+    current -= damage;
+    if (current < 0) current = 0;
+    set_property("current_durability", current);
+}

@@ -1,23 +1,103 @@
 // std/object.c - Base object for all objects in the MUD
 // All other objects should inherit from this
 
+// Phase 2, Step 1a: Size constants
+// 0 = Tiny (sprites, pixies)
+// 1 = Small (goblins, dwarves) 
+// 2 = Medium (humans, elves)
+// 3 = Large (ogres, titans)
+// 4 = Huge (giants, dragons)
+
 string short_desc;
 string long_desc;
+string id;
+string *ids;
+int weight;
+int value;
+mapping properties;
+object environment;
+int wielded;  // Is this weapon being wielded?
+int worn;     // Is this armor/clothing being worn?
+
+// Phase 2, Step 1b: Size property
+int size;     // Object/armor size category (0-4)
+
+// Phase 2, Step 2a: Armor rating (AR) - protection value
+int armor_rating;
+
+// Phase 2, Step 2b: Armor durability/damage capacity
+int armor_damage;      // Current damage sustained
+int armor_max_damage;  // Max damage before armor breaks
+
+// Phase 2, Step 2c: Armor type/slot already handled by properties
+// Use set_property("armor_slot", "body") etc.
 
 void create() {
     // Base object initialization
     short_desc = "a generic object";
     long_desc = "This is a generic object.";
+    id = "object";
+    ids = ({ "object" });
+    weight = 100;  // Default 100 grams
+    value = 0;     // Default no value
+    properties = ([ ]);
+    environment = 0;
+    wielded = 0;
+    worn = 0;
+    size = 2;      // Phase 2, Step 1b: Default medium size
+    
+    // Phase 2, Step 2: Initialize armor properties
+    armor_rating = 0;
+    armor_damage = 0;
+    armor_max_damage = 0;
 }
 
 void setup() {
     // Override this in child objects
 }
 
+// Identity functions
 string query_name() {
-    return "object";
+    return id;
 }
 
+string query_id() {
+    return id;
+}
+
+string *query_ids() {
+    return ids ? ids : ({ id });
+}
+
+void set_id(string new_id) {
+    id = new_id;
+    if (!ids || sizeof(ids) == 0) {
+        ids = ({ new_id });
+    }
+}
+
+void add_id(string new_id) {
+    if (!ids) ids = ({ });
+    ids += ({ new_id });
+}
+
+// Check if this object matches an id
+int id(string str) {
+    if (!str) return 0;
+    str = lower_case(str);
+    
+    if (id && lower_case(id) == str) return 1;
+    
+    if (ids) {
+        foreach (string i in ids) {
+            if (lower_case(i) == str) return 1;
+        }
+    }
+    
+    return 0;
+}
+
+// Description functions
 string query_short() {
     return short_desc ? short_desc : "a generic object";
 }
@@ -32,4 +112,179 @@ void set_short(string desc) {
 
 void set_long(string desc) {
     long_desc = desc;
+}
+
+// Physical properties
+int query_weight() {
+    return weight;
+}
+
+void set_weight(int w) {
+    weight = w;
+}
+
+int query_value() {
+    return value;
+}
+
+void set_value(int v) {
+    value = v;
+}
+
+// Generic properties system
+mixed query_property(string prop) {
+    return properties ? properties[prop] : 0;
+}
+
+void set_property(string prop, mixed val) {
+    if (!properties) properties = ([ ]);
+    properties[prop] = val;
+}
+
+void remove_property(string prop) {
+    if (properties) {
+        map_delete(properties, prop);
+    }
+}
+
+mapping query_properties() {
+    return properties ? properties : ([ ]);
+}
+
+// Environment functions
+object query_environment() {
+    return environment;
+}
+
+void set_environment(object env) {
+    environment = env;
+}
+
+// Movement function
+void move(object dest) {
+    environment = dest;
+    // Note: The driver's move_object() handles inventory tracking
+}
+
+// Item restrictions
+int query_no_get() {
+    return query_property("no_get");
+}
+
+int query_no_drop() {
+    return query_property("no_drop");
+}
+
+// Equipment status
+int query_wielded() {
+    return wielded;
+}
+
+void set_wielded(int val) {
+    wielded = val;
+}
+
+int query_worn() {
+    return worn;
+}
+
+void set_worn(int val) {
+    worn = val;
+}
+
+// Weapon-specific functions
+string query_weapon_type() {
+    return query_property("weapon_type");
+}
+
+int query_two_handed() {
+    return query_property("two_handed");
+}
+
+// Armor-specific functions
+string query_slot() {
+    return query_property("armor_slot");
+}
+
+void set_slot(string s) {
+    set_property("armor_slot", s);
+}
+
+int query_no_remove() {
+    return query_property("no_remove") || query_property("cursed");
+}
+
+// Phase 2, Step 1c: Size query/set functions
+int query_size() {
+    return size;
+}
+
+void set_size(int s) {
+    if (s < 0) s = 0;
+    if (s > 4) s = 4;
+    size = s;
+}
+
+// Phase 2, Step 1c: Size name helper
+string query_size_name() {
+    string *size_names = ({ "tiny", "small", "medium", "large", "huge" });
+    if (size >= 0 && size < sizeof(size_names)) {
+        return size_names[size];
+    }
+    return "medium";
+}
+
+// Phase 2, Step 2a: Armor rating query/set
+int query_armor_rating() {
+    return armor_rating;
+}
+
+void set_armor_rating(int rating) {
+    armor_rating = rating;
+}
+
+// Alias for convenience
+int query_ar() {
+    return armor_rating;
+}
+
+// Phase 2, Step 2b: Armor damage/durability functions
+int query_armor_damage() {
+    return armor_damage;
+}
+
+int query_armor_max_damage() {
+    return armor_max_damage;
+}
+
+void set_armor_max_damage(int max) {
+    armor_max_damage = max;
+}
+
+// Check if armor is broken
+int is_armor_broken() {
+    if (armor_max_damage <= 0) return 0;  // Not armor or indestructible
+    return armor_damage >= armor_max_damage;
+}
+
+// Get armor condition percentage (100 = perfect, 0 = broken)
+int query_armor_condition() {
+    if (armor_max_damage <= 0) return 100;  // Not armor or indestructible
+    if (armor_damage >= armor_max_damage) return 0;
+    return ((armor_max_damage - armor_damage) * 100) / armor_max_damage;
+}
+
+// Damage the armor
+void damage_armor(int amount) {
+    if (armor_max_damage <= 0) return;  // Not armor or indestructible
+    armor_damage += amount;
+    if (armor_damage > armor_max_damage) {
+        armor_damage = armor_max_damage;
+    }
+}
+
+// Repair the armor
+void repair_armor(int amount) {
+    armor_damage -= amount;
+    if (armor_damage < 0) armor_damage = 0;
 }

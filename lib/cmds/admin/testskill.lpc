@@ -1,0 +1,136 @@
+// /lib/cmds/admin/testskill.lpc
+// Test skill check mechanics (wizard/admin debugging tool)
+//
+// Usage: testskill <skill name>
+//
+// Tests the Palladium skill check system:
+// - Roll d100
+// - Compare to skill value
+// - Success if roll <= skill value
+// - Critical failure on 96-100 (always fails)
+
+#include <globals.h>
+
+int main(string arg) {
+    object user;
+    string skill_name;
+    int skill_value, roll, success;
+    
+    user = previous_object();
+    
+    // Check privilege (wizard or admin only)
+    if (user->query_privilege_level() < PRIV_WIZARD) {
+        tell_object(user, "You must be a wizard to use this command.\n");
+        return 1;
+    }
+    
+    // Parse argument
+    if (!arg || arg == "") {
+        tell_object(user, "Usage: testskill <skill name>\n");
+        tell_object(user, "Example: testskill Hand to Hand\n");
+        return 1;
+    }
+    
+    skill_name = arg;
+    
+    // Get skill value
+    if (!function_exists("query_skill", user)) {
+        tell_object(user, "Error: Skill system not implemented in player object.\n");
+        return 1;
+    }
+    
+    skill_value = user->query_skill(skill_name);
+    
+    if (skill_value == 0) {
+        // Check if they have any skills at all
+        mapping all_skills = user->query_all_skills();
+        
+        if (!all_skills || sizeof(all_skills) == 0) {
+            tell_object(user, "You don't have any skills yet.\n");
+            tell_object(user, "Complete character creation first.\n");
+            return 1;
+        }
+        
+        tell_object(user, "You don't have the skill: " + skill_name + "\n");
+        tell_object(user, "\nYour skills:\n");
+        
+        foreach (string s, int v in all_skills) {
+            tell_object(user, sprintf("  %-30s %d%%\n", s, v));
+        }
+        
+        return 1;
+    }
+    
+    // Roll d100 (1-100)
+    roll = random(100) + 1;
+    
+    // Determine result
+    // Critical failure: 96-100 always fails
+    if (roll >= 96) {
+        success = 0;
+        
+        tell_object(user, ANSI_RED + ANSI_BOLD + 
+            "\n=== SKILL CHECK: CRITICAL FAILURE ===\n" + ANSI_RESET);
+        tell_object(user, "Skill: " + skill_name + "\n");
+        tell_object(user, "Your Skill Value: " + skill_value + "%\n");
+        tell_object(user, ANSI_RED + "Rolled: " + roll + 
+            " (need " + skill_value + " or less)\n" + ANSI_RESET);
+        tell_object(user, ANSI_RED + ANSI_BOLD + 
+            "Result: CRITICAL FAILURE!\n" + ANSI_RESET);
+        tell_object(user, ANSI_DIM + 
+            "(Rolls of 96-100 always fail)\n" + ANSI_RESET);
+        tell_object(user, "======================================\n\n");
+        
+    } else if (roll <= skill_value) {
+        // Success
+        success = 1;
+        
+        tell_object(user, ANSI_GREEN + ANSI_BOLD + 
+            "\n=== SKILL CHECK: SUCCESS ===\n" + ANSI_RESET);
+        tell_object(user, "Skill: " + skill_name + "\n");
+        tell_object(user, "Your Skill Value: " + skill_value + "%\n");
+        tell_object(user, ANSI_GREEN + "Rolled: " + roll + 
+            " (need " + skill_value + " or less)\n" + ANSI_RESET);
+        tell_object(user, ANSI_GREEN + ANSI_BOLD + 
+            "Result: SUCCESS!\n" + ANSI_RESET);
+        tell_object(user, "============================\n\n");
+        
+    } else {
+        // Normal failure
+        success = 0;
+        
+        tell_object(user, ANSI_YELLOW + ANSI_BOLD + 
+            "\n=== SKILL CHECK: FAILURE ===\n" + ANSI_RESET);
+        tell_object(user, "Skill: " + skill_name + "\n");
+        tell_object(user, "Your Skill Value: " + skill_value + "%\n");
+        tell_object(user, ANSI_YELLOW + "Rolled: " + roll + 
+            " (need " + skill_value + " or less)\n" + ANSI_RESET);
+        tell_object(user, ANSI_YELLOW + "Result: FAILURE\n" + ANSI_RESET);
+        tell_object(user, "============================\n\n");
+    }
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"TESTSKILL - Test skill check mechanics (Debug command)\n\n"
+"Usage:\n"
+"  testskill <skill name>\n\n"
+"Description:\n"
+"  Performs a Palladium-style skill check for debugging purposes.\n"
+"  Rolls d100 and compares to your skill value.\n"
+"  Success if roll <= skill value.\n"
+"  Rolls of 96-100 are critical failures (always fail).\n\n"
+"Color coding:\n"
+"  " + ANSI_GREEN + "Green" + ANSI_RESET + "  = Success\n"
+"  " + ANSI_YELLOW + "Yellow" + ANSI_RESET + " = Normal failure\n"
+"  " + ANSI_RED + "Red" + ANSI_RESET + "    = Critical failure\n\n"
+"Examples:\n"
+"  testskill Hand to Hand\n"
+"  testskill Literacy\n"
+"  testskill Pilot Automobile\n\n"
+"This command is for testing and debugging only.\n"
+"Wizard/Admin access required.\n\n"
+"See also: skills, score\n";
+}

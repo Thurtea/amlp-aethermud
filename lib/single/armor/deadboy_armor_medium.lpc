@@ -1,0 +1,49 @@
+// /lib/single/armor/deadboy_armor_medium.lpc
+// Phase 2, Step 5b: CS Dead Boy armor (MDC armor, Medium size)
+// Famous Coalition States power armor
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    
+    set_id("armor");
+    add_id("deadboy");
+    add_id("dead boy armor");
+    add_id("cs armor");
+    add_id("power armor");
+    
+    short_desc = "Coalition States Dead Boy armor";
+    long_desc = "This is the iconic black armor of the Coalition States. "
+                "The suit is constructed from mega-damage materials and provides "
+                "excellent protection. The distinctive skull-like faceplate strikes "
+                "fear into enemies. Only CS military personnel are authorized to wear this.";
+    
+    // Phase 2, Step 5b: Size properties
+    set_size(2);  // Medium size (standard human)
+    
+    // Phase 2, Step 2a: Armor rating (MDC armor uses AR differently)
+    set_armor_rating(15);  // Natural AR 15
+    
+    // Phase 2, Step 2b: Durability (MDC armor!)
+    // Dead Boy armor has 60 MDC
+    set_armor_max_damage(60);  // 60 M.D.C.
+    
+    set_property("armor_slot", "body");
+    set_property("armor_type", "heavy");
+    set_property("material", "mdc_alloy");
+    set_property("is_mdc_armor", 1);  // Flag for MDC armor
+    set_property("armor_class", "power_armor");
+    set_property("faction", "coalition_states");
+    set_property("no_get", 0);  // Can be taken
+    
+    // Phase 4, Step 1a/1b/1c: Appearance override properties
+    // When worn, changes wearer's in-room appearance
+    set_property("appearance_override", "Coalition Dead Boy");
+    set_property("article_override", "A");
+    set_property("title_override", "Dead Boy Trooper");
+    
+    // Physical properties
+    weight = 25000;  // 25 kg (power armor is heavy)
+    value = 45000;   // 45,000 credits (very expensive)
+}

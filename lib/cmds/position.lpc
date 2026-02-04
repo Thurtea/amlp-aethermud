@@ -1,0 +1,46 @@
+/*
+ * /lib/cmds/position.lpc - Set custom position for roleplay
+ * 
+ * Usage:
+ *   position <string>    - Set custom position (e.g., "is sitting by the fire.")
+ *   position             - Reset to default "is standing around."
+ * 
+ * The position resets automatically when moving rooms or taking actions.
+ */
+
+int cmd(string args) {
+    object user = this_player();
+    
+    if (!args || args == "") {
+        // Reset to default position
+        user->reset_position();
+        write("Your position has been reset to default.\n");
+        say(user->query_introduction_name(user) + "'s position has changed.\n");
+        return 1;
+    }
+    
+    // Set custom position
+    user->set_position(args);
+    
+    write("Your position is now: " + args + "\n");
+    say(user->query_introduction_name(user) + " changes their position.\n");
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"POSITION - Set your custom position for roleplay\n\n"
+"Usage:\n"
+"  position <description>    Set a custom position description\n"
+"  position                  Reset to default (standing around)\n\n"
+"Examples:\n"
+"  position is sitting by the fire.\n"
+"  position is leaning against the wall, arms crossed.\n"
+"  position is kneeling in prayer.\n"
+"  position lies wounded on the ground.\n\n"
+"Your position appears when others look at the room:\n"
+"  'A human is sitting by the fire.'\n\n"
+"Position automatically resets when you move to another room.\n";
+}
+

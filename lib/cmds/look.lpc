@@ -3,7 +3,7 @@
 #include <globals.h>
 
 int main(string arg) {
-    object room, user;
+    object room, user, target;
     
     user = previous_object();
     room = user->query_environment();
@@ -13,6 +13,95 @@ int main(string arg) {
         return 1;
     }
     
-    tell_object(user, room->look());
-    return 1;
-}
+    // Handle "look at <target>"
+    if (arg && arg != "") {
+        // Remove "at" if present
+        if (sscanf(arg, "at %s", arg) == 1) {
+            // arg is now just the target name
+        }
+        
+        arg = lower_case(arg);
+        
+        // Try exact ID match first
+        target = present(arg, room);
+        
+        // If not found by ID, try by race/RCC name for living creatures
+        if (!target) {
+            object *inv = all_inventory(room);
+            foreach (object ob : inv) {
+                if (living(ob) && ob != user) {
+                    string race = ob->query_race ? ob->query_race() : "";
+                    if (race && lower_case(race) == arg) {
+                        target = ob;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (!target) {
+            tell_object(user, "You don't see that here.\n");
+            return 1;
+        }
+        
+        // Display target's long description
+        string desc = "";
+        
+        if (living(target)) {
+            // Looking at a living creature - show name as introduced
+            string name_seen;
+            if (function_exists("query_introduction_name", target)) {
+                name_seen = target->query_introduction_name(user);
+            } else {
+                name_seen = target->query_name ? target->query_name() : "someone";
+            }
+            
+            // Capitalize
+            if (name_seen && sizeof(name_seen) > 0) {
+                name_seen = capitalize(name_seen);
+            }
+            
+            desc += name_seen + "\n";
+            
+            // Show long description if available
+            if (function_exists("query_long", target)) {
+                string long_desc = target->query_long();
+                if (long_desc && long_desc != "") {
+                    desc += long_desc + "\n";
+                }
+            }
+            
+            // Show equipment if player/NPC
+            if (function_exists("query_equipped", target)) {
+                mapping eq = target->query_equipped();
+                if (eq && sizeof(eq) > 0) {
+                    desc += "\nEquipment:\n";
+                    string *slots = keys(eq);
+                    foreach (string slot : slots) {
+                        object item = eq[slot];
+                        if (item) {
+                            string item_name = item->query_short ? item->query_short() : item->query_name();
+                            desc += "  " + capitalize(slot) + ": " + item_name + "\n";
+                        }
+                    }
+                }
+            }
+        } else {
+            // Looking at an object
+            if (function_exists("query_short", target)) {
+                desc += capitalize(target->query_short()) + "\n";
+            }
+            
+            if (function_exists("query_long", target)) {
+                string long_desc = target->query_long();
+                if (long_desc && long_desc != "") {
+                    desc += long_desc + "\n";
+                }
+            }
+        }
+        
+        tell_object(user, desc);
+        return 1;
+    }
+    
+    // Just "look" - show room

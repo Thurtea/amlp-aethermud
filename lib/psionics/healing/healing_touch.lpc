@@ -1,0 +1,122 @@
+/*
+ * /lib/psionics/healing/healing_touch.lpc - Healing Touch
+ *
+ * Touch-based healing power
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_id("healing_touch");
+    set_power_name("Healing Touch");
+    set_power_desc(
+        "By touching another person (or oneself), the psychic can channel "
+        "healing energy directly into the body, restoring Hit Points and S.D.C. "
+        "The healing is instantaneous and can be performed even in the heat "
+        "of combat. The power restores 2d6 Hit Points or S.D.C., whichever "
+        "the target needs most.\n\n"
+        "Unlike Bio-Regeneration which only works on the psych themselves, "
+        "Healing Touch can be used on others. The psychic simply places their "
+        "hand on the wounded area and concentrates, channeling their Inner "
+        "Strength into healing energy.\n\n"
+        "Range: Touch only\n"
+        "Healing: 2d6 HP or S.D.C.\n"
+        "ISP Cost: 6 points"
+    );
+    set_power_category("healing");
+    
+    set_isp_cost(6);
+    set_duration_type(0);   /* Instant */
+    set_base_duration(0);
+    set_range_type(1);      /* Touch */
+    set_base_range(0);
+}
+
+int apply_effect(object user, object target) {
+    if (!target) {
+        tell_object(user, "Heal whom?\n");
+        return 0;
+    }
+    
+    /* Check if target is in same environment */
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here!\n");
+        return 0;
+    }
+    
+    /* Check if target is living */
+    if (!living(target)) {
+        tell_object(user, "You can only heal living beings!\n");
+        return 0;
+    }
+    
+    /* Check if target needs healing */
+    if (target->query_hp() >= target->query_max_hp() && 
+        target->query_sdc() >= target->query_max_sdc()) {
+        if (user == target) {
+            tell_object(user, "You are already at full health!\n");
+        } else {
+            tell_object(user, target->query_cap_name() + " is already at full health!\n");
+        }
+        return 0;
+    }
+    
+    /* Calculate healing - 2d6 */
+    int healing = random(6) + 1 + random(6) + 1;
+    
+    /* Store starting values */
+    int old_hp = target->query_hp();
+    int old_sdc = target->query_sdc();
+    
+    /* Apply healing */
+    target->heal_damage(healing, 0);  /* 0 = normal healing (not MDC repair) */
+    
+    /* Calculate actual healing done */
+    int healed_hp = target->query_hp() - old_hp;
+    int healed_sdc = target->query_sdc() - old_sdc;
+    int total_healed = healed_hp + healed_sdc;
+    
+    /* Display messages */
+    if (user == target) {
+        tell_object(user,
+            "You place your hand over your wounds and channel healing energy!\n" +
+            "Warmth flows through your body as injuries mend.\n" +
+            "Healed: " + total_healed + " health\n");
+    } else {
+        tell_object(user,
+            "You place your hand on " + target->query_cap_name() +
+            " and channel healing energy!\n" +
+            "Healed " + target->query_cap_name() + " for " + 
+            total_healed + " health\n");
+        
+        tell_object(target,
+            user->query_cap_name() +
+            " places their hand on you!\n" +
+            "Soothing warmth spreads from their touch, healing your wounds.\n" +
+            "Healed: " + total_healed + " health\n");
+    }
+    
+    /* Notify room */
+    object env = environment(user);
+    if (env) {
+        object *inv = all_inventory(env);
+        foreach (object ob : inv) {
+            if (ob != user && ob != target && living(ob)) {
+                if (user == target) {
+                    tell_object(ob,
+                        user->query_cap_name() +
+                        "'s wounds glow with soft light and begin to heal.\n");
+                } else {
+                    tell_object(ob,
+                        user->query_cap_name() +
+                        " places their hand on " + target->query_cap_name() +
+                        ", and soft healing light flows between them.\n");
+                }
+            }
+        }
+    }
+    
+    return 1;
+}

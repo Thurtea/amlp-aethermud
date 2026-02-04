@@ -1,0 +1,107 @@
+/*
+ * /lib/psionics/sensitive/telepathy.lpc - Telepathy
+ *
+ * Mind-reading and mental communication power
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_id("telepathy");
+    set_power_name("Telepathy");
+    set_power_desc(
+        "The most famous of all psionic powers, telepathy allows the psychic "
+        "to read surface thoughts and send mental messages to others. At basic "
+        "levels, the psychic can only read surface thoughts (what the person "
+        "is actively thinking about) and send simple mental messages. With "
+        "practice, deeper probing becomes possible.\n\n"
+        "The target may or may not be aware of the telepathic contact, depending "
+        "on their own mental defenses and sensitivity. Those with Mind Block "
+        "active are completely immune to telepathy.\n\n"
+        "Range: 100 feet per level of experience."
+    );
+    set_power_category("sensitive");
+    
+    set_isp_cost(4);
+    set_duration_type(1);    /* Per minute */
+    set_base_duration(2);
+    set_range_type(2);       /* Ranged */
+    set_base_range(100);     /* 100 feet per level */
+}
+
+int apply_effect(object user, object target) {
+    if (!target) {
+        tell_object(user, "Read whose mind?\n");
+        return 0;
+    }
+    
+    /* Check if target is in same environment */
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here!\n");
+        return 0;
+    }
+    
+    /* Check if target is living */
+    if (!living(target)) {
+        tell_object(user, "You can only read the minds of living beings!\n");
+        return 0;
+    }
+    
+    /* Check if target has Mind Block active */
+    if (target->query_property("mind_block_active")) {
+        tell_object(user,
+            "You sense a powerful mental barrier blocking your telepathy!\n");
+        tell_object(target,
+            "You feel a mental probe attempt to breach your mind block, but it fails.\n");
+        return 1;
+    }
+    
+    /* Cannot read yourself */
+    if (user == target) {
+        tell_object(user, "You already know what you're thinking!\n");
+        return 0;
+    }
+    
+    /* Successful telepathy */
+    tell_object(user,
+        "You focus your mind on " + target->query_cap_name() + 
+        "...\n");
+    
+    /* Generate some surface thoughts */
+    string *sample_thoughts = ({
+        "'I wonder what will happen next...'",
+        "'I should be more careful...'",
+        "'What was that sound?'",
+        "'I need to find some food soon...'",
+        "'This place makes me uneasy...'",
+        "'I wonder if anyone is watching me...'",
+        "'Maybe I should leave this place...'",
+    });
+    
+    string thought = sample_thoughts[random(sizeof(sample_thoughts))];
+    
+    /* If in combat, different thoughts */
+    if (target->in_combat()) {
+        string *combat_thoughts = ({
+            "'I need to win this fight!'",
+            "'Where should I strike next?'",
+            "'I'm running out of strength...'",
+            "'Should I flee or keep fighting?'",
+        });
+        thought = combat_thoughts[random(sizeof(combat_thoughts))];
+    }
+    
+    tell_object(user,
+        "You sense their surface thoughts:\n" + thought + "\n");
+    
+    /* Tell target if they have sufficient ME (mental endurance) */
+    int me = target->query_stat("ME");
+    if (me >= 15 || random(20) + 1 + (me / 2) > 15) {
+        tell_object(target,
+            "You feel a faint presence probing at the edges of your mind...\n");
+    }
+    
+    return 1;
+}

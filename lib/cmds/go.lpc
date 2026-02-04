@@ -29,6 +29,12 @@ int execute(string args, object player) {
     
     tell_object(player, "You go " + args + ".\n");
     player->move(dest);
+    
+    // Reset position when moving rooms
+    if (function_exists("reset_position", player)) {
+        player->reset_position();
+    }
+    
     tell_object(player, dest->look());
     
     return 1;

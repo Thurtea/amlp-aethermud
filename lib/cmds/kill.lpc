@@ -1,0 +1,29 @@
+/*
+ * /lib/cmds/kill.lpc - Initiate combat (alias for attack)
+ * 
+ * Usage:
+ *   kill <target>
+ */
+
+int cmd(string args) {
+    object attack_cmd;
+    
+    // Load and call the attack command
+    attack_cmd = load_object("/cmds/attack");
+    
+    if (attack_cmd && function_exists("cmd", attack_cmd)) {
+        return attack_cmd->cmd(args);
+    }
+    
+    write("Error: Attack command not available.\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"KILL - Initiate combat with a target\n\n"
+"This is an alias for the ATTACK command.\n\n"
+"Usage:\n"
+"  kill <target>    Attack a creature or character\n\n"
+"See 'help attack' for more information.\n";
+}

@@ -1,0 +1,97 @@
+/*
+ * /lib/spells/fireball.lpc - Fireball spell
+ *
+ * Classic explosive spell that deals fire damage to a target
+ * Level 5 spell for offensive magic
+ */
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_id("fireball");
+    set_spell_name("Fireball");
+    set_spell_desc(
+        "One of the most iconic offensive spells, Fireball creates a sphere "
+        "of roaring flame that explodes on impact with the target. The caster "
+        "can choose to make it deal either 6d6 SDC damage or 1d6 MD (mega-damage) "
+        "to a single target. The fireball is launched from the caster's hand and "
+        "streaks toward the target at high speed.\n\n"
+        "On impact, the target is engulfed in flame, suffering severe burns. "
+        "The fireball explodes with a loud WHOOSH and leaves scorch marks on "
+        "the ground."
+    );
+    
+    set_spell_level(5);
+    set_ppe_cost(10);
+    
+    set_duration_type(0);    /* Instant */
+    set_base_duration(0);
+    
+    set_range_type(2);       /* Ranged */
+    set_base_range(120);     /* 120 feet per level */
+    
+    set_incantation("Ignis sphera, combure hostem!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({  }));
+    set_casting_time(1);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster || !target) return 0;
+    
+    /* Check if target is in same environment */
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+    
+    /* Check if target is living */
+    if (!living(target)) {
+        tell_object(caster, "You can only target living beings with Fireball!\n");
+        return 0;
+    }
+    
+    /* Roll damage - 6d6 SDC (for now, MDC is Phase 4) */
+    int damage = 0;
+    for (int i = 0; i < 6; i++) {
+        damage += random(6) + 1;
+    }
+    
+    /* Display messages */
+    tell_object(caster,
+        "You launch a fireball at " + target->query_cap_name() + "!\n" +
+        "The sphere of flame streaks through the air and EXPLODES on impact!\n" +
+        "Damage: " + damage + " SDC\n");
+    
+    tell_object(target,
+        caster->query_cap_name() + " launches a fireball at you!\n" +
+        "The blazing sphere EXPLODES against you, burning your flesh!\n" +
+        "You take " + damage + " fire damage!\n");
+    
+    /* Tell room */
+    object env = environment(caster);
+    if (env) {
+        object *inv = all_inventory(env);
+        foreach (object ob : inv) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    caster->query_cap_name() +
+                    " launches a fireball at " + target->query_cap_name() + "!\n" +
+                    "The sphere of flame EXPLODES in a burst of fire!\n");
+            }
+        }
+    }
+    
+    /* Apply damage (SDC damage type = 0) */
+    int killed = target->take_damage(damage, 0);
+    
+   if (killed) {
+        tell_object(caster, 
+            "Your fireball has slain " + target->query_cap_name() + "!\n");
+    }
+    
+    return 1;
+}

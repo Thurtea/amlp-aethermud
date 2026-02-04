@@ -39,6 +39,7 @@
 #include "compiler.h"
 #include "master_object.h"
 #include "efun.h"
+#include "debug.h"
 #include "skills.h"
 #include "combat.h"
 #include "item.h"
@@ -148,13 +149,13 @@ static void command_debug_init(void) {
 
     command_debug_log = fopen("logs/command_debug.log", "a");
     if (!command_debug_log) {
-        fprintf(stderr, "[Server] WARNING: failed to open logs/command_debug.log\n");
+        WARN_LOG("Failed to open logs/command_debug.log");
         return;
     }
 
     command_debug_enabled = 1;
     memset(&command_debug_ctx, 0, sizeof(command_debug_ctx));
-    fprintf(stderr, "[Server] Command debug logging enabled\n");
+    DEBUG_LOG("Command debug logging enabled");
 }
 
 static void command_debug_set_context(const char *raw, const char *cmd,

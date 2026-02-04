@@ -1,0 +1,118 @@
+/*
+ * /lib/cmds/flee.lpc - Attempt to escape from combat
+ * 
+ * Usage:
+ *   flee [direction]
+ */
+
+int cmd(string args) {
+    object player, target, env;
+    mapping exits;
+    string *directions;
+    string escape_dir;
+    
+    player = this_player();
+    env = environment(player);
+    
+    // Check if in combat
+    if (!player->in_combat()) {
+        write("You're not in combat!\n");
+        return 1;
+    }
+    
+    target = player->query_combat_target();
+    
+    // Get available exits
+    if (!env || !function_exists("query_exits", env)) {
+        write("There's nowhere to flee!\n");
+        return 1;
+    }
+    
+    exits = env->query_exits();
+    if (!exits || sizeof(exits) == 0) {
+        write("There's nowhere to flee!\n");
+        return 1;
+    }
+    
+    // Determine escape direction
+    directions = keys(exits);
+    
+    if (args && args != "") {
+        // Player specified a direction
+        escape_dir = lower_case(args);
+        if (!exits[escape_dir]) {
+            write("You can't flee that way!\n");
+            write("Available exits: " + implode(directions, ", ") + "\n");
+            return 1;
+        }
+    } else {
+        // Random direction
+        escape_dir = directions[random(sizeof(directions))];
+    }
+    
+    // Roll to escape (PP check - dexterity)
+    int pp = player->query_stat("PP");
+    int escape_roll = random(20) + 1 + (pp > 15 ? (pp - 15) / 3 : 0);
+    int difficulty = 10;  // Base difficulty
+    
+    if (escape_roll >= difficulty) {
+        // Success!
+        write("\n%^GREEN%^You successfully flee to the " + escape_dir + "!%^RESET%^\n\n");
+        
+        tell_object(target,
+                    "%^YELLOW%^" + player->query_cap_name() + 
+                    " flees to the " + escape_dir + "!%^RESET%^\n");
+        
+        tell_room(env,
+                  "%^YELLOW%^" + player->query_cap_name() + 
+                  " flees to the " + escape_dir + "!%^RESET%^\n",
+                  ({ player, target }));
+        
+        // End combat
+        player->set_combat_target(0);
+        if (target && function_exists("set_combat_target", target)) {
+            // Target might chase or switch targets, but for now just end combat
+            if (target->query_combat_target() == player) {
+                target->set_combat_target(0);
+            }
+        }
+        
+        // Move player
+        player->move_player(escape_dir);
+        
+    } else {
+        // Failed to escape - take a free hit!
+        write("\n%^RED%^You fail to escape!%^RESET%^ (Rolled " + 
+              escape_roll + " vs " + difficulty + ")\n");
+        write("%^RED%^" + target->query_cap_name() + 
+              " gets a free attack as you turn to flee!%^RESET%^\n\n");
+        
+        tell_object(target,
+                    "%^GREEN%^" + player->query_cap_name() + 
+                    " tries to flee but you get a free attack!%^RESET%^\n");
+        
+        tell_room(env,
+                  player->query_cap_name() + " tries to flee but fails!\n",
+                  ({ player, target }));
+        
+        // Target gets free attack
+        if (function_exists("perform_attack", target)) {
+            target->perform_attack(player);
+        }
+    }
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"FLEE - Attempt to escape from combat\n\n"
+"Usage:\n"
+"  flee              Flee in a random direction\n"
+"  flee <direction>  Flee in a specific direction\n\n"
+"When in combat, you can attempt to flee to escape. Success\n"
+"depends on your PP (Physical Prowess/Dexterity) stat.\n\n"
+"If you fail to flee, your opponent gets a free attack on you\n"
+"as you turn to run!\n\n"
+"Related commands: ATTACK, KILL\n";
+}

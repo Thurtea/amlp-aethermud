@@ -92,7 +92,22 @@ int cmd(string args) {
     if (target_name && target_name != "") {
         object env = environment(this_player());
         if (env) {
+            // Try exact ID match first
             target = present(target_name, env);
+            
+            // If not found by ID, try by race/RCC name for living creatures
+            if (!target) {
+                object *inv = all_inventory(env);
+                foreach (object ob : inv) {
+                    if (living(ob) && ob != this_player()) {
+                        string race = ob->query_race ? ob->query_race() : "";
+                        if (race && lower_case(race) == lower_case(target_name)) {
+                            target = ob;
+                            break;
+                        }
+                    }
+                }
+            }
         }
         if (!target) {
             write("You don't see '" + target_name + "' here.\n");

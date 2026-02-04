@@ -1,0 +1,128 @@
+/*
+ * /lib/psionics/super/psi_sword.lpc - Psi-Sword
+ *
+ * Creates a blade of pure psionic energy
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_id("psi_sword");
+    set_power_name("Psi-Sword");
+    set_power_desc(
+        "The signature power of the Cyber-Knight, the Psi-Sword is a blade "
+        "of pure psionic energy that can cut through almost anything. The "
+        "psychic focuses their inner strength and projects it as a glowing "
+        "blade of light, typically 3-4 feet long. The sword deals 4d6 M.D. "
+        "per strike and can parry energy blasts and other psi-swords.\n\n"
+        "The blade can take any shape the user desires (sword, axe, spear, "
+        "etc.) but is most commonly manifested as a sword. The weapon is "
+        "semi-solid, made of concentrated psionic energy, and only the "
+        "wielder can hold it.\n\n"
+        "Duration: 1 minute per level of experience.\n"
+        "Damage: 4d6 M.D.\n"
+        "ISP Cost: 20 to create, maintained at no additional cost."
+    );
+    set_power_category("super");
+    
+    set_isp_cost(20);
+    set_duration_type(2);    /* Per level */
+    set_base_duration(1);    /* 1 minute per level */
+    set_range_type(0);       /* Self */
+    set_base_range(0);
+}
+
+int apply_effect(object user, object target) {
+    /* Check if already has psi-sword active */
+    if (user->query_property("psi_sword_active")) {
+        tell_object(user, "You already have a Psi-Sword manifested!\n");
+        tell_object(user, "Lower it first before creating a new one.\n");
+        return 0;
+    }
+    
+    /* Check if hands are free (need at least one hand) */
+    object wielded = user->query_wielded();
+    if (wielded) {
+        tell_object(user, "You need a free hand to manifest a Psi-Sword!\n");
+        tell_object(user, "Unwield your current weapon first.\n");
+        return 0;
+    }
+    
+    /* Calculate duration based on user level */
+    int user_level = user->query_level();
+    if (user_level < 1) user_level = 1;
+    
+    int duration_minutes = 1 * user_level;
+    
+    /* Set psi-sword properties */
+    user->set_property("psi_sword_active", 1);
+    user->set_property("psi_sword_duration", duration_minutes);
+    user->set_property("psi_sword_damage", "4d6");
+    user->set_property("psi_sword_damage_dice", 4);
+    user->set_property("psi_sword_damage_sides", 6);
+    
+    /* Display messages */
+    tell_object(user,
+        "You focus your inner strength outward...\n" +
+        "A blade of brilliant blue-white energy springs into existence in your hand!\n" +
+        "The Psi-Sword hums with power, ready to strike.\n" +
+        "Duration: " + duration_minutes + " minutes\n" +
+        "Damage: 4d6 M.D. per strike\n");
+    
+    /* Notify room */
+    object env = environment(user);
+    if (env) {
+        object *inv = all_inventory(env);
+        foreach (object ob : inv) {
+            if (ob != user && living(ob)) {
+                tell_object(ob,
+                    user->query_cap_name() +
+                    " focuses intensely, and a blade of glowing energy materializes in their hand!\n");
+            }
+        }
+    }
+    
+    /* Schedule removal - duration is in minutes */
+    int seconds = duration_minutes * 60;
+    call_out("remove_psi_sword", seconds, user);
+    
+    return 1;
+}
+
+/*
+ * Called when the power wears off
+ */
+void remove_psi_sword(object user) {
+    if (!user) return;
+    
+    if (user->query_property("psi_sword_active")) {
+        user->remove_property("psi_sword_active");
+        user->remove_property("psi_sword_duration");
+        user->remove_property("psi_sword_damage");
+        user->remove_property("psi_sword_damage_dice");
+        user->remove_property("psi_sword_damage_sides");
+        
+        tell_object(user,
+            "Your Psi-Sword flickers and fades from existence.\n");
+        
+        /* Notify room */
+        object env = environment(user);
+        if (env) {
+            object *inv = all_inventory(env);
+            foreach (object ob : inv) {
+                if (ob != user && living(ob)) {
+                    tell_object(ob,
+                        "The glowing blade in " + user->query_cap_name() +
+                        "'s hand fades away.\n");
+                }
+            }
+        }
+    }
+}
+
+/* Helper function to drop psi-sword manually */
+void drop_psi_sword(object user) {
+    remove_psi_sword(user);
+}

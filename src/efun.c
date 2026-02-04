@@ -8,6 +8,7 @@
 
 #include "efun.h"
 #include "vm.h"
+#include "debug.h"
 #include "array.h"
 #include "mapping.h"
 #include "object.h"
@@ -610,11 +611,9 @@ VMValue efun_write(VirtualMachine *vm, VMValue *args, int arg_count) {
     (void)vm;
     (void)arg_count;
     
-    fprintf(stderr, "[EFUN] write() called with arg type=%d", args[0].type);
-    if (args[0].type == VALUE_STRING) {
-        fprintf(stderr, " value='%s'", args[0].data.string_value ? args[0].data.string_value : "(null)");
-    }
-    fprintf(stderr, "\n");
+    DEBUG_LOG_EFUN("write() called with arg type=%d (value='%s')", args[0].type,
+            args[0].type == VALUE_STRING && args[0].data.string_value ? 
+                args[0].data.string_value : "(null)");
     
     // Convert argument to string
     char buffer[1024];

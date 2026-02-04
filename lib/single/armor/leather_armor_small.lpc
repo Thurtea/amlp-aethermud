@@ -1,0 +1,35 @@
+// /lib/single/armor/leather_armor_small.lpc
+// Phase 2, Step 5b: Leather armor for small races (goblins, dwarves, etc.)
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    
+    set_id("armor");
+    add_id("leather");
+    add_id("leather armor");
+    add_id("small armor");
+    
+    short_desc = "a small suit of leather armor";
+    long_desc = "This leather armor is sized for smaller races such as "
+                "dwarves, goblins, or halflings. It provides basic protection.";
+    
+    // Phase 2, Step 5b: Size properties
+    set_size(1);  // Small size
+    
+    // Phase 2, Step 2a: Armor rating
+    set_armor_rating(20);  // Light armor, AR 20
+    
+    // Phase 2, Step 2b: Durability
+    set_armor_max_damage(40);  // Can take 40 SDC before breaking
+    
+    // Phase 2, Step 2c: Armor slot
+    set_property("armor_slot", "body");
+    set_property("armor_type", "light");
+    set_property("material", "leather");
+    
+    // Physical properties
+    weight = 3500;  // 3.5 kg (lighter than medium)
+    value = 140;    // 140 credits
+}

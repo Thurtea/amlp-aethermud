@@ -1,0 +1,22 @@
+// Stim Pack - Temporary boost item
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("stim pack");
+    set_id("stim");
+    set_id_alt("pack");
+    set_short("a stim pack");
+    set_long(
+        "This small injector contains a cocktail of combat stimulants. When used, "
+        "it provides a temporary boost to reflexes and endurance. The effects last "
+        "for about 10 minutes, followed by mild fatigue.\n"
+    );
+    
+    set_type("consumable");
+    set_property("healing", 10);
+    set_property("boost_duration", 10);
+    
+    set_weight(0);
+    set_value(500);
+}

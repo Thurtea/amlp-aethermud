@@ -1,0 +1,112 @@
+/*
+ * /lib/cmds/attack.lpc - Initiate combat with a target
+ * 
+ * Usage:
+ *   attack <target>
+ */
+
+int cmd(string args) {
+    object attacker, target, env;
+    
+    attacker = this_player();
+    env = environment(attacker);
+    
+    // Check arguments
+    if (!args || args == "") {
+        write("Attack whom?\n");
+        write("Usage: attack <target>\n");
+        return 1;
+    }
+    
+    // Find target in environment
+    target = present(args, env);
+    
+    if (!target) {
+        write("You don't see '" + args + "' here.\n");
+        return 1;
+    }
+    
+    // Can't attack yourself
+    if (target == attacker) {
+        write("You can't attack yourself!\n");
+        return 1;
+    }
+    
+    // Must be living
+    if (!living(target)) {
+        write("You can't attack that.\n");
+        return 1;
+    }
+    
+    // Check if target is alive
+    if (!target->is_alive()) {
+        write("That target is already dead!\n");
+        return 1;
+    }
+    
+    // Check if already in combat
+    if (attacker->in_combat()) {
+        object current_target = attacker->query_combat_target();
+        if (current_target == target) {
+            write("You're already fighting " + target->query_cap_name() + "!\n");
+            return 1;
+        } else {
+            write("You're already fighting " + current_target->query_cap_name() + "!\n");
+            write("Finish your current fight first, or use 'flee' to escape.\n");
+            return 1;
+        }
+    }
+    
+    // Check if target is already in combat with someone else
+    if (target->in_combat()) {
+        object target_fighting = target->query_combat_target();
+        if (target_fighting && target_fighting != attacker) {
+            write(target->query_cap_name() + " is already fighting " + 
+                  target_fighting->query_cap_name() + ".\n");
+            // Allow joining combat anyway
+        }
+    }
+    
+    // Start combat!
+    write("\n>>> YOU ATTACK " + upper_case(target->query_cap_name()) + "! <<<\n\n");
+    
+    // Tell target
+    tell_object(target, 
+                "\n>>> " + upper_case(attacker->query_cap_name()) + 
+                " ATTACKS YOU! <<<\n\n");
+    
+    // Tell room
+    tell_room(env, 
+              "\n>>> " + attacker->query_cap_name() + 
+              " ATTACKS " + target->query_cap_name() + "! <<<\n\n",
+              ({ attacker, target }));
+    
+    // Set combat targets
+    attacker->set_combat_target(target);
+    
+    // Target fights back
+    if (function_exists("set_combat_target", target)) {
+        target->set_combat_target(attacker);
+    }
+    
+    // Immediate first attack
+    attacker->perform_attack(target);
+    
+    // Show combat status
+    write("\n" + attacker->query_combat_status());
+    
+    return 1;
+}
+
+string query_help() {
+    return
+"ATTACK - Initiate combat with a target\n\n"
+"Usage:\n"
+"  attack <target>    Attack a creature or character\n\n"
+"Once combat begins, it continues in rounds. You and your\n"
+"opponent will exchange attacks automatically. Use specific\n"
+"combat commands to control your actions, or 'flee' to escape.\n\n"
+"Combat uses your character's combat skills, weapon bonuses,\n"
+"and statistics to determine hit chance and damage.\n\n"
+"Related commands: FLEE, SCORE (shows health)\n";
+}

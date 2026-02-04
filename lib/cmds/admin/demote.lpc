@@ -1,0 +1,96 @@
+// /lib/cmds/admin/demote.lpc
+// Demote command - Remove wizard/admin privileges from a player
+//
+// Usage: demote <player>
+//
+// Only Admins can use this command (safety measure)
+// Demotes target to Player level (0)
+
+#include <globals.h>
+
+int main(string arg) {
+    object user, target;
+    string target_name;
+    int user_level, old_level;
+    
+    user = previous_object();
+    user_level = user->query_privilege_level();
+    
+    // Check if user has permission - only Admins can demote
+    if (user_level < PRIV_ADMIN) {
+        tell_object(user, "You must be an Admin to use this command.\n");
+        return 1;
+    }
+    
+    // Parse arguments
+    if (!arg || arg == "") {
+        tell_object(user, "Usage: demote <player>\n");
+        tell_object(user, "This will set the player's privilege level to 0 (Player).\n");
+        return 1;
+    }
+    
+    target_name = lower_case(arg);
+    
+    // Prevent demoting yourself
+    if (target_name == user->query_name()) {
+        tell_object(user, "You cannot demote yourself.\n");
+        tell_object(user, "Use: promote " + target_name + " 0\n");
+        return 1;
+    }
+    
+    // Find target player (must be online)
+    target = find_player(target_name);
+    
+    if (!target) {
+        tell_object(user, "Player not found: " + target_name + "\n");
+        tell_object(user, "Note: Player must be online to demote.\n");
+        return 1;
+    }
+    
+    // Get current level
+    old_level = target->query_privilege_level();
+    
+    if (old_level == 0) {
+        tell_object(user, target_name + " is already a Player (level 0).\n");
+        return 1;
+    }
+    
+    // Set to Player level
+    target->set_privilege_level(0);
+    
+    // Save the change
+    if (function_exists("save_player", target)) {
+        target->save_player();
+    }
+    
+    // Level names for display
+    string level_names = ({ "Player", "Wizard", "Admin" });
+    string old_title = level_names[old_level];
+    
+    // Notify the admin
+    tell_object(user, "Demoted " + target_name + " from " + old_title + 
+                " to Player.\n");
+    
+    // Notify the target
+    tell_object(target, "\n*** Your privilege level has been changed! ***\n");
+    tell_object(target, "You have been demoted from " + old_title + 
+                " to Player.\n");
+    tell_object(target, "Your wizard tools have been removed.\n\n");
+    
+    return 1;
+}
+
+string query_help() {
+    return 
+"DEMOTE - Remove wizard or admin privileges from a player\n\n"
+"Usage:\n"
+"  demote <player>\n\n"
+"Description:\n"
+"  Sets the target player's privilege level to 0 (Player).\n"
+"  Only Admins can use this command.\n"
+"  You cannot demote yourself (use 'promote <name> 0' instead).\n"
+"  Target player must be online.\n\n"
+"Examples:\n"
+"  demote thurtest             Remove all privileges from thurtest\n\n"
+"See also: promote, who\n";
+}

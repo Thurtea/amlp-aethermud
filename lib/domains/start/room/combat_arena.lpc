@@ -1,0 +1,39 @@
+// Combat Test Arena - Room for testing combat system
+
+inherit "/std/room";
+
+void create() {
+    ::create();
+    
+    set_id("combat_arena");
+    set_short("Combat Training Arena");
+    set_long(
+        "You stand in a sandy training arena surrounded by wooden fencing.\n"
+        "This area is specifically designed for combat practice. Several\n"
+        "practice dummies line the walls, and weapons racks hold training gear.\n\n"
+        
+        "A sign on the wall reads: 'TEST YOUR COMBAT SKILLS HERE!'\n"
+    );
+    
+    add_exit("void", "/domains/start/room/void");
+    set_items(([
+        "sand": "The ground is covered in coarse sand to cushion falls.",
+        "fence": "A wooden fence marks the boundary of the arena.",
+        "dummies": "Several practice dummies, worn from use.",
+        "sign": "The sign says: 'TEST YOUR COMBAT SKILLS HERE!'",
+        "racks": "Weapon racks hold various training weapons."
+    ]));
+}
+
+void reset() {
+    ::reset();
+    
+    // Spawn a goblin if one doesn't exist
+    object goblin = present("goblin", this_object());
+    if (!goblin) {
+        goblin = load_object("/domains/start/npc/test_goblin");
+        if (goblin) {
+            goblin->move(this_object());
+        }
+    }
+}

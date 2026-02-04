@@ -1,0 +1,34 @@
+// /lib/single/armor/leather_armor_medium.lpc
+// Phase 2, Step 5a/5b: Basic leather armor (Medium size)
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    
+    set_id("armor");
+    add_id("leather");
+    add_id("leather armor");
+    
+    short_desc = "a suit of leather armor";
+    long_desc = "This is a well-crafted suit of medium-sized leather armor, "
+                "providing basic protection without restricting movement.";
+    
+    // Phase 2, Step 5b: Size properties
+    set_size(2);  // Medium size (humans, elves, etc.)
+    
+    // Phase 2, Step 2a: Armor rating
+    set_armor_rating(20);  // Light armor, AR 20
+    
+    // Phase 2, Step 2b: Durability (SDC armor)
+    set_armor_max_damage(40);  // Can take 40 SDC before breaking
+    
+    // Phase 2, Step 2c: Armor slot
+    set_property("armor_slot", "body");
+    set_property("armor_type", "light");
+    set_property("material", "leather");
+    
+    // Physical properties
+    weight = 5000;  // 5 kg
+    value = 150;    // 150 credits
+}

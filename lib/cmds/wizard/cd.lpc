@@ -1,0 +1,46 @@
+/*
+ * /lib/cmds/wizard/cd.lpc - Change current working directory
+ * 
+ * Usage:
+ *   cd <directory>
+ *   cd (no args = go to /domains/start)
+ */
+
+int main(string args) {
+    object player = previous_object();
+    string path, resolved;
+    
+    // No args - go to default directory
+    if (!args || args == "") {
+        player->set_cwd("/domains/start");
+        tell_object(player, "Changed directory to: /domains/start\n");
+        return 1;
+    }
+    
+    // Resolve path
+    if (args == "/") {
+        resolved = args;
+    } else {
+        resolved = player->resolve_path(args);
+    }
+    
+    // Verify directory exists
+    if (file_size(resolved) != -2) {
+        tell_object(player, "Error: Directory not found: " + resolved + "\n");
+        return 1;
+    }
+    
+    player->set_cwd(resolved);
+    tell_object(player, "Changed directory to: " + resolved + "\n");
+    return 1;
+}
+
+void help() {
+    write("Syntax: cd <directory>\n");
+    write("Change working directory.\n");
+    write("Examples:\n");
+    write("  cd /domains/start\n");
+    write("  cd rooms\n");
+    write("  cd ..\n");
+    write("  cd (no args = /domains/start)\n");
+}

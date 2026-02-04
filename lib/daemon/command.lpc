@@ -20,6 +20,7 @@ void create() {
     command_paths = ({
         "/cmds/",
         "/cmds/admin/",
+        "/cmds/wizard/",
     });
     
     // Initialize command registry
@@ -109,6 +110,13 @@ void init_commands() {
     commands["clone"] = "/cmds/admin/clone";
     commands["stat"] = "/cmds/admin/stat";
     commands["testskill"] = "/cmds/admin/testskill";
+    
+    // Wizard building tools
+    commands["pwd"] = "/cmds/wizard/pwd";
+    commands["cd"] = "/cmds/wizard/cd";
+    commands["eval"] = "/cmds/wizard/eval";
+    commands["cat"] = "/cmds/wizard/cat";
+    commands["ed"] = "/cmds/wizard/ed";
 }
 
 // Main command execution function

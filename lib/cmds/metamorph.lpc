@@ -67,15 +67,13 @@ mixed main(object caller, string arg) {
     // Change race (appearance only)
     caller->set_race(target_race);
     
-    // Update description
+    // Update short description to match new race
     string new_short = caller->query_cap_name() + " the " + 
                        race_ob->query_short();
-    string new_long = "You see " + caller->query_name() + ", who appears to be a " +
-                      target_race + ". However, this form seems too perfect, "
-                      "almost constructed rather than natural.\n";
     
     caller->set_short(new_short);
-    caller->set_long(new_long);
+    // Don't set a custom long - let the race description be natural
+    // The disguise should be PERFECT - only detectable by psionic/magical means
     
     // Visual effects
     tell_object(caller,

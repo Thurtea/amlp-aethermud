@@ -1,0 +1,197 @@
+/*
+ * /lib/cmds/wizard/ed.lpc - Simple line text editor
+ * Phase 5: File Editing Tools
+ * 
+ * Usage:
+ *   ed <file_path>          - Edit file
+ *   ed <file_path> a <text> - Append line
+ *   ed <file_path> d <n>    - Delete line n
+ *   ed <file_path> show     - Show file contents
+ *   ed <file_path> w        - Write file
+ * 
+ * For interactive editing, use: ed <file_path>
+ * Then issue commands with: ed <file_path> <command>
+ */
+
+int main(string args) {
+    object player = previous_object();
+    string verb, file_path, cmd_args, resolved;
+    string *lines, *parts;
+    int line_num, i;
+    
+    if (!args || args == "") {
+        tell_object(player, "Syntax: ed <file_path> [command] [args]\n");
+        tell_object(player, "Commands: a (append), d (delete), show, w (write), help\n");
+        return 1;
+    }
+    
+    // Parse: ed <file_path> [command] [args]
+    parts = explode(args, " ");
+    
+    file_path = parts[0];
+    resolved = player->resolve_path(file_path);
+    
+    // Auto-add .lpc extension
+    if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
+        resolved += ".lpc";
+    }
+    
+    // Check if file exists or create new
+    if (file_size(resolved) == -1) {
+        // New file
+        lines = ({});
+        tell_object(player, "New file: " + resolved + "\n");
+    } else {
+        // Read existing file
+        catch {
+            lines = explode(read_file(resolved), "\n");
+        } : {
+            tell_object(player, "Error: Cannot read file\n");
+            return 1;
+        }
+    }
+    
+    // No additional command - show file and help
+    if (sizeof(parts) == 1) {
+        show_editor_help(player, resolved, lines);
+        return 1;
+    }
+    
+    // Process command
+    verb = lower_case(parts[1]);
+    cmd_args = implode(parts[2..], " ");
+    
+    switch (verb) {
+        case "show":
+        case "p":
+        case "print":
+            show_file(player, resolved, lines);
+            break;
+        
+        case "a":
+        case "append":
+            if (cmd_args == "" || cmd_args == "...") {
+                tell_object(player, "Syntax: ed <file> a <text>\n");
+                return 1;
+            }
+            lines += ({ cmd_args });
+            tell_object(player, "Appended line " + sizeof(lines) + ": " + cmd_args + "\n");
+            break;
+        
+        case "d":
+        case "delete":
+            if (cmd_args == "") {
+                tell_object(player, "Syntax: ed <file> d <line_number>\n");
+                return 1;
+            }
+            line_num = to_int(cmd_args);
+            if (line_num > 0 && line_num <= sizeof(lines)) {
+                tell_object(player, "Deleted line " + line_num + ": " + 
+                    lines[line_num-1] + "\n");
+                lines = exclude_array(lines, line_num - 1);
+            } else {
+                tell_object(player, "Invalid line number: " + line_num + "\n");
+            }
+            break;
+        
+        case "w":
+        case "write":
+            save_file(player, resolved, lines);
+            break;
+        
+        case "h":
+        case "help":
+            show_help(player);
+            break;
+        
+        default:
+            tell_object(player, "Unknown command: " + verb + "\n");
+            tell_object(player, "Type: ed <file> help\n");
+    }
+    
+    return 1;
+}
+
+void show_editor_help(object player, string file_path, string *lines) {
+    tell_object(player, "Editing: " + file_path + " (" + 
+        sizeof(lines) + " lines)\n");
+    tell_object(player, "\nQuick edit commands:\n");
+    tell_object(player, "  ed file show          - Display file\n");
+    tell_object(player, "  ed file a <text>     - Append line\n");
+    tell_object(player, "  ed file d <n>        - Delete line n\n");
+    tell_object(player, "  ed file w             - Write to disk\n");
+    tell_object(player, "  ed file help          - This help\n");
+    tell_object(player, "\nFile preview:\n");
+    show_file(player, file_path, lines);
+}
+
+void show_file(object player, string file_path, string *lines) {
+    int i;
+    
+    if (!lines || sizeof(lines) == 0) {
+        tell_object(player, "[empty file]\n");
+        return;
+    }
+    
+    tell_object(player, "┌─ " + file_path + "\n");
+    
+    for (i = 0; i < sizeof(lines); i++) {
+        tell_object(player, sprintf("%3d: %s\n", i + 1, lines[i]));
+    }
+    
+    tell_object(player, "└─\n");
+}
+
+void save_file(object player, string file_path, string *lines) {
+    string content;
+    
+    content = implode(lines, "\n");
+    
+    catch {
+        write_file(file_path, content);
+    } : {
+        tell_object(player, "Error: Cannot write file\n");
+        return;
+    }
+    
+    tell_object(player, "Wrote " + sizeof(lines) + " lines to: " + file_path + "\n");
+}
+
+void show_help(object player) {
+    tell_object(player, "ED - Simple Line Editor\n");
+    tell_object(player, "\nUsage:\n");
+    tell_object(player, "  ed <file> show          - Show file\n");
+    tell_object(player, "  ed <file> a <text>     - Append text\n");
+    tell_object(player, "  ed <file> d <line>     - Delete line\n");
+    tell_object(player, "  ed <file> w             - Write file\n");
+    tell_object(player, "  ed <file> help          - This help\n");
+    tell_object(player, "\nExample:\n");
+    tell_object(player, "  ed /domains/test/room a This is a test\n");
+    tell_object(player, "  ed /domains/test/room w\n");
+}
+
+// Utility: exclude array element at index
+string *exclude_array(string *arr, int idx) {
+    string *result;
+    int i;
+    
+    if (!arr || idx < 0 || idx >= sizeof(arr)) {
+        return arr;
+    }
+    
+    result = ({});
+    
+    for (i = 0; i < sizeof(arr); i++) {
+        if (i != idx) {
+            result += ({ arr[i] });
+        }
+    }
+    
+    return result;
+}
+
+void help() {
+    write("Syntax: ed <file_path> [command] [args]\n");
+    write("Simple line text editor for creating/editing LPC files.\n");
+    write("Use 'ed file help' for detailed command help.\n");
+}

@@ -1,0 +1,59 @@
+/*
+ * /lib/cmds/wizard/cat.lpc - Display file contents
+ * Phase 5: File Editing Tools
+ * 
+ * Usage:
+ *   cat <file_path>
+ */
+
+int main(string args) {
+    object player = previous_object();
+    string resolved, *lines;
+    int i;
+    
+    if (!args || args == "") {
+        tell_object(player, "Syntax: cat <file_path>\n");
+        return 1;
+    }
+    
+    resolved = player->resolve_path(args);
+    
+    // Auto-add .lpc extension if needed
+    if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
+        resolved += ".lpc";
+    }
+    
+    // Check if file exists
+    if (file_size(resolved) == -1) {
+        tell_object(player, "File not found: " + args + "\n");
+        return 1;
+    }
+    
+    // Try to read file
+    catch {
+        lines = explode(read_file(resolved), "\n");
+    } : {
+        tell_object(player, "Error: Cannot read file\n");
+        return 1;
+    }
+    
+    if (!lines || sizeof(lines) == 0) {
+        tell_object(player, "File is empty: " + resolved + "\n");
+        return 1;
+    }
+    
+    // Display file with line numbers
+    tell_object(player, "┌─ " + resolved + "\n");
+    
+    for (i = 0; i < sizeof(lines); i++) {
+        tell_object(player, sprintf("%4d: %s\n", i + 1, lines[i]));
+    }
+    
+    tell_object(player, "└─ " + sprintf("%d lines\n", sizeof(lines)));
+    return 1;
+}
+
+void help() {
+    write("Syntax: cat <file_path>\n");
+    write("Display file contents with line numbers.\n");
+}

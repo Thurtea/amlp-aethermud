@@ -1,0 +1,127 @@
+===============================================================================
+                          IDENTITY SYSTEM
+===============================================================================
+
+AetherMUD features a sophisticated identity and introduction system.
+
+THE CONCEPT:
+-----------
+When you first encounter another character, you don't automatically know their
+name. They appear as a stranger based on their race and appearance:
+  "a tall human warrior"
+  "a great horned dragon"
+  "a mysterious elf"
+
+INTRODUCING YOURSELF:
+--------------------
+  introduce <name>
+  
+Tell others your name. Anyone in the room will remember it for the session.
+
+Example:
+  > introduce Raven
+  You introduce yourself as Raven.
+  (Others see: "The tall human warrior introduces themselves as Raven.")
+
+REMEMBERING PEOPLE:
+------------------
+  remember <person>
+  
+Permanently remember someone's identity across sessions. This represents your
+character forming a memory of them.
+
+Example:
+  > remember Raven
+  You will remember Raven from now on.
+
+FORGETTING PEOPLE:
+-----------------
+  forget <person>
+  
+Forget someone's identity. They'll appear as a stranger again.
+
+Example:
+  > forget Raven
+  You forget who Raven is.
+
+HOW IT WORKS IN GAMEPLAY:
+-------------------------
+
+STRANGERS:
+  Before introduction, you see:
+  "A tall human warrior is standing here."
+  
+AFTER INTRODUCTION:
+  "Raven the human warrior is standing here."
+  
+AFTER REMEMBERING:
+  Even after logout/login, you'll recognize them as Raven.
+
+PERSISTENCE:
+-----------
+- Session introductions: Last until you logout
+- Remembered names: Persist forever (saved to your character)
+- Automatic sync: On login, all remembered names are activated
+
+IDENTITY IN COMMANDS:
+--------------------
+Once introduced, you can use their name in commands:
+  > look Raven
+  > give sword Raven
+  > attack Raven
+  > whisper Raven hello
+
+Before introduction, you must use their description:
+  > look human
+  > give sword warrior
+
+OBSERVER MESSAGES:
+-----------------
+When you perform actions, others see different messages based on whether
+they know you:
+
+Strangers see:
+  "A tall human warrior picks up a sword."
+  
+People who know you see:
+  "Raven picks up a sword."
+
+ACTIONS AFFECTED:
+----------------
+The identity system affects these actions:
+- Equipment: wear, wield, remove, unwield
+- Objects: get, drop, give, put
+- Movement: arriving/departing rooms
+- Communication: say, whisper
+- Combat: attack, flee
+- Magic: casting spells
+- Special abilities: metamorph (dragon shapeshift)
+
+DISGUISES:
+---------
+Some abilities allow identity masking:
+- Metamorph (Great Horned Dragon racial ability)
+- Disguise skill
+- Illusion magic
+- Mind wipe psionics
+
+ROLEPLAYING:
+-----------
+The identity system encourages realistic roleplay:
+- Introduce yourself in taverns
+- Form lasting relationships
+- Create your reputation
+- Maintain disguises when needed
+- Recognize enemies on sight
+
+TIPS:
+----
+1. Introduce yourself when entering groups
+2. Remember allies and guild members
+3. Use 'who' command to see online names
+4. Strangers can still attack you!
+5. Your surname is separate (help surname)
+
+===============================================================================
+Related: help introduce, help remember, help forget, help surname
+===============================================================================

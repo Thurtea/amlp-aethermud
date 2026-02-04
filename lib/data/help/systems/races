@@ -1,0 +1,85 @@
+===============================================================================
+                         AVAILABLE RACES
+===============================================================================
+
+AetherMUD features 51 playable races from the Rifts universe:
+
+DRAGONS:
+  adult_dragon          - Mature dragon (immense power)
+  ancient_dragon        - Ancient dragon (legendary)
+  dragon_hatchling      - Young dragon (growing power)
+  great_horned_dragon   - Shapeshifter dragon (metamorph ability)
+  thorny_dragon         - Armored dragon (natural MDC)
+
+HUMANS & VARIANTS:
+  human                 - Standard human (versatile)
+  true_atlantean        - Atlantean (magic affinity, tattoos)
+  promethean            - Engineered human (enhanced)
+  cosmo_knight          - Cosmic champion (divine power)
+
+D-BEES (DIMENSIONAL BEINGS):
+  dog_boy               - CS mutant (enhanced senses)
+  psi_stalker           - Psionic predator (hunts magic users)
+  simvan              - Monster rider (beast master)
+  wolfen              - Wolf humanoid (warrior culture)
+  noli                  - Peaceful race (healer)
+  uteni                 - Aquatic humanoid  
+  eandroth              - Mystical being
+  trimadore             - Mysterious traveler
+
+DWARVES & ELVES:
+  dwarf                 - Sturdy craftsman (tough, skilled)
+  elf                   - Graceful immortal (magic affinity)
+  gnome                 - Small tinkerer (inventive)
+  halfling              - Small wanderer (luck bonus)
+
+GIANTS & LARGE BEINGS:
+  ogre                  - Brutal giant (high strength)
+  troll                 - Regenerating giant (regeneration)
+  titan_juicer          - Enhanced giant (mega-juicer variant)
+  minotaur              - Bull-headed warrior (strength + rage)
+
+SUPERNATURAL:
+  godling               - Demigod (immense power)
+  demon                 - Demonic being (evil powers)
+  deevil                - Infernal being (cunning)
+  vampire               - Undead predator (blood drinker)
+  nightbane             - Shapeshifter (dark mirror form)
+  werewolf              - Lycanthrope (beast transformation)
+
+SPLUGORTH MINIONS:
+  splugorth             - Master slaver (powerful)
+  splugorth_minion      - Servant race
+  splynn_slave          - Enslaved being
+  brodkil               - Demon mercenary
+
+PSYCHICS:
+  burster               - Pyrokinetic (fire powers)
+  mind_melter           - Master psychic (powerful psionics)
+  mind_bleeder          - Defensive psychic
+  psi_ghost             - Invisible psychic
+  psi_healer            - Healing psychic
+
+GOBLINS & SMALL RACES:
+  goblin                - Sneaky humanoid (quick)
+  orc                   - Warrior humanoid (strong)
+  hobgoblin             - Larger goblin (military)
+
+JUICER VARIANTS:
+  mega_juicer           - Enhanced juicer (extreme power)
+  dragon_juicer         - Dragon blood juicer (unique)
+  quick_flex            - Lightning juicer (speed)
+
+MONSTERS & UNIQUE:
+  gargoyle              - Stone creature (flight, MDC)
+  changeling            - Shapeshifter (perfect disguise)
+  mutant_animal         - Evolved animal (varies)
+  cat_girl              - Feline humanoid
+
+UNUSUAL:
+  minion                - Bound servant
+
+===============================================================================
+To see details on a specific race: help <race_name>
+Example: help human, help dragon, help psi_stalker
+===============================================================================

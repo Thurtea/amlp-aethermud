@@ -1,0 +1,62 @@
+===============================================================================
+                    OCCUPATIONAL CHARACTER CLASSES (OCCs)
+===============================================================================
+
+AetherMUD features 36 Occupational Character Classes:
+
+MEN-OF-ARMS (Combat Specialists):
+  cyber_knight          - High-tech paladin (psionic warrior)
+  glitter_boy_pilot     - Iconic power armor pilot
+  headhunter            - Freelance mercenary (combat expert)
+  juicer                - Chemical augmentation warrior (short lifespan)
+  mercenary             - Soldier for hire
+  special_forces        - Elite military operative
+  wilderness_scout      - Ranger/tracker (survival expert)
+  cosmo_knight          - Cosmic champion (divine power)
+
+SCHOLARS & ADVENTURERS:
+  body_fixer            - Combat medic/cyberdoc
+  city_rat              - Urban survivor (street smart)
+  rogue_scholar         - Researcher/historian
+  rogue_scientist       - Independent scientist
+  vagabond              - Jack-of-all-trades wanderer
+  operator              - Mechanic/technician (repairs everything)
+
+PSYCHICS:
+  burster               - Pyrokinetic (master of fire)
+  mind_melter           - Master psychic (full psionics)
+  psi_healer            - Healing specialist
+  crazy                 - Enhanced psychotic (MOM implants)
+
+PRACTITIONERS OF MAGIC:
+  ley_line_walker       - Classic mage (ley line magic)
+  line_walker           - Ley line specialist
+  mystic                - Natural magic user (intuitive)
+  shifter               - Dimensional traveler (summoner)
+  warlock               - Elemental magic (pact magic)
+  techno_wizard         - Technology + magic fusion
+  necromancer           - Death magic specialist
+  battle_magus          - Warrior-mage hybrid
+  biomancer             - Life magic specialist
+  elemental_fusionist   - Elemental combination master
+  stone_master          - Earth/stone magic
+  temporal_wizard       - Time manipulation mage
+
+SPECIAL OCCs:
+  full_conversion_borg  - Full cybernetic conversion (machine body)
+  power_armor_pilot     - Power armor specialist
+  robot_pilot           - Robot/mecha pilot
+  dragon_hatchling_rcc  - Young dragon (racial class)
+  sea_titan             - Aquatic titan being
+  psi_stalker           - Psionic predator (anti-mage)
+
+===============================================================================
+To see details on a specific OCC: help <occ_name>
+Example: help cyber_knight, help ley_line_walker, help juicer
+
+For OCC categories:
+  help men-at-arms     - Combat specialists
+  help scholars        - Educated/skilled classes
+  help psychics        - Psionic classes
+  help magic           - Magic-using classes
+===============================================================================

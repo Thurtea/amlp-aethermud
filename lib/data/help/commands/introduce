@@ -1,0 +1,43 @@
+===============================================================================
+INTRODUCE
+===============================================================================
+
+SYNTAX:
+  introduce <name>
+
+DESCRIPTION:
+  Introduce yourself to others in the room, telling them your name.
+  
+  Before introduction, others see you as "a <race> <description>".
+  After introduction, they'll recognize you by name during the session.
+  
+  For permanent recognition across sessions, others must use the
+  'remember' command.
+
+EXAMPLES:
+  > introduce Marcus
+  You introduce yourself as Marcus.
+  
+  > introduce Shadowblade
+  You introduce yourself as Shadowblade.
+
+WHAT OTHERS SEE:
+  "A tall human warrior introduces themselves as Marcus."
+  "The great horned dragon introduces themselves as Shadowblade."
+
+NOTES:
+  - You can introduce yourself with any name
+  - Introductions last for the current session
+  - Others must use 'remember' to make it permanent
+  - Your surname is separate (see 'help surname')
+  - Part of the identity system (see 'help identity')
+
+RELATED COMMANDS:
+  remember  - Permanently remember someone's identity
+  forget    - Forget someone's identity
+  surname   - Set or change your surname
+  who       - See who's online (shows introduced names)
+
+===============================================================================
+See also: help identity, help remember, help forget
+===============================================================================

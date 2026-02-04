@@ -1,0 +1,77 @@
+===============================================================================
+ATTACK / KILL
+===============================================================================
+
+SYNTAX:
+  attack <target>
+  kill <target>
+
+DESCRIPTION:
+  Initiate combat with a target. The combat system uses rounds and
+  initiative to determine action order.
+
+EXAMPLES:
+  > attack goblin
+  You attack the goblin!
+  
+  > kill orc
+  You attack the orc!
+  
+  > attack Marcus
+  You attack Marcus! (if you know their name)
+
+COMBAT ROUND:
+  Once combat begins:
+  1. Initiative is rolled
+  2. Actions execute in initiative order  
+  3. Attacks are made with to-hit rolls
+  4. Defenses (dodge/parry) are checked
+  5. Damage is applied
+  6. Round repeats until combat ends
+
+YOUR ATTACKS:
+  - Number of attacks per round based on your level & OCC
+  - Attack bonus based on your stats and skills
+  - Damage based on weapon and Strength
+  - Critical hits on natural 20
+
+COMBAT DEFENSES:
+  autododge on/off  - Automatically dodge attacks
+  autoparry on/off  - Automatically parry attacks
+  
+  You can also manually choose defenses during combat.
+
+ENDING COMBAT:
+  - Defeat all enemies
+  - Flee successfully
+  - Target flees
+  - One side dies
+
+FLEEING:
+  flee  - Attempt to escape combat
+  
+  Success depends on your Speed vs. enemy Speed.
+
+DEATH:
+  If you die in combat:
+  - You lose experience
+  - You respawn at your recall point
+  - Some equipment may be lost
+
+NOTES:
+  - 'attack' and 'kill' are the same command
+  - You cannot attack in safe rooms (usually cities)
+  - Some NPCs are aggressive and will attack on sight
+  - PvP (player vs player) combat requires consent (see 'help pvp')
+  - Combat can be lethal - be prepared!
+
+STRATEGY:
+  - Check enemy difficulty before attacking
+  - Use appropriate weapons and armor
+  - Manage your PPE (magic) and ISP (psionics)
+  - Team up for tough enemies
+  - Know when to flee
+
+===============================================================================
+See also: help combat, help flee, help equipment, help skills
+===============================================================================

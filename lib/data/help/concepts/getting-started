@@ -1,0 +1,84 @@
+===============================================================================
+                          GETTING STARTED WITH AETHERMUD
+===============================================================================
+
+Welcome to AetherMUD, a Rifts-based multi-user dungeon!
+
+FIRST STEPS:
+------------
+1. Read through character creation carefully
+2. Choose from 51 races (type 'help races' for list)
+3. Select from 36 Occupational Character Classes (type 'help occs')
+4. Allocate your stats (IQ, ME, MA, PS, PP, PE, PB, Spd)
+5. Choose your skills and abilities
+
+BASIC COMMANDS:
+--------------
+  look / l          - Examine your surroundings
+  inventory / i     - Check what you're carrying
+  stats             - View your character statistics
+  score             - See your complete character sheet
+  equipment         - Show what you're wearing/wielding
+  
+MOVEMENT:
+---------
+  north / n         - Move north
+  south / s         - Move south
+  east / e          - Move east
+  west / w          - Move west
+  up / u            - Move up
+  down / d          - Move down
+  
+  exits             - Show available exits
+
+COMMUNICATION:
+--------------
+  say <message>     - Speak (others in room hear you)
+  chat <message>    - Out-of-character global chat
+  whisper <person> <message> - Whisper to someone
+  introduce <name>  - Introduce yourself to someone
+  remember <person> - See who someone is after introduction
+  forget <person>   - Forget someone's identity
+
+COMBAT:
+-------
+  attack <target>   - Initiate combat
+  kill <target>     - Same as attack
+  flee              - Attempt to escape combat
+
+OBJECTS:
+--------
+  get <item>        - Pick up an item
+  drop <item>       - Drop an item
+  give <item> <person> - Give item to someone
+  wear <armor>      - Wear armor
+  wield <weapon>    - Wield a weapon
+  remove <item>     - Remove worn/wielded equipment
+  unwield <weapon>  - Unwield weapon
+
+HELP SYSTEM:
+-----------
+  help              - Show basic help
+  help <topic>      - Get help on specific topic
+  help commands     - List all commands
+  help races        - List all races
+  help occs         - List all OCCs
+
+IMPORTANT CONCEPTS:
+------------------
+  help combat       - Combat system explanation
+  help identity     - Identity/introduction system
+  help skills       - Skills system
+  help magic        - Magic and spells
+  help psionics     - Psionic powers
+  help alignment    - Alignment system
+
+SAVING:
+-------
+Your character saves automatically. You can also type 'save' to force a save.
+
+Type 'quit' or 'logout' to leave the game safely.
+
+===============================================================================
+For more information, type: help <topic>
+===============================================================================

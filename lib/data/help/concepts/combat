@@ -1,0 +1,103 @@
+===============================================================================
+                            COMBAT SYSTEM
+===============================================================================
+
+AetherMUD uses a round-based combat system inspired by Rifts RPG.
+
+INITIATING COMBAT:
+-----------------
+  attack <target>   - Start attacking an enemy
+  kill <target>     - Same as attack
+
+COMBAT ROUNDS:
+-------------
+Combat proceeds in rounds. Each round:
+1. Initiative is rolled (based on PP and bonuses)
+2. Actions are performed in initiative order
+3. Attacks are rolled vs. defenses
+4. Damage is calculated and applied
+
+ATTACKS PER ROUND:
+-----------------
+The number of attacks you can make per round depends on your:
+- Base attacks (from OCC)
+- Level bonuses
+- Hand-to-hand training
+- Equipment bonuses
+
+ATTACK TYPES:
+------------
+- Melee: Hand-to-hand or melee weapons
+- Ranged: Energy weapons, projectile weapons
+- Magic: Offensive spells
+- Psionics: Mental attacks
+
+DEFENSES:
+--------
+- Dodge: Avoid the attack completely
+- Parry: Block with weapon or hand
+- Roll: Reduce damage by half
+- Armor: Absorbs damage
+
+To enable automatic defenses:
+  autododge on/off
+  autoparry on/off
+
+DAMAGE:
+------
+Damage depends on:
+- Weapon type and quality
+- Your Physical Strength (PS) bonus
+- Critical hits (natural 20)
+- Armor protection (MDC/SDC)
+
+ARMOR:
+-----
+- MDC Armor: Mega-Damage Capacity (high-tech armor)
+- SDC Armor: Structural Damage Capacity (light armor)
+- Armor absorbs damage before your HP are affected
+
+FLEEING:
+-------
+  flee - Attempt to escape combat
+  
+Success chance based on:
+- Your Speed (Spd) stat
+- Enemy's Speed
+- Penalties for being surrounded
+
+DEATH:
+-----
+If your HP reaches 0:
+- You are mortally wounded
+- You may be revived by healing magic/psionics
+- If not revived, you die and respawn
+
+HEALING:
+-------
+- Natural healing over time
+- Healing spells (Heal Wounds, etc.)
+- Psionic healing
+- Medical skills (First Aid, Paramedic)
+- Bio-regeneration (some races)
+
+COMBAT STATUS:
+-------------
+During combat, you'll see:
+- Your current HP/MDC
+- Your target's condition
+- Combat round number
+- Available actions
+
+STRATEGY TIPS:
+-------------
+1. Know your attack/defense capabilities
+2. Use appropriate weapons for the situation
+3. Manage your PPE (magic) and ISP (psionic) resources
+4. Flee if overwhelmed
+5. Use cover and positioning
+6. Work in teams when possible
+
+===============================================================================
+For more information: help skills, help magic, help psionics
+===============================================================================

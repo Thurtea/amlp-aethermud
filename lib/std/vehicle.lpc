@@ -1,0 +1,429 @@
+// /lib/std/vehicle.lpc
+// Base vehicle object with multi-room support
+// Requires piloting skill to operate
+
+inherit "/lib/std/object";
+
+private string pilot_skill;           // Required skill (e.g., "pilot_robot", "pilot_power_armor")
+private int pilot_difficulty;          // Difficulty modifier for skill checks
+private mapping interior_rooms;        // ([ "room_id" : "/path/to/room.lpc" ])
+private string entry_room;             // Default entry room ID
+private object current_pilot;          // Who's piloting
+private string *passenger_list;        // List of passengers inside
+private int max_passengers;            // Maximum occupants
+private int fuel;                      // Current fuel
+private int max_fuel;                  // Maximum fuel capacity
+private int fuel_consumption;          // Fuel per movement
+private int speed;                     // Movement speed (squares per action)
+private int armor_mdc;                 // Mega-Damage Capacity
+private int max_armor_mdc;             // Maximum MDC
+private string vehicle_type;           // "power_armor", "robot", "aircraft", etc.
+private int is_active;                 // Engine running?
+private mapping weapon_systems;        // Vehicle weapons
+private int crew_required;             // Minimum crew to operate
+
+void create() {
+    ::create();
+    
+    pilot_skill = "";
+    pilot_difficulty = 0;
+    interior_rooms = ([]);
+    entry_room = "";
+    current_pilot = 0;
+    passenger_list = ({});
+    max_passengers = 1;
+    fuel = 100;
+    max_fuel = 100;
+    fuel_consumption = 1;
+    speed = 1;
+    armor_mdc = 100;
+    max_armor_mdc = 100;
+    vehicle_type = "ground";
+    is_active = 0;
+    weapon_systems = ([]);
+    crew_required = 1;
+}
+
+// === CONFIGURATION METHODS ===
+
+void set_pilot_skill(string skill) { pilot_skill = skill; }
+string query_pilot_skill() { return pilot_skill; }
+
+void set_pilot_difficulty(int diff) { pilot_difficulty = diff; }
+int query_pilot_difficulty() { return pilot_difficulty; }
+
+void add_interior_room(string id, string path) {
+    if (!interior_rooms) interior_rooms = ([]);
+    interior_rooms[id] = path;
+}
+
+mapping query_interior_rooms() { return interior_rooms; }
+
+void set_entry_room(string id) { entry_room = id; }
+string query_entry_room() { return entry_room; }
+
+void set_max_passengers(int max) { max_passengers = max; }
+int query_max_passengers() { return max_passengers; }
+
+void set_fuel(int amount) { fuel = amount; }
+int query_fuel() { return fuel; }
+
+void set_max_fuel(int amount) { max_fuel = amount; }
+int query_max_fuel() { return max_fuel; }
+
+void set_fuel_consumption(int amount) { fuel_consumption = amount; }
+int query_fuel_consumption() { return fuel_consumption; }
+
+void set_speed(int spd) { speed = spd; }
+int query_speed() { return speed; }
+
+void set_armor_mdc(int mdc) { armor_mdc = mdc; }
+int query_armor_mdc() { return armor_mdc; }
+
+void set_max_armor_mdc(int max) { max_armor_mdc = max; }
+int query_max_armor_mdc() { return max_armor_mdc; }
+
+void set_vehicle_type(string type) { vehicle_type = type; }
+string query_vehicle_type() { return vehicle_type; }
+
+void set_crew_required(int num) { crew_required = num; }
+int query_crew_required() { return crew_required; }
+
+void add_weapon_system(string name, mixed weapon_data) {
+    if (!weapon_systems) weapon_systems = ([]);
+    weapon_systems[name] = weapon_data;
+}
+
+mapping query_weapon_systems() { return weapon_systems; }
+
+// === PILOT MANAGEMENT ===
+
+int set_pilot(object player) {
+    if (current_pilot) {
+        return 0; // Already has pilot
+    }
+    
+    current_pilot = player;
+    return 1;
+}
+
+void remove_pilot() {
+    current_pilot = 0;
+}
+
+object query_pilot() {
+    return current_pilot;
+}
+
+int is_piloted() {
+    return current_pilot ? 1 : 0;
+}
+
+// === PASSENGER MANAGEMENT ===
+
+int add_passenger(object player) {
+    string name;
+    
+    if (!player) return 0;
+    
+    name = player->query_name();
+    if (!name) return 0;
+    
+    if (sizeof(passenger_list) >= max_passengers) {
+        return 0; // Vehicle full
+    }
+    
+    if (member_array(name, passenger_list) != -1) {
+        return 0; // Already inside
+    }
+    
+    passenger_list += ({ name });
+    return 1;
+}
+
+int remove_passenger(object player) {
+    string name;
+    
+    if (!player) return 0;
+    
+    name = player->query_name();
+    if (!name) return 0;
+    
+    if (member_array(name, passenger_list) == -1) {
+        return 0; // Not inside
+    }
+    
+    passenger_list -= ({ name });
+    return 1;
+}
+
+string *query_passengers() {
+    return passenger_list;
+}
+
+int query_passenger_count() {
+    return sizeof(passenger_list);
+}
+
+int is_passenger(object player) {
+    string name;
+    
+    if (!player) return 0;
+    name = player->query_name();
+    
+    return (member_array(name, passenger_list) != -1);
+}
+
+// === ENGINE & FUEL ===
+
+int start_engine(object player) {
+    if (is_active) return 0; // Already running
+    
+    if (!can_pilot(player)) {
+        return 0; // Cannot pilot
+    }
+    
+    if (fuel <= 0) {
+        return -1; // No fuel
+    }
+    
+    is_active = 1;
+    return 1;
+}
+
+int stop_engine() {
+    if (!is_active) return 0;
+    
+    is_active = 0;
+    return 1;
+}
+
+int query_engine_status() {
+    return is_active;
+}
+
+int consume_fuel() {
+    if (fuel <= 0) {
+        stop_engine();
+        return 0;
+    }
+    
+    fuel -= fuel_consumption;
+    if (fuel < 0) fuel = 0;
+    
+    return 1;
+}
+
+int refuel(int amount) {
+    fuel += amount;
+    if (fuel > max_fuel) fuel = max_fuel;
+    
+    return fuel;
+}
+
+// === SKILL CHECKS ===
+
+int can_pilot(object player) {
+    object skill_daemon;
+    int skill_percent;
+    
+    if (!player) return 0;
+    if (!pilot_skill || pilot_skill == "") return 1; // No skill required
+    
+    // Check if player has the required skill
+    skill_daemon = load_object("/lib/daemon/skills");
+    if (!skill_daemon) return 0;
+    
+    // Query player's skill percentage
+    skill_percent = player->query_skill_percent(pilot_skill);
+    if (skill_percent <= 0) return 0; // Doesn't have skill
+    
+    return 1;
+}
+
+int make_pilot_check(object player, int difficulty_mod) {
+    object skill_daemon;
+    int roll, target, modified_diff;
+    
+    if (!player) return 0;
+    if (!pilot_skill || pilot_skill == "") return 1; // Auto-success
+    
+    modified_diff = pilot_difficulty + difficulty_mod;
+    
+    skill_daemon = load_object("/lib/daemon/skills");
+    if (!skill_daemon) return 0;
+    
+    // Make skill roll
+    roll = random(100) + 1;
+    target = player->query_skill_percent(pilot_skill) - modified_diff;
+    
+    if (roll <= target) {
+        return 1; // Success
+    }
+    
+    return 0; // Failure
+}
+
+// === MOVEMENT ===
+
+int move_vehicle(string direction) {
+    object env;
+    string exit_path;
+    
+    if (!is_active) return 0; // Engine not running
+    if (!current_pilot) return 0; // No pilot
+    
+    if (!consume_fuel()) {
+        return -1; // Out of fuel
+    }
+    
+    env = environment();
+    if (!env) return 0;
+    
+    exit_path = env->query_exit(direction);
+    if (!exit_path) return 0; // No exit
+    
+    // Make pilot check for difficult maneuvers
+    if (pilot_difficulty > 0) {
+        if (!make_pilot_check(current_pilot, 0)) {
+            return -2; // Pilot check failed
+        }
+    }
+    
+    // Move the vehicle
+    move_object(exit_path);
+    
+    return 1;
+}
+
+// === COMBAT ===
+
+int take_damage(int amount) {
+    armor_mdc -= amount;
+    
+    if (armor_mdc <= 0) {
+        armor_mdc = 0;
+        // Vehicle destroyed
+        vehicle_destroyed();
+        return 1;
+    }
+    
+    return 0;
+}
+
+void vehicle_destroyed() {
+    object *occupants;
+    int i;
+    
+    // Eject all occupants
+    occupants = all_inventory(this_object());
+    
+    for (i = 0; i < sizeof(occupants); i++) {
+        if (living(occupants[i])) {
+            occupants[i]->receive_message("The vehicle explodes! You're thrown clear!");
+            
+            // Damage occupants
+            occupants[i]->add_hp(-random(50) - 20);
+            
+            // Move them out
+            if (environment()) {
+                move_object(occupants[i], environment());
+            }
+        }
+    }
+    
+    // Destroy vehicle
+    if (environment()) {
+        tell_room(environment(), "The " + query_short() + " explodes in flames!");
+    }
+    
+    destruct(this_object());
+}
+
+int repair_armor(int amount) {
+    armor_mdc += amount;
+    if (armor_mdc > max_armor_mdc) {
+        armor_mdc = max_armor_mdc;
+    }
+    
+    return armor_mdc;
+}
+
+// === ENTRY/EXIT ===
+
+int enter_vehicle(object player) {
+    string entry_path;
+    object entry_room_ob;
+    
+    if (!player) return 0;
+    
+    if (query_passenger_count() >= max_passengers) {
+        return -1; // Vehicle full
+    }
+    
+    if (!entry_room || entry_room == "") {
+        // No interior, player directly into vehicle
+        if (!add_passenger(player)) return 0;
+        move_object(player, this_object());
+        return 1;
+    }
+    
+    // Move to interior room
+    if (!interior_rooms || !interior_rooms[entry_room]) {
+        return 0; // No interior defined
+    }
+    
+    entry_path = interior_rooms[entry_room];
+    entry_room_ob = load_object(entry_path);
+    
+    if (!entry_room_ob) return 0;
+    
+    if (!add_passenger(player)) return 0;
+    
+    move_object(player, entry_room_ob);
+    
+    return 1;
+}
+
+int exit_vehicle(object player) {
+    object env;
+    
+    if (!player) return 0;
+    
+    if (!remove_passenger(player)) {
+        return 0; // Not a passenger
+    }
+    
+    // Remove as pilot if they were piloting
+    if (current_pilot == player) {
+        remove_pilot();
+        stop_engine();
+    }
+    
+    env = environment();
+    if (!env) return 0;
+    
+    move_object(player, env);
+    
+    return 1;
+}
+
+// === STATUS ===
+
+string query_vehicle_status() {
+    string status;
+    
+    status = "Vehicle Status:\n";
+    status += "Type: " + vehicle_type + "\n";
+    status += "Engine: " + (is_active ? "Running" : "Off") + "\n";
+    status += "Armor MDC: " + armor_mdc + "/" + max_armor_mdc + "\n";
+    status += "Fuel: " + fuel + "/" + max_fuel + "\n";
+    status += "Passengers: " + query_passenger_count() + "/" + max_passengers + "\n";
+    status += "Pilot: " + (current_pilot ? current_pilot->query_name() : "None") + "\n";
+    
+    if (pilot_skill && pilot_skill != "") {
+        status += "Required Skill: " + pilot_skill + "\n";
+    }
+    
+    return status;
+}

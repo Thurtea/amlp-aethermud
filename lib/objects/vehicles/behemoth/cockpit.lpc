@@ -1,0 +1,110 @@
+// /lib/objects/vehicles/behemoth/cockpit.lpc
+// EX-5 Behemoth Cockpit - Control center
+
+inherit "/lib/std/vehicle_room";
+
+void create() {
+    ::create();
+    
+    set_parent_vehicle("/lib/objects/vehicles/ex5_behemoth");
+    set_room_type("cockpit");
+    set_can_pilot(1);
+    
+    set_short("the cockpit of the EX-5 Behemoth");
+    set_long(
+        "The cockpit is a cramped but efficient control center packed with screens, "
+        "gauges, and control systems. The pilot's seat dominates the center, surrounded "
+        "by a wraparound console covered in switches, levers, and touchscreens. To the "
+        "right is the co-pilot station with navigation and weapons controls.\n\n"
+        "Through the armored viewports, you can see the terrain outside. The thick "
+        "transparisteel is rated for Mega-Damage impacts. Red emergency lights line "
+        "the ceiling, and the whole room vibrates slightly with engine noise.\n\n"
+        "A ladder leads down to the crew quarters, and a hatch leads aft to the turret "
+        "access."
+    );
+    
+    set_exits(([
+        "down" : "/lib/objects/vehicles/behemoth/crew_quarters",
+        "aft" : "/lib/objects/vehicles/behemoth/turret"
+    ]));
+    
+    set_items(([
+        ({"console", "controls", "screens"}) : 
+            "The main control console features: steering controls, throttle, radar display, "
+            "communications panel, weapon systems, and dozens of status readouts.",
+        ({"viewport", "viewports", "window", "windows"}) :
+            "Thick armored transparisteel viewports give you a clear view outside.",
+        ({"seat", "pilot seat", "chair"}) :
+            "The pilot's seat is well-worn but comfortable, with full harness restraints.",
+        ({"ladder"}) :
+            "A ladder leads down to the crew quarters below."
+    ]));
+}
+
+void init() {
+    ::init();
+    add_action("do_scan", "scan");
+    add_action("do_radar", "radar");
+}
+
+int do_scan(string args) {
+    object vehicle, exterior;
+    object *contents;
+    string output;
+    int i;
+    
+    vehicle = query_parent_vehicle();
+    if (!vehicle) {
+        write("Error: Cannot access vehicle systems.");
+        return 1;
+    }
+    
+    if (!vehicle->query_engine_status()) {
+        write("The scanner systems are offline. Start the engine first.");
+        return 1;
+    }
+    
+    exterior = environment(vehicle);
+    if (!exterior) {
+        write("Scanner error: Cannot detect external environment.");
+        return 1;
+    }
+    
+    output = "SCANNER REPORT:\n";
+    output += "Location: " + exterior->query_short() + "\n\n";
+    
+    contents = all_inventory(exterior);
+    output += "Detected objects:\n";
+    
+    for (i = 0; i < sizeof(contents); i++) {
+        if (contents[i] != vehicle) {
+            if (living(contents[i])) {
+                output += "  [LIFEFORM] " + contents[i]->query_cap_name() + "\n";
+            } else {
+                output += "  [OBJECT] " + contents[i]->query_short() + "\n";
+            }
+        }
+    }
+    
+    write(output);
+    return 1;
+}
+
+int do_radar(string args) {
+    object vehicle;
+    
+    vehicle = query_parent_vehicle();
+    if (!vehicle) return 0;
+    
+    if (!vehicle->query_engine_status()) {
+        write("Radar is offline. Start the engine first.");
+        return 1;
+    }
+    
+    write("Radar sweep initiated...");
+    write("Short-range: 1000m clear");
+    write("Medium-range: 5km - multiple signatures detected");
+    write("Long-range: Beyond effective range");
+    
+    return 1;
+}

@@ -1,0 +1,145 @@
+// /lib/objects/vehicles/behemoth/engineering.lpc
+// EX-5 Behemoth Engineering - Power systems
+
+inherit "/lib/std/vehicle_room";
+
+void create() {
+    ::create();
+    
+    set_parent_vehicle("/lib/objects/vehicles/ex5_behemoth");
+    set_room_type("engineering");
+    set_can_pilot(0);
+    
+    set_short("the engineering section of the EX-5 Behemoth");
+    set_long(
+        "The engineering section is a maze of pipes, conduits, and machinery. The massive "
+        "diesel-electric engine dominates the center of the room, its eight cylinders "
+        "thrumming with power. Heat radiates from every surface, and the noise is "
+        "nearly deafening.\n\n"
+        "Control panels line the walls, monitoring fuel flow, engine temperature, electrical "
+        "output, and countless other systems. A tool bench holds diagnostic equipment and "
+        "spare parts. The air smells of hot metal, fuel, and lubricants.\n\n"
+        "An experienced operator could perform field repairs here, or even boost power "
+        "to the engines in an emergency. A ladder leads down to the cargo hold, and a "
+        "door leads forward to the crew quarters."
+    );
+    
+    set_exits(([
+        "down" : "/lib/objects/vehicles/behemoth/cargo_hold",
+        "forward" : "/lib/objects/vehicles/behemoth/crew_quarters"
+    ]));
+    
+    set_items(([
+        ({"engine", "diesel engine", "motor"}) :
+            "The heart of the Behemoth: a massive eight-cylinder diesel engine coupled to "
+            "electric generators that power the drive motors.",
+        ({"control panels", "monitors", "panels"}) :
+            "Status displays show: Engine temp: NORMAL, Fuel pressure: OPTIMAL, "
+            "Electrical output: 85%, Coolant levels: FULL.",
+        ({"tools", "tool bench"}) :
+            "A well-equipped workbench with diagnostic tools, welding equipment, and spare parts.",
+        ({"pipes", "conduits"}) :
+            "A complex network of fuel lines, coolant pipes, and electrical conduits."
+    ]));
+}
+
+void init() {
+    ::init();
+    add_action("do_diagnose", "diagnose");
+    add_action("do_repair", "repair");
+    add_action("do_boost",
+
+ "boost");
+}
+
+int do_diagnose(string args) {
+    object vehicle;
+    string output;
+    
+    vehicle = query_parent_vehicle();
+    if (!vehicle) {
+        write("Error: Cannot access vehicle systems.");
+        return 1;
+    }
+    
+    output = "DIAGNOSTIC REPORT:\n";
+    output += "===================\n";
+    output += "Engine status: " + (vehicle->query_engine_status() ? "RUNNING" : "OFFLINE") + "\n";
+    output += "Fuel: " + vehicle->query_fuel() + "/" + vehicle->query_max_fuel() + " gallons\n";
+    output += "Armor integrity: " + vehicle->query_armor_mdc() + "/" + vehicle->query_max_armor_mdc() + " MDC\n";
+    output += "Engine temperature: NORMAL\n";
+    output += "Transmission: OPTIMAL\n";
+    output += "Electrical systems: 85% output\n";
+    output += "Hydraulics: NOMINAL\n";
+    output += "\nNo critical faults detected.\n";
+    
+    write(output);
+    return 1;
+}
+
+int do_repair(string args) {
+    object player, vehicle;
+    int skill_percent, roll, armor_repaired;
+    
+    player = this_player();
+    vehicle = query_parent_vehicle();
+    
+    if (!vehicle) {
+        write("Error: Cannot access vehicle.");
+        return 1;
+    }
+    
+    // Check for mechanics skill
+    skill_percent = player->query_skill_percent("basic_mechanics");
+    
+    if (skill_percent <= 0) {
+        write("You don't have the mechanical skill to repair this vehicle.");
+        return 1;
+    }
+    
+    if (vehicle->query_armor_mdc() >= vehicle->query_max_armor_mdc()) {
+        write("The vehicle is already in perfect condition.");
+        return 1;
+    }
+    
+    write("You set to work with the tools, patching damaged systems...");
+    
+    // Make skill roll
+    roll = random(100) + 1;
+    
+    if (roll <= skill_percent) {
+        armor_repaired = random(50) + 50; // Repair 50-100 MDC
+        vehicle->repair_armor(armor_repaired);
+        
+        write("Success! You've repaired " + armor_repaired + " MDC worth of damage.");
+        say(player->query_cap_name() + " successfully repairs the vehicle.");
+    } else {
+        write("Your repairs fail. You'll need to try again.");
+        say(player->query_cap_name() + " struggles with the repairs.");
+    }
+    
+    return 1;
+}
+
+int do_boost(string args) {
+    object vehicle, player;
+    
+    vehicle = query_parent_vehicle();
+    player = this_player();
+    
+    if (!vehicle) return 0;
+    
+    if (!vehicle->query_engine_status()) {
+        write("The engine must be running to boost power.");
+        return 1;
+    }
+    
+    write("You override the engine governors, boosting power output!");
+    write("WARNING: Increased fuel consumption and engine stress!");
+    say(player->query_cap_name() + " boosts the engine power!");
+    
+    // Double speed temporarily (would need timer implementation)
+    tell_room(environment(), "The Behemoth's engines roar to life with increased power!");
+    
+    return 1;
+}

@@ -1,0 +1,96 @@
+// /lib/skills/pilot_robot.lpc
+// Pilot: Robot Vehicle - Operate giant robots and heavy exploration vehicles
+// Base: 30% + 5% per level (PP bonus)
+
+inherit "/lib/std/skill";
+
+void create() {
+    ::create();
+    
+    set_skill_name("pilot_robot");
+    set_skill_display_name("Pilot: Robot Vehicle");
+    set_short("the ability to pilot robot vehicles");
+    set_long(
+        "Pilot: Robot Vehicle allows you to operate giant robots, power armor, "
+        "and heavy exploration vehicles like the EX-5 Behemoth. This includes "
+        "walking mechs, humanoid robots, and heavy combat vehicles with complex "
+        "control systems.\n\n"
+        "The skill covers: basic movement and maneuvering, combat operations, "
+        "system diagnostics, emergency procedures, and terrain navigation. Larger "
+        "and more complex robots require higher skill percentages to operate "
+        "safely.\n\n"
+        "Base: 30% + 5% per level\n"
+        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Related Stat: Physical Prowess"
+    );
+    
+    set_base_percent(30);
+    set_percent_per_level(5);
+    set_related_stat("physical prowess");
+    
+    set_skill_type("pilot");
+    set_skill_category("technical");
+    
+    // Classes that get this skill
+    set_available_to(({
+        "body_fixer",
+        "city_rat",
+        "crazy",
+        "cyber_knight",
+        "glitter_boy",
+        "headhunter",
+        "juicer",
+        "ley_line_walker",
+        "mercenary",
+        "mind_melter",
+        "rogue_scholar",
+        "techno_wizard",
+        "wilderness_scout"
+    }));
+}
+
+int check_skill(object who, int difficulty) {
+    int skill_percent, stat_bonus, roll;
+    
+    if (!who) return 0;
+    
+    skill_percent = query_skill_percent(who);
+    
+    // Add PP bonus (+5% per point of PP above 16)
+    stat_bonus = (who->query_stat("physical prowess") - 16) * 5;
+    if (stat_bonus > 0) {
+        skill_percent += stat_bonus;
+    }
+    
+    // Difficulty modifier
+    skill_percent -= difficulty;
+    
+    // Make percentile roll
+    roll = random(100) + 1;
+    
+    if (roll <= skill_percent) {
+        return 1; // Success
+    }
+    
+    return 0; // Failure
+}
+
+string query_skill_result_message(int success, int difficulty) {
+    if (success) {
+        if (difficulty <= 10) {
+            return "You pilot the vehicle with ease.";
+        } else if (difficulty <= 20) {
+            return "You successfully control the vehicle's complex systems.";
+        } else {
+            return "You masterfully pilot the vehicle through the challenge!";
+        }
+    } else {
+        if (difficulty <= 10) {
+            return "You struggle with the controls!";
+        } else if (difficulty <= 20) {
+            return "The vehicle's systems are too complex for you to manage!";
+        } else {
+            return "You lose control of the vehicle!";
+        }
+    }
+}

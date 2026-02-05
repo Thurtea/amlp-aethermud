@@ -1,0 +1,57 @@
+// /lib/cmds/stop.lpc
+// Command to stop a vehicle's engine
+
+#include <lib.h>
+
+inherit LIB_DAEMON;
+
+int cmd_stop(string args) {
+    object vehicle, room;
+    
+    room = environment(this_player());
+    
+    // Check if we're in a vehicle room
+    if (!function_exists("query_parent_vehicle", room)) {
+        write("You're not in a vehicle.");
+        return 1;
+    }
+    
+    vehicle = room->query_parent_vehicle();
+    
+    if (!vehicle) {
+        write("Error: Cannot access vehicle systems.");
+        return 1;
+    }
+    
+    // Check if already stopped
+    if (!vehicle->query_engine_status()) {
+        write("The engine is already off.");
+        return 1;
+    }
+    
+    // Check if player is the pilot
+    if (vehicle->query_pilot() != this_player()) {
+        write("Only the pilot can stop the engine.");
+        return 1;
+    }
+    
+    // Stop the engine
+    vehicle->stop_engine();
+    
+    write("You shut down the engine. It winds down with a deep rumble.");
+    say(this_player()->query_cap_name() + " shuts down the vehicle's engine.");
+    
+    tell_room(environment(vehicle), 
+        vehicle->query_short() + "'s engines power down.");
+    
+    return 1;
+}
+
+void create() {
+    ::create();
+    set_privilege(1);
+}
+
+void init() {
+    add_action("cmd_stop", "stop");
+}

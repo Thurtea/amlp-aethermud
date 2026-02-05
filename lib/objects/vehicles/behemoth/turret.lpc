@@ -1,0 +1,157 @@
+// /lib/objects/vehicles/behemoth/turret.lpc
+// EX-5 Behemoth Turret - Defensive weapons station
+
+inherit "/lib/std/vehicle_room";
+
+void create() {
+    ::create();
+    
+    set_parent_vehicle("/lib/objects/vehicles/ex5_behemoth");
+    set_room_type("turret");
+    set_can_pilot(0);
+    
+    set_short("the turret gunner station of the EX-5 Behemoth");
+    set_long(
+        "This cramped weapons station sits atop the Behemoth, giving a commanding view "
+        "of the surrounding terrain through 360-degree viewports. The dual laser cannons "
+        "are controlled from a targeting seat with joystick controls and a heads-up "
+        "targeting display.\n\n"
+        "Ammunition feeds and power conduits snake through the tight space. The smell "
+        "of ozone and hot metal fills the air. Red warning lights indicate weapon "
+        "status, and a small screen shows the view from the cockpit.\n\n"
+        "A hatch in the floor leads down to the cockpit. In an emergency, the turret "
+        "can operate independently of the main vehicle systems."
+    );
+    
+    set_exits(([
+        "down" : "/lib/objects/vehicles/behemoth/cockpit"
+    ]));
+    
+    set_items(([
+        ({"lasers", "cannons", "weapons", "dual lasers"}) :
+            "Twin NG-L5 laser cannons mounted on motorized gimbals. Each fires 3d6 MD "
+            "per blast with unlimited ammunition (powered by vehicle reactor).",
+        ({"targeting seat", "gunner seat", "controls"}) :
+            "The gunner's seat with full targeting controls, joystick, and HUD display.",
+        ({"viewports", "windows"}) :
+            "Armored viewports provide 360-degree visibility of the exterior.",
+        ({"display", "screen", "hud"}) :
+            "The heads-up display shows: WEAPONS: READY, POWER: 100%, TRACKING: ACTIVE"
+    ]));
+}
+
+void init() {
+    ::init();
+    add_action("do_fire_lasers", "fire");
+    add_action("do_target", "target");
+}
+
+int do_target(string args) {
+    object vehicle, exterior, target;
+    object *contents;
+    int i;
+    
+    if (!args || args == "") {
+        write("Target what? (Use: target <name>)");
+        return 1;
+    }
+    
+    vehicle = query_parent_vehicle();
+    if (!vehicle) return 0;
+    
+    if (!vehicle->query_engine_status()) {
+        write("Weapons systems are offline. Engine must be running.");
+        return 1;
+    }
+    
+    exterior = environment(vehicle);
+    if (!exterior) {
+        write("Error: Cannot detect exterior environment.");
+        return 1;
+    }
+    
+    contents = all_inventory(exterior);
+    
+    for (i = 0; i < sizeof(contents); i++) {
+        if (contents[i] != vehicle) {
+            string *ids = contents[i]->query_id();
+            if (ids && member_array(args, ids) != -1) {
+                target = contents[i];
+                break;
+            }
+        }
+    }
+    
+    if (!target) {
+        write("Target not found: " + args);
+        return 1;
+    }
+    
+    write("TARGET LOCKED: " + target->query_cap_name());
+    write("Angle: " + (random(360)) + " degrees");
+    write("Range: " + (random(1000) + 500) + " meters");
+    write("Type 'fire' to engage.");
+    
+    this_player()->set_property("turret_target", target);
+    
+    return 1;
+}
+
+int do_fire_lasers(string args) {
+    object player, vehicle, target, exterior;
+    int damage, hit_roll;
+    
+    player = this_player();
+    vehicle = query_parent_vehicle();
+    
+    if (!vehicle) return 0;
+    
+    if (!vehicle->query_engine_status()) {
+        write("Weapons systems are offline.");
+        return 1;
+    }
+    
+    target = player->query_property("turret_target");
+    
+    if (!target) {
+        write("No target locked. Use 'target <name>' first.");
+        return 1;
+    }
+    
+    exterior = environment(vehicle);
+    if (!exterior || environment(target) != exterior) {
+        write("Target has moved out of range.");
+        player->remove_property("turret_target");
+        return 1;
+    }
+    
+    write("You squeeze the trigger. Twin laser beams lance out!");
+    say(player->query_cap_name() + " fires the turret lasers!");
+    
+    // Tell exterior
+    tell_room(exterior, "Twin laser beams shoot from the Behemoth's turret!");
+    
+    // Calculate damage: 3d6 MD per blast (x2 for dual cannons)
+    damage = (random(6) + random(6) + random(6) + 3) * 2;
+    
+    // Simple hit roll (would use proper combat system in full implementation)
+    hit_roll = random(20) + 1;
+    
+    if (hit_roll >= 10) {
+        write("DIRECT HIT! Damage: " + damage + " MD");
+        tell_object(target, "You are struck by laser fire from the Behemoth!");
+        
+        target->add_hp(-damage);
+        
+        if (target->query_hp() <= 0) {
+            tell_room(exterior, target->query_cap_name() + " is destroyed!");
+        }
+    } else {
+        write("MISS! The lasers go wide of the target.");
+        tell_object(target, "Laser fire barely misses you!");
+    }
+    
+    player->remove_property("turret_target");
+    
+    return 1;
+}

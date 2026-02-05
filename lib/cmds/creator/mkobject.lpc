@@ -1,0 +1,262 @@
+// /lib/cmds/creator/mkobject.lpc
+// Object creation wizard for content creators
+// Creates weapons, armor, items, NPCs with template
+
+#include <lib.h>
+
+inherit LIB_DAEMON;
+
+int cmd_mkobject(string args) {
+    string type, filename;
+    object player;
+    
+    player = this_player();
+    
+    if (!SECURITY_D->query_wizard(player)) {
+        write("This command is for creators only.");
+        return 1;
+    }
+    
+    if (!args || args == "") {
+        return show_help();
+    }
+    
+    // Parse: mkobject <type> <filename>
+    if (sscanf(args, "%s %s", type, filename) == 2) {
+        return create_object(type, filename);
+    } else {
+        write("Usage: mkobject <type> <filename>");
+        write("Example: mkobject weapon vibro_sword");
+        return 1;
+    }
+}
+
+int show_help() {
+    write("OBJECT BUILDER - Quick Object Creation Tool\n");
+    write("============================================\n");
+    write("Usage: mkobject <type> <filename>\n");
+    write("Object Types:");
+    write("  weapon    - Create a weapon");
+    write("  armor     - Create armor or MDC armor");
+    write("  item      - Create generic item");
+    write("  npc       - Create NPC/monster");
+    write("  vehicle   - Create vehicle");
+    write("\nExamples:");
+    write("  mkobject weapon ng_pistol");
+    write("  mkobject armor glitter_boy");
+    write("  mkobject npc coalition_soldier");
+    write("  mkobject vehicle hovercycle\n");
+    write("Objects are created in your current working directory.");
+    
+    return 1;
+}
+
+int create_object(string type, string filename) {
+    string filepath, template_code, domain_path;
+    object player;
+    
+    player = this_player();
+    domain_path = player->query_env("cwd");
+    
+    if (!domain_path || domain_path == "") {
+        domain_path = "/lib/objects/";
+    }
+    
+    // Ensure .lpc extension
+    if (!regexp(filename, "\\.lpc$")) {
+        filename += ".lpc";
+    }
+    
+    filepath = domain_path + filename;
+    
+    // Check if file exists
+    if (file_size(filepath) > 0) {
+        write("File already exists: " + filepath);
+        return 1;
+    }
+    
+    // Generate template based on type
+    switch(type) {
+        case "weapon":
+            template_code = generate_weapon_template(filename);
+            break;
+        case "armor":
+            template_code = generate_armor_template(filename);
+            break;
+        case "item":
+            template_code = generate_item_template(filename);
+            break;
+        case "npc":
+            template_code = generate_npc_template(filename);
+            break;
+        case "vehicle":
+            template_code = generate_vehicle_template(filename);
+            break;
+        default:
+            write("Unknown type: " + type);
+            return show_help();
+    }
+    
+    // Write file
+    if (!write_file(filepath, template_code)) {
+        write("Error: Could not create file.");
+        return 1;
+    }
+    
+    write("Object created: " + filepath);
+    write("Use 'update " + filepath + "' to load it.");
+    write("Edit the file to customize properties.");
+    
+    return 1;
+}
+
+string generate_weapon_template(string filename) {
+    string template;
+    
+    template = "// " + filename + "\n";
+    template += "// Created: " + ctime(time()) + "\n\n";
+    template += "inherit \"/lib/std/weapon\";\n\n";
+    template += "void create() {\n";
+    template += "    ::create();\n\n";
+    template += "    set_id(({\n";
+    template += "        \"weapon\",\n";
+    template += "        \"sword\",  // Change to match weapon type\n";
+    template += "    }));\n\n";
+    template += "    set_short(\"a weapon\");\n";
+    template += "    set_long(\"This weapon needs a description.\");\n\n";
+    template += "    set_weapon_type(\"sword\");  // sword, pistol, rifle, heavy, grenade\n";
+    template += "    set_damage_type(\"slashing\");  // slashing, piercing, energy, mega\n";
+    template += "    set_damage_dice(\"1d6\");  // Damage roll\n";
+    template += "    set_mega_damage(0);  // Set to 1 for MD weapons\n\n";
+    template += "    set_weight(3);  // Weight in pounds\n";
+    template += "    set_value(1000);  // Value in credits\n";
+    template += "    set_wield_message(\"$N $vwield $o.\");\n";
+    template += "    set_unwield_message(\"$N $vunwield $o.\");\n";
+    template += "}\n";
+    
+    return template;
+}
+
+string generate_armor_template(string filename) {
+    string template;
+    
+    template = "// " + filename + "\n";
+    template += "// Created: " + ctime(time()) + "\n\n";
+    template += "inherit \"/lib/std/armor\";\n\n";
+    template += "void create() {\n";
+    template += "    ::create();\n\n";
+    template += "    set_id(({\n";
+    template += "        \"armor\",\n";
+    template += "        \"suit\",\n";
+    template += "    }));\n\n";
+    template += "    set_short(\"a suit of armor\");\n";
+    template += "    set_long(\"This armor needs a description.\");\n\n";
+    template += "    set_armor_type(\"light\");  // light, medium, heavy, power\n";
+    template += "    set_armor_class(5);  // AC bonus\n";
+    template += "    set_max_armor_mdc(50);  // MDC rating (0 for SDC armor)\n";
+    template += "    set_armor_mdc(50);  // Current MDC\n\n";
+    template += "    set_wear_slot(\"body\");  // body, head, hands, feet\n";
+    template += "    set_weight(20);  // Weight in pounds\n";
+    template += "    set_value(5000);  // Value in credits\n";
+    template += "    set_wear_message(\"$N $vput on $o.\");\n";
+    template += "    set_remove_message(\"$N $vremove $o.\");\n";
+    template += "}\n";
+    
+    return template;
+}
+
+string generate_item_template(string filename) {
+    string template;
+    
+    template = "// " + filename + "\n";
+    template += "// Created: " + ctime(time()) + "\n\n";
+    template += "inherit \"/lib/std/object\";\n\n";
+    template += "void create() {\n";
+    template += "    ::create();\n\n";
+    template += "    set_id(({\n";
+    template += "        \"item\",\n";
+    template += "        \"object\",\n";
+    template += "    }));\n\n";
+    template += "    set_short(\"an item\");\n";
+    template += "    set_long(\"This item needs a description.\");\n\n";
+    template += "    set_weight(1);  // Weight in pounds\n";
+    template += "    set_value(100);  // Value in credits\n";
+    template += "    set_gettable(1);  // Can be picked up\n";
+    template += "}\n";
+    
+    return template;
+}
+
+string generate_npc_template(string filename) {
+    string template;
+    
+    template = "// " + filename + "\n";
+    template += "// Created: " + ctime(time()) + "\n\n";
+    template += "inherit \"/lib/std/npc\";\n\n";
+    template += "void create() {\n";
+    template += "    ::create();\n\n";
+    template += "    set_name(\"creature\");\n";
+    template += "    set_id(({\n";
+    template += "        \"creature\",\n";
+    template += "        \"npc\",\n";
+    template += "    }));\n\n";
+    template += "    set_short(\"a creature\");\n";
+    template += "    set_long(\"This NPC needs a description.\");\n\n";
+    template += "    set_level(1);  // NPC level\n";
+    template += "    set_max_hp(50);  // HP or MDC\n";
+    template += "    set_hp(50);\n\n";
+    template += "    set_stat(\"intelligence quotient\", 10);\n";
+    template += "    set_stat(\"mental endurance\", 10);\n";
+    template += "    set_stat(\"mental affinity\", 10);\n";
+    template += "    set_stat(\"physical strength\", 10);\n";
+    template += "    set_stat(\"physical prowess\", 10);\n";
+    template += "    set_stat(\"physical endurance\", 10);\n";
+    template += "    set_stat(\"physical beauty\", 10);\n";
+    template += "    set_stat(\"speed\", 10);\n\n";
+    template += "    set_aggressive(0);  // 1 for hostile NPCs\n";
+    template += "    set_monster_race(\"human\");  // Race\n";
+    template += "}\n";
+    
+    return template;
+}
+
+string generate_vehicle_template(string filename) {
+    string template;
+    
+    template = "// " + filename + "\n";
+    template += "// Created: " + ctime(time()) + "\n\n";
+    template += "inherit \"/lib/std/vehicle\";\n\n";
+    template += "void create() {\n";
+    template += "    ::create();\n\n";
+    template += "    set_id(({\n";
+    template += "        \"vehicle\",\n";
+    template += "    }));\n\n";
+    template += "    set_short(\"a vehicle\");\n";
+    template += "    set_long(\"This vehicle needs a description.\");\n\n";
+    template += "    set_vehicle_type(\"ground\");  // ground, air, water, space\n";
+    template += "    set_pilot_skill(\"pilot_automobile\");  // Required skill\n";
+    template += "    set_pilot_difficulty(10);  // Skill difficulty\n\n";
+    template += "    set_max_fuel(100);  // Fuel capacity\n";
+    template += "    set_fuel(100);  // Current fuel\n";
+    template += "    set_fuel_consumption(1);  // Fuel per move\n";
+    template += "    set_max_armor_mdc(100);  // Armor rating\n";
+    template += "    set_armor_mdc(100);\n\n";
+    template += "    set_max_passengers(4);  // Passenger capacity\n";
+    template += "    set_mass(2000);  // Weight in pounds\n";
+    template += "    set_value(50000);  // Value in credits\n\n";
+    template += "    // Add interior rooms if multi-room vehicle\n";
+    template += "    // add_interior_room(\"cockpit\", \"/path/to/cockpit\");\n";
+    template += "}\n";
+    
+    return template;
+}
+
+void create() {
+    ::create();
+    set_privilege(1);
+}
+
+void init() {
+    add_action("cmd_mkobject", "mkobject");
+    add_action("cmd_mkobject", "makeobject");
+}

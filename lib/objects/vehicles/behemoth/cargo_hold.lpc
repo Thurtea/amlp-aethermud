@@ -1,0 +1,63 @@
+// /lib/objects/vehicles/behemoth/cargo_hold.lpc
+// EX-5 Behemoth Cargo Hold - Storage area
+
+inherit "/lib/std/vehicle_room";
+
+void create() {
+    ::create();
+    
+    set_parent_vehicle("/lib/objects/vehicles/ex5_behemoth");
+    set_room_type("cargo");
+    set_can_pilot(0);
+    
+    set_short("the cargo hold of the EX-5 Behemoth");
+    set_long(
+        "The cargo hold occupies the entire rear section of the Behemoth. This cavernous "
+        "space is designed to carry everything an exploration team might need: spare parts, "
+        "weapons, ammunition, food supplies, scientific equipment, and salvaged materials.\n\n"
+        "Cargo nets line the walls, and heavy-duty tie-down points dot the deck. Emergency "
+        "lights cast everything in a dim red glow. The smell of oil, metal, and recycled "
+        "air fills the space. A massive rear loading ramp (currently sealed) would allow "
+        "vehicles or large equipment to be loaded directly into the hold.\n\n"
+        "A door leads forward to the crew quarters, and a ladder leads up to engineering."
+    );
+    
+    set_exits(([
+        "forward" : "/lib/objects/vehicles/behemoth/crew_quarters",
+        "up" : "/lib/objects/vehicles/behemoth/engineering"
+    ]));
+    
+    set_items(([
+        ({"crates", "cargo", "supplies"}) :
+            "Secured crates containing survival gear, weapons, ammo, and field rations.",
+        ({"nets", "cargo nets"}) :
+            "Heavy nylon cargo nets keep everything from sliding around during movement.",
+        ({"ramp", "loading ramp"}) :
+            "The rear loading ramp is currently sealed tight.",
+        ({"tie-downs", "tie-down points"}) :
+            "Heavy metal rings built into the deck for securing large cargo."
+    ]));
+}
+
+void init() {
+    ::init();
+    add_action("do_inventory_cargo", "cargo");
+    add_action("do_inventory_cargo", "supplies");
+}
+
+int do_inventory_cargo(string args) {
+    write("CARGO MANIFEST:");
+    write("==================================");
+    write("Field rations: 200 person-days");
+    write("Water: 500 gallons");
+    write("Ammunition (various): 5,000 rounds");
+    write("Spare parts: Full diagnostic kit");
+    write("Medical supplies: Emergency trauma kit x4");
+    write("Fuel reserves: 200 gallons (emergency)");
+    write("Camping gear: Tents, sleeping bags (20 sets)");
+    write("Weapons locker: Assorted energy rifles and vibro-blades");
+    write("Scientific equipment: Sampling kits, radiation detectors");
+    write("\nAvailable storage: 40% capacity remaining");
+    
+    return 1;
+}

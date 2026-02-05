@@ -1,0 +1,63 @@
+// /lib/cmds/enter.lpc
+// Command to enter vehicles
+
+#include <lib.h>
+
+inherit LIB_DAEMON;
+
+int cmd_enter(string args) {
+    object *obs, vehicle;
+    int i;
+    
+    if (!args || args == "") {
+        write("Enter what?");
+        return 1;
+    }
+    
+    // Look for vehicles in the room
+    obs = all_inventory(environment(this_player()));
+    
+    for (i = 0; i < sizeof(obs); i++) {
+        string *ids;
+        
+        if (!obs[i]) continue;
+        if (obs[i] == this_player()) continue;
+        
+        // Check if the object has vehicle capability
+        if (!function_exists("enter_vehicle", obs[i])) continue;
+        
+        ids = obs[i]->query_id();
+        if (!ids) continue;
+        
+        if (member_array(args, ids) != -1) {
+            vehicle = obs[i];
+            break;
+        }
+    }
+    
+    if (!vehicle) {
+        write("There is no '" + args + "' here to enter.");
+        return 1;
+    }
+    
+    // Try to enter the vehicle
+    if (vehicle->enter_vehicle(this_player())) {
+        // Success message from vehicle object
+        return 1;
+    } else {
+        write("You cannot enter " + vehicle->query_short() + ".");
+        return 1;
+    }
+    
+    return 1;
+}
+
+void create() {
+    ::create();
+    set_privilege(1);
+}
+
+void init() {
+    add_action("cmd_enter", "enter");
+    add_action("cmd_enter", "board");
+}

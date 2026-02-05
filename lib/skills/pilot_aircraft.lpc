@@ -1,0 +1,73 @@
+// /lib/skills/pilot_aircraft.lpc
+// Pilot: Aircraft - Operate jets, helicopters, and aircraft
+// Base: 30% + 4% per level (PP bonus)
+
+inherit "/lib/std/skill";
+
+void create() {
+    ::create();
+    
+    set_skill_name("pilot_aircraft");
+    set_skill_display_name("Pilot: Aircraft");
+    set_short("the ability to pilot aircraft");
+    set_long(
+        "Pilot: Aircraft allows you to operate jets, helicopters, combat aircraft, "
+        "and other flying vehicles. This includes both military and civilian aircraft, "
+        "from simple prop planes to advanced VTOL fighters.\n\n"
+        "The skill covers: takeoff and landing, navigation, combat maneuvers, instrument "
+        "reading, weather flying, and emergency procedures. Advanced aircraft require "
+        "higher skill percentages.\n\n"
+        "Base: 30% + 4% per level\n"
+        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Related Stat: Physical Prowess"
+    );
+    
+    set_base_percent(30);
+    set_percent_per_level(4);
+    set_related_stat("physical prowess");
+    
+    set_skill_type("pilot");
+    set_skill_category("technical");
+    
+    set_available_to(({
+        "body_fixer",
+        "city_rat",
+        "cyber_knight",
+        "headhunter",
+        "juicer",
+        "mercenary",
+        "rogue_scholar",
+        "techno_wizard",
+        "wilderness_scout"
+    }));
+}
+
+int check_skill(object who, int difficulty) {
+    int skill_percent, stat_bonus, roll;
+    
+    if (!who) return 0;
+    
+    skill_percent = query_skill_percent(who);
+    
+    // Add PP bonus
+    stat_bonus = (who->query_stat("physical prowess") - 16) * 5;
+    if (stat_bonus > 0) {
+        skill_percent += stat_bonus;
+    }
+    
+    skill_percent -= difficulty;
+    
+    roll = random(100) + 1;
+    
+    return (roll <= skill_percent) ? 1 : 0;
+}
+
+string query_skill_result_message(int success, int difficulty) {
+    if (success) {
+        return difficulty <= 15 ? "You fly smoothly and confidently." :
+               "You execute a masterful flying maneuver!";
+    } else {
+        return difficulty <= 15 ? "The aircraft bucks and shudders under your control!" :
+               "You're losing control of the aircraft!";
+    }
+}

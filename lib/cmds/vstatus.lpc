@@ -1,0 +1,44 @@
+// /lib/cmds/vstatus.lpc
+// Command to check vehicle status
+
+#include <lib.h>
+
+inherit LIB_DAEMON;
+
+int cmd_vstatus(string args) {
+    object vehicle, room;
+    string status;
+    
+    room = environment(this_player());
+    
+    // Check if we're in a vehicle room
+    if (!function_exists("query_parent_vehicle", room)) {
+        write("You're not in a vehicle.");
+        return 1;
+    }
+    
+    vehicle = room->query_parent_vehicle();
+    
+    if (!vehicle) {
+        write("Error: Cannot access vehicle systems.");
+        return 1;
+    }
+    
+    // Get and display vehicle status
+    status = vehicle->query_vehicle_status();
+    
+    write(status);
+    
+    return 1;
+}
+
+void create() {
+    ::create();
+    set_privilege(1);
+}
+
+void init() {
+    add_action("cmd_vstatus", "vstatus");
+    add_action("cmd_vstatus", "vehicle");
+    add_action("cmd_vstatus", "vstat");
+}

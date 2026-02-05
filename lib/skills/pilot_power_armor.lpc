@@ -1,0 +1,91 @@
+// /lib/skills/pilot_power_armor.lpc
+// Pilot: Power Armor - Operate power armor suits
+// Base: 40% + 5% per level (PP bonus)
+
+inherit "/lib/std/skill";
+
+void create() {
+    ::create();
+    
+    set_skill_name("pilot_power_armor");
+    set_skill_display_name("Pilot: Power Armor");
+    set_short("the ability to pilot power armor");
+    set_long(
+        "Pilot: Power Armor allows you to operate powered exoskeletons and combat "
+        "armor suits like the SAMAS, Glitter Boy, or Triax Power Armor. These suits "
+        "amplify strength and provide protection, but require skill to operate effectively.\n\n"
+        "The skill covers: basic movement and coordination, combat maneuvers, jump jet "
+        "operation (if equipped), weapon systems integration, and emergency protocols. "
+        "Power armor effectively becomes a second skin for a skilled pilot.\n\n"
+        "Base: 40% + 5% per level\n"
+        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Related Stat: Physical Prowess"
+    );
+    
+    set_base_percent(40);
+    set_percent_per_level(5);
+    set_related_stat("physical prowess");
+    
+    set_skill_type("pilot");
+    set_skill_category("technical");
+    
+    // Classes that get this skill
+    set_available_to(({
+        "body_fixer",
+        "city_rat",
+        "crazy",
+        "cyber_knight",
+        "glitter_boy",
+        "headhunter",
+        "juicer",
+        "mercenary",
+        "techno_wizard",
+        "wilderness_scout"
+    }));
+}
+
+int check_skill(object who, int difficulty) {
+    int skill_percent, stat_bonus, roll;
+    
+    if (!who) return 0;
+    
+    skill_percent = query_skill_percent(who);
+    
+    // Add PP bonus (+5% per point of PP above 16)
+    stat_bonus = (who->query_stat("physical prowess") - 16) * 5;
+    if (stat_bonus > 0) {
+        skill_percent += stat_bonus;
+    }
+    
+    // Difficulty modifier
+    skill_percent -= difficulty;
+    
+    // Make percentile roll
+    roll = random(100) + 1;
+    
+    if (roll <= skill_percent) {
+        return 1; // Success
+    }
+    
+    return 0; // Failure
+}
+
+string query_skill_result_message(int success, int difficulty) {
+    if (success) {
+        if (difficulty <= 10) {
+            return "The power armor responds smoothly to your commands.";
+        } else if (difficulty <= 20) {
+            return "You maintain precise control of the power armor systems.";
+        } else {
+            return "You perform an expert maneuver in the power armor!";
+        }
+    } else {
+        if (difficulty <= 10) {
+            return "You fumble with the power armor controls!";
+        } else if (difficulty <= 20) {
+            return "The power armor's servo-motors don't respond as expected!";
+        } else {
+            return "You lose coordination in the power armor!";
+        }
+    }
+}

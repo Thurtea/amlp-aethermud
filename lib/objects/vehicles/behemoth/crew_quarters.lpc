@@ -1,0 +1,78 @@
+// /lib/objects/vehicles/behemoth/crew_quarters.lpc
+// EX-5 Behemoth Crew Quarters - Living space
+
+inherit "/lib/std/vehicle_room";
+
+void create() {
+    ::create();
+    
+    set_parent_vehicle("/lib/objects/vehicles/ex5_behemoth");
+    set_room_type("passenger");
+    set_can_pilot(0);
+    
+    set_short("the crew quarters of the EX-5 Behemoth");
+    set_long(
+        "The crew quarters serve as the heart of the Behemoth during long expeditions. "
+        "Bunks are stacked three-high along both walls, each with privacy curtains and "
+        "personal storage lockers. The middle of the compartment features a combination "
+        "galley and mess area - a small kitchen unit, fold-down table, and mismatched "
+        "chairs salvaged from a dozen different sources.\n\n"
+        "The air smells of coffee, instant meals, and humanity. Personal effects decorate "
+        "some bunks: photos, lucky charms, pin-up posters. A small entertainment system "
+        "plays scratchy pre-Rifts music. Despite the cramped conditions, there's a sense "
+        "of camaraderie here.\n\n"
+        "A ladder leads up to the cockpit, another down to the airlock. Doors lead aft to "
+        "the cargo hold and to the engineering section."
+    );
+    
+    set_exits(([
+        "up" : "/lib/objects/vehicles/behemoth/cockpit",
+        "down" : "/lib/objects/vehicles/behemoth/airlock",
+        "aft" : "/lib/objects/vehicles/behemoth/cargo_hold",
+        "engineering" : "/lib/objects/vehicles/behemoth/engineering"
+    ]));
+    
+    set_items(([
+        ({"bunks", "beds"}) :
+            "Triple-stacked bunks line both walls. Each has a thin mattress, privacy curtain, "
+            "and small locker for personal gear.",
+        ({"galley", "kitchen"}) :
+            "A compact galley unit: microwave, hot plate, water dispenser, and storage for "
+            "field rations and freeze-dried meals.",
+        ({"table", "mess table"}) :
+            "A fold-down metal table serves as the crew's dining and meeting area.",
+        ({"entertainment system", "music", "stereo"}) :
+            "An old pre-Rifts stereo system plays classic rock at low volume.",
+        ({"photos", "decorations"}) :
+            "Personal touches: family photos, drawings, motivational posters, and pin-ups."
+    ]));
+}
+
+void init() {
+    ::init();
+    add_action("do_rest", "rest");
+    add_action("do_rest", "sleep");
+    add_action("do_cook", "cook");
+}
+
+int do_rest(string args) {
+    write("You settle into one of the bunks and rest. The gentle vibration of the "
+          "Behemoth's engines is oddly soothing.");
+    say(this_player()->query_cap_name() + " settles into a bunk to rest.");
+    
+    // Small HP recovery
+    this_player()->add_hp(random(10) + 5);
+    
+    return 1;
+}
+
+int do_cook(string args) {
+    write("You heat up some field rations in the galley microwave. It's not gourmet, "
+          "but it's hot and filling.");
+    say(this_player()->query_cap_name() + " prepares a meal in the galley.");
+    
+    // Small HP/hunger recovery
+    this_player()->add_hp(random(15) + 10);
+    
+    return 1;
+}

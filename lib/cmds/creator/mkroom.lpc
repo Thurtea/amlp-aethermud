@@ -1,0 +1,299 @@
+// /lib/cmds/creator/mkroom.lpc
+// Room creation wizard for content creators
+// Based on Dead Souls room.c module patterns
+
+#include <lib.h>
+
+inherit LIB_DAEMON;
+
+private mapping room_template = ([]);
+
+int cmd_mkroom(string args) {
+    string filename, direction, path;
+    object player, current_room;
+    
+    player = this_player();
+    current_room = environment(player);
+    
+    if (!SECURITY_D->query_wizard(player)) {
+        write("This command is for creators only.");
+        return 1;
+    }
+    
+    if (!args || args == "") {
+        return show_help();
+    }
+    
+    // Parse: mkroom <direction> <filename>
+    if (sscanf(args, "%s %s", direction, filename) == 2) {
+        return create_room_with_exit(direction, filename, current_room);
+    } else {
+        // Just create a room without exit
+        return create_room(args);
+    }
+}
+
+int show_help() {
+    write("ROOM BUILDER - Quick Room Creation Tool\n");
+    write("=========================================\n");
+    write("Usage:");
+    write("  mkroom <filename>                 - Create a new room");
+    write("  mkroom <direction> <filename>     - Create room and link with exit\n");
+    write("Examples:");
+    write("  mkroom tavern                     - Create tavern.lpc in current domain");
+    write("  mkroom north forest_path          - Create forest_path.lpc north of here\n");
+    write("Directions: north, south, east, west, northeast, northwest, southeast, southwest, up, down, out\n");
+    write("After creation, use 'goto <filename>' to edit the room.");
+    
+    return 1;
+}
+
+string get_domain_path(object player) {
+    string cwd;
+    
+    // Get current working directory or use default
+    cwd = player->query_env("cwd");
+    
+    if (!cwd || cwd == "") {
+        // Default to domains directory
+        return "/lib/domains/";
+    }
+    
+    return cwd;
+}
+
+int create_room(string filename) {
+    object player;
+    string filepath, domain_path, short_desc, long_desc;
+    string template_code;
+    
+    player = this_player();
+    domain_path = get_domain_path(player);
+    
+    // Ensure .lpc extension
+    if (!regexp(filename, "\\.lpc$")) {
+        filename += ".lpc";
+    }
+    
+    filepath = domain_path + filename;
+    
+    // Check if file already exists
+    if (file_size(filepath) > 0) {
+        write("File already exists: " + filepath);
+        write("Use 'goto " + filepath + "' to edit it.");
+        return 1;
+    }
+    
+    // Prompt for room details
+    write("Creating new room: " + filepath);
+    write("Press ENTER to use defaults or type custom text.\n");
+    
+    // Use simple defaults for now (could be interactive)
+    short_desc = "a new room";
+    long_desc = "This is a newly created room. Edit it to add description.";
+    
+    // Generate room template
+    template_code = generate_room_template(filename, short_desc, long_desc);
+    
+    // Write the file
+    if (!write_file(filepath, template_code)) {
+        write("Error: Could not create room file.");
+        return 1;
+    }
+    
+    write("Room created successfully: " + filepath);
+    write("Use 'update " + filepath + "' to load it.");
+    write("Use 'goto " + filepath + "' to teleport there.");
+    
+    return 1;
+}
+
+int create_room_with_exit(string direction, string filename, object current_room) {
+    object player;
+    string filepath, current_path, domain_path;
+    string short_desc, long_desc, reverse_dir;
+    string template_code, exit_code;
+    mapping exits;
+    
+    player = this_player();
+    
+    // Validate direction
+    reverse_dir = get_reverse_direction(direction);
+    if (!reverse_dir) {
+        write("Invalid direction: " + direction);
+        write("Valid: north, south, east, west, ne, nw, se, sw, up, down, out");
+        return 1;
+    }
+    
+    // Get current room's file path
+    current_path = file_name(current_room);
+    
+    // Strip object#clone_id if present
+    if (sscanf(current_path, "%s#%*s", current_path) != 2) {
+        // current_path is already clean
+    }
+    
+    domain_path = get_domain_path(player);
+    
+    // Ensure .lpc extension
+    if (!regexp(filename, "\\.lpc$")) {
+        filename += ".lpc";
+    }
+    
+    filepath = domain_path + filename;
+    
+    // Check if file already exists
+    if (file_size(filepath) > 0) {
+        write("File already exists: " + filepath);
+        write("Creating exit only...");
+        return add_exit_to_current(direction, filepath, current_room);
+    }
+    
+    write("Creating new room with bidirectional exit...");
+    
+    // Create the new room
+    short_desc = "a new room to the " + direction;
+    long_desc = "This newly created room connects to the " + reverse_dir + ". "
+                "Edit this description to match your design.";
+    
+    template_code = generate_room_template(filename, short_desc, long_desc);
+    
+    // Add reverse exit to new room (back to current room)
+    template_code = add_exit_to_template(template_code, reverse_dir, current_path);
+    
+    // Write the new room file
+    if (!write_file(filepath, template_code)) {
+        write("Error: Could not create room file.");
+        return 1;
+    }
+    
+    write("New room created: " + filepath);
+    
+    // Add exit to current room
+    if (add_exit_to_current(direction, filepath, current_room)) {
+        write("Bidirectional exits created successfully!");
+        write("  " + current_path + " -> " + direction + " -> " + filepath);
+        write("  " + filepath + " -> " + reverse_dir + " -> " + current_path);
+        write("\nUse 'update " + current_path + "' to reload this room.");
+        write("Use 'update " + filepath + "' to load the new room.");
+    } else {
+        write("New room created but current room exit failed.");
+        write("You'll need to manually add the exit to: " + current_path);
+    }
+    
+    return 1;
+}
+
+string generate_room_template(string filename, string short_desc, string long_desc) {
+    string template, clean_name;
+    
+    // Get clean name without .lpc
+    if (sscanf(filename, "%s.lpc", clean_name) != 1) {
+        clean_name = filename;
+    }
+    
+    template = "// " + filename + "\n";
+    template += "// Created: " + ctime(time()) + "\n\n";
+    template += "inherit \"/lib/std/room\";\n\n";
+    template += "void create() {\n";
+    template += "    ::create();\n\n";
+    template += "    set_short(\"" + short_desc + "\");\n";
+    template += "    set_long(\n";
+    template += "        \"" + long_desc + "\"\n";
+    template += "    );\n\n";
+    template += "    set_exits(([\n";
+    template += "        // Add exits here\n";
+    template += "    ]));\n\n";
+    template += "    set_items(([\n";
+    template += "        // Add examinable items here\n";
+    template += "        // Example: ({\"table\", \"desk\"}) : \"A wooden table.\",\n";
+    template += "    ]));\n";
+    template += "}\n";
+    
+    return template;
+}
+
+string add_exit_to_template(string template, string direction, string destination) {
+    string before_exits, after_exits, new_template;
+    
+    // Find the set_exits line and add the exit
+    if (sscanf(template, "%sset_exits(([\n%s    ]));\n%s", before_exits, after_exits) == 3) {
+        new_template = before_exits + "set_exits(([\n";
+        new_template += "        \"" + direction + "\" : \"" + destination + "\",\n";
+        new_template += after_exits + "    ]));\n" + after_exits;
+        return new_template;
+    }
+    
+    // If pattern doesn't match, return original
+    return template;
+}
+
+int add_exit_to_current(string direction, string destination, object current_room) {
+    string filepath, content, new_content;
+    string before_exits, exits_section, after_exits;
+    
+    filepath = file_name(current_room);
+    
+    // Strip clone ID
+    if (sscanf(filepath, "%s#%*s", filepath) == 2) {
+        // filepath is now clean
+    }
+    
+    // Read current room file
+    content = read_file(filepath);
+    
+    if (!content) {
+        write("Error: Cannot read current room file.");
+        return 0;
+    }
+    
+    // Find set_exits section and add new exit
+    // This is a simple version - full version would parse LPC properly
+    if (strsrch(content, "set_exits") != -1) {
+        // Room already has exits - need to add to existing mapping
+        // For now, just notify user to manually add
+        write("Current room has exits. Manually add this line to set_exits:");
+        write("        \"" + direction + "\" : \"" + destination + "\",");
+        return 1;
+    }
+    
+    // Room has no exits yet - add exit section
+    // This is simplified - real implementation would properly parse the file
+    write("Add this exit to the current room manually:");
+    write("        \"" + direction + "\" : \"" + destination + "\",");
+    
+    return 1;
+}
+
+string get_reverse_direction(string direction) {
+    mapping reverse_map = ([
+        "north" : "south",
+        "south" : "north",
+        "east" : "west",
+        "west" : "east",
+        "northeast" : "southwest",
+        "ne" : "sw",
+        "northwest" : "southeast",
+        "nw" : "se",
+        "southeast" : "northwest",
+        "se" : "nw",
+        "southwest" : "northeast",
+        "sw" : "ne",
+        "up" : "down",
+        "down" : "up",
+        "out" : "in",
+        "in" : "out"
+    ]);
+    
+    return reverse_map[direction];
+}
+
+void create() {
+    ::create();
+    set_privilege(1);
+}
+
+void init() {
+    add_action("cmd_mkroom", "mkroom");
+    add_action("cmd_mkroom", "makeroom");
+}

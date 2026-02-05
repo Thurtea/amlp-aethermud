@@ -1,0 +1,91 @@
+// /lib/objects/vehicles/behemoth/airlock.lpc
+// EX-5 Behemoth Airlock - Entry/exit point
+
+inherit "/lib/std/vehicle_room";
+
+void create() {
+    ::create();
+    
+    set_parent_vehicle("/lib/objects/vehicles/ex5_behemoth");
+    set_room_type("entry");
+    set_can_pilot(0);
+    
+    set_short("the airlock of the EX-5 Behemoth");
+    set_long(
+        "This small chamber serves as the vehicle's primary entry and exit point. Heavy "
+        "bulkhead doors seal off the interior from the outside environment, protecting "
+        "against hostile atmospheres, radiation, and combat damage.\n\n"
+        "The outer hatch is currently " + (is_hatch_open() ? "open" : "sealed") + ". "
+        "Red hazard stripes mark the pressure-seal threshold. Emergency breathing "
+        "apparatus hangs from wall mounts, and a decontamination shower is built into "
+        "one corner.\n\n"
+        "A passage leads forward to the crew quarters, and another leads up to the cockpit "
+        "via a ladder."
+    );
+    
+    set_exits(([
+        "forward" : "/lib/objects/vehicles/behemoth/crew_quarters",
+        "up" : "/lib/objects/vehicles/behemoth/cockpit"
+    ]));
+    
+    set_items(([
+        ({"hatch", "door", "outer hatch", "outer door"}) :
+            "The outer hatch is a massive slab of MDC-rated armor plating with a wheel lock "
+            "and emergency explosive bolts.",
+        ({"breathing apparatus", "masks", "gear"}) :
+            "Emergency breather masks for hostile environments.",
+        ({"shower", "decontamination shower"}) :
+            "A built-in shower system for removing radiation, biological contaminants, or "
+            "chemical agents before entering the main vehicle."
+    ]));
+}
+
+void init() {
+    ::init();
+    add_action("do_open_hatch", "open");
+    add_action("do_close_hatch", "close");
+}
+
+int is_hatch_open() {
+    // Check if vehicle is in motion
+    object vehicle = query_parent_vehicle();
+    if (vehicle && vehicle->query_engine_status()) {
+        return 0; // Sealed when moving
+    }
+    return 1; // Open when stationary
+}
+
+int do_open_hatch(string args) {
+    object vehicle;
+    
+    if (!args || (args != "hatch" && args != "door")) {
+        return 0;
+    }
+    
+    vehicle = query_parent_vehicle();
+    if (!vehicle) {
+        write("Error: Cannot access airlock systems.");
+        return 1;
+    }
+    
+    if (vehicle->query_engine_status()) {
+        write("Safety interlock: Cannot open outer hatch while vehicle is in motion!");
+        return 1;
+    }
+    
+    write("You manually crank open the outer hatch. Fresh air rushes in.");
+    say(this_player()->query_cap_name() + " opens the outer hatch.");
+    
+    return 1;
+}
+
+int do_close_hatch(string args) {
+    if (!args || (args != "hatch" && args != "door")) {
+        return 0;
+    }
+    
+    write("You seal the outer hatch with a heavy clang.");
+    say(this_player()->query_cap_name() + " seals the outer hatch.");
+    
+    return 1;
+}

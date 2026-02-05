@@ -1,0 +1,65 @@
+// /lib/cmds/start.lpc
+// Command to start a vehicle's engine
+
+#include <lib.h>
+
+inherit LIB_DAEMON;
+
+int cmd_start(string args) {
+    object vehicle, room;
+    int result;
+    
+    room = environment(this_player());
+    
+    // Check if we're in a vehicle room
+    if (!function_exists("query_parent_vehicle", room)) {
+        write("You're not in a vehicle.");
+        return 1;
+    }
+    
+    vehicle = room->query_parent_vehicle();
+    
+    if (!vehicle) {
+        write("Error: Cannot access vehicle systems.");
+        return 1;
+    }
+    
+    // Check if already running
+    if (vehicle->query_engine_status()) {
+        write("The engine is already running.");
+        return 1;
+    }
+    
+    // Check if player is the pilot
+    if (vehicle->query_pilot() != this_player()) {
+        write("Only the pilot can start the engine.");
+        return 1;
+    }
+    
+    // Try to start
+    result = vehicle->start_engine(this_player());
+    
+    if (result == 1) {
+        write("You start the engine. It rumbles to life!");
+        say(this_player()->query_cap_name() + " starts the vehicle's engine.");
+        
+        tell_room(environment(vehicle), 
+            vehicle->query_short() + "'s engines roar to life!");
+        
+    } else if (result == -1) {
+        write("The engine won't start - out of fuel!");
+    } else {
+        write("You cannot start the engine.");
+    }
+    
+    return 1;
+}
+
+void create() {
+    ::create();
+    set_privilege(1);
+}
+
+void init() {
+    add_action("cmd_start", "start");
+}

@@ -1,0 +1,215 @@
+// /lib/objects/vehicles/ex5_behemoth.lpc
+// EX-5 Behemoth Explorer - Multi-room ground vehicle
+// Northern Gun's largest exploration vehicle
+// Crew: 6 (pilot, co-pilot, 4 crew)
+// Passengers: Up to 20 total
+
+inherit "/lib/std/vehicle";
+
+void create() {
+    ::create();
+    
+    // Basic details
+    set_id(({"behemoth", "ex-5", "ex5", "vehicle", "explorer"}));
+    set_adjectives(({"massive", "armored", "northern gun", "exploration"}));
+    set_short("an EX-5 Behemoth Explorer");
+    set_long(
+        "The EX-5 Behemoth is Northern Gun's largest exploration vehicle. This massive "
+        "ground vehicle is built like a fortress on wheels, with eight enormous tires and "
+        "sloped armor plating. The vehicle stands three stories tall and stretches over "
+        "50 feet long.\n\n"
+        "The front features a reinforced ram and mounting points for heavy weapons. Armored "
+        "viewports show the cockpit level, while the upper deck has sensor arrays and a "
+        "defensive turret. Side hatches provide access to the interior.\n\n"
+        "This is clearly designed for long-range expeditions into hostile territory."
+    );
+    
+    // Vehicle specs
+    set_vehicle_type("ground_heavy");
+    set_pilot_skill("pilot_robot"); // Or pilot_truck for simpler version
+    set_pilot_difficulty(20); // Challenging to pilot
+    
+    // Capacity
+    set_max_passengers(20);
+    set_crew_required(2); // Minimum pilot + co-pilot
+    
+    // Fuel & Movement
+    set_max_fuel(1000);
+    set_fuel(1000);
+    set_fuel_consumption(5); // Heavy fuel use
+    set_speed(2); // Slow but steady
+    
+    // Armor
+    set_max_armor_mdc(800); // Heavily armored
+    set_armor_mdc(800);
+    
+    // Interior rooms
+    add_interior_room("cockpit", "/lib/objects/vehicles/behemoth/cockpit");
+    add_interior_room("cargo_hold", "/lib/objects/vehicles/behemoth/cargo_hold");
+    add_interior_room("crew_quarters", "/lib/objects/vehicles/behemoth/crew_quarters");
+    add_interior_room("engineering", "/lib/objects/vehicles/behemoth/engineering");
+    add_interior_room("turret", "/lib/objects/vehicles/behemoth/turret");
+    add_interior_room("airlock", "/lib/objects/vehicles/behemoth/airlock");
+    
+    set_entry_room("airlock");
+    
+    // Weapon systems
+    add_weapon_system("front_rail_gun", ([
+        "name" : "NG-202 Rail Gun",
+        "damage" : "1d6x10 MD",
+        "range" : "4000 feet",
+        "ammo" : 4000,
+        "current_ammo" : 4000
+    ]));
+    
+    add_weapon_system("top_turret", ([
+        "name" : "Dual Laser Turret",
+        "damage" : "3d6 MD per blast",
+        "range" : "2000 feet",
+        "unlimited" : 1
+    ]));
+    
+    add_weapon_system("side_missiles", ([
+        "name" : "Medium Range Missiles",
+        "damage" : "2d4x10 MD",
+        "range" : "40 miles",
+        "ammo" : 12,
+        "current_ammo" : 12
+    ]));
+    
+    // Properties
+    set_mass(50000); // 25 tons
+    set_value(4500000); // 4.5 million credits (expensive!)
+    set_no_get(1); // Cannot pick up a vehicle
+}
+
+void init() {
+    ::init();
+    
+    add_action("do_enter_behemoth", "enter");
+    add_action("do_enter_behemoth", "board");
+    add_action("do_examine_behemoth", "examine");
+}
+
+int do_enter_behemoth(string args) {
+    object player;
+    int result;
+    
+    if (!args || (args != "behemoth" && args != "ex-5" && args != "ex5" && args != "vehicle")) {
+        return 0; // Not for us
+    }
+    
+    player = this_player();
+    
+    if (query_passenger_count() >= query_max_passengers()) {
+        write("The " + query_short() + " is already at maximum capacity.");
+        return 1;
+    }
+    
+    result = enter_vehicle(player);
+    
+    if (result == 1) {
+        write("You climb up to the side airlock and enter the " + query_short() + ".");
+        say(player->query_cap_name() + " climbs into the " + query_short() + ".");
+        
+        // Announce to interior
+        if (query_interior_rooms() && query_entry_room()) {
+            object entry = load_object(query_interior_rooms()[query_entry_room()]);
+            if (entry) {
+                tell_room(entry, player->query_cap_name() + " enters through the airlock.");
+            }
+        }
+        
+        return 1;
+    } else if (result == -1) {
+        write("The " + query_short() + " is full. No more passengers can board.");
+        return 1;
+    }
+    
+    write("You cannot enter the " + query_short() + " right now.");
+    return 1;
+}
+
+int do_examine_behemoth(string args) {
+    string output;
+    mapping weapons;
+    string weapon_name;
+    mapping weapon_data;
+    
+    if (!args || (args != "behemoth" && args != "ex-5" && args != "ex5" && args != "vehicle")) {
+        return 0;
+    }
+    
+    output = query_long() + "\n\n";
+    output += query_vehicle_status() + "\n";
+    output += "\nWeapon Systems:\n";
+    
+    weapons = query_weapon_systems();
+    foreach (weapon_name, weapon_data in weapons) {
+        output += "  " + weapon_data["name"] + " (" + weapon_data["damage"] + ")\n";
+        if (weapon_data["ammo"]) {
+            output += "    Ammo: " + weapon_data["current_ammo"] + "/" + weapon_data["ammo"] + "\n";
+        }
+    }
+    
+    output += "\nInterior Locations:\n";
+    output += "  - Cockpit (pilot controls)\n";
+    output += "  - Crew Quarters (bunks, kitchen)\n";
+    output += "  - Cargo Hold (storage)\n";
+    output += "  - Engineering (power systems)\n";
+    output += "  - Turret (defensive position)\n";
+    output += "  - Airlock (entry/exit)\n";
+    
+    write(output);
+    return 1;
+}
+
+// Behemoth-specific features
+int fire_rail_gun(object target) {
+    mapping rail_gun;
+    int damage;
+    
+    if (!query_engine_status()) {
+        return -1; // Engine must be running
+    }
+    
+    rail_gun = query_weapon_systems()["front_rail_gun"];
+    if (!rail_gun) return 0;
+    
+    if (rail_gun["current_ammo"] <= 0) {
+        return -2; // Out of ammo
+    }
+    
+    // Reduce ammo
+    rail_gun["current_ammo"]--;
+    
+    // Roll damage: 1d6x10 MD
+    damage = (random(6) + 1) * 10;
+    
+    // Apply damage to target
+    if (target) {
+        target->add_hp(-damage);
+    }
+    
+    return damage;
+}
+
+void heart_beat() {
+    object *crew;
+    int i;
+    
+    ::heart_beat();
+    
+    // If engine is running, consume fuel
+    if (query_engine_status()) {
+        if (!consume_fuel()) {
+            // Out of fuel - announce to crew
+            crew = all_inventory(this_object());
+            for (i = 0; i < sizeof(crew); i++) {
+                if (living(crew[i])) {
+                    tell_object(crew[i], "The engine sputters and dies! Out of fuel!");
+                }
+            }
+        }
+    }
+}

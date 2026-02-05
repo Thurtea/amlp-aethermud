@@ -1,0 +1,69 @@
+// /lib/skills/pilot_spacecraft.lpc
+// Pilot: Spacecraft - Operate spaceships and orbital vehicles
+// Base: 20% + 4% per level (PP bonus)
+
+inherit "/lib/std/skill";
+
+void create() {
+    ::create();
+    
+    set_skill_name("pilot_spacecraft");
+    set_skill_display_name("Pilot: Spacecraft");
+    set_short("the ability to pilot spacecraft");
+    set_long(
+        "Pilot: Spacecraft allows you to operate spaceships, orbital shuttles, and "
+        "interplanetary vehicles. This is a rare and valuable skill in Rifts Earth, "
+        "as functional spacecraft are extremely uncommon.\n\n"
+        "The skill covers: orbital mechanics, zero-gravity maneuvering, docking procedures, "
+        "re-entry protocols, life support management, and emergency EVA operations. Most "
+        "spacecraft operations require extensive computer assistance.\n\n"
+        "Base: 20% + 4% per level\n"
+        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Related Stat: Physical Prowess"
+    );
+    
+    set_base_percent(20);
+    set_percent_per_level(4);
+    set_related_stat("physical prowess");
+    
+    set_skill_type("pilot");
+    set_skill_category("technical");
+    
+    set_available_to(({
+        "city_rat",
+        "cyber_knight",
+        "headhunter",
+        "mercenary",
+        "rogue_scholar",
+        "techno_wizard"
+    }));
+}
+
+int check_skill(object who, int difficulty) {
+    int skill_percent, stat_bonus, roll;
+    
+    if (!who) return 0;
+    
+    skill_percent = query_skill_percent(who);
+    
+    stat_bonus = (who->query_stat("physical prowess") - 16) * 5;
+    if (stat_bonus > 0) {
+        skill_percent += stat_bonus;
+    }
+    
+    skill_percent -= difficulty;
+    
+    roll = random(100) + 1;
+    
+    return (roll <= skill_percent) ? 1 : 0;
+}
+
+string query_skill_result_message(int success, int difficulty) {
+    if (success) {
+        return difficulty <= 15 ? "You navigate through space with precision." :
+               "You execute a complex orbital maneuver flawlessly!";
+    } else {
+        return difficulty <= 15 ? "The spacecraft drifts off course!" :
+               "Critical navigation error!";
+    }
+}

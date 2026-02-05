@@ -1,0 +1,91 @@
+// /lib/psionics/physical/levitation.lpc
+// Physical Psionic - Levitation (varies ISP)
+// Fly and float using psionic power
+
+inherit "/lib/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_name("Levitation");
+    set_power_id("levitation_psionic");
+    set_category("physical");
+    set_power_level(1);
+    
+    set_short("a levitation psionic power");
+    set_long(
+        "Levitation allows the psychic to fly using mental power at a speed "
+        "of 10 mph per I.S.P. spent. Can hover motionless or fly at speed. "
+        "Each I.S.P. provides 10 minutes of flight at that speed. Costs "
+        "vary: 8 I.S.P. for 10 mph, 16 for 20 mph, etc. Range: Self."
+    );
+    
+    set_isp_cost(8);  // Base cost
+    set_range("Self");
+    set_duration("10 minutes per I.S.P.");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_mental_endurance_required(0);
+    set_requires_concentration(0);  // Can maintain while doing other things
+}
+
+int manifest_power(object caster, mixed target, string args) {
+    int speed = 10;  // mph
+    int cost, duration;
+    
+    if (!caster) return 0;
+    
+    if (caster->query_property("levitating") || caster->query_property("flying")) {
+        tell_object(caster, "You are already airborne!");
+        return 0;
+    }
+    
+    // Parse speed from args if provided
+    if (args && sscanf(args, "%d", speed) == 1) {
+        if (speed < 10) speed = 10;
+        if (speed > 100) speed = 100;  // Max 100 mph
+        
+        // Must be multiple of 10
+        speed = (speed / 10) * 10;
+    }
+    
+    cost = (speed / 10) * 8;
+    duration = 600;  // 10 minutes base
+    
+    // Check if caster has enough ISP (simplified - would check actual ISP in real system)
+    if (cost > 8) {
+        tell_object(caster, "Levitating at " + speed + " mph costs " + cost + " I.S.P.");
+        tell_object(caster, "Using default speed of 10 mph (8 I.S.P.)");
+        speed = 10;
+        cost = 8;
+    }
+    
+    tell_object(caster, "You lift into the air using psionic power!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " rises into the air!",
+        ({caster}));
+    
+    caster->set_property("levitating", 1);
+    caster->set_property("flying", 1);
+    caster->set_property("flight_speed", speed);
+    caster->set_property("altitude", 10);
+    
+    call_out("end_levitation", duration, caster);
+    
+    return 1;
+}
+
+void end_levitation(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("levitating");
+    caster->remove_property("flying");
+    caster->remove_property("flight_speed");
+    caster->remove_property("altitude");
+    
+    tell_object(caster, "Your psionic levitation ends and you drift to the ground.");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " drifts to the ground.",
+        ({caster}));
+}

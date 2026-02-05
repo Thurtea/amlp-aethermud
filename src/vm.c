@@ -867,13 +867,16 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
                     /* Empty string */
                     VMValue result;
                     result.type = VALUE_STRING;
-                    result.data.string_value = gc_strdup(vm->gc, "");
+                    /* Create empty string using gc_alloc */
+                    char *empty_str = (char *)gc_alloc(vm->gc, 1, GC_TYPE_STRING);
+                    if (empty_str) empty_str[0] = '\0';
+                    result.data.string_value = empty_str;
                     return vm_push_value(vm, result);
                 }
                 
                 /* Create substring */
                 int slice_len = end - start + 1;
-                char *slice = gc_malloc(vm->gc, slice_len + 1);
+                char *slice = (char *)gc_alloc(vm->gc, slice_len + 1, GC_TYPE_STRING);
                 strncpy(slice, str + start, slice_len);
                 slice[slice_len] = '\0';
                 
@@ -886,7 +889,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             /* Handle array slicing */
             if (arr_val.type == VALUE_ARRAY) {
                 array_t *arr = (array_t *)arr_val.data.array_value;
-                int len = array_size(arr);
+                int len = array_length(arr);
                 
                 /* Normalize indices */
                 if (start < 0) start = 0;

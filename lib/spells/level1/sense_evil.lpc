@@ -1,0 +1,94 @@
+// /lib/spells/level1/sense_evil.lpc
+// Level 1 Spell - Sense Evil (2 PPE)
+// Detects evil intentions and alignments
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Sense Evil");
+    set_spell_id("sense_evil");
+    set_spell_level(1);
+    set_spell_type("sense");
+    set_casting_time(1);
+    
+    set_short("a sense evil spell");
+    set_long(
+        "Sense Evil allows the spell caster to sense evil or hostile "
+        "intent in others. The spell can detect evil alignments (Aberrant, "
+        "Miscreant, Diabolic) and sense murderous or hostile intent. It "
+        "has a range of 90 feet and lasts 2 minutes per level. "
+        "Costs 2 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(2);
+    set_range("90 feet");
+    set_duration("2 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    object *beings;
+    object room;
+    string output = "";
+    int duration, found = 0;
+    
+    if (!caster) return 0;
+    
+    room = environment(caster);
+    if (!room) return 0;
+    
+    duration = caster->query_spell_caster_level() * 120;  // 2 min/level in seconds
+    
+    tell_object(caster, "You extend your senses, scanning for evil...");
+    tell_room(room, caster->query_cap_name() + " concentrates deeply.", ({caster}));
+    
+    // Scan room for evil beings
+    beings = filter_array(all_inventory(room), (: living($1) :));
+    
+    output = "\n=== Sense Evil Results ===\n";
+    
+    foreach (object being : beings) {
+        if (being == caster) continue;
+        if (!being) continue;
+        
+        string alignment = being->query_alignment();
+        int evil_intent = being->query_property("hostile") || 
+                         being->query_property("aggressive");
+        
+        string name = being->query_introduction_name(caster);
+        
+        if (alignment == "aberrant" || alignment == "miscreant" || alignment == "diabolic") {
+            output += sprintf("%-25s : EVIL ALIGNMENT (%s)\n", name, capitalize(alignment));
+            found++;
+        } else if (evil_intent) {
+            output += sprintf("%-25s : HOSTILE INTENT\n", name);
+            found++;
+        }
+    }
+    
+    if (!found) {
+        output += "You sense no evil or hostile intent nearby.\n";
+    }
+    
+    tell_object(caster, output);
+    
+    // Set property for continued sensing
+    caster->set_property("sense_evil_active", 1);
+    call_out("end_sense_evil", duration, caster);
+    
+    return 1;
+}
+
+void end_sense_evil(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("sense_evil_active");
+    tell_object(caster, "Your sense of evil fades.");
+}

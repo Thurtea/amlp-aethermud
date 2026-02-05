@@ -156,6 +156,27 @@ make driver          # Build driver only
 make all             # Build driver and utilities
 ```
 
+**Understanding Build Warnings:**
+
+When you run `make`, you may see compiler warnings. We've created comprehensive documentation explaining each warning:
+
+- **[diagnostics/INDEX.md](diagnostics/INDEX.md)** - Start here for overview
+- **[diagnostics/quick-reference.md](diagnostics/quick-reference.md)** - One-line solutions table
+- **[diagnostics/README.md](diagnostics/README.md)** - Detailed navigation guide
+
+The build output includes **clickable file paths** in most terminals - just click to open the relevant documentation!
+
+```
+╠════════════════════════════════════════════════════════════════════════════╣
+║  BUILD SUCCESSFUL                                                          ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║  Warnings:       50                                                        ║
+║  Warning details: diagnostics/README.md      ← Click to learn more!       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+```
+
+Current warnings are **safe to ignore** - the MUD runs perfectly with them. But if you want to understand or fix them, the diagnostics directory has everything you need.
+
 ### LPC Development
 
 Create rooms, objects, and NPCs using LPC:

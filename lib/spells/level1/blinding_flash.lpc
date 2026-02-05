@@ -1,0 +1,100 @@
+// /lib/spells/level1/blinding_flash.lpc
+// Level 1 Spell - Blinding Flash (1 PPE)
+// Creates a bright flash that blinds opponents
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Blinding Flash");
+    set_spell_id("blinding_flash");
+    set_spell_level(1);
+    set_spell_type("utility");
+    set_casting_time(1);  // 1 melee action
+    
+    set_short("a blinding flash spell");
+    set_long(
+        "Blinding Flash creates a sudden, brilliant burst of light that "
+        "temporarily blinds all who see it. Those affected are -8 to strike, "
+        "parry, and dodge for 1D4 melees. Costs 1 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(1);
+    set_range("120 feet");
+    set_duration("1D4 melees (blindness)");
+    set_saving_throw("Standard");
+    set_damage("None");
+    
+    set_components(({}));  // No components needed
+    set_verbal(1);         // Requires speaking
+    set_somatic(1);        // Requires hand gestures
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    object *victims;
+    object room;
+    int i, duration, save, affected = 0;
+    
+    if (!caster) return 0;
+    
+    room = environment(caster);
+    if (!room) {
+        tell_object(caster, "You are nowhere!");
+        return 0;
+    }
+    
+    // Get all living things in the room  
+    victims = filter_array(all_inventory(room), (: living($1) :));
+    
+    duration = random(4) + 1;  // 1D4 melees
+    
+    tell_object(caster, "You create a brilliant flash of light!");
+    tell_room(room, caster->query_cap_name() + " creates a blinding flash of light!", ({caster}));
+    
+    // Affect everyone who can see (except caster)
+    foreach (object victim : victims) {
+        if (victim == caster) continue;
+        if (!victim) continue;
+        
+        // Check for blindness immunity
+        if (victim->query_immunity("blindness")) {
+            tell_object(victim, "The flash has no effect on you!");
+            continue;
+        }
+        
+        // Saving throw
+        save = victim->saving_throw("spell");
+        
+        if (save) {
+            tell_object(victim, "You shield your eyes in time!");
+        } else {
+            tell_object(victim, "The brilliant light blinds you!");
+            victim->set_property("blind", duration);
+            victim->add_combat_penalty("strike", 8);
+            victim->add_combat_penalty("parry", 8);
+            victim->add_combat_penalty("dodge", 8);
+            affected++;
+            
+            // Call out after duration
+            call_out("remove_blindness", duration * 15, victim);  // 15 seconds per melee
+        }
+    }
+    
+    if (affected) {
+        tell_object(caster, "You blinded " + affected + " opponent" + (affected > 1 ? "s" : "") + "!");
+    }
+    
+    return 1;
+}
+
+void remove_blindness(object victim) {
+    if (!victim) return;
+    
+    victim->remove_property("blind");
+    victim->add_combat_penalty("strike", -8);
+    victim->add_combat_penalty("parry", -8);
+    victim->add_combat_penalty("dodge", -8);
+    
+    tell_object(victim, "Your vision clears.");
+}

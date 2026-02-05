@@ -1,0 +1,100 @@
+// /lib/psionics/sensitive/presence_sense.lpc
+// Sensitive Psionic - Presence Sense (4 ISP)
+// Detect nearby minds and presences
+
+inherit "/lib/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_name("Presence Sense");
+    set_power_id("presence_sense");
+    set_category("sensitive");
+    set_power_level(1);
+    
+    set_short("a presence sense psionic power");
+    set_long(
+        "Presence Sense allows the psychic to detect the presence of other "
+        "minds within 120 feet. Can sense through walls and obstacles. "
+        "Reveals number of beings, approximate direction and distance, but "
+        "not specific identity. Invisible and hidden beings are detected. "
+        "Lasts 2 minutes per level. Costs 4 I.S.P. to use."
+    );
+    
+    set_isp_cost(4);
+    set_range("120 feet radius");
+    set_duration("2 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_mental_endurance_required(0);
+    set_requires_concentration(1);
+}
+
+int manifest_power(object caster, mixed target, string args) {
+    object room, *adjacent_rooms;
+    object *beings;
+    string output;
+    int duration, count = 0;
+    mapping presence_map = ([]);
+    
+    if (!caster) return 0;
+    
+    room = environment(caster);
+    if (!room) return 0;
+    
+    duration = caster->query_psionic_level() * 120;  // 2 min/level in seconds
+    
+    tell_object(caster, "You extend your psionic senses to detect nearby presences...");
+    
+    output = "\n=== Presence Sense ===\n";
+    
+    // Scan current room
+    beings = filter_array(all_inventory(room), (: living($1) && $1 != $(caster) :));
+    if (sizeof(beings)) {
+        output += "Current Location: " + sizeof(beings) + " presence" + 
+                  (sizeof(beings) > 1 ? "s" : "") + " detected\n";
+        count += sizeof(beings);
+        
+        foreach (object being : beings) {
+            if (being->query_property("invisible") || being->query_property("hidden")) {
+                output += "  - Hidden/Invisible presence detected!\n";
+            }
+        }
+    }
+    
+    // Scan adjacent areas (simplified - would need full room network in real implementation)
+    string *exits = room->query_exits();
+    if (exits && sizeof(exits)) {
+        output += "\nAdjacent Areas:\n";
+        foreach (string exit : exits) {
+            string exit_room = room->query_exit(exit);
+            if (exit_room) {
+                // In real implementation, would load and scan the room
+                // For now, just indicate the direction
+                output += sprintf("  %s: <presence detection active>\n", capitalize(exit));
+            }
+        }
+    }
+    
+    if (count == 0) {
+        output += "\nNo other presences detected in immediate area.\n";
+    } else {
+        output += "\nTotal detected: " + count + " presence" + (count > 1 ? "s" : "") + "\n";
+    }
+    
+    tell_object(caster, output);
+    
+    // Set active property
+    caster->set_property("presence_sense_active", 1);
+    call_out("end_presence_sense", duration, caster);
+    
+    return 1;
+}
+
+void end_presence_sense(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("presence_sense_active");
+    tell_object(caster, "Your presence sense fades.");
+}

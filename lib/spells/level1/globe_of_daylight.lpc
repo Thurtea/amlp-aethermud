@@ -1,0 +1,68 @@
+// /lib/spells/level1/globe_of_daylight.lpc
+// Level 1 Spell - Globe of Daylight (2 PPE)
+// Creates a bright light source
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Globe of Daylight");
+    set_spell_id("globe_of_daylight");
+    set_spell_level(1);
+    set_spell_type("utility");
+    set_casting_time(1);
+    
+    set_short("a globe of daylight spell");
+    set_long(
+        "Globe of Daylight creates a small globe of brilliant light that "
+        "illuminates a 12 foot radius area. The light is as bright as daylight "
+        "and can be moved around by the caster. It lasts for 10 minutes per "
+        "level of experience. Costs 2 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(2);
+    set_range("Self");
+    set_duration("10 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    int duration;
+    
+    if (!caster) return 0;
+    
+    // Check if already has a globe active
+    if (caster->query_property("daylight_globe")) {
+        tell_object(caster, "You already have a globe of daylight active!");
+        return 0;
+    }
+    
+    duration = caster->query_spell_caster_level() * 600;  // 10 min/level in seconds
+    
+    tell_object(caster, "A brilliant globe of light appears above your head!");
+    tell_room(environment(caster), 
+        "A brilliant globe of light appears above " + caster->query_cap_name() + "'s head!",
+        ({caster}));
+    
+    caster->set_property("daylight_globe", 1);
+    caster->set_property("light_source", 12);  // 12 foot radius
+    
+    call_out("end_globe", duration, caster);
+    
+    return 1;
+}
+
+void end_globe(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("daylight_globe");
+    caster->remove_property("light_source");
+    
+    tell_object(caster, "Your globe of daylight fades away.");
+}

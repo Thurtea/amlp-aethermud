@@ -1,33 +1,97 @@
-// Who command - Show online players
+// Who command - Show online wizards and population indicator
+// Players see wizards only (to foster player-wizard interaction)
+// Population shown as: Low/Medium/High instead of exact count
 
 #include <globals.h>
 
 int main(string arg) {
-    object *players;
+    object *all_users, *wizards, *players;
     object user;
-    int i;
-    string output;
+    int i, total_players;
+    string output, population;
     
     user = previous_object();
-    players = users();
+    all_users = users();
+    wizards = ({});
+    players = ({});
     
-    output = "\n";
-    output += "Players online:\n";
-    output += "========================================\n";
-    
-    for (i = 0; i < sizeof(players); i++) {
-        if (players[i]->query_name()) {
-            output += players[i]->query_title();
-            output += players[i]->query_name();
-            output += " the " + capitalize(players[i]->query_race());
-            output += "\n";
+    // Separate wizards from players
+    for (i = 0; i < sizeof(all_users); i++) {
+        if (!all_users[i]) continue;
+        if (!all_users[i]->query_name()) continue;
+        
+        if (all_users[i]->query_privilege_level() >= 1) {
+            wizards += ({ all_users[i] });
+        } else {
+            players += ({ all_users[i] });
         }
     }
     
-    output += "========================================\n";
-    output += "Total: " + sizeof(players) + " player";
-    if (sizeof(players) != 1) output += "s";
-    output += "\n\n";
+    total_players = sizeof(players) + sizeof(wizards);
+    
+    // Determine population indicator
+    if (total_players <= 3) {
+        population = "LOW";
+    } else if (total_players <= 10) {
+        population = "MEDIUM";
+    } else {
+        population = "HIGH";
+    }
+    
+    output = "\n";
+    output += "=== AETHERMUD - ONLINE STAFF ===\n\n";
+    
+    if (sizeof(wizards) > 0) {
+        output += "Wizards Online (available to help):\n";
+        output += "------------------------------------\n";
+        
+        for (i = 0; i < sizeof(wizards); i++) {
+            string wiz_name = wizards[i]->query_name();
+            string wiz_title = wizards[i]->query_title() || "";
+            int idle_time = wizards[i]->query_idle();
+            
+            output += sprintf("  %-20s", capitalize(wiz_name));
+            
+            // Show wizard rank
+            if (wizards[i]->query_privilege_level() >= 5) {
+                output += " [ADMIN]";
+            } else if (wizards[i]->query_privilege_level() >= 3) {
+                output += " [SENIOR WIZ]";
+            } else {
+                output += " [WIZARD]";
+            }
+            
+            // Show idle time if significant
+            if (idle_time > 300) {
+                output += " (idle)";
+            }
+            
+            output += "\n";
+        }
+        
+        output += "\n";
+        output += "To contact a wizard for help, skills, tattoos, or OCC changes:\n";
+        output += "  tell <wizard_name> <your message>\n";
+        output += "\nExample: tell gandalf I would like to request prowl skill\n";
+        output += "Example: tell merlin I would like the flaming_sword tattoo on my right arm\n";
+        
+    } else {
+        output += "No wizards currently online.\n";
+        output += "Please check back later or leave a mudmail message.\n";
+    }
+    
+    output += "\n------------------------------------\n";
+    output += "Server Population: " + population + "\n";
+    output += "====================================\n\n";
+    
+    // If user is a wizard, show them the real count
+    if (user->query_privilege_level() >= 1) {
+        output += "\n[STAFF VIEW]\n";
+        output += "Actual counts:\n";
+        output += "  Wizards: " + sizeof(wizards) + "\n";
+        output += "  Players: " + sizeof(players) + "\n";
+        output += "  Total: " + total_players + "\n\n";
+    }
     
     tell_object(user, output);
     return 1;

@@ -1,0 +1,88 @@
+// /lib/spells/level3/invisibility_simple.lpc
+// Level 3 Spell - Invisibility: Simple (6 PPE)
+// Makes the caster invisible
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Invisibility: Simple");
+    set_spell_id("invisibility_simple");
+    set_spell_level(3);
+    set_spell_type("concealment");
+    set_casting_time(1);
+    
+    set_short("an invisibility spell");
+    set_long(
+        "Invisibility: Simple makes the caster completely invisible. The "
+        "invisibility lasts 3 minutes per level, but ends immediately if "
+        "the caster makes a hostile action (attacks, casts offensive spell). "
+        "Those with See the Invisible or similar powers can still see the "
+        "invisible character. Costs 6 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(6);
+    set_range("Self");
+    set_duration("3 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    int duration;
+    
+    if (!caster) return 0;
+    
+    if (caster->query_property("invisible")) {
+        tell_object(caster, "You are already invisible!");
+        return 0;
+    }
+    
+    duration = caster->query_spell_caster_level() * 180;  // 3 min/level in seconds
+    
+    tell_object(caster, "You fade from view and become invisible!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " fades from view and vanishes!",
+        ({caster}));
+    
+    caster->set_property("invisible", 1);
+    caster->set_property("invisibility_duration", duration);
+    
+    call_out("end_invisibility", duration, caster);
+    
+    return 1;
+}
+
+void end_invisibility(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("invisible");
+    caster->remove_property("invisibility_duration");
+    
+    tell_object(caster, "You fade back into view as your invisibility ends.");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " fades into view!",
+        ({caster}));
+}
+
+// This function can be called by combat system to break invisibility
+void break_invisibility(object caster) {
+    if (!caster) return;
+    if (!caster->query_property("invisible")) return;
+    
+    // Remove the call_out
+    remove_call_out("end_invisibility");
+    
+    caster->remove_property("invisible");
+    caster->remove_property("invisibility_duration");
+    
+    tell_object(caster, "Your hostile action breaks your invisibility!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " suddenly appears!",
+        ({caster}));
+}

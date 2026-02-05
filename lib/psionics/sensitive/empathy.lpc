@@ -1,0 +1,119 @@
+// /lib/psionics/sensitive/empathy.lpc
+// Sensitive Psionic - Empathy (4 ISP)
+// Sense emotions and feelings
+
+inherit "/lib/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_name("Empathy");
+    set_power_id("empathy");
+    set_category("sensitive");
+    set_power_level(1);
+    
+    set_short("an empathy psionic power");
+    set_long(
+        "Empathy allows the psychic to sense the emotions and feelings of "
+        "others. Can detect truthfulness, hostility, fear, love, hate, and "
+        "other strong emotions. Range is 100 feet. Cannot be blocked by "
+        "normal means. Lasts 2 minutes per level. Costs 4 I.S.P. to use."
+    );
+    
+    set_isp_cost(4);
+    set_range("100 feet");
+    set_duration("2 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_mental_endurance_required(0);
+    set_requires_concentration(1);
+}
+
+int manifest_power(object caster, mixed target, string args) {
+    object subject;
+    string emotions, trust_level;
+    int duration;
+    
+    if (!caster) return 0;
+    
+    // Find target
+    if (!target || !objectp(target)) {
+        if (args && args != "") {
+            subject = present(args, environment(caster));
+        }
+    } else {
+        subject = target;
+    }
+    
+    if (!subject || !living(subject)) {
+        tell_object(caster, "You must target a living being!");
+        return 0;
+    }
+    
+    if (subject == caster) {
+        tell_object(caster, "You already know your own emotions!");
+        return 0;
+    }
+    
+    duration = caster->query_psionic_level() * 120;  // 2 min/level in seconds
+    
+    tell_object(caster, "You open your empathic senses to " + subject->query_cap_name() + "...");
+    
+    // Read emotions
+    string output = "\n=== Empathic Reading ===\n";
+    output += "Subject: " + subject->query_cap_name() + "\n";
+    
+    // Detect basic emotional state
+    if (subject->query_property("hostile") || subject->query_property("aggressive")) {
+        output += "Emotion: HOSTILE/AGGRESSIVE - danger!\n";
+    } else if (subject->query_property("afraid") || subject->query_property("feared")) {
+        output += "Emotion: FEARFUL/TERRIFIED\n";
+    } else if (subject->query_property("friendly")) {
+        output += "Emotion: FRIENDLY/WELCOMING\n";
+    } else {
+        output += "Emotion: NEUTRAL/CALM\n";
+    }
+    
+    // Detect truthfulness
+    if (subject->query_property("lying")) {
+        output += "Truthfulness: DECEPTIVE - they are lying!\n";
+    } else {
+        output += "Truthfulness: HONEST\n";
+    }
+    
+    // Detect alignment influence
+    string alignment = subject->query_alignment();
+    if (alignment == "principled" || alignment == "scrupulous") {
+        output += "Nature: GOOD-HEARTED\n";
+    } else if (alignment == "aberrant" || alignment == "miscreant" || alignment == "diabolic") {
+        output += "Nature: MALEVOLENT\n";
+    } else {
+        output += "Nature: SELF-INTERESTED\n";
+    }
+    
+    // Detect pain/injury
+    int hp_percent = (subject->query_hp() * 100) / subject->query_max_hp();
+    if (hp_percent < 25) {
+        output += "Physical State: SEVERE PAIN/INJURY\n";
+    } else if (hp_percent < 50) {
+        output += "Physical State: WOUNDED/HURTING\n";
+    } else {
+        output += "Physical State: HEALTHY\n";
+    }
+    
+    tell_object(caster, output);
+    
+    // Set property for continued empathy
+    caster->set_property("empathy_active", 1);
+    call_out("end_empathy", duration, caster);
+    
+    return 1;
+}
+
+void end_empathy(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("empathy_active");
+    tell_object(caster, "Your empathic senses return to normal.");
+}

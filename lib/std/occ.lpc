@@ -94,6 +94,12 @@ string vehicle_type;        // Special vehicle: "robot", "power_armor", "none"
 string special_training;    // Special training type: "hand_to_hand_*", etc.
 string hand_to_hand_type;   // HTH style: "basic", "expert", "martial_arts", "assassin"
 
+// Starting abilities for magic/psionic classes
+string* starting_spells;    // Spells known at character creation
+string* starting_powers;    // Psionic powers known at creation
+int is_spell_caster;        // 1 if this class can cast spells
+int spells_per_level;       // Additional spells learned per level
+
 // Roleplaying
 string background;          // Typical background
 string* organizations;      // Related organizations/groups
@@ -695,6 +701,43 @@ string* query_organizations() {
 
 string* query_enemies() {
     return enemies ? enemies : ({});
+}
+
+// =============================================================================
+// MAGIC/PSIONIC METHODS
+// =============================================================================
+
+void set_starting_spells(string* spells) {
+    starting_spells = spells;
+    is_spell_caster = 1;
+}
+
+string* query_starting_spells() {
+    return starting_spells ? starting_spells : ({});
+}
+
+void set_starting_powers(string* powers) {
+    starting_powers = powers;
+}
+
+string* query_occ_powers() {
+    return starting_powers ? starting_powers : ({});
+}
+
+void set_is_spell_caster(int flag) {
+    is_spell_caster = flag;
+}
+
+int query_is_spell_caster() {
+    return is_spell_caster;
+}
+
+void set_spells_per_level(int num) {
+    spells_per_level = num;
+}
+
+int query_spells_per_level() {
+    return spells_per_level ? spells_per_level : 2;
 }
 
 // =============================================================================

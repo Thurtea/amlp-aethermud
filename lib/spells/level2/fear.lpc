@@ -1,0 +1,130 @@
+// /lib/spells/level2/fear.lpc
+// Level 2 Spell - Fear (5 PPE)
+// Causes overwhelming fear in target
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Fear");
+    set_spell_id("fear");
+    set_spell_level(2);
+    set_spell_type("mind");
+    set_casting_time(1);
+    
+    set_short("a fear spell");
+    set_long(
+        "Fear fills the victim with overwhelming terror. The victim must make "
+        "a saving throw vs magic or be paralyzed with fear for 1 melee round, "
+        "then flee for 1D4+1 melees. Even after fleeing, the victim is -2 on "
+        "all combat rolls for 2D4 melee rounds. Costs 5 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(5);
+    set_range("100 feet");
+    set_duration("1D4+1 melees (fleeing)");
+    set_saving_throw("Standard");
+    set_damage("None (psychological)");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    object victim;
+    int save, flee_duration, penalty_duration;
+    
+    if (!caster) return 0;
+    
+    // Find target
+    if (!target || !objectp(target)) {
+        if (args && args != "") {
+            victim = present(args, environment(caster));
+        }
+    } else {
+        victim = target;
+    }
+    
+    if (!victim || !living(victim)) {
+        tell_object(caster, "You must target a living being!");
+        return 0;
+    }
+    
+    if (victim == caster) {
+        tell_object(caster, "You cannot target yourself with fear!");
+        return 0;
+    }
+    
+    // Check immunity
+    if (victim->query_immunity("fear") || victim->query_immunity("mind")) {
+        tell_object(caster, victim->query_cap_name() + " is immune to fear!");
+        tell_object(victim, "You feel a touch of fear magic but it has no effect on you.");
+        return 0;
+    }
+    
+    tell_object(caster, "You point at " + victim->query_cap_name() + " and invoke primal terror!");
+    tell_object(victim, caster->query_cap_name() + " points at you and you feel overwhelming fear!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " points at " + victim->query_cap_name() + " who suddenly looks terrified!",
+        ({caster, victim}));
+    
+    // Saving throw
+    save = victim->saving_throw("spell");
+    
+    if (save) {
+        tell_object(caster, victim->query_cap_name() + " resists the fear!");
+        tell_object(victim, "You shake off the feeling of fear!");
+        return 1;
+    }
+    
+    flee_duration = 1 + random(4) + 1;  // 1D4+1
+    penalty_duration = 2 * (random(4) + 1);  // 2D4
+    
+    // Apply fear effects
+    victim->set_property("feared", 1);
+    victim->set_property("paralyzed_with_fear", 1);  // Paralyzed for 1 round
+    victim->add_combat_penalty("all", 8);  // Can't act when paralyzed
+    
+    tell_object(victim, "You are paralyzed with terror!");
+    
+    // After 1 round (15 seconds), force flee
+    call_out("start_fleeing", 15, victim, caster, flee_duration);
+    
+    return 1;
+}
+
+void start_fleeing(object victim, object caster, int duration) {
+    if (!victim) return;
+    
+    victim->remove_property("paralyzed_with_fear");
+    victim->add_combat_penalty("all", -8);
+    
+    victim->set_property("fleeing", 1);
+    victim->add_combat_penalty("all", 2);  // -2 to all rolls
+    
+    tell_object(victim, "You must flee from " + (caster ? caster->query_cap_name() : "the source of your fear") + "!");
+    
+    // Try to make victim flee (move to random exit)
+    if (environment(victim)) {
+        string *exits = environment(victim)->query_exits();
+        if (exits && sizeof(exits)) {
+            string exit = exits[random(sizeof(exits))];
+            tell_object(victim, "You flee in terror!");
+            victim->move_player(exit);
+        }
+    }
+    
+    call_out("end_fleeing", duration * 15, victim);  // 15 seconds per melee
+}
+
+void end_fleeing(object victim) {
+    if (!victim) return;
+    
+    victim->remove_property("fleeing");
+    victim->remove_property("feared");
+    victim->add_combat_penalty("all", -2);
+    
+    tell_object(victim, "You recover from your terror.");
+}

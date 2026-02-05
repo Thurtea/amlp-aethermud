@@ -1,0 +1,68 @@
+// /lib/psionics/sensitive/mind_block.lpc
+// Sensitive Psionic - Mind Block (4 ISP)
+// Protects against psionic attacks and mind reading
+
+inherit "/lib/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_name("Mind Block");
+    set_power_id("mind_block");
+    set_category("sensitive");
+    set_power_level(1);
+    
+    set_short("a mind block psionic power");
+    set_long(
+        "Mind Block creates a psychic barrier that protects the user from "
+        "psionic attacks, mind reading, empathy, telepathy, and similar "
+        "mental powers. The user is +2 to save vs all psionic attacks. "
+        "Automatically blocks casual mind reading and empathy. "
+        "Lasts 10 minutes per level. Range: Self. Costs 4 I.S.P. to use."
+    );
+    
+    set_isp_cost(4);
+    set_range("Self");
+    set_duration("10 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_mental_endurance_required(0);
+    set_requires_concentration(0);  // Can be maintained subconsciously
+}
+
+int manifest_power(object caster, mixed target, string args) {
+    int duration;
+    
+    if (!caster) return 0;
+    
+    if (caster->query_property("mind_block")) {
+        tell_object(caster, "You already have a mind block active!");
+        return 0;
+    }
+    
+    duration = caster->query_psionic_level() * 600;  // 10 min/level in seconds
+    
+    tell_object(caster, "You erect a psychic barrier around your mind!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + "'s eyes flash briefly with psionic energy.",
+        ({caster}));
+    
+    caster->set_property("mind_block", 1);
+    caster->add_saving_throw_bonus("psionics", 2);
+    
+    tell_object(caster, "Your mind is now protected from psionic intrusion.");
+    
+    call_out("end_mind_block", duration, caster);
+    
+    return 1;
+}
+
+void end_mind_block(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("mind_block");
+    caster->add_saving_throw_bonus("psionics", -2);
+    
+    tell_object(caster, "Your mind block fades.");
+}

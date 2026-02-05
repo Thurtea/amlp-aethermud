@@ -1,0 +1,117 @@
+// /lib/spells/level1/sense_magic.lpc
+// Level 1 Spell - Sense Magic (4 PPE)
+// Detects magical energy and enchantments
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Sense Magic");
+    set_spell_id("sense_magic");
+    set_spell_level(1);
+    set_spell_type("sense");
+    set_casting_time(1);
+    
+    set_short("a sense magic spell");
+    set_long(
+        "Sense Magic allows the caster to detect the presence of magical "
+        "energy, enchantments, and supernatural beings within 120 feet. "
+        "The spell reveals magic items, active spells, ley lines, and "
+        "magical creatures. Lasts 2 minutes per level. Costs 4 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(4);
+    set_range("120 feet");
+    set_duration("2 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    object *contents;
+    object room;
+    string output = "";
+    int duration, found = 0;
+    
+    if (!caster) return 0;
+    
+    room = environment(caster);
+    if (!room) return 0;
+    
+    duration = caster->query_spell_caster_level() * 120;  // 2 min/level in seconds
+    
+    tell_object(caster, "You attune your senses to detect magical energy...");
+    tell_room(room, caster->query_cap_name() + "'s eyes shimmer with arcane power.", ({caster}));
+    
+    // Scan room for magical things
+    contents = all_inventory(room);
+    
+    output = "\n=== Sense Magic Results ===\n";
+    
+    foreach (object obj : contents) {
+        if (!obj || obj == caster) continue;
+        
+        int magical = 0;
+        string type = "Unknown";
+        string name;
+        
+        // Check for magical properties
+        if (obj->query_property("enchanted")) {
+            magical = 1;
+            type = "Enchanted Item";
+        }
+        if (obj->query_property("magic_weapon")) {
+            magical = 1;
+            type = "Magic Weapon";
+        }
+        if (obj->query_property("magic_armor")) {
+            magical = 1;
+            type = "Magic Armor";
+        }
+        if (living(obj) && obj->query_race() && 
+            (obj->query_property("supernatural") || obj->query_property("magical_being"))) {
+            magical = 1;
+            type = "Magical Creature";
+        }
+        if (obj->query_property("active_spell")) {
+            magical = 1;
+            type = "Active Spell";
+        }
+        
+        if (magical) {
+            name = living(obj) ? obj->query_introduction_name(caster) : obj->query_short();
+            output += sprintf("%-30s : %s\n", name, type);
+            found++;
+        }
+    }
+    
+    // Check for ley lines
+    if (room->query_property("ley_line") || room->query_property("nexus_point")) {
+        output += "LEY LINE ENERGY DETECTED IN THIS AREA!\n";
+        found++;
+    }
+    
+    if (!found) {
+        output += "You sense no magical energy nearby.\n";
+    }
+    
+    tell_object(caster, output);
+    
+    // Set property for continued sensing
+    caster->set_property("sense_magic_active", 1);
+    call_out("end_sense_magic", duration, caster);
+    
+    return 1;
+}
+
+void end_sense_magic(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("sense_magic_active");
+    tell_object(caster, "Your magical senses return to normal.");
+}

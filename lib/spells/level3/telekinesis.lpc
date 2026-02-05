@@ -1,0 +1,105 @@
+// /lib/spells/level3/telekinesis.lpc
+// Level 3 Spell - Telekinesis (6 PPE)
+// Move objects with mind power
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Telekinesis");
+    set_spell_id("telekinesis");
+    set_spell_level(3);
+    set_spell_type("utility");
+    set_casting_time(1);
+    
+    set_short("a telekinesis spell");
+    set_long(
+        "Telekinesis allows the mage to move objects using mental power. "
+        "Can lift and manipulate up to 200 lbs per level of experience at "
+        "a distance of up to 60 feet. Objects can be moved at 20 feet per "
+        "melee round. Concentration is required. Lasts 2 minutes per level. "
+        "Costs 6 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(6);
+    set_range("60 feet");
+    set_duration("2 minutes per level");
+    set_saving_throw("None");
+    set_damage("None (or by object)");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    object obj;
+    int duration, max_weight;
+    
+    if (!caster) return 0;
+    
+    if (caster->query_property("telekinesis_active")) {
+        tell_object(caster, "You are already using telekinesis!");
+        return 0;
+    }
+    
+    // Find target object
+    if (!target || !objectp(target)) {
+        if (args && args != "") {
+            obj = present(args, environment(caster));
+        }
+    } else {
+        obj = target;
+    }
+    
+    if (!obj) {
+        tell_object(caster, "Target what with your telekinesis?");
+        return 0;
+    }
+    
+    if (living(obj)) {
+        tell_object(caster, "You cannot use telekinesis on living beings (use Telekinesis: Super for that)!");
+        return 0;
+    }
+    
+    // Check weight
+    max_weight = caster->query_spell_caster_level() * 200;  // 200 lbs per level
+    
+    if (obj->query_property("weight") && obj->query_property("weight") > max_weight) {
+        tell_object(caster, "That object is too heavy for your telekinesis!");
+        tell_object(caster, "Maximum weight: " + max_weight + " lbs");
+        return 0;
+    }
+    
+    duration = caster->query_spell_caster_level() * 120;  // 2 min/level in seconds
+    
+    tell_object(caster, "You reach out with your mind and lift " + obj->query_short() + " telekinetically!");
+    tell_room(environment(caster),
+        obj->query_short() + " rises into the air, held by " + caster->query_cap_name() + "'s mental power!",
+        ({caster}));
+    
+    caster->set_property("telekinesis_active", 1);
+    caster->set_property("telekinesis_object", obj);
+    obj->set_property("telekinesis_holder", caster);
+    obj->set_property("levitating", 1);
+    
+    call_out("end_telekinesis", duration, caster, obj);
+    
+    return 1;
+}
+
+void end_telekinesis(object caster, object obj) {
+    if (!caster) return;
+    
+    caster->remove_property("telekinesis_active");
+    caster->remove_property("telekinesis_object");
+    
+    if (obj) {
+        obj->remove_property("telekinesis_holder");
+        obj->remove_property("levitating");
+        tell_object(caster, obj->query_short() + " gently descends as your telekinesis ends.");
+    } else {
+        tell_object(caster, "Your telekinesis spell ends.");
+    }
+}

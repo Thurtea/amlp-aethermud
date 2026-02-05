@@ -679,11 +679,13 @@ void apply_to_player(object player) {
         player->set_base_ppe(magic_potential);
     }
     
-    // Add languages
+    // Add languages with native proficiency
     foreach (string lang in languages) {
-        player->add_language(lang);
+        player->add_language(lang, 98);  // Native proficiency
     }
-    player->set_native_language(primary_language);
+    if (primary_language && primary_language != "") {
+        player->set_primary_language(primary_language);
+    }
     
     // Set faction affiliations
     foreach (string faction in default_factions) {

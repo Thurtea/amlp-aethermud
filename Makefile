@@ -85,10 +85,17 @@ $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  Files compiled: $(TOTAL_FILES)"; \
 		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  Warnings:       $$warns"; \
 		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  Errors:         0"; \
+		       if [ "$$warns" -gt 0 ]; then \
+			       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" ""; \
+			       printf "$(C_CYAN)║$(C_RESET)$(C_YELLOW)%-76s$(C_RESET)$(C_CYAN)║$(C_RESET)\n" "  Warning details: diagnostics/README.md"; \
+			       printf "$(C_CYAN)║$(C_RESET)$(C_YELLOW)%-76s$(C_RESET)$(C_CYAN)║$(C_RESET)\n" "  Quick reference: diagnostics/quick-reference.md"; \
+		       fi; \
 		       printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
 	else \
 		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
 		printf "║                         X BUILD FAILED                                  ║\n"; \
+		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
+		printf "║  See diagnostics/undeclared-identifier.md for common compilation errors   ║\n"; \
 		printf "╚════════════════════════════════════════════════════════════════════════════╝\n"; \
 		printf "\nErrors:\n"; \
 		cat $(BUILD_DIR)/.warnings.txt; \

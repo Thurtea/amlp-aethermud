@@ -1,0 +1,95 @@
+// /lib/spells/level3/energy_bolt.lpc
+// Level 3 Spell - Energy Bolt (5 PPE)
+// Fires a bolt of magical energy at an enemy
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Energy Bolt");
+    set_spell_id("energy_bolt");
+    set_spell_level(3);
+    set_spell_type("combat");
+    set_casting_time(1);
+    
+    set_short("an energy bolt spell");
+    set_long(
+        "Energy Bolt hurls a crackling bolt of magical energy at a single "
+        "target. The bolt automatically strikes (no need to roll to strike) "
+        "and inflicts 4D6 M.D. damage. Range is 200 feet. Costs 5 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(5);
+    set_range("200 feet");
+    set_duration("Instant");
+    set_saving_throw("None");
+    set_damage("4D6 M.D.");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    object victim;
+    int damage, i;
+    
+    if (!caster) return 0;
+    
+    // Find target
+    if (!target || !objectp(target)) {
+        if (args && args != "") {
+            victim = present(args, environment(caster));
+        }
+    } else {
+        victim = target;
+    }
+    
+    if (!victim || !living(victim)) {
+        tell_object(caster, "You must target a living being!");
+        return 0;
+    }
+    
+    if (victim == caster) {
+        tell_object(caster, "You cannot target yourself!");
+        return 0;
+    }
+    
+    // Roll damage: 4D6
+    damage = 0;
+    for (i = 0; i < 4; i++) {
+        damage += random(6) + 1;
+    }
+    
+    tell_object(caster, "You hurl a crackling bolt of energy at " + victim->query_cap_name() + "!");
+    tell_object(victim, 
+        "A crackling bolt of energy from " + caster->query_cap_name() + " strikes you for " + 
+        damage + " M.D. damage!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " hurls a crackling bolt of energy at " + 
+        victim->query_cap_name() + "!",
+        ({caster, victim}));
+    
+    // Apply damage (M.D. damage)
+    if (victim->query_property("mdc")) {
+        int current_mdc = victim->query_mdc();
+        victim->set_mdc(current_mdc - damage);
+        
+        if (victim->query_mdc() <= 0) {
+            tell_object(caster, "Your energy bolt destroys " + victim->query_cap_name() + "'s armor!");
+            tell_object(victim, "Your M.D.C. armor is destroyed!");
+        }
+    } else {
+        // S.D.C. target takes full damage
+        victim->do_damage(damage);
+    }
+    
+    // Start combat if not already in combat
+    if (environment(caster) && environment(caster)->query_property("combat_daemon")) {
+        environment(caster)->query_property("combat_daemon")->add_combatant(caster);
+        environment(caster)->query_property("combat_daemon")->add_combatant(victim);
+    }
+    
+    return 1;
+}

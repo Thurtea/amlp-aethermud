@@ -1,0 +1,64 @@
+// /lib/spells/level1/see_the_invisible.lpc
+// Level 1 Spell - See the Invisible (4 PPE)
+// Allows caster to see invisible objects and beings
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("See the Invisible");
+    set_spell_id("see_the_invisible");
+    set_spell_level(1);
+    set_spell_type("sense");
+    set_casting_time(1);
+    
+    set_short("a see the invisible spell");
+    set_long(
+        "See the Invisible grants the mage the ability to see things that "
+        "are invisible, whether by magic, technology, or natural ability. "
+        "This includes invisible beings, objects, and magical effects. "
+        "Lasts 5 minutes per level. Costs 4 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(4);
+    set_range("Self");
+    set_duration("5 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    int duration;
+    
+    if (!caster) return 0;
+    
+    if (caster->query_property("see_invisible")) {
+        tell_object(caster, "You can already see invisible things!");
+        return 0;
+    }
+    
+    duration = caster->query_spell_caster_level() * 300;  // 5 min/level in seconds
+    
+    tell_object(caster, "Your eyes glow briefly, and suddenly you can see things previously hidden!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + "'s eyes glow briefly with magical power.",
+        ({caster}));
+    
+    caster->set_property("see_invisible", 1);
+    
+    call_out("end_see_invisible", duration, caster);
+    
+    return 1;
+}
+
+void end_see_invisible(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("see_invisible");
+    tell_object(caster, "Your magical sight of invisible things fades.");
+}

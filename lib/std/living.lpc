@@ -1796,3 +1796,155 @@ int transfer_credits(object target, int amount, int type) {
         return 1;
     }
 }
+
+// ==================== SKILL SYSTEM ====================
+
+// Skills mapping: skill_id -> percentage
+mapping skills;
+mapping skill_bonuses;  // Additional bonuses from equipment, etc.
+int *primary_skills;     // Indices or IDs of primary skills
+int *secondary_skills;   // Indices or IDs of secondary skills
+
+// Initialize skills mapping
+void init_skills() {
+    if (!skills) skills = ([]);
+    if (!skill_bonuses) skill_bonuses = ([]);
+}
+
+// Query a specific skill percentage
+int query_skill(string skill_id) {
+    if (!skills) init_skills();
+    
+    skill_id = lower_case(skill_id);
+    
+    // Base skill
+    int base = skills[skill_id] ? skills[skill_id] : 0;
+    
+    // Add bonuses
+    int bonus = skill_bonuses[skill_id] ? skill_bonuses[skill_id] : 0;
+    
+    int total = base + bonus;
+    
+    // Cap at 98%
+    if (total > 98) total = 98;
+    
+    return total;
+}
+
+// Get all skills
+mapping query_all_skills() {
+    if (!skills) init_skills();
+    return copy(skills);
+}
+
+// Set a skill to a specific percentage
+void set_skill(string skill_id, int percentage) {
+    if (!skills) init_skills();
+    
+    skill_id = lower_case(skill_id);
+    
+    if (percentage < 0) percentage = 0;
+    if (percentage > 98) percentage = 98;
+    
+    skills[skill_id] = percentage;
+}
+
+// Add a new skill at a specific percentage
+void add_skill(string skill_id, int percentage) {
+    set_skill(skill_id, percentage);
+}
+
+// Improve an existing skill
+void improve_skill(string skill_id, int amount) {
+    if (!skills) init_skills();
+    
+    skill_id = lower_case(skill_id);
+    
+    int current = skills[skill_id] ? skills[skill_id] : 0;
+    set_skill(skill_id, current + amount);
+}
+
+// Remove a skill
+void remove_skill(string skill_id) {
+    if (!skills) init_skills();
+    
+    skill_id = lower_case(skill_id);
+    
+    if (skills[skill_id]) {
+        map_delete(skills, skill_id);
+    }
+}
+
+// Add a temporary or equipment bonus to a skill
+void add_skill_bonus(string skill_id, int bonus) {
+    if (!skill_bonuses) skill_bonuses = ([]);
+    
+    skill_id = lower_case(skill_id);
+    
+    if (!skill_bonuses[skill_id]) {
+        skill_bonuses[skill_id] = 0;
+    }
+    
+    skill_bonuses[skill_id] += bonus;
+}
+
+// Remove a skill bonus
+void remove_skill_bonus(string skill_id, int bonus) {
+    if (!skill_bonuses) skill_bonuses = ([]);
+    
+    skill_id = lower_case(skill_id);
+    
+    if (skill_bonuses[skill_id]) {
+        skill_bonuses[skill_id] -= bonus;
+        if (skill_bonuses[skill_id] <= 0) {
+            map_delete(skill_bonuses, skill_id);
+        }
+    }
+}
+
+// Make a skill check (Palladium d100 system)
+// Returns: 1 = success, 0 = failure, -1 = critical failure
+int skill_check(string skill_id, int difficulty_modifier) {
+    int skill_percent = query_skill(skill_id);
+    
+    if (skill_percent == 0) {
+        return 0;  // Don't have the skill
+    }
+    
+    // Apply difficulty
+    skill_percent -= difficulty_modifier;
+    
+    // Roll d100 (1-100)
+    int roll = random(100) + 1;
+    
+    // Critical failure: 96-100 always fails
+    if (roll >= 96) {
+        return -1;  // Critical failure
+    }
+    
+    // Success if roll <= skill_percent
+    if (roll <= skill_percent) {
+        return 1;  // Success
+    }
+    
+    return 0;  // Normal failure
+}
+
+// Check if character has a skill
+int has_skill(string skill_id) {
+    if (!skills) init_skills();
+    
+    skill_id = lower_case(skill_id);
+    
+    return (skills[skill_id] && skills[skill_id] > 0) ? 1 : 0;
+}
+
+// Mark skills as primary or secondary (for level-up calculations)
+void set_primary_skill(string skill_id) {
+    // This can be expanded for more complex primary/secondary tracking
+    // For now, skills are managed by percentage
+}
+
+void set_secondary_skill(string skill_id) {
+    // This can be expanded for more complex primary/secondary tracking
+}

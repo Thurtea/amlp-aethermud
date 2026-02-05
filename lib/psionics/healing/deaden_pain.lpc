@@ -1,0 +1,91 @@
+// /lib/psionics/healing/deaden_pain.lpc
+// Healing Psionic - Deaden Pain (4 ISP)
+// Reduces pain and penalties from injury
+
+inherit "/lib/std/psionic";
+
+void create() {
+    ::create();
+    
+    set_power_name("Deaden Pain");
+    set_power_id("deaden_pain");
+    set_category("healing");
+    set_power_level(1);
+    
+    set_short("a deaden pain psionic power");
+    set_long(
+        "Deaden Pain blocks pain receptors, allowing the subject to ignore "
+        "pain penalties from wounds. The character can function at full "
+        "capacity even when near death. Does not heal damage, only blocks "
+        "pain. Lasts 60 minutes per level. Range: Self or touch. "
+        "Costs 4 I.S.P. to use."
+    );
+    
+    set_isp_cost(4);
+    set_range("Self or Touch");
+    set_duration("60 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_mental_endurance_required(0);
+    set_requires_concentration(0);
+}
+
+int manifest_power(object caster, mixed target, string args) {
+    object patient;
+    int duration;
+    
+    if (!caster) return 0;
+    
+    // Find target
+    if (!target || !objectp(target)) {
+        if (args && args != "") {
+            patient = present(args, environment(caster));
+        } else {
+            patient = caster;
+        }
+    } else {
+        patient = target;
+    }
+    
+    if (!patient || !living(patient)) {
+        tell_object(caster, "You must target a living being!");
+        return 0;
+    }
+    
+    if (patient->query_property("pain_deadened")) {
+        tell_object(caster, patient->query_cap_name() + " already has deadened pain!");
+        return 0;
+    }
+    
+    duration = caster->query_psionic_level() * 3600;  // 60 min/level in seconds
+    
+    if (patient == caster) {
+        tell_object(caster, "You block your pain receptors. Pain fades away.");
+        tell_room(environment(caster),
+            caster->query_cap_name() + "'s face becomes calm and serene.",
+            ({caster}));
+    } else {
+        tell_object(caster, "You touch " + patient->query_cap_name() + " and block their pain receptors.");
+        tell_object(patient, caster->query_cap_name() + " touches you and your pain fades away!");
+        tell_room(environment(caster),
+            caster->query_cap_name() + " touches " + patient->query_cap_name() + " who visibly relaxes.",
+            ({caster, patient}));
+    }
+    
+    patient->set_property("pain_deadened", 1);
+    patient->set_property("ignore_wound_penalties", 1);
+    
+    call_out("end_deaden_pain", duration, patient);
+    
+    return 1;
+}
+
+void end_deaden_pain(object patient) {
+    if (!patient) return;
+    
+    patient->remove_property("pain_deadened");
+    patient->remove_property("ignore_wound_penalties");
+    
+    tell_object(patient, "The pain-deadening effect fades and you feel your injuries again.");
+}

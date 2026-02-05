@@ -5,7 +5,9 @@
  * In Rifts lore, Atlantean Tattoo Magic is very specific and powerful
  * 
  * Usage:
- *   tattoogun <atlantean> <tattoo_name>
+ *   tattoogun <atlantean> <tattoo_name> [body_location]
+ *   tattoogun list - Show all available tattoos
+ *   tattoogun check <atlantean> - Check player's tattoo count and limit
  */
 
 // Common Atlantean magical tattoos
@@ -31,9 +33,16 @@ mapping tattoo_database = ([
     "warrior": "Warrior - +1 strike, parry, and dodge"
 ]);
 
+// Valid body locations for tattoos
+string *valid_locations = ({
+    "chest", "back", "right_arm", "left_arm", "right_leg", "left_leg",
+    "right_hand", "left_hand", "forehead", "neck", "abdomen", "shoulders"
+});
+
 int cmd(string args) {
     object wiz, target;
-    string player_name, tattoo_name;
+    string player_name, tattoo_name, body_location;
+    int current_tattoos, max_tattoos;
     
     wiz = this_player();
     
@@ -43,26 +52,82 @@ int cmd(string args) {
         return 1;
     }
     
-    // Parse arguments
-    if (!args || args == "") {
-        write("Usage: tattoogun <atlantean> <tattoo_name>\n");
+    // Handle various command modes
+    if (!args || args == "" || args == "list") {
+        write("Usage: tattoogun <atlantean> <tattoo_name> [body_location]\n");
+        write("       tattoogun check <atlantean> - Check tattoo count/limit\n");
         write("\nGrants a magical tattoo to an Atlantean character.\n");
         write("\nAvailable Tattoos:\n");
+        write("==================\n");
         
         string *keys = keys(tattoo_database);
         foreach (string key : keys) {
             write("  " + key + "\n    -> " + tattoo_database[key] + "\n");
         }
         
+        write("\nValid Body Locations:\n");
+        write("====================\n");
+        write("  ");
+        for (int i = 0; i < sizeof(valid_locations); i++) {
+            write(valid_locations[i]);
+            if (i < sizeof(valid_locations) - 1) write(", ");
+        }
+        write("\n");
+        
         write("\nExamples:\n");
-        write("  tattoogun atlanteanchar flaming_sword\n");
-        write("  tattoogun marcus phoenix\n");
+        write("  tattoogun atlanteanchar flaming_sword right_arm\n");
+        write("  tattoogun marcus phoenix chest\n");
+        write("  tattoogun sarah wings back\n");
+        write("  tattoogun check atlanteanchar\n");
         return 1;
     }
     
-    // Parse player and tattoo
-    if (sscanf(args, "%s %s", player_name, tattoo_name) != 2) {
-        write("Usage: tattoogun <atlantean> <tattoo_name>\n");
+    // Handle "check" command
+    if (sscanf(args, "check %s", player_name) == 1) {
+        target = find_living(player_name);
+        if (!target) target = present(player_name, environment(wiz));
+        
+        if (!target) {
+            write("Player '" + player_name + "' not found.\n");
+            return 1;
+        }
+        
+        current_tattoos = target->query_property("current_tattoos") || 0;
+        max_tattoos = target->query_property("max_tattoos") || 0;
+        
+        write("\n=== Tattoo Status for " + target->query_cap_name() + " ===\n");
+        write("Race: " + target->query_race() + "\n");
+        write("OCC: " + target->query_occ() + "\n");
+        write("Current Tattoos: " + current_tattoos + "\n");
+        write("Maximum Tattoos: " + max_tattoos + "\n");
+        write("Remaining Slots: " + (max_tattoos - current_tattoos) + "\n");
+        
+        if (target->query_property("clan")) {
+            write("Clan: " + target->query_property("clan_name") + "\n");
+        }
+        
+        write("=====================================\n");
+        return 1;
+    }
+    
+    // Parse player, tattoo, and optional location
+    body_location = "chest";  // Default location
+    
+    if (sscanf(args, "%s %s %s", player_name, tattoo_name, body_location) == 3) {
+        // Got all three parameters
+        body_location = lower_case(body_location);
+    } else if (sscanf(args, "%s %s", player_name, tattoo_name) == 2) {
+        // Got two parameters, use default location
+        body_location = "chest";
+    } else {
+        write("Usage: tattoogun <atlantean> <tattoo_name> [body_location]\n");
+        return 1;
+    }
+    
+    // Validate body location
+    if (member_array(body_location, valid_locations) == -1) {
+        write("Invalid body location: " + body_location + "\n");
+        write("Valid locations: " + implode(valid_locations, ", ") + "\n");
         return 1;
     }
     
@@ -77,7 +142,6 @@ int cmd(string args) {
     if (!target || !living(target)) {
         write("Player '" + player_name + "' not found.\n");
         return 1;
-    }
     
     // Verify it's a player
     if (!interactive(target)) {
@@ -89,9 +153,20 @@ int cmd(string args) {
     string race = target->query_race();
     string occ = target->query_occ();
     
-    if (race != "atlantean" && race != "true_atlantean" && occ != "tattoo_warrior") {
-        write(target->query_cap_name() + " is not an Atlantean or Tattoo Warrior.\n");
+    if (race != "atlantean" && race != "true_atlantean" && occ != "tattoo_warrior" && occ != "sunaj_assassin") {
+        write(target->query_cap_name() + " is not an Atlantean, Sunaj, or Tattoo Warrior.\n");
         write("Magical tattoos can only be applied to those with Atlantean blood.\n");
+        return 1;
+    }
+    
+    // Check tattoo limit
+    current_tattoos = target->query_property("current_tattoos") || 0;
+    max_tattoos = target->query_property("max_tattoos") || 6;
+    
+    if (current_tattoos >= max_tattoos) {
+        write(target->query_cap_name() + " has reached their tattoo limit!\n");
+        write("Current: " + current_tattoos + " / Max: " + max_tattoos + "\n");
+        write("They must gain levels or special training for more tattoos.\n");
         return 1;
     }
     
@@ -100,7 +175,7 @@ int cmd(string args) {
     // Check if tattoo exists in database
     if (!tattoo_database[tattoo_name]) {
         write("Unknown tattoo: " + tattoo_name + "\n");
-        write("Type 'tattoogun' with no arguments to see available tattoos.\n");
+        write("Type 'tattoogun list' to see available tattoos.\n");
         return 1;
     }
     
@@ -110,22 +185,30 @@ int cmd(string args) {
         return 1;
     }
     
-    // Grant the tattoo
-    target->add_tattoo(tattoo_name);
+    // Grant the tattoo with location
+    target->add_tattoo(tattoo_name, body_location);
+    
+    // Increment tattoo count
+    target->set_property("current_tattoos", current_tattoos + 1);
     
     string tattoo_desc = tattoo_database[tattoo_name];
+    string location_desc = implode(explode(body_location, "_"), " ");
     
     // Notify wizard
     write("\nYou activate the mystical tattoo gun and inscribe the " + 
-          tattoo_name + " tattoo onto " + target->query_cap_name() + ".\n");
+          tattoo_name + " tattoo onto " + target->query_cap_name() + "'s " + location_desc + ".\n");
     write("The magical ink glows briefly before settling into their skin.\n");
     write("Tattoo: " + tattoo_desc + "\n");
+    write("Location: " + capitalize(location_desc) + "\n");
+    write("Count: " + (current_tattoos + 1) + " / " + max_tattoos + "\n");
     
     // Notify target
     tell_object(target, "\n" + wiz->query_cap_name() + " approaches with an ancient tattoo gun...\n");
-    tell_object(target, "The mystical needles inscribe glowing patterns on your skin!\n");
+    tell_object(target, "The mystical needles inscribe glowing patterns on your " + location_desc + "!\n");
     tell_object(target, "You feel the magic surge through you as the tattoo takes hold.\n");
     tell_object(target, "\nYou have received: " + tattoo_desc + "\n");
+    tell_object(target, "Location: " + capitalize(location_desc) + "\n");
+    tell_object(target, "Tattoos: " + (current_tattoos + 1) + " / " + max_tattoos + "\n");
     tell_object(target, "Type 'tattoos' to see all your magical tattoos.\n");
     
     // Tell the room
@@ -137,15 +220,16 @@ int cmd(string args) {
                 tell_object(ob, wiz->query_cap_name() + " uses a mystical tattoo gun on " + 
                            target->query_cap_name() + ".\n");
                 tell_object(ob, "Glowing magical patterns appear on " + 
-                           target->query_cap_name() + "'s skin!\n");
+                           target->query_cap_name() + "'s " + location_desc + "!\n");
             }
         }
     }
     
     // Log it
-    write_file("/log/rpwiz.log", 
-               sprintf("[%s] %s granted tattoo '%s' to %s\n",
-                       ctime(time()), wiz->query_name(), tattoo_name, target->query_name()));
+    write_file("/log/tattoos.log", 
+               sprintf("[%s] %s granted tattoo '%s' to %s on %s (Count: %d/%d)\n",
+                       ctime(time()), wiz->query_name(), tattoo_name, 
+                       target->query_name(), body_location, current_tattoos + 1, max_tattoos));
     
     return 1;
 }

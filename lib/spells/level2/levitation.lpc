@@ -1,0 +1,72 @@
+// /lib/spells/level2/levitation.lpc
+// Level 2 Spell - Levitation (5 PPE)
+// Allows caster to float and fly
+
+inherit "/lib/std/spell";
+
+void create() {
+    ::create();
+    
+    set_spell_name("Levitation");
+    set_spell_id("levitation");
+    set_spell_level(2);
+    set_spell_type("movement");
+    set_casting_time(1);
+    
+    set_short("a levitation spell");
+    set_long(
+        "Levitation allows the caster to rise into the air and float at will. "
+        "Maximum height is 100 feet. Movement speed is approximately half normal "
+        "running speed. The spell lasts 5 minutes per level. "
+        "Costs 5 P.P.E. to cast."
+    );
+    
+    set_ppe_cost(5);
+    set_range("Self");
+    set_duration("5 minutes per level");
+    set_saving_throw("None");
+    set_damage("None");
+    
+    set_components(({}));
+    set_verbal(1);
+    set_somatic(1);
+}
+
+int cast_spell(object caster, mixed target, string args) {
+    int duration;
+    
+    if (!caster) return 0;
+    
+    if (caster->query_property("levitating") || caster->query_property("flying")) {
+        tell_object(caster, "You are already airborne!");
+        return 0;
+    }
+    
+    duration = caster->query_spell_caster_level() * 300;  // 5 min/level in seconds
+    
+    tell_object(caster, "You rise gracefully into the air!");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " rises gracefully into the air!",
+        ({caster}));
+    
+    caster->set_property("levitating", 1);
+    caster->set_property("flying", 1);  // Allows passage through certain barriers
+    caster->set_property("altitude", 10);  // 10 feet default height
+    
+    call_out("end_levitation", duration, caster);
+    
+    return 1;
+}
+
+void end_levitation(object caster) {
+    if (!caster) return;
+    
+    caster->remove_property("levitating");
+    caster->remove_property("flying");
+    caster->remove_property("altitude");
+    
+    tell_object(caster, "Your levitation spell ends and you drift gently to the ground.");
+    tell_room(environment(caster),
+        caster->query_cap_name() + " drifts gently to the ground.",
+        ({caster}));
+}

@@ -1,0 +1,114 @@
+// /lib/cmds/tattoos.lpc
+// Display player's magical tattoos
+// For Atlanteans and Sunaj Assassins
+
+int cmd(string args) {
+    object player;
+    mapping tattoo_map;
+    string *tattoo_names, output;
+    int count, max_tattoos;
+    
+    player = this_player();
+    
+    // Verify player can have tattoos
+    string race = player->query_race();
+    string occ = player->query_occ();
+    
+    if (race != "atlantean" && race != "true_atlantean" && 
+        occ != "tattoo_warrior" && occ != "sunaj_assassin") {
+        write("You do not possess magical tattoos.\n");
+        write("Only True Atlanteans and Tattoo Warriors have this ability.\n");
+        return 1;
+    }
+    
+    // Get tattoo information
+    tattoo_map = player->query_tattoos() || ([]);
+    tattoo_names = keys(tattoo_map);
+    count = player->query_property("current_tattoos") || 0;
+    max_tattoos = player->query_property("max_tattoos") || 6;
+    
+    output = "\n";
+    output += "=== YOUR MAGICAL TATTOOS ===\n";
+    output += "Race: " + capitalize(race) + "\n";
+    
+    if (player->query_property("clan_name")) {
+        output += "Clan: " + player->query_property("clan_name") + "\n";
+    }
+    
+    output += "Count: " + count + " / " + max_tattoos + "\n";
+    
+    if (count < max_tattoos) {
+        output += "Remaining Slots: " + (max_tattoos - count) + "\n";
+    } else {
+        output += "Status: AT MAXIMUM CAPACITY\n";
+    }
+    
+    output += "============================\n\n";
+    
+    if (sizeof(tattoo_names) == 0) {
+        output += "You have no magical tattoos yet.\n";
+        output += "\nTo request tattoos from a wizard:\n";
+        output += "  1. Use 'who' to see which wizards are online\n";
+        output += "  2. Use 'tell <wizard> I would like to request the <tattoo> tattoo on my <location>'\n";
+        output += "\nExample: tell merlin I would like to request the flaming_sword tattoo on my right_arm\n";
+    } else {
+        output += "Your Current Tattoos:\n";
+        output += "--------------------\n";
+        
+        foreach (string tattoo : tattoo_names) {
+            string location = tattoo_map[tattoo] || "unknown";
+            string location_display = implode(explode(location, "_"), " ");
+            
+            output += sprintf("  %-25s : %s\n", 
+                            capitalize(implode(explode(tattoo, "_"), " ")),
+                            capitalize(location_display));
+        }
+        
+        output += "\n";
+        output += "To activate tattoo powers, use:\n";
+        output += "  activate <tattoo_name>\n";
+        output += "\nExample: activate flaming_sword\n";
+        
+        if (count < max_tattoos) {
+            output += "\nYou can still request " + (max_tattoos - count) + " more tattoo(s).\n";
+            output += "Use 'tell <wizard> tattoo request' to ask for more.\n";
+        }
+    }
+    
+    output += "============================\n\n";
+    
+    write(output);
+    return 1;
+}
+
+string query_help() {
+    return
+"TATTOOS - View your magical tattoos\n\n"
+"Usage:\n"
+"  tattoos\n\n"
+"This command displays all of your magical Atlantean tattoos, their\n"
+"locations on your body, and how many tattoo slots you have remaining.\n\n"
+"ATLANTEAN TATTOO MAGIC:\n"
+"True Atlanteans possess the unique ability to use magical tattoos -\n"
+"permanent markings that grant incredible powers. These are not mere\n"
+"decorations, but sources of real magical energy.\n\n"
+"TATTOO LIMITS:\n"
+"- Standard Atlanteans: 6 tattoos maximum\n"
+"- Sunaj Assassins (Clan Aerihman): 20+ tattoos\n"
+"- Tattoo Warriors: 10-15 tattoos\n\n"
+"REQUESTING TATTOOS:\n"
+"Tattoos must be earned through roleplay and granted by wizards.\n"
+"To request a tattoo:\n"
+"  1. Use 'who' to see online wizards\n"
+"  2. Use 'tell <wizard> I would like the <tattoo> on my <location>'\n\n"
+"Example:\n"
+"  tell merlin I would like the flaming_sword tattoo on my right_arm\n\n"
+"BODY LOCATIONS:\n"
+"Valid locations include: chest, back, right_arm, left_arm, right_leg,\n"
+"left_leg, right_hand, left_hand, forehead, neck, abdomen, shoulders\n\n"
+"ACTIVATING TATTOOS:\n"
+"Once you have tattoos, activate their powers with:\n"
+"  activate <tattoo_name>\n\n"
+"Each tattoo has different powers, costs, and cooldowns.\n\n"
+"See also: ACTIVATE, WHO, TELL\n";
+}

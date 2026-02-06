@@ -415,10 +415,9 @@ void set_secondary_skills(mapping m) {
 }
 
 // Command processing - CRITICAL FUNCTION
-// Returns 0 to signal driver to fall through to C commands
+// Simple command processor - returns 0 to let C handle commands for now
 mixed process_command(string cmd) {
-    // Let the C driver handle all commands for now
-    // LPC command system not fully implemented
+    // Return 0 = command not handled in LPC, let C driver process it
     return 0;
 }
 

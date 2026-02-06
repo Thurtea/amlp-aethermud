@@ -102,6 +102,8 @@ void init_commands() {
     commands["shutdown"] = "/cmds/admin/shutdown";
     commands["promote"] = "/cmds/admin/promote";
     commands["demote"] = "/cmds/admin/demote";
+    commands["setocc"] = "/cmds/admin/setocc";
+    commands["grantskill"] = "/cmds/admin/grantskill";
     commands["users"] = "/cmds/admin/users";
     
     // Wizard tool commands

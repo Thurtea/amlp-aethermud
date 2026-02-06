@@ -18,6 +18,7 @@ mapping properties;
 object environment;
 int wielded;  // Is this weapon being wielded?
 int worn;     // Is this armor/clothing being worn?
+private string object_blueprint_path;
 
 // Phase 2, Step 1b: Size property
 int size;     // Object/armor size category (0-4)
@@ -50,6 +51,7 @@ void create() {
     armor_rating = 0;
     armor_damage = 0;
     armor_max_damage = 0;
+    object_blueprint_path = "";
 }
 
 void setup() {
@@ -112,6 +114,19 @@ void set_short(string desc) {
 
 void set_long(string desc) {
     long_desc = desc;
+}
+
+/* Blueprint path helpers for save/restore */
+void set_object_path(string path) {
+    object_blueprint_path = path;
+}
+
+string query_object_path() {
+    return object_blueprint_path;
+}
+
+string query_save_path() {
+    return object_blueprint_path;
 }
 
 // Physical properties

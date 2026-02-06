@@ -5,46 +5,68 @@
 // View file contents (read-only)
 
 int main(string args) {
-    object player = this_player();
-    string resolved, *lines;
-    int i;
+    object player;
+    string filepath, content;
+    int privilege, fsize;
 
+    player = this_player();
     if (!player) return 0;
+
+    privilege = player->query_privilege();
+    if (privilege < 1) {
+        write("Error: Insufficient privileges. Wizard access required.\n");
+        return 1;
+    }
+
     if (!args || args == "") {
-        write("Usage: cat <file>\n");
+        write("Usage: cat <filename>\n");
+        write("Example: cat /std/player.lpc\n");
+        write("         cat player  (auto-adds .lpc and searches /std/)\n");
         return 1;
     }
 
-    /* Use the player's path resolution helper (common in DS/FluffOS libs) */
-    if (function_exists("resolve_path", player)) {
-        resolved = (string)player->resolve_path(args);
-    } else {
-        /* Fallback: accept the argument as-is */
-        resolved = args;
+    filepath = args;
+
+    /* If no slash present, assume /std/ */
+    if (strsrch(filepath, "/") == -1) {
+        if (filepath[0..0] != '/') filepath = "/std/" + filepath;
     }
 
-    /* Auto-add .lpc if not present */
-    if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
-        resolved += ".lpc";
+    /* Auto-append .lpc if no extension present */
+    if (strlen(filepath) < 4 || filepath[strlen(filepath)-4..strlen(filepath)-1] != ".lpc") {
+        filepath = filepath + ".lpc";
     }
 
-    /* Try to read the file */
-    if (file_size(resolved) == -1) {
-        write("File not found: " + args + "\n");
+    fsize = file_size(filepath);
+    if (fsize < 0) {
+        if (fsize == -2) {
+            write("Error: '" + args + "' is a directory, not a file.\n");
+        } else {
+            write("Cannot open file: " + args + "\n");
+            write("Tried path: " + filepath + "\n");
+        }
         return 1;
     }
 
-    lines = explode(read_file(resolved), "\n");
-    if (!lines || sizeof(lines) == 0) {
-        write("File is empty: " + resolved + "\n");
+    content = read_file(filepath);
+    if (!content || content == "") {
+        write("Error: Could not read file or file is empty.\n");
         return 1;
     }
 
-    write("┌─ " + resolved + "\n");
-    for (i = 0; i < sizeof(lines); i++) {
-        write(sprintf("%4d: %s\n", i + 1, lines[i]));
+    write("File: " + filepath + "\n");
+    write("Size: " + fsize + " bytes\n");
+    write("----------------------------------------\n");
+
+    string *lines = explode(content, "\n");
+    int line_num = 1;
+    foreach (string line in lines) {
+        write(sprintf("%4d | %s\n", line_num, line));
+        line_num++;
     }
-    write("└─ " + sprintf("%d lines\n", sizeof(lines)));
+
+    write("----------------------------------------\n");
+    write((line_num - 1) + " lines total\n");
     return 1;
 }
 

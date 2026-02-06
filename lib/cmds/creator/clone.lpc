@@ -27,10 +27,22 @@ int main(string args) {
         return 1;
     }
     
+    /* Record blueprint path on the object so it can be restored later */
+    if (function_exists("set_object_path", new_obj)) {
+        new_obj->set_object_path(args);
+    }
+
     if (function_exists("move", new_obj)) {
         new_obj->move(player);
     } else {
         move_object(new_obj, player);
+    }
+
+    /* Ensure player's inventory tracking is updated if available */
+    if (function_exists("add_item", player)) {
+        player->add_item(new_obj);
+    } else if (function_exists("add_to_inventory", player)) {
+        player->add_to_inventory(new_obj);
     }
     
     write("You clone " + new_obj->query_short() + ".\n");

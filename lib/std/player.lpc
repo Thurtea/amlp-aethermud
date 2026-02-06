@@ -764,6 +764,27 @@ string execute_cmd_file(string verb, string args) {
 
 // Save/restore (for file I/O system)
 mapping save_data() {
+    string *inv_paths = ({ });
+    object *inv = all_inventory(this_object());
+    foreach (object obj in inv) {
+        string path = "";
+        if (function_exists("query_save_path", obj)) {
+            path = obj->query_save_path();
+        } else if (function_exists("query_object_path", obj)) {
+            path = obj->query_object_path();
+        } else {
+            string fn = file_name(obj);
+            if (fn) {
+                if (strsrch(fn, "#") != -1) {
+                    path = fn[0..strsrch(fn, "#")-1];
+                } else {
+                    path = fn;
+                }
+            }
+        }
+        if (path && path != "") inv_paths += ({ path });
+    }
+
     return ([
         "name": name,
         "password_hash": password_hash,
@@ -814,6 +835,8 @@ mapping save_data() {
         "max_ppe": query_max_ppe(),
         "spells_known": query_spells(),
         "spell_caster_level": query_spell_caster_level(),
+        // Inventory paths for persistence
+        "inventory_paths": inv_paths
     ]);
 }
 
@@ -887,6 +910,30 @@ void restore_data(mapping data) {
     // Sync introductions from persistent storage
     if (function_exists("sync_introductions", this_object())) {
         sync_introductions();
+    }
+
+    // Note: inventory restoration is handled separately by saved data
+    // If inventory_paths is present, attempt to clone each path into inventory
+    if (data["inventory_paths"]) {
+        string *inv_paths = data["inventory_paths"];
+        foreach (string obj_path in inv_paths) {
+            if (!obj_path || obj_path == "") continue;
+            object restored_obj = 0;
+            // Try to clone by absolute path
+            if (function_exists("clone_object", this_object())) {
+                restored_obj = clone_object(obj_path);
+            } else {
+                // Fallback: try load_object and clone via driver helper
+                restored_obj = clone_object(obj_path);
+            }
+            if (restored_obj) {
+                if (function_exists("move", restored_obj)) {
+                    restored_obj->move(this_object());
+                } else {
+                    move_object(restored_obj, this_object());
+                }
+            }
+        }
     }
 }
 

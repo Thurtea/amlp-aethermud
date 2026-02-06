@@ -1,45 +1,130 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/splugorth.lpc
+// Splugorth - Ancient Evil Intelligence
 //
-// This is a stub file. Implement the full race details.
+// Splugorth are immensely powerful supernatural alien intelligences,
+// ancient beings that have existed for tens of thousands of years.
+// They are masters of bio-wizardry, dimensional travel, and control
+// vast slave empires across multiple dimensions. Each Splugorth is
+// a unique entity with individual personality and powers.
 
 inherit "/std/race";
 
 void create() {
     ::create();
     
-    set_race_name("");
+    set_race_name("Splugorth");
     set_race_id("splugorth");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
+    set_race_plural("Splugorth");
+    set_race_category(RACE_CAT_SUPERNATURAL);
     
     set_race_description(
-        "TODO: Add full race description for ."
+        "Splugorth are ancient evil alien intelligences, massive tentacled beings "
+        "of immense supernatural power. They are masters of bio-wizardry, dimensional "
+        "magic, and control vast slave empires spanning multiple dimensions. Each "
+        "Splugorth is a unique entity with individual personality, though all share "
+        "traits of cunning intelligence, ruthless ambition, and insatiable appetite "
+        "for power and control.\n\n"
+        "The most famous Splugorth is Splynncryth, Lord of Atlantis, who rules the "
+        "dimensional marketplace city of Splynn with an iron tentacle. Splugorth are "
+        "mega-damage creatures of enormous size, typically 20-40 feet in length with "
+        "hundreds of writhing tentacles. They possess vast psionic and magical powers, "
+        "and their physical forms are nearly indestructible.\n\n"
+        "Splugorth are essentially immortal, though they can be destroyed through "
+        "sufficient violence. They are highly intelligent, possess supernatural "
+        "perception, and can communicate telepathically across dimensions. Most "
+        "Splugorth surround themselves with armies of servants, minions, and "
+        "bio-wizard creations."
     );
     
-    // TODO: Configure physical characteristics
-    set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
+    // Physical characteristics - Splugorth are MASSIVE
+    set_size_category(SIZE_HUGE);
+    set_height_range(240, 480);  // 20-40 feet in length
+    set_weight_range(5000, 20000);  // Several tons
+    set_lifespan(999999);  // Effectively immortal
     
-    // TODO: Configure stat modifiers
+    // Stat modifiers - Splugorth are incredibly powerful
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "iq": random(6) + 10,   // IQ: 20-25 (genius intellect)
+        "me": random(6) + 10,   // ME: 20-25 (iron will)
+        "ma": random(6) + 15,   // MA: 25-30 (supernatural charisma/intimidation)
+        "ps": random(10) + 30,  // PS: 40-50 (supernatural strength)
+        "pp": random(4) + 6,    // PP: 16-20 (coordinated despite size)
+        "pe": random(10) + 20,  // PE: 30-40 (supernatural endurance)
+        "pb": random(6),        // PB: 3D6 (alien beauty/horror)
+        "spd": random(10) + 10  // SPD: 20-30 (surprisingly fast)
     ]));
     
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
+    // Racial abilities
+    set_racial_abilities(({
+        "mega_damage_being",      // MDC creature: 4D6x100 MDC
+        "supernatural_strength",   // Supernatural PS
+        "supernatural_endurance",  // Supernatural PE
+        "dimensional_teleport",    // Teleport across dimensions
+        "bio_wizardry_master",    // Create and control bio-constructs
+        "tentacle_attacks",       // Multiple tentacle strikes per round
+        "regeneration",           // 2D6 MDC per melee round
+        "impervious_to_energy",   // Half damage from energy attacks
+        "telepathy",              // Range: 1000 miles
+        "dimensional_perception", // See/sense other dimensions
+        "magic_affinity",         // Cast spells as 10th level or higher
+        "psionic_powers",         // Master psychic: 300+ ISP
+        "never_fatigues",         // Immune to exhaustion
+        "immune_to_poison",       // Immune to toxins/disease
+        "immune_to_horror_factor", // Immune to fear/intimidation
+        "nightvision_superior",   // Perfect vision in darkness (3000 feet)
+    }));
     
-    // TODO: Configure OCC restrictions
-    set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
+    // OCC restrictions
+    set_allowed_occs(({
+        // Splugorth don't take OCCs - they ARE the ultimate power
+        // If playable, they would be special admin-only characters
+    }));
+    set_forbidden_occs(({ 
+        "all"  // Splugorth transcend OCC categories
+    }));
     set_recommended_occs(({ }));
     
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
+    // Starting resources - Splugorth control vast wealth
+    set_starting_equipment(({
+        "/objects/splugorth/eye_of_eternal_sight",
+        "/objects/splugorth/tentacle_whip_of_binding",
+        "/objects/splugorth/dimensional_mirror",
+    }));
+    set_starting_credits(10000000);  // 10 million credits (vast wealth)
     
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    // Languages - Splugorth know many languages
+    set_languages(({
+        "dragonese_elven",  // Language of power
+        "american",
+        "spanish", 
+        "euro",
+        "atlantean",
+        "demongorgon",
+        "faerie_speak",
+        "gobblely",
+        "techno_can",
+        "all_languages"  // Telepathy allows universal communication
+    }));
+    set_primary_language("dragonese_elven");
+    
+    // Special notes
+    set_special_notes(
+        "ADMIN NOTE: Splugorth are extraordinarily powerful NPCs, not intended as "
+        "playable characters in standard campaigns. If allowed as player characters, "
+        "they should be heavily restricted and require admin approval. Their vast "
+        "powers, mega-damage nature, and effective immortality make them unsuitable "
+        "for balanced gameplay without significant limitations.\n\n"
+        "POWERS SUMMARY:\n"
+        "- MDC: 400-2400 (4D6x100)\n"
+        "- Attacks: 6-8 tentacle strikes per round\n"
+        "- Damage: 2D6x10 MD per tentacle strike\n"
+        "- Magic: All spell categories, cast as 10th level minimum\n"
+        "- Psionics: Master level, 300+ ISP, all powers\n"
+        "- Special: Bio-Wizardry, dimensional travel, regeneration\n\n"
+        "ROLE-PLAY NOTES:\n"
+        "Splugorth are alien intelligences with utterly inhuman psychology. They view "
+        "other beings as property, entertainment, or tools. They are patient, cunning, "
+        "and utterly ruthless. A Splugorth PC should be played with gravitas and an "
+        "appropriate sense of ancient, terrible power."
+    );
 }

@@ -376,6 +376,188 @@ VMValue efun_trim(VirtualMachine *vm, VMValue *args, int arg_count) {
     return ret;
 }
 
+VMValue efun_sprintf(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    
+    if (arg_count < 1 || args[0].type != VALUE_STRING) {
+        return vm_value_create_null();
+    }
+    
+    const char *format = args[0].data.string_value;
+    if (!format) {
+        return vm_value_create_string("");
+    }
+    
+    const size_t BUFFER_SIZE = 8192;
+    char *result = (char *)malloc(BUFFER_SIZE);
+    if (!result) return vm_value_create_null();
+    
+    size_t result_pos = 0;
+    int arg_index = 1;
+    
+    for (size_t i = 0; format[i] != '\0' && result_pos < BUFFER_SIZE - 1; i++) {
+        if (format[i] != '%') {
+            result[result_pos++] = format[i];
+            continue;
+        }
+        
+        /* Handle format specifier */
+        i++; /* skip '%' */
+        if (format[i] == '\0') break;
+        
+        /* Handle %% (literal percent) */
+        if (format[i] == '%') {
+            result[result_pos++] = '%';
+            continue;
+        }
+        
+        /* Parse flags and field width */
+        int left_align = 0;
+        int zero_pad = 0;
+        int field_width = 0;
+        
+        if (format[i] == '-') {
+            left_align = 1;
+            i++;
+        } else if (format[i] == '0') {
+            zero_pad = 1;
+            i++;
+        }
+        
+        /* Parse field width */
+        while (isdigit(format[i])) {
+            field_width = field_width * 10 + (format[i] - '0');
+            i++;
+        }
+        
+        /* Get format specifier */
+        char spec = format[i];
+        
+        /* Get next argument */
+        if (arg_index >= arg_count) {
+            /* No more arguments, just skip this specifier */
+            continue;
+        }
+        
+        VMValue arg = args[arg_index++];
+        char temp[512];
+        temp[0] = '\0';
+        
+        /* Format based on specifier */
+        switch (spec) {
+            case 's': /* string */
+                if (arg.type == VALUE_STRING && arg.data.string_value) {
+                    snprintf(temp, sizeof(temp), "%s", arg.data.string_value);
+                } else if (arg.type == VALUE_INT) {
+                    snprintf(temp, sizeof(temp), "%ld", arg.data.int_value);
+                } else if (arg.type == VALUE_FLOAT) {
+                    snprintf(temp, sizeof(temp), "%g", arg.data.float_value);
+                } else {
+                    snprintf(temp, sizeof(temp), "(null)");
+                }
+                break;
+                
+            case 'd': /* decimal integer */
+            case 'i':
+                if (arg.type == VALUE_INT) {
+                    snprintf(temp, sizeof(temp), "%ld", arg.data.int_value);
+                } else if (arg.type == VALUE_FLOAT) {
+                    snprintf(temp, sizeof(temp), "%.0f", arg.data.float_value);
+                } else {
+                    snprintf(temp, sizeof(temp), "0");
+                }
+                break;
+                
+            case 'o': /* octal */
+                if (arg.type == VALUE_INT) {
+                    snprintf(temp, sizeof(temp), "%lo", arg.data.int_value);
+                } else {
+                    snprintf(temp, sizeof(temp), "0");
+                }
+                break;
+                
+            case 'x': /* hexadecimal (lowercase) */
+                if (arg.type == VALUE_INT) {
+                    snprintf(temp, sizeof(temp), "%lx", arg.data.int_value);
+                } else {
+                    snprintf(temp, sizeof(temp), "0");
+                }
+                break;
+                
+            case 'X': /* hexadecimal (uppercase) */
+                if (arg.type == VALUE_INT) {
+                    snprintf(temp, sizeof(temp), "%lX", arg.data.int_value);
+                } else {
+                    snprintf(temp, sizeof(temp), "0");
+                }
+                break;
+                
+            case 'f': /* float */
+            case 'g':
+                if (arg.type == VALUE_FLOAT) {
+                    snprintf(temp, sizeof(temp), "%f", arg.data.float_value);
+                } else if (arg.type == VALUE_INT) {
+                    snprintf(temp, sizeof(temp), "%f", (double)arg.data.int_value);
+                } else {
+                    snprintf(temp, sizeof(temp), "0.0");
+                }
+                break;
+                
+            case 'c': /* character */
+                if (arg.type == VALUE_INT) {
+                    temp[0] = (char)arg.data.int_value;
+                    temp[1] = '\0';
+                } else {
+                    temp[0] = '\0';
+                }
+                break;
+                
+            default:
+                /* Unknown specifier, just output as-is */
+                result[result_pos++] = '%';
+                result[result_pos++] = spec;
+                continue;
+        }
+        
+        /* Apply field width formatting */
+        size_t temp_len = strlen(temp);
+        if (field_width > 0 && (int)temp_len < field_width) {
+            int padding = field_width - (int)temp_len;
+            char pad_char = zero_pad ? '0' : ' ';
+            
+            if (left_align) {
+                /* Left-align: value then padding */
+                for (size_t j = 0; j < temp_len && result_pos < BUFFER_SIZE - 1; j++) {
+                    result[result_pos++] = temp[j];
+                }
+                for (int j = 0; j < padding && result_pos < BUFFER_SIZE - 1; j++) {
+                    result[result_pos++] = ' ';
+                }
+            } else {
+                /* Right-align: padding then value */
+                for (int j = 0; j < padding && result_pos < BUFFER_SIZE - 1; j++) {
+                    result[result_pos++] = pad_char;
+                }
+                for (size_t j = 0; j < temp_len && result_pos < BUFFER_SIZE - 1; j++) {
+                    result[result_pos++] = temp[j];
+                }
+            }
+        } else {
+            /* No padding needed */
+            for (size_t j = 0; j < temp_len && result_pos < BUFFER_SIZE - 1; j++) {
+                result[result_pos++] = temp[j];
+            }
+        }
+    }
+    
+    result[result_pos] = '\0';
+    
+    VMValue ret = vm_value_create_string(result);
+    free(result);
+    
+    return ret;
+}
+
 /* ========== Array Functions ========== */
 
 VMValue efun_sizeof(VirtualMachine *vm, VMValue *args, int arg_count) {
@@ -1434,7 +1616,8 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "upper_case", efun_upper_case, 1, 1, "string upper_case(string)");
     efun_register(registry, "lower_case", efun_lower_case, 1, 1, "string lower_case(string)");
     efun_register(registry, "trim", efun_trim, 1, 1, "string trim(string)");
-    count += 7;
+    efun_register(registry, "sprintf", efun_sprintf, 1, -1, "string sprintf(string, ...)");
+    count += 8;
     
     /* Array functions */
     efun_register(registry, "sizeof", efun_sizeof, 1, 1, "int sizeof(mixed)");

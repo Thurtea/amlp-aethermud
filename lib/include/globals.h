@@ -19,6 +19,7 @@
 #define OBJECT          "/std/object"
 #define LIVING          "/std/living"
 #define PLAYER          "/std/player"
+#define USER_OB         "/std/player"
 #define WIZTOOL         "/std/wiztool"
 
 // === PRIVILEGE LEVELS ===
@@ -86,5 +87,19 @@
 #define DIR_PLAYERS     "/save/players"
 #define DIR_LOG         "/log"
 #define DIR_DATA        "/data"
+
+// === COMMAND PATHS ===
+#define CMD_PREFIX      "/cmds/"
+#define ADMIN_CMD_PREFIX "/cmds/admin/"
+
+// === DEFAULT VALUES ===
+#define DEFAULT_RACE     "human"
+#define DEFAULT_LANGUAGE "american"
+#define DEFAULT_FLUENCY  98
+#define START_ROOM       "/domains/forest/rooms/void"
+#define PLAYER_LEVEL     0
+#define WIZARD_LEVEL     1
+#define ADMIN_LEVEL      2
+#define STD_WIZTOOL      "/std/wiztool"
 
 #endif // __GLOBALS_H__

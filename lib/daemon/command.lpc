@@ -244,7 +244,7 @@ private int execute_global_command(object player, string path, string verb, stri
     
     // Execute the command
     if (function_exists("main", cmd)) {
-        result = cmd->main(player, args);
+        result = cmd->main(args);
         return result;
     }
     

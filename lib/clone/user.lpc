@@ -125,6 +125,24 @@ void reconnect() {
     }
 }
 
+// Called by C driver when player enters a command
+mixed process_command(string cmd) {
+    int res;
+    
+    if (!cmd || cmd == "") return "";
+    
+    /* Route to command daemon */
+    if (objectp(COMMAND_D)) {
+        res = 0;
+        catch(res = COMMAND_D->execute_command(this_object(), cmd));
+        if (res) return "";  /* command handled, return empty string */
+    }
+    
+    /* Fallback to process_input if command daemon didn't handle it */
+    process_input(cmd);
+    return "";
+}
+
 int process_input(string input) {
     if (!input || input == "") return 1;
 

@@ -651,6 +651,21 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
                     vm->current_frame->function ? vm->current_frame->function->name : "(null)");
             
             int idx = instr->operand.int_operand;
+            
+            // CRITICAL DEBUG for process_command
+            if (vm->current_frame->function && strcmp(vm->current_frame->function->name, "process_command") == 0) {
+                fprintf(stderr, "[VM LOAD_LOCAL] process_command loading idx=%d, operand.int_operand=%d\n", 
+                        idx, instr->operand.int_operand);
+                fprintf(stderr, "[VM LOAD_LOCAL]   local_variables=%p, local[%d].type=%d\n",
+                        (void*)vm->current_frame->local_variables, idx,
+                        vm->current_frame->local_variables[idx].type);
+                if (vm->current_frame->local_variables[idx].type == VALUE_STRING) {
+                    fprintf(stderr, "[VM LOAD_LOCAL]   String: '%s'\n",
+                            vm->current_frame->local_variables[idx].data.string_value ? 
+                            vm->current_frame->local_variables[idx].data.string_value : "(NULL PTR)");
+                }
+            }
+            
             /* CRITICAL FIX: Bounds check must include BOTH parameters and locals
              * Parameters are at indices [0..param_count-1]
              * Locals are at indices [param_count..param_count+local_var_count-1]
@@ -754,13 +769,13 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         case OP_RSHIFT: vm_bitwise_op(vm, 5); return 0;
         
         case OP_JUMP:
-            vm->instruction_pointer = instr->operand.address_operand;
+            vm->current_frame->instruction_pointer = instr->operand.address_operand;
             return 0;
         
         case OP_JUMP_IF_FALSE: {
             VMValue cond = vm_pop_value(vm);
             if (!vm_value_is_truthy(cond)) {
-                vm->instruction_pointer = instr->operand.address_operand;
+                vm->current_frame->instruction_pointer = instr->operand.address_operand;
             }
             vm_value_release(&cond);
             return 0;
@@ -769,7 +784,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         case OP_JUMP_IF_TRUE: {
             VMValue cond = vm_pop_value(vm);
             if (vm_value_is_truthy(cond)) {
-                vm->instruction_pointer = instr->operand.address_operand;
+                vm->current_frame->instruction_pointer = instr->operand.address_operand;
             }
             vm_value_release(&cond);
             return 0;
@@ -864,25 +879,22 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
                 if (start < 0) start = 0;
                 if (end < 0 || end >= len) end = len - 1;
                 if (start > end) {
-                    /* Empty string */
-                    VMValue result;
-                    result.type = VALUE_STRING;
-                    /* Create empty string using gc_alloc */
-                    char *empty_str = (char *)gc_alloc(vm->gc, 1, GC_TYPE_STRING);
-                    if (empty_str) empty_str[0] = '\0';
-                    result.data.string_value = empty_str;
-                    return vm_push_value(vm, result);
+                    /* Empty string: create a VM-managed empty string */
+                    {
+                        VMValue result = vm_value_create_string("");
+                        return vm_push_value(vm, result);
+                    }
                 }
                 
-                /* Create substring */
+                /* Create substring as a VM-managed string */
                 int slice_len = end - start + 1;
-                char *slice = (char *)gc_alloc(vm->gc, slice_len + 1, GC_TYPE_STRING);
+                char *slice = (char *)malloc(slice_len + 1);
+                if (!slice) return -1;
                 strncpy(slice, str + start, slice_len);
                 slice[slice_len] = '\0';
-                
-                VMValue result;
-                result.type = VALUE_STRING;
-                result.data.string_value = slice;
+
+                VMValue result = vm_value_create_string(slice);
+                free(slice);
                 return vm_push_value(vm, result);
             }
             
@@ -1107,12 +1119,33 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
     }
     
     /* Copy parameters from stack to local variables array */
+    // CRITICAL: Log stack state BEFORE copying
+    if (strcmp(func->name, "process_command") == 0) {
+        fprintf(stderr, "[VM CRITICAL] BEFORE PARAM COPY: func=%s args=%d stack_base=%d stack->top=%d\n",
+                func->name, arg_count, frame->stack_base, vm->stack->top);
+        for (int j = 0; j < arg_count; j++) {
+            fprintf(stderr, "[VM CRITICAL]   stack[%d].type=%d\n", 
+                    frame->stack_base + j, vm->stack->values[frame->stack_base + j].type);
+        }
+    }
+    
     for (int i = 0; i < arg_count; i++) {
         frame->local_variables[i] = vm->stack->values[frame->stack_base + i];
         vm_value_addref(&frame->local_variables[i]);
         DEBUG_LOG_VM("Copied param %d from stack[%d] to local[%d]: type=%d (str_ptr=%p)",
                 i, frame->stack_base + i, i, frame->local_variables[i].type,
                 (void*)frame->local_variables[i].data.string_value);
+        
+        // CRITICAL DEBUG for process_command
+        if (strcmp(func->name, "process_command") == 0) {
+            fprintf(stderr, "[VM CRITICAL] %s param %d: stack_base=%d, stack[%d].type=%d, local[%d].type=%d\n",
+                    func->name, i, frame->stack_base, frame->stack_base + i,
+                    vm->stack->values[frame->stack_base + i].type, i, frame->local_variables[i].type);
+            if (frame->local_variables[i].type == VALUE_STRING) {
+                fprintf(stderr, "[VM CRITICAL]   String value: '%s'\n", 
+                        frame->local_variables[i].data.string_value ? frame->local_variables[i].data.string_value : "(NULL PTR)");
+            }
+        }
     }
     
     vm->current_frame = frame;

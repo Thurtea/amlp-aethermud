@@ -170,6 +170,7 @@ int query_wizard_level() { return privilege_level; }  // For introduction system
 
 void set_privilege_level(int level) {
     if (level < 0 || level > 2) return;
+    int old_level = privilege_level;
     privilege_level = level;
     switch(level) {
         case 0:
@@ -178,10 +179,16 @@ void set_privilege_level(int level) {
             break;
         case 1:
             title = "Wizard";
+            if (old_level != 1) {
+                tell_object(this_object(), "\n[SYSTEM] Promoted to Wizard level. Type 'wiztool' to load your tools.\n");
+            }
             attach_wiztool();
             break;
         case 2:
             title = "Admin";
+            if (old_level != 2) {
+                tell_object(this_object(), "\n[SYSTEM] Promoted to Admin level. Type 'wiztool' to load your tools.\n");
+            }
             attach_wiztool();
             break;
     }
@@ -408,37 +415,11 @@ void set_secondary_skills(mapping m) {
 }
 
 // Command processing - CRITICAL FUNCTION
+// Returns 0 to signal driver to fall through to C commands
 mixed process_command(string cmd) {
-    // DEBUG: Check what we actually received
-    write("[DEBUG] process_command START\n");
-    
-    if (!cmd) {
-        write("[DEBUG] cmd is NULL\n");
-        return "Empty command.\n";
-    }
-    
-    if (cmd == "") {
-        write("[DEBUG] cmd is empty string\n");
-        return "Empty command.\n";
-    }
-    
-    write("[DEBUG] cmd = '" + cmd + "'\n");
-    write("[DEBUG] strlen = " + strlen(cmd) + "\n");
-    
-    // Route command to command daemon
-    object cmd_daemon = load_object(COMMAND_D);
-    if (!cmd_daemon) {
-        write("[DEBUG] Command daemon FAILED to load!\n");
-        return "Command system not initialized.\n";
-    }
-    
-    write("[DEBUG] Calling command daemon...\n");
-    int result = cmd_daemon->execute_command(this_object(), cmd);
-    write("[DEBUG] Command daemon returned: " + result + "\n");
-    
-    // Commands handle their own output via write/tell_object
-    // Return empty string to driver to signal output already sent
-    return "";
+    // Let the C driver handle all commands for now
+    // LPC command system not fully implemented
+    return 0;
 }
 
 // Command implementations

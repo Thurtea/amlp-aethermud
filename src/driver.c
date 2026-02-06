@@ -790,6 +790,9 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
     
+    fprintf(stderr, "[execute_command] INPUT: command=%p '%s'\n", 
+            (void*)command, command ? command : "(NULL)");
+    
     /* Parse command early for filesystem checks */
     char cmd_buffer[256];
     strncpy(cmd_buffer, command, sizeof(cmd_buffer) - 1);
@@ -816,33 +819,25 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         if (strcmp(cmd, "ls") == 0 || strcmp(cmd, "dir") == 0) {
             command_debug_set_context(command, cmd, args ? args : "", "filesystem");
             cmd_ls_filesystem(session, args);
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("");
-            return result;
+            return vm_value_create_string("");
         }
         
         if (strcmp(cmd, "cd") == 0) {
             command_debug_set_context(command, cmd, args ? args : "", "filesystem");
             cmd_cd_filesystem(session, args);
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("");
-            return result;
+            return vm_value_create_string("");
         }
         
         if (strcmp(cmd, "pwd") == 0) {
             command_debug_set_context(command, cmd, args ? args : "", "filesystem");
             cmd_pwd_filesystem(session);
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("");
-            return result;
+            return vm_value_create_string("");
         }
         
         if (strcmp(cmd, "cat") == 0 || strcmp(cmd, "more") == 0) {
             command_debug_set_context(command, cmd, args ? args : "", "filesystem");
             cmd_cat_filesystem(session, args);
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("");
-            return result;
+            return vm_value_create_string("");
         }
     }
     
@@ -907,9 +902,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             send_to_player(session, " Warning: Failed to save character.\r\n");
         }
         
-        result.type = VALUE_STRING;
-        result.data.string_value = strdup("quit");
-        return result;
+        return vm_value_create_string("quit");
     }
     
     if (strcmp(cmd, "save") == 0) {
@@ -942,8 +935,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         if (session->privilege_level >= 1) {
             strcat(help_text,
                 "\r\nWIZARD COMMANDS (Level 1+):\r\n"
-                "  goto <room>         - Teleport to a room\r\n"
-                "  clone <object>      - Clone an object\r\n");
+                "  goto <room>          - Teleport to a room\r\n"
+                "  clone <object>       - Clone an object\r\n"
+                "  ls/cd/pwd            - Navigate filesystem\r\n"
+                "  cat <file>           - View file contents\r\n"
+                "  eval <code>          - Execute LPC code\r\n"
+                "\r\nWizard tools also available via 'wiz' command.\r\n");
         }
         
         if (session->privilege_level >= 2) {
@@ -954,8 +951,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 "  shutdown [delay]          - Shutdown server (optional delay in seconds)\r\n");
         }
         
-        result.data.string_value = strdup(help_text);
-        return result;
+        return vm_value_create_string(help_text);
     }
     
     if (strcmp(cmd, "look") == 0 || strcmp(cmd, "l") == 0) {
@@ -1094,13 +1090,10 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             broadcast_message(msg, session);
             
             snprintf(msg, sizeof(msg), "You say: %s\r\n", args);
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup(msg);
+            return vm_value_create_string(msg);
         } else {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("Say what?\r\n");
+            return vm_value_create_string("Say what?\r\n");
         }
-        return result;
     }
     
     if (strcmp(cmd, "emote") == 0) {
@@ -1108,13 +1101,10 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             char msg[BUFFER_SIZE];
             snprintf(msg, sizeof(msg), "%s %s\r\n", session->username, args);
             broadcast_message(msg, session);
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup(msg);
+            return vm_value_create_string(msg);
         } else {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("Emote what?\r\n");
+            return vm_value_create_string("Emote what?\r\n");
         }
-        return result;
     }
     
     /* Priority gameplay commands */
@@ -1183,9 +1173,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 count, count == 1 ? "" : "s");
         strcat(msg, footer);
         
-        result.type = VALUE_STRING;
-        result.data.string_value = strdup(msg);
-        return result;
+        return vm_value_create_string(msg);
     }
     
     if (strcmp(cmd, "stats") == 0) {
@@ -1203,9 +1191,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             "  Intelligence: 10\r\n",
             session->username, session->privilege_level, priv_name);
         
-        result.type = VALUE_STRING;
-        result.data.string_value = strdup(msg);
-        return result;
+        return vm_value_create_string(msg);
     }
     
     /* Movement commands */
@@ -1213,42 +1199,32 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                                "n", "s", "e", "w", "u", "d", NULL};
     for (int i = 0; directions[i]; i++) {
         if (strcmp(cmd, directions[i]) == 0) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("You can't go that way.\r\n");
-            return result;
+            return vm_value_create_string("You can't go that way.\r\n");
         }
     }
     
     /* Admin commands */
     if (strcmp(cmd, "promote") == 0) {
         if (session->privilege_level < 2) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("You don't have permission to use that command.\r\n");
-            return result;
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         
         if (!args || *args == '\0') {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup(
+            return vm_value_create_string(
                 "Usage: promote <player> <level>\r\n"
                 "Levels: 0=player, 1=wizard, 2=admin\r\n");
-            return result;
         }
         
         char target_name[64];
         int new_level;
         if (sscanf(args, "%63s %d", target_name, &new_level) != 2) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup(
+            return vm_value_create_string(
                 "Usage: promote <player> <level>\r\n"
                 "Levels: 0=player, 1=wizard, 2=admin\r\n");
-            return result;
         }
         
         if (new_level < 0 || new_level > 2) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("Invalid level. Use 0 (player), 1 (wizard), or 2 (admin).\r\n");
-            return result;
+            return vm_value_create_string("Invalid level. Use 0 (player), 1 (wizard), or 2 (admin).\r\n");
         }
         
         // Find and promote player
@@ -1269,20 +1245,15 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             snprintf(msg, sizeof(msg), 
                     "Promoted %s to %s (level %d).\r\n", 
                     target_name, level_name, new_level);
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup(msg);
+            return vm_value_create_string(msg);
         } else {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("Player not found.\r\n");
+            return vm_value_create_string("Player not found.\r\n");
         }
-        return result;
     }
     
     if (strcmp(cmd, "users") == 0) {
         if (session->privilege_level < 2) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("You don't have permission to use that command.\r\n");
-            return result;
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         
         char msg[BUFFER_SIZE];
@@ -1302,34 +1273,26 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             }
         }
         
-        result.type = VALUE_STRING;
-        result.data.string_value = strdup(msg);
-        return result;
+        return vm_value_create_string(msg);
     }
     
     /* Wizard commands */
     if (strcmp(cmd, "goto") == 0) {
         if (session->privilege_level < 1) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("You don't have permission to use that command.\r\n");
-            return result;
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         
         if (!args || *args == '\0') {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup(
+            return vm_value_create_string(
                 "Usage: goto <room_id>\r\n"
                 "Available rooms: 0=Void, 1=Chi-Town Plaza, 2=Coalition HQ, 3=Merchant District\r\n");
-            return result;
         }
         
         int room_id = atoi(args);
         Room *target_room = room_get_by_id(room_id);
         
         if (!target_room) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("Invalid room ID.\r\n");
-            return result;
+            return vm_value_create_string("Invalid room ID.\r\n");
         }
         
         /* Remove from current room */
@@ -1360,17 +1323,13 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     
     if (strcmp(cmd, "clone") == 0) {
         if (session->privilege_level < 1) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("You don't have permission to use that command.\r\n");
-            return result;
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         
         if (!args || *args == '\0') {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup(
+            return vm_value_create_string(
                 "Usage: clone <object>\r\n"
                 "Available objects: sword, shield, potion\r\n");
-            return result;
         }
         
         char msg[512];
@@ -1392,16 +1351,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                     "Available objects: sword, shield, potion\r\n", args);
         }
         
-        result.type = VALUE_STRING;
-        result.data.string_value = strdup(msg);
-        return result;
+        return vm_value_create_string(msg);
     }
     
     if (strcmp(cmd, "shutdown") == 0) {
         if (session->privilege_level < 2) {
-            result.type = VALUE_STRING;
-            result.data.string_value = strdup("You don't have permission to use that command.\r\n");
-            return result;
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         
         int delay = 0;
@@ -1420,9 +1375,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         
         fprintf(stderr, "[Server] Shutdown initiated by %s\n", session->username);
         server_running = 0;
-        result.type = VALUE_STRING;
-        result.data.string_value = strdup("Server shutdown initiated.\r\n");
-        return result;
+        return vm_value_create_string("Server shutdown initiated.\r\n");
     }
     
     /* Unknown command */
@@ -1430,10 +1383,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     char error_msg[512];
     snprintf(error_msg, sizeof(error_msg), 
             "Unknown command: %.200s\r\nType 'help' for available commands.\r\n", cmd);
-    result.type = VALUE_STRING;
-    result.data.string_value = strdup(error_msg);
-    
-    return result;
+    return vm_value_create_string(error_msg);
 }
 
 /* Broadcast message to all players except one */
@@ -1608,6 +1558,9 @@ void process_chargen_state(PlayerSession *session, const char *input) {
 
 /* Process input during playing state */
 void process_playing_state(PlayerSession *session, const char *input) {
+    fprintf(stderr, "[process_playing_state] INPUT: input=%p '%s'\n",
+            (void*)input, input ? input : "(NULL)");
+    
     VMValue result = execute_command(session, input);
 
     command_debug_log_result(session, result);

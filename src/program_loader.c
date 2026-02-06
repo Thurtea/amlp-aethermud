@@ -231,6 +231,16 @@ int program_loader_load(VirtualMachine *vm, Program *program) {
         if (bytes_read < 0) {
             free(instructions);
             fprintf(stderr, "[program_loader] Failed to decode instruction at offset %zu\n", offset);
+            // Hexdump around the error for debugging
+            fprintf(stderr, "[program_loader] Bytecode hexdump around offset %zu:\n", offset);
+            size_t start = (offset > 32) ? (offset - 32) : 0;
+            size_t end = (offset + 32 < program->bytecode_len) ? (offset + 32) : program->bytecode_len;
+            for (size_t i = start; i < end; i++) {
+                if (i == offset) fprintf(stderr, "[%02X]", program->bytecode[i]);
+                else fprintf(stderr, " %02X", program->bytecode[i]);
+                if ((i - start + 1) % 16 == 0) fprintf(stderr, "\n");
+            }
+            fprintf(stderr, "\n");
             return -1;
         }
         

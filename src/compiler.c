@@ -208,6 +208,23 @@ static void compiler_add_constant(compiler_state_t *state, VMValue value) {
 /**
  * Emit bytecode
  */
+
+/**
+ * Emit a raw data byte without line mapping
+ * Use for string data, integer data, float data, etc.
+ */
+static void compiler_emit_byte(compiler_state_t *state, unsigned char byte) {
+    static int debug_count = 0;
+    if (debug_count++ < 5) {
+        fprintf(stderr, "[COMPILER DEBUG] compiler_emit_byte called: byte=0x%02X (%c)\n", byte, (byte >= 32 && byte < 127) ? byte : '.');
+    }
+    if (state->bytecode_len >= state->bytecode_capacity) {
+        state->bytecode_capacity *= 2;
+        state->bytecode = realloc(state->bytecode, state->bytecode_capacity);
+    }
+    state->bytecode[state->bytecode_len++] = byte;
+}
+
 static void compiler_emit(compiler_state_t *state, uint8_t byte, int line) {
     if (state->bytecode_len >= state->bytecode_capacity) {
         state->bytecode_capacity *= 2;
@@ -256,14 +273,14 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
                 uint64_t bits;
                 memcpy(&bits, &val, sizeof(double));
                 for (int i = 0; i < 8; i++) {
-                    compiler_emit(state, (bits >> (i * 8)) & 0xFF, node->line);
+                    compiler_emit_byte(state, (bits >> (i * 8)) & 0xFF);
                 }
             } else {
                 compiler_emit(state, OP_PUSH_INT, node->line);
                 // Encode int value as 8 bytes (64-bit)
                 long val = num->int_value;
                 for (int i = 0; i < 8; i++) {
-                    compiler_emit(state, (val >> (i * 8)) & 0xFF, node->line);
+                    compiler_emit_byte(state, (val >> (i * 8)) & 0xFF);
                 }
             }
             break;
@@ -272,15 +289,44 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
         case NODE_LITERAL_STRING: {
             LiteralStringNode *str = (LiteralStringNode *)node->data;
             if (str && str->value) {
-                compiler_emit(state, OP_PUSH_STRING, node->line);
-                // Store string length (2 bytes)
                 size_t len = strlen(str->value);
-                compiler_emit(state, len & 0xFF, node->line);
-                compiler_emit(state, (len >> 8) & 0xFF, node->line);
-                // Store string bytes
+                
+                // CRITICAL DEBUG OUTPUT
+                fprintf(stderr, "\n[COMPILER] OP_PUSH_STRING for: '%s'\n", str->value);
+                fprintf(stderr, "[COMPILER]   String length: %zu\n", len);
+                fprintf(stderr, "[COMPILER]   Low byte (len & 0xFF): 0x%02X (decimal %u)\n", 
+                        (unsigned int)(len & 0xFF), (unsigned int)(len & 0xFF));
+                fprintf(stderr, "[COMPILER]   High byte ((len >> 8) & 0xFF): 0x%02X (decimal %u)\n",
+                        (unsigned int)((len >> 8) & 0xFF), (unsigned int)((len >> 8) & 0xFF));
+                fprintf(stderr, "[COMPILER]   Current bytecode offset: %zu\n", state->bytecode_len);
+                
+                size_t opcode_offset = state->bytecode_len;
+                compiler_emit(state, OP_PUSH_STRING, node->line);
+                
+                fprintf(stderr, "[COMPILER]   After opcode, offset: %zu\n", state->bytecode_len);
+                
+                compiler_emit_byte(state, len & 0xFF);
+                fprintf(stderr, "[COMPILER]   After low byte, offset: %zu\n", state->bytecode_len);
+                
+                compiler_emit_byte(state, (len >> 8) & 0xFF);
+                fprintf(stderr, "[COMPILER]   After high byte, offset: %zu\n", state->bytecode_len);
+                
+                // Emit string data
                 for (size_t i = 0; i < len; i++) {
-                    compiler_emit(state, (unsigned char)str->value[i], node->line);
+                    compiler_emit_byte(state, (unsigned char)str->value[i]);
                 }
+                
+                fprintf(stderr, "[COMPILER]   After string data, offset: %zu\n", state->bytecode_len);
+                fprintf(stderr, "[COMPILER]   Emitted bytes at [%zu]: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+                        opcode_offset,
+                        state->bytecode[opcode_offset],
+                        state->bytecode[opcode_offset + 1],
+                        state->bytecode[opcode_offset + 2],
+                        state->bytecode[opcode_offset + 3],
+                        state->bytecode[opcode_offset + 4],
+                        state->bytecode[opcode_offset + 5],
+                        state->bytecode[opcode_offset + 6],
+                        state->bytecode[opcode_offset + 7]);
             }
             break;
         }
@@ -307,13 +353,15 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
                 if (local_idx >= 0) {
                     // It's a local variable/parameter - use LOAD_LOCAL
                     compiler_emit(state, OP_LOAD_LOCAL, node->line);
-                    compiler_emit(state, local_idx, node->line);
+                    // Emit as uint16 (2 bytes) to match loader expectations
+                    compiler_emit_byte(state, local_idx & 0xFF);        // Low byte
+                    compiler_emit_byte(state, (local_idx >> 8) & 0xFF); // High byte
                 } else {
                     // It's a global variable - use LOAD_GLOBAL
                     compiler_emit(state, OP_LOAD_GLOBAL, node->line);
                     // Emit global index (simplified: use first 2 bytes for index)
-                    compiler_emit(state, 0, node->line);
-                    compiler_emit(state, 0, node->line);
+                    compiler_emit_byte(state, 0);
+                    compiler_emit_byte(state, 0);
                 }
             }
             break;
@@ -326,15 +374,41 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
                 for (int i = 0; i < call->argument_count; i++) {
                     compiler_codegen_expression(state, call->arguments[i]);
                 }
+                
+                // CRITICAL DEBUG OUTPUT FOR OP_CALL
+                size_t len = strlen(call->function_name);
+                fprintf(stderr, "\n[COMPILER] OP_CALL for: '%s'\n", call->function_name);
+                fprintf(stderr, "[COMPILER]   Arg count: %d\n", call->argument_count);
+                fprintf(stderr, "[COMPILER]   Function name length: %zu\n", len);
+                fprintf(stderr, "[COMPILER]   Current bytecode offset: %zu\n", state->bytecode_len);
+                
+                size_t opcode_offset = state->bytecode_len;
+                
                 // Emit call instruction
                 compiler_emit(state, OP_CALL, node->line);
-                compiler_emit(state, call->argument_count & 0xFF, node->line);
+                fprintf(stderr, "[COMPILER]   After opcode, offset: %zu\n", state->bytecode_len);
+                
+                compiler_emit_byte(state, call->argument_count & 0xFF);
+                fprintf(stderr, "[COMPILER]   After arg_count, offset: %zu\n", state->bytecode_len);
+                
                 // Function name length and bytes
-                size_t len = strlen(call->function_name);
-                compiler_emit(state, len & 0xFF, node->line);
+                compiler_emit_byte(state, len & 0xFF);
+                fprintf(stderr, "[COMPILER]   After name_len, offset: %zu\n", state->bytecode_len);
+                
                 for (size_t i = 0; i < len; i++) {
-                    compiler_emit(state, (unsigned char)call->function_name[i], node->line);
+                    compiler_emit_byte(state, (unsigned char)call->function_name[i]);
                 }
+                fprintf(stderr, "[COMPILER]   After function name, offset: %zu\n", state->bytecode_len);
+                fprintf(stderr, "[COMPILER]   Emitted bytes at [%zu]: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+                        opcode_offset,
+                        state->bytecode[opcode_offset],
+                        state->bytecode[opcode_offset + 1],
+                        state->bytecode[opcode_offset + 2],
+                        state->bytecode[opcode_offset + 3],
+                        state->bytecode[opcode_offset + 4],
+                        state->bytecode[opcode_offset + 5],
+                        state->bytecode[opcode_offset + 6],
+                        state->bytecode[opcode_offset + 7]);
             }
             break;
         }
@@ -500,8 +574,8 @@ static void compiler_codegen_statement(compiler_state_t *state, ASTNode *node) {
                 // Emit jump-if-false (placeholder offset, will need patching)
                 int jump_false_addr = state->bytecode_len;
                 compiler_emit(state, OP_JUMP_IF_FALSE, node->line);
-                compiler_emit(state, 0, node->line);  // Offset placeholder
-                compiler_emit(state, 0, node->line);
+                compiler_emit_byte(state, 0);  // Offset placeholder
+                compiler_emit_byte(state, 0);
                 
                 // Generate then-branch bytecode
                 compiler_codegen_statement(state, ifstmt->then_statement);
@@ -511,8 +585,8 @@ static void compiler_codegen_statement(compiler_state_t *state, ASTNode *node) {
                 if (ifstmt->else_statement) {
                     jump_end_addr = state->bytecode_len;
                     compiler_emit(state, OP_JUMP, node->line);
-                    compiler_emit(state, 0, node->line);  // Offset placeholder
-                    compiler_emit(state, 0, node->line);
+                    compiler_emit_byte(state, 0);  // Offset placeholder
+                    compiler_emit_byte(state, 0);
                 }
                 
                 // Patch the jump-false offset

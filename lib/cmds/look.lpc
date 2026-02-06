@@ -103,5 +103,68 @@ int main(string arg) {
         tell_object(user, desc);
         return 1;
     }
-    
+
     // Just "look" - show room
+    string desc = "";
+
+    // Room name
+    if (function_exists("query_short", room)) {
+        desc += room->query_short() + "\n";
+    }
+
+    // Room description
+    if (function_exists("query_long", room)) {
+        desc += room->query_long();
+    }
+
+    // Show exits
+    if (function_exists("query_exits", room)) {
+        string *exit_dirs = keys(room->query_exits());
+        if (sizeof(exit_dirs) > 0) {
+            desc += "Exits: " + implode(exit_dirs, ", ") + "\n";
+        } else {
+            desc += "There are no obvious exits.\n";
+        }
+    }
+
+    // Show objects and players in the room
+    object *contents = all_inventory(room);
+    if (sizeof(contents) > 0) {
+        int found_items = 0;
+        int found_living = 0;
+
+        foreach (object ob : contents) {
+            if (ob == user) continue;
+
+            if (living(ob)) {
+                if (!found_living) {
+                    desc += "\nAlso here:\n";
+                    found_living = 1;
+                }
+                string name_seen;
+                if (function_exists("query_introduction_name", ob)) {
+                    name_seen = ob->query_introduction_name(user);
+                } else {
+                    name_seen = ob->query_name ? ob->query_name() : "someone";
+                }
+                desc += "  " + capitalize(name_seen) + "\n";
+            }
+        }
+
+        foreach (object ob : contents) {
+            if (ob == user) continue;
+
+            if (!living(ob)) {
+                if (!found_items) {
+                    desc += "\nYou see:\n";
+                    found_items = 1;
+                }
+                string item_desc = ob->query_short ? ob->query_short() : "something";
+                desc += "  " + capitalize(item_desc) + "\n";
+            }
+        }
+    }
+
+    tell_object(user, desc);
+    return 1;
+}

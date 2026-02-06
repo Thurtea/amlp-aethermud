@@ -2,6 +2,12 @@
 
 #include <globals.h>
 
+void delayed_quit(object user) {
+    if (!objectp(user)) return;
+    tell_object(user, "Goodbye!\n");
+    destruct(user);
+}
+
 int main(string arg) {
     object user;
     
@@ -25,18 +31,8 @@ int main(string arg) {
         write_file("/log/server.log", sprintf("[DEBUG quit] %s save_me() returned normally\n", (function_exists("query_name", user) ? (string)user->query_name() : "<unknown>")));
     }
     
-        // Defer the actual removal to next tick to avoid reentrancy crash
-        call_out("delayed_quit", 0, user);
-    
-        return 1;
-    }
-
-    void delayed_quit(object user) {
-        if (!objectp(user)) return;
-        tell_object(user, "Goodbye!\n");
-        destruct(user);
-    }
-    // Note: cannot write after destruct; if driver crashes here, check server.log for previous line
+    // Defer the actual removal to next tick to avoid reentrancy crash
+    call_out("delayed_quit", 0, user);
     
     return 1;
 }

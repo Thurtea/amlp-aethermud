@@ -1,0 +1,203 @@
+// /lib/occs/special_forces.lpc
+//  O.C.C. - Placeholder Implementation
+//
+// This is a stub file. Implement the full OCC details.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    
+    set_occ_name("Special Forces Soldier");
+    set_occ_id("special_forces");
+    set_occ_category(OCC_CAT_MILITARY);
+    set_alignment_requirement("any");
+    set_alignment_requirement("not_anarchist");
+    
+    set_occ_description(
+        "Special Forces Soldiers are elite military personnel trained by the "
+        "Coalition States or similar military organizations. They are highly "
+        "disciplined, extremely well-trained in combat and tactical operations, "
+        "and loyal to their chain of command. These soldiers combine martial "
+        "prowess with technological proficiency, using the latest in military gear "
+        "and weapons. They excel in team operations, tactical planning, and adaptation "
+        "to mission requirements. While primarily loyal to their military authority, "
+        "some Special Forces soldiers go rogue or become mercenaries after completing "
+        "their service."
+    );
+    
+    // Stat requirements - above average physical
+    set_stat_requirements(([
+        "ps": 11,   // Physical Strength 11+
+        "pp": 11,   // Physical Prowess 11+
+        "pe": 10,   // Physical Endurance 10+
+        "iq": 10    // Intelligence 10+
+    ]));
+    
+    // Stat bonuses - training effects
+    set_stat_bonuses(([
+        "pp": 1,    // +1 Physical Prowess (training)
+        "pe": 1,    // +1 Physical Endurance
+        "ps": 1     // +1 Physical Strength
+    ]));
+    
+    // XP progression
+    set_xp_table(XP_LEVELS);
+    
+    // Combat configuration - excellent
+    set_base_attacks(3);
+    set_attacks_per_level(1, 2);  // +1 attack every 2 levels
+    set_hand_to_hand_type("expert");
+    
+    // Base abilities
+    set_base_abilities(({
+        "weapons_specialist",
+        "tactical_training",
+        "squad_tactics",
+        "suppression_fire",
+        "hand_to_hand_expert"
+    }));
+    
+    // Abilities by level
+    set_occ_abilities(([
+        2: ({ "flanking_maneuver" }),
+        4: ({ "rapid_deployment" }),
+        6: ({ "heavy_weapons_spec" }),
+        8: ({ "fire_team_leader" }),
+        10: ({ "command_authority" }),
+        12: ({ "tactical_genius" }),
+        15: ({ "master_of_combat" })
+    ]));
+    
+    // Configure OCC skills - military focused
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "technical_repair",
+        "military_tactics",
+        "demolitions_basic",
+        "field_medicine",
+        "weapons_maintenance",
+        "land_navigation",
+        "map_reading",
+        "climbing",
+        "swimming",
+        "running",
+        "wp_rifle",
+        "wp_handgun",
+        "wp_heavy_weapons",
+        "wp_grenades",
+        "htoh_expert"
+    ]));
+    
+    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "interrogation", "surveillance", "stealth",
+        "pick_locks", "demolitions_advanced", "computers_basic",
+        "laser_weapons", "pilot_truck", "pilot_jeep",
+        "electronics_basic", "sensor_operation",
+        "armor_operation", "mecha_basics", "radio_operation"
+    }));
+    set_occ_skill_count(5);
+    set_elective_count(4);
+    set_secondary_count(6);
+    
+    // Skill bonuses - military training
+    set_skill_bonuses(([
+        "military": 15,
+        "weapon": 10,
+        "physical": 10,
+        "technical": 5
+    ]));
+    
+    // Combat progression
+    set_combat_progression(([
+        1: ([ "strike": 2, "parry": 1, "dodge": 1, "roll": 1 ]),
+        2: ([ "strike": 1, "parry": 1 ]),
+        4: ([ "dodge": 1, "initiative": 1 ]),
+        6: ([ "strike": 1, "parry": 1, "death_blow": 1 ]),
+        8: ([ "strike": 1, "parry": 1 ]),
+        10: ([ "dodge": 1, "disarm": 1 ]),
+        12: ([ "strike": 1, "initiative": 1 ])
+    ]));
+    
+    // Magic/Psionics (if applicable)
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+    
+    // HP/SDC - tough soldiers
+    set_base_hp(0);  // Standard: PE + 1d6
+    set_hp_per_level(0);  // Standard: 1d6
+    set_base_sdc(50);  // Well protected
+    set_sdc_per_level(5);  // Gain 5 SDC per level
+    set_mdc_class(0);
+    
+    // Starting equipment - full military kit
+    set_standard_equipment(({
+        "/obj/clothing/combat_uniform",
+        "/obj/clothing/body_armor_light",
+        "/obj/item/backpack_military",
+        "/obj/item/canteen",
+        "/obj/item/torch",
+        "/obj/item/survival_kit",
+        "/obj/item/ammo_pouch",
+        "/obj/item/first_aid_combat"
+    }));
+    
+    set_optional_gear(({
+        "/obj/item/camouflage_suit",
+        "/obj/item/night_vision_goggles",
+        "/obj/item/helmet_tactical",
+        "/obj/weapon/rifle_energy",
+        "/obj/weapon/rifle_automatic",
+        "/obj/weapon/sword_vibro"
+    }));
+    
+    set_starting_credits(200, 800);  // Better funded
+    
+    set_starting_weapons(({
+        "/obj/weapon/rifle_automatic",
+        "/obj/weapon/handgun_energy"
+    }));
+    
+    set_starting_armor(({
+        "/obj/armor/body_armor_light",
+        "/obj/armor/helmet"
+    }));
+    
+    // Race restrictions - humans primarily, demihumans sometimes
+    set_race_requirements(({ }));  // Any race
+    set_race_exclusions(({ }));
+    
+    // Cybernetics - moderate augmentation allowed
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+    
+    // Special features
+    set_special_powers(({
+        "squad_tactics",
+        "heavy_weapons",
+        "advanced_training"
+    }));
+    set_vehicle_type("military_transport");
+    set_special_training("hand_to_hand_expert");
+    
+    // Background
+    set_background(
+        "Special Forces Soldiers come from military academies, enlistment programs, "
+        "or recruitment drives. Most are loyal to their organizations, though some "
+        "leave to pursue independent careers as mercenaries, bodyguards, or adventurers. "
+        "They are disciplined, well-trained, and dangerous in combat."
+    );
+    set_organizations(({
+        "Coalition States Military",
+        "Independent Mercenary Corps",
+        "Private Security Firms"
+    }));
+    set_enemies(({ }));
+}

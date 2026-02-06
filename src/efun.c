@@ -1033,23 +1033,34 @@ VMValue efun_write_file(VirtualMachine *vm, VMValue *args, int arg_count) {
 VMValue efun_file_size(VirtualMachine *vm, VMValue *args, int arg_count) {
     (void)vm;
 
-    if (arg_count != 1) return vm_value_create_int(0);
-    if (args[0].type != VALUE_STRING) return vm_value_create_int(0);
+    if (arg_count != 1) return vm_value_create_int(-1);
+    if (args[0].type != VALUE_STRING) return vm_value_create_int(-1);
 
     const char *path = args[0].data.string_value;
     char resolved[PATH_MAX];
     if (!resolve_safe_path(path, resolved, sizeof(resolved))) {
-        return vm_value_create_int(0);
+        /* Path resolution/security failure => treat as not found */
+        return vm_value_create_int(-1);
     }
 
     struct stat st;
     if (stat(resolved, &st) != 0) {
-        return vm_value_create_int(0);
+        /* File doesn't exist or inaccessible */
+        return vm_value_create_int(-1);
     }
 
-    if (S_ISDIR(st.st_mode)) return vm_value_create_int(-2);
-    if (S_ISREG(st.st_mode)) return vm_value_create_int(-1);
-    return vm_value_create_int(0);
+    if (S_ISREG(st.st_mode)) {
+        /* Regular file: return size in bytes (as int) */
+        return vm_value_create_int((long)st.st_size);
+    }
+
+    if (S_ISDIR(st.st_mode)) {
+        /* Directory: standard LPC convention */
+        return vm_value_create_int(-2);
+    }
+
+    /* Other types: treat as not found/error */
+    return vm_value_create_int(-1);
 }
 
 /* ========== Directory efuns ========== */

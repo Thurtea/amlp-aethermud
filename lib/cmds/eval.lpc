@@ -1,0 +1,10 @@
+// /cmds/eval.lpc
+// Evaluate LPC code
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement code evaluation logic
+    write("Stub: eval command. Code evaluation not yet implemented.\n");
+    return 1;
+}

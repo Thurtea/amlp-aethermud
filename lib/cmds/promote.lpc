@@ -1,0 +1,10 @@
+// /cmds/promote.lpc
+// Promote/demote player
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement promotion/demotion logic
+    write("Stub: promote command. Promotion/demotion not yet implemented.\n");
+    return 1;
+}

@@ -1,0 +1,175 @@
+// /lib/races/true_atlantean.lpc
+// True Atlantean Race - Masters of Tattoo Magic
+//
+// True Atlanteans are dimensional travelers from the original Atlantis. They are
+// heroes, wanderers, and fighters of evil who possess incredible tattoo magic.
+// Atlanteans belong to various clans, each with different philosophies. The most
+// feared are the Clan Aerihman - the Sunaj Assassins.
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    
+    set_race_name("True Atlantean");
+    set_race_id("true_atlantean");
+    set_race_plural("True Atlanteans");
+    set_race_category(RACE_CAT_DEMIHUMAN);
+    
+    set_race_description(
+        "True Atlanteans are the descendants of the original Atlantis, a civilization "
+        "that mastered dimensional travel before the Rifts. When Atlantis fell, its "
+        "people were scattered across the megaverse. Now they wander the dimensions, "
+        "fighting evil wherever they find it, seeking to reunite their people, and "
+        "searching for a way to reclaim their lost homeland.\n\n"
+        
+        "True Atlanteans are masters of Tattoo Magic - magical tattoos that grant "
+        "incredible powers. Each Atlantean receives their first tattoo at birth, "
+        "marking them as one of the People. As they grow and prove themselves, they "
+        "earn additional tattoos from Tattoo Masters, gaining new abilities.\n\n"
+        
+        "Atlanteans are organized into clans, each with different philosophies:\n"
+        "- CLAN AHLEN: Warriors and protectors (standard Atlanteans)\n"
+        "- CLAN MORAST: Scholars and historians\n"
+        "- CLAN AERIHMAN: The feared SUNAJ ASSASSINS - deadly killers who can "
+        "receive many more tattoos than other Atlanteans and serve as secret agents.\n\n"
+        
+        "All True Atlanteans possess natural mega-damage bodies, enhanced physical "
+        "abilities, and extended lifespans. They can sense rift activity and have an "
+        "innate understanding of dimensional travel. Most Atlanteans live by a code "
+        "of honor, though Clan Aerihman has darker methods."
+    );
+    
+    // Physical characteristics - superior human stock
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(66, 78);    // 5'6" to 6'6"
+    set_weight_range(140, 220);  // Athletic, muscular
+    set_lifespan(200);           // Live 200+ years
+    
+    // Stat modifiers - superior physical and mental attributes
+    set_stat_modifiers(([
+        "ps": 2,    // +2 Physical Strength
+        "pe": 2,    // +2 Physical Endurance  
+        "pp": 1,    // +1 Physical Prowess
+        "me": 2,    // +2 Mental Endurance (tattoo magic requires discipline)
+        "ma": 1     // +1 Mental Affinity (natural leaders)
+    ]));
+    
+    // Racial abilities
+    set_racial_abilities(({
+        "mega_damage_being",      // Natural MDC body
+        "tattoo_magic",           // Can use magical tattoos
+        "sense_rifts",            // Detect rift activity
+        "dimensional_sense",      // Navigate dimensions
+        "enhanced_healing",       // Recover faster
+        "ley_line_walker_bonus",  // +10% when on ley lines
+        "magic_resistance"        // Save vs magic at +2
+    }));
+    
+    // M.D.C. - Atlanteans are mega-damage beings
+    set_base_mdc(20);           // Start with 20 MDC
+    set_mdc_per_level(5);       // +5 MDC per level
+    
+    // Natural AR (only vs SDC attacks)
+    set_natural_ar(10);
+    
+    // HP/SDC (in addition to MDC)
+    set_base_hp(15);
+    set_hp_per_level(0);
+    set_base_sdc(25);
+    set_sdc_per_level(0);
+    
+    // Saving throw bonuses
+    set_saving_throw_bonuses(([
+        "magic": 2,
+        "horror_factor": 2,
+        "possession": 3
+    ]));
+    
+    // OCC restrictions - can pick any non-magical OCC, plus special Sunaj
+    set_allowed_occs(({
+        // Any adventurer/combat OCC
+        "vagabond", "operator", "body_fixer", "cyber_knight",
+        "headhunter", "wilderness_scout", "city_rat",
+        "juicer", "crazy", "glitter_boy_pilot",
+        // Clan Aerihman only
+        "sunaj_assassin"
+    }));
+    
+    set_forbidden_occs(({
+        // Cannot be mages (tattoo magic replaces it)
+        "ley_line_walker", "mystic", "shifter", "necromancer",
+        "techno_wizard", "temporal_wizard",
+        // Cannot be psychics
+        "mind_melter", "burster", "psi_healer"
+    }));
+    
+    set_recommended_occs(({
+        "sunaj_assassin",    // Clan Aerihman
+        "cyber_knight",      // Common path
+        "wilderness_scout",  // Dimensional travelers
+        "headhunter"        // Bounty hunters
+    }));
+    
+    // Starting resources
+    set_starting_equipment(({
+        "/obj/clothing/atlantean_garb",
+        "/obj/item/dimensional_crystal",
+        "/obj/item/clan_pendant",
+        "/obj/item/survival_pack"
+    }));
+    
+    set_starting_credits(200);  // Modest wealth
+    
+    // Languages - speak Atlantean and others
+    set_languages(({ "atlantean", "dragonese", "american", "spanish" }));
+    set_primary_language("atlantean");
+    
+    // Factions and culture
+    set_default_factions(({ "true_atlanteans", "dimensional_travelers" }));
+    set_hostile_factions(({ "splugorth", "splynn", "slavers" }));
+    set_culture("Atlantean Clan Tradition");
+    
+    // Special properties
+    set_property("dimensional_traveler", 1);
+    set_property("tattoo_magic_user", 1);
+    set_property("hunted_by_splugorth", 1);  // Splugorth enslave Atlanteans
+}
+
+// Apply racial traits to a newly created character
+void apply_to_player(object player) {
+    ::apply_to_player(player);
+    
+    if (!player) return;
+    
+    // Set as mega-damage being
+    player->set_property("mega_damage_being", 1);
+    player->set_mdc_class(1);
+    
+    // Apply MDC
+    int base_mdc = query_base_mdc();
+    player->set_mdc(base_mdc);
+    player->set_max_mdc(base_mdc);
+    
+    // Grant dimensional sense
+    player->set_property("sense_rifts", 1);
+    player->set_property("dimensional_sense", 1);
+    
+    // ALL Atlanteans get one starting tattoo (birthmark)
+    player->set_property("max_tattoos", 6);  // Standard limit (Sunaj get more)
+    player->set_property("current_tattoos", 1);  // Birth tattoo
+    
+    // Add birth tattoo automatically
+    player->add_tattoo("heart_pierced_by_swords");
+    
+    tell_object(player, "\n*** TRUE ATLANTEAN HERITAGE ***");
+    tell_object(player, "You bear the mark of the True Atlanteans - a heart pierced by swords");
+    tell_object(player, "on your chest, marking you as one of the People.");
+    tell_object(player, "\nYou may request additional tattoos from wizards using: tell <wizard> tattoo request");
+    tell_object(player, "Standard Atlanteans can have up to 6 tattoos total.");
+    tell_object(player, "Clan Aerihman (Sunaj Assassins) can have many more.");
+    tell_object(player, "\nYour clan will be determined by your OCC choice:");
+    tell_object(player, "- Sunaj Assassin OCC = Clan Aerihman (assassins)");
+    tell_object(player, "- Other OCCs = Clan Ahlen (warriors/standard)");
+    tell_object(player, "****************************\n");
+}

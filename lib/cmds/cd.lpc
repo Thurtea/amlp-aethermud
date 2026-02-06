@@ -1,0 +1,10 @@
+// /cmds/cd.lpc
+// Change working directory
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement directory change logic
+    write("Stub: cd command. Directory change not yet implemented.\n");
+    return 1;
+}

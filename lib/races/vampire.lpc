@@ -1,45 +1,142 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/vampire.lpc
+// Vampire Race - Undead Supernatural Predator
 //
-// This is a stub file. Implement the full race details.
+// Vampires are undead supernatural beings that sustain themselves on the
+// blood and life force of the living. They are among the most feared
+// creatures on Rifts Earth, combining immense physical power with
+// dark supernatural abilities.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Vampire");
     set_race_id("vampire");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("Vampires");
+    set_race_category(RACE_CAT_UNDEAD);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Vampires are undead supernatural predators who feed on the blood and "
+        "psychic energy of the living. Transformed through the dark kiss of another "
+        "vampire or through powerful necromantic magic, they possess superhuman "
+        "strength, speed, and regenerative abilities that make them nearly "
+        "indestructible by conventional means. Their pale, cold flesh conceals a "
+        "predatory cunning honed over centuries, and their hypnotic gaze can bend "
+        "weaker minds to their will. However, they are cursed with devastating "
+        "vulnerabilities to sunlight, running water, silver, and wooden stakes "
+        "through the heart, which can destroy them utterly."
     );
-    
-    // TODO: Configure physical characteristics
+
+    // Physical characteristics - appears human but unnaturally perfect
     set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_height_range(60, 78);   // 5'0" to 6'6"
+    set_weight_range(100, 240);
+    set_lifespan(0);            // Immortal - undead do not age
+    set_body_types(({ "gaunt", "average", "athletic", "imposing" }));
+
+    // Stat modifiers - supernatural physical enhancement
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 10,   // Supernatural strength
+        "pp": 4,    // Enhanced agility
+        "pe": 6,    // Tireless endurance
+        "spd": 6,   // Preternatural speed
+        "pb": 3,    // Unnaturally attractive
+        "ma": 4,    // Commanding presence
+        "me": 2,    // Strong willpower
+        "iq": 1     // Sharpened cunning
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Combat bonuses - predatory reflexes
+    set_combat_bonuses(([
+        "strike": 3,
+        "parry": 3,
+        "dodge": 4,
+        "initiative": 2,
+        "roll": 2
+    ]));
+
+    // MDC supernatural creature
+    set_natural_sdc(0);
+    set_natural_mdc(200);
+    set_mdc_creature(1);
+    set_natural_armor(14);
+
+    // Combat system configuration
+    set_attacks_per_round(2);
+    set_parries_per_round(4);
+    set_auto_parry(1);
+    set_auto_dodge(1);
+    set_combat_archetype("supernatural_predator");
+    set_mdc_natural_attacks(1);
+
+    // Natural weapons
+    add_natural_weapon("bite", 2, 6, 4);    // 2d6+4 bite (drains blood)
+    add_natural_weapon("claw", 2, 4, 2);    // 2d4+2 claw strike
+    add_natural_weapon("punch", 3, 6, 0);   // 3d6 supernatural punch
+
+    // Resistances - undead resilience
+    set_resistances(([
+        "cold": 80,
+        "poison": 100,
+        "disease": 100,
+        "fear": 75,
+        "mind_control": 50
+    ]));
+    set_immunities(({ "poison", "disease", "suffocation", "fatigue", "aging" }));
+    set_vulnerabilities(({ "sunlight", "silver", "wood_stake", "running_water", "holy_symbols", "fire", "garlic" }));
+
+    // Racial abilities
+    add_racial_ability("nightvision", 3);
+    add_racial_ability("regeneration", 3);
+    add_racial_ability("charm_gaze", 2);
+    add_racial_ability("shapeshift_bat", 1);
+    add_racial_ability("shapeshift_mist", 1);
+    add_racial_ability("summon_animals", 1);
+    add_racial_ability("blood_drain", 2);
+    add_racial_ability("create_secondary_vampire", 1);
+    add_racial_ability("sense_living", 2);
+
+    // Vampires have moderate magic and psionic awareness
+    set_psionic_potential(40);
+    set_magic_potential(30);
+
+    // RCC designation - Vampire is a Racial Character Class
+    set_is_rcc(1);
+    set_can_have_occ(0);
+    set_rcc_description(
+        "Vampires are a Racial Character Class defined by their undead nature. "
+        "Their supernatural abilities, immortality, and devastating vulnerabilities "
+        "form a complete character framework. Vampires cannot take a separate OCC "
+        "but gain powers through age and the consumption of blood. Master vampires "
+        "who have survived for centuries develop abilities far beyond those of the "
+        "newly turned."
+    );
+
+    // OCC restrictions - vampires are their own RCC
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
+    set_forbidden_occs(({ "cyber_knight", "cosmo_knight", "techno_wizard",
+        "operator", "juicer", "crazy", "full_conversion_borg" }));
     set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
+
+    // Evil alignments only
+    set_allowed_alignments(({ "miscreant", "aberrant", "diabolic" }));
+
+    // Starting resources
+    set_starting_equipment(({
+        "/obj/clothing/dark_cloak",
+        "/obj/clothing/elegant_clothes"
+    }));
+    set_starting_credits(500);
+
+    // Faction affiliations - feared and hated by most
+    set_default_factions(({ "vampire_kingdom" }));
+    set_hostile_factions(({ "coalition_states", "reid_rangers", "tundra_rangers",
+        "cyber_knights", "true_atlanteans" }));
+
+    // Cultural background
+    set_culture("Vampire Kingdoms");
+    set_homeland("Vampire Kingdoms (Mexico)");
+    set_languages(({ "american", "spanish", "dragonese" }));
     set_primary_language("american");
 }

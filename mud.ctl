@@ -7,7 +7,7 @@ MUDLIB_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_BIN="$MUDLIB_DIR/build/driver"
 PID_FILE="$MUDLIB_DIR/mud.pid"
 LOG_FILE="$MUDLIB_DIR/lib/log/server.log"
-DEFAULT_PORT=3000
+DEFAULT_PORT=6668
 
 cd "$MUDLIB_DIR" || exit 1
 
@@ -54,7 +54,8 @@ start_server() {
     
     echo "Starting AMLP-MUD server on port $DEFAULT_PORT..."
     # Start driver with telnet port, websocket port and explicit master path
-    nohup "$SERVER_BIN" "$DEFAULT_PORT" "3001" "lib/secure/master.lpc" >> "$LOG_FILE" 2>&1 &
+    WS_PORT=$((DEFAULT_PORT + 1))
+    nohup "$SERVER_BIN" "$DEFAULT_PORT" "$WS_PORT" "lib/secure/master.lpc" >> "$LOG_FILE" 2>&1 &
     SERVER_PID=$!
     echo "$SERVER_PID" > "$PID_FILE"
     

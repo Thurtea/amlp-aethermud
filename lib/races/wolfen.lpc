@@ -1,45 +1,99 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/wolfen.lpc
+// Wolfen Race - Wolf-like Humanoid Warriors
 //
-// This is a stub file. Implement the full race details.
+// The Wolfen are a proud race of wolf-like humanoids originating from
+// the Palladium Fantasy world. They are renowned warriors with a strong
+// sense of honor and pack loyalty.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Wolfen");
     set_race_id("wolfen");
-    set_race_plural("s");
+    set_race_plural("Wolfen");
     set_race_category(RACE_CAT_DEMIHUMAN);
-    
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Wolfen are tall, powerful wolf-like humanoids who walk upright and "
+        "possess keen predatory senses. Standing seven to eight feet tall and "
+        "covered in thick fur, they are imposing warriors who live by a strict "
+        "code of honor and pack loyalty. Wolfen society is organized into "
+        "packs and clans with a strong military tradition, and they are "
+        "considered some of the finest melee combatants in the Megaverse. "
+        "Their heightened senses of smell and hearing make them exceptional "
+        "trackers and scouts, and their natural claws and fangs are formidable "
+        "weapons in close combat."
     );
-    
-    // TODO: Configure physical characteristics
-    set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(84, 96);   // 7'0" to 8'0"
+    set_weight_range(280, 400);
     set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_body_types(({ "athletic", "muscular", "lean", "powerful" }));
+
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 4,
+        "pp": 2,
+        "pe": 2,
+        "spd": 3,
+        "me": 1,
+        "pb": -2,
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    set_combat_bonuses(([
+        "strike": 2,
+        "parry": 2,
+        "dodge": 1,
+        "initiative": 3,
+        "save_horror": 3,
+    ]));
+
+    set_natural_sdc(30);
+    set_mdc_creature(0);
+    set_natural_armor(8);
+
+    set_resistances(([
+        "cold": 30,
+    ]));
+    set_immunities(({ }));
+    set_vulnerabilities(({ }));
+
+    add_racial_ability("keen_hearing", 2);
+    add_racial_ability("keen_smell", 3);
+    add_racial_ability("nightvision", 2);
+    add_racial_ability("tracking", 2);
+    add_racial_ability("natural_claws", 1);
+    add_racial_ability("natural_bite", 1);
+
+    set_psionic_potential(0);
+    set_magic_potential(0);
+
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    set_forbidden_occs(({
+        "ley_line_walker", "techno_wizard", "operator",
+    }));
+    set_recommended_occs(({
+        "mercenary", "wilderness_scout", "ranger",
+        "gladiator", "soldier", "bounty_hunter",
+    }));
+
+    set_allowed_alignments(({ }));
+
+    set_starting_equipment(({
+        "/obj/armor/wolfen_chain_mail",
+        "/obj/weapon/wolfen_battle_axe",
+        "/obj/item/pack_totem",
+        "/obj/item/survival_kit",
+    }));
+    set_starting_credits(150);
+
+    set_default_factions(({ "wolfen_empire" }));
+    set_hostile_factions(({ }));
+
+    set_culture("Wolfen Pack Society");
+    set_homeland("Great Northern Wilderness");
+    set_languages(({ "wolfen", "gobblely", "american" }));
+    set_primary_language("wolfen");
 }

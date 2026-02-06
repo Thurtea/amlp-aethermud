@@ -781,6 +781,138 @@ static int cmd_give_item(PlayerSession *session, const char *arg) {
     return 1;
 }
 
+/* Helper: extract the first quoted string after a setter call in LPC source.
+ * Searches for the setter name (e.g. "set_short"), then returns the first
+ * double-quoted value following it.  Supports both snake_case (set_short)
+ * and PascalCase (SetShort) conventions.  Returns a malloc'd string or NULL. */
+static char* lpc_extract_string(const char *buf, const char *snake, const char *pascal) {
+    const char *p = strstr(buf, snake);
+    if (!p && pascal) p = strstr(buf, pascal);
+    if (!p) return NULL;
+    p = strchr(p, '"');
+    if (!p) return NULL;
+    p++;  /* skip opening quote */
+    const char *end = strchr(p, '"');
+    if (!end) return NULL;
+    size_t len = (size_t)(end - p);
+    char *val = malloc(len + 1);
+    if (!val) return NULL;
+    memcpy(val, p, len);
+    val[len] = '\0';
+    return val;
+}
+
+/* Helper: extract an integer argument from a setter call, e.g. set_weight(5).
+ * Supports both naming conventions. Returns 0 if not found. */
+static int lpc_extract_int(const char *buf, const char *snake, const char *pascal) {
+    const char *p = strstr(buf, snake);
+    if (!p && pascal) p = strstr(buf, pascal);
+    if (!p) return 0;
+    p = strchr(p, '(');
+    if (!p) return 0;
+    return atoi(p + 1);
+}
+
+/* Resolve an LPC-style clone argument to a filesystem path.
+ * Handles: /lib/objects/weapons/sword, lib/objects/weapons/sword,
+ *          objects/weapons/sword, /lib/objects/weapons/sword.lpc
+ * Writes the result into out_path (max out_size bytes).
+ * Returns 1 if the resolved file exists, 0 otherwise. */
+static int resolve_lpc_path(const char *args, char *out_path, size_t out_size) {
+    /* Strip leading slash */
+    const char *p = (args[0] == '/') ? args + 1 : args;
+
+    /* Strip trailing .lpc if the user typed it (we add it ourselves) */
+    char clean[512];
+    strncpy(clean, p, sizeof(clean) - 1);
+    clean[sizeof(clean) - 1] = '\0';
+    size_t clen = strlen(clean);
+    if (clen > 4 && strcmp(clean + clen - 4, ".lpc") == 0) {
+        clean[clen - 4] = '\0';
+    }
+
+    /* Build candidate paths in order of preference */
+    const char *fmts[] = {
+        "%s.lpc",       /* already has lib/ prefix */
+        "lib/%s.lpc",   /* needs lib/ prefix */
+        NULL
+    };
+
+    for (int i = 0; fmts[i]; i++) {
+        snprintf(out_path, out_size, fmts[i], clean);
+        if (access(out_path, R_OK) == 0) {
+            fprintf(stderr, "[Clone] Resolved '%s' -> '%s'\n", args, out_path);
+            return 1;
+        }
+    }
+
+    fprintf(stderr, "[Clone] Could not resolve '%s' (tried '%s.lpc', 'lib/%s.lpc')\n",
+            args, clean, clean);
+    return 0;
+}
+
+/* Parse a simple LPC object file and create a C Item from it.
+ * Extracts property setters from the source text to populate a C Item struct.
+ * Supports both snake_case (set_short) and PascalCase (SetShort) naming. */
+static Item* item_create_from_lpc(const char *fs_path) {
+    FILE *f = fopen(fs_path, "r");
+    if (!f) {
+        fprintf(stderr, "[Clone] fopen failed for '%s': %s\n", fs_path, strerror(errno));
+        return NULL;
+    }
+
+    char buf[4096];
+    size_t n = fread(buf, 1, sizeof(buf) - 1, f);
+    fclose(f);
+    buf[n] = '\0';
+
+    /* Allocate a blank item */
+    Item *item = (Item *)calloc(1, sizeof(Item));
+    if (!item) return NULL;
+    item->id = -1;  /* dynamic item, not from template */
+    item->type = ITEM_MISC;
+    item->stack_count = 1;
+
+    /* Extract string properties (try both naming conventions) */
+    char *name_val  = lpc_extract_string(buf, "set_name(",  "SetKeyName(");
+    char *short_val = lpc_extract_string(buf, "set_short(", "SetShort(");
+    char *long_val  = lpc_extract_string(buf, "set_long(",  "SetLong(");
+
+    /* Prefer short description as display name (matches inventory display).
+     * Fall back to set_name value if no short desc. */
+    if (short_val) {
+        item->name = short_val;
+        free(name_val);
+    } else if (name_val) {
+        item->name = name_val;
+    } else {
+        item->name = strdup("unknown object");
+    }
+
+    item->description = long_val ? long_val : strdup("An unremarkable object.");
+
+    /* Extract numeric properties */
+    item->weight = lpc_extract_int(buf, "set_weight(", "SetMass(");
+    item->value  = lpc_extract_int(buf, "set_value(",  "SetBaseCost(");
+
+    /* Infer type from path keywords */
+    if (strstr(fs_path, "weapon") || strstr(fs_path, "weap")) {
+        item->type = ITEM_WEAPON_MELEE;
+        item->weapon_type = WEAPON_SWORD;
+        item->stats.damage_dice = 1;
+        item->stats.damage_sides = 6;
+    } else if (strstr(fs_path, "armor")) {
+        item->type = ITEM_ARMOR;
+        item->stats.ar = 10;
+        item->stats.sdc_mdc = 30;
+        item->current_durability = 30;
+    }
+
+    fprintf(stderr, "[Clone] Created item from '%s': name='%s' weight=%d value=%d\n",
+            fs_path, item->name, item->weight, item->value);
+    return item;
+}
+
 /* Execute command through VM */
 VMValue execute_command(PlayerSession *session, const char *command) {
     VMValue result;
@@ -1321,36 +1453,63 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
     
+    /* Clone command: creates objects from LPC files or item templates.
+     * Until full LPC command dispatch is wired up, this C handler reads
+     * LPC object files, extracts properties, and creates C Items that
+     * integrate with the existing inventory system. */
     if (strcmp(cmd, "clone") == 0) {
         if (session->privilege_level < 1) {
-            return vm_value_create_string("You don't have permission to use that command.\r\n");
+            return vm_value_create_string("Error: Insufficient privileges. Wizard access required.\r\n");
         }
-        
         if (!args || *args == '\0') {
             return vm_value_create_string(
-                "Usage: clone <object>\r\n"
-                "Available objects: sword, shield, potion\r\n");
+                "Usage: clone <object_path>\r\n"
+                "Example: clone /lib/objects/weapons/sword\r\n");
         }
-        
+
+        /* First try item template name lookup (e.g. "Steel Sword") */
+        Item *tmpl = item_find_by_name(args);
+        if (tmpl) {
+            Item *new_item = item_clone(tmpl);
+            if (new_item && inventory_add(&session->character.inventory, new_item)) {
+                char msg[512];
+                snprintf(msg, sizeof(msg),
+                    "You clone %s.\r\nIt has been added to your inventory.\r\n",
+                    new_item->name);
+                return vm_value_create_string(msg);
+            }
+            if (new_item) item_free(new_item);
+            return vm_value_create_string("Error: Could not add item to inventory (weight limit?).\r\n");
+        }
+
+        /* Try LPC file path (e.g. /lib/objects/weapons/sword) */
+        char fs_path[512];
+        if (!resolve_lpc_path(args, fs_path, sizeof(fs_path))) {
+            char msg[512];
+            snprintf(msg, sizeof(msg),
+                "Error: Failed to clone object: %s\r\n"
+                "File not found. Check the path and try again.\r\n", args);
+            return vm_value_create_string(msg);
+        }
+
+        Item *new_item = item_create_from_lpc(fs_path);
+        if (!new_item) {
+            char msg[512];
+            snprintf(msg, sizeof(msg),
+                "Error: Failed to parse LPC object: %s\r\n", fs_path);
+            return vm_value_create_string(msg);
+        }
+
+        if (!inventory_add(&session->character.inventory, new_item)) {
+            item_free(new_item);
+            return vm_value_create_string("Error: Could not add item to inventory (weight limit?).\r\n");
+        }
+
+        /* Extract short desc for the message */
         char msg[512];
-        if (strcmp(args, "sword") == 0) {
-            snprintf(msg, sizeof(msg), 
-                    "You conjure a gleaming sword from thin air!\r\n"
-                    "The sword materializes in your hands.\r\n");
-        } else if (strcmp(args, "shield") == 0) {
-            snprintf(msg, sizeof(msg), 
-                    "You conjure a sturdy shield from thin air!\r\n"
-                    "The shield materializes on your arm.\r\n");
-        } else if (strcmp(args, "potion") == 0) {
-            snprintf(msg, sizeof(msg), 
-                    "You conjure a health potion from thin air!\r\n"
-                    "The potion appears in a small glass vial.\r\n");
-        } else {
-            snprintf(msg, sizeof(msg), 
-                    "Unknown object: %s\r\n"
-                    "Available objects: sword, shield, potion\r\n", args);
-        }
-        
+        snprintf(msg, sizeof(msg),
+            "You clone %s.\r\nIt has been added to your inventory.\r\n",
+            new_item->name);
         return vm_value_create_string(msg);
     }
     
@@ -1449,7 +1608,12 @@ void process_login_state(PlayerSession *session, const char *input) {
                 }
                 send_to_player(session, "\r\nWelcome back!\r\n");
                 send_to_player(session, "Your character has been restored.\r\n\r\n");
-                
+
+                /* Initialize inventory/equipment for loaded character */
+                inventory_init(&session->character.inventory,
+                               session->character.stats.ps > 0 ? session->character.stats.ps : 10);
+                equipment_init(&session->character.equipment);
+
                 /* Create LPC player object for existing character */
                 session->player_object = create_player_object(
                     session->username,

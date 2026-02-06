@@ -1,0 +1,10 @@
+// /cmds/goto.lpc
+// Teleport to a room
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement teleport logic
+    write("Stub: goto command. Teleport not yet implemented.\n");
+    return 1;
+}

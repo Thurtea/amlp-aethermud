@@ -1,0 +1,10 @@
+// /cmds/pwd.lpc
+// Print working directory
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement print working directory logic
+    write("Stub: pwd command. Working directory not yet implemented.\n");
+    return 1;
+}

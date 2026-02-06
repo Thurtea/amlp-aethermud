@@ -1,0 +1,101 @@
+// /lib/races/goblin.lpc
+// Goblin Race - Small, Sneaky Humanoids
+//
+// Goblins are small, cunning humanoids known for their sneakiness,
+// quick reflexes, and survival instincts. They thrive in urban
+// environments and wilderness alike.
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    
+    set_race_name("Goblin");
+    set_race_id("goblin");
+    set_race_plural("Goblins");
+    set_race_category(RACE_CAT_DEMIHUMAN);
+    
+    set_race_description(
+        "Goblins are small, green-skinned humanoids with pointed ears, sharp teeth, \n"
+        "and yellow eyes that gleam in the dark. Standing only 3 to 4 feet tall, they \n"
+        "make up for their small size with cunning, agility, and sheer determination. \n\n"
+        
+        "In the world of Rifts Earth, goblins have adapted remarkably well to the \n"
+        "post-apocalyptic landscape. They infest ruins, sewers, and wilderness areas, \n"
+        "forming tribes that survive through scavenging, theft, and occasionally \n"
+        "mercenary work. Some have integrated into human society, working as spies, \n"
+        "thieves, or scouts.\n\n"
+        
+        "Goblins have excellent nightvision and natural stealth abilities. They are \n"
+        "quick, nimble, and surprisingly tough for their size. Their small stature \n"
+        "makes them difficult targets in combat, and they excel at ambushes and \n"
+        "guerrilla tactics. However, they lack physical strength and are often \n"
+        "cowardly when faced with larger, more powerful opponents.\n\n"
+        
+        "Most goblins are opportunistic and self-serving, though not necessarily evil. \n"
+        "They can be loyal allies if treated fairly, but they have long memories for \n"
+        "insults and betrayals. Goblin society is tribal, with power going to the \n"
+        "strongest, smartest, or most cunning."
+    );
+    
+    // Physical characteristics - small
+    set_size_category(SIZE_SMALL);
+    set_height_range(36, 48);  // 3-4 feet
+    set_weight_range(40, 80);   // Light
+    set_lifespan(60);           // Short-lived
+    
+    // Stat modifiers - weak but agile
+    set_stat_modifiers(([
+        "ps": -2,   // -2 Physical Strength (small, weak)
+        "pp": 2,    // +2 Physical Prowess (agile, quick)
+        "pe": -1    // -1 Physical Endurance (fragile)
+    ]));
+    
+    // Racial abilities
+    set_racial_abilities(({
+        "nightvision",      // See in the dark
+        "small_target",     // Harder to hit (-1 to strike)
+        "sneaky",           // +10% to prowl
+        "keen_hearing",     // +1 perception for sounds
+        "scavenger"         // Better at finding items
+    }));
+    
+    // Hit points/SDC - low
+    set_base_hp(8);   // Low HP
+    set_base_sdc(15);  // Low SDC
+    
+    // Natural AR - none
+    set_natural_ar(0);
+    
+    // OCC restrictions - avoid heavy combat classes
+    set_forbidden_occs(({
+        "juicer",        // Too small for augmentation
+        "glitter_boy"    // Can't pilot power armor
+    }));
+    
+    set_recommended_occs(({
+        "city_rat",
+        "wilderness_scout",
+        "rogue_scholar",
+        "vagabond",
+        "thief",
+        "assassin"
+    }));
+    
+    // Starting resources - poor
+    set_starting_equipment(({
+        "/obj/clothing/ratty_clothes",
+        "/obj/item/small_backpack",
+        "/obj/item/dagger"
+    }));
+    
+    set_starting_credits(50, 150);  // Poor
+    
+    // Languages - goblin is primary
+    set_languages(({
+        "goblin",
+        "american",
+        "dragonese"
+    }));
+    set_primary_language("goblin");
+}

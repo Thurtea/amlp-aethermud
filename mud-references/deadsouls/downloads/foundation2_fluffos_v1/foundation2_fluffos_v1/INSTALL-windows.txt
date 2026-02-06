@@ -1,0 +1,8 @@
+1) Uncompress/rename the package so that the folders like bin and lib 
+   are in c:\foundation2
+2) Use wordpad to edit c:\foundation2\bin\mudos.cfg.win32 and change the mudname
+3) Double-click on c:\foundation2\win32\mud.bat
+4) telnet to localhost 2020
+
+Enjoy!
+

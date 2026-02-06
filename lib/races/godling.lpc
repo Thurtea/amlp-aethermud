@@ -1,45 +1,157 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/godling.lpc
+// Godling Race - Demigod Offspring of Supernatural Entities
 //
-// This is a stub file. Implement the full race details.
+// Godlings are the offspring of gods, pantheon deities, or other
+// supremely powerful supernatural entities. They are beings of
+// immense power and potential, walking among mortals.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Godling");
     set_race_id("godling");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("Godlings");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Godlings are the mortal-born offspring of gods, demigods, and other "
+        "supremely powerful supernatural beings drawn to Rifts Earth by its "
+        "overflowing psychic energy. They carry divine blood in their veins, "
+        "granting them physical and supernatural abilities far beyond those of "
+        "ordinary mortals. Each Godling inherits aspects of their divine parent's "
+        "domain, whether it be war, storms, wisdom, or death, manifesting as "
+        "unique powers and affinities. Their mega-damage bodies can withstand "
+        "punishment that would obliterate lesser beings, and they possess innate "
+        "magical and psionic capabilities that grow stronger with age and "
+        "experience. Despite their power, Godlings are exceedingly rare and "
+        "often struggle to find their place in a world that both reveres and "
+        "fears them. They are drawn to conflict and destiny as moths to flame, "
+        "their divine heritage ensuring they are never far from the center of "
+        "great events."
     );
-    
-    // TODO: Configure physical characteristics
-    set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+
+    // Physical characteristics - typically larger and more impressive than humans
+    set_size_category(SIZE_LARGE);
+    set_height_range(72, 108);  // 6'0" to 9'0"
+    set_weight_range(200, 600);
+    set_lifespan(5000);
+    set_body_types(({ "heroic", "athletic", "imposing", "statuesque", "radiant" }));
+
+    // Stat modifiers - extremely powerful across the board
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 12,   // Supernatural divine strength
+        "pp": 6,    // Divine grace and coordination
+        "pe": 10,   // Nearly inexhaustible endurance
+        "spd": 8,   // Supernatural speed
+        "me": 6,    // Powerful divine willpower
+        "ma": 6,    // Commanding divine presence
+        "iq": 4,    // Heightened divine intellect
+        "pb": 6     // Supernaturally beautiful or awe-inspiring
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Combat bonuses - divine combat prowess
+    set_combat_bonuses(([
+        "strike": 5,
+        "parry": 5,
+        "dodge": 4,
+        "initiative": 4,
+        "roll": 3,
+        "pull": 3
+    ]));
+
+    // MDC creature - extremely durable divine body
+    set_natural_sdc(0);
+    set_natural_mdc(400);
+    set_mdc_creature(1);
+    set_natural_armor(16);
+
+    // Combat system configuration
+    set_attacks_per_round(3);
+    set_parries_per_round(5);
+    set_auto_parry(1);
+    set_auto_dodge(1);
+    set_combat_archetype("divine_warrior");
+    set_mdc_natural_attacks(1);
+
+    // Natural weapons - divine strikes
+    add_natural_weapon("divine_punch", 4, 6, 8);    // 4d6+8 divine punch
+    add_natural_weapon("divine_kick", 4, 6, 4);     // 4d6+4 divine kick
+    add_natural_weapon("energy_bolt", 3, 6, 6);     // 3d6+6 divine energy
+
+    // Resistances - divine resilience
+    set_resistances(([
+        "fire": 60,
+        "cold": 60,
+        "lightning": 60,
+        "poison": 80,
+        "disease": 90,
+        "fear": 90,
+        "mind_control": 70,
+        "psionics": 50,
+        "magic": 40
+    ]));
+    set_immunities(({ "horror_factor", "aging", "disease" }));
+    set_vulnerabilities(({ "rune_weapons", "godslayer_weapons",
+        "divine_weapons_of_rival_pantheon" }));
+
+    // Racial abilities - extensive divine powers
+    add_racial_ability("nightvision", 3);
+    add_racial_ability("see_invisible", 3);
+    add_racial_ability("regeneration", 3);
+    add_racial_ability("divine_aura", 3);
+    add_racial_ability("sense_supernatural", 3);
+    add_racial_ability("sense_magic", 2);
+    add_racial_ability("dimensional_teleport", 2);
+    add_racial_ability("bio_regeneration", 3);
+    add_racial_ability("supernatural_strength", 3);
+    add_racial_ability("divine_endurance", 2);
+    add_racial_ability("turn_undead", 2);
+    add_racial_ability("sense_evil", 2);
+
+    // Very high magical and psionic potential - divine heritage
+    set_psionic_potential(100);
+    set_magic_potential(150);
+
+    // RCC designation - Godling is a powerful Racial Character Class
+    set_is_rcc(1);
+    set_can_have_occ(0);
+    set_rcc_description(
+        "Godlings are a Racial Character Class of exceptional power, their divine "
+        "heritage granting them abilities that dwarf mortal OCCs. Their supernatural "
+        "strength, mega-damage bodies, innate magic, and psionic abilities develop "
+        "naturally as they mature and grow into their divine potential. Godlings "
+        "cannot take mortal OCCs, as their divine nature provides a comprehensive "
+        "suite of abilities that defines their progression. Instead, they grow "
+        "in power by discovering and mastering the aspects of their divine heritage."
+    );
+
+    // OCC restrictions - Godlings are their own class, very restricted
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
+    set_forbidden_occs(({ "cyber_knight", "cosmo_knight", "techno_wizard",
+        "operator", "juicer", "crazy", "full_conversion_borg", "glitter_boy",
+        "headhunter", "coalition_soldier", "mind_melter" }));
     set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
+
+    // All alignments - divine heritage spans all moral spectrums
+    set_allowed_alignments(({ }));
+
+    // Starting resources - Godlings arrive with divine gifts
+    set_starting_equipment(({
+        "/obj/clothing/divine_raiment",
+        "/obj/item/divine_token",
+        "/obj/item/celestial_map"
+    }));
     set_starting_credits(100);
-    
-    set_languages(({ "american" }));
+
+    // Faction affiliations - variable depending on divine parent
+    set_default_factions(({ }));
+    set_hostile_factions(({ }));
+
+    // Cultural background
+    set_culture("Divine Heritage");
+    set_homeland("Various (Born on Rifts Earth or Descended from the Heavens)");
+    set_languages(({ "american", "dragonese", "olympian", "asgardian" }));
     set_primary_language("american");
 }

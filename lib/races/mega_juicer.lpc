@@ -1,45 +1,183 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/mega_juicer.lpc
+// Mega-Juicer Race - The Ultimate Chemical Augmentation
 //
-// This is a stub file. Implement the full race details.
+// Mega-Juicers are the pinnacle and the death sentence of Juicer technology.
+// Their augmentation process is so extreme that it kills almost every
+// candidate, and those who survive are granted only two to three years of
+// staggeringly powerful, near-suicidal combat capability before total burnout.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Mega-Juicer");
     set_race_id("mega_juicer");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("Mega-Juicers");
+    set_race_category(RACE_CAT_HUMAN);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Mega-Juicers are the final evolution of chemical super-soldier augmentation, "
+        "subjects who have undergone multiple rounds of increasingly lethal procedures "
+        "that saturate every cell of their body with synthetic bio-compounds. Towering "
+        "between seven and nine feet tall with muscles like knotted steel cable, they "
+        "possess physical capabilities that rival lesser supernatural beings. Their "
+        "nervous systems have been rewired to suppress all pain and fear, making them "
+        "utterly fearless combatants who fight with reckless, near-suicidal aggression. "
+        "The price is absolute: total systemic burnout within two to three years, with "
+        "no known reversal, and a progressive detachment from emotion and humanity that "
+        "leaves them hollow-eyed instruments of destruction in their final months."
     );
-    
-    // TODO: Configure physical characteristics
-    set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+
+    // Physical characteristics - peak augmented human form
+    set_size_category(SIZE_LARGE);
+    set_height_range(84, 108);  // 7'0" to 9'0"
+    set_weight_range(400, 600);
+    set_lifespan(2);            // 2-3 years from augmentation
+    set_body_types(({ "massive", "monstrous", "hulking", "titanic" }));
+
+    // Stat modifiers - beyond extreme physical enhancement
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 12,   // Supernatural strength beyond Titan Juicers
+        "pe": 10,   // Near-indestructible endurance
+        "pp": 5,    // Lightning reflexes
+        "spd": 8,   // Blinding chemical speed
+        "iq": -3,   // Severe cognitive degradation
+        "me": -4,   // Willpower obliterated; emotionally hollow
+        "ma": -4,   // Terrifying presence; no social grace
+        "pb": -4    // Grotesquely over-muscled; visible chemical scarring
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Combat bonuses - ultimate combat machine
+    set_combat_bonuses(([
+        "strike": 4,
+        "parry": 3,
+        "dodge": 3,
+        "initiative": 4,
+        "roll": 3,
+        "pull": -4   // Cannot pull punches; always at maximum force
+    ]));
+
+    // MDC creature - more durable than Titan Juicers
+    set_natural_sdc(0);
+    set_natural_mdc(250);
+    set_mdc_creature(1);
+    set_natural_armor(12);
+
+    // Combat system configuration
+    set_attacks_per_round(3);           // 4 total attacks per round
+    set_parries_per_round(4);
+    set_auto_parry(1);
+    set_auto_dodge(1);
+    set_combat_archetype("augmented_berserker");
+    set_mdc_natural_attacks(1);
+
+    // Natural weapons - devastatingly augmented strikes
+    add_natural_weapon("punch", 4, 6, 8);     // 4d6+8 mega-augmented punch
+    add_natural_weapon("kick", 5, 6, 6);      // 5d6+6 mega-augmented kick
+    add_natural_weapon("body_block", 3, 6, 10); // 3d6+10 devastating body slam
+    add_natural_weapon("headbutt", 2, 6, 6);  // 2d6+6 reinforced skull strike
+
+    // Resistances - chemically immune to most biological effects
+    set_resistances(([
+        "poison": 80,          // Extreme bio-chemical tolerance
+        "disease": 70,         // Hyper-enhanced immune system
+        "cold": 50,            // Temperature regulation
+        "heat": 40,            // Partial thermal resistance
+        "horror_factor": 90,   // Fear centers chemically suppressed
+        "mind_control": 30     // Too chemically altered for easy mental influence
+    ]));
+    set_immunities(({ "pain", "fear", "fatigue" }));
+    set_vulnerabilities(({ "chemical_withdrawal", "emp", "bio_manipulation", "magic_dispel" }));
+
+    // Racial abilities
+    add_racial_ability("pain_immunity", 3);
+    add_racial_ability("fear_immunity", 3);
+    add_racial_ability("berserker_rage", 3);
+    add_racial_ability("chemical_resistance", 3);
+    add_racial_ability("enhanced_reflexes", 3);
+    add_racial_ability("adrenaline_surge", 2);
+    add_racial_ability("leap", 2);
+    add_racial_ability("death_blow", 1);
+
+    // No psychic or magical potential - completely suppressed
+    set_psionic_potential(0);
+    set_magic_potential(0);
+
+    // RCC designation
+    set_is_rcc(1);
+    set_can_have_occ(0);
+    set_rcc_description(
+        "Mega-Juicers are a Racial Character Class representing the absolute zenith "
+        "of chemical augmentation. The procedure is so extreme that it redefines the "
+        "subject at a cellular level, erasing any prior training. Mega-Juicers exist "
+        "solely as weapons, and their remaining lifespan is measured in months rather "
+        "than years. Reversal is impossible; the only question is how they choose to "
+        "spend their final days."
+    );
+
+    // OCC restrictions - the augmentation IS the class
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
+    set_forbidden_occs(({
+        "ley_line_walker", "mystic", "warlock", "shifter", "temporal_wizard",
+        "techno_wizard", "mind_melter", "burster", "cyber_knight",
+        "cosmo_knight", "operator", "rogue_scholar", "body_fixer",
+        "wilderness_scout", "vagabond"
+    }));
+    set_recommended_occs(({
+        "mercenary", "bounty_hunter", "gladiator"
+    }));
+
+    // Alignment - emotional suppression makes good alignments nearly impossible
+    set_allowed_alignments(({
+        "anarchist", "miscreant", "aberrant", "diabolic"
+    }));
+
+    // Starting resources
+    set_starting_equipment(({
+        "/obj/clothing/mega_juicer_harness",
+        "/obj/item/chemical_injector",
+        "/obj/item/chemical_reserve_pack",
+        "/obj/item/backpack"
+    }));
+    set_starting_credits(300);
+
+    // Faction affiliations
+    set_default_factions(({ }));
+    set_hostile_factions(({ "coalition_states" }));
+
+    // Cultural background
+    set_culture("Juicer Underground / Death Cults / Arena Circuits");
+    set_homeland("Various (Illegal Augmentation Facilities)");
     set_languages(({ "american" }));
     set_primary_language("american");
+}
+
+// Mega-Juicers always fight at full power
+int query_berserker_bonus() {
+    return 6;  // +6 to strike and damage when berserk
+}
+
+// Chemical dependency is even more severe
+int query_withdrawal_interval() {
+    return 4;  // Must receive injection every 4 hours
+}
+
+// Burnout is accelerated
+int query_burnout_rate() {
+    return 5;  // Lose 5 MDC per game month from burnout
+}
+
+// Mega-Juicers can perform a suicidal death blow
+int query_death_blow_damage() {
+    return 100;  // 1d4x100 MDC self-destructive final attack
+}
+
+// Immune to pain and fear -- always
+int query_is_immune_to_pain() {
+    return 1;
+}
+
+int query_is_immune_to_fear() {
+    return 1;
 }

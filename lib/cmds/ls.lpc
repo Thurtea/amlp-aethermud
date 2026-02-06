@@ -1,0 +1,10 @@
+// /cmds/ls.lpc
+// List directory contents
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement directory listing logic
+    write("Stub: ls command. Directory listing not yet implemented.\n");
+    return 1;
+}

@@ -1,0 +1,116 @@
+// /lib/occs/city_rat.lpc
+// City Rat O.C.C. - Urban Survivor
+//
+// City Rats are street-smart survivors who grew up in the ruins and slums
+// of post-Rifts cities. They know every alley, hide-out, and black market
+// contact. Masters of scrounging, scavenging, and survival in urban hell.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    
+    set_occ_name("City Rat");
+    set_occ_id("city_rat");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+    
+    set_occ_description(
+        "City Rats are the ultimate urban survivors. Born and raised in the slums, \\n"
+        "ruins, and back alleys of post-Rifts cities, they know how to survive where \\n"
+        "others would starve. Every dumpster, every abandoned building, every black \\n"
+        "market dealer - they know them all.\\n\\n"
+        
+        "These street-smart survivors are masters of scrounging, scavenging, and \\n"
+        "making do with nothing. They can hot-wire vehicles, pick locks, lift wallets, \\n"
+        "and disappear into crowds in seconds. They know all the street rumors, who's \\n"
+        "buying what, and where to fence stolen goods.\\n\\n"
+        
+        "While not formally trained fighters, City Rats are scrappy and know how to \\n"
+        "handle themselves in a street fight. They prefer to talk, run, or sneak their \\n"
+        "way out of trouble, but they'll fight dirty if cornered. Many work as couriers, \\n"
+        "informants, petty thieves, or black market intermediaries.\"\n    );
+    
+    // No stat requirements - survivors come from all types
+    set_stat_requirements(([\n    ]));\n    
+    // Stat bonuses - scrappy and street-smart\n    set_stat_bonuses(([\n        \"pp\": 1,    // +1 Physical Prowess (quick reflexes)\n        \"me\": 1     // +1 Mental Endurance (street toughness)\n    ]));\n    
+    // Standard XP progression\n    set_xp_table(XP_LEVELS);
+    
+    // Base abilities
+    set_base_abilities(({\n        \"streetwise\",           // Know the streets\n        \"scavenger\",            // Find useful items\n        \"urban_camouflage\",     // Blend into crowds\n        \"fence\",                // Sell stolen goods\n        \"street_contacts\"       // Know people everywhere\n    }));
+    
+    // Combat - poor to moderate (street fighters)
+    set_base_attacks(2);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type(\"basic\");
+    
+    // OCC Skills - urban survival
+    set_occ_skills(({\n        \"language_american\",\n        \"literacy_american\",\n        \"streetwise\",\n        \"scrounging\",\n        \"pick_pockets\",\n        \"pick_locks\",\n        \"prowl\",\n        \"running\",\n        \"climbing\",\n        \"detect_ambush\",\n        \"palming\",\n        \"concealment\",\n        \"recognize_contraband\",\n        \"pilot_automobile\",\n        \"radio_basic\",\n        \"find_contraband\"\n    }));
+    
+    // OCC related skills
+    set_occ_related_skills(({\n        \"wp_knife\", \"wp_club\", \"wp_revolver\", \"wp_automatic_pistol\",\n        \"hand_to_hand_expert\", \"hand_to_hand_martial_arts\",\n        \"running\", \"athletics\", \"swimming\",\n        \"pilot_motorcycle\", \"pilot_truck\",\n        \"locksmith\", \"safecracking\",\n        \"forgery\", \"disguise\",\n        \"computer_operation\", \"computer_hacking\",\n        \"first_aid\", \"brewing\", \"cooking\",\n        \"gambling\", \"seduction\",\n        \"intelligence_gathering\"\n    }));
+    set_occ_skill_count(7);\n    set_elective_count(4);\n    set_secondary_count(8);\n    \n    // Skill bonuses\n    set_skill_bonuses(([\n        \"rogue\": 20,\n        \"urban\": 25,\n        \"streetwise\": 30\n    ]));\n    \n    // Magic/Psionics - none\n    set_base_ppe(0);\n    set_ppe_per_level(0);\n    set_base_isp(0);\n    set_isp_per_level(0);\n    set_magic_type(\"none\");\n    set_psionic_type(\"none\");\n    \n    // HP/SDC - average\n    set_base_sdc(20);\n    set_sdc_per_level(0);\n    \n    // Starting equipment - whatever they could scrounge\n    set_standard_equipment(({\n        \"/obj/clothing/street_clothes\",\n        \"/obj/item/backpack\",\n        \"/obj/item/lockpicks\",\n        \"/obj/item/pocket_knife\",\n        \"/obj/item/flashlight\",\n        \"/obj/item/rope_short\",\n        \"/obj/item/cigarettes\",\n        \"/obj/item/lighter\"\n    }));\n    \n    set_starting_credits(50, 200);  // Poor\n    \n    set_starting_weapons(({\n        \"/obj/weapon/switchblade\",\n        \"/obj/weapon/brass_knuckles\"\n    }));\n    \n    set_starting_armor(({\n        \"/obj/armor/leather_jacket\"  // SDC only\n    }));\n    \n    // Race restrictions - any race\n    set_race_requirements(({ }));\n    set_race_exclusions(({ }));\n    \n    // Cybernetics - can get cheap implants\n    set_cybernetics_allowed(1);\n    set_max_cybernetic_slots(3);\n}
+
+void create() {
+    ::create();
+    
+    set_occ_name("");
+    set_occ_id("city_rat");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+    
+    set_occ_description(
+        "TODO: Add full O.C.C. description for ."
+    );
+    
+    // TODO: Configure stat requirements
+    set_stat_requirements(([
+        // Example: "iq": 10
+    ]));
+    
+    // TODO: Configure stat bonuses
+    set_stat_bonuses(([
+        // Example: "ps": 2
+    ]));
+    
+    // Combat configuration
+    set_base_attacks(2);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("basic");
+    
+    // TODO: Configure OCC skills
+    set_occ_skills(({
+        "language_american"
+    }));
+    
+    set_occ_related_skills(({ }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+    
+    // Magic/Psionics (if applicable)
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+    
+    // HP/SDC
+    set_base_sdc(20);
+    set_sdc_per_level(0);
+    
+    // TODO: Configure starting equipment
+    set_standard_equipment(({ }));
+    set_starting_credits(100, 500);
+    set_starting_weapons(({ }));
+    set_starting_armor(({ }));
+    
+    // Race restrictions
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+    
+    // Cybernetics
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(4);
+}

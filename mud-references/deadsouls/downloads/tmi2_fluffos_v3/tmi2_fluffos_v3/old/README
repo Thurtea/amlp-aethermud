@@ -1,0 +1,23 @@
+go into the driver source dir and type:
+
+./build.MudOS
+
+then:
+
+make
+
+You should get a driver and addr_server binary. Copy it to whereever you want,
+and edit the files in etc to point to the approp. places.
+Edit config.tmi2 there to change the mudname.
+
+Then startmud tmi2 &
+
+And it should work ;)
+
+good luck,
+
+If you have problems, login to cam037103.student.utwente.nl 5555, it's the
+support site for the tmi2 mudlibs.
+
+Leto@Tmi2
+(paul@via.nl)

@@ -1,45 +1,107 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/quick_flex.lpc
+// Quick-Flex Alien Race - Speed-Enhanced Psychic of Rifts Earth
 //
-// This is a stub file. Implement the full race details.
+// Quick-Flex are human psychics whose psionic abilities manifest as
+// superhuman speed, reflexes, and physical agility. They can move faster
+// than the eye can follow and dodge attacks with uncanny precision.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Quick-Flex");
     set_race_id("quick_flex");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("Quick-Flexes");
+    set_race_category(RACE_CAT_PSIONIC);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Quick-Flex psychics are human beings whose psionic abilities manifest "
+        "entirely through their physical form, granting them superhuman speed, "
+        "reflexes, and agility far beyond normal human capabilities. They can move "
+        "so fast they appear as blurs, dodge gunfire through precognitive reflexes, "
+        "and strike multiple times before an opponent can react. Unlike most psychics "
+        "who focus their ISP on mental powers, Quick-Flex channel all psionic energy "
+        "into physical enhancement, making them extraordinary combatants but limited "
+        "in traditional psychic disciplines."
     );
-    
-    // TODO: Configure physical characteristics
+
     set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
+    set_height_range(62, 74);   // 5'2" to 6'2"
+    set_weight_range(110, 190); // Lean and wiry builds
     set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_body_types(({ "thin", "wiry", "athletic" }));
+
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "pp": 6,      // Physical Prowess +6 (extreme agility)
+        "spd": 8,     // Speed +8 (superhuman quickness)
+        "pe": 2,      // Physical Endurance +2 (physically fit)
+        "me": 2,      // Mental Endurance +2 (psionic focus)
+        "ps": -1,     // Physical Strength -1 (speed over power)
+        "ma": -2      // Mental Affinity -2 (impatient, restless)
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    set_combat_bonuses(([
+        "initiative": 4,   // Almost always acts first
+        "dodge": 4,        // Exceptional dodging
+        "strike": 2,       // Fast strikes
+        "parry": 2         // Quick parries
+    ]));
+
+    set_natural_sdc(5);
+    set_mdc_creature(0);
+
+    set_resistances(([
+        "psionic_resistance": 10       // 10% resist hostile psionics
+    ]));
+    set_immunities(({ }));
+    set_vulnerabilities(({ "anti_psychic_technology", "psionic_dampeners" }));
+
+    add_racial_ability("super_speed", 1);
+    add_racial_ability("auto_dodge", 1);
+    add_racial_ability("precognitive_reflex", 1);
+    add_racial_ability("rapid_strike", 1);
+    add_racial_ability("enhanced_agility", 1);
+    add_racial_ability("speed_burst", 1);
+
+    set_psionic_potential(15);  // Moderate ISP (channeled into physical enhancement)
+    set_magic_potential(0);     // Psionic focus precludes magic
+
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
+    set_forbidden_occs(({
+        "ley_line_walker", "techno_wizard", "warlock", "necromancer",
+        "shifter", "battle_magus", "mystic"
+    }));
+    set_recommended_occs(({
+        "vagabond", "city_rat", "bounty_hunter", "headhunter",
+        "wilderness_scout", "mercenary"
+    }));
+
+    set_allowed_alignments(({ }));
+
+    set_starting_equipment(({
+        "/obj/clothing/light_clothes",
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/item/running_shoes"
+    }));
+    set_starting_credits(130);
+
+    set_default_factions(({ }));
+    set_hostile_factions(({ "coalition_states" }));
+
+    set_culture("Outcast Psychic");
+    set_homeland("Rifts Earth (Various)");
+    set_languages(({ "american", "spanish" }));
     set_primary_language("american");
+}
+
+// Quick-Flex gain a large bonus to speed-related checks
+int query_speed_bonus() {
+    return 20;  // +20% to speed and reflex-related rolls
+}
+
+// Quick-Flex have enhanced perception from precognitive reflexes
+int query_perception_bonus() {
+    return 8;  // +8% to perception rolls (precognitive awareness)
 }

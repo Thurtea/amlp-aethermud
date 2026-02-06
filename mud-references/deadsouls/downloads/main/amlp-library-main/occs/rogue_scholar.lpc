@@ -1,0 +1,117 @@
+// /lib/occs/rogue_scholar.lpc
+// Rogue Scholar O.C.C. - Independent Researcher
+//
+// Rogue Scholars are independent researchers, archaeologists, and scholars
+// who seek knowledge of the pre-Rifts world. They explore ruins, collect
+// artifacts, and piece together humanity's lost history.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    
+    set_occ_name("Rogue Scholar");
+    set_occ_id("rogue_scholar");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement(\"any\");
+    
+    set_occ_description(
+        \"Rogue Scholars are independent researchers, archaeologists, and historians \\n\"
+        \"who dedicate their lives to recovering the lost knowledge of the pre-Rifts \\n\"
+        \"world. While the Coalition bans and burns books, Rogue Scholars risk their \\n\"
+        \"lives to preserve humanity's cultural and technological heritage.\\n\\n\"
+        
+        \"These brave academics explore dangerous ruins, decipher ancient texts, and \\n\"
+        \"piece together fragments of pre-Rifts civilization. They know multiple languages, \\n\"
+        \"both modern and ancient, and have broad knowledge across many fields. Their \\n\"
+        \"expertise makes them invaluable as translators, consultants, and guides.\\n\\n\"
+        
+        \"In combat, Rogue Scholars are generally poor fighters - their training is \\n\"
+        \"mental, not martial. However, their vast knowledge often provides advantages \\n\"
+        \"where brute force fails. They know history, science, anthropology, and often \\n\"
+        \"unusual lore that can mean the difference between life and death in the ruins.\"\n    );
+    
+    // Stat requirements - need intelligence\n    set_stat_requirements(([\n        \"iq\": 12    // Intelligence 12+ required\n    ]));\n    
+    // Stat bonuses - mental training\n    set_stat_bonuses(([\n        \"iq\": 2,    // +2 Intelligence\n        \"ma\": 1     // +1 Mental Affinity (communication skills)\n    ]));\n    
+    // Standard XP progression\n    set_xp_table(XP_LEVELS);
+    
+    // Base abilities\n    set_base_abilities(({\n        \"research\",             // Expert researcher\n        \"appraise_artifacts\",   // Identify valuable items\n        \"decipher_text\",        // Decode ancient writing\n        \"academic_contacts\",    // Know other scholars\n        \"lore_master\"           // Vast knowledge\n    }));
+    
+    // Combat - poor (not trained fighters)\n    set_base_attacks(2);\n    set_attacks_per_level(1, 5);\n    set_hand_to_hand_type(\"basic\");
+    
+    // OCC Skills - academic mastery\n    set_occ_skills(({\n        \"language_american\",\n        \"literacy_american\",\n        \"language_spanish\",\n        \"literacy_spanish\",\n        \"language_euro\",\n        \"literacy_euro\",\n        \"mathematics_basic\",\n        \"mathematics_advanced\",\n        \"computer_operation\",\n        \"research\",\n        \"lore_demons\",\n        \"lore_faeries\",\n        \"lore_magic\",\n        \"lore_religion\",\n        \"anthropology\",\n        \"archaeology\",\n        \"history_pre_rifts\",\n        \"history_post_rifts\",\n        \"art\",\n        \"writing\"\n    }));
+    
+    // OCC related skills - some physical for ruins exploration\n    set_occ_related_skills(({\n        \"language_dragonese\", \"language_gobblely\", \"language_techno_can\",\n        \"literacy_dragonese\", \"literacy_gobblely\",\n        \"wp_knife\", \"wp_revolver\", \"wp_automatic_pistol\",\n        \"hand_to_hand_basic\", \"hand_to_hand_expert\",\n        \"climbing\", \"swimming\", \"running\",\n        \"pilot_automobile\", \"pilot_motorcycle\",\n        \"computer_programming\", \"computer_hacking\",\n        \"photography\", \"holographic_imaging\",\n        \"first_aid\", \"biology\", \"chemistry\",\n        \"cryptography\", \"forgery\",\n        \"lore_geomancy\", \"lore_psychics\",\n        \"prowl\", \"detect_ambush\"\n    }));
+    set_occ_skill_count(8);\n    set_elective_count(5);\n    set_secondary_count(6);\n    \n    // Skill bonuses\n    set_skill_bonuses(([\n        \"academic\": 30,\n        \"lore\": 25,\n        \"language\": 20\n    ]));\n    \n    // Magic/Psionics - none (but understand it)\n    set_base_ppe(0);\n    set_ppe_per_level(0);\n    set_base_isp(0);\n    set_isp_per_level(0);\n    set_magic_type(\"none\");\n    set_psionic_type(\"none\");\n    \n    // HP/SDC - low (not physically trained)\n    set_base_sdc(15);\n    set_sdc_per_level(0);\n    \n    // Starting equipment - research gear\n    set_standard_equipment(({\n        \"/obj/clothing/field_researcher_outfit\",\n        \"/obj/item/backpack_large\",\n        \"/obj/item/notebook\",\n        \"/obj/item/pens\",\n        \"/obj/item/laptop_computer\",\n        \"/obj/item/camera\",\n        \"/obj/item/portable_language_translator\",\n        \"/obj/item/magnifying_glass\",\n        \"/obj/item/flashlight\",\n        \"/obj/item/maps\"\n    }));
+    
+    set_starting_credits(100, 400);
+    
+    set_starting_weapons(({\n        \"/obj/weapon/utility_knife\",\n        \"/obj/weapon/light_pistol\"\n    }));
+    
+    set_starting_armor(({\n        \"/obj/armor/light_mdc_armor\"  // Basic protection for ruins\n    }));
+    
+    // Race restrictions - most intelligent races\n    set_race_requirements(({ }));\n    set_race_exclusions(({ }));\n    \n    // Cybernetics - generally avoided (prefer natural mind)\n    set_cybernetics_allowed(1);\n    set_max_cybernetic_slots(2);\n}
+
+void create() {
+    ::create();
+    
+    set_occ_name("");
+    set_occ_id("rogue_scholar");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+    
+    set_occ_description(
+        "TODO: Add full O.C.C. description for ."
+    );
+    
+    // TODO: Configure stat requirements
+    set_stat_requirements(([
+        // Example: "iq": 10
+    ]));
+    
+    // TODO: Configure stat bonuses
+    set_stat_bonuses(([
+        // Example: "ps": 2
+    ]));
+    
+    // Combat configuration
+    set_base_attacks(2);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("basic");
+    
+    // TODO: Configure OCC skills
+    set_occ_skills(({
+        "language_american"
+    }));
+    
+    set_occ_related_skills(({ }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+    
+    // Magic/Psionics (if applicable)
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+    
+    // HP/SDC
+    set_base_sdc(20);
+    set_sdc_per_level(0);
+    
+    // TODO: Configure starting equipment
+    set_standard_equipment(({ }));
+    set_starting_credits(100, 500);
+    set_starting_weapons(({ }));
+    set_starting_armor(({ }));
+    
+    // Race restrictions
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+    
+    // Cybernetics
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(4);
+}

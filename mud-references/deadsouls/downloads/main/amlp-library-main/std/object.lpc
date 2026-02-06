@@ -1,0 +1,35 @@
+// std/object.c - Base object for all objects in the MUD
+// All other objects should inherit from this
+
+string short_desc;
+string long_desc;
+
+void create() {
+    // Base object initialization
+    short_desc = "a generic object";
+    long_desc = "This is a generic object.";
+}
+
+void setup() {
+    // Override this in child objects
+}
+
+string query_name() {
+    return "object";
+}
+
+string query_short() {
+    return short_desc ? short_desc : "a generic object";
+}
+
+string query_long() {
+    return long_desc ? long_desc : "This is a generic object.";
+}
+
+void set_short(string desc) {
+    short_desc = desc;
+}
+
+void set_long(string desc) {
+    long_desc = desc;
+}

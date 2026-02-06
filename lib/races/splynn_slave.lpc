@@ -1,45 +1,144 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/splynn_slave.lpc
+// Splynn Slave Race - Bio-Engineered Servitor of the Splugorth
 //
-// This is a stub file. Implement the full race details.
+// Splynn Slaves are bio-engineered beings created in the gene pools and
+// flesh vats of Splynn on Atlantis. Designed for obedience and endurance,
+// they were shaped by the Splugorth to serve as laborers, soldiers, and
+// expendable tools across their vast interdimensional empire.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Splynn Slave");
     set_race_id("splynn_slave");
-    set_race_plural("s");
+    set_race_plural("Splynn Slaves");
     set_race_category(RACE_CAT_DEMIHUMAN);
-    
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Splynn Slaves are a bio-engineered servitor race created in the flesh vats "
+        "and gene pools beneath the city of Splynn on the reconstituted continent of "
+        "Atlantis. Designed by the Splugorth alien intelligences to be obedient, "
+        "durable, and easily replaced, they possess enhanced physical endurance but "
+        "have been genetically conditioned for reduced willpower and diminished force "
+        "of personality. Their smooth, grayish skin bears faint bio-modification "
+        "scarring, and many carry embedded identification tattoos from their creators. "
+        "Those who have escaped Splugorth control struggle with deeply ingrained "
+        "conditioning but burn with a fierce hatred for their former masters."
     );
-    
-    // TODO: Configure physical characteristics
+
+    // Physical characteristics - humanoid but clearly engineered
     set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_height_range(60, 72);   // 5'0" to 6'0"
+    set_weight_range(130, 200);
+    set_lifespan(40);           // Short engineered lifespan
+    set_body_types(({ "lean", "wiry", "stocky", "average" }));
+
+    // Stat modifiers - enhanced endurance, diminished will
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "pe": 4,    // Bio-engineered for tireless labor
+        "ps": 1,    // Slightly above human strength
+        "me": -3,   // Genetically conditioned for obedience; weak willpower
+        "ma": -3,   // Suppressed personality and charisma
+        "pb": -1,   // Unremarkable appearance; bio-scarring
+        "iq": -1    // Deliberately limited cognitive development
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Combat bonuses - trained for basic defense, not offense
+    set_combat_bonuses(([
+        "parry": 1,
+        "dodge": 1,
+        "roll": 2   // Conditioned to absorb punishment
+    ]));
+
+    // SDC creature - not MDC rated
+    set_natural_sdc(30);
+    set_natural_mdc(0);
+    set_mdc_creature(0);
+    set_natural_armor(0);
+
+    // Combat system configuration
+    set_attacks_per_round(0);           // Base 1 attack only
+    set_parries_per_round(2);
+    set_auto_parry(1);
+    set_auto_dodge(1);
+    set_combat_archetype("humanoid_unarmed");
+    set_mdc_natural_attacks(0);
+
+    // No natural weapons beyond fists
+    add_natural_weapon("punch", 1, 4, 0);   // 1d4 basic punch
+    add_natural_weapon("kick", 1, 6, 0);    // 1d6 basic kick
+
+    // Resistances - engineered for survival
+    set_resistances(([
+        "disease": 50,         // Bio-engineered immune system
+        "poison": 30,          // Partial toxin filtration
+        "fatigue": 60,         // Built for endurance labor
+        "heat": 20,            // Temperature tolerance
+        "cold": 20             // Temperature tolerance
+    ]));
+    set_immunities(({ }));
+    set_vulnerabilities(({ "psionic_domination", "bio_manipulation" }));
+
+    // Racial abilities
+    add_racial_ability("enhanced_endurance", 2);
+    add_racial_ability("disease_resistance", 2);
+    add_racial_ability("bio_regeneration", 1);
+    add_racial_ability("low_light_vision", 1);
+    add_racial_ability("identify_splugorth_tech", 1);
+
+    // Minimal latent psionic potential
+    set_psionic_potential(5);
+    set_magic_potential(0);
+
+    // Not an RCC - can take OCCs
+    set_is_rcc(0);
+    set_can_have_occ(1);
+
+    // OCC restrictions - limited by conditioning and background
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    set_forbidden_occs(({
+        "ley_line_walker", "temporal_wizard", "cosmo_knight",
+        "cyber_knight", "godling"
+    }));
+    set_recommended_occs(({
+        "vagabond", "wilderness_scout", "mercenary",
+        "city_rat", "body_fixer", "operator"
+    }));
+
+    // All alignments allowed - freed slaves vary wildly
+    set_allowed_alignments(({ }));
+
+    // Starting resources - escaped slaves start with very little
+    set_starting_equipment(({
+        "/obj/clothing/tattered_clothes",
+        "/obj/item/small_pouch"
+    }));
+    set_starting_credits(25);
+
+    // Faction affiliations - hostile to former masters
+    set_default_factions(({ }));
+    set_hostile_factions(({ "splugorth", "splynn" }));
+
+    // Cultural background
+    set_culture("Escaped Splugorth Servitor / Freed Slave");
+    set_homeland("Atlantis (Splynn) - Escaped");
+    set_languages(({ "american", "splugorth", "dragonese" }));
+    set_primary_language("splugorth");
+}
+
+// Splynn Slaves have ingrained knowledge of Splugorth technology
+int query_splugorth_tech_bonus() {
+    return 20;  // +20% to identify Splugorth devices and bio-tech
+}
+
+// Resistance to psionic domination attempts from Splugorth (ironic defiance)
+int query_domination_resistance() {
+    return 15;  // +15% to resist specifically Splugorth mind control
+}
+
+// Bio-regeneration rate (HP per hour of rest)
+int query_bio_regen_rate() {
+    return 2;  // Regenerate 2 HP per hour of rest
 }

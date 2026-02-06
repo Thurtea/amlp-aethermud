@@ -1,45 +1,108 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/psi_ghost.lpc
+// Psi-Ghost Race - Intangible Psychic of Rifts Earth
 //
-// This is a stub file. Implement the full race details.
+// Psi-Ghosts are rare human psychics who possess the extraordinary ability
+// to render themselves intangible and invisible through psionic power. They
+// can project their consciousness onto the astral plane and phase through
+// solid matter.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Psi-Ghost");
     set_race_id("psi_ghost");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("Psi-Ghosts");
+    set_race_category(RACE_CAT_PSIONIC);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Psi-Ghosts are extraordinarily rare human psychics born with the ability "
+        "to render themselves intangible, invisible, and capable of phasing through "
+        "solid matter using nothing but the power of their minds. They can project "
+        "their consciousness onto the astral plane, becoming true ghost-like entities "
+        "that are nearly impossible to detect or harm by conventional means. Their "
+        "physical bodies tend to be frail and underdeveloped, as their psionic gifts "
+        "manifest at the expense of corporeal strength, making them vulnerable when "
+        "they cannot maintain their ethereal state."
     );
-    
-    // TODO: Configure physical characteristics
+
     set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
+    set_height_range(60, 74);   // 5'0" to 6'2"
+    set_weight_range(90, 180);  // Tend to be lighter
     set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_body_types(({ "thin", "wiry" }));
+
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "me": 6,      // Mental Endurance +6 (extreme psychic discipline)
+        "ma": 1,      // Mental Affinity +1 (ethereal presence)
+        "iq": 2,      // Intelligence +2 (sharp mind)
+        "ps": -4,     // Physical Strength -4 (frail physical form)
+        "pe": -3,     // Physical Endurance -3 (fragile body)
+        "pp": -1      // Physical Prowess -1 (physically underdeveloped)
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    set_combat_bonuses(([
+        "initiative": 1,
+        "dodge": 3     // Hard to hit when partially phased
+    ]));
+
+    set_natural_sdc(-10);  // Below average SDC (fragile body)
+    set_mdc_creature(0);
+
+    set_resistances(([
+        "psionic_resistance": 20,        // 20% resist hostile psionics
+        "physical_resistance": 15,       // 15% resist physical (partial phasing)
+        "energy_resistance": 10          // 10% resist energy attacks
+    ]));
+    set_immunities(({ }));
+    set_vulnerabilities(({ "anti_psychic_technology", "psionic_dampeners", "iron" }));
+
+    add_racial_ability("intangibility", 1);
+    add_racial_ability("invisibility", 1);
+    add_racial_ability("astral_projection", 1);
+    add_racial_ability("phase_walk", 1);
+    add_racial_ability("psychic_sense", 1);
+    add_racial_ability("mind_shield", 1);
+    add_racial_ability("ethereal_form", 1);
+
+    set_psionic_potential(35);  // Very high ISP (powers are ISP-intensive)
+    set_magic_potential(0);     // Psionic focus precludes magic
+
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
+    set_forbidden_occs(({
+        "ley_line_walker", "techno_wizard", "warlock", "necromancer",
+        "shifter", "battle_magus", "mystic", "juicer", "crazy"
+    }));
+    set_recommended_occs(({
+        "vagabond", "rogue_scholar", "city_rat", "wilderness_scout",
+        "spy"
+    }));
+
+    set_allowed_alignments(({ }));
+
+    set_starting_equipment(({
+        "/obj/clothing/light_clothes",
+        "/obj/item/backpack",
+        "/obj/item/canteen"
+    }));
     set_starting_credits(100);
-    
-    set_languages(({ "american" }));
+
+    set_default_factions(({ }));
+    set_hostile_factions(({ "coalition_states" }));
+
+    set_culture("Reclusive Psychic");
+    set_homeland("Rifts Earth (Various)");
+    set_languages(({ "american", "euro" }));
     set_primary_language("american");
+}
+
+// Psi-Ghosts gain a bonus to stealth when using psionic abilities
+int query_stealth_bonus() {
+    return 15;  // +15% to stealth rolls (phasing ability)
+}
+
+// Psi-Ghosts have heightened astral awareness
+int query_perception_bonus() {
+    return 5;  // +5% to perception rolls (astral sensitivity)
 }

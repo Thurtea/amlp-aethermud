@@ -1,45 +1,131 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/hobgoblin.lpc
+// Hobgoblin Race - Disciplined goblinoid warriors
 //
-// This is a stub file. Implement the full race details.
+// Hobgoblins are the larger, more dangerous cousins of common goblins.
+// They are disciplined, militaristic, and far more dangerous than their
+// smaller kin, forming organized warbands across Rifts Earth.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Hobgoblin");
     set_race_id("hobgoblin");
-    set_race_plural("s");
+    set_race_plural("Hobgoblins");
     set_race_category(RACE_CAT_DEMIHUMAN);
-    
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Hobgoblins are tall, powerfully built goblinoids standing five to six feet "
+        "tall, with dark orange to reddish-brown skin, flat noses, and sharp fangs. "
+        "Unlike their smaller goblin cousins, hobgoblins are disciplined, organized, "
+        "and possess a strong martial culture that revolves around military hierarchy "
+        "and conquest. They are natural soldiers who fight with tactical precision "
+        "rather than the chaotic swarm tactics of goblins. Hobgoblin warbands are "
+        "among the most feared organized threats in the wilderness of Rifts Earth, "
+        "employing coordinated strategies and maintaining strict chains of command."
     );
-    
-    // TODO: Configure physical characteristics
+
+    // Physical characteristics - medium, solidly built
     set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_height_range(60, 72);    // 5'0" to 6'0"
+    set_weight_range(160, 240);  // Muscular and dense
+    set_lifespan(80);            // Similar to humans
+    set_body_types(({ "muscular", "athletic", "stocky", "broad" }));
+
+    // Stat modifiers - strong, tough, and disciplined
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 2,    // +2 Physical Strength (natural warriors)
+        "pe": 2,    // +2 Physical Endurance (hardy)
+        "iq": -1,   // -1 Intelligence (cunning but not scholarly)
+        "pb": -2,   // -2 Physical Beauty (brutish features)
+        "ma": -1    // -1 Mental Affinity (intimidating, not personable)
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Combat bonuses - trained warriors
+    set_combat_bonuses(([
+        "strike": 1,     // +1 strike (disciplined aim)
+        "parry": 1,      // +1 parry (trained defense)
+        "initiative": 1  // +1 initiative (military readiness)
+    ]));
+
+    // Tougher than most medium humanoids
+    set_natural_sdc(15);   // +15 racial SDC
+    set_natural_armor(3);  // Natural AR 3 (tough hide)
+    set_mdc_creature(0);
+
+    // Natural resistances - hardy warriors
+    set_resistances(([
+        "fear": 25,      // 25% fear resistance (disciplined courage)
+        "disease": 15,   // 15% disease resistance
+        "poison": 10     // 10% poison resistance
+    ]));
+    set_immunities(({ }));
+    set_vulnerabilities(({ }));
+
+    // Racial abilities
+    add_racial_ability("nightvision", 1);          // Can see in the dark (60 feet)
+    add_racial_ability("military_tactics", 1);     // Instinctive tactical awareness
+    add_racial_ability("weapon_proficiency", 1);   // Born weapon users
+    add_racial_ability("command_goblinoids", 1);   // Can lead goblin and orc troops
+
+    // No magical or psionic potential
+    set_psionic_potential(0);
+    set_magic_potential(0);
+
+    // OCC preferences - martial focus
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    set_forbidden_occs(({
+        "ley_line_walker",
+        "mystic",
+        "temporal_wizard",
+        "shifter",
+        "rogue_scholar",
+        "cosmo_knight"
+    }));
+    set_recommended_occs(({
+        "mercenary", "headhunter", "wilderness_scout",
+        "vagabond", "bandit"
+    }));
+
+    // Tend toward selfish and evil, but capable of discipline
+    set_allowed_alignments(({
+        ALIGN_UNPRINCIPLED, ALIGN_ANARCHIST,
+        ALIGN_ABERRANT, ALIGN_MISCREANT, ALIGN_DIABOLIC
+    }));
+
+    // Starting resources - military gear
+    set_starting_equipment(({
+        "/obj/clothing/leather_armor",
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/weapon/short_sword",
+        "/obj/weapon/shield"
+    }));
+    set_starting_credits(75);
+
+    // Faction relationships
+    set_default_factions(({ "goblin_warrens" }));
+    set_hostile_factions(({ "coalition_states", "elven_kingdoms" }));
+
+    // Cultural background
+    set_culture("Militaristic Tribal");
+    set_homeland("Various Dimensions (Warcamp Strongholds of Rifts Earth)");
+    set_languages(({ "goblinoid", "american" }));
+    set_primary_language("goblinoid");
+}
+
+// Hobgoblins have military training bonuses
+int query_military_bonus() {
+    return 10;  // +10% to military and tactical skills
+}
+
+// Hobgoblins can lead goblinoid troops effectively
+int query_leadership_bonus() {
+    return 15;  // +15% to leadership of goblinoid forces
+}
+
+// Hobgoblins are skilled with weapons from birth
+int query_weapon_proficiency_bonus() {
+    return 10;  // +10% to weapon proficiencies
 }

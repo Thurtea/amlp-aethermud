@@ -1,45 +1,125 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/halfling.lpc
+// Halfling Race - Small brave folk of remarkable luck
 //
-// This is a stub file. Implement the full race details.
+// Halflings are diminutive but courageous people who arrived on Rifts Earth
+// through dimensional portals. Despite their small stature, they are known
+// for their incredible luck, stealth, and surprising bravery.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Halfling");
     set_race_id("halfling");
-    set_race_plural("s");
+    set_race_plural("Halflings");
     set_race_category(RACE_CAT_DEMIHUMAN);
-    
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Halflings are small, sturdy folk standing three to four feet tall, with "
+        "rounded features, curly hair, and large bare feet that are tougher than "
+        "any boot leather. They are known across the dimensions for their remarkable "
+        "luck, which manifests as an almost supernatural ability to avoid danger and "
+        "find fortune in unlikely places. Halflings are naturally stealthy, moving "
+        "with a quiet grace that belies their portly frames. Though they prefer "
+        "comfort and good food to adventure, when called upon they display a courage "
+        "that shames many larger warriors, particularly with thrown weapons and slings."
     );
-    
-    // TODO: Configure physical characteristics
-    set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+
+    // Physical characteristics - small and sturdy
+    set_size_category(SIZE_SMALL);
+    set_height_range(36, 48);    // 3'0" to 4'0"
+    set_weight_range(40, 70);    // Light but solid
+    set_lifespan(200);           // Longer than humans
+    set_body_types(({ "portly", "stocky", "average", "rotund" }));
+
+    // Stat modifiers - agile and lucky, but small
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "pp": 2,    // +2 Physical Prowess (nimble)
+        "pe": 1,    // +1 Physical Endurance (surprisingly hardy)
+        "ps": -3,   // -3 Physical Strength (small stature)
+        "spd": -1   // -1 Speed (short legs)
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Combat bonuses - excellent with thrown weapons
+    set_combat_bonuses(([
+        "dodge": 2,         // +2 dodge (small target, agile)
+        "strike_thrown": 2, // +2 to thrown weapon attacks
+        "initiative": 1     // +1 initiative (quick reactions)
+    ]));
+
+    // Small and light, but tougher than expected
+    set_natural_sdc(5);   // +5 racial SDC
+    set_mdc_creature(0);
+
+    // Natural resistances - the famous halfling fortitude
+    set_resistances(([
+        "magic": 25,     // 25% magic resistance (innate luck)
+        "poison": 30,    // 30% poison resistance (hardy constitution)
+        "fear": 40       // 40% fear resistance (brave hearts)
+    ]));
+    set_immunities(({ }));
+    set_vulnerabilities(({ }));
+
+    // Racial abilities
+    add_racial_ability("lucky", 2);            // Supernatural luck (rerolls, fortune)
+    add_racial_ability("stealth", 2);          // Natural stealth ability
+    add_racial_ability("thrown_weapon_mastery", 1); // Expert with thrown weapons
+    add_racial_ability("detect_traps", 1);     // Innate trap sense
+    add_racial_ability("silent_movement", 1);  // Move without sound
+
+    // Minor psionic sensitivity through luck
+    set_psionic_potential(0);
+    set_magic_potential(0);
+
+    // OCC preferences - versatile but limited by size
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    set_forbidden_occs(({
+        "juicer",                // Body too small for augmentation
+        "crazy",                 // Brain implants too large
+        "full_conversion_borg",  // Size incompatibility
+        "titan_juicer"           // Requires large frame
+    }));
+    set_recommended_occs(({
+        "vagabond", "rogue_scholar", "city_rat",
+        "wilderness_scout", "thief"
+    }));
+
+    // Tend toward good or selfish alignments
+    set_allowed_alignments(({ }));  // All allowed, but rarely evil
+
+    // Starting resources - comfortable and practical
+    set_starting_equipment(({
+        "/obj/clothing/halfling_clothes",
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/weapon/sling",
+        "/obj/food/trail_rations"
+    }));
+    set_starting_credits(175);  // Halflings value comfort and trade
+
+    // Faction relationships
+    set_default_factions(({ }));
+    set_hostile_factions(({ }));
+
+    // Cultural background
+    set_culture("Pastoral Community");
+    set_homeland("Various Dimensions (Palladium World)");
+    set_languages(({ "halfling", "elven", "american" }));
+    set_primary_language("halfling");
+}
+
+// Halflings have a luck bonus to saving throws
+int query_luck_bonus() {
+    return 15;  // +15% to luck-based rolls
+}
+
+// Halflings are naturally stealthy
+int query_stealth_bonus() {
+    return 20;  // +20% to stealth and prowl
+}
+
+// Halflings are expert with thrown weapons
+int query_thrown_weapon_bonus() {
+    return 15;  // +15% to thrown weapon skills
 }

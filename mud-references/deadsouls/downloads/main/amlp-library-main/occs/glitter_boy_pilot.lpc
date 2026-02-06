@@ -1,0 +1,231 @@
+// /lib/occs/glitter_boy_pilot.lpc
+// Glitter Boy Pilot O.C.C. - Master of Power Armor
+//
+// Glitter Boy Pilots are elite operators of the Glitter Boy power armor suit,
+// one of the most powerful personal weapons on Rifts Earth. They are highly
+// trained combat specialists with intimate knowledge of their armor systems.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    
+    set_occ_name("Glitter Boy Pilot");
+    set_occ_id("glitter_boy_pilot");
+    set_occ_category(OCC_CAT_PILOT);
+    set_alignment_requirement("any");
+    
+    set_occ_description(
+        "Glitter Boy Pilots are elite combat specialists trained to pilot the "
+        "legendary Glitter Boy power armor suit. The Glitter Boy is a massive "
+        "military-grade power armor system equipped with a plasma ejector rifle, "
+        "plasma cartridge cannons, and other integrated weapons systems. It is one "
+        "of the most powerful single-pilot combat units in existence. A Glitter Boy "
+        "Pilot must undergo extensive training to master this complex machine, learning "
+        "everything from armor systems management to advanced combat tactics. They are "
+        "highly disciplined soldiers, typically serving military organizations or hiring "
+        "out as elite mercenaries. A single Glitter Boy Pilot can engage entire military "
+        "units and emerge victorious, making them some of the most feared and respected "
+        "warriors in the world."
+    );
+    
+    // Stat requirements - above average across the board
+    set_stat_requirements(([
+        "iq": 12,   // Intelligence 12+ (complex systems)
+        "me": 11,   // Mental Endurance 11+ (stress resistance)
+        "pp": 12,   // Physical Prowess 12+ (reflexes)
+        "pe": 11,   // Physical Endurance 11+ (stamina)
+        "ps": 11    // Physical Strength 11+ (control).
+    ]));
+    
+    // Stat bonuses
+    set_stat_bonuses(([
+        "pp": 2,    // +2 Physical Prowess (pilot training)
+        "iq": 1,    // +1 Intelligence
+        "me": 1     // +1 Mental Endurance
+    ]));
+    
+    // XP progression
+    set_xp_table(XP_LEVELS);
+    
+    // Base abilities
+    set_base_abilities(({
+        "mecha_operation",          // Operate power armor
+        "glitter_boy_mastery",      // Specialize in GB armor
+        "systems_management",        // Manage armor systems
+        "integrated_weapons",        // Control armor weaponry
+        "armor_evasion"             // Dodge in armor
+    }));
+    
+    // Abilities gained at levels
+    set_occ_abilities(([
+        2: ({ "plasma_weapon_spec" }),
+        4: ({ "advanced_evasion" }),
+        6: ({ "armor_maintenance" }),
+        8: ({ "weapon_calibration" }),
+        10: ({ "pilot_instinct" }),
+        12: ({ "expert_tactics" }),
+        15: ({ "legendary_pilot" })
+    ]));
+    
+    // Combat - excellent (in powered armor)
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);  // +1 attack every 3 levels
+    set_hand_to_hand_type("advanced");
+    
+    // Combat progression (armor-enhanced)
+    set_combat_progression(([
+        1: ([ "strike": 2, "parry": 2, "dodge": 3 ]),  // Extra dodge in armor
+        3: ([ "roll": 1, "initiative": 1 ]),
+        5: ([ "strike": 1, "parry": 1, "dodge": 1 ]),
+        7: ([ "dodge": 1, "disarm": 2 ]),
+        9: ([ "strike": 1, "initiative": 1 ]),
+        12: ([ "parry": 1, "dodge": 1, "death_blow": 1 ])
+    ]));
+    
+    // OCC Skills - technical and weapons-focused
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "mecha_operation",           // Operate power armor
+        "weapon_systems",             // Armor weapons
+        "technical_repair",           // Repair armor
+        "systems_diagnosis",          // Diagnose problems
+        "military_tactics",
+        "land_navigation",
+        "climbing",
+        "wp_energy_rifle",
+        "wp_heavy_weapons",
+        "wp_cannon",
+        "htoh_advanced"
+    }));
+    
+    // OCC Related Skills - supporting abilities
+    set_occ_related_skills(({
+        "electronics_advanced",       // Armor electronics
+        "hydraulics_systems",        // Armor systems
+        "computer_programming",      // Armor AI
+        "field_medicine",
+        "demolitions",
+        "swimming",
+        "running",
+        "piloting_vehicles",
+        "radio_operation",
+        "sensor_operation",
+        "communications_military",
+        "targeting_systems",
+        "weapons_maintenance",
+        "ammunition_storage"
+    }));
+    set_occ_skill_count(6);
+    
+    // Electives
+    set_elective_categories(({}));  // Many options
+    set_elective_count(4);
+    set_secondary_count(6);
+    
+    // Skill bonuses
+    set_skill_bonuses(([
+        "mechanical": 15,
+        "technical": 15,
+        "weapon": 10,
+        "military": 10,
+        "physical": 5
+    ]));
+    
+    // No magic or psionics
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+    
+    // HP/SDC - increased for armor operation
+    set_base_hp(0);  // Standard: PE + 1d6
+    set_hp_per_level(0);  // Standard: 1d6
+    set_base_sdc(30);  // Protected by armor containment
+    set_sdc_per_level(3);  // Gain 3 SDC per level
+    set_mdc_class(0);  // Personal SDC only (armor is separate)
+    
+    // Starting equipment - pilot's kit
+    set_standard_equipment(({
+        "/obj/clothing/pilot_suit",
+        "/obj/clothing/combat_uniform",
+        "/obj/item/backpack_military",
+        "/obj/item/canteen",
+        "/obj/item/tool_kit_repair",
+        "/obj/item/survival_kit",
+        "/obj/item/ammo_pouch",
+        "/obj/item/data_pad_military"
+    }));
+    
+    set_optional_gear(({
+        "/obj/item/helmet_tactical",
+        "/obj/item/night_vision_goggles",
+        "/obj/weapon/sidearm_energy",
+        "/obj/item/armor_key_card",
+        "/obj/item/repair_kit_advanced"
+    }));
+    
+    set_starting_credits(300, 1000);  // Access to armor makes credits less critical
+    
+    set_starting_weapons(({
+        "/obj/weapon/handgun_energy",
+        "/obj/weapon/knife_combat"
+    }));
+    
+    set_starting_armor(({
+        "/obj/armor/combat_suit"
+    }));
+    
+    // Race restrictions - any can pilot
+    set_race_requirements(({ }));   // Empty = any race
+    set_race_exclusions(({ }));
+    
+    // Cybernetics - limited (armor interface is sufficient)
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+    
+    // Special features
+    set_special_powers(({
+        "glitter_boy_access",       // Can pilot Glitter Boy armor
+        "advanced_piloting",
+        "integrated_weapons_system"
+    }));
+    set_vehicle_type("power_armor");
+    set_special_training("mecha_operation");
+    
+    // Background
+    set_background(
+        "Glitter Boy Pilots come from elite military training programs or are "
+        "selected for their exceptional aptitude in mechanical systems and combat. "
+        "They are typically highly disciplined and loyal to their organizations, "
+        "though some become independent operators or mercenaries after leaving "
+        "service. A Glitter Boy Pilot is one of the most valuable military assets "
+        "in the world."
+    );
+    set_organizations(({
+        "Coalition States Military",
+        "Free Agents",
+        "Private Military Contractors",
+        "Robot Masters"
+    }));
+    set_enemies(({ }));
+}
+
+// Glitter Boy Pilots get bonuses in their armor
+int query_armor_bonus() {
+    return 5;  // +5% to combat rolls while in armor
+}
+
+// Glitter Boy Pilots can optimize armor systems
+int query_system_efficiency() {
+    return 10;  // 10% better armor system performance
+}
+
+// Glitter Boy Pilots pilot better than most
+int query_piloting_bonus() {
+    return 15;  // +15% to piloting rolls while in mecha
+}

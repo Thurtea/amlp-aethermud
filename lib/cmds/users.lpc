@@ -1,0 +1,10 @@
+// /cmds/users.lpc
+// Show detailed user list
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement user listing logic
+    write("Stub: users command. User listing not yet implemented.\n");
+    return 1;
+}

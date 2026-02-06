@@ -1,0 +1,68 @@
+// /cmds/cat.lpc
+// Display file contents
+
+// /cmds/cat.lpc
+// View file contents (read-only)
+
+int main(string args) {
+    object player;
+    int privilege;
+    string path, cwd, content;
+    int size;
+
+    player = this_player();
+    if (!player) return 0;
+    privilege = player->query_privilege();
+    if (privilege < 1) {
+        write("Error: Insufficient privileges.\n");
+        return 1;
+    }
+
+    if (!args || trim(args) == "") {
+        write("Usage: cat <file>\n");
+        return 1;
+    }
+
+    cwd = player->query_cwd();
+    if (!cwd || cwd == "") cwd = "/lib";
+    path = normalize_path(trim(args), cwd);
+
+    size = file_size(path);
+    if (size == -1) {
+        write("Error: File not found: " + path + "\n");
+        return 1;
+    }
+    if (size == 0) {
+        write("Error: File is empty: " + path + "\n");
+        return 1;
+    }
+
+    content = read_file(path, 0, 0);
+    if (!content || content == "") {
+        write("Error: Unable to read file: " + path + "\n");
+        return 1;
+    }
+
+    write("=== " + path + " (" + size + " bytes) ===\n");
+    write(content);
+    write("\n=== End of file ===\n");
+    return 1;
+}
+
+// Trim whitespace from string
+private string trim(string str) {
+    int start, end;
+    if (!str) return "";
+    start = 0;
+    end = strlen(str) - 1;
+    while (start <= end && (str[start] == ' ' || str[start] == '\t')) start++;
+    while (end >= start && (str[end] == ' ' || str[end] == '\t')) end--;
+    return (start > end) ? "" : str[start..end];
+}
+
+// Normalize path (add /lib prefix if relative)
+private string normalize_path(string path, string cwd) {
+    if (path[0] == '/') return path;
+    if (cwd && cwd != "") return cwd + "/" + path;
+    return "/lib/" + path;
+}

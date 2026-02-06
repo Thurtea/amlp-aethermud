@@ -240,16 +240,14 @@ void cmd_more(string file) {
     tell_object(owner, "=== " + path + " (" + total + " lines) ===");
     tell_object(owner, "");
     
-    // Display all lines (for now, simple implementation)
-    // TODO: Implement true pagination with page breaks
+    // Display lines with page markers every lines_per_page lines
     for (i = 0; i < total; i++) {
         tell_object(owner, lines[i]);
-        
-        // Show a break every 20 lines
+
         if ((i + 1) % lines_per_page == 0 && i < total - 1) {
-            tell_object(owner, "--- (Line " + (i + 1) + " of " + total + ", press 'space' for more) ---");
-            // Note: Would need interactive prompt to truly pause here
-            // For now, just continue
+            tell_object(owner, "--- Page " + ((i + 1) / lines_per_page) +
+                " (lines " + (i + 2) + "-" + min(i + 1 + lines_per_page, total) +
+                " of " + total + ") ---");
         }
     }
     
@@ -506,10 +504,32 @@ void cmd_trace(string args) {
 }
 
 void cmd_errors() {
+    string content;
+    string *lines;
+    int total, start;
+
     tell_object(owner, "Recent errors:");
     tell_object(owner, "---");
-    // TODO: Implement error log reading
-    tell_object(owner, "(Error logging not yet implemented)");
+
+    content = read_file("/log/errors.log", 0, 0);
+    if (!content || content == "") {
+        tell_object(owner, "(No errors logged)");
+        return;
+    }
+
+    lines = explode(content, "\n");
+    total = sizeof(lines);
+
+    // Show last 50 lines
+    start = total - 50;
+    if (start < 0) start = 0;
+
+    for (int i = start; i < total; i++) {
+        tell_object(owner, lines[i]);
+    }
+
+    tell_object(owner, "---");
+    tell_object(owner, "(" + total + " total lines, showing last " + (total - start) + ")");
 }
 
 // === HELPER COMMANDS ===

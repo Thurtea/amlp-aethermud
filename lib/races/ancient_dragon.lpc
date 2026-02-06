@@ -1,45 +1,121 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/ancient_dragon.lpc
+// Ancient Dragon - Incredibly powerful ancient wyrm RCC
 //
-// This is a stub file. Implement the full race details.
+// Ancient Dragons are among the oldest and most powerful beings on Rifts
+// Earth. These colossal wyrms have lived for tens of thousands of years,
+// accumulating vast knowledge, immense magical power, and unmatched
+// physical might.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Ancient Dragon");
     set_race_id("ancient_dragon");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("Ancient Dragons");
+    set_race_category(RACE_CAT_DRAGON);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Ancient Dragons are primordial wyrms of staggering power, having "
+        "survived for tens of thousands of years through cunning, magic, and "
+        "raw might. Their colossal forms can stretch over a hundred feet from "
+        "snout to tail, and their scales are harder than the strongest mega-damage "
+        "alloys known to science. They command powerful magic as naturally as "
+        "breathing, and their intellect rivals or surpasses the greatest mortal "
+        "scholars. Few beings in the Megaverse can challenge an Ancient Dragon "
+        "and hope to survive."
     );
-    
-    // TODO: Configure physical characteristics
-    set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+
+    // Physical characteristics - colossal wyrm
+    set_size_category(SIZE_COLOSSAL);
+    set_height_range(720, 1440);    // 60 to 120 feet (in inches)
+    set_weight_range(80000, 200000); // 40 to 100 tons
+    set_lifespan(50000);
+    set_body_types(({ "massive", "serpentine", "thick-bodied", "lean" }));
+
+    // Immense stat modifiers
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 20,
+        "pe": 15,
+        "pp": 8,
+        "spd": 10,
+        "iq": 10,
+        "me": 12,
+        "ma": 8,
+        "pb": 4
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Superior combat bonuses
+    set_combat_bonuses(([
+        "strike": 6,
+        "parry": 6,
+        "dodge": 4,
+        "initiative": 5,
+        "roll": 4,
+        "pull": 2
+    ]));
+
+    // MDC creature with immense natural durability
+    set_natural_sdc(0);
+    set_mdc_creature(1);
+    set_natural_mdc(2000);
+
+    // Extreme resistance profile
+    set_resistances(([
+        "magic": 60,
+        "cold": 50,
+        "energy": 40,
+        "psionics": 50,
+        "poison": 75
+    ]));
+    set_immunities(({ "fire", "heat", "disease", "horror_factor" }));
+    set_vulnerabilities(({ "rune_weapons", "millennium_tree" }));
+
+    // Racial abilities
+    add_racial_ability("breath_weapon_fire", 5);
+    add_racial_ability("flight", 3);
+    add_racial_ability("metamorphosis_humanoid", 1);
+    add_racial_ability("nightvision", 1);
+    add_racial_ability("see_invisible", 1);
+    add_racial_ability("sense_magic", 1);
+    add_racial_ability("dimensional_teleport", 1);
+    add_racial_ability("regeneration", 3);
+    add_racial_ability("bio_regeneration", 2);
+    add_racial_ability("fear_aura", 4);
+
+    // Immense magical and psionic potential
+    set_psionic_potential(120);
+    set_magic_potential(500);
+
+    // Ancient Dragons are a full RCC -- very restricted OCC access
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    set_forbidden_occs(({
+        "juicer", "crazy", "headhunter", "borg", "glitter_boy",
+        "cyber_knight", "operator", "rogue_scientist", "city_rat",
+        "vagabond", "coalition_soldier", "dog_boy_occ", "psi_stalker_occ",
+        "techno_wizard", "mind_melter_occ", "burster_occ", "mega_juicer",
+        "titan_juicer", "dragon_juicer_occ", "cosmo_knight"
+    }));
+    set_recommended_occs(({ "dragon_rcc", "ley_line_walker", "shifter" }));
+
+    // All alignments allowed - Ancient Dragons span the moral spectrum
+    set_allowed_alignments(({ }));
+
+    // Starting resources - dragons have hoards, not backpacks
+    set_starting_equipment(({
+        "/obj/treasure/ancient_dragon_hoard"
+    }));
+    set_starting_credits(50000);
+
+    // Faction standing
+    set_default_factions(({ "dragonkind" }));
+    set_hostile_factions(({ "coalition_states", "splugorth" }));
+
+    // Cultural background
+    set_culture("Draconic Elder");
+    set_homeland("Rifts Earth (Various Ley Line Nexuses)");
+    set_languages(({ "dragonese", "american", "demongogian", "elven",
+                     "gobblely", "faerie_speak" }));
+    set_primary_language("dragonese");
 }

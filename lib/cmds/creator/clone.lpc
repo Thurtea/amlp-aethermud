@@ -1,59 +1,40 @@
-/*
- * /lib/cmds/creator/clone.lpc - Clone an object into inventory
- * Phase 4: Object Management
- * 
- * Usage:
- *   clone <object_path>
- */
+// /lib/cmds/creator/clone.lpc
+// Clone objects for wizard testing
 
 int main(string args) {
-    object player = previous_object();
-    string path, resolved;
-    object ob;
+    object player, new_obj;
+    int privilege;
+    
+    player = this_player();
+    if (!player) return 0;
+    
+    privilege = player->query_privilege();
+    if (privilege < 1) {
+        write("Error: Insufficient privileges. Wizard access required.\n");
+        return 1;
+    }
     
     if (!args || args == "") {
-        tell_object(player, "Syntax: clone <object_path>\n");
+        write("Usage: clone <object_path>\n");
+        write("Example: clone /lib/objects/weapons/sword\n");
         return 1;
     }
     
-    // Resolve path
-    resolved = player->resolve_path(args);
+    new_obj = clone_object(args);
     
-    // Add .lpc if not present
-    if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
-        resolved += ".lpc";
-    }
-    
-    // Try to clone
-    catch {
-        ob = clone_object(resolved);
-    } : {
-        tell_object(player, "Error: Failed to clone " + resolved + "\n");
-        tell_object(player, "Check compilation errors with: eval load_object(\"" + resolved + "\")\n");
+    if (!new_obj) {
+        write("Error: Failed to clone object: " + args + "\n");
         return 1;
     }
     
-    if (!ob) {
-        tell_object(player, "Error: Clone failed for " + resolved + "\n");
-        return 1;
+    if (function_exists("move", new_obj)) {
+        new_obj->move(player);
+    } else {
+        move_object(new_obj, player);
     }
     
-    // Move to wizard's inventory
-    if (ob->move(player) != 0) {
-        tell_object(player, "Error: Could not move object to inventory\n");
-        destruct(ob);
-        return 1;
-    }
+    write("You clone " + new_obj->query_short() + ".\n");
+    write("It has been added to your inventory.\n");
     
-    tell_object(player, "Cloned: " + ob->query_short() + "\n");
-    tell_object(player, "Object: " + file_name(ob) + "\n");
     return 1;
-}
-
-void help() {
-    write("Syntax: clone <object_path>\n");
-    write("Clone an object and move it to your inventory.\n");
-    write("Examples:\n");
-    write("  clone /objects/weapons/vibro_blade\n");
-    write("  clone vibro_blade  (if in /objects/weapons/)\n");
 }

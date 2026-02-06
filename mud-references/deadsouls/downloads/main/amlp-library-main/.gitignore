@@ -1,0 +1,29 @@
+# Development and historical files
+archive/
+
+# Build artifacts
+*.o
+*.so
+*.a
+build/
+
+# Runtime files
+log/
+save/
+tmp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

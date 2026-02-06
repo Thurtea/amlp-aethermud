@@ -1,0 +1,39 @@
+Foundation IIr1 installation requires that you have version 5 of perl
+installed on your machine!!!!  To see which version of perl you have,
+type 'perl -v' at the command line.  If you have version 4 or earlier,
+you must update your perl package.  You can get the latest perl
+package at prep.ai.mit.edu in /pub/gnu.
+
+Another problem you might encounter is if your perl package is not in
+/usr/local/bin.  If when running the Configure script, you get a
+message saying command or file not found, this means perl is somewhere
+else.  To fix this, first find out where perl is by typing "which
+perl".  Then you will need to edit line 1 of Configure to reflect the
+location of perl.  For example, if perl is in /bin, then change line 1
+from...
+
+#!/usr/local/bin/perl
+
+to
+
+#!/bin/perl
+
+Once these perl issues are out of the way, simply type:
+
+./Configure
+
+Answer the questions, and it will install the driver and mudlib for
+you.  After it is installed, type startmud &.  The mud will start,
+then you can telnet to port 4000 of your machine.  You will be asked
+to create an admin character and disconnected.  Next time you connect,
+it will be with a runnning MUD and you at the helm.
+
+Finally, one last possible problem, you made need to redefine $MAKE in
+the Configure program to point to "make" nstead of "gmake".
+
+For detailed installation instructions, try
+http://www.imaginary.com/LPC/Foundation/Installation.html.
+
+George Reese
+borg@imaginary.com
+28 April 1996

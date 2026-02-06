@@ -1,0 +1,10 @@
+// /cmds/clone.lpc
+// Clone an object
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // TODO: Implement object cloning logic
+    write("Stub: clone command. Object cloning not yet implemented.\n");
+    return 1;
+}

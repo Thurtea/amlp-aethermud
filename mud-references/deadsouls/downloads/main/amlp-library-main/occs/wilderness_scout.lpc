@@ -1,0 +1,156 @@
+// /lib/occs/wilderness_scout.lpc
+// Wilderness Scout O.C.C. - Master of the Outdoors
+//
+// Wilderness Scouts are expert trackers, hunters, and survivalists who thrive
+// in the wild lands between settlements. They know the forests, mountains, and
+// deserts like no other, and can survive indefinitely in the harshest environments.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    
+    set_occ_name("Wilderness Scout");
+    set_occ_id("wilderness_scout");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+    
+    set_occ_description(
+        "Wilderness Scouts are masters of survival and outdoor skills. They are \n"
+        "expert trackers, hunters, and guides who can survive indefinitely in the \n"
+        "wilderness. Whether leading expeditions through dangerous territory, tracking \n"
+        "enemies across vast distances, or simply surviving where others would perish, \n"
+        "the Wilderness Scout is unmatched in outdoor expertise.\n\n"
+        
+        "These hardy individuals know every plant, animal, and danger in their territory. \n"
+        "They can read the land like a book, finding water in deserts, food in wastelands, \n"
+        "and shelter in the harshest conditions. Many work as guides for expeditions, \n"
+        "scouts for military units, or independent trappers and hunters.\n\n"
+        
+        "In combat, Wilderness Scouts use guerrilla tactics, ambushes, and their superior \n"
+        "knowledge of terrain to gain every advantage. They are expert marksmen, skilled \n"
+        "with bow and rifle, and can disappear into the wilderness without a trace."
+    );
+    
+    // Stat requirements - need good physical endurance and awareness
+    set_stat_requirements(([
+        "pe": 12,   // Physical Endurance 12+ (survival)
+        "pp": 10    // Physical Prowess 10+ (agility)
+    ]));
+    
+    // Stat bonuses - hardy and alert
+    set_stat_bonuses(([
+        "pe": 2,    // +2 Physical Endurance
+        "pp": 1     // +1 Physical Prowess
+    ]));
+    
+    // Standard XP progression
+    set_xp_table(XP_LEVELS);
+    
+    // Base abilities
+    set_base_abilities(({
+        "wilderness_survival",  // Expert survival
+        "tracking_master",      // Superior tracking
+        "camouflage",          // Natural concealment
+        "hunter",              // Expert hunter
+        "trapper",             // Set and detect traps
+        "foraging"             // Find food/water anywhere
+    }));
+    
+    // Combat - good (experienced fighters)
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("expert");
+    
+    // OCC Skills - wilderness mastery
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "wilderness_survival",
+        "land_navigation",
+        "tracking_humanoid",
+        "tracking_animal",
+        "climbing",
+        "swimming",
+        "prowl",
+        "detect_ambush",
+        "detect_concealment",
+        "preserve_food",
+        "skin_animals",
+        "cooking",
+        "identify_plants",
+        "carpentry_basic",
+        "rope_works",
+        "fishing"
+    }));
+    
+    // OCC related skills
+    set_occ_related_skills(({
+        "wp_knife", "wp_sword", "wp_bow", "wp_crossbow",
+        "wp_rifle", "wp_energy_rifle",
+        "wp_revolver", "wp_automatic_pistol",
+        "hand_to_hand_expert", "hand_to_hand_martial_arts",
+        "running", "athletics", "acrobatics",
+        "horsemanship", "animal_husbandry",
+        "pilot_automobile", "pilot_motorcycle",
+        "first_aid", "paramedic",
+        "astronomy", "geology", "biology",
+        "radio_basic", "intelligence_gathering"
+    }));
+    set_occ_skill_count(8);
+    set_elective_count(5);
+    set_secondary_count(8);
+    
+    // Skill bonuses
+    set_skill_bonuses(([
+        "wilderness": 25,
+        "physical": 15,
+        "tracking": 20
+    ]));
+    
+    // Magic/Psionics - none
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+    
+    // HP/SDC - hardy
+    set_base_sdc(30);
+    set_sdc_per_level(0);
+    
+    // Starting equipment
+    set_standard_equipment(({
+        "/obj/clothing/wilderness_outfit",
+        "/obj/item/backpack_large",
+        "/obj/item/survival_kit",
+        "/obj/item/compass",
+        "/obj/item/rope",
+        "/obj/item/tent",
+        "/obj/item/sleeping_bag",
+        "/obj/item/water_purification_kit",
+        "/obj/item/hunting_knife",
+        "/obj/item/first_aid_kit"
+    }));
+    
+    set_starting_credits(150, 600);
+    
+    set_starting_weapons(({
+        "/obj/weapon/hunting_rifle",
+        "/obj/weapon/compound_bow",
+        "/obj/weapon/survival_knife"
+    }));
+    
+    set_starting_armor(({
+        "/obj/armor/light_mdc_armor"
+    }));
+    
+    // Race restrictions - most races can be scouts
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+    
+    // Cybernetics - limited (prefer natural abilities)
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(2);
+}

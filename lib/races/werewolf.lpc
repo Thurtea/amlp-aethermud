@@ -1,45 +1,138 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/werewolf.lpc
+// Werewolf Race - Lycanthropic Shapeshifter
 //
-// This is a stub file. Implement the full race details.
+// Werewolves are supernatural shapeshifters cursed or gifted with the
+// ability to transform between human and wolf forms. In their wolf or
+// hybrid form they become MDC creatures of tremendous physical power.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Werewolf");
     set_race_id("werewolf");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("Werewolves");
+    set_race_category(RACE_CAT_SHIFTER);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Werewolves are lycanthropic shapeshifters who can assume three forms: a "
+        "normal human appearance, a terrifying hybrid wolf-man, and a massive dire "
+        "wolf. The curse of lycanthropy grants them supernatural strength, keen "
+        "predatory senses, and rapid regeneration that allows them to recover from "
+        "all but the most grievous wounds. In their transformed state they become "
+        "MDC creatures capable of shrugging off conventional weapons, though silver "
+        "remains their bane, bypassing their supernatural toughness entirely. Most "
+        "werewolves struggle to control the beast within, especially during the "
+        "full moon, when the urge to transform and hunt becomes overwhelming."
     );
-    
-    // TODO: Configure physical characteristics
+
+    // Physical characteristics - human form stats, transforms larger
     set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_height_range(66, 84);   // 5'6" to 7'0" (hybrid form)
+    set_weight_range(180, 350);
+    set_lifespan(200);
+    set_body_types(({ "lean", "athletic", "muscular", "heavy" }));
+
+    // Stat modifiers - enhanced physical attributes (hybrid form baseline)
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 8,    // Supernatural strength in wolf form
+        "pp": 4,    // Predatory agility
+        "pe": 6,    // Tireless endurance and regeneration
+        "spd": 8,   // Incredible running speed
+        "me": 1,    // Slightly above average willpower
+        "iq": 0,    // Normal intelligence
+        "ma": -2,   // Feral presence unsettles others
+        "pb": -1    // Bestial features in hybrid form
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    // Combat bonuses - predatory instincts
+    set_combat_bonuses(([
+        "strike": 3,
+        "parry": 2,
+        "dodge": 3,
+        "initiative": 4,
+        "roll": 2
+    ]));
+
+    // MDC in wolf/hybrid form
+    set_natural_sdc(0);
+    set_natural_mdc(120);
+    set_mdc_creature(1);
+    set_natural_armor(12);
+
+    // Combat system configuration
+    set_attacks_per_round(2);
+    set_parries_per_round(3);
+    set_auto_parry(1);
+    set_auto_dodge(1);
+    set_combat_archetype("supernatural_predator");
+    set_mdc_natural_attacks(1);
+
+    // Natural weapons - claws and fangs
+    add_natural_weapon("bite", 2, 6, 4);    // 2d6+4 bite
+    add_natural_weapon("claw", 2, 4, 6);    // 2d4+6 rending claws
+    add_natural_weapon("body_slam", 2, 6, 0); // 2d6 body slam
+
+    // Resistances - supernatural toughness
+    set_resistances(([
+        "cold": 50,
+        "fear": 40,
+        "disease": 80,
+        "poison": 50
+    ]));
+    set_immunities(({ "lycanthropy" }));
+    set_vulnerabilities(({ "silver" }));
+
+    // Racial abilities
+    add_racial_ability("nightvision", 2);
+    add_racial_ability("regeneration", 2);
+    add_racial_ability("shapeshift_wolf", 2);
+    add_racial_ability("shapeshift_hybrid", 2);
+    add_racial_ability("heightened_senses", 3);
+    add_racial_ability("tracking", 2);
+    add_racial_ability("howl", 1);
+    add_racial_ability("pack_sense", 1);
+
+    // Minor psionic potential, no innate magic
+    set_psionic_potential(20);
+    set_magic_potential(0);
+
+    // RCC designation - Werewolf is a Racial Character Class
+    set_is_rcc(1);
+    set_can_have_occ(1);
+    set_rcc_description(
+        "Werewolves are a Racial Character Class defined by their lycanthropic "
+        "transformation abilities. Their shapeshifting, regeneration, and "
+        "supernatural physical attributes form the core of their power. While "
+        "the RCC provides significant combat ability, werewolves may also select "
+        "certain OCCs to supplement their natural prowess with learned skills."
+    );
+
+    // OCC restrictions - no heavy cybernetics (interferes with transformation)
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
+    set_forbidden_occs(({ "full_conversion_borg", "partial_borg", "juicer",
+        "crazy", "techno_wizard" }));
+    set_recommended_occs(({ "wilderness_scout", "ranger", "vagabond",
+        "bounty_hunter" }));
+
+    // All alignments - werewolves can be noble or savage
+    set_allowed_alignments(({ }));
+
+    // Starting resources
+    set_starting_equipment(({
+        "/obj/clothing/rugged_clothes",
+        "/obj/item/survival_pack"
+    }));
+    set_starting_credits(150);
+
+    // Faction affiliations
+    set_default_factions(({ }));
+    set_hostile_factions(({ "coalition_states" }));
+
+    // Cultural background
+    set_culture("Nomadic Packs");
+    set_homeland("North America (Wilderness)");
+    set_languages(({ "american", "gobblely" }));
     set_primary_language("american");
 }

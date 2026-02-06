@@ -1,0 +1,12 @@
+// /lib/objects/weapons/sword.lpc
+inherit "/lib/std/object";
+
+void create() {
+    ::create();
+    set_name("sword");
+    set_id(({"sword", "blade", "weapon"}));
+    set_short("a gleaming sword");
+    set_long("This is a well-crafted steel sword with a leather-wrapped hilt.");
+    set_weight(5);
+    set_value(50);
+}

@@ -1,45 +1,104 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/brodkil.lpc
+// Brodkil Race - Brutal Demon-Blooded Humanoids
 //
-// This is a stub file. Implement the full race details.
+// Brodkil are savage, demon-blooded humanoids known for their immense
+// physical strength, cruelty, and love of cybernetic augmentation. They
+// are common mercenaries and raiders throughout Rifts Earth.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("Brodkil");
     set_race_id("brodkil");
-    set_race_plural("s");
+    set_race_plural("Brodkil");
     set_race_category(RACE_CAT_DEMIHUMAN);
-    
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "Brodkil are massive, demon-blooded humanoids that stand seven to nine "
+        "feet tall with thick grey or mottled skin and pronounced brow ridges. "
+        "They are creatures of supernatural origin who have become permanent "
+        "residents of Rifts Earth, forming brutal tribal communities in the "
+        "wilderness. Known for their extreme cruelty and love of violence, "
+        "Brodkil are natural predators who often augment their already formidable "
+        "bodies with crude cybernetics and bionics. They frequently serve as "
+        "mercenaries and shock troops for anyone willing to pay or provide them "
+        "with opportunities for destruction."
     );
-    
-    // TODO: Configure physical characteristics
-    set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(84, 108);  // 7'0" to 9'0"
+    set_weight_range(350, 600);
+    set_lifespan(200);
+    set_body_types(({ "muscular", "massive", "hulking", "brutish" }));
+
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "ps": 8,
+        "pe": 5,
+        "pp": 1,
+        "spd": 2,
+        "iq": -2,
+        "ma": -3,
+        "pb": -4,
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    set_combat_bonuses(([
+        "strike": 2,
+        "parry": 1,
+        "initiative": 1,
+        "save_horror": 5,
+        "save_magic": 2,
+    ]));
+
+    set_natural_sdc(0);
+    set_natural_mdc(80);
+    set_mdc_creature(1);
+    set_natural_armor(12);
+
+    set_resistances(([
+        "fire": 30,
+        "cold": 20,
+        "physical": 15,
+    ]));
+    set_immunities(({ }));
+    set_vulnerabilities(({ "holy_weapons", "millennium_tree_weapons" }));
+
+    add_racial_ability("nightvision", 2);
+    add_racial_ability("supernatural_strength", 1);
+    add_racial_ability("bio_regeneration", 1);
+    add_racial_ability("sense_supernatural", 1);
+
+    set_psionic_potential(0);
+    set_magic_potential(0);
+
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    set_forbidden_occs(({
+        "ley_line_walker", "mystic", "shifter", "techno_wizard",
+        "cyber_knight", "operator",
+    }));
+    set_recommended_occs(({
+        "headhunter", "mercenary", "bandit", "wilderness_scout",
+    }));
+
+    set_allowed_alignments(({
+        "anarchist", "miscreant", "aberrant", "diabolic",
+    }));
+
+    set_starting_equipment(({
+        "/obj/armor/brodkil_hide_armor",
+        "/obj/weapon/crude_vibro_blade",
+        "/obj/item/tribal_fetish",
+    }));
+    set_starting_credits(50);
+
+    set_default_factions(({ "brodkil_tribes" }));
+    set_hostile_factions(({
+        "coalition_states", "cyber_knights", "federation_of_magic",
+    }));
+
+    set_culture("Brodkil Tribal");
+    set_homeland("Rifts Earth Wilderness");
+    set_languages(({ "gobblely", "american" }));
+    set_primary_language("gobblely");
 }

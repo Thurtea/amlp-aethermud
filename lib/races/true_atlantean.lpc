@@ -1,45 +1,89 @@
-// /lib/races/.lpc
-//  Race - Placeholder Implementation
+// /lib/races/true_atlantean.lpc
+// True Atlantean Race - Ancient Human Sub-Race
 //
-// This is a stub file. Implement the full race details.
+// True Atlanteans are an ancient offshoot of humanity who mastered
+// dimensional travel long before the Great Cataclysm. They are the
+// sworn enemies of the Splugorth and carry magical tattoos as a mark
+// of their heritage.
 
 inherit "/std/race";
 
 void create() {
     ::create();
-    
-    set_race_name("");
+
+    set_race_name("True Atlantean");
     set_race_id("true_atlantean");
-    set_race_plural("s");
-    set_race_category(RACE_CAT_DEMIHUMAN);
-    
+    set_race_plural("True Atlanteans");
+    set_race_category(RACE_CAT_HUMAN);
+
     set_race_description(
-        "TODO: Add full race description for ."
+        "True Atlanteans are an ancient sub-race of humanity who developed "
+        "dimensional travel technology millennia before the Coming of the Rifts. "
+        "They are taller and longer-lived than ordinary humans, and carry magical "
+        "tattoos known as Marks of Heritage that identify their clan lineage. "
+        "Driven from their homeland of Atlantis by the Splugorth, they have "
+        "become wanderers of the Megaverse, sworn enemies of the alien "
+        "intelligence and its minions. Their mastery of magic and dimensional "
+        "lore is unrivaled among humanoid races."
     );
-    
-    // TODO: Configure physical characteristics
+
     set_size_category(SIZE_MEDIUM);
-    set_height_range(60, 72);
-    set_weight_range(120, 200);
-    set_lifespan(80);
-    
-    // TODO: Configure stat modifiers
+    set_height_range(72, 84);   // 6'0" to 7'0"
+    set_weight_range(160, 260);
+    set_lifespan(500);
+    set_body_types(({ "athletic", "muscular", "tall", "lean" }));
+
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "iq": 2,
+        "me": 2,
+        "pe": 2,
     ]));
-    
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
-    
-    // TODO: Configure OCC restrictions
+
+    set_combat_bonuses(([
+        "save_magic": 2,
+        "save_horror": 3,
+    ]));
+
+    set_natural_sdc(20);
+    set_mdc_creature(0);
+
+    set_resistances(([
+        "mind_control": 40,
+        "magic": 15,
+    ]));
+    set_immunities(({ "transformation", "vampire_bite" }));
+    set_vulnerabilities(({ }));
+
+    add_racial_ability("magic_tattoos", 1);
+    add_racial_ability("sense_ley_lines", 1);
+    add_racial_ability("dimensional_navigation", 1);
+    add_racial_ability("sense_vampires", 1);
+    add_racial_ability("recognize_enchantment", 1);
+
+    set_psionic_potential(30);
+    set_magic_potential(50);
+
     set_allowed_occs(({ }));
-    set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
-    
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
-    
-    set_languages(({ "american" }));
-    set_primary_language("american");
+    set_forbidden_occs(({ "juicer", "crazy", "mind_melter" }));
+    set_recommended_occs(({
+        "ley_line_walker", "temporal_wizard", "stone_master",
+        "undead_slayer", "tattooed_warrior", "shifter",
+    }));
+
+    set_allowed_alignments(({ }));
+
+    set_starting_equipment(({
+        "/obj/clothing/atlantean_robes",
+        "/obj/item/backpack",
+        "/obj/item/dimensional_compass",
+    }));
+    set_starting_credits(500);
+
+    set_default_factions(({ "true_atlantean_clans" }));
+    set_hostile_factions(({ "splugorth", "splugorth_minions" }));
+
+    set_culture("Atlantean Nomadic Clans");
+    set_homeland("Atlantis (lost to Splugorth)");
+    set_languages(({ "atlantean", "dragonese", "american", "euro" }));
+    set_primary_language("atlantean");
 }

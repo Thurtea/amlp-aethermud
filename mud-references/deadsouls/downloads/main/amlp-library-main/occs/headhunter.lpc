@@ -1,0 +1,160 @@
+// /lib/occs/headhunter.lpc
+// Headhunter O.C.C. - Elite Bounty Hunter
+//
+// Headhunters are professional bounty hunters and mercenaries specializing
+// in tracking down and capturing (or killing) dangerous targets. They are
+// weapons specialists and expert trackers.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    
+    set_occ_name("Headhunter");
+    set_occ_id("headhunter");
+    set_occ_category(OCC_CAT_MERCENARY);
+    set_alignment_requirement("any");
+    
+    set_occ_description(
+        "Headhunters are professional bounty hunters, trackers, and mercenaries who \n"
+        "specialize in hunting down dangerous prey. Whether tracking rogue mages, \n"
+        "escaped criminals, or supernatural monsters, Headhunters are relentless \n"
+        "and highly skilled.\n\n"
+        
+        "These warriors are masters of weapons and combat tactics. They know dozens \n"
+        "of weapon systems, from ancient blades to modern energy weapons, and can \n"
+        "quickly assess and exploit an enemy's weaknesses. Their tracking abilities \n"
+        "rival wilderness scouts, but with a focus on hunting intelligent prey.\n\n"
+        
+        "Headhunters are often hired by governments, corporations, or wealthy \n"
+        "individuals to handle problems that require a lethal touch. They work alone \n"
+        "or in small teams, always professional, always dangerous. Many specialize \n"
+        "in hunting specific types of threats - mages, D-Bees, or supernatural creatures."
+    );
+    
+    // Stat requirements - combat focused
+    set_stat_requirements(([
+        "ps": 12,   // Physical Strength 12+
+        "pp": 12    // Physical Prowess 12+
+    ]));
+    
+    // Stat bonuses - warrior conditioning
+    set_stat_bonuses(([
+        "ps": 2,    // +2 Physical Strength
+        "pp": 2,    // +2 Physical Prowess
+        "pe": 1     // +1 Physical Endurance
+    ]));
+    
+    // Standard XP progression
+    set_xp_table(XP_LEVELS);
+    
+    // Base abilities
+    set_base_abilities(({
+        "weapon_master",        // Expert with all weapons
+        "bounty_hunter",        // Track and capture prey
+        "combat_tactics",       // Superior tactics
+        "target_assessment",    // Evaluate threats
+        "interrogation"         // Extract information
+    }));
+    
+    // Combat - excellent (elite fighters)
+    set_base_attacks(4);
+    set_attacks_per_level(1, 2);
+    set_hand_to_hand_type("martial_arts");
+    
+    // OCC Skills - combat and tracking
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "tracking_humanoid",
+        "tracking_animal",
+        "wilderness_survival",
+        "intelligence_gathering",
+        "interrogation",
+        "detect_ambush",
+        "detect_concealment",
+        "climbing",
+        "swimming",
+        "prowl",
+        "radio_basic",
+        "weapons_systems",
+        "recognize_weapon_quality",
+        "first_aid",
+        "wp_knife",
+        "wp_sword",
+        "wp_energy_rifle",
+        "wp_energy_pistol",
+        "wp_rifle",
+        "wp_automatic_pistol"
+    }));
+    
+    // OCC related skills - combat focused
+    set_occ_related_skills(({
+        "wp_heavy_weapons", "wp_bow", "wp_heavy_energy_weapons",
+        "warsuit_basic", "warsuit_advanced",
+        "hand_to_hand_assassin",
+        "running", "athletics", "acrobatics",
+        "pilot_automobile", "pilot_motorcycle", "pilot_robot",
+        "demolitions", "demolitions_disposal",
+        "computer_operation", "computer_hacking",
+        "disguise", "forgery",
+        "streetwise", "gambling",
+        "paramedic", "brewing",
+        "lore_demons", "lore_faeries"
+    }));
+    set_occ_skill_count(8);
+    set_elective_count(4);
+    set_secondary_count(6);
+    
+    // Skill bonuses
+    set_skill_bonuses(([
+        "combat": 25,
+        "weapons": 30,
+        "tracking": 20
+    ]));
+    
+    // Magic/Psionics - none
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+    
+    // HP/SDC - high (combat trained)
+    set_base_sdc(35);
+    set_sdc_per_level(0);
+    
+    // Starting equipment - professional gear
+    set_standard_equipment(({
+        "/obj/item/backpack_large",
+        "/obj/item/survival_kit",
+        "/obj/item/tracking_equipment",
+        "/obj/item/binoculars",
+        "/obj/item/radio",
+        "/obj/item/restraints",
+        "/obj/item/first_aid_kit",
+        "/obj/item/weapon_maintenance_kit"
+    }));
+    
+    set_starting_credits(500, 1500);  // Well paid
+    
+    set_starting_weapons(({
+        "/obj/weapon/energy_rifle",
+        "/obj/weapon/vibro_blade",
+        "/obj/weapon/laser_pistol",
+        "/obj/weapon/neural_mace"
+    }));
+    
+    set_starting_armor(({
+        "/obj/armor/medium_mdc_armor"
+    }));
+    
+    // Race restrictions - most races
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+    
+    // Cybernetics - encouraged
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(6);
+}

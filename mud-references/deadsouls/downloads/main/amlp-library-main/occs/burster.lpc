@@ -1,0 +1,175 @@
+// /lib/occs/burster.lpc
+// Burster O.C.C. - Pyrokinetic Master
+//
+// Bursters are major psychics who specialize in pyrokinesis - the ability
+// to create and control fire with their minds. They are living flamethrowers,
+// capable of incinerating enemies with a thought.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    
+    set_occ_name("Burster");
+    set_occ_id("burster");
+    set_occ_category(OCC_CAT_PSYCHIC);
+    set_alignment_requirement("any");
+    
+    set_occ_description(
+        "Bursters are major psychics who have mastered the art of pyrokinesis - the \n"
+        "creation and control of fire through mental power alone. With a thought, they \n"
+        "can summon flames, hurl bolts of fire, or immolate their enemies in a blazing \n"
+        "inferno.\n\n"
+        
+        "These feared psionics are naturally resistant to heat and fire, often walking \n"
+        "through flames unharmed. Many Bursters develop a fascination with fire, sometimes \n"
+        "bordering on obsession. They may become pyromaniacs, or conversely, firefighters \n"
+        "who use their powers for good.\n\n"
+        
+        "In combat, Bursters are devastating at any range. They can create walls of fire \n"
+        "to block enemies, throw fire balls with deadly accuracy, or cause enemies to \n"
+        "spontaneously combust. Their pyrokinetic abilities make conventional armor less \n"
+        "effective, as intense heat can overwhelm even MDC materials.\n\n"
+        
+        "Bursters are highly sought after by military forces but feared by civilians. \n"
+        "Many cities ban them outright, seeing them as living weapons too dangerous to \n"
+        "allow within city limits."
+    );
+    
+    // Stat requirements - major psychic
+    set_stat_requirements(([
+        "me": 14    // Mental Endurance 14+ (major psychic requirement)
+    ]));
+    
+    // Stat bonuses - psionic enhancement
+    set_stat_bonuses(([
+        "me": 2,    // +2 Mental Endurance
+        "ma": 1     // +1 Mental Affinity
+    ]));
+    
+    // Standard XP progression
+    set_xp_table(XP_LEVELS);
+    
+    // Base abilities
+    set_base_abilities(({
+        "pyrokinesis",          // Master of flame
+        "fire_resistance",      // Immune to heat/fire
+        "fire_sensing",         // Detect fire/heat
+        "flame_manipulation",   // Control existing flames
+        "heat_generation"       // Generate intense heat
+    }));
+    
+    // Combat - moderate (rely on psionics)
+    set_base_attacks(3);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type("expert");
+    
+    // OCC Skills - psionic training with some combat
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "meditation",
+        "psionics",
+        "lore_psychics",
+        "detect_ambush",
+        "prowl",
+        "climbing",
+        "running",
+        "first_aid",
+        "radio_basic",
+        "pilot_automobile",
+        "wp_energy_pistol",
+        "wp_knife"
+    }));
+    
+    // OCC related skills
+    set_occ_related_skills(({
+        "wp_energy_rifle", "wp_rifle", "wp_automatic_pistol",
+        "hand_to_hand_martial_arts",
+        "swimming", "athletics", "acrobatics",
+        "pilot_motorcycle", "pilot_robot",
+        "computer_operation",
+        "streetwise", "intelligence_gathering",
+        "paramedic", "brewing",
+        "lore_magic", "lore_demons",
+        "tracking_humanoid", "wilderness_survival"
+    }));
+    set_occ_skill_count(6);
+    set_elective_count(3);
+    set_secondary_count(5);
+    
+    // Skill bonuses
+    set_skill_bonuses(([
+        "psionic": 30,
+        "mental": 20,
+        "fire_related": 25
+    ]));
+    
+    // Magic/Psionics - major psychic
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(80);  // High ISP for major psychic
+    set_isp_per_level(12);
+    set_magic_type("none");
+    set_psionic_type("major");
+    
+    // Grant starting psionic powers - focus on pyrokinesis
+    set_base_psionic_powers(({
+        // Super Psionics (Pyrokinetic)
+        "pyrokinesis",              // Create/control fire
+        "spontaneous_combustion",   // Ignite targets
+        "fire_bolt",                // Ranged fire attack
+        "summon_fire",              // Create fire from nothing
+        "plasma_bolt",              // Intense fire projectile
+        
+        // Physical Psionics (support)
+        "mind_block",               // Mental defense
+        "resist_fatigue",           // Enhanced endurance
+        "bio_regeneration",         // Healing
+        
+        // Sensitive Psionics
+        "sixth_sense"               // Danger warning
+    }));
+    
+    // Gain additional powers at levels 3, 6, 9, 12
+    set_powers_per_level([
+        3: 1,  // One new power at level 3
+        6: 1,  // One new power at level 6
+        9: 1,  // One new power at level 9
+        12: 1  // One new power at level 12
+    ]);
+    
+    // HP/SDC - moderate
+    set_base_sdc(25);
+    set_sdc_per_level(0);
+    
+    // Starting equipment
+    set_standard_equipment(({
+        "/obj/clothing/fire_resistant_suit",
+        "/obj/item/backpack",
+        "/obj/item/fire_extinguisher",  // Ironic
+        "/obj/item/heat_goggles",
+        "/obj/item/first_aid_kit",
+        "/obj/item/radio",
+        "/obj/item/psi_crystal"  // Focus for meditation
+    }));
+    
+    set_starting_credits(200, 600);
+    
+    set_starting_weapons(({
+        "/obj/weapon/laser_pistol",  // Backup weapon
+        "/obj/weapon/survival_knife"
+    }));
+    
+    set_starting_armor(({
+        "/obj/armor/light_mdc_armor"  // Don't need much, have fire resistance
+    }));
+    
+    // Race restrictions - most races can be psychic
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+    
+    // Cybernetics - generally avoided (interferes with psionics)
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(1);
+}

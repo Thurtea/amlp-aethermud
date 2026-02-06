@@ -1,0 +1,12 @@
+1) Uncompress/rename the package so that the folders like bin and lib
+   are in c:\lpuni
+2) Use wordpad to edit c:\lpuni\bin\config.lpuni.win32 and change the mudname
+3) Double-click on c:\lpuni\win32\mud.bat
+4) telnet to localhost 1336
+
+Enjoy!
+
+If you run into trouble, feel free to post on the LPUni
+section of http://lpmuds.net/forum
+
+

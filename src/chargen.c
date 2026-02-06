@@ -3,6 +3,7 @@
 #include "room.h"
 #include "skills.h"
 #include "combat.h"
+#include "race_loader.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -302,6 +303,7 @@ void chargen_roll_stats(PlayerSession *sess) {
     if (!sess) return;
     
     Character *ch = &sess->character;
+    int i;
     
     ch->stats.iq = roll_3d6();
     ch->stats.me = roll_3d6();
@@ -324,8 +326,28 @@ void chargen_roll_stats(PlayerSession *sess) {
     ch->sdc = 20;
     ch->max_sdc = 20;
     
+    /* Phase 1 defaults for extended health/energy */
+    ch->health_type = HP_SDC;
+    ch->mdc = 0;
+    ch->max_mdc = 0;
+
+    ch->isp = 0;
+    ch->max_isp = 0;
+
+    ch->ppe = 0;
+    ch->max_ppe = 0;
+
+    ch->natural_weapon_count = 0;
+    for (i = 0; i < 8; i++) ch->natural_weapons[i] = NULL;
+
+    ch->introduced_count = 0;
+    for (i = 0; i < 32; i++) ch->introduced_to[i] = NULL;
+    
     /* ISP/PPE will be calculated in psionics_init_abilities() and magic_init_abilities() */
     /* These are called in chargen_complete() */
+
+    /* Apply race / O.C.C. derived bonuses */
+    apply_race_and_occ(sess);
 }
 
 /* Display character stats */
@@ -347,14 +369,27 @@ void chargen_display_stats(PlayerSession *sess) {
     send_to_player(sess, "  PP: %-3d   PE: %-3d   PB: %-3d   SPD: %-3d\n",
                   ch->stats.pp, ch->stats.pe, ch->stats.pb, ch->stats.spd);
     send_to_player(sess, "-------------------------------------------------------\n");
-    send_to_player(sess, "  HP: %-3d/%-3d    S.D.C.: %-3d/%-3d\n",
-                  ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
-    
-    if (ch->psionics.isp_max > 0) {
+    if (ch->health_type == MDC_ONLY) {
+        send_to_player(sess, "  MDC: %-3d/%-3d\n", ch->mdc, ch->max_mdc);
+    } else if (ch->health_type == HP_ONLY) {
+        send_to_player(sess, "  HP: %-3d/%-3d\n", ch->hp, ch->max_hp);
+    } else {
+        send_to_player(sess, "  HP: %-3d/%-3d    S.D.C.: %-3d/%-3d\n",
+                      ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
+    }
+
+    if (ch->max_isp > 0) {
+        send_to_player(sess, "  I.S.P.: %-3d/%-3d (Psionic Energy)\n",
+                      ch->isp, ch->max_isp);
+    } else if (ch->psionics.isp_max > 0) {
         send_to_player(sess, "  I.S.P.: %-3d/%-3d (Psionic Energy)\n",
                       ch->psionics.isp_current, ch->psionics.isp_max);
     }
-    if (ch->magic.ppe_max > 0) {
+
+    if (ch->max_ppe > 0) {
+        send_to_player(sess, "  P.P.E.: %-3d/%-3d (Magical Energy)\n",
+                      ch->ppe, ch->max_ppe);
+    } else if (ch->magic.ppe_max > 0) {
         send_to_player(sess, "  P.P.E.: %-3d/%-3d (Magical Energy)\n",
                       ch->magic.ppe_current, ch->magic.ppe_max);
     }
@@ -910,6 +945,7 @@ int save_character(PlayerSession *sess) {
                 filepath, strerror(errno));
         return 0;
     }
+    int i;
     
     /* Write magic number (for validation) */
     uint32_t magic = 0x414D4C50;  /* "AMLP" in hex */
@@ -965,6 +1001,21 @@ int save_character(PlayerSession *sess) {
     fwrite(&ch->max_hp, sizeof(int), 1, f);
     fwrite(&ch->sdc, sizeof(int), 1, f);
     fwrite(&ch->max_sdc, sizeof(int), 1, f);
+
+    /* Phase 1: extended health fields */
+    /* health_type as uint8_t */
+    uint8_t htype = (uint8_t) ch->health_type;
+    fwrite(&htype, sizeof(uint8_t), 1, f);
+    fwrite(&ch->mdc, sizeof(int), 1, f);
+    fwrite(&ch->max_mdc, sizeof(int), 1, f);
+
+    /* ISP / PPE fields (also stored in psionics/magic structs) */
+    fwrite(&ch->isp, sizeof(int), 1, f);
+    fwrite(&ch->max_isp, sizeof(int), 1, f);
+    fwrite(&ch->ppe, sizeof(int), 1, f);
+    fwrite(&ch->max_ppe, sizeof(int), 1, f);
+
+    /* Backwards-compatible: also store psionics/magic pools for older systems */
     fwrite(&ch->psionics.isp_current, sizeof(int), 1, f);
     fwrite(&ch->psionics.isp_max, sizeof(int), 1, f);
     fwrite(&ch->magic.ppe_current, sizeof(int), 1, f);
@@ -973,6 +1024,38 @@ int save_character(PlayerSession *sess) {
     /* Write current room ID */
     int room_id = sess->current_room ? sess->current_room->id : 0;
     fwrite(&room_id, sizeof(int), 1, f);
+
+    /* Write natural weapons */
+    int nw = ch->natural_weapon_count;
+    if (nw < 0) nw = 0;
+    if (nw > 8) nw = 8;
+    fwrite(&nw, sizeof(int), 1, f);
+    for (i = 0; i < nw; i++) {
+        if (ch->natural_weapons[i]) {
+            size_t len = strlen(ch->natural_weapons[i]);
+            fwrite(&len, sizeof(size_t), 1, f);
+            fwrite(ch->natural_weapons[i], 1, len, f);
+        } else {
+            size_t zero = 0;
+            fwrite(&zero, sizeof(size_t), 1, f);
+        }
+    }
+
+    /* Write introduced_to list */
+    int it = ch->introduced_count;
+    if (it < 0) it = 0;
+    if (it > 32) it = 32;
+    fwrite(&it, sizeof(int), 1, f);
+    for (i = 0; i < it; i++) {
+        if (ch->introduced_to[i]) {
+            size_t len = strlen(ch->introduced_to[i]);
+            fwrite(&len, sizeof(size_t), 1, f);
+            fwrite(ch->introduced_to[i], 1, len, f);
+        } else {
+            size_t zero = 0;
+            fwrite(&zero, sizeof(size_t), 1, f);
+        }
+    }
     
     /* Write timestamp */
     time_t now = time(NULL);
@@ -1001,6 +1084,7 @@ int load_character(PlayerSession *sess, const char *username) {
         DEBUG_LOG("No save file found for '%s'", username);
         return 0;  /* New player, need to create character */
     }
+    int i;
     
     /* Read and validate magic number */
     uint32_t magic;
@@ -1090,6 +1174,29 @@ int load_character(PlayerSession *sess, const char *username) {
     fread(&ch->max_hp, sizeof(int), 1, f);
     fread(&ch->sdc, sizeof(int), 1, f);
     fread(&ch->max_sdc, sizeof(int), 1, f);
+    
+    /* Phase 1: extended health fields */
+    {
+        uint8_t htype = 0;
+        if (fread(&htype, sizeof(uint8_t), 1, f) == 1) {
+            ch->health_type = (HealthType) htype;
+        } else {
+            ch->health_type = HP_SDC;
+        }
+        fread(&ch->mdc, sizeof(int), 1, f);
+        fread(&ch->max_mdc, sizeof(int), 1, f);
+
+        fread(&ch->isp, sizeof(int), 1, f);
+        fread(&ch->max_isp, sizeof(int), 1, f);
+        fread(&ch->ppe, sizeof(int), 1, f);
+        fread(&ch->max_ppe, sizeof(int), 1, f);
+
+        /* Backwards-compatible: read psionics/magic pools */
+        fread(&ch->psionics.isp_current, sizeof(int), 1, f);
+        fread(&ch->psionics.isp_max, sizeof(int), 1, f);
+        fread(&ch->magic.ppe_current, sizeof(int), 1, f);
+        fread(&ch->magic.ppe_max, sizeof(int), 1, f);
+    }
     fread(&ch->psionics.isp_current, sizeof(int), 1, f);
     fread(&ch->psionics.isp_max, sizeof(int), 1, f);
     fread(&ch->magic.ppe_current, sizeof(int), 1, f);
@@ -1102,18 +1209,63 @@ int load_character(PlayerSession *sess, const char *username) {
     /* Read timestamp (for info only) */
     time_t saved_time;
     fread(&saved_time, sizeof(time_t), 1, f);
-    
+    /* Read natural weapons */
+    int nw = 0;
+    if (fread(&nw, sizeof(int), 1, f) == 1) {
+        if (nw < 0) nw = 0;
+        if (nw > 8) nw = 8;
+        ch->natural_weapon_count = nw;
+        for (i = 0; i < nw; i++) {
+            size_t len = 0;
+            if (fread(&len, sizeof(size_t), 1, f) != 1) { ch->natural_weapons[i] = NULL; continue; }
+            if (len > 0 && len < 256) {
+                char buf[256];
+                fread(buf, 1, len, f);
+                buf[len] = '\0';
+                ch->natural_weapons[i] = strdup(buf);
+            } else {
+                if (len > 0) fseek(f, len, SEEK_CUR);
+                ch->natural_weapons[i] = NULL;
+            }
+        }
+    } else {
+        ch->natural_weapon_count = 0;
+    }
+
+    /* Read introduced_to list */
+    int it = 0;
+    if (fread(&it, sizeof(int), 1, f) == 1) {
+        if (it < 0) it = 0;
+        if (it > 32) it = 32;
+        ch->introduced_count = it;
+        for (i = 0; i < it; i++) {
+            size_t len = 0;
+            if (fread(&len, sizeof(size_t), 1, f) != 1) { ch->introduced_to[i] = NULL; continue; }
+            if (len > 0 && len < 256) {
+                char buf[256];
+                fread(buf, 1, len, f);
+                buf[len] = '\0';
+                ch->introduced_to[i] = strdup(buf);
+            } else {
+                if (len > 0) fseek(f, len, SEEK_CUR);
+                ch->introduced_to[i] = NULL;
+            }
+        }
+    } else {
+        ch->introduced_count = 0;
+    }
+
     fclose(f);
-    
+
+    INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)", 
+            username, filepath, time(NULL) - saved_time);
+
     /* Set room pointer */
     sess->current_room = room_get_by_id(room_id);
     if (!sess->current_room) {
         sess->current_room = room_get_start();  /* Fallback to start room */
     }
-    
-    INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)", 
-            username, filepath, time(NULL) - saved_time);
-    
+
     return 1;
 }
 

@@ -48,8 +48,15 @@ int cmd_ls_filesystem(PlayerSession *session, const char *args) {
         }
     }
     
-    /* Build full filesystem path */
-    snprintf(full_path, sizeof(full_path), "lib%s", path);
+    /* Build full filesystem path. If the user already included a leading
+     * "/lib/" prefix (e.g. "/lib/std/player.lpc"), strip the leading
+     * slash so we don't end up with "lib/lib/...". Otherwise prefix with
+     * "lib" as before. */
+    if (strncmp(path, "/lib/", 5) == 0) {
+        snprintf(full_path, sizeof(full_path), "%s", path + 1);
+    } else {
+        snprintf(full_path, sizeof(full_path), "lib%s", path);
+    }
     
     DIR *dir = opendir(full_path);
     if (!dir) {
@@ -129,7 +136,11 @@ int cmd_cd_filesystem(PlayerSession *session, const char *args) {
     }
     
     /* Verify directory exists */
-    snprintf(full_path, sizeof(full_path), "lib%s", new_dir);
+    if (strncmp(new_dir, "/lib/", 5) == 0) {
+        snprintf(full_path, sizeof(full_path), "%s", new_dir + 1);
+    } else {
+        snprintf(full_path, sizeof(full_path), "lib%s", new_dir);
+    }
    
     struct stat st;
     if (stat(full_path, &st) != 0 || !S_ISDIR(st.st_mode)) {
@@ -178,7 +189,11 @@ int cmd_cat_filesystem(PlayerSession *session, const char *args) {
         }
     }
     
-    snprintf(full_path, sizeof(full_path), "lib%s", path);
+    if (strncmp(path, "/lib/", 5) == 0) {
+        snprintf(full_path, sizeof(full_path), "%s", path + 1);
+    } else {
+        snprintf(full_path, sizeof(full_path), "lib%s", path);
+    }
     
     FILE *f = fopen(full_path, "r");
     if (!f) {

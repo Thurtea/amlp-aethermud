@@ -5,47 +5,46 @@
 // View file contents (read-only)
 
 int main(string args) {
-    object player;
-    int privilege;
-    string path, cwd, content;
-    int size;
+    object player = this_player();
+    string resolved, *lines;
+    int i;
 
-    player = this_player();
     if (!player) return 0;
-    privilege = player->query_privilege();
-    if (privilege < 1) {
-        write("Error: Insufficient privileges.\n");
-        return 1;
-    }
-
-    if (!args || trim(args) == "") {
+    if (!args || args == "") {
         write("Usage: cat <file>\n");
         return 1;
     }
 
-    cwd = player->query_cwd();
-    if (!cwd || cwd == "") cwd = "/lib";
-    path = normalize_path(trim(args), cwd);
-
-    size = file_size(path);
-    if (size == -1) {
-        write("Error: File not found: " + path + "\n");
-        return 1;
-    }
-    if (size == 0) {
-        write("Error: File is empty: " + path + "\n");
-        return 1;
+    /* Use the player's path resolution helper (common in DS/FluffOS libs) */
+    if (function_exists("resolve_path", player)) {
+        resolved = (string)player->resolve_path(args);
+    } else {
+        /* Fallback: accept the argument as-is */
+        resolved = args;
     }
 
-    content = read_file(path, 0, 0);
-    if (!content || content == "") {
-        write("Error: Unable to read file: " + path + "\n");
+    /* Auto-add .lpc if not present */
+    if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
+        resolved += ".lpc";
+    }
+
+    /* Try to read the file */
+    if (file_size(resolved) == -1) {
+        write("File not found: " + args + "\n");
         return 1;
     }
 
-    write("=== " + path + " (" + size + " bytes) ===\n");
-    write(content);
-    write("\n=== End of file ===\n");
+    lines = explode(read_file(resolved), "\n");
+    if (!lines || sizeof(lines) == 0) {
+        write("File is empty: " + resolved + "\n");
+        return 1;
+    }
+
+    write("┌─ " + resolved + "\n");
+    for (i = 0; i < sizeof(lines); i++) {
+        write(sprintf("%4d: %s\n", i + 1, lines[i]));
+    }
+    write("└─ " + sprintf("%d lines\n", sizeof(lines)));
     return 1;
 }
 

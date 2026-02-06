@@ -38,6 +38,13 @@ typedef struct {
 } CharacterStats;
 
 /* Character data */
+/* Phase 1: Extended health / energy systems */
+typedef enum {
+    HP_SDC = 0,   /* Standard HP + SDC model */
+    MDC_ONLY,     /* Use MDC values only (mega-damage creatures) */
+    HP_ONLY       /* Only HP (no SDC) */
+} HealthType;
+
 typedef struct Character {
     char *race;
     char *occ;
@@ -62,6 +69,24 @@ typedef struct Character {
     
     /* Magic system (Phase 5) */
     MagicAbilities magic;       /* Magic spells and PPE pool */
+    
+    HealthType health_type;    /* Which health model this character uses */
+    int mdc;                   /* Current mega-damage capacity */
+    int max_mdc;               /* Max mega-damage capacity */
+
+    int isp;                   /* Current ISP (alternate to psionics.isp_current) */
+    int max_isp;               /* Max ISP */
+
+    int ppe;                   /* Current PPE (alternate to magic.ppe_current) */
+    int max_ppe;               /* Max PPE */
+
+    /* Natural weapons for creatures (claws, bite, etc.) */
+    char *natural_weapons[8];
+    int natural_weapon_count;
+
+    /* Tracks which players this character has been introduced to */
+    char *introduced_to[32];
+    int introduced_count;
 } Character;
 
 /* Chargen initialization */

@@ -173,7 +173,7 @@ static OCCSkillConfig mystic_config = {
 
 /* DRAGON HATCHLING - Young Dragon Rider */
 static OCCSkillConfig dragon_hatchling_config = {
-    .occ_name = "Dragon Hatchling",
+    .occ_name = "Dragon Hatchling RCC",
     .primary_count = 8,
     .primary_skills = {
         {"Hand to Hand: Combat", 45, 3, 1, 1},
@@ -204,7 +204,7 @@ static const SkillConfigEntry skill_configs[] = {
     {"Scholar", &scholar_config},
     {"Merchant", &merchant_config},
     {"Mystic", &mystic_config},
-    {"Dragon Hatchling", &dragon_hatchling_config},
+    {"Dragon Hatchling RCC", &dragon_hatchling_config},
     {NULL, NULL}  /* Sentinel */
 };
 

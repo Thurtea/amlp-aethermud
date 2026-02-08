@@ -827,7 +827,7 @@ const char *skill_get_name(int skill_id) {
 static const char *OCC_PACKAGE_NAMES[] = {
     "Cyber-Knight", "Ley Line Walker", "Rogue Scientist", "Techno-Wizard",
     "Battle Magus", "Biomancer", "Body Fixer", "Burster",
-    "City Rat", "Cosmo-Knight", "Crazy", "Dragon Hatchling",
+    "City Rat", "Cosmo-Knight", "Crazy", "Dragon Hatchling RCC",
     "Elemental Fusionist", "Full Conversion Borg", "Headhunter", "Juicer",
     "Line Walker", "Mercenary", "Mind Melter", "Mystic",
     "Necromancer", "Ninja", "Operator", "Power Armor Pilot",

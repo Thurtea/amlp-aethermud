@@ -1,0 +1,107 @@
+// /lib/races/atlantean.lpc
+// Atlantean Race - Dimensional Traveler with Tattoo Magic
+//
+// Atlanteans are an ancient human sub-race who mastered dimensional
+// travel millennia ago. They are taller and longer-lived than standard
+// humans and carry magical heritage tattoos. Their connection to
+// tattoo magic makes them uniquely suited to mystical combat roles.
+// Some Atlanteans serve the secretive Aerihman clan as Sunaj Assassins.
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Atlantean");
+    set_race_id("atlantean");
+    set_race_plural("Atlanteans");
+    set_race_category(RACE_CAT_HUMAN);
+
+    set_race_description(
+        "Atlanteans are an ancient sub-race of humanity who developed "
+        "dimensional travel technology millennia before the Coming of the Rifts. "
+        "Taller and longer-lived than ordinary humans, they carry magical "
+        "tattoos known as Marks of Heritage that identify their clan lineage "
+        "and grant supernatural abilities. Driven from their homeland by the "
+        "Splugorth, Atlanteans have become wanderers of the Megaverse. Their "
+        "mastery of tattoo magic is unrivaled, and their hatred of the Splugorth "
+        "is legendary. Some clans harbor dark secrets - the Aerihman clan is "
+        "rumored to train shadow assassins known only as the Sunaj."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(70, 82);   // 5'10" to 6'10"
+    set_weight_range(150, 240);
+    set_lifespan(500);
+    set_body_types(({ "athletic", "muscular", "tall", "lean" }));
+
+    // Atlanteans are physically and mentally superior to baseline humans
+    set_stat_modifiers(([
+        "iq": 1,
+        "me": 1,
+        "ps": 2,
+        "pp": 1,
+        "pe": 2,
+    ]));
+
+    set_combat_bonuses(([
+        "save_magic": 2,
+        "save_horror": 2,
+    ]));
+
+    // Tougher than standard humans
+    set_natural_sdc(15);
+    set_mdc_creature(0);
+
+    set_resistances(([
+        "mind_control": 30,
+        "magic": 10,
+    ]));
+    set_immunities(({ "vampire_bite" }));
+    set_vulnerabilities(({ }));
+
+    // Tattoo magic abilities
+    add_racial_ability("magic_tattoos", 1);
+    add_racial_ability("sense_ley_lines", 1);
+    add_racial_ability("sense_vampires", 1);
+    add_racial_ability("recognize_enchantment", 1);
+
+    // Significant magical and psionic potential from tattoo magic heritage
+    set_psionic_potential(20);
+    set_magic_potential(40);
+
+    set_allowed_occs(({ }));
+    set_forbidden_occs(({ "juicer", "crazy" }));
+    set_recommended_occs(({
+        "ley_line_walker", "tattooed_man", "undead_slayer",
+        "temporal_wizard", "stone_master", "shifter",
+        "atlantean_nomad",
+    }));
+
+    set_allowed_alignments(({ }));
+
+    set_starting_equipment(({
+        "/obj/clothing/atlantean_clothes",
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+    }));
+    set_starting_credits(300);
+
+    set_default_factions(({ "atlantean_clans" }));
+    set_hostile_factions(({ "splugorth", "splugorth_minions" }));
+
+    set_culture("Atlantean Nomadic Clans");
+    set_homeland("Atlantis (lost to Splugorth)");
+    set_languages(({ "atlantean", "dragonese", "american" }));
+    set_primary_language("atlantean");
+}
+
+// Atlanteans get bonus to magic skills
+int query_skill_bonus() {
+    return 3;  // +3% to magical/mystical skills
+}
+
+// Atlanteans have enhanced resistance to transformation
+string* query_skill_restrictions() {
+    return ({ });  // No restrictions
+}

@@ -98,6 +98,7 @@ typedef struct Character {
     int auto_dodge_enabled;    /* Player toggle: 1=on, 0=off (default on) */
     int wimpy_threshold;       /* Auto-flee at this % of max HP (0=disabled) */
     int credits;               /* Universal credits (currency) */
+    char *clan;                /* Clan membership (e.g., "aerihman" for Sunaj) */
 } Character;
 
 /* Chargen initialization */
@@ -134,6 +135,9 @@ void cmd_drop(PlayerSession *sess, const char *args);
 void cmd_use_power(PlayerSession *sess, const char *args);
 void cmd_powers(PlayerSession *sess, const char *args);
 void cmd_isp(PlayerSession *sess, const char *args);
+
+/* Clan command */
+void cmd_clan(PlayerSession *sess, const char *args);
 
 /* Magic commands (Phase 5) */
 void cmd_cast(PlayerSession *sess, const char *args);

@@ -1,70 +1,165 @@
 // /lib/occs/dragon_hatchling_rcc.lpc
-//  O.C.C. - Placeholder Implementation
+// Dragon Hatchling R.C.C. - Racial Character Class for all dragon species
 //
-// This is a stub file. Implement the full OCC details.
+// Dragons are among the most powerful beings in the Megaverse. Even as
+// hatchlings they possess immense strength, natural mega-damage armor,
+// metamorphosis, fire breath, innate psionics, and an intuitive
+// understanding of magic. The Dragon Hatchling RCC is automatically
+// assigned when a player selects any dragon race.
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
-    set_occ_name("");
+
+    set_occ_name("Dragon Hatchling RCC");
     set_occ_id("dragon_hatchling_rcc");
-    set_occ_category(OCC_CAT_ADVENTURER);
+    set_occ_category(OCC_CAT_RCC);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "TODO: Add full O.C.C. description for ."
+        "Dragon hatchlings are young but tremendously powerful creatures of "
+        "magic. Born fully sentient and capable of speech, they possess natural "
+        "mega-damage hides, the ability to fly, breathe fire, shapeshift into "
+        "humanoid forms via metamorphosis, and an innate connection to both "
+        "psionic and magical energies. The hatchling period lasts until roughly "
+        "600 years of age, during which the dragon explores the world and "
+        "develops its abilities. Dragons have no formal society and are fiercely "
+        "independent and territorial."
     );
-    
-    // TODO: Configure stat requirements
+
+    // No stat requirements - race file handles dragon attributes
     set_stat_requirements(([
-        // Example: "iq": 10
+        // Dragon stats come from the race file (5D6 IQ, 6D6 PS, etc.)
     ]));
-    
-    // TODO: Configure stat bonuses
+
+    // No OCC stat bonuses - dragon race bonuses are sufficient
     set_stat_bonuses(([
-        // Example: "ps": 2
+        // Race file provides all stat bonuses
     ]));
-    
-    // Combat configuration
-    set_base_attacks(2);
-    set_attacks_per_level(1, 3);
+
+    // Combat - hand to hand basic + 1 melee attack (from reference)
+    set_base_attacks(3);
+    set_attacks_per_level(1, 4);  // +1 attack every 4 levels
     set_hand_to_hand_type("basic");
-    
-    // TODO: Configure OCC skills
+
+    // Combat progression
+    set_combat_progression(([
+        1: ([ "strike": 2, "parry": 2, "dodge": 2 ]),
+        3: ([ "roll": 2, "initiative": 1 ]),
+        5: ([ "strike": 1, "parry": 1 ]),
+        8: ([ "dodge": 1, "initiative": 1 ]),
+        10: ([ "strike": 1, "parry": 1 ]),
+        12: ([ "dodge": 1, "critical_strike": 1 ]),
+        15: ([ "strike": 1, "parry": 1, "dodge": 1 ])
+    ]));
+
+    // OCC Skills - limited skill selection for dragons
+    // Reference: automatically literate in dragonese + one language at 98%
+    // Can select six skills at level 1
     set_occ_skills(({
-        "language_american"
+        "language_dragonese",
+        "language_american",
+        "basic_math",
+        "lore_magic",
+        "lore_demons_monsters",
+        "land_navigation"
     }));
-    
-    set_occ_related_skills(({ }));
+
+    set_occ_related_skills(({
+        "wilderness_survival", "tracking", "prowl",
+        "detect_ambush", "detect_concealment",
+        "history", "anthropology",
+        "language_*", "literacy_*"
+    }));
     set_occ_skill_count(6);
-    set_elective_count(4);
+
+    // Limited elective categories for dragons
+    set_elective_categories(({
+        SKILL_CAT_COMMUNICATION, SKILL_CAT_DOMESTIC,
+        SKILL_CAT_MILITARY, SKILL_CAT_TECHNICAL,
+        SKILL_CAT_WILDERNESS, SKILL_CAT_ROGUE
+    }));
+    set_elective_count(4);  // +4 at levels 4 and 8
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
-    set_base_ppe(0);
-    set_ppe_per_level(0);
-    set_base_isp(0);
-    set_isp_per_level(0);
-    set_magic_type("none");
-    set_psionic_type("none");
-    
-    // HP/SDC
-    set_base_sdc(20);
+
+    // Major psionic (Great Horned) - 8 powers, ISP: 3D4x10
+    // Race file sets base ISP and PPE; OCC adds per-level gains
+    set_base_ppe(0);        // Race file handles base PPE
+    set_ppe_per_level(10);  // +10 PPE per level (learns more magic)
+    set_base_isp(0);        // Race file handles base ISP
+    set_isp_per_level(5);   // +5 ISP per level
+    set_magic_type("innate");
+    set_psionic_type("major");
+
+    // MDC creature - no HP/SDC. Race file sets base MDC.
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(0);
     set_sdc_per_level(0);
-    
-    // TODO: Configure starting equipment
+    set_mdc_class(0);   // Race file handles MDC
+
+    // No starting equipment - dragons are in natural form
     set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
-    
-    // Race restrictions
-    set_race_requirements(({ }));
+    set_optional_gear(({ }));
+    set_starting_credits(500, 1000);
+    set_starting_weapons(({ }));  // Natural weapons only
+    set_starting_armor(({ }));    // Natural MDC hide
+
+    // Race restrictions - dragon races only
+    set_race_requirements(({
+        "great_horned_dragon", "fire_dragon", "ice_dragon",
+        "thunder_lizard_dragon", "dragon_hatchling",
+        "thorny_dragon"
+    }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    // No cybernetics - dragons regenerate and reject implants
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
+
+    // Special abilities
+    add_special_power("fire_breath", 1);
+    add_special_power("metamorphosis", 1);
+    add_special_power("teleport", 1);
+    add_special_power("bio_regenerate", 1);
+    add_special_power("see_invisible", 1);
+    add_special_power("nightvision", 1);
+    add_special_power("sense_ley_lines", 1);
+
+    set_vehicle_type("none");  // Dragons fly
+    set_special_training("dragon_instinct");
+
+    // Background
+    set_background(
+        "You hatched from your egg fully sentient, possessing an innate "
+        "understanding of language, magic, and the fundamental nature of the "
+        "cosmos. Left to fend for yourself within days of hatching, as is the "
+        "way of all dragons, you now explore the world of Rifts Earth - a "
+        "realm overflowing with the magical energy that sustains your kind. "
+        "Your immense power belies your youth; even as a hatchling, you are "
+        "a mega-damage creature capable of flight, fire breath, and shapeshifting."
+    );
+    set_organizations(({ }));  // Dragons are solitary
+    set_enemies(({ "dragon_slayers", "splugorth" }));
+}
+
+// Fire breath damage scales with level
+string query_fire_breath_damage(int level) {
+    if (level < 3) return "2d6 MD";
+    else if (level < 6) return "4d6 MD";
+    else if (level < 9) return "6d6 MD";
+    else if (level < 12) return "8d6 MD";
+    else return "1d4x10 MD";
+}
+
+// Metamorphosis duration (hours per level)
+int query_metamorph_duration(int level) {
+    return 2 * level;
+}
+
+// Teleport success percentage
+int query_teleport_chance(int level) {
+    return 28 + (2 * level);
 }

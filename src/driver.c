@@ -1136,6 +1136,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             "  rift                 - Use Moxim rift travel (500 credits)\r\n"
             "  rift <destination>   - Travel to a destination via rift\r\n"
             "  credits / balance    - Check your credit balance\r\n"
+            "  clan                 - View or join a clan\r\n"
+            "  clan <name>          - Join a clan (race-restricted)\r\n"
             "\r\nUI/SETTINGS:\r\n"
             "  scan                 - Show contents of adjacent rooms\r\n"
             "  examine/view <tgt>   - Inspect objects/players\r\n"
@@ -1201,6 +1203,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
     if (strcmp(cmd, "credits") == 0 || strcmp(cmd, "balance") == 0) {
         send_to_player(session, "You have %d credits.\r\n", session->character.credits);
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "clan") == 0) {
+        cmd_clan(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }

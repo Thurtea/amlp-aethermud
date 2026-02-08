@@ -349,7 +349,9 @@ void chargen_roll_stats(PlayerSession *sess) {
 
     ch->introduced_count = 0;
     for (i = 0; i < 32; i++) ch->introduced_to[i] = NULL;
-    
+
+    ch->clan = NULL;
+
     /* ISP/PPE will be calculated in psionics_init_abilities() and magic_init_abilities() */
     /* These are called in chargen_complete() */
 
@@ -462,15 +464,38 @@ void chargen_complete(PlayerSession *sess) {
     magic_add_starting_spells(&sess->character, sess->character.occ);
     
     /* Add starting equipment based on OCC */
+    /* Dragon RCC: no equipment, natural form only */
+    if (strcasestr(sess->character.occ, "Dragon Hatchling")) {
+        /* Dragons don't use equipment - they ARE the weapon */
+        send_to_player(sess, "As a dragon, you rely on your natural abilities.\n");
+        sess->character.credits = 500;
+    }
+    /* Sunaj Assassin: stealth gear */
+    else if (strcasestr(sess->character.occ, "Sunaj Assassin")) {
+        Item *weapon = item_create(1); /* Vibro-Blade (shadow weapon) */
+        Item *armor = item_create(27); /* Light EBA (shadow suit) */
+        if (weapon) {
+            inventory_add(&sess->character.inventory, weapon);
+            equipment_equip(&sess->character, sess, weapon);
+        }
+        if (armor) {
+            inventory_add(&sess->character.inventory, armor);
+            equipment_equip(&sess->character, sess, armor);
+        }
+        sess->character.credits = 800;
+    }
     /* Combat OCCs get weapon + armor */
-    if (strcasestr(sess->character.occ, "Juicer") ||
+    else if (strcasestr(sess->character.occ, "Juicer") ||
         strcasestr(sess->character.occ, "Cyber-Knight") ||
         strcasestr(sess->character.occ, "Headhunter") ||
         strcasestr(sess->character.occ, "Glitter Boy") ||
         strcasestr(sess->character.occ, "CS ") ||
         strcasestr(sess->character.occ, "Ranger") ||
         strcasestr(sess->character.occ, "Soldier") ||
-        strcasestr(sess->character.occ, "Merc")) {
+        strcasestr(sess->character.occ, "Merc") ||
+        strcasestr(sess->character.occ, "Assassin") ||
+        strcasestr(sess->character.occ, "Knight") ||
+        strcasestr(sess->character.occ, "Bounty")) {
         /* Give Vibro-Blade + Light EBA */
         Item *weapon = item_create(1); /* Vibro-Blade */
         Item *armor = item_create(27); /* Light EBA */
@@ -482,12 +507,17 @@ void chargen_complete(PlayerSession *sess) {
             inventory_add(&sess->character.inventory, armor);
             equipment_equip(&sess->character, sess, armor);
         }
+        sess->character.credits = 1000;
     }
     /* Magic OCCs get staff + healing potion */
     else if (strcasestr(sess->character.occ, "Walker") ||
              strcasestr(sess->character.occ, "Warlock") ||
              strcasestr(sess->character.occ, "Mystic") ||
-             strcasestr(sess->character.occ, "Wizard")) {
+             strcasestr(sess->character.occ, "Wizard") ||
+             strcasestr(sess->character.occ, "Tattooed") ||
+             strcasestr(sess->character.occ, "Fusionist") ||
+             strcasestr(sess->character.occ, "Necromancer") ||
+             strcasestr(sess->character.occ, "Shifter")) {
         Item *staff = item_create(24); /* TW Fire Bolt Staff */
         Item *potion = item_create(40); /* Healing Potion */
         if (staff) {
@@ -495,6 +525,7 @@ void chargen_complete(PlayerSession *sess) {
             equipment_equip(&sess->character, sess, staff);
         }
         if (potion) inventory_add(&sess->character.inventory, potion);
+        sess->character.credits = 1000;
     }
     /* Vagabond/unskilled OCCs get a knife */
     else if (strcasestr(sess->character.occ, "Vagabond") ||
@@ -505,15 +536,20 @@ void chargen_complete(PlayerSession *sess) {
             inventory_add(&sess->character.inventory, knife);
             equipment_equip(&sess->character, sess, knife);
         }
+        sess->character.credits = 1000;
     }
-    /* All characters get basic supplies */
-    Item *ration = item_create(48); /* Food Ration */
-    Item *water = item_create(49); /* Water Canteen */
-    if (ration) inventory_add(&sess->character.inventory, ration);
-    if (water) inventory_add(&sess->character.inventory, water);
+    /* Default: basic supplies and credits */
+    else {
+        sess->character.credits = 1000;
+    }
 
-    /* Starting credits */
-    sess->character.credits = 1000;
+    /* Non-dragon characters get basic supplies */
+    if (!strcasestr(sess->character.occ, "Dragon Hatchling")) {
+        Item *ration = item_create(48); /* Food Ration */
+        Item *water = item_create(49); /* Water Canteen */
+        if (ration) inventory_add(&sess->character.inventory, ration);
+        if (water) inventory_add(&sess->character.inventory, water);
+    }
 
     /* Place player in starting room */
     Room *start = room_get_start();
@@ -619,15 +655,19 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
 
                 send_to_player(sess, "\nYou selected: %s\n\n", ch->race);
 
-                /* Default OCC: Vagabond (wizard can reassign via 'set <player> occ <name>') */
-                ch->occ = strdup("Vagabond");
-
-                send_to_player(sess, "Your starting O.C.C. is Vagabond (jack of all trades).\n");
-                send_to_player(sess, "A wizard can assign a specialized O.C.C. later.\n\n");
+                /* Dragon races auto-assign Dragon Hatchling RCC */
+                if (strcasestr(ch->race, "Dragon") != NULL) {
+                    ch->occ = strdup("Dragon Hatchling RCC");
+                    send_to_player(sess, "As a %s, your O.C.C. is Dragon Hatchling RCC.\n", ch->race);
+                    send_to_player(sess, "Dragons are a Racial Character Class with innate abilities.\n\n");
+                } else {
+                    /* Default OCC: Vagabond (wizard can reassign via 'set <player> occ <name>') */
+                    ch->occ = strdup("Vagabond");
+                    send_to_player(sess, "Your starting O.C.C. is Vagabond (jack of all trades).\n");
+                    send_to_player(sess, "A wizard can assign a specialized O.C.C. later.\n\n");
+                }
 
                 send_to_player(sess, "Rolling your attributes...\n");
-
-                /* Go directly to stats (race bonuses applied, OCC applied later by wizard) */
                 chargen_roll_stats(sess);
                 chargen_display_stats(sess);
 
@@ -640,7 +680,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             break;
 
         case CHARGEN_OCC_SELECT:
-            /* OCC selection is handled by wizards via wiz-tools */
+            /* OCC selection is handled post-chargen by wizards via 'set <player> occ <name>' */
             send_to_player(sess, "O.C.C. selection is handled by game administrators.\n");
             send_to_player(sess, "Please contact a wizard for your O.C.C. assignment.\n");
             break;
@@ -1023,8 +1063,18 @@ int save_character(PlayerSession *sess) {
     time_t now = time(NULL);
     fwrite(&now, sizeof(time_t), 1, f);
 
+    /* Write clan (appended after timestamp for backwards compatibility) */
+    if (ch->clan && ch->clan[0]) {
+        size_t clan_len = strlen(ch->clan);
+        fwrite(&clan_len, sizeof(size_t), 1, f);
+        fwrite(ch->clan, 1, clan_len, f);
+    } else {
+        size_t zero = 0;
+        fwrite(&zero, sizeof(size_t), 1, f);
+    }
+
     fclose(f);
-    
+
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
     return 1;
 }
@@ -1256,6 +1306,18 @@ int load_character(PlayerSession *sess, const char *username) {
     time_t saved_time = 0;
     fread(&saved_time, sizeof(time_t), 1, f);
 
+    /* Read clan (appended after timestamp, may not exist in older saves) */
+    ch->clan = NULL;
+    {
+        size_t clan_len = 0;
+        if (fread(&clan_len, sizeof(size_t), 1, f) == 1 && clan_len > 0 && clan_len < 256) {
+            char clan_buf[256];
+            fread(clan_buf, 1, clan_len, f);
+            clan_buf[clan_len] = '\0';
+            ch->clan = strdup(clan_buf);
+        }
+    }
+
     fclose(f);
 
     INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)",
@@ -1446,4 +1508,107 @@ void cmd_meditate(PlayerSession *sess, const char *args) {
     ch->magic.meditation_rounds_active = 1;
     
     send_to_player(sess, "You begin to meditate, centering yourself...\n");
+}
+
+/* ========== CLAN SYSTEM ========== */
+
+void cmd_clan(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+
+    if (sess->state != STATE_PLAYING) {
+        send_to_player(sess, "You must complete character creation first.\n");
+        return;
+    }
+
+    Character *ch = &sess->character;
+
+    /* No argument: show current clan or list available */
+    if (!args || !(*args)) {
+        if (ch->clan && ch->clan[0]) {
+            send_to_player(sess, "You are a member of Clan %s.\n", ch->clan);
+        } else {
+            send_to_player(sess, "You do not belong to any clan.\n");
+        }
+        send_to_player(sess, "\nAvailable Clans:\n");
+        send_to_player(sess, "  aerihman  - The Aerihman Clan (Atlantean only)\n");
+        send_to_player(sess, "              Unlocks: Sunaj Assassin O.C.C.\n");
+        send_to_player(sess, "\nUsage: clan <name>\n");
+        return;
+    }
+
+    /* Already in a clan */
+    if (ch->clan && ch->clan[0]) {
+        send_to_player(sess, "You are already a member of Clan %s.\n", ch->clan);
+        send_to_player(sess, "You cannot change clans.\n");
+        return;
+    }
+
+    /* Handle "clan aerihman" */
+    if (strcasecmp(args, "aerihman") == 0) {
+        /* Must be Atlantean */
+        if (!ch->race || (strcasecmp(ch->race, "Atlantean") != 0 &&
+                          strcasecmp(ch->race, "True Atlantean") != 0)) {
+            send_to_player(sess, "Only Atlanteans may join Clan Aerihman.\n");
+            return;
+        }
+
+        /* Set clan */
+        if (ch->clan) free(ch->clan);
+        ch->clan = strdup("Aerihman");
+
+        send_to_player(sess, "\n");
+        send_to_player(sess, "=========================================\n");
+        send_to_player(sess, "  You pledge yourself to Clan Aerihman.\n");
+        send_to_player(sess, "=========================================\n");
+        send_to_player(sess, "\n");
+        send_to_player(sess, "The shadows embrace you. Ancient tattoo magic\n");
+        send_to_player(sess, "courses through your veins as the clan's secrets\n");
+        send_to_player(sess, "are revealed to you.\n\n");
+
+        /* Reassign OCC to Sunaj Assassin */
+        if (ch->occ) free(ch->occ);
+        ch->occ = strdup("Sunaj Assassin");
+
+        /* Reassign skills for new OCC */
+        occ_assign_skills(sess, ch->occ);
+
+        /* Apply OCC stat bonuses from LPC file */
+        load_occ_data(ch->occ, ch);
+
+        /* Boost PPE and ISP for Sunaj tattoo magic */
+        if (ch->max_ppe < 30) {
+            ch->max_ppe = 30;
+            ch->ppe = 30;
+        }
+        if (ch->max_isp < 20) {
+            ch->max_isp = 20;
+            ch->isp = 20;
+        }
+
+        /* Grant shadow suit armor */
+        Item *armor = item_create(27); /* Light EBA as shadow suit */
+        if (armor) {
+            inventory_add(&ch->inventory, armor);
+            equipment_equip(ch, sess, armor);
+            send_to_player(sess, "You receive Sunaj Shadow Armor.\n");
+        }
+
+        /* Grant vibro-blade as shadow weapon */
+        Item *weapon = item_create(1); /* Vibro-Blade */
+        if (weapon) {
+            inventory_add(&ch->inventory, weapon);
+            equipment_equip(ch, sess, weapon);
+            send_to_player(sess, "You receive a Shadow Blade.\n");
+        }
+
+        send_to_player(sess, "\nYour O.C.C. is now: Sunaj Assassin\n");
+        send_to_player(sess, "Your skills have been updated.\n");
+
+        /* Auto-save */
+        if (save_character(sess)) {
+            send_to_player(sess, "Character saved.\n");
+        }
+    } else {
+        send_to_player(sess, "Unknown clan '%s'. Type 'clan' to see available clans.\n", args);
+    }
 }

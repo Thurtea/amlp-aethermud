@@ -34,3 +34,4 @@ Thumbs.db
 
 # AI context files (local only, do not commit)
 **/llm_breadcrumb.md
+archived-md/

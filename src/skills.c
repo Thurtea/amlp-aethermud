@@ -823,25 +823,47 @@ const char *skill_get_name(int skill_id) {
 
 /* ========== OCC SKILL ASSIGNMENT ========== */
 
+/* OCC names aligned with OCC_SKILL_PACKAGES indices */
+static const char *OCC_PACKAGE_NAMES[] = {
+    "Cyber-Knight", "Ley Line Walker", "Rogue Scientist", "Techno-Wizard",
+    "Battle Magus", "Biomancer", "Body Fixer", "Burster",
+    "City Rat", "Cosmo-Knight", "Crazy", "Dragon Hatchling",
+    "Elemental Fusionist", "Full Conversion Borg", "Headhunter", "Juicer",
+    "Line Walker", "Mercenary", "Mind Melter", "Mystic",
+    "Necromancer", "Ninja", "Operator", "Power Armor Pilot",
+    "Psi-Stalker", "Psychic", "Rifter", "Rogue Scholar",
+    "Shifter", "Temporal Wizard", "Undead Slayer", "Vagabond",
+    "Warrior Monk", "Wilderness Scout", "Zapper",
+    "Atlantean Nomad", "Atlantean Slave", "Ninja Juicer", "Delphi Juicer",
+    "Hyperion Juicer", "CS Ranger", "CS Technical Officer",
+    "Air Warlock", "Tattooed Man", "Nega-Psychic", "Cyber-Doc",
+    "Kittani Field Mechanic", "NGR Mechanic", "Master Assassin",
+    "Kittani Warrior", "NGR Soldier", "Knight", "Royal Knight",
+    "Professional Thief", "Forger", "Smuggler", "Freelance Spy",
+    "ISS Peacekeeper", "ISS Specter", "NTSET Protector",
+    "Pirate", "Sailor", "Gifted Gypsy", "Sunaj Assassin", "Maxi-Man"
+};
+
 void occ_assign_skills(PlayerSession *sess, const char *occ_name) {
-    int occ_idx = 0;
+    int occ_idx = -1;
     OCCSkillPackage *package;
-    int i, j;
-    
+    int i;
+
     if (!sess || !occ_name) return;
-    
-    /* Find OCC index by name */
-    for (occ_idx = 0; occ_idx < 35; occ_idx++) {
-        if (strcasecmp(ALL_OCCS[occ_idx].name, occ_name) == 0) {
+
+    /* Find OCC index by name in package names array */
+    for (i = 0; i < 65; i++) {
+        if (strcasecmp(OCC_PACKAGE_NAMES[i], occ_name) == 0) {
+            occ_idx = i;
             break;
         }
     }
-    
-    if (occ_idx >= 35) {
+
+    if (occ_idx < 0) {
         fprintf(stderr, "[Skills] Unknown OCC: %s\n", occ_name);
         return;
     }
-    
+
     package = &OCC_PACKAGES[occ_idx];
     
     /* Clear existing skills */
@@ -855,10 +877,6 @@ void occ_assign_skills(PlayerSession *sess, const char *occ_name) {
     }
     
     sess->character.num_skills = package->num_skills;
-    
-    /* Set PSIs/PPE (these are initial pool amounts - will be system dependent) */
-    /* Temporary: just store the pool sizes */
-    sess->chargen_temp_choice = package->starting_isp;  /* Reuse for ISP pool */
 }
 
 /* ========== SKILL CHECKS ========== */
@@ -876,7 +894,7 @@ void skill_display_list(PlayerSession *sess) {
     
     if (!sess) return;
     
-    send_to_player(sess, "\n\033[1;32m=== YOUR SKILLS ===\033[0m\n\n");
+    send_to_player(sess, "\n=== YOUR SKILLS ===\n\n");
     
     if (sess->character.num_skills == 0) {
         send_to_player(sess, "No skills learned yet.\n");

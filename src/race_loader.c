@@ -540,9 +540,9 @@ void check_and_apply_level_up(PlayerSession *sess) {
 
         /* Announce level-up */
         send_to_player(sess,
-            "\n\033[1;33m========================================\033[0m\n"
-            "\033[1;33m  LEVEL UP! You are now level %d!\033[0m\n"
-            "\033[1;33m========================================\033[0m\n",
+            "\n========================================\n"
+            "  LEVEL UP! You are now level %d!\n"
+            "========================================\n",
             ch->level);
         send_to_player(sess, "  HP:  +%d\n", hp_gain);
         if (atk_bonus > 0) send_to_player(sess, "  Attacks/round: +1 (now %d)\n", ch->attacks_per_round);

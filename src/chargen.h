@@ -22,6 +22,7 @@ typedef enum {
     CHARGEN_OCC_SELECT,
     CHARGEN_STATS_ROLL,
     CHARGEN_STATS_CONFIRM,
+    CHARGEN_SECONDARY_SKILLS,
     CHARGEN_COMPLETE
 } ChargenState;
 
@@ -96,6 +97,7 @@ typedef struct Character {
     int auto_parry_enabled;    /* Player toggle: 1=on, 0=off (default on) */
     int auto_dodge_enabled;    /* Player toggle: 1=on, 0=off (default on) */
     int wimpy_threshold;       /* Auto-flee at this % of max HP (0=disabled) */
+    int credits;               /* Universal credits (currency) */
 } Character;
 
 /* Chargen initialization */

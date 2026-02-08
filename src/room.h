@@ -45,5 +45,6 @@ void room_broadcast(Room *room, const char *message, PlayerSession *exclude);
 /* Room commands */
 void cmd_look(PlayerSession *sess, const char *args);
 void cmd_move(PlayerSession *sess, const char *direction);
+void cmd_rift(PlayerSession *sess, const char *args);
 
 #endif /* ROOM_H */

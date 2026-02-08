@@ -1,70 +1,202 @@
 // /lib/occs/headhunter.lpc
-//  O.C.C. - Placeholder Implementation
+// Headhunter O.C.C. - Bounty Hunter and Tech Warrior
 //
-// This is a stub file. Implement the full OCC details.
+// Headhunters are professional warriors who rely on weapons, armor, and
+// cybernetic enhancements to compete in a world of supernatural beings.
+// They are skilled combatants, trackers, and survivalists.
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
-    set_occ_name("");
+
+    set_occ_name("Headhunter");
     set_occ_id("headhunter");
-    set_occ_category(OCC_CAT_ADVENTURER);
+    set_occ_category(OCC_CAT_MILITARY);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "TODO: Add full O.C.C. description for ."
+        "Headhunters are professional warriors, bounty hunters, and mercenaries "
+        "who rely on weapons, body armor, and cybernetic/bionic augmentation to "
+        "survive in a world dominated by mega-damage creatures, magic, and the "
+        "supernatural. What they lack in mystic power, they make up for with "
+        "firepower, skill, and technology. Many Headhunters serve as bounty "
+        "hunters, bodyguards, or freelance soldiers. They are experts with "
+        "weapons and vehicle combat, and often have cybernetic enhancements "
+        "that give them an edge. The term 'Headhunter' refers to their "
+        "reputation for always getting their target."
     );
-    
-    // TODO: Configure stat requirements
+
+    // Stat requirements - physically capable
     set_stat_requirements(([
-        // Example: "iq": 10
+        "iq": 9,
+        "ps": 10,
+        "pe": 10
     ]));
-    
-    // TODO: Configure stat bonuses
+
+    // Stat bonuses - physical training
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "ps": 1,
+        "pe": 1,
+        "pp": 1
     ]));
-    
-    // Combat configuration
-    set_base_attacks(2);
-    set_attacks_per_level(1, 3);
-    set_hand_to_hand_type("basic");
-    
-    // TODO: Configure OCC skills
-    set_occ_skills(({
-        "language_american"
+
+    // Standard level progression
+    set_xp_table(XP_LEVELS);
+
+    // Base abilities - combat and tech
+    set_base_abilities(({
+        "weapon_specialist",
+        "armor_specialist",
+        "vehicle_specialist"
     }));
-    
-    set_occ_related_skills(({ }));
-    set_occ_skill_count(6);
+
+    // Abilities gained at levels
+    set_occ_abilities(([
+        3: ({ "quick_draw" }),
+        5: ({ "sharpshooter" }),
+        7: ({ "armor_mastery" }),
+        10: ({ "cybernetic_affinity" }),
+        13: ({ "deadly_precision" })
+    ]));
+
+    // Combat - excellent, weapon focused
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);  // +1 attack every 3 levels
+    set_hand_to_hand_type("expert");
+
+    // OCC Skills - comprehensive weapon and survival training
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "radio_basic",
+        "pilot_automobile",
+        "pilot_motorcycle",
+        "read_sensory_equipment",
+        "weapon_systems",
+        "land_navigation",
+        "wilderness_survival",
+        "tracking",
+        "wp_energy_pistol",
+        "wp_energy_rifle",
+        "wp_knife",
+        "htoh_expert"
+    }));
+
+    // OCC related skills - tech and combat
+    set_occ_related_skills(({
+        "computer_operation", "electronics_basic", "mechanical_basic",
+        "pilot_tanks_apcs", "pilot_hovercycle", "pilot_jet_pack",
+        "demolitions", "demolitions_disposal", "detect_ambush",
+        "detect_concealment", "intelligence", "sniper",
+        "camouflage", "trap_construction", "trap_disarm",
+        "first_aid", "paramedic",
+        "wp_heavy_md_weapons", "wp_handgun", "wp_rifle",
+        "wp_sword", "wp_blunt"
+    }));
+    set_occ_skill_count(8);   // Pick 8 from OCC related
+
+    // Elective skills - broad combat access
+    set_elective_categories(({
+        SKILL_CAT_COMMUNICATION, SKILL_CAT_DOMESTIC,
+        SKILL_CAT_ELECTRICAL, SKILL_CAT_MECHANICAL,
+        SKILL_CAT_MEDICAL, SKILL_CAT_PHYSICAL,
+        SKILL_CAT_PILOT, SKILL_CAT_TECHNICAL,
+        SKILL_CAT_WEAPON, SKILL_CAT_WILDERNESS
+    }));
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+
+    // Skill bonuses - combat and tech
+    set_skill_bonuses(([
+        "weapon_proficiencies": 10,
+        "pilot": 5,
+        "mechanical": 5,
+        "wilderness": 5
+    ]));
+
+    // No magic or psionics
     set_base_ppe(0);
     set_ppe_per_level(0);
     set_base_isp(0);
     set_isp_per_level(0);
     set_magic_type("none");
     set_psionic_type("none");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    // TODO: Configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
-    
-    // Race restrictions
+
+    // Good HP and SDC - combat trained
+    set_base_hp(0);  // Standard: PE + 1d6
+    set_hp_per_level(0);  // Standard: 1d6
+    set_base_sdc(38);     // High base SDC from training
+    set_sdc_per_level(2); // +2 SDC per level
+    set_mdc_class(0);
+
+    // Standard equipment - well-armed
+    set_standard_equipment(({
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/item/first_aid_kit",
+        "/obj/item/flashlight",
+        "/obj/item/rope",
+        "/obj/item/binoculars",
+        "/obj/clothing/basic_clothes",
+        "/obj/item/survival_kit"
+    }));
+
+    set_optional_gear(({
+        "/obj/vehicle/motorcycle",
+        "/obj/item/multi_optics_band",
+        "/obj/item/language_translator"
+    }));
+
+    set_starting_credits(300, 800);
+
+    set_starting_weapons(({
+        "/obj/weapon/energy_rifle",
+        "/obj/weapon/energy_pistol",
+        "/obj/weapon/vibro_knife",
+        "/obj/weapon/survival_knife"
+    }));
+
+    set_starting_armor(({
+        "/obj/armor/huntsman_armor"  // Medium body armor
+    }));
+
+    // No race restrictions
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
+
+    // Headhunters embrace cybernetics
     set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+    set_max_cybernetic_slots(6);  // More slots than most OCCs
+    set_starting_cybernetics(({
+        "gyro_compass",
+        "clock_calendar"
+    }));
+
+    // No special powers
+    set_special_powers(({ }));
+    set_vehicle_type("motorcycle");
+    set_special_training("weapon_specialist");
+
+    // Background
+    set_background(
+        "Headhunters come from all walks of life - former soldiers, wilderness "
+        "survivors, city toughs, and self-taught warriors. What they share is a "
+        "reliance on technology and weapons to survive. Many start as local "
+        "defenders or hired guns before building a reputation as bounty hunters "
+        "or freelance soldiers. The name 'Headhunter' is both a badge of honor "
+        "and a warning - they always get their target."
+    );
+    set_organizations(({ "mercenary_guilds" }));
+    set_enemies(({ }));
+}
+
+// Headhunters get bonus to weapon maintenance
+int query_weapon_maintenance_bonus() {
+    return 10;  // +10% to weapon repair/maintenance
+}
+
+// Headhunters can identify weapons and armor on sight
+int query_weapon_identify_bonus() {
+    return 15;  // +15% to identify weapon types and capabilities
 }

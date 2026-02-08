@@ -404,6 +404,35 @@ void chargen_display_stats(PlayerSession *sess) {
     send_to_player(sess, "=======================================================\n");
 }
 
+/* Display available secondary skills for selection */
+static void chargen_show_secondary_skills(PlayerSession *sess) {
+    Character *ch = &sess->character;
+    int remaining = 3 - sess->chargen_temp_choice;
+
+    send_to_player(sess, "\n=== SELECT SECONDARY SKILLS (%d remaining) ===\n\n",
+        remaining);
+
+    int num = 0;
+    for (int si = 0; si < NUM_SKILLS && si < 16; si++) {
+        int already_has = 0;
+        for (int j = 0; j < ch->num_skills; j++) {
+            if (ch->skills[j].skill_id == si) {
+                already_has = 1;
+                break;
+            }
+        }
+        if (!already_has) {
+            SkillDef *skill = skill_get_by_id(si);
+            if (skill) {
+                num++;
+                send_to_player(sess, "  %2d. %-25s (%s) - %s\n",
+                    num, skill->name, skill->category, skill->description);
+            }
+        }
+    }
+    send_to_player(sess, "\nEnter choice (1-%d): ", num);
+}
+
 /* Complete character generation */
 void chargen_complete(PlayerSession *sess) {
     if (!sess) return;
@@ -434,8 +463,10 @@ void chargen_complete(PlayerSession *sess) {
     
     /* Add starting equipment based on OCC */
     /* Combat OCCs get weapon + armor */
-    if (strcasestr(sess->character.occ, "Juicer") || 
+    if (strcasestr(sess->character.occ, "Juicer") ||
         strcasestr(sess->character.occ, "Cyber-Knight") ||
+        strcasestr(sess->character.occ, "Headhunter") ||
+        strcasestr(sess->character.occ, "Glitter Boy") ||
         strcasestr(sess->character.occ, "CS ") ||
         strcasestr(sess->character.occ, "Ranger") ||
         strcasestr(sess->character.occ, "Soldier") ||
@@ -465,12 +496,25 @@ void chargen_complete(PlayerSession *sess) {
         }
         if (potion) inventory_add(&sess->character.inventory, potion);
     }
+    /* Vagabond/unskilled OCCs get a knife */
+    else if (strcasestr(sess->character.occ, "Vagabond") ||
+             strcasestr(sess->character.occ, "City Rat") ||
+             strcasestr(sess->character.occ, "Scout")) {
+        Item *knife = item_create(7); /* Steel Knife */
+        if (knife) {
+            inventory_add(&sess->character.inventory, knife);
+            equipment_equip(&sess->character, sess, knife);
+        }
+    }
     /* All characters get basic supplies */
     Item *ration = item_create(48); /* Food Ration */
     Item *water = item_create(49); /* Water Canteen */
     if (ration) inventory_add(&sess->character.inventory, ration);
     if (water) inventory_add(&sess->character.inventory, water);
-    
+
+    /* Starting credits */
+    sess->character.credits = 1000;
+
     /* Place player in starting room */
     Room *start = room_get_start();
     if (start) {
@@ -479,7 +523,7 @@ void chargen_complete(PlayerSession *sess) {
     }
     
     send_to_player(sess, "\n");
-    send_to_player(sess, "\033[1;32mCharacter creation complete!\033[0m\n");
+    send_to_player(sess, "Character creation complete!\n");
     send_to_player(sess, "Welcome to Rifts Earth, %s!\n", sess->username);
     
     /* Auto-save new character */
@@ -573,13 +617,13 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             if (choice >= 1 && choice <= NUM_RACES) {
                 ch->race = strdup(ALL_RACES[choice - 1].name);
 
-                send_to_player(sess, "\nYou selected: \033[1;32m%s\033[0m\n\n", ch->race);
+                send_to_player(sess, "\nYou selected: %s\n\n", ch->race);
 
-                /* OCC is assigned by wizards via wiz-tools */
-                ch->occ = strdup("Awaiting Wizard Assignment");
+                /* Default OCC: Vagabond (wizard can reassign via 'set <player> occ <name>') */
+                ch->occ = strdup("Vagabond");
 
-                send_to_player(sess, "Your O.C.C. will be assigned by a wizard.\n");
-                send_to_player(sess, "Please send a 'tell' to a wizard requesting an O.C.C.\n\n");
+                send_to_player(sess, "Your starting O.C.C. is Vagabond (jack of all trades).\n");
+                send_to_player(sess, "A wizard can assign a specialized O.C.C. later.\n\n");
 
                 send_to_player(sess, "Rolling your attributes...\n");
 
@@ -603,7 +647,16 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             
         case CHARGEN_STATS_CONFIRM:
             if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
-                chargen_complete(sess);
+                /* Auto-assign OCC primary skills */
+                occ_assign_skills(sess, ch->occ);
+
+                send_to_player(sess, "\nYour primary skills have been assigned based on your O.C.C.\n");
+                skill_display_list(sess);
+
+                /* Transition to secondary skills selection */
+                sess->chargen_temp_choice = 0; /* picks made so far */
+                sess->chargen_state = CHARGEN_SECONDARY_SKILLS;
+                chargen_show_secondary_skills(sess);
             } else if (strncasecmp(input, "reroll", 6) == 0 || strncasecmp(input, "r", 1) == 0) {
                 send_to_player(sess, "\nRerolling stats...\n");
                 chargen_roll_stats(sess);
@@ -614,7 +667,49 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 send_to_player(sess, "Please answer 'yes' or 'reroll': ");
             }
             break;
-            
+
+        case CHARGEN_SECONDARY_SKILLS:
+            {
+                int pick = atoi(input);
+                /* Build list of available skills (not already assigned) */
+                int available[16];
+                int num_available = 0;
+                for (int si = 0; si < NUM_SKILLS && si < 16; si++) {
+                    int already_has = 0;
+                    for (int j = 0; j < ch->num_skills; j++) {
+                        if (ch->skills[j].skill_id == si) {
+                            already_has = 1;
+                            break;
+                        }
+                    }
+                    if (!already_has) {
+                        available[num_available++] = si;
+                    }
+                }
+                if (pick >= 1 && pick <= num_available) {
+                    int skill_id = available[pick - 1];
+                    SkillDef *skill = skill_get_by_id(skill_id);
+                    if (skill && ch->num_skills < MAX_PLAYER_SKILLS) {
+                        ch->skills[ch->num_skills].skill_id = skill_id;
+                        ch->skills[ch->num_skills].percentage = skill->base_percentage;
+                        ch->skills[ch->num_skills].uses = 0;
+                        ch->num_skills++;
+                        sess->chargen_temp_choice++;
+                        send_to_player(sess, "Learned: %s (%d%%)\n",
+                            skill->name, skill->base_percentage);
+                    }
+                    if (sess->chargen_temp_choice >= 3) {
+                        send_to_player(sess, "\nSecondary skills selection complete.\n");
+                        chargen_complete(sess);
+                    } else {
+                        chargen_show_secondary_skills(sess);
+                    }
+                } else {
+                    send_to_player(sess, "Invalid choice. Enter a number from the list: ");
+                }
+            }
+            break;
+
         default:
             break;
     }
@@ -897,10 +992,37 @@ int save_character(PlayerSession *sess) {
         }
     }
     
+    /* Write credits */
+    fwrite(&ch->credits, sizeof(int), 1, f);
+
+    /* Write skills */
+    fwrite(&ch->num_skills, sizeof(int), 1, f);
+    for (i = 0; i < ch->num_skills && i < 20; i++) {
+        fwrite(&ch->skills[i].skill_id, sizeof(int), 1, f);
+        fwrite(&ch->skills[i].percentage, sizeof(int), 1, f);
+        fwrite(&ch->skills[i].uses, sizeof(int), 1, f);
+    }
+
+    /* Write psionic powers */
+    int pc = ch->psionics.power_count;
+    fwrite(&pc, sizeof(int), 1, f);
+    for (i = 0; i < pc; i++) {
+        fwrite(&ch->psionics.powers[i].power_id, sizeof(int), 1, f);
+        fwrite(&ch->psionics.powers[i].rank, sizeof(int), 1, f);
+    }
+
+    /* Write magic spells */
+    int sc = ch->magic.spell_count;
+    fwrite(&sc, sizeof(int), 1, f);
+    for (i = 0; i < sc; i++) {
+        fwrite(&ch->magic.spells[i].spell_id, sizeof(int), 1, f);
+        fwrite(&ch->magic.spells[i].rank, sizeof(int), 1, f);
+    }
+
     /* Write timestamp */
     time_t now = time(NULL);
     fwrite(&now, sizeof(time_t), 1, f);
-    
+
     fclose(f);
     
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
@@ -1041,10 +1163,7 @@ int load_character(PlayerSession *sess, const char *username) {
     /* Read current room ID */
     int room_id;
     fread(&room_id, sizeof(int), 1, f);
-    
-    /* Read timestamp (for info only) */
-    time_t saved_time;
-    fread(&saved_time, sizeof(time_t), 1, f);
+
     /* Read natural weapons */
     int nw = 0;
     if (fread(&nw, sizeof(int), 1, f) == 1) {
@@ -1091,9 +1210,55 @@ int load_character(PlayerSession *sess, const char *username) {
         ch->introduced_count = 0;
     }
 
+    /* Read credits (may not exist in older saves) */
+    if (fread(&ch->credits, sizeof(int), 1, f) != 1) {
+        ch->credits = 0;
+    }
+
+    /* Read skills */
+    int ns = 0;
+    if (fread(&ns, sizeof(int), 1, f) == 1 && ns > 0 && ns <= 20) {
+        ch->num_skills = ns;
+        for (i = 0; i < ns; i++) {
+            fread(&ch->skills[i].skill_id, sizeof(int), 1, f);
+            fread(&ch->skills[i].percentage, sizeof(int), 1, f);
+            fread(&ch->skills[i].uses, sizeof(int), 1, f);
+        }
+    }
+
+    /* Read psionic powers */
+    int pc = 0;
+    if (fread(&pc, sizeof(int), 1, f) == 1 && pc > 0 && pc <= 25) {
+        ch->psionics.powers = calloc(pc, sizeof(KnownPower));
+        ch->psionics.power_count = pc;
+        for (i = 0; i < pc; i++) {
+            fread(&ch->psionics.powers[i].power_id, sizeof(int), 1, f);
+            fread(&ch->psionics.powers[i].rank, sizeof(int), 1, f);
+            ch->psionics.powers[i].total_uses = 0;
+            ch->psionics.powers[i].last_activated = 0;
+        }
+    }
+
+    /* Read magic spells */
+    int sc = 0;
+    if (fread(&sc, sizeof(int), 1, f) == 1 && sc > 0 && sc <= 34) {
+        ch->magic.spells = calloc(sc, sizeof(KnownSpell));
+        ch->magic.spell_count = sc;
+        for (i = 0; i < sc; i++) {
+            fread(&ch->magic.spells[i].spell_id, sizeof(int), 1, f);
+            fread(&ch->magic.spells[i].rank, sizeof(int), 1, f);
+            ch->magic.spells[i].total_casts = 0;
+            ch->magic.spells[i].last_cast = 0;
+        }
+    }
+
+    /* Read timestamp (for info only) */
+    time_t saved_time = 0;
+    fread(&saved_time, sizeof(time_t), 1, f);
+
     fclose(f);
 
-    INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)", 
+    INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)",
             username, filepath, time(NULL) - saved_time);
 
     /* Set room pointer */

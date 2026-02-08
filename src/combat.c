@@ -175,7 +175,7 @@ CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender) {
                 ap->target = new_p;
                 defender->in_combat = 1;
                 defender->combat_target = attacker;
-                send_to_player(defender, "\n\033[1;31m%s attacks you!\033[0m\n", attacker->username);
+                send_to_player(defender, "\n%s attacks you!\n", attacker->username);
             }
             return existing;
         }
@@ -191,7 +191,7 @@ CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender) {
             new_p->target = dp;
             attacker->in_combat = 1;
             attacker->combat_target = defender;
-            send_to_player(defender, "\n\033[1;31m%s joins the fight against you!\033[0m\n", attacker->username);
+            send_to_player(defender, "\n%s joins the fight against you!\n", attacker->username);
         }
         return existing;
     }
@@ -238,7 +238,7 @@ CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender) {
 
     // Announce
     char msg[256];
-    snprintf(msg, sizeof(msg), "\n\033[1;33m>>> COMBAT! %s attacks %s! <<<\033[0m\n",
+    snprintf(msg, sizeof(msg), "\n>>> COMBAT! %s attacks %s! <<<\n",
              attacker->username, defender->username);
     combat_broadcast(combat, msg);
 
@@ -293,7 +293,7 @@ void combat_disengage(PlayerSession *session) {
 void combat_end(CombatRound *combat) {
     if (!combat) return;
 
-    combat_broadcast(combat, "\n\033[1;33m>>> COMBAT ENDED <<<\033[0m\n\n");
+    combat_broadcast(combat, "\n>>> COMBAT ENDED <<<\n\n");
 
     // Clear session combat state for all participants
     CombatParticipant *p = combat->participants;
@@ -417,7 +417,7 @@ static void combat_auto_attack(CombatParticipant *attacker, CombatParticipant *d
             int threshold = (max_hp * defender->character->wimpy_threshold) / 100;
             if (defender->character->hp <= threshold && defender->character->hp > 0) {
                 send_to_player(defender->session,
-                    "\033[1;31mYou are badly hurt! WIMPY triggers - you try to flee!\033[0m\n");
+                    "You are badly hurt! WIMPY triggers - you try to flee!\n");
                 combat_disengage(defender->session);
                 // Attempt to move in a random direction
                 const char *dirs[] = {"north", "south", "east", "west"};
@@ -499,7 +499,7 @@ void combat_regen_tick(void) {
         }
 
         if (regen > 0) {
-            send_to_player(sess, "\033[0;32mYou rest and recover. HP: %d/%d SDC: %d/%d\033[0m\n",
+            send_to_player(sess, "You rest and recover. HP: %d/%d SDC: %d/%d\n",
                            ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
         }
 
@@ -578,7 +578,7 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
     // Fumble on natural 1
     if (attack_roll == 1) {
         char msg[256];
-        snprintf(msg, sizeof(msg), "\033[1;31m%s fumbles!\033[0m\n", attacker->name);
+        snprintf(msg, sizeof(msg), "%s fumbles!\n", attacker->name);
         combat_send_to_participant(attacker, msg);
         combat_send_to_participant(defender, msg);
         return result;
@@ -636,11 +636,11 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
     char msg[256];
     if (result.is_critical) {
         snprintf(msg, sizeof(msg),
-                 "\033[1;33mCRITICAL!\033[0m %s hits %s for \033[1;31m%d damage\033[0m!\n",
+                 "CRITICAL! %s hits %s for %d damage!\n",
                  attacker->name, defender->name, result.damage);
     } else {
         snprintf(msg, sizeof(msg),
-                 "%s hits %s for \033[1;31m%d damage\033[0m (%d+%d=%d)\n",
+                 "%s hits %s for %d damage (%d+%d=%d)\n",
                  attacker->name, defender->name, result.damage, attack_roll, strike_bonus, total_strike);
     }
     combat_send_to_participant(attacker, msg);
@@ -662,7 +662,7 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
 
     if (attack_roll == 1) {
         char msg[256];
-        snprintf(msg, sizeof(msg), "\033[1;31m%s fumbles the shot!\033[0m\n", attacker->name);
+        snprintf(msg, sizeof(msg), "%s fumbles the shot!\n", attacker->name);
         combat_send_to_participant(attacker, msg);
         combat_send_to_participant(defender, msg);
         return result;
@@ -712,11 +712,11 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
     char msg[256];
     if (result.is_critical) {
         snprintf(msg, sizeof(msg),
-                 "\033[1;33mCRITICAL!\033[0m %s shoots %s for \033[1;31m%d damage\033[0m!\n",
+                 "CRITICAL! %s shoots %s for %d damage!\n",
                  attacker->name, defender->name, result.damage);
     } else {
         snprintf(msg, sizeof(msg),
-                 "%s shoots %s for \033[1;31m%d damage\033[0m (%d+%d=%d)\n",
+                 "%s shoots %s for %d damage (%d+%d=%d)\n",
                  attacker->name, defender->name, result.damage, attack_roll, strike_bonus, total_strike);
     }
     combat_send_to_participant(attacker, msg);
@@ -785,7 +785,7 @@ bool combat_defend_parry(CombatParticipant *defender, int attack_roll) {
 
     if (total_parry >= attack_roll) {
         char msg[256];
-        snprintf(msg, sizeof(msg), "\033[1;32m%s parries!\033[0m (%d+%d=%d vs %d)\n",
+        snprintf(msg, sizeof(msg), "%s parries! (%d+%d=%d vs %d)\n",
                  defender->name, parry_roll, parry_bonus, total_parry, attack_roll);
         combat_send_to_participant(defender, msg);
         return true;
@@ -803,7 +803,7 @@ bool combat_defend_dodge(CombatParticipant *defender, int attack_roll) {
 
     if (total_dodge >= attack_roll) {
         char msg[256];
-        snprintf(msg, sizeof(msg), "\033[1;32m%s dodges!\033[0m (%d+%d=%d vs %d)\n",
+        snprintf(msg, sizeof(msg), "%s dodges! (%d+%d=%d vs %d)\n",
                  defender->name, dodge_roll, dodge_bonus, total_dodge, attack_roll);
         combat_send_to_participant(defender, msg);
         return true;
@@ -823,7 +823,7 @@ void combat_apply_damage(CombatParticipant *target, DamageResult *dmg) {
     if (target->session && target->session->is_godmode) {
         dmg->damage = 0;
         char msg[128];
-        snprintf(msg, sizeof(msg), "\033[1;33m%s is in god mode and takes no damage!\033[0m\n",
+        snprintf(msg, sizeof(msg), "%s is in god mode and takes no damage!\n",
                  target->name);
         combat_send_to_participant(target, msg);
         return;
@@ -840,7 +840,7 @@ void combat_apply_damage(CombatParticipant *target, DamageResult *dmg) {
             damage_remaining -= armor_absorbed;
 
             char msg[256];
-            snprintf(msg, sizeof(msg), "\033[1;33m%s's armor is destroyed!\033[0m\n", target->name);
+            snprintf(msg, sizeof(msg), "%s's armor is destroyed!\n", target->name);
             combat_send_to_participant(target, msg);
         } else {
             armor->current_durability -= damage_remaining;
@@ -883,7 +883,7 @@ bool combat_check_death(CombatParticipant *p) {
     if (p->character->hp <= 0) {
         char msg[256];
         snprintf(msg, sizeof(msg),
-                 "\n\033[1;31m>>> %s has been defeated! <<<\033[0m\n\n",
+                 "\n>>> %s has been defeated! <<<\n\n",
                  p->name);
         combat_send_to_participant(p, msg);
 
@@ -927,7 +927,7 @@ void combat_award_experience(CombatParticipant *winner, CombatParticipant *loser
     winner->character->xp += xp;
 
     char msg[256];
-    snprintf(msg, sizeof(msg), "\033[1;33mYou gained %d experience points! (Total: %d XP)\033[0m\n",
+    snprintf(msg, sizeof(msg), "You gained %d experience points! (Total: %d XP)\n",
              xp, winner->character->xp);
     combat_send_to_participant(winner, msg);
 

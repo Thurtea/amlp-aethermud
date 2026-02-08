@@ -428,7 +428,22 @@ void magic_add_starting_spells(struct Character *ch, const char *occ_name) {
         ch->magic.ppe_max = 40;
         ch->magic.ppe_current = 40;
     }
-    /* For non-magic classes, PPE is still available but no spells start */
+    else if (strcasecmp(occ_name, "Mystic") == 0) {
+        magic_learn_spell(ch, 0);   /* Magic Armor */
+        magic_learn_spell(ch, 1);   /* Detect Magic */
+        magic_learn_spell(ch, 2);   /* Light */
+        magic_learn_spell(ch, 8);   /* Fireball */
+        ch->magic.ppe_max = 40;
+        ch->magic.ppe_current = 40;
+    }
+    else if (strcasecmp(occ_name, "Shifter") == 0) {
+        magic_learn_spell(ch, 1);   /* Detect Magic */
+        magic_learn_spell(ch, 10);  /* Teleport */
+        magic_learn_spell(ch, 0);   /* Magic Armor */
+        ch->magic.ppe_max = 45;
+        ch->magic.ppe_current = 45;
+    }
+    /* Vagabond, Headhunter, and other non-magic classes: no starting spells */
 }
 
 /* =============== PPE MANAGEMENT =============== */

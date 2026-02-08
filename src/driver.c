@@ -591,9 +591,14 @@ static int cmd_tell(PlayerSession *session, const char *arg) {
         return 1;
     }
     
-    /* Send messages */
-    send_to_player(target, "\n<%s tells you> %s\n", session->username, message);
-    send_to_player(session, "<You tell %s> %s\n", target->username, message);
+    /* Send messages - blue text when wizard is involved */
+    if (session->privilege_level >= 1 || target->privilege_level >= 1) {
+        send_to_player(target, "\n\033[1;34m<%s tells you> %s\033[0m\n", session->username, message);
+        send_to_player(session, "\033[1;34m<You tell %s> %s\033[0m\n", target->username, message);
+    } else {
+        send_to_player(target, "\n<%s tells you> %s\n", session->username, message);
+        send_to_player(session, "<You tell %s> %s\n", target->username, message);
+    }
 
     /* Track for reply command */
     strncpy(target->last_tell_from, session->username, sizeof(target->last_tell_from) - 1);
@@ -1091,6 +1096,11 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             "  emote <action>       - Perform an emote\r\n"
             "  who                  - List players online\r\n"
             "  stats / score        - Show your character stats\r\n"
+            "  skills               - Show all skills\r\n"
+            "  pskills              - Show primary (OCC) skills\r\n"
+            "  sskills              - Show secondary (chosen) skills\r\n"
+            "  spells               - Show known spells\r\n"
+            "  powers / psionics    - Show psionic powers\r\n"
             "  save                 - Save your character\r\n"
             "  quit / logout        - Save and disconnect\r\n"
             "\r\nMovement: north, south, east, west, up, down (or n, s, e, w, u, d)\r\n");
@@ -1122,6 +1132,10 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             "  remember             - List known introductions\r\n");
 
         strcat(help_text,
+            "\r\nTRAVEL:\r\n"
+            "  rift                 - Use Moxim rift travel (500 credits)\r\n"
+            "  rift <destination>   - Travel to a destination via rift\r\n"
+            "  credits / balance    - Check your credit balance\r\n"
             "\r\nUI/SETTINGS:\r\n"
             "  scan                 - Show contents of adjacent rooms\r\n"
             "  examine/view <tgt>   - Inspect objects/players\r\n"
@@ -1178,6 +1192,18 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result.type = VALUE_NULL;
         return result;
     }
+
+    if (strcmp(cmd, "rift") == 0) {
+        cmd_rift(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "credits") == 0 || strcmp(cmd, "balance") == 0) {
+        send_to_player(session, "You have %d credits.\r\n", session->character.credits);
+        result.type = VALUE_NULL;
+        return result;
+    }
     
     if (strcmp(cmd, "stats") == 0 || strcmp(cmd, "score") == 0) {
         cmd_stats(session, args ? args : "");
@@ -1187,6 +1213,38 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     
     if (strcmp(cmd, "skills") == 0) {
         cmd_skills(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "pskills") == 0) {
+        /* Show primary (OCC-assigned) skills only (first 5) */
+        Character *ch = &session->character;
+        send_to_player(session, "\n=== PRIMARY SKILLS (O.C.C.) ===\r\n\r\n");
+        int limit = ch->num_skills < 5 ? ch->num_skills : 5;
+        for (int i = 0; i < limit; i++) {
+            const char *sname = skill_get_name(ch->skills[i].skill_id);
+            send_to_player(session, "  %-30s %3d%%\r\n", sname, ch->skills[i].percentage);
+        }
+        if (limit == 0) send_to_player(session, "  No primary skills assigned.\r\n");
+        send_to_player(session, "\r\n");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "sskills") == 0) {
+        /* Show secondary (player-chosen) skills only (after first 5) */
+        Character *ch = &session->character;
+        send_to_player(session, "\n=== SECONDARY SKILLS (Player-chosen) ===\r\n\r\n");
+        if (ch->num_skills <= 5) {
+            send_to_player(session, "  No secondary skills selected.\r\n");
+        } else {
+            for (int i = 5; i < ch->num_skills; i++) {
+                const char *sname = skill_get_name(ch->skills[i].skill_id);
+                send_to_player(session, "  %-30s %3d%%\r\n", sname, ch->skills[i].percentage);
+            }
+        }
+        send_to_player(session, "\r\n");
         result.type = VALUE_NULL;
         return result;
     }
@@ -1373,7 +1431,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
     
-    if (strcmp(cmd, "powers") == 0 || strcmp(cmd, "abilities") == 0) {
+    if (strcmp(cmd, "powers") == 0 || strcmp(cmd, "abilities") == 0 ||
+        strcmp(cmd, "psionics") == 0) {
         cmd_powers(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
@@ -1916,12 +1975,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             combat_end(combat);
         }
 
-        send_to_player(target, "\r\n\033[1;31mYou have been slain by %s!\033[0m\r\n",
+        send_to_player(target, "\r\nYou have been slain by %s!\r\n",
                        session->username);
 
         if (session->current_room) {
             char msg[256];
-            snprintf(msg, sizeof(msg), "\033[1;31m%s has been slain by %s!\033[0m\r\n",
+            snprintf(msg, sizeof(msg), "%s has been slain by %s!\r\n",
                     target->username, session->username);
             room_broadcast(session->current_room, msg, session);
         }
@@ -1954,7 +2013,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         target->character.xp += xp_amount;
         check_and_apply_level_up(target);
 
-        send_to_player(target, "\033[1;33mYou have been awarded %d experience points! (Total: %d XP)\033[0m\r\n",
+        send_to_player(target, "You have been awarded %d experience points! (Total: %d XP)\r\n",
                        xp_amount, target->character.xp);
         char response[256];
         snprintf(response, sizeof(response), "Awarded %d XP to %s. (Total: %d XP, Level: %d)\r\n",
@@ -2036,7 +2095,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
         if (ended > 0) {
             room_broadcast(session->current_room,
-                "\033[1;33mPeace has been restored by divine intervention.\033[0m\r\n", NULL);
+                "Peace has been restored by divine intervention.\r\n", NULL);
             return vm_value_create_string("Combat ended.\r\n");
         }
         return vm_value_create_string("There is no combat in this room.\r\n");
@@ -2309,7 +2368,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
         session->is_godmode = !session->is_godmode;
         if (session->is_godmode) {
-            return vm_value_create_string("\033[1;33mGod mode ENABLED. You are immune to all damage.\033[0m\r\n");
+            return vm_value_create_string("God mode ENABLED. You are immune to all damage.\r\n");
         } else {
             return vm_value_create_string("God mode DISABLED. You are mortal once more.\r\n");
         }
@@ -2422,11 +2481,11 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         char msg[256];
         if (delay > 0) {
             snprintf(msg, sizeof(msg),
-                "\033[1;31m[SYSTEM] Server rebooting in %d seconds by %s. All characters saved.\033[0m\r\n",
+                "[SYSTEM] Server rebooting in %d seconds by %s. All characters saved.\r\n",
                 delay, session->username);
         } else {
             snprintf(msg, sizeof(msg),
-                "\033[1;31m[SYSTEM] Server rebooting NOW by %s. All characters saved.\033[0m\r\n",
+                "[SYSTEM] Server rebooting NOW by %s. All characters saved.\r\n",
                 session->username);
         }
         broadcast_message(msg, NULL);
@@ -2480,7 +2539,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         }
 
         char msg[BUFFER_SIZE];
-        snprintf(msg, sizeof(msg), "\r\n\033[1;33m[ADMIN: %s] %s\033[0m\r\n",
+        snprintf(msg, sizeof(msg), "\r\n[ADMIN: %s] %s\r\n",
                 session->username, args);
         broadcast_message(msg, NULL);
         return vm_value_create_string("Message broadcast.\r\n");
@@ -2654,7 +2713,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     if (strcmp(cmd, "color") == 0 || strcmp(cmd, "ansi") == 0) {
         session->is_color = !session->is_color;
         if (session->is_color) {
-            return vm_value_create_string("\033[1;32mColor mode ON.\033[0m\r\n");
+            return vm_value_create_string("Color mode ON.\r\n");
         } else {
             return vm_value_create_string("Color mode OFF.\r\n");
         }

@@ -330,7 +330,29 @@ void psionics_add_starting_powers(struct Character *ch, const char *occ_name) {
         ch->psionics.isp_max = 44;
         ch->psionics.isp_current = 44;
     }
-    /* For non-psionic classes, ISP is still available but no powers start */
+    else if (strcasecmp(occ_name, "Cyber-Knight") == 0) {
+        psionics_learn_power(ch, 0);   /* Mind Block */
+        psionics_learn_power(ch, 17);  /* Sixth Sense */
+        ch->psionics.isp_max = 30;
+        ch->psionics.isp_current = 30;
+    }
+    else if (strcasecmp(occ_name, "Mind Melter") == 0) {
+        psionics_learn_power(ch, 0);   /* Mind Block */
+        psionics_learn_power(ch, 12);  /* Telekinesis */
+        psionics_learn_power(ch, 17);  /* Sixth Sense */
+        psionics_learn_power(ch, 21);  /* Clairvoyance */
+        psionics_learn_power(ch, 14);  /* Pyrokinesis */
+        ch->psionics.isp_max = 50;
+        ch->psionics.isp_current = 50;
+    }
+    else if (strcasecmp(occ_name, "Burster") == 0) {
+        psionics_learn_power(ch, 14);  /* Pyrokinesis */
+        psionics_learn_power(ch, 0);   /* Mind Block */
+        psionics_learn_power(ch, 17);  /* Sixth Sense */
+        ch->psionics.isp_max = 40;
+        ch->psionics.isp_current = 40;
+    }
+    /* Headhunter, Vagabond, and other non-psionic classes: no starting powers */
 }
 
 /* =============== ISP MANAGEMENT =============== */

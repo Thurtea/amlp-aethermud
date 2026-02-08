@@ -167,11 +167,12 @@ When you run `make`, you may see compiler warnings. We've created comprehensive 
 The build output includes **clickable file paths** in most terminals - just click to open the relevant documentation!
 
 ```
+╔════════════════════════════════════════════════════════════════════════════╗
 ╠════════════════════════════════════════════════════════════════════════════╣
 ║  BUILD SUCCESSFUL                                                          ║
 ╠════════════════════════════════════════════════════════════════════════════╣
 ║  Warnings:       50                                                        ║
-║  Warning details: diagnostics/README.md      ← Click to learn more!       ║
+║  Warning details: diagnostics/README.md      ← Click to learn more!        ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 ```
 

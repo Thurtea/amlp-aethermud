@@ -104,39 +104,9 @@ telnet localhost 3000
 
 First player to connect receives admin privileges automatically.
 
-### Wizard Commands
-
-For admins and builders, the following wizard commands are available:
-
-```lpc
-eval <code>           - Execute LPC code directly
-                        Example: eval me->set_universal_credits(10000)
-                        Example: eval environment(me)->query_short()
-                        Note: 'me' = your player, 'here' = current room
-
-goto <path>           - Teleport to a room
-                        Example: goto /domains/start/village_center
-
-force <player> <cmd>  - Force a player to execute a command (admin only)
-                        Example: force bob say hello
-
-clone <path>          - Clone an object into your inventory (coming soon)
-dest <object>         - Destroy an object (coming soon)
-```
-
 ### Prompt Customization
 
-Players can customize their command prompt with status information:
-
-```lpc
-prompt [%h/%H HP %m/%M MDC]>    - Show health and MDC
-prompt [%n L%l]>                - Show name and level  
-prompt %r>                       - Show current room
-prompt [%c UC %b BMC]>          - Show credits
-prompt default                   - Reset to "> "
-```
-
-Format codes: %h=HP, %H=maxHP, %m=MDC, %M=maxMDC, %p=PPE, %P=maxPPE, %i=ISP, %I=maxISP, %l=level, %n=name, %r=room, %c=UC, %b=BMC
+Players can customize their command prompt with status information.
 
 ## Development
 

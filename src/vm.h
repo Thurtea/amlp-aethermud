@@ -239,6 +239,10 @@ typedef struct {
     int instruction_count;
     int instruction_capacity;
 
+    /* Object context tracking */
+    void *current_object;           /* Object currently executing (for this_object()) */
+    void *previous_object;          /* Object that called current method (for previous_object()) */
+
     /* Debugging and profiling */
     unsigned int debug_flags;
     FILE *trace_output;

@@ -87,6 +87,15 @@ typedef struct Character {
     /* Tracks which players this character has been introduced to */
     char *introduced_to[32];
     int introduced_count;
+
+    /* Real-time combat attributes (loaded from race files) */
+    int attacks_per_round;     /* Total attacks per melee round (base 2 for most) */
+    int parries_per_round;     /* Total parries per melee round */
+    int racial_auto_parry;     /* Race grants auto-parry (from LPC file) */
+    int racial_auto_dodge;     /* Race grants auto-dodge (from LPC file) */
+    int auto_parry_enabled;    /* Player toggle: 1=on, 0=off (default on) */
+    int auto_dodge_enabled;    /* Player toggle: 1=on, 0=off (default on) */
+    int wimpy_threshold;       /* Auto-flee at this % of max HP (0=disabled) */
 } Character;
 
 /* Chargen initialization */

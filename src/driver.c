@@ -50,6 +50,7 @@
 #include "object.h"
 #include "room.h"
 #include "chargen.h"
+#include "race_loader.h"
 
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 4096
@@ -68,7 +69,7 @@
 /* Global state */
 static volatile sig_atomic_t server_running = 1;
 static VirtualMachine *global_vm = NULL;
-static PlayerSession *sessions[MAX_CLIENTS];
+PlayerSession *sessions[MAX_CLIENTS];
 static int first_player_created = 0;  /* Track if first player has logged in */
 
 typedef struct {
@@ -368,12 +369,28 @@ void init_session(PlayerSession *session, int fd, const char *ip, ConnectionType
     strncpy(session->ip_address, ip, INET_ADDRSTRLEN - 1);
     session->input_length = 0;
     session->ws_buffer_length = 0;
+    session->is_color = 1;  /* ANSI color on by default */
 }
 
 /* Free session resources */
 void free_session(PlayerSession *session) {
     if (!session) return;
-    
+
+    /* Clean up combat state on disconnect */
+    if (session->in_combat) {
+        combat_disengage(session);
+    }
+
+    /* Clean up snoop relationships */
+    if (session->snooping) {
+        session->snooping->snooped_by = NULL;
+        session->snooping = NULL;
+    }
+    if (session->snooped_by) {
+        session->snooped_by->snooping = NULL;
+        session->snooped_by = NULL;
+    }
+
     if (session->player_object) {
         /* Persist a minimal savefile on disconnect as a temporary measure
          * until the VM-backed LPC objects are fully implemented. This
@@ -440,6 +457,16 @@ void send_to_player(PlayerSession *session, const char *format, ...) {
     va_end(args);
     
     if (len > 0 && len < BUFFER_SIZE - 3) {
+        /* Snoop echo: if someone is snooping this session, echo output */
+        if (session->snooped_by && session->snooped_by->fd > 0) {
+            char snoop_buf[BUFFER_SIZE + 64];
+            int slen = snprintf(snoop_buf, sizeof(snoop_buf), "[Snoop: %s] %s",
+                                session->username, buffer);
+            if (slen > 0 && session->snooped_by->connection_type == CONN_TELNET) {
+                send(session->snooped_by->fd, snoop_buf, slen, 0);
+            }
+        }
+
         if (session->connection_type == CONN_WEBSOCKET) {
             /* WebSocket: send as text frame */
             if (session->ws_state == WS_STATE_OPEN) {
@@ -522,7 +549,7 @@ void send_prompt(PlayerSession *session) {
  * ======================================================================== */
 
 /* Helper: Find a player session by name */
-static PlayerSession* find_player_by_name(const char *name) {
+PlayerSession* find_player_by_name(const char *name) {
     if (!name || !*name) return NULL;
     
     for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -567,7 +594,11 @@ static int cmd_tell(PlayerSession *session, const char *arg) {
     /* Send messages */
     send_to_player(target, "\n<%s tells you> %s\n", session->username, message);
     send_to_player(session, "<You tell %s> %s\n", target->username, message);
-    
+
+    /* Track for reply command */
+    strncpy(target->last_tell_from, session->username, sizeof(target->last_tell_from) - 1);
+    target->last_tell_from[sizeof(target->last_tell_from) - 1] = '\0';
+
     return 1;
 }
 
@@ -785,7 +816,7 @@ static int cmd_give_item(PlayerSession *session, const char *arg) {
  * Searches for the setter name (e.g. "set_short"), then returns the first
  * double-quoted value following it.  Supports both snake_case (set_short)
  * and PascalCase (SetShort) conventions.  Returns a malloc'd string or NULL. */
-static char* lpc_extract_string(const char *buf, const char *snake, const char *pascal) {
+static char* clone_extract_string(const char *buf, const char *snake, const char *pascal) {
     const char *p = strstr(buf, snake);
     if (!p && pascal) p = strstr(buf, pascal);
     if (!p) return NULL;
@@ -804,7 +835,7 @@ static char* lpc_extract_string(const char *buf, const char *snake, const char *
 
 /* Helper: extract an integer argument from a setter call, e.g. set_weight(5).
  * Supports both naming conventions. Returns 0 if not found. */
-static int lpc_extract_int(const char *buf, const char *snake, const char *pascal) {
+static int clone_extract_int(const char *buf, const char *snake, const char *pascal) {
     const char *p = strstr(buf, snake);
     if (!p && pascal) p = strstr(buf, pascal);
     if (!p) return 0;
@@ -874,9 +905,9 @@ static Item* item_create_from_lpc(const char *fs_path) {
     item->stack_count = 1;
 
     /* Extract string properties (try both naming conventions) */
-    char *name_val  = lpc_extract_string(buf, "set_name(",  "SetKeyName(");
-    char *short_val = lpc_extract_string(buf, "set_short(", "SetShort(");
-    char *long_val  = lpc_extract_string(buf, "set_long(",  "SetLong(");
+    char *name_val  = clone_extract_string(buf, "set_name(",  "SetKeyName(");
+    char *short_val = clone_extract_string(buf, "set_short(", "SetShort(");
+    char *long_val  = clone_extract_string(buf, "set_long(",  "SetLong(");
 
     /* Prefer short description as display name (matches inventory display).
      * Fall back to set_name value if no short desc. */
@@ -892,8 +923,8 @@ static Item* item_create_from_lpc(const char *fs_path) {
     item->description = long_val ? long_val : strdup("An unremarkable object.");
 
     /* Extract numeric properties */
-    item->weight = lpc_extract_int(buf, "set_weight(", "SetMass(");
-    item->value  = lpc_extract_int(buf, "set_value(",  "SetBaseCost(");
+    item->weight = clone_extract_int(buf, "set_weight(", "SetMass(");
+    item->value  = clone_extract_int(buf, "set_value(",  "SetBaseCost(");
 
     /* Infer type from path keywords */
     if (strstr(fs_path, "weapon") || strstr(fs_path, "weap")) {
@@ -1050,8 +1081,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     if (strcmp(cmd, "help") == 0) {
         result.type = VALUE_STRING;
         
-        char help_text[2048];
-        strcpy(help_text, 
+        char help_text[4096];
+        strcpy(help_text,
             "Available commands:\r\n"
             "  help                 - Show this help\r\n"
             "  look / l             - Look at your surroundings\r\n"
@@ -1059,11 +1090,49 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             "  say <message>        - Say something\r\n"
             "  emote <action>       - Perform an emote\r\n"
             "  who                  - List players online\r\n"
-            "  stats                - Show your character stats\r\n"
+            "  stats / score        - Show your character stats\r\n"
             "  save                 - Save your character\r\n"
             "  quit / logout        - Save and disconnect\r\n"
             "\r\nMovement: north, south, east, west, up, down (or n, s, e, w, u, d)\r\n");
-        
+
+        strcat(help_text,
+            "\r\nCOMBAT COMMANDS:\r\n"
+            "  attack/kill <target> - Engage in real-time combat\r\n"
+            "  stop                 - Disengage from combat\r\n"
+            "  flee                 - Attempt to escape combat\r\n"
+            "  assist <player>      - Join combat helping an ally\r\n"
+            "  autoparry            - Toggle automatic parrying\r\n"
+            "  autododge            - Toggle automatic dodging\r\n"
+            "  wimpy <percent>      - Auto-flee at HP threshold (0=off)\r\n"
+            "  rest                 - Sit down and regenerate HP/SDC\r\n"
+            "  wake / stand         - Stand up from resting\r\n");
+
+        strcat(help_text,
+            "\r\nSOCIAL/RP COMMANDS:\r\n"
+            "  tell <player> <msg>  - Private message to a player\r\n"
+            "  reply <msg>          - Reply to last tell\r\n"
+            "  chat <msg>           - Global chat channel\r\n"
+            "  whisper <who> <msg>  - Private message in room\r\n"
+            "  shout <msg>          - Loud message heard nearby\r\n"
+            "  pemote <action>      - Possessive emote (e.g. Bob's)\r\n"
+            "  think <thought>      - Display internal thought\r\n"
+            "  converse             - Toggle conversation mode\r\n"
+            "  introduce <player>   - Introduce yourself to someone\r\n"
+            "  forget <player>      - Forget an introduction\r\n"
+            "  remember             - List known introductions\r\n");
+
+        strcat(help_text,
+            "\r\nUI/SETTINGS:\r\n"
+            "  scan                 - Show contents of adjacent rooms\r\n"
+            "  examine/view <tgt>   - Inspect objects/players\r\n"
+            "  map                  - Show basic ASCII area map\r\n"
+            "  brief                - Toggle brief room descriptions\r\n"
+            "  color / ansi         - Toggle ANSI color output\r\n"
+            "  echo <text>          - Echo text back to self\r\n"
+            "  title <text>         - Set your title in who list\r\n"
+            "  password <old> <new> - Change your password\r\n"
+            "  position             - Show/set position\r\n");
+
         if (session->privilege_level >= 1) {
             strcat(help_text,
                 "\r\nWIZARD COMMANDS (Level 1+):\r\n"
@@ -1072,15 +1141,33 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 "  ls/cd/pwd            - Navigate filesystem\r\n"
                 "  cat <file>           - View file contents\r\n"
                 "  eval <code>          - Execute LPC code\r\n"
-                "\r\nWizard tools also available via 'wiz' command.\r\n");
+                "  set <player> <field> <value> - Set player attributes\r\n"
+                "  heal <player>        - Restore HP/SDC/MDC/ISP/PPE\r\n"
+                "  slay <target>        - Instant kill a target\r\n"
+                "  award <player> <xp>  - Award experience points\r\n"
+                "  trans/summon <player> - Teleport player to you\r\n"
+                "  peace                - End all combat in room\r\n"
+                "  reset                - Reset current room\r\n"
+                "  kick <player>        - Force disconnect a player\r\n"
+                "  finger <player>      - Show detailed player info\r\n"
+                "  whereis <player>     - Show player's location\r\n"
+                "  snoop <player>       - See a player's output\r\n"
+                "  invis                - Toggle wizard invisibility\r\n"
+                "  godmode              - Toggle damage immunity\r\n"
+                "  destruct <item>      - Remove an item from room\r\n"
+                "  clean                - Remove all items from room\r\n");
         }
-        
+
         if (session->privilege_level >= 2) {
             strcat(help_text,
                 "\r\nADMIN COMMANDS (Level 2):\r\n"
                 "  promote <player> <level> - Promote player (0=player, 1=wizard, 2=admin)\r\n"
-                "  users                     - Show detailed user list\r\n"
-                "  shutdown [delay]          - Shutdown server (optional delay in seconds)\r\n");
+                "  users                    - Show detailed user list\r\n"
+                "  shutdown [delay]         - Shutdown server\r\n"
+                "  force <player> <cmd>     - Force player to execute command\r\n"
+                "  reboot [delay]           - Graceful server restart\r\n"
+                "  ban <player>             - Ban a player\r\n"
+                "  broadcast/wall <msg>     - Send message to all players\r\n");
         }
         
         return vm_value_create_string(help_text);
@@ -1104,32 +1191,141 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
     
-    if (strcmp(cmd, "attack") == 0) {
+    if (strcmp(cmd, "attack") == 0 || strcmp(cmd, "kill") == 0) {
         cmd_attack(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
-    
+
     if (strcmp(cmd, "strike") == 0) {
         cmd_strike(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
-    
+
     if (strcmp(cmd, "shoot") == 0) {
         cmd_shoot(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
-    
+
     if (strcmp(cmd, "dodge") == 0) {
         cmd_dodge(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
-    
+
     if (strcmp(cmd, "flee") == 0) {
         cmd_flee(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* STOP - Disengage from combat */
+    if (strcmp(cmd, "stop") == 0) {
+        if (!session->in_combat) {
+            send_to_player(session, "You are not in combat.\n");
+        } else {
+            combat_disengage(session);
+            send_to_player(session, "You stop fighting.\n");
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* ASSIST - Join combat targeting their target */
+    if (strcmp(cmd, "assist") == 0) {
+        if (!args || !*args) {
+            send_to_player(session, "Assist who?\n");
+            result.type = VALUE_NULL;
+            return result;
+        }
+        PlayerSession *ally = find_player_by_name(args);
+        if (!ally) {
+            send_to_player(session, "Player '%s' not found.\n", args);
+        } else if (!ally->in_combat || !ally->combat_target) {
+            send_to_player(session, "%s is not in combat.\n", ally->username);
+        } else {
+            send_to_player(session, "You rush to assist %s!\n", ally->username);
+            combat_engage(session, ally->combat_target);
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* AUTODODGE - Toggle auto-dodge */
+    if (strcmp(cmd, "autododge") == 0) {
+        session->character.auto_dodge_enabled = !session->character.auto_dodge_enabled;
+        send_to_player(session, "Auto-dodge is now %s.\n",
+                       session->character.auto_dodge_enabled ? "ON" : "OFF");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* AUTOPARRY - Toggle auto-parry */
+    if (strcmp(cmd, "autoparry") == 0) {
+        session->character.auto_parry_enabled = !session->character.auto_parry_enabled;
+        send_to_player(session, "Auto-parry is now %s.\n",
+                       session->character.auto_parry_enabled ? "ON" : "OFF");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* WIMPY - Set auto-flee threshold */
+    if (strcmp(cmd, "wimpy") == 0) {
+        if (!args || !*args) {
+            if (session->character.wimpy_threshold > 0) {
+                send_to_player(session, "Wimpy is set to %d%% HP.\n", session->character.wimpy_threshold);
+            } else {
+                send_to_player(session, "Wimpy is disabled. Usage: wimpy <percent> (0 to disable)\n");
+            }
+        } else {
+            int pct = atoi(args);
+            if (pct < 0) pct = 0;
+            if (pct > 90) pct = 90;
+            session->character.wimpy_threshold = pct;
+            if (pct > 0) {
+                send_to_player(session, "Wimpy set to %d%% HP. You will auto-flee when HP drops below %d%%.\n", pct, pct);
+            } else {
+                send_to_player(session, "Wimpy disabled.\n");
+            }
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* REST - Sit down and regenerate */
+    if (strcmp(cmd, "rest") == 0) {
+        if (session->in_combat) {
+            send_to_player(session, "You can't rest while in combat!\n");
+        } else if (session->is_resting) {
+            send_to_player(session, "You are already resting.\n");
+        } else {
+            session->is_resting = 1;
+            send_to_player(session, "You sit down and rest.\n");
+            if (session->current_room) {
+                char msg[256];
+                snprintf(msg, sizeof(msg), "%s sits down and rests.\n", session->username);
+                room_broadcast(session->current_room, msg, session);
+            }
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* WAKE / STAND - Stand up from resting */
+    if (strcmp(cmd, "wake") == 0 || strcmp(cmd, "stand") == 0) {
+        if (!session->is_resting) {
+            send_to_player(session, "You are already standing.\n");
+        } else {
+            session->is_resting = 0;
+            send_to_player(session, "You stand up.\n");
+            if (session->current_room) {
+                char msg[256];
+                snprintf(msg, sizeof(msg), "%s stands up.\n", session->username);
+                room_broadcast(session->current_room, msg, session);
+            }
+        }
         result.type = VALUE_NULL;
         return result;
     }
@@ -1289,12 +1485,22 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
-                char line[128];
+                /* Hide invisible wizards from non-wizards */
+                if (sessions[i]->is_invisible && session->privilege_level < 1)
+                    continue;
+                char line[256];
                 time_t idle = time(NULL) - sessions[i]->last_activity;
                 const char *priv = (sessions[i]->privilege_level == 2) ? "[Admin]" :
                                   (sessions[i]->privilege_level == 1) ? "[Wiz]" : "";
-                snprintf(line, sizeof(line), "  %-20s %s(idle: %ld seconds)\r\n",
-                        sessions[i]->username, priv, idle);
+                const char *invis_tag = sessions[i]->is_invisible ? " (invis)" : "";
+                const char *title_str = sessions[i]->title[0] ? sessions[i]->title : "";
+                if (title_str[0]) {
+                    snprintf(line, sizeof(line), "  %-20s %s%s %s (idle: %ld seconds)\r\n",
+                            sessions[i]->username, priv, invis_tag, title_str, idle);
+                } else {
+                    snprintf(line, sizeof(line), "  %-20s %s%s (idle: %ld seconds)\r\n",
+                            sessions[i]->username, priv, invis_tag, idle);
+                }
                 strcat(msg, line);
                 count++;
             }
@@ -1512,7 +1718,1048 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             new_item->name);
         return vm_value_create_string(msg);
     }
-    
+
+    /* ====================================================================
+     * WIZARD COMMANDS - Character Management (Phase 1)
+     * ==================================================================== */
+
+    /* SET - Set player attributes (THE most critical wizard command) */
+    if (strcmp(cmd, "set") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string(
+                "Usage: set <player> <field> <value>\r\n"
+                "Fields: occ, race, level, hp, max_hp, sdc, max_sdc, mdc, max_mdc,\r\n"
+                "        isp, max_isp, ppe, max_ppe, xp,\r\n"
+                "        stat_iq, stat_me, stat_ma, stat_ps, stat_pp, stat_pe, stat_pb, stat_spd\r\n");
+        }
+
+        char target_name[64], field[64], value_str[256];
+        if (sscanf(args, "%63s %63s %255[^\n]", target_name, field, value_str) < 3) {
+            return vm_value_create_string("Usage: set <player> <field> <value>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(target_name);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+
+        Character *ch = &target->character;
+        char response[512];
+
+        if (strcmp(field, "occ") == 0) {
+            if (ch->occ) free(ch->occ);
+            ch->occ = strdup(value_str);
+            load_occ_data(value_str, ch);
+            apply_race_and_occ(target);
+            snprintf(response, sizeof(response),
+                "Set %s's O.C.C. to '%s' and applied bonuses.\r\n",
+                target_name, value_str);
+            send_to_player(target, "Your O.C.C. has been set to: %s\r\n", value_str);
+        } else if (strcmp(field, "race") == 0) {
+            if (ch->race) free(ch->race);
+            ch->race = strdup(value_str);
+            load_race_data(value_str, ch);
+            apply_race_and_occ(target);
+            snprintf(response, sizeof(response),
+                "Set %s's race to '%s' and applied bonuses.\r\n",
+                target_name, value_str);
+            send_to_player(target, "Your race has been set to: %s\r\n", value_str);
+        } else if (strcmp(field, "level") == 0) {
+            ch->level = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's level to %d.\r\n",
+                    target_name, ch->level);
+            send_to_player(target, "Your level has been set to %d.\r\n", ch->level);
+        } else if (strcmp(field, "hp") == 0) {
+            ch->hp = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's HP to %d.\r\n",
+                    target_name, ch->hp);
+        } else if (strcmp(field, "max_hp") == 0) {
+            ch->max_hp = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's max HP to %d.\r\n",
+                    target_name, ch->max_hp);
+        } else if (strcmp(field, "sdc") == 0) {
+            ch->sdc = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's SDC to %d.\r\n",
+                    target_name, ch->sdc);
+        } else if (strcmp(field, "max_sdc") == 0) {
+            ch->max_sdc = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's max SDC to %d.\r\n",
+                    target_name, ch->max_sdc);
+        } else if (strcmp(field, "mdc") == 0) {
+            ch->mdc = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's MDC to %d.\r\n",
+                    target_name, ch->mdc);
+        } else if (strcmp(field, "max_mdc") == 0) {
+            ch->max_mdc = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's max MDC to %d.\r\n",
+                    target_name, ch->max_mdc);
+        } else if (strcmp(field, "isp") == 0) {
+            ch->isp = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's ISP to %d.\r\n",
+                    target_name, ch->isp);
+        } else if (strcmp(field, "max_isp") == 0) {
+            ch->max_isp = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's max ISP to %d.\r\n",
+                    target_name, ch->max_isp);
+        } else if (strcmp(field, "ppe") == 0) {
+            ch->ppe = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's PPE to %d.\r\n",
+                    target_name, ch->ppe);
+        } else if (strcmp(field, "max_ppe") == 0) {
+            ch->max_ppe = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's max PPE to %d.\r\n",
+                    target_name, ch->max_ppe);
+        } else if (strcmp(field, "xp") == 0) {
+            ch->xp = atoi(value_str);
+            check_and_apply_level_up(target);
+            snprintf(response, sizeof(response), "Set %s's XP to %d.\r\n",
+                    target_name, ch->xp);
+        } else if (strcmp(field, "stat_iq") == 0) {
+            ch->stats.iq = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's IQ to %d.\r\n",
+                    target_name, ch->stats.iq);
+        } else if (strcmp(field, "stat_me") == 0) {
+            ch->stats.me = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's ME to %d.\r\n",
+                    target_name, ch->stats.me);
+        } else if (strcmp(field, "stat_ma") == 0) {
+            ch->stats.ma = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's MA to %d.\r\n",
+                    target_name, ch->stats.ma);
+        } else if (strcmp(field, "stat_ps") == 0) {
+            ch->stats.ps = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's PS to %d.\r\n",
+                    target_name, ch->stats.ps);
+        } else if (strcmp(field, "stat_pp") == 0) {
+            ch->stats.pp = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's PP to %d.\r\n",
+                    target_name, ch->stats.pp);
+        } else if (strcmp(field, "stat_pe") == 0) {
+            ch->stats.pe = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's PE to %d.\r\n",
+                    target_name, ch->stats.pe);
+        } else if (strcmp(field, "stat_pb") == 0) {
+            ch->stats.pb = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's PB to %d.\r\n",
+                    target_name, ch->stats.pb);
+        } else if (strcmp(field, "stat_spd") == 0) {
+            ch->stats.spd = atoi(value_str);
+            snprintf(response, sizeof(response), "Set %s's SPD to %d.\r\n",
+                    target_name, ch->stats.spd);
+        } else {
+            snprintf(response, sizeof(response), "Unknown field: %s\r\n", field);
+        }
+
+        return vm_value_create_string(response);
+    }
+
+    /* HEAL - Restore player's HP/SDC/MDC/ISP/PPE */
+    if (strcmp(cmd, "heal") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: heal <player> [amount]\r\n");
+        }
+
+        char target_name[64];
+        int amount = 0;
+        sscanf(args, "%63s %d", target_name, &amount);
+
+        PlayerSession *target = find_player_by_name(target_name);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+
+        Character *ch = &target->character;
+        if (amount > 0) {
+            ch->hp = (ch->hp + amount > ch->max_hp) ? ch->max_hp : ch->hp + amount;
+            ch->sdc = (ch->sdc + amount > ch->max_sdc) ? ch->max_sdc : ch->sdc + amount;
+        } else {
+            ch->hp = ch->max_hp;
+            ch->sdc = ch->max_sdc;
+            ch->mdc = ch->max_mdc;
+            ch->isp = ch->max_isp;
+            ch->ppe = ch->max_ppe;
+        }
+
+        send_to_player(target, "You feel a warm healing energy wash over you!\r\n");
+        char response[256];
+        snprintf(response, sizeof(response), "Healed %s. HP: %d/%d SDC: %d/%d\r\n",
+                target_name, ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
+        return vm_value_create_string(response);
+    }
+
+    /* SLAY - Instant kill a target */
+    if (strcmp(cmd, "slay") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: slay <player>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(args);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+
+        target->character.hp = 0;
+        target->character.sdc = 0;
+
+        /* End combat if target is in one */
+        CombatRound *combat = combat_get_active(target);
+        if (combat) {
+            combat_end(combat);
+        }
+
+        send_to_player(target, "\r\n\033[1;31mYou have been slain by %s!\033[0m\r\n",
+                       session->username);
+
+        if (session->current_room) {
+            char msg[256];
+            snprintf(msg, sizeof(msg), "\033[1;31m%s has been slain by %s!\033[0m\r\n",
+                    target->username, session->username);
+            room_broadcast(session->current_room, msg, session);
+        }
+
+        char response[256];
+        snprintf(response, sizeof(response), "You slay %s.\r\n", target->username);
+        return vm_value_create_string(response);
+    }
+
+    /* AWARD - Give experience points to a player */
+    if (strcmp(cmd, "award") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: award <player> <xp_amount>\r\n");
+        }
+
+        char target_name[64];
+        int xp_amount = 0;
+        if (sscanf(args, "%63s %d", target_name, &xp_amount) != 2 || xp_amount <= 0) {
+            return vm_value_create_string("Usage: award <player> <xp_amount>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(target_name);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+
+        target->character.xp += xp_amount;
+        check_and_apply_level_up(target);
+
+        send_to_player(target, "\033[1;33mYou have been awarded %d experience points! (Total: %d XP)\033[0m\r\n",
+                       xp_amount, target->character.xp);
+        char response[256];
+        snprintf(response, sizeof(response), "Awarded %d XP to %s. (Total: %d XP, Level: %d)\r\n",
+                xp_amount, target_name, target->character.xp, target->character.level);
+        return vm_value_create_string(response);
+    }
+
+    /* ====================================================================
+     * WIZARD COMMANDS - Teleportation & Room Control (Phase 2)
+     * ==================================================================== */
+
+    /* TRANS / SUMMON - Teleport a player to your room */
+    if (strcmp(cmd, "trans") == 0 || strcmp(cmd, "summon") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: trans <player>\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(args);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+        if (target == session) {
+            return vm_value_create_string("You can't summon yourself.\r\n");
+        }
+
+        /* Remove from old room */
+        if (target->current_room) {
+            char leave_msg[256];
+            snprintf(leave_msg, sizeof(leave_msg),
+                    "%s vanishes in a flash of light.\r\n", target->username);
+            room_broadcast(target->current_room, leave_msg, target);
+            room_remove_player(target->current_room, target);
+        }
+
+        /* Add to wizard's room */
+        target->current_room = session->current_room;
+        room_add_player(session->current_room, target);
+
+        char arrive_msg[256];
+        snprintf(arrive_msg, sizeof(arrive_msg),
+                "%s appears in a flash of light.\r\n", target->username);
+        room_broadcast(session->current_room, arrive_msg, target);
+
+        send_to_player(target, "You have been summoned by %s!\r\n", session->username);
+        cmd_look(target, "");
+
+        char response[256];
+        snprintf(response, sizeof(response), "You summon %s to your location.\r\n",
+                target->username);
+        return vm_value_create_string(response);
+    }
+
+    /* PEACE - End all combat in the current room */
+    if (strcmp(cmd, "peace") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        Room *room = session->current_room;
+        int ended = 0;
+        for (int i = 0; i < room->num_players; i++) {
+            if (room->players[i]) {
+                CombatRound *combat = combat_get_active(room->players[i]);
+                if (combat) {
+                    combat_end(combat);
+                    ended++;
+                }
+            }
+        }
+
+        if (ended > 0) {
+            room_broadcast(session->current_room,
+                "\033[1;33mPeace has been restored by divine intervention.\033[0m\r\n", NULL);
+            return vm_value_create_string("Combat ended.\r\n");
+        }
+        return vm_value_create_string("There is no combat in this room.\r\n");
+    }
+
+    /* RESET - Reset the current room */
+    if (strcmp(cmd, "reset") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        /* Clear room items */
+        Room *room = session->current_room;
+        /* Items are a linked list - free them */
+        /* (room items use InventoryItem which is same as Item linked list) */
+        room->items = NULL;
+
+        room_broadcast(room, "The room shimmers and resets.\r\n", NULL);
+        return vm_value_create_string("Room reset.\r\n");
+    }
+
+    /* ====================================================================
+     * WIZARD COMMANDS - Player Management (Phase 3)
+     * ==================================================================== */
+
+    /* KICK - Force disconnect a player */
+    if (strcmp(cmd, "kick") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: kick <player>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(args);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+        if (target == session) {
+            return vm_value_create_string("You can't kick yourself.\r\n");
+        }
+        if (target->privilege_level >= session->privilege_level) {
+            return vm_value_create_string("You can't kick someone of equal or higher privilege.\r\n");
+        }
+
+        /* Save first */
+        save_character(target);
+
+        send_to_player(target, "\r\nYou have been kicked from the game by %s.\r\n",
+                       session->username);
+
+        char kick_msg[256];
+        snprintf(kick_msg, sizeof(kick_msg), "%s has been kicked from the game.\r\n",
+                target->username);
+        broadcast_message(kick_msg, target);
+
+        /* Remove from room */
+        if (target->current_room) {
+            room_remove_player(target->current_room, target);
+        }
+
+        target->state = STATE_DISCONNECTING;
+
+        char response[256];
+        snprintf(response, sizeof(response), "Kicked %s from the game.\r\n",
+                target->username);
+        return vm_value_create_string(response);
+    }
+
+    /* FINGER - Show detailed player info */
+    if (strcmp(cmd, "finger") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: finger <player>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(args);
+        if (!target) {
+            return vm_value_create_string("Player not found or not online.\r\n");
+        }
+
+        Character *ch = &target->character;
+        char info[2048];
+        time_t idle = time(NULL) - target->last_activity;
+        time_t online = time(NULL) - target->connect_time;
+
+        snprintf(info, sizeof(info),
+            "=== FINGER: %s ===\r\n"
+            "  Race:    %s\r\n"
+            "  O.C.C.:  %s\r\n"
+            "  Level:   %d\r\n"
+            "  XP:      %d\r\n"
+            "  HP:      %d/%d\r\n"
+            "  SDC:     %d/%d\r\n"
+            "  MDC:     %d/%d\r\n"
+            "  ISP:     %d/%d\r\n"
+            "  PPE:     %d/%d\r\n"
+            "  Stats:   IQ:%d ME:%d MA:%d PS:%d PP:%d PE:%d PB:%d SPD:%d\r\n"
+            "  Priv:    %d (%s)\r\n"
+            "  Room:    %s (ID: %d)\r\n"
+            "  IP:      %s\r\n"
+            "  Idle:    %ld seconds\r\n"
+            "  Online:  %ld seconds\r\n"
+            "==================\r\n",
+            target->username,
+            ch->race ? ch->race : "None",
+            ch->occ ? ch->occ : "None",
+            ch->level, ch->xp,
+            ch->hp, ch->max_hp,
+            ch->sdc, ch->max_sdc,
+            ch->mdc, ch->max_mdc,
+            ch->isp, ch->max_isp,
+            ch->ppe, ch->max_ppe,
+            ch->stats.iq, ch->stats.me, ch->stats.ma, ch->stats.ps,
+            ch->stats.pp, ch->stats.pe, ch->stats.pb, ch->stats.spd,
+            target->privilege_level,
+            target->privilege_level == 2 ? "Admin" :
+            target->privilege_level == 1 ? "Wizard" : "Player",
+            target->current_room ? target->current_room->name : "Nowhere",
+            target->current_room ? target->current_room->id : -1,
+            target->ip_address,
+            idle, online);
+
+        return vm_value_create_string(info);
+    }
+
+    /* WHEREIS - Show where a player is */
+    if (strcmp(cmd, "whereis") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: whereis <player>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(args);
+        if (!target) {
+            return vm_value_create_string("Player not found or not online.\r\n");
+        }
+
+        char response[256];
+        if (target->current_room) {
+            snprintf(response, sizeof(response), "%s is in %s (Room ID: %d)\r\n",
+                    target->username, target->current_room->name, target->current_room->id);
+        } else {
+            snprintf(response, sizeof(response), "%s is nowhere (no room assigned)\r\n",
+                    target->username);
+        }
+        return vm_value_create_string(response);
+    }
+
+    /* SCAN - Show contents of adjacent rooms (available to all players) */
+    if (strcmp(cmd, "scan") == 0) {
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        Room *room = session->current_room;
+        char scan_buf[2048];
+        strcpy(scan_buf, "You scan the area...\r\n\r\n");
+
+        struct { const char *dir; int id; } dirs[] = {
+            {"North", room->exits.north},
+            {"South", room->exits.south},
+            {"East", room->exits.east},
+            {"West", room->exits.west},
+            {"Up", room->exits.up},
+            {"Down", room->exits.down},
+        };
+
+        for (int d = 0; d < 6; d++) {
+            if (dirs[d].id < 0) continue;
+            Room *adj = room_get_by_id(dirs[d].id);
+            if (!adj) continue;
+
+            char line[256];
+            snprintf(line, sizeof(line), "  %s: %s", dirs[d].dir, adj->name);
+            strcat(scan_buf, line);
+
+            if (adj->num_players > 0) {
+                strcat(scan_buf, " [");
+                for (int p = 0; p < adj->num_players; p++) {
+                    if (adj->players[p] && adj->players[p]->username[0]) {
+                        if (adj->players[p]->is_invisible && session->privilege_level < 1)
+                            continue;
+                        if (p > 0) strcat(scan_buf, ", ");
+                        strcat(scan_buf, adj->players[p]->username);
+                    }
+                }
+                strcat(scan_buf, "]");
+            }
+            strcat(scan_buf, "\r\n");
+        }
+
+        return vm_value_create_string(scan_buf);
+    }
+
+    /* ====================================================================
+     * WIZARD COMMANDS - Utility (Phase 4)
+     * ==================================================================== */
+
+    /* SNOOP - See everything a player sees */
+    if (strcmp(cmd, "snoop") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+
+        /* No args = stop snooping */
+        if (!args || !*args) {
+            if (session->snooping) {
+                session->snooping->snooped_by = NULL;
+                char response[256];
+                snprintf(response, sizeof(response), "You stop snooping %s.\r\n",
+                        session->snooping->username);
+                session->snooping = NULL;
+                return vm_value_create_string(response);
+            }
+            return vm_value_create_string("You are not snooping anyone.\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(args);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+        if (target == session) {
+            return vm_value_create_string("You can't snoop yourself.\r\n");
+        }
+        if (target->snooped_by) {
+            return vm_value_create_string("That player is already being snooped.\r\n");
+        }
+
+        /* Stop current snoop if any */
+        if (session->snooping) {
+            session->snooping->snooped_by = NULL;
+        }
+
+        session->snooping = target;
+        target->snooped_by = session;
+
+        char response[256];
+        snprintf(response, sizeof(response), "You begin snooping %s.\r\n",
+                target->username);
+        return vm_value_create_string(response);
+    }
+
+    /* INVIS - Toggle wizard invisibility */
+    if (strcmp(cmd, "invis") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+
+        session->is_invisible = !session->is_invisible;
+        if (session->is_invisible) {
+            return vm_value_create_string("You fade from view. You are now invisible.\r\n");
+        } else {
+            return vm_value_create_string("You become visible again.\r\n");
+        }
+    }
+
+    /* GODMODE - Toggle damage immunity */
+    if (strcmp(cmd, "godmode") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+
+        session->is_godmode = !session->is_godmode;
+        if (session->is_godmode) {
+            return vm_value_create_string("\033[1;33mGod mode ENABLED. You are immune to all damage.\033[0m\r\n");
+        } else {
+            return vm_value_create_string("God mode DISABLED. You are mortal once more.\r\n");
+        }
+    }
+
+    /* FORCE - Force a player to execute a command (admin only) */
+    if (strcmp(cmd, "force") == 0) {
+        if (session->privilege_level < 2) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: force <player> <command>\r\n");
+        }
+
+        char target_name[64];
+        char forced_cmd[512];
+        if (sscanf(args, "%63s %511[^\n]", target_name, forced_cmd) != 2) {
+            return vm_value_create_string("Usage: force <player> <command>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(target_name);
+        if (!target) {
+            return vm_value_create_string("Player not found.\r\n");
+        }
+
+        send_to_player(target, "%s forces you to: %s\r\n", session->username, forced_cmd);
+        execute_command(target, forced_cmd);
+
+        char response[256];
+        snprintf(response, sizeof(response), "You force %s to: %s\r\n",
+                target_name, forced_cmd);
+        return vm_value_create_string(response);
+    }
+
+    /* ====================================================================
+     * WIZARD COMMANDS - Object Management (Phase 5)
+     * ==================================================================== */
+
+    /* DESTRUCT - Remove an item from room or inventory by name */
+    if (strcmp(cmd, "destruct") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: destruct <item_name>\r\n");
+        }
+
+        /* Try inventory first */
+        Item *item = inventory_remove(&session->character.inventory, args);
+        if (item) {
+            char response[256];
+            snprintf(response, sizeof(response), "Destructed '%s' from your inventory.\r\n",
+                    item->name);
+            item_free(item);
+            return vm_value_create_string(response);
+        }
+
+        /* Try room items */
+        if (session->current_room) {
+            InventoryItem *room_item = room_find_item(session->current_room, args);
+            if (room_item) {
+                room_remove_item(session->current_room, room_item);
+                char response[256];
+                snprintf(response, sizeof(response), "Destructed '%s' from the room.\r\n", args);
+                return vm_value_create_string(response);
+            }
+        }
+
+        return vm_value_create_string("Item not found in your inventory or this room.\r\n");
+    }
+
+    /* CLEAN - Remove all items from current room */
+    if (strcmp(cmd, "clean") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        /* Clear all room items */
+        session->current_room->items = NULL;
+        room_broadcast(session->current_room,
+            "A magical wind sweeps through, clearing the room of debris.\r\n", NULL);
+        return vm_value_create_string("Room cleaned.\r\n");
+    }
+
+    /* ====================================================================
+     * ADMIN COMMANDS (Phase 6)
+     * ==================================================================== */
+
+    /* REBOOT - Graceful server restart */
+    if (strcmp(cmd, "reboot") == 0) {
+        if (session->privilege_level < 2) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+
+        int delay = 0;
+        if (args && *args) {
+            delay = atoi(args);
+        }
+
+        /* Save all players */
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
+                save_character(sessions[i]);
+            }
+        }
+
+        char msg[256];
+        if (delay > 0) {
+            snprintf(msg, sizeof(msg),
+                "\033[1;31m[SYSTEM] Server rebooting in %d seconds by %s. All characters saved.\033[0m\r\n",
+                delay, session->username);
+        } else {
+            snprintf(msg, sizeof(msg),
+                "\033[1;31m[SYSTEM] Server rebooting NOW by %s. All characters saved.\033[0m\r\n",
+                session->username);
+        }
+        broadcast_message(msg, NULL);
+
+        fprintf(stderr, "[Server] Reboot initiated by %s (delay=%d)\n",
+                session->username, delay);
+        server_running = 0;
+        return vm_value_create_string("Reboot initiated. All characters saved.\r\n");
+    }
+
+    /* BAN - Ban a player */
+    if (strcmp(cmd, "ban") == 0) {
+        if (session->privilege_level < 2) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: ban <player>\r\n");
+        }
+
+        /* Append to ban file */
+        FILE *bf = fopen("lib/save/banned.txt", "a");
+        if (bf) {
+            fprintf(bf, "%s\n", args);
+            fclose(bf);
+        }
+
+        /* Kick if online */
+        PlayerSession *target = find_player_by_name(args);
+        if (target) {
+            save_character(target);
+            send_to_player(target, "\r\nYou have been BANNED from this server.\r\n");
+            if (target->current_room) {
+                room_remove_player(target->current_room, target);
+            }
+            target->state = STATE_DISCONNECTING;
+        }
+
+        char response[256];
+        snprintf(response, sizeof(response), "Banned %s. Added to lib/save/banned.txt.\r\n",
+                args);
+        return vm_value_create_string(response);
+    }
+
+    /* BROADCAST / WALL - Admin message to all players */
+    if (strcmp(cmd, "broadcast") == 0 || strcmp(cmd, "wall") == 0) {
+        if (session->privilege_level < 2) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: broadcast <message>\r\n");
+        }
+
+        char msg[BUFFER_SIZE];
+        snprintf(msg, sizeof(msg), "\r\n\033[1;33m[ADMIN: %s] %s\033[0m\r\n",
+                session->username, args);
+        broadcast_message(msg, NULL);
+        return vm_value_create_string("Message broadcast.\r\n");
+    }
+
+    /* ====================================================================
+     * PLAYER COMMANDS (Phase 7)
+     * ==================================================================== */
+
+    /* ====================================================================
+     * NEW PLAYER COMMANDS - Social/RP + UI/Settings
+     * ==================================================================== */
+
+    /* REPLY - Reply to last tell sender */
+    if (strcmp(cmd, "reply") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string("Reply what? Usage: reply <message>\r\n");
+        }
+        if (!session->last_tell_from[0]) {
+            return vm_value_create_string("No one has sent you a tell yet.\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(session->last_tell_from);
+        if (!target) {
+            char response[256];
+            snprintf(response, sizeof(response), "%s is no longer online.\r\n", session->last_tell_from);
+            return vm_value_create_string(response);
+        }
+
+        send_to_player(target, "\n<%s tells you> %s\n", session->username, args);
+        strncpy(target->last_tell_from, session->username, sizeof(target->last_tell_from) - 1);
+
+        char response[1024];
+        snprintf(response, sizeof(response), "<You tell %s> %s\r\n", target->username, args);
+        return vm_value_create_string(response);
+    }
+
+    /* PEMOTE - Possessive emote: "Bob's eyes widen" */
+    if (strcmp(cmd, "pemote") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string("Pemote what? Usage: pemote <action>\r\n");
+        }
+        char msg[BUFFER_SIZE];
+        snprintf(msg, sizeof(msg), "%s's %s\r\n", session->username, args);
+        broadcast_message(msg, session);
+        return vm_value_create_string(msg);
+    }
+
+    /* THINK - Display internal thought */
+    if (strcmp(cmd, "think") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string("Think what?\r\n");
+        }
+        char msg[BUFFER_SIZE];
+        snprintf(msg, sizeof(msg), "%s . o O ( %s )\r\n", session->username, args);
+        if (session->current_room) {
+            room_broadcast(session->current_room, msg, NULL);
+        } else {
+            send_to_player(session, "%s", msg);
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* CONVERSE - Toggle conversation mode */
+    if (strcmp(cmd, "converse") == 0) {
+        session->converse_mode = !session->converse_mode;
+        if (session->converse_mode) {
+            return vm_value_create_string("Conversation mode ON. All input will be spoken. Type '.' to exit.\r\n");
+        } else {
+            return vm_value_create_string("Conversation mode OFF.\r\n");
+        }
+    }
+
+    /* INTRODUCE / GREET - Introduce yourself to someone in room */
+    if (strcmp(cmd, "introduce") == 0 || strcmp(cmd, "greet") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string("Introduce yourself to whom?\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        PlayerSession *target = NULL;
+        Room *room = session->current_room;
+        for (int i = 0; i < room->num_players; i++) {
+            if (room->players[i] && room->players[i] != session &&
+                room->players[i]->username &&
+                strcasecmp(room->players[i]->username, args) == 0) {
+                target = room->players[i];
+                break;
+            }
+        }
+
+        if (!target) {
+            return vm_value_create_string("They are not here.\r\n");
+        }
+
+        /* Add to target's introduced list */
+        Character *tch = &target->character;
+        if (tch->introduced_count < 32) {
+            /* Check if already introduced */
+            for (int i = 0; i < tch->introduced_count; i++) {
+                if (tch->introduced_to[i] && strcasecmp(tch->introduced_to[i], session->username) == 0) {
+                    return vm_value_create_string("They already know who you are.\r\n");
+                }
+            }
+            tch->introduced_to[tch->introduced_count] = strdup(session->username);
+            tch->introduced_count++;
+        }
+
+        send_to_player(target, "%s introduces themselves to you.\r\n", session->username);
+        char response[256];
+        snprintf(response, sizeof(response), "You introduce yourself to %s.\r\n", target->username);
+        return vm_value_create_string(response);
+    }
+
+    /* FORGET - Forget an introduction */
+    if (strcmp(cmd, "forget") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string("Forget whom?\r\n");
+        }
+
+        Character *ch = &session->character;
+        for (int i = 0; i < ch->introduced_count; i++) {
+            if (ch->introduced_to[i] && strcasecmp(ch->introduced_to[i], args) == 0) {
+                free(ch->introduced_to[i]);
+                /* Shift remaining entries */
+                for (int j = i; j < ch->introduced_count - 1; j++) {
+                    ch->introduced_to[j] = ch->introduced_to[j+1];
+                }
+                ch->introduced_count--;
+                char response[256];
+                snprintf(response, sizeof(response), "You forget %s.\r\n", args);
+                return vm_value_create_string(response);
+            }
+        }
+        return vm_value_create_string("You don't know that person.\r\n");
+    }
+
+    /* REMEMBER - List remembered introductions */
+    if (strcmp(cmd, "remember") == 0) {
+        Character *ch = &session->character;
+        if (ch->introduced_count == 0) {
+            return vm_value_create_string("You haven't been introduced to anyone.\r\n");
+        }
+
+        char msg[BUFFER_SIZE];
+        strcpy(msg, "People you've been introduced to:\r\n");
+        for (int i = 0; i < ch->introduced_count; i++) {
+            if (ch->introduced_to[i]) {
+                char line[128];
+                snprintf(line, sizeof(line), "  %s\r\n", ch->introduced_to[i]);
+                strcat(msg, line);
+            }
+        }
+        return vm_value_create_string(msg);
+    }
+
+    /* BRIEF - Toggle brief room descriptions */
+    if (strcmp(cmd, "brief") == 0) {
+        session->is_brief = !session->is_brief;
+        if (session->is_brief) {
+            return vm_value_create_string("Brief mode ON. Room descriptions will be shortened.\r\n");
+        } else {
+            return vm_value_create_string("Brief mode OFF. Full room descriptions will be shown.\r\n");
+        }
+    }
+
+    /* COLOR / ANSI - Toggle ANSI color */
+    if (strcmp(cmd, "color") == 0 || strcmp(cmd, "ansi") == 0) {
+        session->is_color = !session->is_color;
+        if (session->is_color) {
+            return vm_value_create_string("\033[1;32mColor mode ON.\033[0m\r\n");
+        } else {
+            return vm_value_create_string("Color mode OFF.\r\n");
+        }
+    }
+
+    /* SCORE - Detailed stats display (extends existing stats) */
+    if (strcmp(cmd, "score") == 0 && 0) {
+        /* stats/score already handled above, this is a no-op placeholder */
+    }
+
+    /* PASSWORD - Change password */
+    if (strcmp(cmd, "password") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: password <old_password> <new_password>\r\n");
+        }
+
+        char old_pw[128], new_pw[128];
+        if (sscanf(args, "%127s %127s", old_pw, new_pw) != 2) {
+            return vm_value_create_string("Usage: password <old_password> <new_password>\r\n");
+        }
+
+        /* Verify old password */
+        if (strcmp(old_pw, session->password_hash) != 0) {
+            return vm_value_create_string("Incorrect old password.\r\n");
+        }
+
+        strncpy(session->password_hash, new_pw, sizeof(session->password_hash) - 1);
+        save_character(session);
+        return vm_value_create_string("Password changed successfully.\r\n");
+    }
+
+    /* ECHO - Echo text back to self */
+    if (strcmp(cmd, "echo") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string("Echo what?\r\n");
+        }
+        char msg[BUFFER_SIZE];
+        snprintf(msg, sizeof(msg), "%s\r\n", args);
+        return vm_value_create_string(msg);
+    }
+
+    /* VIEW - Alias for examine */
+    if (strcmp(cmd, "view") == 0) {
+        cmd_examine(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* POSITION - Set position description */
+    if (strcmp(cmd, "position") == 0) {
+        if (!args || !*args) {
+            if (session->is_resting) {
+                return vm_value_create_string("You are resting.\r\n");
+            } else {
+                return vm_value_create_string("You are standing.\r\n");
+            }
+        }
+        /* Position is handled via rest/stand commands */
+        return vm_value_create_string("Use 'rest' to sit down or 'stand' to stand up.\r\n");
+    }
+
+    /* MAP - Show basic ASCII area map */
+    if (strcmp(cmd, "map") == 0) {
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        Room *room = session->current_room;
+        char map_buf[1024];
+
+        /* Build a simple 3x3 directional map */
+        char n_sym = (room->exits.north >= 0) ? '#' : ' ';
+        char s_sym = (room->exits.south >= 0) ? '#' : ' ';
+        char e_sym = (room->exits.east >= 0) ? '#' : ' ';
+        char w_sym = (room->exits.west >= 0) ? '#' : ' ';
+        char u_sym = (room->exits.up >= 0) ? '+' : ' ';
+        char d_sym = (room->exits.down >= 0) ? '-' : ' ';
+
+        snprintf(map_buf, sizeof(map_buf),
+            "     %c\r\n"
+            "     |\r\n"
+            " %c---@---%c  %c up  %c dn\r\n"
+            "     |\r\n"
+            "     %c\r\n"
+            "\r\n@ = You   # = Exit   + = Up   - = Down\r\n",
+            n_sym, w_sym, e_sym, u_sym, d_sym, s_sym);
+
+        return vm_value_create_string(map_buf);
+    }
+
+    /* TITLE - Set custom title */
+    if (strcmp(cmd, "title") == 0) {
+        if (!args || !*args) {
+            session->title[0] = '\0';
+            return vm_value_create_string("Title cleared.\r\n");
+        }
+
+        strncpy(session->title, args, sizeof(session->title) - 1);
+        session->title[sizeof(session->title) - 1] = '\0';
+
+        char response[256];
+        snprintf(response, sizeof(response), "Title set to: %s\r\n", session->title);
+        return vm_value_create_string(response);
+    }
+
     if (strcmp(cmd, "shutdown") == 0) {
         if (session->privilege_level < 2) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
@@ -1571,14 +2818,35 @@ void process_login_state(PlayerSession *session, const char *input) {
     switch (session->state) {
         case STATE_GET_NAME:
             if (strlen(start) < 3 || strlen(start) > 15) {
-                send_to_player(session, 
+                send_to_player(session,
                     "Name must be between 3 and 15 characters.\r\n");
                 send_prompt(session);
                 return;
             }
-            
+
+            /* Check ban list */
+            {
+                FILE *bf = fopen("lib/save/banned.txt", "r");
+                if (bf) {
+                    char ban_line[128];
+                    while (fgets(ban_line, sizeof(ban_line), bf)) {
+                        /* Strip newline */
+                        char *nl = strchr(ban_line, '\n');
+                        if (nl) *nl = '\0';
+                        if (strcasecmp(ban_line, start) == 0) {
+                            fclose(bf);
+                            send_to_player(session,
+                                "\r\nYou have been banned from this server.\r\n");
+                            session->state = STATE_DISCONNECTING;
+                            return;
+                        }
+                    }
+                    fclose(bf);
+                }
+            }
+
             strncpy(session->username, start, sizeof(session->username) - 1);
-            
+
             /* Check if character exists */
             if (character_exists(session->username)) {
                 send_to_player(session, 
@@ -1724,7 +2992,27 @@ void process_chargen_state(PlayerSession *session, const char *input) {
 void process_playing_state(PlayerSession *session, const char *input) {
     fprintf(stderr, "[process_playing_state] INPUT: input=%p '%s'\n",
             (void*)input, input ? input : "(NULL)");
-    
+
+    /* Converse mode: treat all input as "say <input>" unless it's "." to exit */
+    if (session->converse_mode && input && input[0] != '\0') {
+        if (strcmp(input, ".") == 0) {
+            session->converse_mode = 0;
+            send_to_player(session, "Conversation mode OFF.\r\n");
+            send_prompt(session);
+            return;
+        }
+        /* Prepend "say " to the input */
+        char say_buf[BUFFER_SIZE];
+        snprintf(say_buf, sizeof(say_buf), "say %s", input);
+        VMValue result = execute_command(session, say_buf);
+        if (result.type == VALUE_STRING && result.data.string_value) {
+            send_to_player(session, "%s", result.data.string_value);
+            vm_value_release(&result);
+        }
+        send_prompt(session);
+        return;
+    }
+
     VMValue result = execute_command(session, input);
 
     command_debug_log_result(session, result);
@@ -2136,7 +3424,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "[Server] Ready for connections\n\n");
     
     time_t last_timeout_check = time(NULL);
-    
+    time_t last_combat_tick = time(NULL);
+
     while (server_running) {
         fd_set read_fds;
         FD_ZERO(&read_fds);
@@ -2267,6 +3556,13 @@ int main(int argc, char **argv) {
         if (now - last_timeout_check > 60) {
             check_session_timeouts();
             last_timeout_check = now;
+        }
+
+        /* Combat heartbeat - every 2 seconds */
+        if (now - last_combat_tick >= COMBAT_TICK_SECS) {
+            combat_tick();
+            combat_regen_tick();
+            last_combat_tick = now;
         }
     }
     

@@ -151,6 +151,25 @@ void room_remove_player(Room *room, PlayerSession *player) {
     }
 }
 
+/* Add item to room */
+void room_add_item(Room *room, InventoryItem *item) {
+    (void)room; (void)item;
+    /* TODO: implement when room items are fully wired */
+}
+
+/* Find item in room by name */
+InventoryItem* room_find_item(Room *room, const char *name) {
+    (void)room; (void)name;
+    /* TODO: implement when room items are fully wired */
+    return NULL;
+}
+
+/* Remove item from room */
+void room_remove_item(Room *room, InventoryItem *item) {
+    (void)room; (void)item;
+    /* TODO: implement when room items are fully wired */
+}
+
 /* Broadcast message to all players in room (optionally excluding one) */
 void room_broadcast(Room *room, const char *message, PlayerSession *exclude) {
     if (!room || !message) return;

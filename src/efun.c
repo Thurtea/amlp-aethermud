@@ -1612,6 +1612,362 @@ VMValue efun_debug_mem_stats(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_string(buffer);
 }
 
+/* ========== String Search / Replace Efuns ========== */
+
+VMValue efun_strsrch(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+
+    if (arg_count < 2 || args[0].type != VALUE_STRING)
+        return vm_value_create_int(-1);
+
+    const char *haystack = args[0].data.string_value;
+    if (!haystack) return vm_value_create_int(-1);
+
+    /* strsrch(str, char_int) - search for single character */
+    if (args[1].type == VALUE_INT) {
+        char ch = (char)args[1].data.int_value;
+        int reverse = (arg_count >= 3 && args[2].type == VALUE_INT && args[2].data.int_value == -1);
+        if (reverse) {
+            const char *p = strrchr(haystack, ch);
+            return vm_value_create_int(p ? (long)(p - haystack) : -1);
+        } else {
+            const char *p = strchr(haystack, ch);
+            return vm_value_create_int(p ? (long)(p - haystack) : -1);
+        }
+    }
+
+    /* strsrch(str, substr [, flag]) */
+    if (args[1].type != VALUE_STRING || !args[1].data.string_value)
+        return vm_value_create_int(-1);
+
+    const char *needle = args[1].data.string_value;
+    size_t needle_len = strlen(needle);
+    if (needle_len == 0) return vm_value_create_int(0);
+
+    int reverse = (arg_count >= 3 && args[2].type == VALUE_INT && args[2].data.int_value == -1);
+
+    if (reverse) {
+        /* Search backwards from end */
+        size_t hay_len = strlen(haystack);
+        if (needle_len > hay_len) return vm_value_create_int(-1);
+        for (long i = (long)(hay_len - needle_len); i >= 0; i--) {
+            if (strncmp(haystack + i, needle, needle_len) == 0)
+                return vm_value_create_int(i);
+        }
+        return vm_value_create_int(-1);
+    } else {
+        const char *p = strstr(haystack, needle);
+        return vm_value_create_int(p ? (long)(p - haystack) : -1);
+    }
+}
+
+VMValue efun_replace_string(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+
+    if (arg_count < 3) return vm_value_create_string("");
+    if (args[0].type != VALUE_STRING || args[1].type != VALUE_STRING ||
+        args[2].type != VALUE_STRING)
+        return vm_value_create_string("");
+
+    const char *str = args[0].data.string_value;
+    const char *old = args[1].data.string_value;
+    const char *rep = args[2].data.string_value;
+    if (!str) return vm_value_create_string("");
+    if (!old || !*old) return vm_value_create_string(str);
+    if (!rep) rep = "";
+
+    size_t old_len = strlen(old);
+    size_t rep_len = strlen(rep);
+    size_t str_len = strlen(str);
+
+    /* Count occurrences to pre-allocate */
+    int count = 0;
+    const char *s = str;
+    while ((s = strstr(s, old)) != NULL) { count++; s += old_len; }
+
+    if (count == 0) return vm_value_create_string(str);
+
+    size_t result_len = str_len + (size_t)count * (rep_len - old_len);
+    char *result = (char *)malloc(result_len + 1);
+    if (!result) return vm_value_create_string(str);
+
+    char *dst = result;
+    s = str;
+    while (*s) {
+        if (strncmp(s, old, old_len) == 0) {
+            memcpy(dst, rep, rep_len);
+            dst += rep_len;
+            s += old_len;
+        } else {
+            *dst++ = *s++;
+        }
+    }
+    *dst = '\0';
+
+    VMValue ret = vm_value_create_string(result);
+    free(result);
+    return ret;
+}
+
+/* ========== Object Context Efuns ========== */
+
+VMValue efun_this_object(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)args; (void)arg_count;
+
+    if (vm->current_object) {
+        VMValue v;
+        v.type = VALUE_OBJECT;
+        v.data.object_value = vm->current_object;
+        return v;
+    }
+
+    /* Fallback: return current player object if no method context */
+    void *po = get_current_player_object();
+    if (po) {
+        VMValue v;
+        v.type = VALUE_OBJECT;
+        v.data.object_value = po;
+        return v;
+    }
+
+    return vm_value_create_null();
+}
+
+VMValue efun_previous_object(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)args; (void)arg_count;
+
+    if (vm->previous_object) {
+        VMValue v;
+        v.type = VALUE_OBJECT;
+        v.data.object_value = vm->previous_object;
+        return v;
+    }
+
+    return vm_value_create_null();
+}
+
+VMValue efun_destruct(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+
+    obj_t *target = NULL;
+
+    if (arg_count >= 1 && args[0].type == VALUE_OBJECT) {
+        target = (obj_t *)args[0].data.object_value;
+    } else if (vm->current_object) {
+        target = (obj_t *)vm->current_object;
+    }
+
+    if (!target) return vm_value_create_int(0);
+
+    /* Unregister from object manager */
+    ObjManager *mgr = get_global_obj_manager();
+    if (mgr) obj_manager_unregister(mgr, target);
+
+    obj_destroy(target);
+    return vm_value_create_int(1);
+}
+
+/* ========== Array Utility Efuns ========== */
+
+VMValue efun_member_array(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+
+    if (arg_count < 2 || args[1].type != VALUE_ARRAY)
+        return vm_value_create_int(-1);
+
+    array_t *arr = args[1].data.array_value;
+    if (!arr) return vm_value_create_int(-1);
+
+    VMValue needle = args[0];
+    size_t len = array_length(arr);
+
+    for (size_t i = 0; i < len; i++) {
+        VMValue elem = array_get(arr, i);
+        /* Match by type and value */
+        if (elem.type != needle.type) continue;
+        switch (needle.type) {
+            case VALUE_INT:
+                if (elem.data.int_value == needle.data.int_value) return vm_value_create_int((long)i);
+                break;
+            case VALUE_STRING:
+                if (elem.data.string_value && needle.data.string_value &&
+                    strcmp(elem.data.string_value, needle.data.string_value) == 0)
+                    return vm_value_create_int((long)i);
+                break;
+            case VALUE_FLOAT:
+                if (elem.data.float_value == needle.data.float_value) return vm_value_create_int((long)i);
+                break;
+            case VALUE_OBJECT:
+                if (elem.data.object_value == needle.data.object_value) return vm_value_create_int((long)i);
+                break;
+            default:
+                break;
+        }
+    }
+
+    return vm_value_create_int(-1);
+}
+
+/* ========== Type Conversion Efuns ========== */
+
+VMValue efun_to_int(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+
+    switch (args[0].type) {
+        case VALUE_INT:    return args[0];
+        case VALUE_FLOAT:  return vm_value_create_int((long)args[0].data.float_value);
+        case VALUE_STRING:
+            if (args[0].data.string_value)
+                return vm_value_create_int(atol(args[0].data.string_value));
+            return vm_value_create_int(0);
+        default:           return vm_value_create_int(0);
+    }
+}
+
+VMValue efun_to_float(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+
+    switch (args[0].type) {
+        case VALUE_FLOAT:  return args[0];
+        case VALUE_INT:    return vm_value_create_float((double)args[0].data.int_value);
+        case VALUE_STRING:
+            if (args[0].data.string_value)
+                return vm_value_create_float(atof(args[0].data.string_value));
+            return vm_value_create_float(0.0);
+        default:           return vm_value_create_float(0.0);
+    }
+}
+
+VMValue efun_to_string(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+
+    char buf[128];
+    switch (args[0].type) {
+        case VALUE_STRING:  return args[0];
+        case VALUE_INT:     snprintf(buf, sizeof(buf), "%ld", args[0].data.int_value); break;
+        case VALUE_FLOAT:   snprintf(buf, sizeof(buf), "%g", args[0].data.float_value); break;
+        case VALUE_NULL:    return vm_value_create_string("0");
+        default:            return vm_value_create_string("");
+    }
+    return vm_value_create_string(buf);
+}
+
+/* ========== Extended Type Check Efuns ========== */
+
+VMValue efun_undefinedp(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+    return vm_value_create_int(args[0].type == VALUE_UNINITIALIZED || args[0].type == VALUE_NULL ? 1 : 0);
+}
+
+VMValue efun_nullp(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+    return vm_value_create_int(args[0].type == VALUE_NULL ? 1 : 0);
+}
+
+VMValue efun_clonep(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+    if (args[0].type != VALUE_OBJECT) return vm_value_create_int(0);
+    obj_t *o = (obj_t *)args[0].data.object_value;
+    /* An object with a prototype is considered a clone */
+    return vm_value_create_int(o && o->proto ? 1 : 0);
+}
+
+VMValue efun_typeof(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+    switch (args[0].type) {
+        case VALUE_INT:     return vm_value_create_string("int");
+        case VALUE_FLOAT:   return vm_value_create_string("float");
+        case VALUE_STRING:  return vm_value_create_string("string");
+        case VALUE_OBJECT:  return vm_value_create_string("object");
+        case VALUE_ARRAY:   return vm_value_create_string("array");
+        case VALUE_MAPPING: return vm_value_create_string("mapping");
+        case VALUE_NULL:    return vm_value_create_string("null");
+        default:            return vm_value_create_string("undefined");
+    }
+}
+
+/* ========== Time Efuns ========== */
+
+VMValue efun_time(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    return vm_value_create_int((long)time(NULL));
+}
+
+VMValue efun_ctime(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    time_t t;
+    if (arg_count >= 1 && args[0].type == VALUE_INT) {
+        t = (time_t)args[0].data.int_value;
+    } else {
+        t = time(NULL);
+    }
+    char *s = ctime(&t);
+    if (!s) return vm_value_create_string("");
+    /* ctime returns string with trailing newline, strip it */
+    size_t len = strlen(s);
+    if (len > 0 && s[len - 1] == '\n') {
+        char *copy = (char *)malloc(len);
+        memcpy(copy, s, len - 1);
+        copy[len - 1] = '\0';
+        VMValue ret = vm_value_create_string(copy);
+        free(copy);
+        return ret;
+    }
+    return vm_value_create_string(s);
+}
+
+/* ========== Miscellaneous Efuns ========== */
+
+VMValue efun_capitalize(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+    if (args[0].type != VALUE_STRING || !args[0].data.string_value)
+        return vm_value_create_string("");
+    const char *str = args[0].data.string_value;
+    char *result = (char *)malloc(strlen(str) + 1);
+    strcpy(result, str);
+    if (result[0]) result[0] = (char)toupper((unsigned char)result[0]);
+    VMValue ret = vm_value_create_string(result);
+    free(result);
+    return ret;
+}
+
+VMValue efun_allocate(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)arg_count;
+    if (args[0].type != VALUE_INT || args[0].data.int_value < 0)
+        return vm_value_create_null();
+    long size = args[0].data.int_value;
+    if (size > 10000) size = 10000; /* safety limit */
+    array_t *arr = array_new(vm->gc, (size_t)size);
+    if (!arr) return vm_value_create_null();
+    /* Pre-fill with null values */
+    for (long i = 0; i < size; i++) {
+        array_push(arr, vm_value_create_int(0));
+    }
+    VMValue v;
+    v.type = VALUE_ARRAY;
+    v.data.array_value = arr;
+    return v;
+}
+
+VMValue efun_pointerp(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)arg_count;
+    return vm_value_create_int(args[0].type == VALUE_ARRAY ? 1 : 0);
+}
+
+VMValue efun_mud_name(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    return vm_value_create_string("AetherMUD");
+}
+
+VMValue efun_query_host_name(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    char hostname[256];
+    if (gethostname(hostname, sizeof(hostname)) == 0) {
+        return vm_value_create_string(hostname);
+    }
+    return vm_value_create_string("localhost");
+}
+
 /* ========== Utility Functions ========== */
 
 int efun_register_all(EfunRegistry *registry) {
@@ -1682,6 +2038,40 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "write", efun_write, 1, 1, "int write(mixed)");
     efun_register(registry, "printf", efun_printf, 1, -1, "int printf(string, ...)");
     count += 2;
+
+    /* String search/replace */
+    efun_register(registry, "strsrch", efun_strsrch, 2, 3, "int strsrch(string, string|int, int|void)");
+    efun_register(registry, "replace_string", efun_replace_string, 3, 3, "string replace_string(string, string, string)");
+    efun_register(registry, "capitalize", efun_capitalize, 1, 1, "string capitalize(string)");
+
+    /* Object context */
+    efun_register(registry, "this_object", efun_this_object, 0, 0, "object this_object()");
+    efun_register(registry, "previous_object", efun_previous_object, 0, 0, "object previous_object()");
+    efun_register(registry, "destruct", efun_destruct, 0, 1, "void destruct(object|void)");
+
+    /* Array utilities */
+    efun_register(registry, "member_array", efun_member_array, 2, 2, "int member_array(mixed, mixed*)");
+    efun_register(registry, "allocate", efun_allocate, 1, 1, "mixed* allocate(int)");
+    efun_register(registry, "pointerp", efun_pointerp, 1, 1, "int pointerp(mixed)");
+
+    /* Type conversion */
+    efun_register(registry, "to_int", efun_to_int, 1, 1, "int to_int(mixed)");
+    efun_register(registry, "to_float", efun_to_float, 1, 1, "float to_float(mixed)");
+    efun_register(registry, "to_string", efun_to_string, 1, 1, "string to_string(mixed)");
+
+    /* Extended type checks */
+    efun_register(registry, "undefinedp", efun_undefinedp, 1, 1, "int undefinedp(mixed)");
+    efun_register(registry, "nullp", efun_nullp, 1, 1, "int nullp(mixed)");
+    efun_register(registry, "clonep", efun_clonep, 1, 1, "int clonep(object)");
+    efun_register(registry, "typeof", efun_typeof, 1, 1, "string typeof(mixed)");
+
+    /* Time functions */
+    efun_register(registry, "time", efun_time, 0, 0, "int time()");
+    efun_register(registry, "ctime", efun_ctime, 0, 1, "string ctime(int|void)");
+
+    /* System info */
+    efun_register(registry, "mud_name", efun_mud_name, 0, 0, "string mud_name()");
+    efun_register(registry, "query_host_name", efun_query_host_name, 0, 0, "string query_host_name()");
 
     /* Debugging efuns */
     efun_register(registry, "debug_set_flags", efun_debug_set_flags, 1, 1, "int debug_set_flags(int)");

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <strings.h>
 #include "debug.h"
 #include <stdint.h>
 #include <sys/stat.h>
@@ -16,6 +17,12 @@
 
 /* External function from session.c */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
+
+/* External from driver.c - find a player session by name */
+extern PlayerSession* find_player_by_name(const char *name);
+
+/* External from room.c - movement command */
+extern void cmd_move(PlayerSession *sess, const char *direction);
 
 /* ========== COMPLETE RACE AND OCC DATABASE ========== */
 
@@ -408,6 +415,15 @@ void chargen_complete(PlayerSession *sess) {
     inventory_init(&sess->character.inventory, sess->character.stats.ps);
     equipment_init(&sess->character.equipment);
     
+    /* Initialize real-time combat defaults (before race loading overrides) */
+    sess->character.attacks_per_round = 2;
+    sess->character.parries_per_round = 2;
+    sess->character.racial_auto_parry = 0;
+    sess->character.racial_auto_dodge = 0;
+    sess->character.auto_parry_enabled = 1;
+    sess->character.auto_dodge_enabled = 1;
+    sess->character.wimpy_threshold = 0;
+
     /* Initialize psionics and magic (Phase 5) */
     psionics_init_abilities(&sess->character);
     magic_init_abilities(&sess->character);
@@ -556,21 +572,21 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             /* Handle selection */
             if (choice >= 1 && choice <= NUM_RACES) {
                 ch->race = strdup(ALL_RACES[choice - 1].name);
-                
+
                 send_to_player(sess, "\nYou selected: \033[1;32m%s\033[0m\n\n", ch->race);
-                
-                /* Set placeholder OCC - will be assigned by wizard */
+
+                /* OCC is assigned by wizards via wiz-tools */
                 ch->occ = strdup("Awaiting Wizard Assignment");
-                
+
                 send_to_player(sess, "Your O.C.C. will be assigned by a wizard.\n");
                 send_to_player(sess, "Please send a 'tell' to a wizard requesting an O.C.C.\n\n");
-                
+
                 send_to_player(sess, "Rolling your attributes...\n");
-                
-                /* Skip OCC selection - go directly to stats */
+
+                /* Go directly to stats (race bonuses applied, OCC applied later by wizard) */
                 chargen_roll_stats(sess);
                 chargen_display_stats(sess);
-                
+
                 sess->chargen_state = CHARGEN_STATS_CONFIRM;
                 send_to_player(sess, "\n");
                 send_to_player(sess, "Accept these stats? (yes/reroll): ");
@@ -578,9 +594,9 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 send_to_player(sess, "Invalid choice. Please enter 1-%d: ", NUM_RACES);
             }
             break;
-            
+
         case CHARGEN_OCC_SELECT:
-            /* OCC selection disabled - wizards assign OCCs via wiz-tools instead */
+            /* OCC selection is handled by wizards via wiz-tools */
             send_to_player(sess, "O.C.C. selection is handled by game administrators.\n");
             send_to_player(sess, "Please contact a wizard for your O.C.C. assignment.\n");
             break;
@@ -635,272 +651,96 @@ void cmd_attack(PlayerSession *sess, const char *args) {
         send_to_player(sess, "You must complete character creation first.\n");
         return;
     }
-    
+
     if (!args || !(*args)) {
         send_to_player(sess, "Attack who?\n");
         return;
     }
-    
-    // For Phase 3, we'll implement basic NPC combat
-    // For now, demonstrate combat initiation
-    send_to_player(sess, "Combat system ready! Use 'strike' or 'shoot' commands.\n");
-    send_to_player(sess, "(Full combat with NPCs coming in next iteration)\n");
+
+    if (sess->in_combat) {
+        send_to_player(sess, "You are already in combat! Use 'stop' to disengage.\n");
+        return;
+    }
+
+    if (sess->is_resting) {
+        send_to_player(sess, "You stand up from resting.\n");
+        sess->is_resting = 0;
+    }
+
+    /* Find target player in room */
+    if (!sess->current_room) {
+        send_to_player(sess, "You are nowhere.\n");
+        return;
+    }
+
+    PlayerSession *target = NULL;
+    Room *room = sess->current_room;
+    for (int i = 0; i < room->num_players; i++) {
+        if (room->players[i] && room->players[i] != sess &&
+            room->players[i]->username &&
+            strcasecmp(room->players[i]->username, args) == 0) {
+            target = room->players[i];
+            break;
+        }
+    }
+
+    if (!target) {
+        send_to_player(sess, "You don't see '%s' here.\n", args);
+        return;
+    }
+
+    if (target == sess) {
+        send_to_player(sess, "You can't attack yourself.\n");
+        return;
+    }
+
+    combat_engage(sess, target);
 }
 
 void cmd_strike(PlayerSession *sess, const char *args) {
-    if (!sess || sess->state != STATE_PLAYING) {
-        send_to_player(sess, "You must complete character creation first.\n");
-        return;
-    }
-    
-    // Check if in combat
-    CombatRound *combat = combat_get_active(sess);
-    if (!combat) {
-        send_to_player(sess, "You are not in combat.\n");
-        return;
-    }
-    
-    // Find this player's participant
-    CombatParticipant *attacker = NULL;
-    for (CombatParticipant *p = combat->participants; p; p = p->next) {
-        if (p->session == sess) {
-            attacker = p;
-            break;
-        }
-    }
-    
-    if (!attacker) {
-        send_to_player(sess, "Error: You are not in this combat.\n");
-        return;
-    }
-    
-    // Check if it's this player's turn
-    if (combat->current != attacker) {
-        send_to_player(sess, "It is not your turn.\n");
-        return;
-    }
-    
-    // Check if already acted
-    if (attacker->actions_remaining <= 0) {
-        send_to_player(sess, "You have already acted this round.\n");
-        return;
-    }
-    
-    // Find target (for now, just attack the other participant)
-    CombatParticipant *target = NULL;
-    for (CombatParticipant *p = combat->participants; p; p = p->next) {
-        if (p != attacker) {
-            target = p;
-            break;
-        }
-    }
-    
-    if (!target) {
-        send_to_player(sess, "No valid target found.\n");
-        return;
-    }
-    
-    // Perform melee attack
-    DamageResult result = combat_attack_melee(attacker, target);
-    
-    // Use up action
-    attacker->actions_remaining--;
-    
-    // Check if target died
-    if (result.is_kill) {
-        combat_award_experience(attacker, target);
-        combat_remove_participant(combat, target);
-        
-        // End combat if only one participant left
-        if (combat->num_participants <= 1) {
-            combat_end(combat);
-            return;
-        }
-    }
-    
-    // Advance to next turn
-    combat_next_turn(combat);
+    (void)args;
+    if (!sess) return;
+    send_to_player(sess, "Combat is now real-time. Use 'attack <target>' to engage. Attacks fire automatically.\n");
 }
 
 void cmd_shoot(PlayerSession *sess, const char *args) {
-    if (!sess || sess->state != STATE_PLAYING) {
-        send_to_player(sess, "You must complete character creation first.\n");
-        return;
-    }
-    
-    // Check if in combat
-    CombatRound *combat = combat_get_active(sess);
-    if (!combat) {
-        send_to_player(sess, "You are not in combat.\n");
-        return;
-    }
-    
-    // Find this player's participant
-    CombatParticipant *attacker = NULL;
-    for (CombatParticipant *p = combat->participants; p; p = p->next) {
-        if (p->session == sess) {
-            attacker = p;
-            break;
-        }
-    }
-    
-    if (!attacker) {
-        send_to_player(sess, "Error: You are not in this combat.\n");
-        return;
-    }
-    
-    // Check if it's this player's turn
-    if (combat->current != attacker) {
-        send_to_player(sess, "It is not your turn.\n");
-        return;
-    }
-    
-    // Check if already acted
-    if (attacker->actions_remaining <= 0) {
-        send_to_player(sess, "You have already acted this round.\n");
-        return;
-    }
-    
-    // Find target (for now, just attack the other participant)
-    CombatParticipant *target = NULL;
-    for (CombatParticipant *p = combat->participants; p; p = p->next) {
-        if (p != attacker) {
-            target = p;
-            break;
-        }
-    }
-    
-    if (!target) {
-        send_to_player(sess, "No valid target found.\n");
-        return;
-    }
-    
-    // Perform ranged attack
-    DamageResult result = combat_attack_ranged(attacker, target);
-    
-    // Use up action
-    attacker->actions_remaining--;
-    
-    // Check if target died
-    if (result.is_kill) {
-        combat_award_experience(attacker, target);
-        combat_remove_participant(combat, target);
-        
-        // End combat if only one participant left
-        if (combat->num_participants <= 1) {
-            combat_end(combat);
-            return;
-        }
-    }
-    
-    // Advance to next turn
-    combat_next_turn(combat);
+    (void)args;
+    if (!sess) return;
+    send_to_player(sess, "Combat is now real-time. Use 'attack <target>' to engage. Attacks fire automatically.\n");
 }
 
 void cmd_dodge(PlayerSession *sess, const char *args) {
-    if (!sess || sess->state != STATE_PLAYING) {
-        send_to_player(sess, "You must complete character creation first.\n");
-        return;
-    }
-    
-    // Check if in combat
-    CombatRound *combat = combat_get_active(sess);
-    if (!combat) {
-        send_to_player(sess, "You are not in combat.\n");
-        return;
-    }
-    
-    // Find this player's participant
-    CombatParticipant *defender = NULL;
-    for (CombatParticipant *p = combat->participants; p; p = p->next) {
-        if (p->session == sess) {
-            defender = p;
-            break;
-        }
-    }
-    
-    if (!defender) {
-        send_to_player(sess, "Error: You are not in this combat.\n");
-        return;
-    }
-    
-    // Check if it's this player's turn
-    if (combat->current != defender) {
-        send_to_player(sess, "It is not your turn.\n");
-        return;
-    }
-    
-    // Check if already acted
-    if (defender->actions_remaining <= 0) {
-        send_to_player(sess, "You have already acted this round.\n");
-        return;
-    }
-    
-    // Set defending flag
-    defender->is_defending = true;
-    defender->actions_remaining--;
-    
-    send_to_player(sess, "You take a defensive stance, ready to dodge incoming attacks.\n");
-    
-    // Advance to next turn
-    combat_next_turn(combat);
+    (void)args;
+    if (!sess) return;
+    send_to_player(sess, "Dodging is now automatic. Use 'autododge' to toggle auto-dodge on/off.\n");
 }
 
 void cmd_flee(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess || sess->state != STATE_PLAYING) {
         send_to_player(sess, "You must complete character creation first.\n");
         return;
     }
-    
-    // Check if in combat
-    CombatRound *combat = combat_get_active(sess);
-    if (!combat) {
+
+    if (!sess->in_combat) {
         send_to_player(sess, "You are not in combat.\n");
         return;
     }
-    
-    // Find this player's participant
-    CombatParticipant *fleeing = NULL;
-    for (CombatParticipant *p = combat->participants; p; p = p->next) {
-        if (p->session == sess) {
-            fleeing = p;
-            break;
-        }
-    }
-    
-    if (!fleeing) {
-        send_to_player(sess, "Error: You are not in this combat.\n");
-        return;
-    }
-    
-    // Roll SPD check (1d20 + SPD vs 15)
-    int spd = fleeing->character->stats.spd;
+
+    /* PP check: 1d20 + PP bonus vs 12 */
+    int pp = sess->character.stats.pp;
+    int pp_bonus = (pp > 10) ? (pp - 10) / 5 : 0;
     int roll = combat_d20();
-    int total = roll + spd;
-    
-    if (total >= 15) {
-        // Successful flee
+    int total = roll + pp_bonus;
+
+    if (total >= 12) {
         send_to_player(sess, "You successfully flee from combat!\n");
-        
-        char msg[256];
-        snprintf(msg, sizeof(msg), "%s flees from combat!\n", fleeing->name);
-        combat_broadcast(combat, msg);
-        
-        combat_remove_participant(combat, fleeing);
-        
-        // End combat if only one participant left
-        if (combat->num_participants <= 1) {
-            combat_end(combat);
-        }
+        combat_disengage(sess);
+        /* Try to move in a random direction */
+        const char *dirs[] = {"north", "south", "east", "west"};
+        cmd_move(sess, dirs[rand() % 4]);
     } else {
-        // Failed flee
-        char msg[256];
-        snprintf(msg, sizeof(msg), "You fail to escape! (Rolled %d+%d=%d vs 15)\n", roll, spd, total);
-        send_to_player(sess, msg);
-        fleeing->actions_remaining--;
-        
-        // Advance to next turn
-        combat_next_turn(combat);
+        send_to_player(sess, "You fail to escape! (Rolled %d+%d=%d vs 12)\n", roll, pp_bonus, total);
     }
 }
 
@@ -1197,11 +1037,7 @@ int load_character(PlayerSession *sess, const char *username) {
         fread(&ch->magic.ppe_current, sizeof(int), 1, f);
         fread(&ch->magic.ppe_max, sizeof(int), 1, f);
     }
-    fread(&ch->psionics.isp_current, sizeof(int), 1, f);
-    fread(&ch->psionics.isp_max, sizeof(int), 1, f);
-    fread(&ch->magic.ppe_current, sizeof(int), 1, f);
-    fread(&ch->magic.ppe_max, sizeof(int), 1, f);
-    
+
     /* Read current room ID */
     int room_id;
     fread(&room_id, sizeof(int), 1, f);

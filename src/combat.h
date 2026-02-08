@@ -6,14 +6,16 @@
 #include "session_internal.h"
 
 // ============================================================================
-// COMBAT SYSTEM - Rifts RPG Turn-Based Combat
+// COMBAT SYSTEM - Real-Time Heartbeat-Driven Combat
 // ============================================================================
+
+#define MELEE_ROUND_TICKS  8    /* 8 ticks per melee round (16 seconds at 2s/tick) */
+#define COMBAT_TICK_SECS   2    /* Heartbeat interval in seconds */
 
 // Combat state machine
 typedef enum {
     COMBAT_NONE = 0,        // Not in combat
-    COMBAT_INITIATIVE,      // Rolling initiative
-    COMBAT_ACTIVE,          // Taking turns
+    COMBAT_ACTIVE,          // Real-time combat in progress
     COMBAT_ENDED            // Combat finished
 } CombatState;
 
@@ -23,17 +25,15 @@ typedef struct CombatParticipant {
     bool is_player;                       // True if player, false if NPC
     PlayerSession *session;               // Player session (NULL for NPCs)
     Character *character;                 // Character data
-    
-    // Combat state
-    int initiative;                       // Initiative roll (SPD + 1d20)
-    int actions_remaining;                // Actions left this round
-    bool is_defending;                    // Currently in defensive stance
-    int parries_remaining;                // Parries left this round
-    
+
+    // Real-time combat tracking
+    int attacks_used_this_round;          // Track attacks used in current melee round
+    int parries_used_this_round;          // Track parries used in current melee round
+
     // Target tracking
     struct CombatParticipant *target;     // Current attack target
-    
-    // Linked list
+
+    // Linked list within a CombatRound
     struct CombatParticipant *next;
 } CombatParticipant;
 
@@ -41,9 +41,10 @@ typedef struct CombatParticipant {
 typedef struct CombatRound {
     CombatState state;                    // Current combat state
     CombatParticipant *participants;      // Linked list of combatants
-    CombatParticipant *current;           // Current turn participant
-    int round_number;                     // Combat round counter
+    int round_number;                     // Melee round counter
+    int tick_in_round;                    // 0 to MELEE_ROUND_TICKS-1 within current melee round
     int num_participants;                 // Number of active combatants
+    struct CombatRound *next;            // Linked list of concurrent combats
 } CombatRound;
 
 // Damage result
@@ -51,7 +52,7 @@ typedef struct {
     int damage;                           // Total damage dealt
     bool is_critical;                     // Critical hit flag
     bool is_kill;                         // Target killed flag
-    bool is_mega_damage;                  // MDC weapon flag (Phase 4)
+    bool is_mega_damage;                  // MDC weapon flag
     int sdc_damage;                       // Damage to SDC
     int hp_damage;                        // Damage to HP
 } DamageResult;
@@ -63,8 +64,17 @@ typedef struct {
 // Initialization
 void combat_init(void);
 
-// Combat round management
-CombatRound* combat_start(CombatParticipant *initiator, CombatParticipant *target);
+// Real-time combat heartbeat (called every 2 seconds from main loop)
+void combat_tick(void);
+
+// Regen tick for resting players (called every 2 seconds from main loop)
+void combat_regen_tick(void);
+
+// Engage/disengage combat
+CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender);
+void combat_disengage(PlayerSession *session);
+
+// Legacy API (still used by slay, peace, etc.)
 void combat_end(CombatRound *combat);
 CombatRound* combat_get_active(PlayerSession *sess);
 
@@ -74,11 +84,6 @@ void combat_free_participant(CombatParticipant *p);
 void combat_add_participant(CombatRound *combat, CombatParticipant *p);
 void combat_remove_participant(CombatRound *combat, CombatParticipant *p);
 CombatParticipant* combat_find_participant(CombatRound *combat, const char *name);
-
-// Initiative system
-void combat_roll_initiative(CombatRound *combat);
-void combat_next_turn(CombatRound *combat);
-void combat_display_initiative(CombatRound *combat);
 
 // Attack system
 DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant *defender);

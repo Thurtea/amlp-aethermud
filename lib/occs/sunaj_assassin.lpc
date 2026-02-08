@@ -1,0 +1,230 @@
+// /lib/occs/sunaj_assassin.lpc
+// Sunaj Assassin O.C.C. - Elite Atlantean Shadow Assassin
+//
+// The Sunaj are a secret order of True Atlantean assassins who serve
+// the darker interests of certain Atlantean clans. Masters of stealth,
+// tattoo magic, and silent killing, they are feared across the Megaverse.
+// Their name is "Janus" spelled backwards, reflecting their two-faced nature.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+
+    set_occ_name("Sunaj Assassin");
+    set_occ_id("sunaj_assassin");
+    set_occ_category(OCC_CAT_SPECIAL);
+    set_alignment_requirement("not_good");
+
+    set_occ_description(
+        "The Sunaj are a shadowy order of True Atlantean assassins, their very "
+        "existence denied by most Atlantean clans. Operating in absolute secrecy, "
+        "they combine ancient tattoo magic with deadly combat training to become "
+        "the most feared killers in the Megaverse. A Sunaj can meld with shadows, "
+        "conjure weapons from their magical tattoos, and strike with lethal "
+        "precision before vanishing without a trace. Their loyalty is absolute, "
+        "their methods ruthless, and their targets never see them coming."
+    );
+
+    // Stat requirements - must be exceptional
+    set_stat_requirements(([
+        "pp": 14,   // Physical Prowess 14+
+        "pe": 12,   // Physical Endurance 12+
+        "me": 12,   // Mental Endurance 12+
+        "iq": 10    // Intelligence 10+
+    ]));
+
+    // Stat bonuses from training
+    set_stat_bonuses(([
+        "pp": 3,    // +3 Physical Prowess
+        "pe": 2,    // +2 Physical Endurance
+        "me": 2,    // +2 Mental Endurance
+        "spd": 2    // +2 Speed
+    ]));
+
+    // XP table
+    set_xp_table(XP_LEVELS);
+
+    // Base abilities - shadow and tattoo magic
+    set_base_abilities(({
+        "shadow_meld",         // Blend into shadows, near-invisible
+        "tattoo_weapon",       // Summon weapon from tattoo magic
+        "silent_kill",         // Instant kill on unaware targets
+        "disguise_mastery",    // Master of disguise and deception
+        "sense_magic"          // Detect magical auras and enchantments
+    }));
+
+    // Abilities gained at levels
+    set_occ_abilities(([
+        2: ({ "shadow_step" }),        // Short-range shadow teleport
+        4: ({ "tattoo_armor" }),        // Summon magical armor from tattoos
+        6: ({ "death_strike" }),        // Enhanced critical strike
+        8: ({ "shadow_cloak" }),        // Invisibility in darkness
+        10: ({ "tattoo_mastery" }),     // Enhanced tattoo weapon damage
+        12: ({ "phantom_blade" }),      // Phase through armor
+        15: ({ "shadow_lord" })         // Complete shadow mastery
+    ]));
+
+    // Combat - assassin-grade
+    set_base_attacks(5);
+    set_attacks_per_level(1, 3);  // +1 attack every 3 levels
+    set_hand_to_hand_type("assassin");
+
+    // Combat progression
+    set_combat_progression(([
+        1: ([ "strike": 3, "parry": 2, "dodge": 3 ]),
+        3: ([ "roll": 2, "initiative": 2 ]),
+        5: ([ "strike": 1, "dodge": 1, "backstab": 2 ]),
+        7: ([ "parry": 1, "disarm": 2 ]),
+        9: ([ "strike": 1, "initiative": 1, "death_blow": 1 ]),
+        12: ([ "dodge": 1, "critical_strike": 1 ]),
+        15: ([ "strike": 1, "parry": 1, "dodge": 1 ])
+    ]));
+
+    // OCC Skills - stealth and assassination focused
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "language_atlantean",
+        "language_dragonese",
+        "prowl",
+        "climbing",
+        "swimming",
+        "acrobatics",
+        "gymnastics",
+        "detect_concealment",
+        "detect_ambush",
+        "intelligence",
+        "disguise",
+        "wp_knife",
+        "wp_sword",
+        "wp_energy_pistol",
+        "htoh_assassin"
+    }));
+
+    // OCC related skills
+    set_occ_related_skills(({
+        "tracking", "wilderness_survival", "land_navigation",
+        "streetwise", "palming", "pick_locks", "pick_pockets",
+        "escape_artist", "forgery", "impersonation",
+        "pilot_motorcycle", "pilot_automobile",
+        "first_aid", "toxicology",
+        "lore_magic", "lore_demons_monsters",
+        "language_*", "literacy_*"
+    }));
+    set_occ_skill_count(8);
+
+    // Elective skills
+    set_elective_categories(({
+        SKILL_CAT_ESPIONAGE, SKILL_CAT_PHYSICAL,
+        SKILL_CAT_WEAPON, SKILL_CAT_ROGUE
+    }));
+    set_elective_count(4);
+    set_secondary_count(4);
+
+    // Skill bonuses
+    set_skill_bonuses(([
+        "espionage": 15,
+        "physical": 10,
+        "weapon_proficiencies": 10,
+        "rogue": 10
+    ]));
+
+    // Psionic and magic abilities - tattoo magic focus
+    set_base_ppe(30);           // Tattoo magic energy
+    set_ppe_per_level(5);       // +5 per level
+    set_base_isp(20);           // Minor psionic awareness
+    set_isp_per_level(3);       // +3 per level
+    set_magic_type("tattoo");
+    set_psionic_type("minor");
+
+    // Health - tough but not tank
+    set_base_hp(0);    // PE + 1d6
+    set_hp_per_level(0);   // 1d6
+    set_base_sdc(60);
+    set_sdc_per_level(3);
+    set_mdc_class(0);
+
+    // Standard equipment - assassin's kit
+    set_standard_equipment(({
+        "/obj/armor/shadow_suit",
+        "/obj/item/backpack",
+        "/obj/item/disguise_kit",
+        "/obj/item/lockpick_set",
+        "/obj/item/grappling_hook",
+        "/obj/item/rope_silk",
+        "/obj/clothing/dark_cloak",
+        "/obj/item/rations_1week"
+    }));
+
+    set_optional_gear(({
+        "/obj/item/poison_kit",
+        "/obj/vehicle/motorcycle"
+    }));
+
+    set_starting_credits(300, 800);
+
+    set_starting_weapons(({
+        "/obj/weapon/vibro_knife",
+        "/obj/weapon/short_sword",
+        "/obj/weapon/energy_pistol"
+    }));
+
+    set_starting_armor(({
+        "/obj/armor/shadow_suit"   // Light stealth armor
+    }));
+
+    // Race restriction - True Atlantean / Atlantean only
+    set_race_requirements(({
+        "true_atlantean", "atlantean"
+    }));
+    set_race_exclusions(({ }));
+
+    // Limited cybernetics - tattoo magic conflicts
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
+
+    // Special powers
+    add_special_power("shadow_meld", 1);
+    add_special_power("tattoo_weapon", 1);
+    add_special_power("silent_kill", 1);
+    add_special_power("disguise_mastery", 1);
+    add_special_power("sense_magic", 1);
+
+    set_vehicle_type("none");
+    set_special_training("sunaj_order");
+
+    // Background
+    set_background(
+        "You were selected as a child by the Sunaj order, your potential recognized "
+        "by the elders. Years of brutal training in the shadow arts, tattoo magic, "
+        "and the ways of silent death have forged you into a weapon. The order's "
+        "existence is denied by all True Atlantean clans, and you operate in absolute "
+        "secrecy. Your missions serve the hidden agendas of powerful Atlantean "
+        "factions, and failure is not an option — the order does not forgive."
+    );
+    set_organizations(({ "sunaj_order" }));
+    set_enemies(({ "splugorth", "coalition_states", "anyone_who_discovers_the_order" }));
+}
+
+// Sunaj shadow meld bonus
+int query_shadow_bonus() {
+    return 3;  // +3 to prowl in darkness/shadows
+}
+
+// Tattoo weapon damage increases with level
+string query_tattoo_weapon_damage(int level) {
+    if (level < 4) return "2d6 MD";
+    else if (level < 8) return "3d6 MD";
+    else if (level < 12) return "4d6 MD";
+    else return "5d6 MD";
+}
+
+// Backstab multiplier
+int query_backstab_multiplier(int level) {
+    if (level < 6) return 2;
+    else if (level < 10) return 3;
+    else if (level < 14) return 4;
+    else return 5;
+}

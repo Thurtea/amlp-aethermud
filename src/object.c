@@ -300,6 +300,12 @@ VMValue obj_call_method(VirtualMachine *vm, obj_t *obj, const char *method_name,
     /* Preserve VM state to avoid leaking stack growth into caller */
     int saved_top = vm->stack ? vm->stack->top : 0;
     int saved_running = vm->running;
+    void *saved_current = vm->current_object;
+    void *saved_previous = vm->previous_object;
+
+    /* Track object context for this_object() / previous_object() */
+    vm->previous_object = vm->current_object;
+    vm->current_object = obj;
 
     /* Push arguments onto stack (in call order) */
     for (int i = 0; i < arg_count; i++) {
@@ -350,11 +356,13 @@ VMValue obj_call_method(VirtualMachine *vm, obj_t *obj, const char *method_name,
         vm_value_release(&arg);
     }
 
-    /* Restore stack and running state */
+    /* Restore stack, running state, and object context */
     if (vm->stack) {
         vm->stack->top = saved_top;
     }
     vm->running = saved_running;
+    vm->current_object = saved_current;
+    vm->previous_object = saved_previous;
 
     return result;
 }

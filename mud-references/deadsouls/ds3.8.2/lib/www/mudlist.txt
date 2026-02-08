@@ -1,13 +1,11 @@
-2026.02.06-11.34,09
-Dead_Souls_thurtea recognizes one hundred and two muds matching your query: 
+2026.02.07-16.51,23
+Dead_Souls_thurtea recognizes one hundred and one muds matching your query: 
 
 7thplane        n/a    IMC2 client     IMC2 Freedom CL-2. 69.164.199.238 8888
 A.HEGY          LPMud  FluffOS v2.23-d Dead Souls 3.8.6-h 149.200.64.93 6666
 Adaka           Coffee CoffeeMud v5.9. CoffeeMud v5.9.6   85.3.216.226 5555
 AftermathRPG    Coffee CoffeeMud v5.11 CoffeeMud v5.11.0. 71.231.90.148 5555
 AgeOfHeroes     LPMud  LDMud 3.6.8 (3. AoH 0.5.6          128.76.165.163 2345
-Antikaria       TMD    TMD             antikaria          128.16.10.197 9000
-Archipelago     LPMud  FluffOS v2.28.3 Discworld 15.0a    88.97.75.68 8000
 Astaria         LP     fluffos 2024071 Astaria v3.0       204.216.111.205 5000
 Canvas          Coffee CoffeeMud v5.10 CoffeeMud v5.10.0. 181.214.133.96 5555
 Castle Rock     Coffee CoffeeMud v5.10 CoffeeMud v5.10.3  51.81.187.57 5555
@@ -20,6 +18,7 @@ Dark City       GodWar GodWars I3 Driv Dark City          178.79.173.99 3000
 DarkLands MUD   Coffee CoffeeMud v5.10 CoffeeMud v5.10.1  45.56.92.184 5555
 DarkeMUD        n/a    IMC2 client     IMC2 Taurus LPC Cl 174.27.39.183 5559
 Darkness and De LPMud  FluffOS v2017.2 Nightmare+DnD      155.254.17.154 4201
+Darkseed        Coffee CoffeeMud v5.10 CoffeeMud v5.10.5  137.186.122.42 5555
 Dead Souls Dev  LPMud  FluffOS v2.23-d Dead Souls 3.9     97.107.133.86 8000
 DeadSouls-Fluff n/a    IMC2 client     Tim's LPC IMC2 cli 64.225.49.44 5555
 Dead_Souls_chin LPMud  FluffOS v2.23-d Dead Souls 3.8.2   206.174.97.187 6666
@@ -67,21 +66,21 @@ Planar Converge Coffee CoffeeMud v5.10 CoffeeMud v5.10.3  23.239.29.159 5555
 ProbsquatchMUD  Coffee CoffeeMud v5.11 CoffeeMud v5.11.0. 204.83.235.198 5555
 ProgressMUD     Coffee CoffeeMud v5.9. CoffeeMud v5.9.12. 139.162.249.62 5555
 Rainy Daze - Fa Coffee CoffeeMud v5.9. CoffeeMud v5.9.12  192.81.133.87 5555
+Ralidar         Coffee CoffeeMud v5.11 CoffeeMud v5.11.0. 207.183.143.38 5555
 Realm of Shadow DikuMU I3 Driver 2.40b Smaug 1.4a         134.122.38.91 1133
-Resident Evil R Coffee CoffeeMud v5.10 CoffeeMud v5.10.0. 45.79.224.33 6666
+Resident Evil R Coffee CoffeeMud v5.10 CoffeeMud v5.10.0. 45.79.224.33 5555
 Rise of Praxis  LPMud  fluffos 2024013 Dead Souls 2.4.2   3.21.145.51 6666
 Rogue-Edition   God Wa God Wars I3 Dri Rogue 3.49 (build: 178.79.173.99 9000
 Secret of Life  Coffee CoffeeMud v5.10 CoffeeMud v5.10.4. 45.56.88.19 5555
 Shadow Lands    Coffee CoffeeMud v5.10 CoffeeMud v5.10.3  172.233.211.252 5555
 Shadow Wind MUD Coffee CoffeeMud v5.10 CoffeeMud v5.10.1  45.56.95.114 5555
 ShadowMUD       LP     FluffOS v2.28.2 Nightmare/ShadowLi 199.74.141.8 1030
-ShadowMUDii Dev LP     FluffOS v2.28.2 Nightmare/ShadowLi 199.74.141.8 1035
+ShadowMUDii Dev LP     FluffOS v2.28.2 Nightmare/ShadowLi 216.136.9.8 1035
 Song of Sword & LPMud  fluffos v2019.2 Dead Souls 3.8.6   124.51.149.52 9981
 Song_of_Sword_& n/a    IMC2 client     Tim's LPC IMC2 cli 124.51.149.52 9981
 Space MUD       LP     fluffos 2024071 Lima 1.1a4         139.144.35.74 7878
 Star Hero       LPMud  FluffOS v2.23-d Dead Souls 3.9     45.55.79.194 3000
 The Beast Withi Coffee CoffeeMud v5.9. CoffeeMud v5.9.9   96.126.100.171 5555
-The Illusion of LPMud  fluffos 2024013 Sand Man 1.0 (alph 176.9.151.147 7800
 The Rifthome MU Coffee CoffeeMud v5.9. CoffeeMud v5.9.11. 88.99.254.53 5585
 The Savage Soul LPMud  FluffOS v2.23-d Dead Souls 3.7a7   173.255.210.234 6666
 The Walking Dea LPMud  FluffOS v2.23-d Dead Souls 3.9     195.201.166.132 8000
@@ -89,9 +88,9 @@ The Zone        LPMud  DGD 1.4.1       WOTFlib 0.90       136.144.155.250 8888
 The Zone-dalet  LPMud  DGD 1.4.1       WOTFlib 0.90       136.144.155.250 8888
 The Zone-i4     LPMud  DGD 1.4.1       WOTFlib 0.90       136.144.155.250 8888
 The Zone-wpr    LPMud  DGD 1.4.1       WOTFlib 0.90       136.144.155.250 8888
+Unnamed_CM_2897 Coffee CoffeeMud v5.11 CoffeeMud v5.11.0. 75.253.190.121 5555
 Unnamed_CM_2cbf Coffee CoffeeMud v5.11 CoffeeMud v5.11.0. 66.52.255.18 5555
 Unnamed_CM_87dc Coffee CoffeeMud v5.11 CoffeeMud v5.11.0  100.1.249.185 5555
-Unnamed_CM_c8d2 Coffee CoffeeMud v5.11 CoffeeMud v5.11.0. 108.214.94.181 5555
 Upon Black Wing LPMud  FluffOS v2.23-d Dead Souls 3.9     146.168.137.126 6767
 Upon Black Wing LPMud  FluffOS v2.23-d Dead Souls 3.9     146.168.137.126 6969
 WL-Development  LPMud  LDMud 3.6.4 (3. WL-Lib             49.13.232.95 4711

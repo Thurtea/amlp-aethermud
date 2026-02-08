@@ -106,6 +106,9 @@ VirtualMachine* vm_init(void) {
     vm->instruction_capacity = 0;
     vm->instruction_pointer = 0;
 
+    vm->current_object = NULL;
+    vm->previous_object = NULL;
+
     vm->debug_flags = 0;
     vm->trace_output = NULL;
     memset(&vm->profile, 0, sizeof(vm->profile));

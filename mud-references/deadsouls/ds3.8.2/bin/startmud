@@ -17,8 +17,12 @@ fi
 echo "driver: "$DRIVER
 echo "cfg: "$CFG
 
-# Specify your mud dir here.
-MUDHOME=""
+# Determine the MUD home directory (script parent by default).
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -z "$MUDHOME" ]; then
+    MUDHOME="$SCRIPT_DIR/.."
+fi
+MUDHOME="$(cd "$MUDHOME" && pwd)"
 
 # It has been reported that non-US users have problems
 # with some .o files because their systems default to
@@ -50,13 +54,21 @@ while [ true ]; do
     cat $MUDHOME/lib/log/runtime >> $MUDHOME/lib/log/runtime.boot
     rm $MUDHOME/lib/log/runtime
 
-    if [ $MUDHOME ] && [ -f $MUDHOME/bin/$DRIVER ]  && [ -f $MUDHOME/bin/$CFG ]
+    if [ -n "$MUDHOME" ] && [ -f "$MUDHOME/bin/$DRIVER" ]  && [ -f "$MUDHOME/bin/$CFG" ]
         then
-        $MUDHOME/bin/$DRIVER $MUDHOME/bin/$CFG 
+        # Read configured external port from the cfg (if present) for user feedback
+        CFG_PATH="$MUDHOME/bin/$CFG"
+        if [ -f "$CFG_PATH" ]; then
+            EXTPORT=$(awk -F: '/^external_port_1/ {print $2; exit}' "$CFG_PATH" | tr -d ' ' | grep -o '[0-9]\+' || true)
+            if [ -n "$EXTPORT" ]; then
+                echo "Configured external port: $EXTPORT"
+            fi
+        fi
+        exec "$MUDHOME/bin/$DRIVER" "$CFG_PATH"
         else
         if [ -f ./$DRIVER ]  && [ -f ./$CFG ] 
             then
-            ./$DRIVER ./$CFG
+            exec ./$DRIVER ./$CFG
             else
             break
         fi

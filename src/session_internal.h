@@ -54,6 +54,24 @@ typedef struct PlayerSession {
     int chargen_temp_choice; /* Temporary storage for menu selection */
     Character character;
     Room *current_room;
+
+    /* Wizard tools */
+    struct PlayerSession *snooping;      /* Session being snooped on */
+    struct PlayerSession *snooped_by;    /* Session that is snooping us */
+    int is_invisible;                    /* Wizard invisibility flag */
+    int is_godmode;                      /* God mode - immune to damage */
+    char title[128];                     /* Custom title for who list */
+
+    /* Real-time combat state */
+    struct PlayerSession *combat_target;  /* Current combat target */
+    int in_combat;                        /* 1 if in active combat */
+
+    /* Social/RP state */
+    char last_tell_from[64];              /* Username of last tell sender (for reply) */
+    int is_brief;                         /* Brief mode: skip long room descriptions */
+    int is_color;                         /* ANSI color enabled (default 1) */
+    int is_resting;                       /* Resting state (regen bonus) */
+    int converse_mode;                    /* 1 = every input becomes "say" */
 } PlayerSession;
 
 #endif /* SESSION_INTERNAL_H */

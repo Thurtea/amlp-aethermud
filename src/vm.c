@@ -478,6 +478,15 @@ static void vm_negate(VirtualMachine *vm) {
 static void vm_comparison_op(VirtualMachine *vm, int op) {
     VMValue b = vm_pop_value(vm);
     VMValue a = vm_pop_value(vm);
+    /* Diagnostic: log LT comparisons to catch type mismatches during foreach */
+    if (op == 2) {
+        fprintf(stderr, "[VM OP_LT] a.type=%d b.type=%d", a.type, b.type);
+        if (a.type == VALUE_INT) fprintf(stderr, " a.int=%ld", a.data.int_value);
+        if (b.type == VALUE_INT) fprintf(stderr, " b.int=%ld", b.data.int_value);
+        if (a.type == VALUE_ARRAY) fprintf(stderr, " a.array_len=%zu", array_length((array_t*)a.data.array_value));
+        if (b.type == VALUE_ARRAY) fprintf(stderr, " b.array_len=%zu", array_length((array_t*)b.data.array_value));
+        fprintf(stderr, "\n");
+    }
     
     double a_val = (a.type == VALUE_FLOAT) ? a.data.float_value : (double)a.data.int_value;
     double b_val = (b.type == VALUE_FLOAT) ? b.data.float_value : (double)b.data.int_value;
@@ -687,15 +696,31 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             }
             
             VMValue v = vm->current_frame->local_variables[idx];
-            
-            /* Debug ALL OP_LOAD_LOCAL in process_command */
-            if (strcmp(vm->current_frame->function->name, "process_command") == 0) {
-                DEBUG_LOG_VM("OP_LOAD_LOCAL idx=%d in %s: type=%d (PARAM/LOCAL check), ptr=%p",
-                        idx, vm->current_frame->function->name, v.type, (void*)v.data.string_value);
-                
-                /* Warn if parameter is NULL */
-                if (v.type == VALUE_NULL && idx < vm->current_frame->function->param_count) {
-                    WARN_LOG("Parameter %d is NULL in process_command! Frame corruption?", idx);
+
+            /* Debug OP_LOAD_LOCAL for master create()/init_daemons/process_command */
+            if (vm->current_frame->function) {
+                const char *fname = vm->current_frame->function->name;
+                if (fname && (strcmp(fname, "process_command") == 0 || strcmp(fname, "create") == 0 || strcmp(fname, "init_daemons") == 0)) {
+                    /* For init_daemons we want verbose tracing of the first few locals */
+                    if (strcmp(fname, "init_daemons") == 0 && idx <= 6) {
+                        fprintf(stderr, "[VM LOAD_LOCAL] %s local[%d] read: type=%d",
+                                fname, idx, v.type);
+                        if (v.type == VALUE_INT) fprintf(stderr, " int=%ld", v.data.int_value);
+                        if (v.type == VALUE_STRING && v.data.string_value) fprintf(stderr, " string='%s'", v.data.string_value);
+                        if (v.type == VALUE_ARRAY && v.data.array_value) fprintf(stderr, " array_len=%zu", array_length((array_t*)v.data.array_value));
+                        if (v.type == VALUE_OBJECT && v.data.object_value) fprintf(stderr, " obj=%p", v.data.object_value);
+                        fprintf(stderr, "\n");
+                    } else {
+                        DEBUG_LOG_VM("OP_LOAD_LOCAL idx=%d in %s: type=%d (PARAM/LOCAL check), ptr=%p",
+                                idx, fname, v.type, (void*)v.data.string_value);
+                        if (v.type == VALUE_STRING) {
+                            fprintf(stderr, "[VM LOAD_LOCAL] %s local[%d] = '%s'\n",
+                                    fname, idx, v.data.string_value ? v.data.string_value : "(NULL)");
+                        }
+                        if (v.type == VALUE_NULL && idx < vm->current_frame->function->param_count) {
+                            WARN_LOG("Parameter %d is NULL in %s! Frame corruption?", idx, fname);
+                        }
+                    }
                 }
             }
             
@@ -718,6 +743,30 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             VMValue v = vm_pop_value(vm);
             vm_value_release(&vm->current_frame->local_variables[idx]);
             vm->current_frame->local_variables[idx] = v;
+
+            /* Debug OP_STORE_LOCAL for relevant functions (foreach tracing) */
+            if (vm->current_frame->function) {
+                const char *fname = vm->current_frame->function->name;
+                if (fname && (strcmp(fname, "create") == 0 || strcmp(fname, "init_daemons") == 0)) {
+                    VMValue stored = vm->current_frame->local_variables[idx];
+                    /* Only print detailed traces for the first several locals used by init_daemons */
+                    if (idx <= 6) {
+                        fprintf(stderr, "[VM STORE_LOCAL] %s local[%d] set: type=%d\n",
+                                fname, idx, stored.type);
+                        if (stored.type == VALUE_STRING && stored.data.string_value) {
+                            fprintf(stderr, "[VM STORE_LOCAL]   string: '%s'\n", stored.data.string_value);
+                        }
+                        if (stored.type == VALUE_ARRAY && stored.data.array_value) {
+                            fprintf(stderr, "[VM STORE_LOCAL]   array length: %zu\n", array_length((array_t*)stored.data.array_value));
+                        }
+                    } else {
+                        /* Minimal trace for other slots */
+                        fprintf(stderr, "[VM STORE_LOCAL] %s local[%d] set: type=%d\n",
+                                fname, idx, stored.type);
+                    }
+                }
+            }
+
             return 0;
         }
         
@@ -772,12 +821,17 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         case OP_RSHIFT: vm_bitwise_op(vm, 5); return 0;
         
         case OP_JUMP:
+            /* Debug jump target for loop backedges */
+            fprintf(stderr, "[VM] OP_JUMP -> addr=%d (ip=%d)\n", instr->operand.address_operand, vm->current_frame ? vm->current_frame->instruction_pointer : -1);
             vm->current_frame->instruction_pointer = instr->operand.address_operand;
             return 0;
         
         case OP_JUMP_IF_FALSE: {
             VMValue cond = vm_pop_value(vm);
-            if (!vm_value_is_truthy(cond)) {
+            int truthy = vm_value_is_truthy(cond);
+            fprintf(stderr, "[VM] OP_JUMP_IF_FALSE cond_type=%d truthy=%d -> %s addr=%d\n",
+                    cond.type, truthy, truthy ? "no-jump" : "jump", instr->operand.address_operand);
+            if (!truthy) {
                 vm->current_frame->instruction_pointer = instr->operand.address_operand;
             }
             vm_value_release(&cond);
@@ -811,7 +865,25 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
                                 args[i] = vm_pop_value(vm);
                             }
                         }
+                        if (func_name && strcmp(func_name, "load_object") == 0) {
+                            fprintf(stderr, "[VM] OP_CALL efun load_object invoked\n");
+                        }
                         VMValue result = efun_entry->callback(vm, args, arg_count);
+                        if (func_name && strcmp(func_name, "load_object") == 0) {
+                            fprintf(stderr, "[VM] OP_CALL efun load_object returned type=%d\n", result.type);
+                        }
+                        /* Extra diagnostics: log sizeof() efun return value and type */
+                        if (func_name && strcmp(func_name, "sizeof") == 0) {
+                            fprintf(stderr, "[VM] OP_CALL efun sizeof returned type=%d", result.type);
+                            if (result.type == VALUE_INT) {
+                                fprintf(stderr, " int=%ld", result.data.int_value);
+                            } else if (result.type == VALUE_ARRAY && result.data.array_value) {
+                                fprintf(stderr, " array_len=%zu", array_length((array_t*)result.data.array_value));
+                            } else if (result.type == VALUE_STRING && result.data.string_value) {
+                                fprintf(stderr, " string='%s'", result.data.string_value);
+                            }
+                            fprintf(stderr, "\n");
+                        }
                         if (args) {
                             for (int i = 0; i < arg_count; i++) {
                                 vm_value_release(&args[i]);
@@ -844,23 +916,78 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         case OP_MAKE_ARRAY: {
             int size = instr->operand.int_operand;
             array_t *arr = array_new(vm->gc, size);
+            /* Pop elements in reverse (stack is LIFO), then push in order */
+            VMValue temp[256];
+            for (int i = size - 1; i >= 0; i--) {
+                temp[i] = vm_pop_value(vm);
+            }
             for (int i = 0; i < size; i++) {
-                VMValue v = vm_pop_value(vm);
-                array_push(arr, v);
+                array_push(arr, temp[i]);
             }
             VMValue arr_val;
             arr_val.type = VALUE_ARRAY;
             arr_val.data.array_value = arr;
+            /* Debug: always dump small arrays for tracing foreach behavior */
+            if (size <= 64) {
+                const char *fname = vm->current_frame && vm->current_frame->function ? vm->current_frame->function->name : "<top>";
+                fprintf(stderr, "[VM] OP_MAKE_ARRAY created array of size=%d in %s\n", size, fname ? fname : "(null)");
+                for (int i = 0; i < (int)size; i++) {
+                    VMValue e = array_get(arr, i);
+                    if (e.type == VALUE_STRING && e.data.string_value) {
+                        fprintf(stderr, "[VM]   element %d: '%s'\n", i, e.data.string_value);
+                    } else if (e.type == VALUE_INT) {
+                        fprintf(stderr, "[VM]   element %d: int=%ld\n", i, e.data.int_value);
+                    } else {
+                        fprintf(stderr, "[VM]   element %d: type=%d\n", i, e.type);
+                    }
+                }
+            }
+
             return vm_push_value(vm, arr_val);
         }
         
         case OP_INDEX_ARRAY: {
             VMValue idx_val = vm_pop_value(vm);
             VMValue arr_val = vm_pop_value(vm);
+            /* Debugging: log index access for tracing foreach behavior */
+            {
+                const char *fname = vm->current_frame && vm->current_frame->function ? vm->current_frame->function->name : "<top>";
+                fprintf(stderr, "[VM] OP_INDEX_ARRAY in %s: arr_type=%d idx_type=%d\n",
+                        fname ? fname : "(null)", arr_val.type, idx_val.type);
+                if (idx_val.type == VALUE_INT) fprintf(stderr, "[VM]   index=%ld\n", idx_val.data.int_value);
+            }
+            if (arr_val.type == VALUE_MAPPING) {
+                /* Handle mapping access: map[key] */
+                if (idx_val.type == VALUE_STRING && idx_val.data.string_value) {
+                    VMValue result = mapping_get(
+                        (mapping_t *)arr_val.data.mapping_value,
+                        idx_val.data.string_value);
+                    return vm_push_value(vm, result);
+                }
+                return vm_push_value(vm, vm_value_create_null());
+            }
+            if (arr_val.type == VALUE_STRING && idx_val.type == VALUE_INT) {
+                /* Handle string indexing: str[i] */
+                const char *s = arr_val.data.string_value;
+                int idx = (int)idx_val.data.int_value;
+                if (s && idx >= 0 && idx < (int)strlen(s)) {
+                    return vm_push_value(vm, vm_value_create_int(s[idx]));
+                }
+                return vm_push_value(vm, vm_value_create_int(0));
+            }
             if (arr_val.type != VALUE_ARRAY) return -1;
-            
             int idx = (idx_val.type == VALUE_INT) ? idx_val.data.int_value : (int)idx_val.data.float_value;
-            VMValue result = array_get((array_t *)arr_val.data.array_value, idx);
+            array_t *arr = (array_t *)arr_val.data.array_value;
+            size_t len = array_length(arr);
+            fprintf(stderr, "[VM] OP_INDEX_ARRAY: idx=%d array_len=%zu\n", idx, len);
+            VMValue result = array_get(arr, idx);
+            if (result.type == VALUE_STRING && result.data.string_value) {
+                fprintf(stderr, "[VM]   element string: %s\n", result.data.string_value);
+            } else if (result.type == VALUE_ARRAY && result.data.array_value) {
+                fprintf(stderr, "[VM]   element is array (len=%zu)\n", array_length((array_t*)result.data.array_value));
+            } else {
+                fprintf(stderr, "[VM]   element type=%d\n", result.type);
+            }
             return vm_push_value(vm, result);
         }
         
@@ -939,8 +1066,16 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             VMValue val = vm_pop_value(vm);
             VMValue idx_val = vm_pop_value(vm);
             VMValue arr_val = vm_pop_value(vm);
+            if (arr_val.type == VALUE_MAPPING) {
+                /* Handle mapping store: map[key] = val */
+                if (idx_val.type == VALUE_STRING && idx_val.data.string_value) {
+                    mapping_set((mapping_t *)arr_val.data.mapping_value,
+                                idx_val.data.string_value, val);
+                    return 0;
+                }
+                return -1;
+            }
             if (arr_val.type != VALUE_ARRAY) return -1;
-            
             int idx = (idx_val.type == VALUE_INT) ? idx_val.data.int_value : (int)idx_val.data.float_value;
             return array_set((array_t *)arr_val.data.array_value, idx, val);
         }

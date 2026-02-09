@@ -247,7 +247,43 @@ int program_loader_load(VirtualMachine *vm, Program *program) {
         instructions[instruction_count++] = instr;
         offset += bytes_read;
     }
-    
+
+    /* Fix up jump targets: convert bytecode offsets to instruction indices.
+     * The compiler emits jump addresses as bytecode byte offsets, but the
+     * VM execution loop indexes into an instruction array. */
+    {
+        size_t *instr_offsets = (size_t *)malloc(sizeof(size_t) * (instruction_count + 1));
+        if (instr_offsets) {
+            size_t scan_pos = 0;
+            for (int fi = 0; fi < instruction_count; fi++) {
+                instr_offsets[fi] = scan_pos;
+                VMInstruction tmp_instr;
+                int ilen = program_loader_decode_instruction(program->bytecode, scan_pos, &tmp_instr);
+                if (tmp_instr.opcode == OP_PUSH_STRING && tmp_instr.operand.string_operand)
+                    free(tmp_instr.operand.string_operand);
+                else if (tmp_instr.opcode == OP_CALL && tmp_instr.operand.call_operand.name)
+                    free(tmp_instr.operand.call_operand.name);
+                scan_pos += ilen;
+            }
+            instr_offsets[instruction_count] = scan_pos;
+            for (int fi = 0; fi < instruction_count; fi++) {
+                OpCode jop = instructions[fi].opcode;
+                if (jop == OP_JUMP || jop == OP_JUMP_IF_FALSE || jop == OP_JUMP_IF_TRUE) {
+                    uint16_t byte_target = (uint16_t)instructions[fi].operand.address_operand;
+                    int target_idx = instruction_count;
+                    for (int si = 0; si <= instruction_count; si++) {
+                        if (instr_offsets[si] == (size_t)byte_target) {
+                            target_idx = si;
+                            break;
+                        }
+                    }
+                    instructions[fi].operand.address_operand = target_idx;
+                }
+            }
+            free(instr_offsets);
+        }
+    }
+
     /* Step 2: Load top-level bytecode into VM */
     if (vm_load_bytecode(vm, instructions, instruction_count) != 0) {
         free(instructions);
@@ -360,6 +396,44 @@ int program_loader_load(VirtualMachine *vm, Program *program) {
                 line_map[func->instruction_count - 1] = program_line_for_offset(program, instr_offset);
             }
             func_offset_current += bytes_read;
+        }
+
+        /* Fix up jump targets: convert bytecode offsets to instruction indices.
+         * The compiler emits jump addresses as bytecode byte offsets, but the
+         * VM execution loop indexes into an instruction array. */
+        {
+            size_t *instr_offsets = (size_t *)malloc(sizeof(size_t) * (func->instruction_count + 1));
+            if (instr_offsets) {
+                size_t scan_pos = func_offset;
+                for (int fi = 0; fi < func->instruction_count; fi++) {
+                    instr_offsets[fi] = scan_pos;
+                    VMInstruction tmp_instr;
+                    int ilen = program_loader_decode_instruction(program->bytecode, scan_pos, &tmp_instr);
+                    if (tmp_instr.opcode == OP_PUSH_STRING && tmp_instr.operand.string_operand)
+                        free(tmp_instr.operand.string_operand);
+                    else if (tmp_instr.opcode == OP_CALL && tmp_instr.operand.call_operand.name)
+                        free(tmp_instr.operand.call_operand.name);
+                    scan_pos += ilen;
+                }
+                instr_offsets[func->instruction_count] = scan_pos;
+                for (int fi = 0; fi < func->instruction_count; fi++) {
+                    OpCode op = func->instructions[fi].opcode;
+                    if (op == OP_JUMP || op == OP_JUMP_IF_FALSE || op == OP_JUMP_IF_TRUE) {
+                        uint16_t byte_target = (uint16_t)func->instructions[fi].operand.address_operand;
+                        int target_idx = func->instruction_count;
+                        for (int si = 0; si <= func->instruction_count; si++) {
+                            if (instr_offsets[si] == (size_t)byte_target) {
+                                target_idx = si;
+                                break;
+                            }
+                        }
+                        fprintf(stderr, "[program_loader] %s: jump fixup byte_off=%u -> instr_idx=%d\n",
+                                func->name, byte_target, target_idx);
+                        func->instructions[fi].operand.address_operand = target_idx;
+                    }
+                }
+                free(instr_offsets);
+            }
         }
 
         func->line_map = line_map;

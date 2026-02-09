@@ -54,10 +54,14 @@ typedef struct Program {
     } *line_map;
     size_t line_map_count;
     
+    // Inheritance
+    char **inherit_paths;
+    size_t inherit_count;
+
     // Error tracking
     compile_error_t last_error;
     compile_error_info_t error_info;
-    
+
     // Reference counting for GC
     int ref_count;
 } Program;

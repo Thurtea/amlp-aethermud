@@ -73,6 +73,10 @@ typedef struct {
     ASTNode **declarations;         /* Array of declarations */
     int declaration_count;
     int capacity;
+    /* Inheritance paths (from 'inherit "path";' statements) */
+    char **inherit_paths;
+    int inherit_count;
+    int inherit_capacity;
 } ProgramNode;
 
 /* Function declaration node */

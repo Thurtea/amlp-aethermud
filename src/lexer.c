@@ -428,13 +428,14 @@ Token lexer_get_next_token(Lexer *lexer) {
             continue;
         }
 
-        /* Skip preprocessor directives (#include, #define, etc) */
+        /* Preprocessor directives should already be handled by preprocessor.c.
+         * If any # lines remain (shouldn't happen), skip them as before. */
         if (ch == '#') {
             while (!lexer_is_at_end(lexer) && lexer_current_char(lexer) != '\n') {
                 lexer_advance(lexer);
             }
             if (!lexer_is_at_end(lexer)) {
-                lexer_advance(lexer);  /* Skip the newline */
+                lexer_advance(lexer);
             }
             continue;
         }

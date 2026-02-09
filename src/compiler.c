@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include "lexer.h"
 #include "parser.h"
+#include "preprocessor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +56,13 @@ typedef struct {
     } *line_map;
     size_t line_map_count;
     size_t line_map_capacity;
+
+    /* Per-function local variable tracking (reset per function) */
+    struct {
+        char *name;
+        int index;   /* slot index = param_count + declaration_order */
+    } locals[256];
+    int local_count;  /* number of declared locals in current function */
 } compiler_state_t;
 
 /**
@@ -205,19 +213,65 @@ static void compiler_add_constant(compiler_state_t *state, VMValue value) {
     state->constants[state->constant_count++] = value;
 }
 
-/**
- * Emit bytecode
- */
+/* ========== Local Variable Tracking ========== */
+
+static void compiler_reset_locals(compiler_state_t *state) {
+    for (int i = 0; i < state->local_count; i++) {
+        free(state->locals[i].name);
+    }
+    state->local_count = 0;
+}
+
+/* Get parameter count for current function */
+static int compiler_current_param_count(compiler_state_t *state) {
+    if (state->current_function_idx < 0) return 0;
+    return state->functions[state->current_function_idx].arg_count;
+}
+
+/* Add a local variable, returns its slot index */
+static int compiler_add_local(compiler_state_t *state, const char *name) {
+    if (state->local_count >= 256) return -1;
+    int slot = compiler_current_param_count(state) + state->local_count;
+    state->locals[state->local_count].name = strdup(name);
+    state->locals[state->local_count].index = slot;
+    state->local_count++;
+    /* Update function's local_count */
+    if (state->current_function_idx >= 0) {
+        state->functions[state->current_function_idx].local_count = state->local_count;
+    }
+    return slot;
+}
+
+/* Find local variable by name, returns slot index or -1 */
+static int compiler_find_local(compiler_state_t *state, const char *name) {
+    /* Check declared locals */
+    for (int i = 0; i < state->local_count; i++) {
+        if (strcmp(state->locals[i].name, name) == 0) {
+            return state->locals[i].index;
+        }
+    }
+    /* Check parameters */
+    if (state->current_function_idx >= 0) {
+        ASTNode *fn_node = state->functions[state->current_function_idx].ast_node;
+        if (fn_node && fn_node->data) {
+            FunctionDeclNode *fn = (FunctionDeclNode *)fn_node->data;
+            for (int i = 0; i < fn->parameter_count; i++) {
+                if (fn->parameters[i].name && strcmp(fn->parameters[i].name, name) == 0) {
+                    return i;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+/* ========== Bytecode Emission ========== */
 
 /**
  * Emit a raw data byte without line mapping
  * Use for string data, integer data, float data, etc.
  */
 static void compiler_emit_byte(compiler_state_t *state, unsigned char byte) {
-    static int debug_count = 0;
-    if (debug_count++ < 5) {
-        fprintf(stderr, "[COMPILER DEBUG] compiler_emit_byte called: byte=0x%02X (%c)\n", byte, (byte >= 32 && byte < 127) ? byte : '.');
-    }
     if (state->bytecode_len >= state->bytecode_capacity) {
         state->bytecode_capacity *= 2;
         state->bytecode = realloc(state->bytecode, state->bytecode_capacity);
@@ -290,43 +344,12 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
             LiteralStringNode *str = (LiteralStringNode *)node->data;
             if (str && str->value) {
                 size_t len = strlen(str->value);
-                
-                // CRITICAL DEBUG OUTPUT
-                fprintf(stderr, "\n[COMPILER] OP_PUSH_STRING for: '%s'\n", str->value);
-                fprintf(stderr, "[COMPILER]   String length: %zu\n", len);
-                fprintf(stderr, "[COMPILER]   Low byte (len & 0xFF): 0x%02X (decimal %u)\n", 
-                        (unsigned int)(len & 0xFF), (unsigned int)(len & 0xFF));
-                fprintf(stderr, "[COMPILER]   High byte ((len >> 8) & 0xFF): 0x%02X (decimal %u)\n",
-                        (unsigned int)((len >> 8) & 0xFF), (unsigned int)((len >> 8) & 0xFF));
-                fprintf(stderr, "[COMPILER]   Current bytecode offset: %zu\n", state->bytecode_len);
-                
-                size_t opcode_offset = state->bytecode_len;
                 compiler_emit(state, OP_PUSH_STRING, node->line);
-                
-                fprintf(stderr, "[COMPILER]   After opcode, offset: %zu\n", state->bytecode_len);
-                
                 compiler_emit_byte(state, len & 0xFF);
-                fprintf(stderr, "[COMPILER]   After low byte, offset: %zu\n", state->bytecode_len);
-                
                 compiler_emit_byte(state, (len >> 8) & 0xFF);
-                fprintf(stderr, "[COMPILER]   After high byte, offset: %zu\n", state->bytecode_len);
-                
-                // Emit string data
                 for (size_t i = 0; i < len; i++) {
                     compiler_emit_byte(state, (unsigned char)str->value[i]);
                 }
-                
-                fprintf(stderr, "[COMPILER]   After string data, offset: %zu\n", state->bytecode_len);
-                fprintf(stderr, "[COMPILER]   Emitted bytes at [%zu]: %02X %02X %02X %02X %02X %02X %02X %02X\n",
-                        opcode_offset,
-                        state->bytecode[opcode_offset],
-                        state->bytecode[opcode_offset + 1],
-                        state->bytecode[opcode_offset + 2],
-                        state->bytecode[opcode_offset + 3],
-                        state->bytecode[opcode_offset + 4],
-                        state->bytecode[opcode_offset + 5],
-                        state->bytecode[opcode_offset + 6],
-                        state->bytecode[opcode_offset + 7]);
             }
             break;
         }
@@ -334,32 +357,13 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
         case NODE_IDENTIFIER: {
             IdentifierNode *id = (IdentifierNode *)node->data;
             if (id && id->name) {
-                // Check if we're in a function and if this identifier is a local/param
-                int local_idx = -1;
-                if (state->current_function_idx >= 0) {
-                    ASTNode *fn_node = state->functions[state->current_function_idx].ast_node;
-                    if (fn_node && fn_node->data) {
-                        FunctionDeclNode *fn = (FunctionDeclNode *)fn_node->data;
-                        // Check parameters
-                        for (int i = 0; i < fn->parameter_count; i++) {
-                            if (fn->parameters[i].name && strcmp(fn->parameters[i].name, id->name) == 0) {
-                                local_idx = i;
-                                break;
-                            }
-                        }
-                    }
-                }
-                
+                int local_idx = compiler_find_local(state, id->name);
                 if (local_idx >= 0) {
-                    // It's a local variable/parameter - use LOAD_LOCAL
                     compiler_emit(state, OP_LOAD_LOCAL, node->line);
-                    // Emit as uint16 (2 bytes) to match loader expectations
-                    compiler_emit_byte(state, local_idx & 0xFF);        // Low byte
-                    compiler_emit_byte(state, (local_idx >> 8) & 0xFF); // High byte
+                    compiler_emit_byte(state, local_idx & 0xFF);
+                    compiler_emit_byte(state, (local_idx >> 8) & 0xFF);
                 } else {
-                    // It's a global variable - use LOAD_GLOBAL
                     compiler_emit(state, OP_LOAD_GLOBAL, node->line);
-                    // Emit global index (simplified: use first 2 bytes for index)
                     compiler_emit_byte(state, 0);
                     compiler_emit_byte(state, 0);
                 }
@@ -374,41 +378,28 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
                 for (int i = 0; i < call->argument_count; i++) {
                     compiler_codegen_expression(state, call->arguments[i]);
                 }
-                
-                // CRITICAL DEBUG OUTPUT FOR OP_CALL
-                size_t len = strlen(call->function_name);
-                fprintf(stderr, "\n[COMPILER] OP_CALL for: '%s'\n", call->function_name);
-                fprintf(stderr, "[COMPILER]   Arg count: %d\n", call->argument_count);
-                fprintf(stderr, "[COMPILER]   Function name length: %zu\n", len);
-                fprintf(stderr, "[COMPILER]   Current bytecode offset: %zu\n", state->bytecode_len);
-                
-                size_t opcode_offset = state->bytecode_len;
-                
+
+                // Build the function name: prefix with "__parent__" for ::method() calls
+                char emit_name[256];
+                if (call->is_parent_call) {
+                    snprintf(emit_name, sizeof(emit_name), "__parent__%s",
+                             call->function_name);
+                } else {
+                    snprintf(emit_name, sizeof(emit_name), "%s",
+                             call->function_name);
+                }
+
+                size_t len = strlen(emit_name);
+
                 // Emit call instruction
                 compiler_emit(state, OP_CALL, node->line);
-                fprintf(stderr, "[COMPILER]   After opcode, offset: %zu\n", state->bytecode_len);
-                
                 compiler_emit_byte(state, call->argument_count & 0xFF);
-                fprintf(stderr, "[COMPILER]   After arg_count, offset: %zu\n", state->bytecode_len);
-                
+
                 // Function name length and bytes
                 compiler_emit_byte(state, len & 0xFF);
-                fprintf(stderr, "[COMPILER]   After name_len, offset: %zu\n", state->bytecode_len);
-                
                 for (size_t i = 0; i < len; i++) {
-                    compiler_emit_byte(state, (unsigned char)call->function_name[i]);
+                    compiler_emit_byte(state, (unsigned char)emit_name[i]);
                 }
-                fprintf(stderr, "[COMPILER]   After function name, offset: %zu\n", state->bytecode_len);
-                fprintf(stderr, "[COMPILER]   Emitted bytes at [%zu]: %02X %02X %02X %02X %02X %02X %02X %02X\n",
-                        opcode_offset,
-                        state->bytecode[opcode_offset],
-                        state->bytecode[opcode_offset + 1],
-                        state->bytecode[opcode_offset + 2],
-                        state->bytecode[opcode_offset + 3],
-                        state->bytecode[opcode_offset + 4],
-                        state->bytecode[opcode_offset + 5],
-                        state->bytecode[opcode_offset + 6],
-                        state->bytecode[opcode_offset + 7]);
             }
             break;
         }
@@ -489,31 +480,71 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
         case NODE_ASSIGNMENT: {
             AssignmentNode *assign = (AssignmentNode *)node->data;
             if (assign && assign->target && assign->value) {
-                // For now, only handle simple assignment (=), not +=, -=, etc.
                 if (assign->operator && strcmp(assign->operator, "=") == 0) {
-                    // Check if target is array access: array[index] = value
                     if (assign->target->type == NODE_ARRAY_ACCESS) {
                         ArrayAccessNode *access = (ArrayAccessNode *)assign->target->data;
                         if (access && access->array && access->index) {
-                            // Emit: array, index, value, then OP_STORE_ARRAY
                             compiler_codegen_expression(state, access->array);
                             compiler_codegen_expression(state, access->index);
                             compiler_codegen_expression(state, assign->value);
                             compiler_emit(state, OP_STORE_ARRAY, node->line);
                         }
-                    } 
-                    // Handle simple variable assignment: var = value
-                    else if (assign->target->type == NODE_IDENTIFIER) {
-                        // For now, just compile value and pop it (placeholder)
-                        // Full implementation would need symbol table lookup
-                        compiler_codegen_expression(state, assign->value);
-                        compiler_emit(state, OP_POP, node->line);
-                    }
-                    // For other targets (member access, etc.), emit placeholder
-                    else {
+                    } else if (assign->target->type == NODE_IDENTIFIER) {
+                        IdentifierNode *id = (IdentifierNode *)assign->target->data;
+                        if (id && id->name) {
+                            compiler_codegen_expression(state, assign->value);
+                            int local_idx = compiler_find_local(state, id->name);
+                            if (local_idx >= 0) {
+                                compiler_emit(state, OP_STORE_LOCAL, node->line);
+                                compiler_emit_byte(state, local_idx & 0xFF);
+                                compiler_emit_byte(state, (local_idx >> 8) & 0xFF);
+                            } else {
+                                /* Global variable */
+                                compiler_emit(state, OP_STORE_GLOBAL, node->line);
+                                compiler_emit_byte(state, 0);
+                                compiler_emit_byte(state, 0);
+                            }
+                        }
+                    } else {
                         compiler_codegen_expression(state, assign->value);
                     }
                 }
+            }
+            break;
+        }
+
+        case NODE_LITERAL_ARRAY: {
+            ArrayLiteralNode *arr = (ArrayLiteralNode *)node->data;
+            if (arr) {
+                /* Push elements onto stack in order */
+                for (int i = 0; i < arr->element_count; i++) {
+                    compiler_codegen_expression(state, arr->elements[i]);
+                }
+                /* OP_MAKE_ARRAY with element count (uint16) */
+                compiler_emit(state, OP_MAKE_ARRAY, node->line);
+                compiler_emit_byte(state, arr->element_count & 0xFF);
+                compiler_emit_byte(state, (arr->element_count >> 8) & 0xFF);
+            }
+            break;
+        }
+
+        case NODE_LITERAL_MAPPING: {
+            MappingLiteralNode *map = (MappingLiteralNode *)node->data;
+            if (map) {
+                /* Push key/value pairs onto stack */
+                for (int i = 0; i < map->pair_count; i++) {
+                    compiler_codegen_expression(state, map->keys[i]);
+                    compiler_codegen_expression(state, map->values[i]);
+                }
+                /* OP_MAKE_MAPPING with pair count (uint16) */
+                compiler_emit(state, OP_MAKE_MAPPING, node->line);
+                compiler_emit_byte(state, map->pair_count & 0xFF);
+                compiler_emit_byte(state, (map->pair_count >> 8) & 0xFF);
+            } else {
+                /* Empty mapping */
+                compiler_emit(state, OP_MAKE_MAPPING, node->line);
+                compiler_emit_byte(state, 0);
+                compiler_emit_byte(state, 0);
             }
             break;
         }
@@ -607,6 +638,156 @@ static void compiler_codegen_statement(compiler_state_t *state, ASTNode *node) {
             break;
         }
 
+        case NODE_VARIABLE_DECL: {
+            VariableDeclNode *var = (VariableDeclNode *)node->data;
+            if (var && var->name) {
+                int slot = compiler_add_local(state, var->name);
+                if (slot >= 0 && var->initializer) {
+                    compiler_codegen_expression(state, var->initializer);
+                    compiler_emit(state, OP_STORE_LOCAL, node->line);
+                    compiler_emit_byte(state, slot & 0xFF);
+                    compiler_emit_byte(state, (slot >> 8) & 0xFF);
+                }
+            }
+            break;
+        }
+
+        case NODE_WHILE_LOOP: {
+            WhileLoopNode *wh = (WhileLoopNode *)node->data;
+            if (wh && wh->condition && wh->body) {
+                int loop_start = state->bytecode_len;
+                compiler_codegen_expression(state, wh->condition);
+                int jump_false_addr = state->bytecode_len;
+                compiler_emit(state, OP_JUMP_IF_FALSE, node->line);
+                compiler_emit_byte(state, 0);
+                compiler_emit_byte(state, 0);
+                compiler_codegen_statement(state, wh->body);
+                compiler_emit(state, OP_JUMP, node->line);
+                compiler_emit_byte(state, loop_start & 0xFF);
+                compiler_emit_byte(state, (loop_start >> 8) & 0xFF);
+                int loop_end = state->bytecode_len;
+                state->bytecode[jump_false_addr + 1] = loop_end & 0xFF;
+                state->bytecode[jump_false_addr + 2] = (loop_end >> 8) & 0xFF;
+            }
+            break;
+        }
+
+        case NODE_FOREACH_LOOP: {
+            /*
+             * foreach (type var in collection) { body }
+             * Compiled as:
+             *   <collection>           -> push array
+             *   CALL sizeof 1          -> push length
+             *   PUSH_INT 0             -> push index counter
+             *   STORE_LOCAL idx_slot
+             *   STORE_LOCAL len_slot
+             *   STORE_LOCAL arr_slot
+             * loop_start:
+             *   LOAD_LOCAL idx_slot
+             *   LOAD_LOCAL len_slot
+             *   LT                     -> index < length?
+             *   JUMP_IF_FALSE loop_end
+             *   LOAD_LOCAL arr_slot
+             *   LOAD_LOCAL idx_slot
+             *   INDEX_ARRAY            -> array[index]
+             *   STORE_LOCAL var_slot
+             *   <body>
+             *   LOAD_LOCAL idx_slot
+             *   PUSH_INT 1
+             *   ADD
+             *   STORE_LOCAL idx_slot   -> index++
+             *   JUMP loop_start
+             * loop_end:
+             */
+            ForeachLoopNode *fe = (ForeachLoopNode *)node->data;
+            if (fe && fe->value_name && fe->collection && fe->body) {
+                /* Allocate hidden locals for array, length, index */
+                int arr_slot = compiler_add_local(state, "__fe_arr");
+                int len_slot = compiler_add_local(state, "__fe_len");
+                int idx_slot = compiler_add_local(state, "__fe_idx");
+                int var_slot = compiler_add_local(state, fe->value_name);
+
+                /* Evaluate collection and store */
+                compiler_codegen_expression(state, fe->collection);
+                compiler_emit(state, OP_STORE_LOCAL, node->line);
+                compiler_emit_byte(state, arr_slot & 0xFF);
+                compiler_emit_byte(state, (arr_slot >> 8) & 0xFF);
+
+                /* Call sizeof(arr) to get length */
+                compiler_emit(state, OP_LOAD_LOCAL, node->line);
+                compiler_emit_byte(state, arr_slot & 0xFF);
+                compiler_emit_byte(state, (arr_slot >> 8) & 0xFF);
+                compiler_emit(state, OP_CALL, node->line);
+                compiler_emit_byte(state, 1);  /* 1 arg */
+                compiler_emit_byte(state, 6);  /* strlen("sizeof") = 6 */
+                const char *sizeof_str = "sizeof";
+                for (int i = 0; i < 6; i++) compiler_emit_byte(state, sizeof_str[i]);
+                compiler_emit(state, OP_STORE_LOCAL, node->line);
+                compiler_emit_byte(state, len_slot & 0xFF);
+                compiler_emit_byte(state, (len_slot >> 8) & 0xFF);
+
+                /* Initialize index to 0 */
+                compiler_emit(state, OP_PUSH_INT, node->line);
+                for (int i = 0; i < 8; i++) compiler_emit_byte(state, 0);
+                compiler_emit(state, OP_STORE_LOCAL, node->line);
+                compiler_emit_byte(state, idx_slot & 0xFF);
+                compiler_emit_byte(state, (idx_slot >> 8) & 0xFF);
+
+                /* Loop start: index < length? */
+                int loop_start = state->bytecode_len;
+                compiler_emit(state, OP_LOAD_LOCAL, node->line);
+                compiler_emit_byte(state, idx_slot & 0xFF);
+                compiler_emit_byte(state, (idx_slot >> 8) & 0xFF);
+                compiler_emit(state, OP_LOAD_LOCAL, node->line);
+                compiler_emit_byte(state, len_slot & 0xFF);
+                compiler_emit_byte(state, (len_slot >> 8) & 0xFF);
+                compiler_emit(state, OP_LT, node->line);
+
+                int jump_false_addr = state->bytecode_len;
+                compiler_emit(state, OP_JUMP_IF_FALSE, node->line);
+                compiler_emit_byte(state, 0);
+                compiler_emit_byte(state, 0);
+
+                /* var = array[index] */
+                compiler_emit(state, OP_LOAD_LOCAL, node->line);
+                compiler_emit_byte(state, arr_slot & 0xFF);
+                compiler_emit_byte(state, (arr_slot >> 8) & 0xFF);
+                compiler_emit(state, OP_LOAD_LOCAL, node->line);
+                compiler_emit_byte(state, idx_slot & 0xFF);
+                compiler_emit_byte(state, (idx_slot >> 8) & 0xFF);
+                compiler_emit(state, OP_INDEX_ARRAY, node->line);
+                compiler_emit(state, OP_STORE_LOCAL, node->line);
+                compiler_emit_byte(state, var_slot & 0xFF);
+                compiler_emit_byte(state, (var_slot >> 8) & 0xFF);
+
+                /* Body */
+                compiler_codegen_statement(state, fe->body);
+
+                /* index++ */
+                compiler_emit(state, OP_LOAD_LOCAL, node->line);
+                compiler_emit_byte(state, idx_slot & 0xFF);
+                compiler_emit_byte(state, (idx_slot >> 8) & 0xFF);
+                compiler_emit(state, OP_PUSH_INT, node->line);
+                long one = 1;
+                for (int i = 0; i < 8; i++) compiler_emit_byte(state, (one >> (i * 8)) & 0xFF);
+                compiler_emit(state, OP_ADD, node->line);
+                compiler_emit(state, OP_STORE_LOCAL, node->line);
+                compiler_emit_byte(state, idx_slot & 0xFF);
+                compiler_emit_byte(state, (idx_slot >> 8) & 0xFF);
+
+                /* Jump back to loop start */
+                compiler_emit(state, OP_JUMP, node->line);
+                compiler_emit_byte(state, loop_start & 0xFF);
+                compiler_emit_byte(state, (loop_start >> 8) & 0xFF);
+
+                /* Patch loop end */
+                int loop_end = state->bytecode_len;
+                state->bytecode[jump_false_addr + 1] = loop_end & 0xFF;
+                state->bytecode[jump_false_addr + 2] = (loop_end >> 8) & 0xFF;
+            }
+            break;
+        }
+
         default:
             // Unhandled statement type - silently skip
             break;
@@ -640,6 +821,9 @@ static compile_error_t compiler_generate_bytecode(compiler_state_t *state,
         
         // Set current function context for variable resolution
         state->current_function_idx = (int)i;
+
+        // Reset local variable tracking for this function
+        compiler_reset_locals(state);
 
         // Generate bytecode for function body
         if (fn->body->type == NODE_BLOCK) {
@@ -824,7 +1008,23 @@ static Program* compiler_compile_internal(const char *source, const char *filena
         prog->line_map[i].source_line = state->line_map[i].source_line;
     }
     prog->line_map_count = state->line_map_count;
-    
+
+    /* Extract inherit paths from AST ProgramNode */
+    prog->inherit_paths = NULL;
+    prog->inherit_count = 0;
+    if (ast && ast->type == NODE_PROGRAM && ast->data) {
+        ProgramNode *pn = (ProgramNode *)ast->data;
+        if (pn->inherit_count > 0) {
+            prog->inherit_paths = malloc(sizeof(char*) * pn->inherit_count);
+            for (int i = 0; i < pn->inherit_count; i++) {
+                prog->inherit_paths[i] = strdup(pn->inherit_paths[i]);
+                fprintf(stderr, "[Compiler] Program '%s' inherits '%s'\n",
+                        filename, pn->inherit_paths[i]);
+            }
+            prog->inherit_count = (size_t)pn->inherit_count;
+        }
+    }
+
     prog->last_error = compile_result;
     if (state->error_count > 0) {
         prog->error_info = (compile_error_info_t){
@@ -854,16 +1054,25 @@ static Program* compiler_compile_internal(const char *source, const char *filena
  */
 Program* compiler_compile_file(const char *filename) {
     if (!filename) return NULL;
-    
+
     char *source = read_file(filename);
     if (!source) {
         fprintf(stderr, "Error: Could not open file '%s'\n", filename);
         return NULL;
     }
-    
-    Program *prog = compiler_compile_internal(source, filename);
+
+    /* Preprocess: resolve #include, expand #define macros */
+    char *preprocessed = preprocess_lpc(source, filename);
     free(source);
-    
+
+    if (!preprocessed) {
+        fprintf(stderr, "Error: Preprocessing failed for '%s'\n", filename);
+        return NULL;
+    }
+
+    Program *prog = compiler_compile_internal(preprocessed, filename);
+    free(preprocessed);
+
     return prog;
 }
 
@@ -920,7 +1129,14 @@ void program_free(Program *prog) {
     if (prog->constants) free(prog->constants);
     if (prog->line_map) free(prog->line_map);
     if (prog->error_info.message) free(prog->error_info.message);
-    
+
+    if (prog->inherit_paths) {
+        for (size_t i = 0; i < prog->inherit_count; i++) {
+            free(prog->inherit_paths[i]);
+        }
+        free(prog->inherit_paths);
+    }
+
     free(prog);
 }
 

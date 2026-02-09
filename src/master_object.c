@@ -1,5 +1,6 @@
 #include "master_object.h"
 #include "vm.h"
+#include "efun.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,13 +52,28 @@ int master_object_init(const char *path, VirtualMachine *vm) {
     }
     
     fclose(fp);
-    master_loaded = 1;
-    printf("[Master] Master object verified\n");
-    
+    printf("[Master] Compiling and executing master object...\n");
+
+    /* Use efun_load_object to compile, load, handle inheritance, and call create() */
+    VMValue path_arg;
+    path_arg.type = VALUE_STRING;
+    path_arg.data.string_value = strdup("/secure/master");
+
+    VMValue result = efun_load_object(vm, &path_arg, 1);
+    free(path_arg.data.string_value);
+
+    if (result.type == VALUE_OBJECT && result.data.object_value != NULL) {
+        master_loaded = 1;
+        printf("[Master] Master object loaded and initialized successfully\n");
+    } else {
+        fprintf(stderr, "[ERROR] Master object failed to compile/initialize\n");
+        master_loaded = 0;
+    }
+
     if (master_path) {
         free(master_path);
     }
-    
+
     return 0;
 }
 

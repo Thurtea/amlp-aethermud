@@ -148,6 +148,9 @@ static ProgramNode* program_node_create(void) {
     node->declarations = malloc(sizeof(ASTNode*) * 10);
     node->declaration_count = 0;
     node->capacity = 10;
+    node->inherit_paths = malloc(sizeof(char*) * 4);
+    node->inherit_count = 0;
+    node->inherit_capacity = 4;
     return node;
 }
 
@@ -892,6 +895,12 @@ static ASTNode* parser_parse_foreach(Parser *parser) {
  * Parse a statement
  */
 static ASTNode* parser_parse_statement(Parser *parser) {
+    /* Empty statement (standalone semicolon, e.g. from catch{};) */
+    if (parser_check(parser, TOKEN_SEMICOLON)) {
+        parser_advance(parser);
+        return NULL;
+    }
+
     /* Local variable declaration - check if starts with a type keyword */
     if (parser_check(parser, TOKEN_KEYWORD)) {
         const char *word = parser->current_token.value;
@@ -1352,19 +1361,28 @@ ASTNode* parser_parse(Parser *parser) {
 
     while (!parser_check(parser, TOKEN_EOF)) {
         /* Handle inherit statements */
-        if (parser_check(parser, TOKEN_KEYWORD) && 
+        if (parser_check(parser, TOKEN_KEYWORD) &&
             strcmp(parser->current_token.value, "inherit") == 0) {
             parser_advance(parser);  /* Skip 'inherit' */
-            
+
             /* Expect a string path like "/std/object" */
             if (parser_check(parser, TOKEN_STRING)) {
-                /* Log the inherit for now, full implementation later */
-                fprintf(stderr, "[Parser] Inherit statement: %s\n", parser->current_token.value);
+                const char *path = parser->current_token.value;
+                fprintf(stderr, "[Parser] Inherit statement: %s\n", path);
+
+                /* Store inherit path in ProgramNode */
+                if (program->inherit_count >= program->inherit_capacity) {
+                    program->inherit_capacity *= 2;
+                    program->inherit_paths = realloc(program->inherit_paths,
+                        sizeof(char*) * program->inherit_capacity);
+                }
+                program->inherit_paths[program->inherit_count++] = strdup(path);
+
                 parser_advance(parser);
             } else {
                 parser_error(parser, "Expected string path after 'inherit'");
             }
-            
+
             parser_expect(parser, TOKEN_SEMICOLON);
             continue;
         }

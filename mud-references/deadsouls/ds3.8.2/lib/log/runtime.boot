@@ -33,3 +33,13 @@ Autoexec daemon run complete.
 
  (Performance score: Spectacular.)
 
+----------------------------------------------------------------------------
+Dead_Souls_thurtea (FluffOS v2.23-ds03) starting up on Linux - Sun Feb  8 20:58:15 2026
+
+
+
+Loading preloaded files ...
+Initializations complete.
+
+Accepting connections on port 6666.
+System Error: init_user_conn: bind:Address already in use

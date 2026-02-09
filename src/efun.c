@@ -1351,55 +1351,109 @@ VMValue efun_file_name(VirtualMachine *vm, VMValue *args, int arg_count) {
 
 /* ========== Additional Object Efuns ========== */
 
+/**
+ * Helper: attach methods from a compiled Program to an object.
+ * If name_prefix is non-NULL, methods are attached with that prefix
+ * (used for parent methods with "__parent__" prefix).
+ */
+static void attach_program_methods(VirtualMachine *vm, obj_t *o,
+                                   Program *prog, const char *name_prefix) {
+    for (size_t fi = 0; fi < prog->function_count; fi++) {
+        const char *fname = prog->functions[fi].name;
+        if (!fname) continue;
+
+        /* Find VMFunction pointer by name lookup in VM (search from end
+         * to find the most recently loaded version of this function) */
+        for (int i = vm->function_count - 1; i >= 0; i--) {
+            if (vm->functions[i] && strcmp(vm->functions[i]->name, fname) == 0) {
+                if (name_prefix) {
+                    /* Create a copy of the VMFunction with prefixed name */
+                    char prefixed[256];
+                    snprintf(prefixed, sizeof(prefixed), "%s%s", name_prefix, fname);
+
+                    /* Check if VM already has this prefixed function */
+                    int found = 0;
+                    for (int j = 0; j < vm->function_count; j++) {
+                        if (vm->functions[j] && strcmp(vm->functions[j]->name, prefixed) == 0) {
+                            obj_add_method(o, vm->functions[j]);
+                            found = 1;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        /* Create alias: duplicate the VMFunction with new name */
+                        VMFunction *alias = malloc(sizeof(VMFunction));
+                        if (alias) {
+                            *alias = *vm->functions[i];
+                            alias->name = strdup(prefixed);
+                            /* Register in VM function table */
+                            if (vm->function_count < vm->function_capacity) {
+                                vm->functions[vm->function_count++] = alias;
+                            }
+                            obj_add_method(o, alias);
+                        }
+                    }
+
+                    /* Also attach without prefix (parent method available directly) */
+                    obj_add_method(o, vm->functions[i]);
+                } else {
+                    obj_add_method(o, vm->functions[i]);
+                }
+                break;
+            }
+        }
+    }
+}
+
 VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     if (arg_count != 1 || args[0].type != VALUE_STRING) return vm_value_create_null();
-    
+
     const char *lpc_path = args[0].data.string_value;
     if (!lpc_path) return vm_value_create_null();
-    
+
     fprintf(stderr, "[Efun] load_object: requested '%s'\n", lpc_path);
-    
+
     /* Check if object is already loaded (singleton pattern) */
     ObjManager *mgr = get_global_obj_manager();
     if (mgr) {
         obj_t *existing = obj_manager_find(mgr, lpc_path);
         if (existing) {
-            fprintf(stderr, "[Efun] load_object: '%s' already loaded, returning existing object\n", lpc_path);
+            fprintf(stderr, "[Efun] load_object: '%s' already loaded, returning existing\n", lpc_path);
             VMValue v;
             v.type = VALUE_OBJECT;
             v.data.object_value = existing;
             return v;
         }
     }
-    
-    /* Map LPC path like "/cmds/admin/wiztool" -> <MUDLIB>/lib/cmds/admin/wiztool.lpc */
+
+    /* Map LPC path -> filesystem path */
     char fs_path[PATH_MAX];
     const char *mudlib = getenv("AMLP_MUDLIB");
     if (!mudlib || !*mudlib) mudlib = "./lib";
-    
-    /* Strip leading slash */
+
     const char *p = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
     if (snprintf(fs_path, sizeof(fs_path), "%s/%s.lpc", mudlib, p) >= (int)sizeof(fs_path)) {
         fprintf(stderr, "[Efun] load_object: path too long\n");
         return vm_value_create_null();
     }
-    
+
     fprintf(stderr, "[Efun] load_object: compiling '%s'\n", fs_path);
-    
+
     /* Compile source file */
     Program *prog = compiler_compile_file(fs_path);
     if (!prog) {
         fprintf(stderr, "[Efun] load_object: compilation failed for '%s'\n", fs_path);
         return vm_value_create_null();
     }
-    
-    /* Load into VM (adds VMFunction entries) */
+
+    /* Load into VM */
     if (program_loader_load(vm, prog) != 0) {
         fprintf(stderr, "[Efun] load_object: program_loader_load failed\n");
         program_free(prog);
         return vm_value_create_null();
     }
-    
+
     /* Create object and register it */
     obj_t *o = obj_new(lpc_path);
     if (!o) {
@@ -1408,28 +1462,45 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         return vm_value_create_null();
     }
     if (mgr) obj_manager_register(mgr, o);
-    
-    /* Attach functions from program to object by name lookup in VM */
-    for (size_t fi = 0; fi < prog->function_count; fi++) {
-        const char *fname = prog->functions[fi].name;
-        if (!fname) continue;
-        /* Find VMFunction pointer by name */
-        for (int i = 0; i < vm->function_count; i++) {
-            if (vm->functions[i] && strcmp(vm->functions[i]->name, fname) == 0) {
-                obj_add_method(o, vm->functions[i]);
-                break;
+
+    /* Handle inheritance: compile and attach parent methods first */
+    for (size_t ih = 0; ih < prog->inherit_count; ih++) {
+        const char *parent_path = prog->inherit_paths[ih];
+        fprintf(stderr, "[Efun] load_object: loading parent '%s' for '%s'\n",
+                parent_path, lpc_path);
+
+        /* Build parent filesystem path */
+        char parent_fs[PATH_MAX];
+        const char *pp = parent_path[0] == '/' ? parent_path + 1 : parent_path;
+        snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib, pp);
+
+        /* Compile parent */
+        Program *parent_prog = compiler_compile_file(parent_fs);
+        if (parent_prog) {
+            if (program_loader_load(vm, parent_prog) == 0) {
+                /* Attach parent methods with __parent__ prefix */
+                attach_program_methods(vm, o, parent_prog, "__parent__");
+                fprintf(stderr, "[Efun] load_object: attached parent '%s' methods\n",
+                        parent_path);
             }
+            program_free(parent_prog);
+        } else {
+            fprintf(stderr, "[Efun] load_object: WARNING - parent '%s' failed to compile\n",
+                    parent_path);
         }
     }
-    
-    fprintf(stderr, "[Efun] load_object: created '%s' with %d methods\n", 
+
+    /* Attach child methods (override parent methods with same names) */
+    attach_program_methods(vm, o, prog, NULL);
+
+    fprintf(stderr, "[Efun] load_object: created '%s' with %d methods\n",
             o->name ? o->name : "<noname>", o->method_count);
-    
+
     /* Call create() on object if present */
     obj_call_method(vm, o, "create", NULL, 0);
-    
+
     program_free(prog);
-    
+
     VMValue v;
     v.type = VALUE_OBJECT;
     v.data.object_value = o;
@@ -1968,6 +2039,252 @@ VMValue efun_query_host_name(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_string("localhost");
 }
 
+/* ========== Missing LPC Efuns ========== */
+
+/**
+ * map_delete(mapping, key) - Delete a key from a mapping.
+ * Wraps mapping_delete() from mapping.c.
+ */
+VMValue efun_map_delete(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count != 2) return vm_value_create_int(0);
+    if (args[0].type != VALUE_MAPPING || args[1].type != VALUE_STRING)
+        return vm_value_create_int(0);
+
+    mapping_t *map = args[0].data.mapping_value;
+    const char *key = args[1].data.string_value;
+    if (!map || !key) return vm_value_create_int(0);
+
+    int result = mapping_delete(map, key);
+    return vm_value_create_int(result == 0 ? 1 : 0);
+}
+
+/**
+ * copy(mixed) - Deep copy a mapping or array.
+ * Wraps mapping_clone() and array_clone().
+ */
+VMValue efun_copy(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)arg_count;
+
+    if (args[0].type == VALUE_MAPPING) {
+        mapping_t *clone = mapping_clone(args[0].data.mapping_value, vm->gc);
+        if (!clone) return vm_value_create_null();
+        VMValue v;
+        v.type = VALUE_MAPPING;
+        v.data.mapping_value = clone;
+        return v;
+    }
+
+    if (args[0].type == VALUE_ARRAY) {
+        array_t *clone = array_clone(args[0].data.array_value, vm->gc);
+        if (!clone) return vm_value_create_null();
+        VMValue v;
+        v.type = VALUE_ARRAY;
+        v.data.array_value = clone;
+        return v;
+    }
+
+    /* For scalar types, return a clone of the value */
+    return vm_value_clone(args[0]);
+}
+
+/**
+ * mapping_values(mapping) - Return array of all values in a mapping.
+ */
+VMValue efun_values(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    (void)arg_count;
+
+    if (args[0].type != VALUE_MAPPING) return vm_value_create_null();
+
+    array_t *arr = mapping_values(args[0].data.mapping_value);
+    if (!arr) return vm_value_create_null();
+
+    VMValue v;
+    v.type = VALUE_ARRAY;
+    v.data.array_value = arr;
+    return v;
+}
+
+/**
+ * set_no_clean(int) - Stub: prevent object cleanup (no-op in our driver).
+ */
+VMValue efun_set_no_clean(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    return vm_value_create_int(1);
+}
+
+/**
+ * sscanf(string, format, ...) - Pattern matching/extraction.
+ *
+ * NOTE: Full sscanf requires compiler-level pass-by-reference support.
+ * This stub version handles the most common patterns used in our LPC code:
+ *   sscanf(str, "%s %s", verb, args) -> split on first space
+ *   sscanf(str, "prefix%ssuffix", var) -> extract between prefix/suffix
+ * It returns the match count but CANNOT modify the caller's variables.
+ * The results are stored in a global slot accessible via __sscanf_result().
+ */
+static VMValue sscanf_results[16];
+static int sscanf_result_count = 0;
+
+VMValue efun_sscanf(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+
+    if (arg_count < 2 || args[0].type != VALUE_STRING
+        || args[1].type != VALUE_STRING)
+        return vm_value_create_int(0);
+
+    const char *str = args[0].data.string_value;
+    const char *fmt = args[1].data.string_value;
+    if (!str || !fmt) return vm_value_create_int(0);
+
+    int matches = 0;
+    sscanf_result_count = 0;
+
+    const char *sp = str;   /* String pointer */
+    const char *fp = fmt;   /* Format pointer */
+
+    while (*fp && *sp) {
+        if (*fp == '%') {
+            fp++;
+            if (*fp == 's') {
+                fp++;
+                /* %s: match a string up to the next literal in format */
+                if (*fp == '\0') {
+                    /* %s at end of format: rest of string */
+                    if (sscanf_result_count < 16) {
+                        sscanf_results[sscanf_result_count++] =
+                            vm_value_create_string(sp);
+                    }
+                    matches++;
+                    sp += strlen(sp);
+                } else {
+                    /* Find next literal segment in format */
+                    const char *next_lit = fp;
+                    while (*next_lit && *next_lit == '%') {
+                        next_lit++;
+                        if (*next_lit) next_lit++; /* skip format char */
+                    }
+
+                    /* Find the literal in the string */
+                    size_t lit_len = 0;
+                    const char *lit_end = next_lit;
+                    while (*lit_end && *lit_end != '%') {
+                        lit_len++;
+                        lit_end++;
+                    }
+
+                    if (lit_len > 0) {
+                        /* Search for literal in remaining string */
+                        char lit[256];
+                        if (lit_len >= sizeof(lit)) lit_len = sizeof(lit) - 1;
+                        memcpy(lit, next_lit - lit_len, lit_len);
+                        lit[lit_len] = '\0';
+
+                        /* Actually: literal starts at fp (current format pos) */
+                        const char *lstart = fp;
+                        size_t llen = 0;
+                        while (lstart[llen] && lstart[llen] != '%') llen++;
+
+                        if (llen > 0) {
+                            char search[256];
+                            if (llen >= sizeof(search)) llen = sizeof(search) - 1;
+                            memcpy(search, lstart, llen);
+                            search[llen] = '\0';
+
+                            const char *found = strstr(sp, search);
+                            if (found) {
+                                size_t match_len = (size_t)(found - sp);
+                                char *piece = malloc(match_len + 1);
+                                memcpy(piece, sp, match_len);
+                                piece[match_len] = '\0';
+
+                                if (sscanf_result_count < 16) {
+                                    sscanf_results[sscanf_result_count++] =
+                                        vm_value_create_string(piece);
+                                }
+                                free(piece);
+                                matches++;
+                                sp = found + llen;
+                                fp = lstart + llen;
+                            } else {
+                                break; /* No match found */
+                            }
+                        } else {
+                            /* No literal after %s - match rest */
+                            if (sscanf_result_count < 16) {
+                                sscanf_results[sscanf_result_count++] =
+                                    vm_value_create_string(sp);
+                            }
+                            matches++;
+                            sp += strlen(sp);
+                        }
+                    } else {
+                        /* No literal: match rest of string */
+                        if (sscanf_result_count < 16) {
+                            sscanf_results[sscanf_result_count++] =
+                                vm_value_create_string(sp);
+                        }
+                        matches++;
+                        sp += strlen(sp);
+                    }
+                }
+            } else if (*fp == 'd') {
+                fp++;
+                /* %d: match an integer */
+                const char *num_start = sp;
+                if (*sp == '-' || *sp == '+') sp++;
+                while (*sp && isdigit((unsigned char)*sp)) sp++;
+
+                if (sp > num_start) {
+                    char num_buf[64];
+                    size_t nlen = (size_t)(sp - num_start);
+                    if (nlen >= sizeof(num_buf)) nlen = sizeof(num_buf) - 1;
+                    memcpy(num_buf, num_start, nlen);
+                    num_buf[nlen] = '\0';
+
+                    if (sscanf_result_count < 16) {
+                        sscanf_results[sscanf_result_count++] =
+                            vm_value_create_int(atol(num_buf));
+                    }
+                    matches++;
+                } else {
+                    break; /* No digits found */
+                }
+            } else {
+                /* Unknown format spec, skip */
+                if (*fp) fp++;
+            }
+        } else {
+            /* Literal character in format - must match string */
+            if (*sp == *fp) {
+                sp++;
+                fp++;
+            } else {
+                break; /* Mismatch */
+            }
+        }
+    }
+
+    return vm_value_create_int(matches);
+}
+
+/**
+ * __sscanf_result(int index) - Retrieve sscanf result by index.
+ * Helper for accessing sscanf output without pass-by-reference.
+ */
+VMValue efun_sscanf_result(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count < 1 || args[0].type != VALUE_INT)
+        return vm_value_create_null();
+
+    int idx = (int)args[0].data.int_value;
+    if (idx < 0 || idx >= sscanf_result_count)
+        return vm_value_create_null();
+
+    return vm_value_clone(sscanf_results[idx]);
+}
+
 /* ========== Utility Functions ========== */
 
 int efun_register_all(EfunRegistry *registry) {
@@ -2073,6 +2390,14 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "mud_name", efun_mud_name, 0, 0, "string mud_name()");
     efun_register(registry, "query_host_name", efun_query_host_name, 0, 0, "string query_host_name()");
 
+    /* Missing LPC efuns */
+    efun_register(registry, "map_delete", efun_map_delete, 2, 2, "int map_delete(mapping, string)");
+    efun_register(registry, "copy", efun_copy, 1, 1, "mixed copy(mixed)");
+    efun_register(registry, "values", efun_values, 1, 1, "mixed* values(mapping)");
+    efun_register(registry, "set_no_clean", efun_set_no_clean, 1, 1, "int set_no_clean(int)");
+    efun_register(registry, "sscanf", efun_sscanf, 2, -1, "int sscanf(string, string, ...)");
+    efun_register(registry, "__sscanf_result", efun_sscanf_result, 1, 1, "mixed __sscanf_result(int)");
+
     /* Debugging efuns */
     efun_register(registry, "debug_set_flags", efun_debug_set_flags, 1, 1, "int debug_set_flags(int)");
     efun_register(registry, "debug_get_flags", efun_debug_get_flags, 0, 0, "int debug_get_flags()");
@@ -2082,7 +2407,7 @@ int efun_register_all(EfunRegistry *registry) {
                   "int debug_dump_bytecode(string, string|void)");
     efun_register(registry, "debug_mem_stats", efun_debug_mem_stats, 0, 0,
                   "string debug_mem_stats()");
-    
+
     int registered = registry->efun_count - before;
     printf("[Efun] Registered %d standard efuns\n", registered);
 

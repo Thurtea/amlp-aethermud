@@ -25,7 +25,8 @@ TEST_COMMON_SOURCES = $(SRC_DIR)/vm.c \
                       $(SRC_DIR)/session.c \
                       $(SRC_DIR)/lexer.c \
                       $(SRC_DIR)/parser.c \
-                      $(SRC_DIR)/codegen.c
+                      $(SRC_DIR)/codegen.c \
+                      $(SRC_DIR)/preprocessor.c
 
 # Driver source files
 DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/server.c $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c \
@@ -34,6 +35,7 @@ DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/server.c $(SRC_DIR)/lexer.c $(SRC_D
               $(SRC_DIR)/gc.c $(SRC_DIR)/efun.c $(SRC_DIR)/array.c \
               $(SRC_DIR)/mapping.c $(SRC_DIR)/compiler.c $(SRC_DIR)/program.c \
               $(SRC_DIR)/simul_efun.c $(SRC_DIR)/program_loader.c \
+              $(SRC_DIR)/preprocessor.c \
               $(SRC_DIR)/master_object.c $(SRC_DIR)/terminal_ui.c \
               $(SRC_DIR)/websocket.c $(SRC_DIR)/session.c \
               $(SRC_DIR)/room.c $(SRC_DIR)/chargen.c $(SRC_DIR)/skills.c \
@@ -44,13 +46,13 @@ DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/server.c $(SRC_DIR)/lexer.c $(SRC_D
 # Count source files
 TOTAL_FILES = $(words $(DRIVER_SRCS))
 
-# Colors
-C_CYAN = \033[36m
-C_GREEN = \033[32m
-C_YELLOW = \033[33m
-C_RED = \033[31m
-C_RESET = \033[0m
-C_BOLD = \033[1m
+# Colors: disabled for simpler plain output
+C_CYAN =
+C_GREEN =
+C_YELLOW =
+C_RED =
+C_RESET =
+C_BOLD =
 
 # Default target - just build the driver
 .PHONY: all driver tests clean distclean help test
@@ -61,48 +63,35 @@ driver: $(BUILD_DIR)/driver
 # Build driver with custom unicode frame and ASCII indicators
 $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	@mkdir -p $(BUILD_DIR)
-	@printf "\n"
-	@printf "$(C_CYAN)╔════════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "AMLP MUD DRIVER - BUILD IN PROGRESS"
-	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" ""
+	@echo
+	@echo "AMLP MUD DRIVER - BUILD IN PROGRESS"
 	@count=0; for src in $(DRIVER_SRCS); do \
 		count=$$((count + 1)); \
 		name=$$(basename $$src); \
-		line=$$(printf " [*] [%2d/$(TOTAL_FILES)] Compiling %s" $$count "$$name"); \
-		printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "$$line"; \
+		printf " [*] [%2d/$(TOTAL_FILES)] Compiling %s\\n" $$count "$$name"; \
 	done
-	@printf "║                                                                            ║\n"
-	@line=$$(printf " [*] [LINK]  Creating driver executable..."); printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "$$line"
-	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" ""
+	@echo
+	@echo "[LINK] Creating driver executable..."
 	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) 2>$(BUILD_DIR)/.warnings.txt; \
 	status=$$?; \
 	warns=$$(grep -c "warning:" $(BUILD_DIR)/.warnings.txt 2>/dev/null | head -1 || echo 0); \
 	warns=$${warns:-0}; \
-	       if [ "$$status" -eq 0 ]; then \
-		       printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  BUILD SUCCESSFUL"; \
-		       printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  Files compiled: $(TOTAL_FILES)"; \
-		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  Warnings:       $$warns"; \
-		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  Errors:         0"; \
-		       if [ "$$warns" -gt 0 ]; then \
-			       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" ""; \
-			       printf "$(C_CYAN)║$(C_RESET)$(C_YELLOW)%-76s$(C_RESET)$(C_CYAN)║$(C_RESET)\n" "  Warning details: diagnostics/README.md"; \
-			       printf "$(C_CYAN)║$(C_RESET)$(C_YELLOW)%-76s$(C_RESET)$(C_CYAN)║$(C_RESET)\n" "  Quick reference: diagnostics/quick-reference.md"; \
-		       fi; \
-		       printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+	if [ "$$status" -eq 0 ]; then \
+		echo "BUILD SUCCESSFUL"; \
+		echo "Files compiled: $(TOTAL_FILES)"; \
+		echo "Warnings:       $$warns"; \
+		echo "Errors:         0"; \
+		if [ "$$warns" -gt 0 ]; then \
+			echo "Warning details: diagnostics/README.md"; \
+			echo "Quick reference: diagnostics/quick-reference.md"; \
+		fi; \
 	else \
-		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
-		printf "║                         X BUILD FAILED                                  ║\n"; \
-		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
-		printf "║  See diagnostics/undeclared-identifier.md for common compilation errors   ║\n"; \
-		printf "╚════════════════════════════════════════════════════════════════════════════╝\n"; \
-		printf "\nErrors:\n"; \
+		echo "X BUILD FAILED"; \
+		echo "See diagnostics/undeclared-identifier.md for common compilation errors"; \
 		cat $(BUILD_DIR)/.warnings.txt; \
 		exit 1; \
 	fi
-	@printf "\n"
+	@echo
 
 # Build all tests quietly
 tests: $(BUILD_DIR)/test_lexer $(BUILD_DIR)/test_parser $(BUILD_DIR)/test_vm \

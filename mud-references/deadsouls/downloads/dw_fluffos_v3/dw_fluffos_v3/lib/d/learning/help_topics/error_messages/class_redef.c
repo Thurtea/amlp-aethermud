@@ -1,5 +1,0 @@
-class bing {
-}
-
-class bing {
-}

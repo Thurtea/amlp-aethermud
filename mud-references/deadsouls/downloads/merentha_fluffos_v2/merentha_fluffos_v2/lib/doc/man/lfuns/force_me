@@ -1,5 +1,0 @@
-Local Functions (/std/inheritables/living.c)
-
-void force_me(string str);
-
-This function will force the living to attempt the command str.  

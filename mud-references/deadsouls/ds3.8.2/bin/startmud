@@ -64,7 +64,31 @@ while [ true ]; do
                 echo "Configured external port: $EXTPORT"
             fi
         fi
-        exec "$MUDHOME/bin/$DRIVER" "$CFG_PATH"
+
+        # Try several possible driver locations to match project layout:
+        # 1) $MUDHOME/bin/$DRIVER (standard)
+        # 2) $MUDHOME/../../build/driver (this repo: mud-references/.../bin -> project root/build/driver)
+        # 3) $MUDHOME/../build/driver (one level up, just in case)
+        # 4) fallback to ./driver with cfg in current dir
+        if [ -f "$MUDHOME/bin/$DRIVER" ] && [ -f "$CFG_PATH" ]; then
+            exec "$MUDHOME/bin/$DRIVER" "$CFG_PATH"
+        elif [ -f "$MUDHOME/../../build/driver" ] && [ -f "$CFG_PATH" ]; then
+            echo "Using driver at: $MUDHOME/../../build/driver"
+            exec "$MUDHOME/../../build/driver" "$CFG_PATH"
+        elif [ -f "$MUDHOME/../build/driver" ] && [ -f "$CFG_PATH" ]; then
+            echo "Using driver at: $MUDHOME/../build/driver"
+            exec "$MUDHOME/../build/driver" "$CFG_PATH"
+        elif [ -f ./$DRIVER ] && [ -f ./$CFG ]; then
+            exec ./$DRIVER ./$CFG
+        else
+            echo "Driver or config not found. Checked paths:"
+            echo "  $MUDHOME/bin/$DRIVER"
+            echo "  $MUDHOME/../../build/driver"
+            echo "  $MUDHOME/../build/driver"
+            echo "  ./$DRIVER"
+            echo "Config path: $CFG_PATH"
+            break
+        fi
         else
         if [ -f ./$DRIVER ]  && [ -f ./$CFG ] 
             then

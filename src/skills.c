@@ -6,6 +6,7 @@
 #include "skills.h"
 #include "session_internal.h"
 #include "debug.h"
+#include "ui_frames.h"
 
 /* External declarations */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
@@ -891,27 +892,30 @@ int skill_check(int skill_percentage) {
 void skill_display_list(PlayerSession *sess) {
     int i, skill_id;
     SkillDef *skill;
-    
+    int w = FRAME_WIDTH;
+    char buf[128];
+
     if (!sess) return;
-    
-    send_to_player(sess, "\n=== YOUR SKILLS ===\n\n");
-    
+
+    send_to_player(sess, "\r\n");
+    frame_top(sess, w);
+    frame_title(sess, "YOUR SKILLS", w);
+    frame_sep(sess, w);
+
     if (sess->character.num_skills == 0) {
-        send_to_player(sess, "No skills learned yet.\n");
-        return;
-    }
-    
-    for (i = 0; i < sess->character.num_skills; i++) {
-        skill_id = sess->character.skills[i].skill_id;
-        skill = skill_get_by_id(skill_id);
-        
-        if (skill) {
-            send_to_player(sess, "  %-30s %3d%%\n", 
-                          skill->name, 
-                          sess->character.skills[i].percentage);
+        frame_line(sess, "No skills learned yet.", w);
+    } else {
+        for (i = 0; i < sess->character.num_skills; i++) {
+            skill_id = sess->character.skills[i].skill_id;
+            skill = skill_get_by_id(skill_id);
+            if (skill) {
+                snprintf(buf, sizeof(buf), "%-32s %3d%%",
+                         skill->name, sess->character.skills[i].percentage);
+                frame_line(sess, buf, w);
+            }
         }
     }
-    
-    send_to_player(sess, "\n");
+
+    frame_bottom(sess, w);
 }
 

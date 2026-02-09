@@ -10,6 +10,7 @@
 #include <time.h>
 #include <strings.h>
 #include "debug.h"
+#include "ui_frames.h"
 #include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -266,6 +267,77 @@ int roll_1d6(void) {
     return (rand() % 6 + 1);
 }
 
+/* Add a language to character (returns 1 if added, 0 if already known or full) */
+static int character_add_language(Character *ch, const char *lang) {
+    if (!ch || !lang) return 0;
+    /* Check if already known */
+    for (int i = 0; i < ch->num_languages; i++) {
+        if (ch->languages[i] && strcasecmp(ch->languages[i], lang) == 0)
+            return 0;
+    }
+    if (ch->num_languages >= 16) return 0;
+    ch->languages[ch->num_languages] = strdup(lang);
+    ch->num_languages++;
+    if (!ch->current_language) {
+        ch->current_language = strdup(lang);
+    }
+    return 1;
+}
+
+/* Assign starting languages based on race */
+static void assign_starting_languages(Character *ch) {
+    if (!ch || !ch->race) return;
+    const char *race = ch->race;
+
+    /* Dragons get dragonese + american */
+    if (strcasestr(race, "Dragon") != NULL) {
+        character_add_language(ch, "dragonese");
+        character_add_language(ch, "american");
+    }
+    /* Elves get elven + american */
+    else if (strcasecmp(race, "Elf") == 0 || strcasestr(race, "Night-Elves") != NULL) {
+        character_add_language(ch, "elven");
+        character_add_language(ch, "american");
+    }
+    /* Dwarves get dwarven + american */
+    else if (strcasecmp(race, "Dwarf") == 0) {
+        character_add_language(ch, "dwarven");
+        character_add_language(ch, "american");
+    }
+    /* Faerie types get faerie + american */
+    else if (strcasestr(race, "Faerie") != NULL || strcasestr(race, "Pixie") != NULL ||
+             strcasestr(race, "Sprite") != NULL || strcasestr(race, "Brownie") != NULL ||
+             strcasestr(race, "Bogie") != NULL) {
+        character_add_language(ch, "faerie");
+        character_add_language(ch, "american");
+    }
+    /* Goblins get gobblely + american */
+    else if (strcasestr(race, "Goblin") != NULL || strcasestr(race, "Hobgoblin") != NULL ||
+             strcasestr(race, "Ogre") != NULL || strcasestr(race, "Troll") != NULL) {
+        character_add_language(ch, "gobblely");
+        character_add_language(ch, "american");
+    }
+    /* Atlantean types get american + euro */
+    else if (strcasestr(race, "Atlantean") != NULL) {
+        character_add_language(ch, "american");
+        character_add_language(ch, "euro");
+    }
+    /* Demons/Deevils get demonic + american */
+    else if (strcasestr(race, "Demon") != NULL || strcasestr(race, "Deevil") != NULL) {
+        character_add_language(ch, "demonic");
+        character_add_language(ch, "american");
+    }
+    /* Splugorth get demonic + american */
+    else if (strcasestr(race, "Splugorth") != NULL || strcasestr(race, "Splynn") != NULL) {
+        character_add_language(ch, "demonic");
+        character_add_language(ch, "american");
+    }
+    /* Default: american */
+    else {
+        character_add_language(ch, "american");
+    }
+}
+
 /* Init car generation */
 void chargen_init(PlayerSession *sess) {
     if (!sess) return;
@@ -277,7 +349,7 @@ void chargen_init(PlayerSession *sess) {
     send_to_player(sess, "\n");
     send_to_player(sess, "=========================================\n");
     send_to_player(sess, "      CHARACTER CREATION SYSTEM\n");
-    send_to_player(sess, "        Rifts Earth - 109 P.A.\n");
+    send_to_player(sess, "        AetherMUD - 109 P.A.\n");
     send_to_player(sess, "=========================================\n");
     send_to_player(sess, "\n");
     
@@ -351,6 +423,12 @@ void chargen_roll_stats(PlayerSession *sess) {
     for (i = 0; i < 32; i++) ch->introduced_to[i] = NULL;
 
     ch->clan = NULL;
+    ch->alignment = NULL;
+
+    /* Initialize languages */
+    ch->num_languages = 0;
+    for (i = 0; i < 16; i++) ch->languages[i] = NULL;
+    ch->current_language = NULL;
 
     /* ISP/PPE will be calculated in psionics_init_abilities() and magic_init_abilities() */
     /* These are called in chargen_complete() */
@@ -362,48 +440,96 @@ void chargen_roll_stats(PlayerSession *sess) {
 /* Display character stats */
 void chargen_display_stats(PlayerSession *sess) {
     if (!sess) return;
-    
+
     Character *ch = &sess->character;
-    
-    send_to_player(sess, "\n");
-    send_to_player(sess, "=======================================================\n");
-    send_to_player(sess, "              YOUR CHARACTER SHEET\n");
-    send_to_player(sess, "-------------------------------------------------------\n");
-    send_to_player(sess, "  Name: %s\n", sess->username);
-    send_to_player(sess, "  Race: %-20s  O.C.C.: %s\n", ch->race, ch->occ);
-    send_to_player(sess, "-------------------------------------------------------\n");
-    send_to_player(sess, "  ATTRIBUTES\n");
-    send_to_player(sess, "  IQ: %-3d   ME: %-3d   MA: %-3d   PS: %-3d\n",
-                  ch->stats.iq, ch->stats.me, ch->stats.ma, ch->stats.ps);
-    send_to_player(sess, "  PP: %-3d   PE: %-3d   PB: %-3d   SPD: %-3d\n",
-                  ch->stats.pp, ch->stats.pe, ch->stats.pb, ch->stats.spd);
-    send_to_player(sess, "-------------------------------------------------------\n");
+    int w = FRAME_WIDTH;
+    char buf[128];
+
+    send_to_player(sess, "\r\n");
+    frame_top(sess, w);
+    frame_title(sess, "CHARACTER SHEET", w);
+    frame_sep(sess, w);
+
+    snprintf(buf, sizeof(buf), "Name: %s", sess->username);
+    frame_line(sess, buf, w);
+    snprintf(buf, sizeof(buf), "Race: %-20s O.C.C.: %s",
+             ch->race ? ch->race : "None", ch->occ ? ch->occ : "None");
+    frame_line(sess, buf, w);
+    if (ch->alignment) {
+        snprintf(buf, sizeof(buf), "Alignment: %s", ch->alignment);
+        frame_line(sess, buf, w);
+    }
+
+    frame_header(sess, "ATTRIBUTES", w);
+    snprintf(buf, sizeof(buf), "IQ: %-3d   ME: %-3d   MA: %-3d   PS: %-3d",
+             ch->stats.iq, ch->stats.me, ch->stats.ma, ch->stats.ps);
+    frame_line(sess, buf, w);
+    snprintf(buf, sizeof(buf), "PP: %-3d   PE: %-3d   PB: %-3d   SPD: %-3d",
+             ch->stats.pp, ch->stats.pe, ch->stats.pb, ch->stats.spd);
+    frame_line(sess, buf, w);
+
+    frame_header(sess, "RESOURCES", w);
     if (ch->health_type == MDC_ONLY) {
-        send_to_player(sess, "  MDC: %-3d/%-3d\n", ch->mdc, ch->max_mdc);
+        snprintf(buf, sizeof(buf), "MDC: %d/%d", ch->mdc, ch->max_mdc);
+        frame_line(sess, buf, w);
     } else if (ch->health_type == HP_ONLY) {
-        send_to_player(sess, "  HP: %-3d/%-3d\n", ch->hp, ch->max_hp);
+        snprintf(buf, sizeof(buf), "HP: %d/%d", ch->hp, ch->max_hp);
+        frame_line(sess, buf, w);
     } else {
-        send_to_player(sess, "  HP: %-3d/%-3d    S.D.C.: %-3d/%-3d\n",
-                      ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
+        snprintf(buf, sizeof(buf), "HP: %d/%d    S.D.C.: %d/%d",
+                 ch->hp, ch->max_hp, ch->sdc, ch->max_sdc);
+        frame_line(sess, buf, w);
     }
 
     if (ch->max_isp > 0) {
-        send_to_player(sess, "  I.S.P.: %-3d/%-3d (Psionic Energy)\n",
-                      ch->isp, ch->max_isp);
+        snprintf(buf, sizeof(buf), "I.S.P.: %d/%d  (Psionic Energy)",
+                 ch->isp, ch->max_isp);
+        frame_line(sess, buf, w);
     } else if (ch->psionics.isp_max > 0) {
-        send_to_player(sess, "  I.S.P.: %-3d/%-3d (Psionic Energy)\n",
-                      ch->psionics.isp_current, ch->psionics.isp_max);
+        snprintf(buf, sizeof(buf), "I.S.P.: %d/%d  (Psionic Energy)",
+                 ch->psionics.isp_current, ch->psionics.isp_max);
+        frame_line(sess, buf, w);
     }
 
     if (ch->max_ppe > 0) {
-        send_to_player(sess, "  P.P.E.: %-3d/%-3d (Magical Energy)\n",
-                      ch->ppe, ch->max_ppe);
+        snprintf(buf, sizeof(buf), "P.P.E.: %d/%d  (Magical Energy)",
+                 ch->ppe, ch->max_ppe);
+        frame_line(sess, buf, w);
     } else if (ch->magic.ppe_max > 0) {
-        send_to_player(sess, "  P.P.E.: %-3d/%-3d (Magical Energy)\n",
-                      ch->magic.ppe_current, ch->magic.ppe_max);
+        snprintf(buf, sizeof(buf), "P.P.E.: %d/%d  (Magical Energy)",
+                 ch->magic.ppe_current, ch->magic.ppe_max);
+        frame_line(sess, buf, w);
     }
-    
-    send_to_player(sess, "=======================================================\n");
+
+    snprintf(buf, sizeof(buf), "Credits: %d", ch->credits);
+    frame_line(sess, buf, w);
+
+    frame_bottom(sess, w);
+}
+
+/* Display alignment choices */
+static void chargen_show_alignments(PlayerSession *sess) {
+    send_to_player(sess, "\n=== SELECT YOUR ALIGNMENT ===\n\n");
+    send_to_player(sess, "  1. Principled    (Good)    - Honest, trustworthy, fights evil\n");
+    send_to_player(sess, "  2. Scrupulous    (Good)    - Moral but pragmatic, fights injustice\n");
+    send_to_player(sess, "  3. Unprincipled  (Selfish) - Looks out for #1, has some scruples\n");
+    send_to_player(sess, "  4. Anarchist     (Selfish) - Free spirit, rebels against authority\n");
+    send_to_player(sess, "  5. Miscreant     (Evil)    - Untrustworthy, self-serving villain\n");
+    send_to_player(sess, "  6. Aberrant      (Evil)    - Has a personal code, but ruthless\n");
+    send_to_player(sess, "  7. Diabolic      (Evil)    - Pure evil, cruel and sadistic\n");
+    send_to_player(sess, "\nEnter choice (1-7): ");
+}
+
+/* Display starting zone choices */
+static void chargen_show_zones(PlayerSession *sess) {
+    send_to_player(sess, "\n=== SELECT YOUR STARTING ZONE ===\n\n");
+    send_to_player(sess, "  1. New Camelot  - A haven of chivalry and honor in the\n");
+    send_to_player(sess, "                    northern wilderness. Town Square.\n");
+    send_to_player(sess, "  2. Splynn       - The infamous dimensional market of\n");
+    send_to_player(sess, "                    Atlantis. Market Center.\n");
+    send_to_player(sess, "  3. Chi-Town     - The Coalition States' fortress city.\n");
+    send_to_player(sess, "                    Transit Hub.\n");
+    send_to_player(sess, "\nEnter choice (1-3): ");
 }
 
 /* Display available secondary skills for selection */
@@ -462,6 +588,9 @@ void chargen_complete(PlayerSession *sess) {
     /* Add starting powers and spells based on OCC */
     psionics_add_starting_powers(&sess->character, sess->character.occ);
     magic_add_starting_spells(&sess->character, sess->character.occ);
+
+    /* Assign starting languages based on race */
+    assign_starting_languages(&sess->character);
     
     /* Add starting equipment based on OCC */
     /* Dragon RCC: no equipment, natural form only */
@@ -551,16 +680,20 @@ void chargen_complete(PlayerSession *sess) {
         if (water) inventory_add(&sess->character.inventory, water);
     }
 
-    /* Place player in starting room */
-    Room *start = room_get_start();
-    if (start) {
-        sess->current_room = start;
-        room_add_player(start, sess);
+    /* Place player in starting room (use zone-selected room if set, else default) */
+    if (sess->current_room) {
+        room_add_player(sess->current_room, sess);
+    } else {
+        Room *start = room_get_start();
+        if (start) {
+            sess->current_room = start;
+            room_add_player(start, sess);
+        }
     }
     
     send_to_player(sess, "\n");
     send_to_player(sess, "Character creation complete!\n");
-    send_to_player(sess, "Welcome to Rifts Earth, %s!\n", sess->username);
+    send_to_player(sess, "Welcome to AetherMUD, %s!\n", sess->username);
     
     /* Auto-save new character */
     send_to_player(sess, "\nSaving your character...\n");
@@ -687,16 +820,19 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             
         case CHARGEN_STATS_CONFIRM:
             if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
-                /* Auto-assign OCC primary skills */
-                occ_assign_skills(sess, ch->occ);
+                /* Auto-assign OCC primary skills, except for dragon RCCs which use racial skills */
+                if (ch->occ && strcasestr(ch->occ, "Dragon Hatchling") != NULL) {
+                    send_to_player(sess, "\nAs a dragon, your racial abilities apply instead of OCC primary skills.\n");
+                    send_to_player(sess, "You will select secondary skills next.\n");
+                } else {
+                    occ_assign_skills(sess, ch->occ);
+                    send_to_player(sess, "\nYour primary skills have been assigned based on your O.C.C.\n");
+                    skill_display_list(sess);
+                }
 
-                send_to_player(sess, "\nYour primary skills have been assigned based on your O.C.C.\n");
-                skill_display_list(sess);
-
-                /* Transition to secondary skills selection */
-                sess->chargen_temp_choice = 0; /* picks made so far */
-                sess->chargen_state = CHARGEN_SECONDARY_SKILLS;
-                chargen_show_secondary_skills(sess);
+                /* Transition to alignment selection */
+                sess->chargen_state = CHARGEN_ALIGNMENT_SELECT;
+                chargen_show_alignments(sess);
             } else if (strncasecmp(input, "reroll", 6) == 0 || strncasecmp(input, "r", 1) == 0) {
                 send_to_player(sess, "\nRerolling stats...\n");
                 chargen_roll_stats(sess);
@@ -705,6 +841,52 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 send_to_player(sess, "Accept these stats? (yes/reroll): ");
             } else {
                 send_to_player(sess, "Please answer 'yes' or 'reroll': ");
+            }
+            break;
+
+        case CHARGEN_ALIGNMENT_SELECT:
+            {
+                static const char *alignment_names[] = {
+                    "Principled", "Scrupulous", "Unprincipled", "Anarchist",
+                    "Miscreant", "Aberrant", "Diabolic"
+                };
+                if (choice >= 1 && choice <= 7) {
+                    if (ch->alignment) free(ch->alignment);
+                    ch->alignment = strdup(alignment_names[choice - 1]);
+                    send_to_player(sess, "\nAlignment set to: %s\n", ch->alignment);
+
+                    /* Transition to zone selection */
+                    sess->chargen_state = CHARGEN_ZONE_SELECT;
+                    chargen_show_zones(sess);
+                } else {
+                    send_to_player(sess, "Invalid choice. Enter 1-7: ");
+                }
+            }
+            break;
+
+        case CHARGEN_ZONE_SELECT:
+            {
+                static const int zone_rooms[] = { 4, 11, 23 };
+                static const char *zone_names[] = {
+                    "New Camelot", "Splynn", "Chi-Town"
+                };
+                if (choice >= 1 && choice <= 3) {
+                    sess->chargen_temp_choice = 0; /* Reset for secondary skill picks */
+                    int selected_room = zone_rooms[choice - 1];
+                    send_to_player(sess, "\nStarting zone: %s\n", zone_names[choice - 1]);
+
+                    /* Store selected room for chargen_complete */
+                    Room *zone_room = room_get_by_id(selected_room);
+                    if (zone_room) {
+                        sess->current_room = zone_room;
+                    }
+
+                    /* Transition to secondary skills */
+                    sess->chargen_state = CHARGEN_SECONDARY_SKILLS;
+                    chargen_show_secondary_skills(sess);
+                } else {
+                    send_to_player(sess, "Invalid choice. Enter 1-3: ");
+                }
             }
             break;
 
@@ -1073,6 +1255,41 @@ int save_character(PlayerSession *sess) {
         fwrite(&zero, sizeof(size_t), 1, f);
     }
 
+    /* Write languages (appended after clan for backwards compatibility) */
+    int nl = ch->num_languages;
+    if (nl < 0) nl = 0;
+    if (nl > 16) nl = 16;
+    fwrite(&nl, sizeof(int), 1, f);
+    for (i = 0; i < nl; i++) {
+        if (ch->languages[i]) {
+            size_t len = strlen(ch->languages[i]);
+            fwrite(&len, sizeof(size_t), 1, f);
+            fwrite(ch->languages[i], 1, len, f);
+        } else {
+            size_t zero = 0;
+            fwrite(&zero, sizeof(size_t), 1, f);
+        }
+    }
+    /* Write current_language */
+    if (ch->current_language && ch->current_language[0]) {
+        size_t cl_len = strlen(ch->current_language);
+        fwrite(&cl_len, sizeof(size_t), 1, f);
+        fwrite(ch->current_language, 1, cl_len, f);
+    } else {
+        size_t zero = 0;
+        fwrite(&zero, sizeof(size_t), 1, f);
+    }
+
+    /* Write alignment (appended after languages for backwards compatibility) */
+    if (ch->alignment && ch->alignment[0]) {
+        size_t align_len = strlen(ch->alignment);
+        fwrite(&align_len, sizeof(size_t), 1, f);
+        fwrite(ch->alignment, 1, align_len, f);
+    } else {
+        size_t zero = 0;
+        fwrite(&zero, sizeof(size_t), 1, f);
+    }
+
     fclose(f);
 
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
@@ -1315,6 +1532,54 @@ int load_character(PlayerSession *sess, const char *username) {
             fread(clan_buf, 1, clan_len, f);
             clan_buf[clan_len] = '\0';
             ch->clan = strdup(clan_buf);
+        }
+    }
+
+    /* Read languages (appended after clan, may not exist in older saves) */
+    ch->num_languages = 0;
+    for (i = 0; i < 16; i++) ch->languages[i] = NULL;
+    ch->current_language = NULL;
+    {
+        int nl = 0;
+        if (fread(&nl, sizeof(int), 1, f) == 1 && nl > 0 && nl <= 16) {
+            ch->num_languages = nl;
+            for (i = 0; i < nl; i++) {
+                size_t len = 0;
+                if (fread(&len, sizeof(size_t), 1, f) != 1) { ch->languages[i] = NULL; continue; }
+                if (len > 0 && len < 256) {
+                    char buf[256];
+                    fread(buf, 1, len, f);
+                    buf[len] = '\0';
+                    ch->languages[i] = strdup(buf);
+                } else {
+                    if (len > 0) fseek(f, len, SEEK_CUR);
+                    ch->languages[i] = NULL;
+                }
+            }
+            /* Read current_language */
+            size_t cl_len = 0;
+            if (fread(&cl_len, sizeof(size_t), 1, f) == 1 && cl_len > 0 && cl_len < 256) {
+                char cl_buf[256];
+                fread(cl_buf, 1, cl_len, f);
+                cl_buf[cl_len] = '\0';
+                ch->current_language = strdup(cl_buf);
+            }
+        }
+        /* If no languages loaded (old save), assign defaults */
+        if (ch->num_languages == 0) {
+            assign_starting_languages(ch);
+        }
+    }
+
+    /* Read alignment (appended after languages, may not exist in older saves) */
+    ch->alignment = NULL;
+    {
+        size_t align_len = 0;
+        if (fread(&align_len, sizeof(size_t), 1, f) == 1 && align_len > 0 && align_len < 256) {
+            char align_buf[256];
+            fread(align_buf, 1, align_len, f);
+            align_buf[align_len] = '\0';
+            ch->alignment = strdup(align_buf);
         }
     }
 
@@ -1611,4 +1876,332 @@ void cmd_clan(PlayerSession *sess, const char *args) {
     } else {
         send_to_player(sess, "Unknown clan '%s'. Type 'clan' to see available clans.\n", args);
     }
+}
+
+/* ========== LANGUAGE COMMANDS ========== */
+
+/* Switch default speaking language */
+void cmd_speak(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+
+    if (!args || !(*args)) {
+        if (ch->current_language) {
+            send_to_player(sess, "You are currently speaking %s.\n", ch->current_language);
+        } else {
+            send_to_player(sess, "You have no language set.\n");
+        }
+        send_to_player(sess, "Usage: speak <language>\n");
+        return;
+    }
+
+    /* Check if player knows this language */
+    for (int i = 0; i < ch->num_languages; i++) {
+        if (ch->languages[i] && strcasecmp(ch->languages[i], args) == 0) {
+            if (ch->current_language) free(ch->current_language);
+            ch->current_language = strdup(ch->languages[i]);
+            send_to_player(sess, "You will now speak in %s.\n", ch->current_language);
+            return;
+        }
+    }
+    send_to_player(sess, "You don't know the language '%s'.\n", args);
+}
+
+/* List known languages */
+void cmd_languages(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+    int w = FRAME_WIDTH;
+    char buf[128];
+
+    send_to_player(sess, "\r\n");
+    frame_top(sess, w);
+    frame_title(sess, "KNOWN LANGUAGES", w);
+    frame_sep(sess, w);
+
+    if (ch->num_languages == 0) {
+        frame_line(sess, "You don't know any languages.", w);
+    } else {
+        for (int i = 0; i < ch->num_languages; i++) {
+            if (ch->languages[i]) {
+                const char *marker = "";
+                if (ch->current_language && strcasecmp(ch->languages[i], ch->current_language) == 0)
+                    marker = "  (default)";
+                snprintf(buf, sizeof(buf), "%s%s", ch->languages[i], marker);
+                frame_line(sess, buf, w);
+            }
+        }
+    }
+
+    frame_sep(sess, w);
+    frame_line(sess, "Use 'speak <language>' to change default.", w);
+    frame_bottom(sess, w);
+}
+
+/* ========== WIZARD GRANT/REVOKE COMMANDS ========== */
+
+/* Check if character knows a language */
+static int character_knows_language(Character *ch, const char *lang) {
+    for (int i = 0; i < ch->num_languages; i++) {
+        if (ch->languages[i] && strcasecmp(ch->languages[i], lang) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+/* Remove a language from character (returns 1 if removed) */
+static int character_remove_language(Character *ch, const char *lang) {
+    for (int i = 0; i < ch->num_languages; i++) {
+        if (ch->languages[i] && strcasecmp(ch->languages[i], lang) == 0) {
+            free(ch->languages[i]);
+            for (int j = i; j < ch->num_languages - 1; j++) {
+                ch->languages[j] = ch->languages[j + 1];
+            }
+            ch->languages[ch->num_languages - 1] = NULL;
+            ch->num_languages--;
+
+            /* Reset current_language if it was removed */
+            if (ch->current_language && strcasecmp(ch->current_language, lang) == 0) {
+                free(ch->current_language);
+                ch->current_language = (ch->num_languages > 0 && ch->languages[0])
+                    ? strdup(ch->languages[0]) : NULL;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* Grant skill/spell/psionic/language to a player */
+void cmd_grant(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+
+    if (sess->privilege_level < 1) {
+        send_to_player(sess, "You don't have permission to use that command.\n");
+        return;
+    }
+
+    if (!args || !(*args)) {
+        send_to_player(sess, "Usage: grant <player> <type> <name>\n");
+        send_to_player(sess, "Types: skill, spell, psionic, language\n");
+        return;
+    }
+
+    char target_name[64];
+    char type[32];
+    char name[256];
+
+    /* Parse: "player type name with spaces" */
+    if (sscanf(args, "%63s %31s %255[^\n]", target_name, type, name) != 3) {
+        send_to_player(sess, "Usage: grant <player> <type> <name>\n");
+        send_to_player(sess, "Types: skill, spell, psionic, language\n");
+        return;
+    }
+
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) {
+        send_to_player(sess, "Player '%s' not found.\n", target_name);
+        return;
+    }
+
+    Character *ch = &target->character;
+
+    if (strcasecmp(type, "skill") == 0) {
+        /* Check if already has this skill by name */
+        int skill_id = skill_get_id_by_name(name);
+        if (skill_id < 0) {
+            send_to_player(sess, "Unknown skill '%s'.\n", name);
+            return;
+        }
+        for (int i = 0; i < ch->num_skills; i++) {
+            if (ch->skills[i].skill_id == skill_id) {
+                send_to_player(sess, "%s already knows skill '%s'.\n", target->username, name);
+                return;
+            }
+        }
+        if (ch->num_skills >= 20) {
+            send_to_player(sess, "%s has maximum skills (20).\n", target->username);
+            return;
+        }
+        ch->skills[ch->num_skills].skill_id = skill_id;
+        ch->skills[ch->num_skills].percentage = 30;  /* Starting percentage */
+        ch->skills[ch->num_skills].uses = 0;
+        ch->num_skills++;
+
+        send_to_player(sess, "You grant %s the skill: %s\n", target->username, name);
+        send_to_player(target, "A wizard has granted you the skill: %s\n", name);
+    }
+    else if (strcasecmp(type, "spell") == 0) {
+        MagicSpell *spell = magic_find_spell_by_name(name);
+        if (!spell) {
+            send_to_player(sess, "Unknown spell '%s'.\n", name);
+            return;
+        }
+        KnownSpell *known = magic_find_known_spell(ch, spell->id);
+        if (known) {
+            send_to_player(sess, "%s already knows spell '%s'.\n", target->username, name);
+            return;
+        }
+        magic_learn_spell(ch, spell->id);
+
+        send_to_player(sess, "You grant %s the spell: %s\n", target->username, spell->name);
+        send_to_player(target, "A wizard has granted you the spell: %s\n", spell->name);
+    }
+    else if (strcasecmp(type, "psionic") == 0) {
+        PsionicPower *power = psionics_find_power_by_name(name);
+        if (!power) {
+            send_to_player(sess, "Unknown psionic power '%s'.\n", name);
+            return;
+        }
+        KnownPower *known = psionics_find_known_power(ch, power->id);
+        if (known) {
+            send_to_player(sess, "%s already knows psionic '%s'.\n", target->username, name);
+            return;
+        }
+        psionics_learn_power(ch, power->id);
+
+        send_to_player(sess, "You grant %s the psionic: %s\n", target->username, power->name);
+        send_to_player(target, "A wizard has granted you the psionic: %s\n", power->name);
+    }
+    else if (strcasecmp(type, "language") == 0) {
+        if (character_knows_language(ch, name)) {
+            send_to_player(sess, "%s already knows language '%s'.\n", target->username, name);
+            return;
+        }
+        if (!character_add_language(ch, name)) {
+            send_to_player(sess, "%s has maximum languages (16).\n", target->username);
+            return;
+        }
+        send_to_player(sess, "You grant %s the language: %s\n", target->username, name);
+        send_to_player(target, "A wizard has granted you the language: %s\n", name);
+    }
+    else {
+        send_to_player(sess, "Invalid type '%s'. Use: skill, spell, psionic, language\n", type);
+        return;
+    }
+
+    /* Auto-save target */
+    save_character(target);
+}
+
+/* Revoke skill/spell/psionic/language from a player */
+void cmd_revoke(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+
+    if (sess->privilege_level < 1) {
+        send_to_player(sess, "You don't have permission to use that command.\n");
+        return;
+    }
+
+    if (!args || !(*args)) {
+        send_to_player(sess, "Usage: revoke <player> <type> <name>\n");
+        send_to_player(sess, "Types: skill, spell, psionic, language\n");
+        return;
+    }
+
+    char target_name[64];
+    char type[32];
+    char name[256];
+
+    if (sscanf(args, "%63s %31s %255[^\n]", target_name, type, name) != 3) {
+        send_to_player(sess, "Usage: revoke <player> <type> <name>\n");
+        send_to_player(sess, "Types: skill, spell, psionic, language\n");
+        return;
+    }
+
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) {
+        send_to_player(sess, "Player '%s' not found.\n", target_name);
+        return;
+    }
+
+    Character *ch = &target->character;
+
+    if (strcasecmp(type, "skill") == 0) {
+        int skill_id = skill_get_id_by_name(name);
+        if (skill_id < 0) {
+            send_to_player(sess, "Unknown skill '%s'.\n", name);
+            return;
+        }
+        int found = 0;
+        for (int i = 0; i < ch->num_skills; i++) {
+            if (ch->skills[i].skill_id == skill_id) {
+                for (int j = i; j < ch->num_skills - 1; j++) {
+                    ch->skills[j] = ch->skills[j + 1];
+                }
+                ch->num_skills--;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            send_to_player(sess, "%s doesn't have skill '%s'.\n", target->username, name);
+            return;
+        }
+        send_to_player(sess, "You revoke %s's skill: %s\n", target->username, name);
+        send_to_player(target, "A wizard has revoked your skill: %s\n", name);
+    }
+    else if (strcasecmp(type, "spell") == 0) {
+        MagicSpell *spell = magic_find_spell_by_name(name);
+        if (!spell) {
+            send_to_player(sess, "Unknown spell '%s'.\n", name);
+            return;
+        }
+        int found = 0;
+        for (int i = 0; i < ch->magic.spell_count; i++) {
+            if (ch->magic.spells[i].spell_id == spell->id) {
+                for (int j = i; j < ch->magic.spell_count - 1; j++) {
+                    ch->magic.spells[j] = ch->magic.spells[j + 1];
+                }
+                ch->magic.spell_count--;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            send_to_player(sess, "%s doesn't know spell '%s'.\n", target->username, name);
+            return;
+        }
+        send_to_player(sess, "You revoke %s's spell: %s\n", target->username, spell->name);
+        send_to_player(target, "A wizard has revoked your spell: %s\n", spell->name);
+    }
+    else if (strcasecmp(type, "psionic") == 0) {
+        PsionicPower *power = psionics_find_power_by_name(name);
+        if (!power) {
+            send_to_player(sess, "Unknown psionic power '%s'.\n", name);
+            return;
+        }
+        int found = 0;
+        for (int i = 0; i < ch->psionics.power_count; i++) {
+            if (ch->psionics.powers[i].power_id == power->id) {
+                for (int j = i; j < ch->psionics.power_count - 1; j++) {
+                    ch->psionics.powers[j] = ch->psionics.powers[j + 1];
+                }
+                ch->psionics.power_count--;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            send_to_player(sess, "%s doesn't know psionic '%s'.\n", target->username, name);
+            return;
+        }
+        send_to_player(sess, "You revoke %s's psionic: %s\n", target->username, power->name);
+        send_to_player(target, "A wizard has revoked your psionic: %s\n", power->name);
+    }
+    else if (strcasecmp(type, "language") == 0) {
+        if (!character_remove_language(ch, name)) {
+            send_to_player(sess, "%s doesn't know language '%s'.\n", target->username, name);
+            return;
+        }
+        send_to_player(sess, "You revoke %s's language: %s\n", target->username, name);
+        send_to_player(target, "A wizard has revoked your language: %s\n", name);
+    }
+    else {
+        send_to_player(sess, "Invalid type '%s'. Use: skill, spell, psionic, language\n", type);
+        return;
+    }
+
+    /* Auto-save target */
+    save_character(target);
 }

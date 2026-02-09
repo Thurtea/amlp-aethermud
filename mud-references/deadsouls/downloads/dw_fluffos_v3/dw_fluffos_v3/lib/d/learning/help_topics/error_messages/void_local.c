@@ -1,3 +1,0 @@
-void bing() {
-    void x;
-}

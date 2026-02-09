@@ -1,1 +1,0 @@
-mixed command() { return deep_inventory(environment(this_player())); }

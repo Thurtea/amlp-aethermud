@@ -1,7 +1,0 @@
-Local Functions (/std/inheritables/object.c)
-
-void set_cap_name(string str);
-
-Sets the object's capitalized name.
-
-See also: query_cap_name()

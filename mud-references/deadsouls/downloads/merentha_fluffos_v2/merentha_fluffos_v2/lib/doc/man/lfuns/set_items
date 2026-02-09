@@ -1,8 +1,0 @@
-Local Functions (/std/inheritables/room.c)
-
-void set_items(mapping map);
-
-Sets all the items in a room as exit:file mapping pairs.
-
-See also: add_item(), remove_item(), query_item()
-

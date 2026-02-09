@@ -139,7 +139,7 @@ void room_init_world(void) {
 
     init_room(5, "The Silver Unicorn Tavern",
         "A warm tavern with heavy wooden beams and a roaring fireplace.\n"
-        "Travelers from across Rifts Earth share tales of adventure over\n"
+        "Travelers from across AetherMUD share tales of adventure over\n"
         "mugs of ale. A bard plays softly in the corner. The barkeep\n"
         "nods a greeting from behind the counter.",
         -1, 4, -1, -1, -1, -1);

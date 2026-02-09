@@ -1,7 +1,0 @@
-Local Functions (/std/inheritables/bar.c)
-
-mapping query_menu();
-
-Returns the menu of the bar.
-
-See also: set_currency(), set_menu()

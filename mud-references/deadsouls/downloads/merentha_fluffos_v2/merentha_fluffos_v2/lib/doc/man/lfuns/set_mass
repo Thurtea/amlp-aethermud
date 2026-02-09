@@ -1,7 +1,0 @@
-Local Functions (/std/inheritables/object.c)
-
-void set_mass(int i);
-
-Sets the mass of an object.
-
-See also: query_mass(), query_total_mass()

@@ -1,3 +1,0 @@
-create(){
-seteuid("hi");
-}

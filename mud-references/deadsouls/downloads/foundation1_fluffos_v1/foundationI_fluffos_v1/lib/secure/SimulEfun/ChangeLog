@@ -1,4 +1,0 @@
--  /adm/SimulEfun/english.c
-   Sat Jul  2 17:05:42 1994 by Descartes(George Reese):
-     * Fixed pluralize() SimulEfun...  It was not properly handling
-     * words ending in "y". 

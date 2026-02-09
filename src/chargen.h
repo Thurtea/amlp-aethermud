@@ -22,6 +22,8 @@ typedef enum {
     CHARGEN_OCC_SELECT,
     CHARGEN_STATS_ROLL,
     CHARGEN_STATS_CONFIRM,
+    CHARGEN_ALIGNMENT_SELECT,
+    CHARGEN_ZONE_SELECT,
     CHARGEN_SECONDARY_SKILLS,
     CHARGEN_COMPLETE
 } ChargenState;
@@ -99,6 +101,12 @@ typedef struct Character {
     int wimpy_threshold;       /* Auto-flee at this % of max HP (0=disabled) */
     int credits;               /* Universal credits (currency) */
     char *clan;                /* Clan membership (e.g., "aerihman" for Sunaj) */
+    char *alignment;           /* Character alignment (e.g., "Principled") */
+
+    /* Language system */
+    char *languages[16];       /* Known languages (max 16) */
+    int num_languages;         /* Number of known languages */
+    char *current_language;    /* Default language for say command */
 } Character;
 
 /* Chargen initialization */
@@ -138,6 +146,14 @@ void cmd_isp(PlayerSession *sess, const char *args);
 
 /* Clan command */
 void cmd_clan(PlayerSession *sess, const char *args);
+
+/* Language commands */
+void cmd_speak(PlayerSession *sess, const char *args);
+void cmd_languages(PlayerSession *sess, const char *args);
+
+/* Wizard grant/revoke commands */
+void cmd_grant(PlayerSession *sess, const char *args);
+void cmd_revoke(PlayerSession *sess, const char *args);
 
 /* Magic commands (Phase 5) */
 void cmd_cast(PlayerSession *sess, const char *args);

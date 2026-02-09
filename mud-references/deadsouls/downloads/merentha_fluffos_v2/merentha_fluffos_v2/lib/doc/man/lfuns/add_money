@@ -1,7 +1,0 @@
-Local Functions (/std/inheritables/living.c)
-
-void add_money(string type, int amt);
-
-Adds amt more money of type type to a living object.
-
-See also: set_money(), query_money()

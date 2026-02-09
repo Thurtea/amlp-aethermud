@@ -51,6 +51,7 @@
 #include "room.h"
 #include "chargen.h"
 #include "race_loader.h"
+#include "ui_frames.h"
 
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 4096
@@ -1084,109 +1085,84 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
     
     if (strcmp(cmd, "help") == 0) {
-        result.type = VALUE_STRING;
-        
-        char help_text[4096];
-        strcpy(help_text,
-            "Available commands:\r\n"
-            "  help                 - Show this help\r\n"
-            "  look / l             - Look at your surroundings\r\n"
-            "  inventory / i        - Check your inventory\r\n"
-            "  say <message>        - Say something\r\n"
-            "  emote <action>       - Perform an emote\r\n"
-            "  who                  - List players online\r\n"
-            "  stats / score        - Show your character stats\r\n"
-            "  skills               - Show all skills\r\n"
-            "  pskills              - Show primary (OCC) skills\r\n"
-            "  sskills              - Show secondary (chosen) skills\r\n"
-            "  spells               - Show known spells\r\n"
-            "  powers / psionics    - Show psionic powers\r\n"
-            "  save                 - Save your character\r\n"
-            "  quit / logout        - Save and disconnect\r\n"
-            "\r\nMovement: north, south, east, west, up, down (or n, s, e, w, u, d)\r\n");
-
-        strcat(help_text,
-            "\r\nCOMBAT COMMANDS:\r\n"
-            "  attack/kill <target> - Engage in real-time combat\r\n"
-            "  stop                 - Disengage from combat\r\n"
-            "  flee                 - Attempt to escape combat\r\n"
-            "  assist <player>      - Join combat helping an ally\r\n"
-            "  autoparry            - Toggle automatic parrying\r\n"
-            "  autododge            - Toggle automatic dodging\r\n"
-            "  wimpy <percent>      - Auto-flee at HP threshold (0=off)\r\n"
-            "  rest                 - Sit down and regenerate HP/SDC\r\n"
-            "  wake / stand         - Stand up from resting\r\n");
-
-        strcat(help_text,
-            "\r\nSOCIAL/RP COMMANDS:\r\n"
-            "  tell <player> <msg>  - Private message to a player\r\n"
-            "  reply <msg>          - Reply to last tell\r\n"
-            "  chat <msg>           - Global chat channel\r\n"
-            "  whisper <who> <msg>  - Private message in room\r\n"
-            "  shout <msg>          - Loud message heard nearby\r\n"
-            "  pemote <action>      - Possessive emote (e.g. Bob's)\r\n"
-            "  think <thought>      - Display internal thought\r\n"
-            "  converse             - Toggle conversation mode\r\n"
-            "  introduce <player>   - Introduce yourself to someone\r\n"
-            "  forget <player>      - Forget an introduction\r\n"
-            "  remember             - List known introductions\r\n");
-
-        strcat(help_text,
-            "\r\nTRAVEL:\r\n"
-            "  rift                 - Use Moxim rift travel (500 credits)\r\n"
-            "  rift <destination>   - Travel to a destination via rift\r\n"
-            "  credits / balance    - Check your credit balance\r\n"
-            "  clan                 - View or join a clan\r\n"
-            "  clan <name>          - Join a clan (race-restricted)\r\n"
-            "\r\nUI/SETTINGS:\r\n"
-            "  scan                 - Show contents of adjacent rooms\r\n"
-            "  examine/view <tgt>   - Inspect objects/players\r\n"
-            "  map                  - Show basic ASCII area map\r\n"
-            "  brief                - Toggle brief room descriptions\r\n"
-            "  color / ansi         - Toggle ANSI color output\r\n"
-            "  echo <text>          - Echo text back to self\r\n"
-            "  title <text>         - Set your title in who list\r\n"
-            "  password <old> <new> - Change your password\r\n"
-            "  position             - Show/set position\r\n");
-
+        int w = FRAME_WIDTH;
+        send_to_player(session, "\r\n");
+        frame_top(session, w);
+        frame_title(session, "AETHERMUD COMMAND REFERENCE", w);
+        frame_header(session, "BASIC", w);
+        frame_line(session, "help                - Show this help", w);
+        frame_line(session, "look / l            - Look around", w);
+        frame_line(session, "inventory / i       - Check inventory", w);
+        frame_line(session, "stats / score       - Character sheet", w);
+        frame_line(session, "skills              - Show all skills", w);
+        frame_line(session, "pskills / sskills   - Primary / secondary", w);
+        frame_line(session, "save                - Save character", w);
+        frame_line(session, "quit / logout       - Save and disconnect", w);
+        frame_header(session, "MOVEMENT", w);
+        frame_line(session, "north/south/east/west  (or n/s/e/w)", w);
+        frame_line(session, "up / down              (or u/d)", w);
+        frame_line(session, "rift <dest>         - Rift travel (500 cr)", w);
+        frame_header(session, "COMMUNICATION", w);
+        frame_line(session, "say <msg>           - Speak (in language)", w);
+        frame_line(session, "tell <player> <msg> - Private message", w);
+        frame_line(session, "reply <msg>         - Reply to last tell", w);
+        frame_line(session, "chat <msg>          - Global chat", w);
+        frame_line(session, "shout <msg>         - Shout nearby", w);
+        frame_line(session, "whisper <who> <msg> - Whisper in room", w);
+        frame_line(session, "emote <action>      - Perform an emote", w);
+        frame_line(session, "converse            - Toggle talk mode", w);
+        frame_line(session, "speak <language>    - Change language", w);
+        frame_line(session, "languages / langs   - List languages", w);
+        frame_header(session, "COMBAT", w);
+        frame_line(session, "attack <target>     - Engage combat", w);
+        frame_line(session, "stop                - Disengage", w);
+        frame_line(session, "flee                - Attempt escape", w);
+        frame_line(session, "assist <player>     - Help an ally", w);
+        frame_line(session, "autoparry/autododge - Toggle auto-defense", w);
+        frame_line(session, "wimpy <percent>     - Auto-flee threshold", w);
+        frame_line(session, "rest / wake         - Rest / stand up", w);
+        frame_header(session, "SOCIAL", w);
+        frame_line(session, "introduce <player>  - Introduce yourself", w);
+        frame_line(session, "remember            - Known introductions", w);
+        frame_line(session, "who                 - Players online", w);
+        frame_line(session, "title <text>        - Set who-list title", w);
+        frame_header(session, "OTHER", w);
+        frame_line(session, "credits / balance   - Check credits", w);
+        frame_line(session, "clan                - View/join a clan", w);
+        frame_line(session, "scan                - Peek adjacent rooms", w);
+        frame_line(session, "examine <target>    - Inspect object/player", w);
+        frame_line(session, "map                 - ASCII area map", w);
+        frame_line(session, "brief               - Toggle brief mode", w);
+        frame_line(session, "spells / powers     - Magic / psionics", w);
         if (session->privilege_level >= 1) {
-            strcat(help_text,
-                "\r\nWIZARD COMMANDS (Level 1+):\r\n"
-                "  goto <room>          - Teleport to a room\r\n"
-                "  clone <object>       - Clone an object\r\n"
-                "  ls/cd/pwd            - Navigate filesystem\r\n"
-                "  cat <file>           - View file contents\r\n"
-                "  eval <code>          - Execute LPC code\r\n"
-                "  set <player> <field> <value> - Set player attributes\r\n"
-                "  heal <player>        - Restore HP/SDC/MDC/ISP/PPE\r\n"
-                "  slay <target>        - Instant kill a target\r\n"
-                "  award <player> <xp>  - Award experience points\r\n"
-                "  trans/summon <player> - Teleport player to you\r\n"
-                "  peace                - End all combat in room\r\n"
-                "  reset                - Reset current room\r\n"
-                "  kick <player>        - Force disconnect a player\r\n"
-                "  finger <player>      - Show detailed player info\r\n"
-                "  whereis <player>     - Show player's location\r\n"
-                "  snoop <player>       - See a player's output\r\n"
-                "  invis                - Toggle wizard invisibility\r\n"
-                "  godmode              - Toggle damage immunity\r\n"
-                "  destruct <item>      - Remove an item from room\r\n"
-                "  clean                - Remove all items from room\r\n");
+            frame_header(session, "WIZARD (Level 1+)", w);
+            frame_line(session, "wiztool / wiz       - Wizard command ref", w);
+            frame_line(session, "goto <room>         - Teleport to room", w);
+            frame_line(session, "set <p> <f> <v>     - Set player attr", w);
+            frame_line(session, "heal <player>       - Restore all pools", w);
+            frame_line(session, "slay <target>       - Instant kill", w);
+            frame_line(session, "trans/summon <p>    - Teleport player", w);
+            frame_line(session, "finger <player>     - Detailed info", w);
+            frame_line(session, "award <p> <xp>      - Give experience", w);
+            frame_line(session, "clone <path>        - Clone object", w);
+            frame_line(session, "eval <code>         - Execute LPC", w);
+            frame_line(session, "snoop / invis       - Spy / hide", w);
+            frame_line(session, "godmode             - Toggle immunity", w);
+            frame_line(session, "peace               - End room combat", w);
+            frame_line(session, "ls/cd/pwd/cat       - Filesystem", w);
         }
-
         if (session->privilege_level >= 2) {
-            strcat(help_text,
-                "\r\nADMIN COMMANDS (Level 2):\r\n"
-                "  promote <player> <level> - Promote player (0=player, 1=wizard, 2=admin)\r\n"
-                "  users                    - Show detailed user list\r\n"
-                "  shutdown [delay]         - Shutdown server\r\n"
-                "  force <player> <cmd>     - Force player to execute command\r\n"
-                "  reboot [delay]           - Graceful server restart\r\n"
-                "  ban <player>             - Ban a player\r\n"
-                "  broadcast/wall <msg>     - Send message to all players\r\n");
+            frame_header(session, "ADMIN (Level 2)", w);
+            frame_line(session, "promote <p> <lvl>   - Set privilege", w);
+            frame_line(session, "force <p> <cmd>     - Force command", w);
+            frame_line(session, "shutdown / reboot   - Server control", w);
+            frame_line(session, "kick / ban <player> - Remove player", w);
+            frame_line(session, "broadcast <msg>     - Message all", w);
+            frame_line(session, "users               - User listing", w);
         }
-        
-        return vm_value_create_string(help_text);
+        frame_bottom(session, w);
+        result.type = VALUE_NULL;
+        return result;
     }
     
     if (strcmp(cmd, "look") == 0 || strcmp(cmd, "l") == 0) {
@@ -1212,7 +1188,31 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result.type = VALUE_NULL;
         return result;
     }
-    
+
+    if (strcmp(cmd, "speak") == 0) {
+        cmd_speak(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "languages") == 0 || strcmp(cmd, "langs") == 0) {
+        cmd_languages(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "grant") == 0) {
+        cmd_grant(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "revoke") == 0) {
+        cmd_revoke(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "stats") == 0 || strcmp(cmd, "score") == 0) {
         cmd_stats(session, args ? args : "");
         result.type = VALUE_NULL;
@@ -1226,33 +1226,51 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
 
     if (strcmp(cmd, "pskills") == 0) {
-        /* Show primary (OCC-assigned) skills only (first 5) */
         Character *ch = &session->character;
-        send_to_player(session, "\n=== PRIMARY SKILLS (O.C.C.) ===\r\n\r\n");
-        int limit = ch->num_skills < 5 ? ch->num_skills : 5;
-        for (int i = 0; i < limit; i++) {
-            const char *sname = skill_get_name(ch->skills[i].skill_id);
-            send_to_player(session, "  %-30s %3d%%\r\n", sname, ch->skills[i].percentage);
-        }
-        if (limit == 0) send_to_player(session, "  No primary skills assigned.\r\n");
+        int is_rcc = (ch->occ && strcasestr(ch->occ, "Dragon Hatchling") != NULL);
+        int w = FRAME_WIDTH;
+        char buf[128];
         send_to_player(session, "\r\n");
+        frame_top(session, w);
+        frame_title(session, "PRIMARY SKILLS (O.C.C.)", w);
+        frame_sep(session, w);
+        if (is_rcc) {
+            frame_line(session, "Dragon RCC uses racial abilities", w);
+            frame_line(session, "instead of OCC primary skills.", w);
+        } else {
+            int limit = ch->num_skills < 5 ? ch->num_skills : 5;
+            for (int i = 0; i < limit; i++) {
+                const char *sname = skill_get_name(ch->skills[i].skill_id);
+                snprintf(buf, sizeof(buf), "%-32s %3d%%", sname, ch->skills[i].percentage);
+                frame_line(session, buf, w);
+            }
+            if (limit == 0) frame_line(session, "No primary skills assigned.", w);
+        }
+        frame_bottom(session, w);
         result.type = VALUE_NULL;
         return result;
     }
 
     if (strcmp(cmd, "sskills") == 0) {
-        /* Show secondary (player-chosen) skills only (after first 5) */
         Character *ch = &session->character;
-        send_to_player(session, "\n=== SECONDARY SKILLS (Player-chosen) ===\r\n\r\n");
-        if (ch->num_skills <= 5) {
-            send_to_player(session, "  No secondary skills selected.\r\n");
+        int is_rcc = (ch->occ && strcasestr(ch->occ, "Dragon Hatchling") != NULL);
+        int start_idx = is_rcc ? 0 : 5;
+        int w = FRAME_WIDTH;
+        char buf[128];
+        send_to_player(session, "\r\n");
+        frame_top(session, w);
+        frame_title(session, "SECONDARY SKILLS (Player-chosen)", w);
+        frame_sep(session, w);
+        if (ch->num_skills <= start_idx) {
+            frame_line(session, "No secondary skills selected.", w);
         } else {
-            for (int i = 5; i < ch->num_skills; i++) {
+            for (int i = start_idx; i < ch->num_skills; i++) {
                 const char *sname = skill_get_name(ch->skills[i].skill_id);
-                send_to_player(session, "  %-30s %3d%%\r\n", sname, ch->skills[i].percentage);
+                snprintf(buf, sizeof(buf), "%-32s %3d%%", sname, ch->skills[i].percentage);
+                frame_line(session, buf, w);
             }
         }
-        send_to_player(session, "\r\n");
+        frame_bottom(session, w);
         result.type = VALUE_NULL;
         return result;
     }
@@ -1479,13 +1497,80 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     
     if (strcmp(cmd, "say") == 0) {
         if (args && *args) {
-            char msg[BUFFER_SIZE];
-            snprintf(msg, sizeof(msg), "%s says: %s\r\n", 
-                    session->username, args);
-            broadcast_message(msg, session);
-            
-            snprintf(msg, sizeof(msg), "You say: %s\r\n", args);
-            return vm_value_create_string(msg);
+            Character *speaker_ch = &session->character;
+            const char *lang = speaker_ch->current_language;
+            if (!lang) lang = "american";
+
+            /* Message to speaker */
+            char self_msg[BUFFER_SIZE];
+            snprintf(self_msg, sizeof(self_msg), "You say, \"%s\" in %s.\r\n", args, lang);
+
+            /* Send to room occupants with language check */
+            if (session->current_room) {
+                Room *room = session->current_room;
+                for (int i = 0; i < room->num_players; i++) {
+                    PlayerSession *listener = room->players[i];
+                    if (!listener || listener == session) continue;
+
+                    /* Determine display name: use username if introduced, else race */
+                    Character *lch = &listener->character;
+                    const char *speaker_name = NULL;
+                    for (int j = 0; j < lch->introduced_count; j++) {
+                        if (lch->introduced_to[j] &&
+                            strcasecmp(lch->introduced_to[j], session->username) == 0) {
+                            speaker_name = session->username;
+                            break;
+                        }
+                    }
+                    if (!speaker_name) {
+                        speaker_name = speaker_ch->race ? speaker_ch->race : "Someone";
+                        /* Prepend "A " for race description */
+                        char race_desc[128];
+                        snprintf(race_desc, sizeof(race_desc), "A %s", speaker_name);
+
+                        /* Check if listener knows the language */
+                        int knows_lang = 0;
+                        for (int k = 0; k < lch->num_languages; k++) {
+                            if (lch->languages[k] && strcasecmp(lch->languages[k], lang) == 0) {
+                                knows_lang = 1;
+                                break;
+                            }
+                        }
+
+                        char listener_msg[BUFFER_SIZE];
+                        if (knows_lang) {
+                            snprintf(listener_msg, sizeof(listener_msg),
+                                "%s says, \"%s\" in %s.\r\n", race_desc, args, lang);
+                        } else {
+                            snprintf(listener_msg, sizeof(listener_msg),
+                                "%s says something unintelligible in %s.\r\n", race_desc, lang);
+                        }
+                        send_to_player(listener, "%s", listener_msg);
+                        continue;
+                    }
+
+                    /* Listener knows speaker by name */
+                    int knows_lang = 0;
+                    for (int k = 0; k < lch->num_languages; k++) {
+                        if (lch->languages[k] && strcasecmp(lch->languages[k], lang) == 0) {
+                            knows_lang = 1;
+                            break;
+                        }
+                    }
+
+                    char listener_msg[BUFFER_SIZE];
+                    if (knows_lang) {
+                        snprintf(listener_msg, sizeof(listener_msg),
+                            "%s says, \"%s\" in %s.\r\n", speaker_name, args, lang);
+                    } else {
+                        snprintf(listener_msg, sizeof(listener_msg),
+                            "%s says something unintelligible in %s.\r\n", speaker_name, lang);
+                    }
+                    send_to_player(listener, "%s", listener_msg);
+                }
+            }
+
+            return vm_value_create_string(self_msg);
         } else {
             return vm_value_create_string("Say what?\r\n");
         }
@@ -1546,57 +1631,48 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
     
     if (strcmp(cmd, "who") == 0) {
-        char msg[BUFFER_SIZE];
+        int w = FRAME_WIDTH;
         int count = 0;
-        strcpy(msg, "Players online:\r\n");
-        
+        char buf[128];
+        send_to_player(session, "\r\n");
+        frame_top(session, w);
+        frame_title(session, "PLAYERS ONLINE", w);
+        frame_sep(session, w);
+
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
-                /* Hide invisible wizards from non-wizards */
                 if (sessions[i]->is_invisible && session->privilege_level < 1)
                     continue;
-                char line[256];
                 time_t idle = time(NULL) - sessions[i]->last_activity;
-                const char *priv = (sessions[i]->privilege_level == 2) ? "[Admin]" :
-                                  (sessions[i]->privilege_level == 1) ? "[Wiz]" : "";
+                const char *priv = (sessions[i]->privilege_level == 2) ? " [Admin]" :
+                                  (sessions[i]->privilege_level == 1) ? " [Wiz]" : "";
                 const char *invis_tag = sessions[i]->is_invisible ? " (invis)" : "";
                 const char *title_str = sessions[i]->title[0] ? sessions[i]->title : "";
                 if (title_str[0]) {
-                    snprintf(line, sizeof(line), "  %-20s %s%s %s (idle: %ld seconds)\r\n",
+                    snprintf(buf, sizeof(buf), "%-16s%s%s %s  (%lds idle)",
                             sessions[i]->username, priv, invis_tag, title_str, idle);
                 } else {
-                    snprintf(line, sizeof(line), "  %-20s %s%s (idle: %ld seconds)\r\n",
+                    snprintf(buf, sizeof(buf), "%-16s%s%s  (%lds idle)",
                             sessions[i]->username, priv, invis_tag, idle);
                 }
-                strcat(msg, line);
+                frame_line(session, buf, w);
                 count++;
             }
         }
-        
-        char footer[64];
-        snprintf(footer, sizeof(footer), "\r\nTotal: %d player%s\r\n", 
-                count, count == 1 ? "" : "s");
-        strcat(msg, footer);
-        
-        return vm_value_create_string(msg);
+
+        frame_sep(session, w);
+        snprintf(buf, sizeof(buf), "Total: %d player%s", count, count == 1 ? "" : "s");
+        frame_line(session, buf, w);
+        frame_bottom(session, w);
+        result.type = VALUE_NULL;
+        return result;
     }
-    
+
     if (strcmp(cmd, "stats") == 0) {
-        char msg[512];
-        const char *priv_name = (session->privilege_level == 2) ? "Admin" :
-                               (session->privilege_level == 1) ? "Wizard" : "Player";
-        snprintf(msg, sizeof(msg),
-            "Your stats:\r\n"
-            "  Name: %s\r\n"
-            "  Privilege Level: %d (%s)\r\n"
-            "  Level: 1\r\n"
-            "  HP: 100/100\r\n"
-            "  Strength: 10\r\n"
-            "  Dexterity: 10\r\n"
-            "  Intelligence: 10\r\n",
-            session->username, session->privilege_level, priv_name);
-        
-        return vm_value_create_string(msg);
+        /* Use the chargen_display_stats which now has frames */
+        cmd_stats(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
     }
     
     /* Movement commands */
@@ -2464,6 +2540,140 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return vm_value_create_string("Room cleaned.\r\n");
     }
 
+    /* EVAL - Execute LPC code inline (wizard tool) */
+    if (strcmp(cmd, "eval") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !*args) {
+            return vm_value_create_string("Usage: eval <lpc_code>\r\n"
+                "Example: eval return 2 + 2;\r\n"
+                "Example: eval return \"hello\";\r\n");
+        }
+
+        /* Wrap the code in a function so the compiler can handle it */
+        char source[2048];
+        snprintf(source, sizeof(source),
+            "mixed __eval__() { %s }", args);
+
+        Program *prog = compiler_compile_string(source, "__eval__");
+        if (!prog) {
+            return vm_value_create_string("Eval error: compilation failed.\r\n");
+        }
+
+        if (prog->last_error != COMPILE_SUCCESS) {
+            char err_msg[512];
+            snprintf(err_msg, sizeof(err_msg), "Eval compile error: %s\r\n",
+                    compiler_error_string(prog->last_error));
+            program_free(prog);
+            return vm_value_create_string(err_msg);
+        }
+
+        /* Try to find and execute the __eval__ function */
+        int func_idx = program_find_function(prog, "__eval__");
+        if (func_idx < 0) {
+            program_free(prog);
+            return vm_value_create_string("Eval error: could not find eval function.\r\n");
+        }
+
+        /* Load program into VM and execute */
+        /* For safety, capture result and clean up */
+        set_current_session(session);
+
+        /* Add the function to the VM temporarily */
+        VMFunction *eval_func = NULL;
+        if (func_idx >= 0 && (size_t)func_idx < prog->function_count) {
+            eval_func = vm_function_create(
+                prog->functions[func_idx].name,
+                prog->functions[func_idx].arg_count,
+                prog->functions[func_idx].local_count);
+            if (eval_func && prog->bytecode) {
+                /* Load bytecode as instructions */
+                int vm_func_idx = vm_add_function(global_vm, eval_func);
+                if (vm_func_idx >= 0) {
+                    vm_call_function(global_vm, vm_func_idx, 0);
+                    vm_execute(global_vm);
+                }
+            }
+        }
+
+        set_current_session(NULL);
+
+        /* Get result from stack if any */
+        VMValue eval_result = vm_pop_value(global_vm);
+        char *result_str = vm_value_to_string(eval_result);
+
+        char response[1024];
+        snprintf(response, sizeof(response), "=> %s\r\n",
+                result_str ? result_str : "(null)");
+        if (result_str) free(result_str);
+        vm_value_free(&eval_result);
+        program_free(prog);
+
+        return vm_value_create_string(response);
+    }
+
+    /* WIZTOOL - Framed wizard command reference */
+    if (strcmp(cmd, "wiztool") == 0 || strcmp(cmd, "wiz") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+
+        int w = FRAME_WIDTH;
+        send_to_player(session, "\r\n");
+        frame_top(session, w);
+        frame_title(session, "WIZARD TOOLBOX", w);
+
+        frame_header(session, "CHARACTER MGMT", w);
+        frame_line(session, "set <p> <field> <val>  - Set attribute", w);
+        frame_line(session, "  fields: occ, race, level, hp, max_hp,", w);
+        frame_line(session, "  sdc, max_sdc, mdc, max_mdc, isp, ppe,", w);
+        frame_line(session, "  max_isp, max_ppe, xp, stat_*", w);
+        frame_line(session, "heal <player> [amt]    - Restore pools", w);
+        frame_line(session, "slay <player>          - Instant kill", w);
+        frame_line(session, "award <player> <xp>    - Give XP", w);
+        frame_line(session, "finger <player>        - Detailed info", w);
+
+        frame_header(session, "TELEPORTATION", w);
+        frame_line(session, "goto <room_id>         - Teleport self", w);
+        frame_line(session, "trans/summon <player>   - Summon player", w);
+        frame_line(session, "whereis <player>       - Locate player", w);
+
+        frame_header(session, "ROOM CONTROL", w);
+        frame_line(session, "peace                  - End all combat", w);
+        frame_line(session, "reset                  - Reset room", w);
+        frame_line(session, "clean                  - Remove items", w);
+
+        frame_header(session, "ITEMS & OBJECTS", w);
+        frame_line(session, "clone <path|name>      - Clone item", w);
+        frame_line(session, "destruct <item>        - Destroy item", w);
+        frame_line(session, "grant <p> <type> <n>   - Grant ability", w);
+        frame_line(session, "revoke <p> <type> <n>  - Revoke ability", w);
+
+        frame_header(session, "UTILITY", w);
+        frame_line(session, "snoop [player]         - Spy on player", w);
+        frame_line(session, "invis                  - Toggle invisible", w);
+        frame_line(session, "godmode                - Toggle immunity", w);
+        frame_line(session, "eval <lpc_code>        - Execute LPC", w);
+        frame_line(session, "ls/cd/pwd/cat          - Filesystem", w);
+
+        if (session->privilege_level >= 2) {
+            frame_header(session, "ADMIN ONLY", w);
+            frame_line(session, "promote <p> <level>    - Set privilege", w);
+            frame_line(session, "kick <player>          - Disconnect", w);
+            frame_line(session, "ban <player>           - Permanent ban", w);
+            frame_line(session, "force <p> <cmd>        - Force command", w);
+            frame_line(session, "broadcast <msg>        - Message all", w);
+            frame_line(session, "users                  - User listing", w);
+            frame_line(session, "reboot [delay]         - Restart server", w);
+            frame_line(session, "shutdown [delay]       - Stop server", w);
+        }
+
+        frame_bottom(session, w);
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     /* ====================================================================
      * ADMIN COMMANDS (Phase 6)
      * ==================================================================== */
@@ -3082,30 +3292,32 @@ void process_playing_state(PlayerSession *session, const char *input) {
 
     VMValue result = execute_command(session, input);
 
-    command_debug_log_result(session, result);
-    
     if (result.type == VALUE_STRING && result.data.string_value) {
         if (strcmp(result.data.string_value, "quit") == 0) {
             send_to_player(session, "\r\nGoodbye, %s!\r\n", session->username);
-            
+
             char logout_msg[256];
-            snprintf(logout_msg, sizeof(logout_msg), 
+            snprintf(logout_msg, sizeof(logout_msg),
                     "%s has left the game.\r\n", session->username);
             broadcast_message(logout_msg, session);
-            
+
             session->state = STATE_DISCONNECTING;
         } else {
             send_to_player(session, "%s", result.data.string_value);
             send_prompt(session);
         }
-        
+
+        command_debug_log_result(session, result);
+
         if (result.data.string_value) {
             vm_value_release(&result);
         }
     } else if (result.type == VALUE_NULL) {
+        command_debug_log_result(session, result);
         /* Command handled its own output, just send prompt */
         send_prompt(session);
     } else {
+        command_debug_log_result(session, result);
         send_to_player(session, "Command failed to execute.\r\n");
         send_prompt(session);
     }

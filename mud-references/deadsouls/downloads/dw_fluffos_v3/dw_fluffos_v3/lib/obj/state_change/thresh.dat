@@ -1,5 +1,0 @@
-
-::item "thresh:Wheat"::
-::->result:: "/obj/food/grains/wheat_berry.food"
-::->factor:: 8
-::->func:: ({ })

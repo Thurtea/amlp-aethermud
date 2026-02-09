@@ -1,2 +1,0 @@
-inherit "/std/armour_logic";
-inherit "/std/basic/condition";

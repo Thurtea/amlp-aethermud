@@ -1,7 +1,0 @@
-Local Functions (/std/inheritables/monster.c)
-
-void says(string str);
-
-Forces the monster to say str.
-
-See also: emotes()

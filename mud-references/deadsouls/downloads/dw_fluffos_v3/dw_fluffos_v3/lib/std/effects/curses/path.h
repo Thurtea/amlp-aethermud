@@ -1,5 +1,0 @@
-#define NPCS "/obj/monster/"
-#define ITEMS "/obj/faith/"
-#define SHADOWS "/std/shadows/curses/"
-#define EFFECTS "/std/effects/curses/"
-#define BASIS "/std/effects/religious/basic_ritual"

@@ -1,3 +1,0 @@
-#include <lib.h>
-
-#define ROOM LIB_ROOM

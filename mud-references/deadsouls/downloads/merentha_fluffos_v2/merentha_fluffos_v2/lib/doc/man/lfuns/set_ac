@@ -1,7 +1,0 @@
-Local Functions (/std/inheritables/armour.c)
-
-void set_ac(int val);
-
-Sets the armour class (ac) of a armour object.
-
-See also: query_ac()

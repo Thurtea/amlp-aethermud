@@ -1,3 +1,0 @@
-class bing {
-    void x;
-}

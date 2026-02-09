@@ -1,5 +1,0 @@
-void bing() {
-}
-
-void bing() {
-}

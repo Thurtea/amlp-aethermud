@@ -134,43 +134,7 @@ When you run `make`, you may see compiler warnings. We've created comprehensive 
 - **[diagnostics/quick-reference.md](diagnostics/quick-reference.md)** - One-line solutions table
 - **[diagnostics/README.md](diagnostics/README.md)** - Detailed navigation guide
 
-The build output includes **clickable file paths** in most terminals - just click to open the relevant documentation!
-
-```
-╔════════════════════════════════════════════════════════════════════════════╗
-╠════════════════════════════════════════════════════════════════════════════╣
-║  BUILD SUCCESSFUL                                                          ║
-╠════════════════════════════════════════════════════════════════════════════╣
-║  Warnings:       50                                                        ║
-║  Warning details: diagnostics/README.md      ← Click to learn more!        ║
-╚════════════════════════════════════════════════════════════════════════════╝
-```
-
-Current warnings are **safe to ignore** - the MUD runs perfectly with them. But if you want to understand or fix them, the diagnostics directory has everything you need.
-
-### LPC Development
-
-Create rooms, objects, and NPCs using LPC:
-
-```lpc
-// lib/domains/myworld/rooms/entry.lpc
-inherit "/std/room";
-
-void create() {
-    ::create();
-    set_short("The Entrance");
-    set_long("You stand at the entrance to a grand adventure.");
-    add_exit("north", "/domains/myworld/rooms/hall");
-}
-```
-
-See `docs/WIZTOOL.md` for in-game building tools.
-
-## Documentation
-
-- **Administrator Guide** - Server setup and management
-- **Wiztool Guide** - In-game building commands
-- **Development Guide** - Technical implementation details
+The diagnostics directory contains detailed information about build warnings; consult diagnostics/README.md for guidance if needed.
 
 ## Architecture
 

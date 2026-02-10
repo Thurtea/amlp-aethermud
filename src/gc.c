@@ -127,6 +127,7 @@ GCObject* gc_track(GC *gc, void *ptr, size_t size, GCObjectType type) {
     obj->ptr = ptr;
     obj->type = type;
     obj->ref_count = 1;  /* Start with reference count of 1 */
+    obj->freed = 0;
     obj->marked = 0;
     obj->size = size;
     obj->next = NULL;
@@ -143,6 +144,7 @@ int gc_retain(GC *gc, void *ptr) {
     
     GCObject *obj = gc_find_object(gc, ptr);
     if (!obj) return -1;
+    if (obj->freed) return -1;
     
     obj->ref_count++;
     return obj->ref_count;
@@ -153,6 +155,7 @@ int gc_release(GC *gc, void *ptr) {
     
     GCObject *obj = gc_find_object(gc, ptr);
     if (!obj) return -1;
+    if (obj->freed) return -1;
     
     obj->ref_count--;
     
@@ -160,13 +163,16 @@ int gc_release(GC *gc, void *ptr) {
     if (obj->ref_count <= 0) {
         gc->total_freed += obj->size;
         
-        /* Free the actual object */
-        if (obj->ptr) {
-            free(obj->ptr);
-            obj->ptr = NULL;
+        /* Free the actual object (defensive) */
+        if (!obj->freed) {
+            obj->freed = 1;
+            if (obj->ptr) {
+                free(obj->ptr);
+                obj->ptr = NULL;
+            }
         }
-        
-        /* Remove from tracking */
+
+        /* Remove from tracking and free wrapper */
         gc_remove_object(gc, obj);
         free(obj);
         
@@ -188,13 +194,15 @@ int gc_collect(GC *gc) {
         if (obj && obj->ref_count <= 0) {
             /* Free the object */
             gc->total_freed += obj->size;
-            
-            if (obj->ptr) {
-                free(obj->ptr);
-                obj->ptr = NULL;
+            if (!obj->freed) {
+                obj->freed = 1;
+                if (obj->ptr) {
+                    free(obj->ptr);
+                    obj->ptr = NULL;
+                }
             }
-            
-            /* Remove from tracking */
+
+            /* Remove from tracking and free wrapper */
             gc_remove_object(gc, obj);
             free(obj);
             
@@ -241,12 +249,14 @@ int gc_collect_full(GC *gc) {
         if (obj && !obj->marked) {
             /* Unreachable object - free it */
             gc->total_freed += obj->size;
-            
-            if (obj->ptr) {
-                free(obj->ptr);
-                obj->ptr = NULL;
+            if (!obj->freed) {
+                obj->freed = 1;
+                if (obj->ptr) {
+                    free(obj->ptr);
+                    obj->ptr = NULL;
+                }
             }
-            
+
             gc_remove_object(gc, obj);
             free(obj);
             
@@ -273,10 +283,15 @@ void gc_free(GC *gc) {
     /* Free all tracked objects */
     for (int i = 0; i < gc->object_count; i++) {
         if (gc->objects[i]) {
-            if (gc->objects[i]->ptr) {
-                free(gc->objects[i]->ptr);
+            GCObject *obj = gc->objects[i];
+            if (!obj->freed) {
+                if (obj->ptr) {
+                    free(obj->ptr);
+                    obj->ptr = NULL;
+                }
+                obj->freed = 1;
             }
-            free(gc->objects[i]);
+            free(obj);
         }
     }
     

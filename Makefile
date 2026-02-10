@@ -2,7 +2,10 @@
 # Standard C project structure with src/, tests/, build/ directories
 
 CC = gcc
-CFLAGS = -Wall -Wextra -D_DEFAULT_SOURCE -g -O2 -std=c99 -Isrc
+# Allow users to override CFLAGS, but keep include dirs in CPPFLAGS so
+# they are not lost when CFLAGS is overridden on the make command line.
+CFLAGS = -Wall -Wextra -D_DEFAULT_SOURCE -g -O2 -std=c99
+CPPFLAGS += -Isrc
 LDFLAGS = -lm
 
 # Directories
@@ -72,7 +75,7 @@ $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	done
 	@echo
 	@echo "[LINK] Creating driver executable..."
-	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) 2>$(BUILD_DIR)/.warnings.txt; \
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) 2>$(BUILD_DIR)/.warnings.txt; \
 	status=$$?; \
 	warns=$$(grep -c "warning:" $(BUILD_DIR)/.warnings.txt 2>/dev/null | head -1 || echo 0); \
 	warns=$${warns:-0}; \
@@ -112,7 +115,7 @@ $(BUILD_DIR)/test_%: $(TEST_DIR)/test_%.c $(TEST_COMMON_SOURCES)
 	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "BUILDING TEST: $@"
 	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
 	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" " [*] Compiling test sources..."
-	@$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) -I$(TEST_DIR) $(LDFLAGS)
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) -I$(TEST_DIR) $(LDFLAGS)
 	@status=$$?; \
 	       if [ "$$status" -eq 0 ]; then \
 		       printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
@@ -132,7 +135,7 @@ $(BUILD_DIR)/test_simul_efun: $(TEST_DIR)/test_simul_efun.c $(TEST_COMMON_SOURCE
 	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "BUILDING TEST: $@"
 	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
 	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" " [*] Compiling test sources..."
-	@$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) -I$(TEST_DIR) $(LDFLAGS)
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) -I$(TEST_DIR) $(LDFLAGS)
 	@status=$$?; \
 	       if [ "$$status" -eq 0 ]; then \
 		       printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \

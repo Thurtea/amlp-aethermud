@@ -1382,16 +1382,85 @@ static void attach_program_methods(VirtualMachine *vm, obj_t *o,
                     }
 
                     if (!found) {
-                        /* Create alias: duplicate the VMFunction with new name */
+                        /* Create alias: deep-copy the VMFunction with new name to
+                         * avoid shared pointers (which lead to double-free on shutdown). */
+                        VMFunction *src = vm->functions[i];
                         VMFunction *alias = malloc(sizeof(VMFunction));
                         if (alias) {
-                            *alias = *vm->functions[i];
-                            alias->name = strdup(prefixed);
-                            /* Register in VM function table */
-                            if (vm->function_count < vm->function_capacity) {
-                                vm->functions[vm->function_count++] = alias;
+                            /* Initialize alias to safe defaults */
+                            memset(alias, 0, sizeof(VMFunction));
+
+                            /* Copy simple fields */
+                            alias->param_count = src->param_count;
+                            alias->local_var_count = src->local_var_count;
+                            alias->instruction_count = src->instruction_count;
+                            alias->instruction_capacity = src->instruction_capacity;
+
+                            /* Duplicate instructions array (shallow-copy of operand pointers
+                             * is acceptable because operand string memory is shared/owned
+                             * elsewhere in the current design). */
+                            if (src->instructions && alias->instruction_capacity > 0) {
+                                alias->instructions = malloc(sizeof(VMInstruction) * alias->instruction_capacity);
+                                if (alias->instructions) {
+                                    memcpy(alias->instructions, src->instructions,
+                                           sizeof(VMInstruction) * alias->instruction_count);
+                                } else {
+                                    free(alias);
+                                    alias = NULL;
+                                }
                             }
-                            obj_add_method(o, alias);
+
+                            /* Duplicate line map if present */
+                            if (src->line_map && src->line_map_count > 0) {
+                                alias->line_map = malloc(sizeof(int) * src->line_map_count);
+                                if (alias->line_map) {
+                                    memcpy(alias->line_map, src->line_map, sizeof(int) * src->line_map_count);
+                                    alias->line_map_count = src->line_map_count;
+                                } else {
+                                    if (alias->instructions) free(alias->instructions);
+                                    free(alias);
+                                    alias = NULL;
+                                }
+                            }
+
+                            /* Duplicate source_file if present */
+                            if (alias && src->source_file) {
+                                alias->source_file = strdup(src->source_file);
+                                if (!alias->source_file) {
+                                    if (alias->line_map) free(alias->line_map);
+                                    if (alias->instructions) free(alias->instructions);
+                                    free(alias);
+                                    alias = NULL;
+                                }
+                            }
+
+                            /* Assign the new name */
+                            if (alias) {
+                                alias->name = strdup(prefixed);
+                                if (!alias->name) {
+                                    if (alias->source_file) free(alias->source_file);
+                                    if (alias->line_map) free(alias->line_map);
+                                    if (alias->instructions) free(alias->instructions);
+                                    free(alias);
+                                    alias = NULL;
+                                }
+                            }
+
+                            /* Register in VM function table */
+                            if (alias) {
+                                if (vm->function_count < vm->function_capacity) {
+                                    vm->functions[vm->function_count++] = alias;
+                                } else {
+                                    /* No space: clean up */
+                                    if (alias->name) free(alias->name);
+                                    if (alias->source_file) free(alias->source_file);
+                                    if (alias->line_map) free(alias->line_map);
+                                    if (alias->instructions) free(alias->instructions);
+                                    free(alias);
+                                    alias = NULL;
+                                }
+                                if (alias) obj_add_method(o, alias);
+                            }
                         }
                     }
 

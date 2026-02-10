@@ -52,6 +52,7 @@ struct GCObject {
     GCObjectType type;          /* Type of object */
     int ref_count;              /* Reference count */
     int marked;                 /* Mark bit for cycle detection */
+    int freed;                  /* Flag set when object is freed */
     size_t size;                /* Size in bytes */
     GCObject *next;             /* Next in linked list */
 };

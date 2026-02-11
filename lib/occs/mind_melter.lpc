@@ -8,23 +8,25 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Mind Melter");
     set_occ_id("mind_melter");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Placeholder O.C.C. description."
+        "A powerful psionic specialist focused on overwhelming mental attacks.
+Conservative defaults for high psionics and low physical requirements. Review
+for balance and canonical fidelity."
     );
     
-    // Placeholder: configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "ps": 12,
+        "iq": 10
     ]));
     
-    // Placeholder: configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "ps": 3,
+        "iq": 1
     ]));
     
     // Combat configuration
@@ -32,9 +34,13 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // Placeholder: configure OCC skills
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "psionics_advanced",
+        "mental_resistance",
+        "spellcraft",
+        "occult_lore",
+        "psychology"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +60,10 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // Placeholder: configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/psionic_robe", "/obj/item/mental_focus" }));
+    set_starting_credits(50, 250);
+    set_starting_weapons(({ "/obj/weapons/dagger" }));
+    set_starting_armor(({ "/obj/armor/robe" }));
     
     // Race restrictions
     set_race_requirements(({ }));

@@ -8,37 +8,28 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("Special Forces Soldier");
+        set_occ_name("Special Forces");
     set_occ_id("special_forces");
     set_occ_category(OCC_CAT_MILITARY);
     set_alignment_requirement("any");
     set_alignment_requirement("not_anarchist");
     
-    set_occ_description(
-        "Special Forces Soldiers are elite military personnel trained by the "
-        "Coalition States or similar military organizations. They are highly "
-        "disciplined, extremely well-trained in combat and tactical operations, "
-        "and loyal to their chain of command. These soldiers combine martial "
-        "prowess with technological proficiency, using the latest in military gear "
-        "and weapons. They excel in team operations, tactical planning, and adaptation "
-        "to mission requirements. While primarily loyal to their military authority, "
-        "some Special Forces soldiers go rogue or become mercenaries after completing "
-        "their service."
-    );
+        set_occ_description(
+            "A highly trained combat operator skilled in unconventional warfare.\n"
+            "Conservative defaults for combat, tactics, and gear; review for balance."
+        );
     
     // Stat requirements - above average physical
     set_stat_requirements(([
-        "ps": 11,   // Physical Strength 11+
-        "pp": 11,   // Physical Prowess 11+
-        "pe": 10,   // Physical Endurance 10+
-        "iq": 10    // Intelligence 10+
+            "ps": 11,
+            "me": 10,
+            "spd": 9
     ]));
     
     // Stat bonuses - training effects
-    set_stat_bonuses(([
-        "pp": 1,    // +1 Physical Prowess (training)
-        "pe": 1,    // +1 Physical Endurance
-        "ps": 1     // +1 Physical Strength
+        set_stat_bonuses(([
+            "ps": 2,
+            "me": 1
     ]));
     
     // XP progression
@@ -70,24 +61,13 @@ void create() {
     ]));
     
     // Configure OCC skills - military focused
-    set_occ_skills(({
-        "language_american",
-        "literacy_american",
-        "technical_repair",
-        "military_tactics",
-        "demolitions_basic",
-        "field_medicine",
-        "weapons_maintenance",
-        "land_navigation",
-        "map_reading",
-        "climbing",
-        "swimming",
-        "running",
-        "wp_rifle",
-        "wp_handgun",
-        "wp_heavy_weapons",
-        "wp_grenades",
-        "htoh_expert"
+        set_occ_skills(({
+            "language_american",
+            "small_arms",
+            "tactics",
+            "demolitions",
+            "survival",
+            "stealth"
     ]));
     
     set_occ_related_skills(({ }));
@@ -137,37 +117,10 @@ void create() {
     set_mdc_class(0);
     
     // Starting equipment - full military kit
-    set_standard_equipment(({
-        "/obj/clothing/combat_uniform",
-        "/obj/clothing/body_armor_light",
-        "/obj/item/backpack_military",
-        "/obj/item/canteen",
-        "/obj/item/torch",
-        "/obj/item/survival_kit",
-        "/obj/item/ammo_pouch",
-        "/obj/item/first_aid_combat"
-    }));
-    
-    set_optional_gear(({
-        "/obj/item/camouflage_suit",
-        "/obj/item/night_vision_goggles",
-        "/obj/item/helmet_tactical",
-        "/obj/weapon/rifle_energy",
-        "/obj/weapon/rifle_automatic",
-        "/obj/weapon/sword_vibro"
-    }));
-    
-    set_starting_credits(200, 800);  // Better funded
-    
-    set_starting_weapons(({
-        "/obj/weapon/rifle_automatic",
-        "/obj/weapon/handgun_energy"
-    }));
-    
-    set_starting_armor(({
-        "/obj/armor/body_armor_light",
-        "/obj/armor/helmet"
-    }));
+        set_standard_equipment(({ "/obj/clothing/ops_uniform", "/obj/kit/ops_kit" }));
+        set_starting_credits(150, 600);
+        set_starting_weapons(({ "/obj/weapons/assault_rifle", "/obj/weapons/knife" }));
+        set_starting_armor(({ "/obj/armor/combat_vest" }));
     
     // Race restrictions - humans primarily, demihumans sometimes
     set_race_requirements(({ }));  // Any race

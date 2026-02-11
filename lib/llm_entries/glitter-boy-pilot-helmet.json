@@ -1,0 +1,19 @@
+{
+  "id": "glitter-boy-pilot-helmet",
+  "name": "GLITTER BOY PILOT HELMET",
+  "slug": "glitter-boy-pilot-helmet",
+  "section": "rcc",
+  "description": "PILOT'S SUIT NUERAL SENSOR. PLUG",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13047,
+    13052
+  ],
+  "raw_snippet": "GLITTER BOY PILOT HELMET PILOT'S SUIT NUERAL SENSOR. PLUG",
+  "suggested_target": "lib/occs/glitter-boy-pilot-helmet.lpc"
+}

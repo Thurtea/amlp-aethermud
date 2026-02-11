@@ -1,0 +1,19 @@
+{
+  "id": "168",
+  "name": "168",
+  "slug": "168",
+  "section": "rcc",
+  "description": "(this does not include psychic powers), is in the process of invoking",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "Thunderclap                                                                           This magic makes any small object sort of invisible. Actually, it\nRange: Directly affects the immediate area (30ft/9.1m around the                   affects the perception of anybody who looks at it. Unless the person(s)\nmagic weaver), but can be heard up to one mile away.                               makes a successful saving throw, the item can not be seen. This can\nDuration: Instant                                                                  be applied to an item on one's person or out in the open. Only one\nSaving Throw: Save vs Horror Factor                                                object is affected each time the magic is invoked. The object can not",
+  "source_range": [
+    9843,
+    9914
+  ],
+  "raw_snippet": "168 (this does not include psychic powers), is in the process of invoking magic, or if magic is being used in the range area. Note: Men of Concealment Range: Small objects up to 40ft away (12.2m). Magic and most supernatural beings do not register as magic except Duration: 5 minutes per level of experience. when actually casting a spell/using magic. Saving Throw: Standard P.P.E.: Six Thunderclap This magic makes any small object sort of invisible. Actually, it Range: Directly affects the immediate area (30ft/9.1m around the affects the perception of anybody who looks at it. Unless the person(s) magic weaver), but can be heard up to one mile away. makes a successful saving throw, the item can not be seen. This can Duration: Instant be applied to an item on one's person or out in the open.…",
+  "suggested_target": "lib/occs/168.lpc"
+}

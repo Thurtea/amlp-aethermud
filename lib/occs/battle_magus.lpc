@@ -8,23 +8,25 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Battle Magus");
     set_occ_id("battle_magus");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "TODO: Add full O.C.C. description for ."
+        "A frontline spellcaster trained to fight alongside warriors.
+Conservative defaults provided for hybrid combat-casting role; please review."
     );
     
-    // TODO: Configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "iq": 11,
+        "ps": 9,
+        "me": 9
     ]));
     
-    // TODO: Configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "ps": 2,
+        "me": 1
     ]));
     
     // Combat configuration
@@ -32,9 +34,13 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // TODO: Configure OCC skills
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "spellcraft",
+        "melee_weapons",
+        "tactics",
+        "concentration",
+        "armorer_basic"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +60,10 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // TODO: Configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/battle_robe", "/obj/item/lesser_focus" }));
+    set_starting_credits(80, 300);
+    set_starting_weapons(({ "/obj/weapons/shortsword" }));
+    set_starting_armor(({ "/obj/armor/chain_shirt" }));
     
     // Race restrictions
     set_race_requirements(({ }));

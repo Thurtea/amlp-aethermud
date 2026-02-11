@@ -1,0 +1,43 @@
+{
+  "id": "the-essay-continues-with-references-to-hitler-s-genius-and-his",
+  "name": "The essay continues with references to Hitler's genius and his",
+  "slug": "the-essay-continues-with-references-to-hitler-s-genius-and-his",
+  "section": "rcc",
+  "description": "methods. I pray that the paradise of Chi-Town is not being corrupted",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": [
+    "SAMAS and is considered to be the most powerful",
+    "accurate",
+    "and                 is armed with a variety of weapon systems",
+    "good in hand to hand",
+    "lightweight rail gun in the world. Other heavier rail guns can be              combat",
+    "and mobile.",
+    "substituted in an emergency. See Other Weapons section for a full",
+    "description of rail guns and their use as machineguns. Note that the",
+    "UAR",
+    "1 Enforcer Assault Robot",
+    "SAMAS has a greater payload than the machinegun version. Also",
+    "Model Type:UAR",
+    "l",
+    "there is no separate power pack",
+    "the unit is hooked directly to the            Class: Urban Assault Robot",
+    "armor's nuclear power supply.                                                  Crew: One or two",
+    "Primary Purpose: Assault                                                       M.D.C. by Location:",
+    "Secondary Purpose: Defense                                                       Right Shoulder Rail Gun — 100 (shielded)",
+    "Weight: Gun: 92 lbs (41.4 kg)",
+    "One SAMAS Ammo",
+    "Drum: 190 lbs                      Left Shoulder Medium Range Missile Launcher — 150",
+    "(85.5 kg).                                                                       Shoulder Mounted Laser Turrets (2) — 50 each",
+    "194"
+  ],
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    11553,
+    12101
+  ],
+  "raw_snippet": "The essay continues with references to Hitler's genius and his methods. I pray that the paradise of Chi-Town is not being corrupted Dog Pack DPM by the insane vision of a 20th Century madman. This world knows too Light Riot Armor much pain already. The Dog Pack force is a recent addition to the Coalition armed forces. The mutant dogs are used for reconnaissance and city law enforcement, specifically in the areas of tracking fugitives, supernatural monsters, Coalition \"Dead Boy\" magic, and psionics. The armor is light, allowing for maximum mobility and stealth. Unfortunately, it offers minimal physical protection. This Body Armor is due, in part, to the Coalition's perception that the intelligent mutant dogs are little more than trained animals and quite expendable. The famous Death's…",
+  "suggested_target": "lib/occs/the-essay-continues-with-references-to-hitler-s-genius-and-his.lpc"
+}

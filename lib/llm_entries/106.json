@@ -1,0 +1,39 @@
+{
+  "id": "106",
+  "name": "106",
+  "slug": "106",
+  "section": "rcc",
+  "description": "Weapons will include a couple knives, and four other weapons",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": [
+    "Coalition \"Dead Boy\" armor",
+    "weapons",
+    "equipment",
+    "money",
+    "and                     Star is completely self",
+    "sufficient",
+    "with both nuclear and fossil fuel",
+    "cybernetics are all the same as the Coalition Grunt. Plus a few of the            power and resources",
+    "state of the art science and genetics laboratories",
+    "Dog Pack special hand to hand weapons such as the neuro",
+    "mace",
+    "vibro",
+    "dating to pre",
+    "Rifts earth",
+    "and high",
+    "tech manufacturing plants of all",
+    "knife",
+    "and fist spikes.                                                           kinds (55% are currently in full operation",
+    "while the remaining still"
+  ],
+  "money": "experimentation. Only the Chinese continued experimentation on human\n  saleable black market items.\n                                                                                  subjects. Eventually, American \"gene-splicers,\" as they were called,",
+  "cybernetics": "natural powers. If cybernetics are used, they are usually sensory or            speech, and physiology.\n  optical enhancements.\n                                                                                     The great controversy that arose from the creation of intelligent mutant\nSkills of a Coalition Psi-stalker                                                 animals was the fear that humans were establishing a new precedent\nOr a Civilized Mercenary Stalker                                                  for slavery. The outcry against slavery was well taken, because the\n   The civilized stalker has undergone some basic military training. The          American government had high hopes for, literally, creating a super\nfollowing Coalition military skills are known.                                    soldier from animal mutants. Soldiers with the predatory instincts, in-\n                                                                                  human abilities, strength, and endurance of an animal, complemented\nRadio: Basic (+10%)                                                               by the intelligence of a human. Fortunately, social outrage stopped the\nPilot Hovercraft (+10%)                                                           creation of a race of mutant soldiers and laborers before it had begun.\nRobot Combat: Basic                                                               Still, the government continued secret research in this area for decades\nRead Sensory Equipment (+ 10%)                                                    to come, just in case the need should arise. In fact, billions were spent\nWeapon Systems (+ 10%)                                                            on the completion of a genetics engineering facility that included a vast\nBody Building                                                                     factory-like plant with full design and manufacturing capabilities.\nClimbing ( + 5%)                                                                  Rumor had it that the secret plant could create hundreds of mutant\nRunning                                                                           animals a month. Of course, the government denied the existence of\nProwl (+10%)                                                                      any such facility, admitting only that minimal genetic research continued\nW.P. Energy Pistol                                                                at the Tex-Am Complex, a top secret military base located in Texas.\nW.P. Energy Rifle\nW.P. two of choice                                                                   While society may have had the presence of mind to stop the re-estab-lishment of slavery in the 21st ce\nHand to Hand: Expert\n                                                                                  crueler and savage period. The Coalition has created and utilized mutant\n   At first level the psychic can select four \"other\" skills, each with a         animals for labor, as soldiers, and for experimentation for years. The\n + 5% bonus, and speaks American and one other language at 96%.                   Lone Star Coalition State is the center for genetic research and develop-\n   character can also select eight (8) Secondary skills without benefit           ment. It is at Lone Star that the majority of the Dog Pack and other\nof bonuses. At fourth and eighth levels an additional two secondary               mutations are created and trained. As one may have guessed, Lone Star\nskills can be selected.                                                           is the Tex Am Complex, which, amazingly, survived the apocalyptic\n   Available skill categories are limited to any: Communication, Domes-           time of the rift explosions mostly unscathed. It was its fabulous genetics,\ntic, Electrical: Basic only, Mechanical: Automotive only, Military,               manufacturing, military security, and other unique capabilities that en-\nMedical: First aid only, Physical (any except acrobatics), Pilot, Pilot           ticed solicitation for its addition as a member of the Coalition States.\nRelated, Science: Math only, Technical, and W.P.                                  The place is barely a city. Instead, Lone Star is a sprawling 20 mile\n                                                                                  (32 km) research and manufacturing complex with half the population",
+  "ppe": null,
+  "source_range": [
+    6653,
+    6727
+  ],
+  "raw_snippet": "106 Weapons will include a couple knives, and four other weapons of choice. May use techno-wizardry weapons too, but not suggested as part of the initial equipment (GM's choice). Dog Pack R.C.C. Vehicle is limited to horse or other animal mount (has an affinity Before the Time of Rifts, the quest for human augmentation naturally with all non-predatory animals, including D-Bees and aliens), or lead to genetic manipulation. North America was by far the leader in non-military vehicle, and may include hover vehicles or souped-up the area of genetic research. They had enjoyed some spectacular results motorcycle or car. May use a techno-wizard vehicle, but not recom- working on laboratory animals. However, genetic manipulation of mended to start (GM's choice). human beings proved to be much…",
+  "suggested_target": "lib/occs/106.lpc"
+}

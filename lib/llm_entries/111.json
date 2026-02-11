@@ -1,0 +1,19 @@
+{
+  "id": "111",
+  "name": "111",
+  "slug": "111",
+  "section": "rcc",
+  "description": "111",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    6968,
+    6969
+  ],
+  "raw_snippet": "111",
+  "suggested_target": "lib/occs/111.lpc"
+}

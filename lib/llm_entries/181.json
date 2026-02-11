@@ -1,0 +1,19 @@
+{
+  "id": "181",
+  "name": "181",
+  "slug": "181",
+  "section": "rcc",
+  "description": "Wisps of Confusion Metamorphosis: Insect",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "Wisps cause 1 -8 people/creatures to become confused and disoriented.             The mage can transform himself into an insect, including spiders,\n Those affected strike, dodge, and parry at minus five; attacks per melee          that is no smaller than a half inch (12.7mm) and no larger than six\n are reduced by one-half.                                                          inches (152.4mm). In insect form, the mage retains his own I.Q.,\n                                                                                   memory, knowledge, hit points, and S.D.C.; however, the performance\n                                                                                   of human skills is impossible as a bug. Likewise, magic can not be\n                                                                                   cast because as an insect he can not speak. The metamorphosis can be\n LEVEL NINE                                                                        cancelled at will, but the arcanist will be naked.\n                                                                                      The following are some typical bug abilities:\n                                                                                   Bite or Sting:\n                                                                                     Nonpoisonous: One hit point or S.D.C. point.\n Curse: Phobia                                                                       Non-Lethal Poison: 1D6 damage, causes swelling and discomfort.\nRange: Touch or 20ft (6m).                                                         Speed:\nDuration: 24 hours per level of experience.                                          Running: Spd. attribute equal to eight.\nSaving Throw: Standard\n                                                                                     Climbing: Spd. attribute equal to six.",
+  "source_range": [
+    10790,
+    10881
+  ],
+  "raw_snippet": "181 Wisps of Confusion Metamorphosis: Insect Range: 90ft Range: Self, or others through ritual magic. Duration: 5 melees per level of the spell caster Duration: 20 minutes per level of experience. Saving Throw: Standard Saving Throw: None P.P.E.: Forty P.P.E.: Sixty Wisps cause 1 -8 people/creatures to become confused and disoriented. The mage can transform himself into an insect, including spiders, Those affected strike, dodge, and parry at minus five; attacks per melee that is no smaller than a half inch (12.7mm) and no larger than six are reduced by one-half. inches (152.4mm). In insect form, the mage retains his own I.Q., memory, knowledge, hit points, and S.D.C.; however, the performance of human skills is impossible as a bug. Likewise, magic can not be cast because as an insect he…",
+  "suggested_target": "lib/occs/181.lpc"
+}

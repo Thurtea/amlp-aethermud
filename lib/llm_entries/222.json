@@ -1,0 +1,19 @@
+{
+  "id": "222",
+  "name": "222",
+  "slug": "222",
+  "section": "rcc",
+  "description": "222",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13185,
+    13186
+  ],
+  "raw_snippet": "222",
+  "suggested_target": "lib/occs/222.lpc"
+}

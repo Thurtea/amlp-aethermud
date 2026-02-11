@@ -1,0 +1,55 @@
+// /lib/occs/xiticix_worker.lpc
+//  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
+//  Source: The Xiticix (parsed) - worker variant
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Xiticix Worker");
+    set_occ_id("xiticix_worker");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "The worker caste of the Xiticix hive: less combative than the"
+        " warrior but essential to hive construction and maintenance."
+    );
+
+    set_stat_bonuses(([
+        "ps": 2,
+        "pp": 1
+    ]));
+
+    set_base_attacks(4);
+    set_attacks_per_level(1, 2);
+    set_hand_to_hand_type("natural");
+
+    set_occ_skills(({ "language_american", "wilderness_survival", "climb",
+                       "track" }));
+    set_occ_related_skills(({ }));
+    set_occ_skill_count(5);
+    set_elective_count(1);
+    set_secondary_count(4);
+
+    set_base_ppe(20);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("minor");
+
+    set_base_sdc(30);
+    set_sdc_per_level(0);
+
+    set_standard_equipment(({ "short_sword" }));
+    set_starting_credits(0, 0);
+    set_starting_weapons(({ }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+}

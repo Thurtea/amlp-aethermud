@@ -1,0 +1,19 @@
+{
+  "id": "the-coalition-states-cs-have-a-standardized-army-with-standard",
+  "name": "The Coalition States (CS) have a standardized army with standard",
+  "slug": "the-coalition-states-cs-have-a-standardized-army-with-standard",
+  "section": "rcc",
+  "description": "weapons and equipment. Generally, only CS weapons and equipment",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    11471,
+    11481
+  ],
+  "raw_snippet": "The Coalition States (CS) have a standardized army with standard weapons and equipment. Generally, only CS weapons and equipment are issued to its soldiers. Only wilderness, reconnaissance, and covert Chi-Town operatives are allowed to use weapons other than standard issue. The A study in the corruption of the soul Coalition has the most powerful army in the known world. Their level From the diary of Erin Tarn; Circa 78 P.A. of technology is unsurpassed in the Americas. I fear that I am a firsthand witness to the birthing of a sad new saga of human tyranny. A despot named Karl Prosek sits as the chairman-elect of Chi-Town, but I can see storm clouds rushing swiftly from the horizon. He is the second of the Prosek family to hold the illustrious The recollection seat of chairman-elect. And…",
+  "suggested_target": "lib/occs/the-coalition-states-cs-have-a-standardized-army-with-standard.lpc"
+}

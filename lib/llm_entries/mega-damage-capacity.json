@@ -1,0 +1,19 @@
+{
+  "id": "mega-damage-capacity",
+  "name": "Mega-Damage Capacity",
+  "slug": "mega-damage-capacity",
+  "section": "rcc",
+  "description": "Body Armor",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    12502,
+    12529
+  ],
+  "raw_snippet": "Mega-Damage Capacity Body Armor There are several different types of M.D.C. body armor from light padded armor to full environmental armor. The Gladiator 411 environmental body armor have the following properties. A minimum of 30 M.D.C. Full Environmental Body Armor Complete environmental battle armor suitable for use in most hostile One of the most popular medium weight full environmental suits environments. recently introduced to the market. The body utilize the new super light Computer controlled life support system. weight fiber armor that resembles chain mail and light plates of armor. Internal cooling and temperature control. The suit offer excellent mobility and equally excellent physical protec- Artificial air circulation systems, gas filtration, humidifier. tion. The fiber skirt…",
+  "suggested_target": "lib/occs/mega-damage-capacity.lpc"
+}

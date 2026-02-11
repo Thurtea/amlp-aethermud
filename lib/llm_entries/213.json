@@ -1,0 +1,19 @@
+{
+  "id": "213",
+  "name": "213",
+  "slug": "213",
+  "section": "rcc",
+  "description": "Range: Varies with missile type. • Insulated, high temperature resistant shielding for up to 400 degrees",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    12717,
+    12856
+  ],
+  "raw_snippet": "213 Range: Varies with missile type. • Insulated, high temperature resistant shielding for up to 400 degrees Rate of Fire: One at a time or in volleys of two, three, or four. centigrade. Normal fires do no damage. Nuclear, plasma, and magic Payload: Total of 12 mini-missiles or 6 short range missiles. fires do full damage. 3. Energy Rifles and other normal weapons are also used by the pilot • Radiation shielded. of a Flying Titan. The less bulky armor allows for sidearm, rifle • Polarized and light sensitive/adjusting tinted visor. and the usual supply belts, harness, and containers. The only limi- tation is that a belt and especially sacks and containers are subject to flying off when travelling at speeds beyond 100 mph. 4. Hand to Hand Combat: Rather than use a weapon, the pilot can…",
+  "suggested_target": "lib/occs/213.lpc"
+}

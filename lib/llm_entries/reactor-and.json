@@ -1,0 +1,19 @@
+{
+  "id": "reactor-and",
+  "name": "REACTOR AND",
+  "slug": "reactor-and",
+  "section": "rcc",
+  "description": "COOLANT TEMP.",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13090,
+    13095
+  ],
+  "raw_snippet": "REACTOR AND COOLANT TEMP.",
+  "suggested_target": "lib/occs/reactor-and.lpc"
+}

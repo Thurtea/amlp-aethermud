@@ -1,0 +1,19 @@
+{
+  "id": "level-twelve",
+  "name": "LEVEL TWELVE",
+  "slug": "level-twelve",
+  "section": "rcc",
+  "description": "LEVEL TWELVE",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    11136,
+    11137
+  ],
+  "raw_snippet": "LEVEL TWELVE",
+  "suggested_target": "lib/occs/level-twelve.lpc"
+}

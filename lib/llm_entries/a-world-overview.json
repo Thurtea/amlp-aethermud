@@ -1,0 +1,19 @@
+{
+  "id": "a-world-overview",
+  "name": "A World Overview",
+  "slug": "a-world-overview",
+  "section": "rcc",
+  "description": "Through the eyes of Erin Tarn",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    8236,
+    8298
+  ],
+  "raw_snippet": "A World Overview Through the eyes of Erin Tarn What follows is a brief world overview written by historian and In some cases, depending on the people involved and the cir- explorer, Erin Tarn. It is an excerpt from the most recent book that cumstances, a kingdom may refuse one on one combat between their bears her name, Traversing Our Modern World. The book is an champion and challenger. In this situation, the champion leads the unauthorized collection of letters and notes from Erin Tarn to various defense of the kingdom, directing its army as a general. colleagues, and several recountings from people who spoke to her at The concept of a champion who serves as protector and peacekeeper length on world subjects. The correspondences span the last two decades has been adopted by many towns…",
+  "suggested_target": "lib/occs/a-world-overview.lpc"
+}

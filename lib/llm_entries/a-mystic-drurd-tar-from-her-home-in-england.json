@@ -1,0 +1,19 @@
+{
+  "id": "a-mystic-drurd-tar-from-her-home-in-england",
+  "name": "A mystic drurd tar from her home in England",
+  "slug": "a-mystic-drurd-tar-from-her-home-in-england",
+  "section": "rcc",
+  "description": "A mystic drurd tar from her home in England",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9175,
+    9176
+  ],
+  "raw_snippet": "A mystic drurd tar from her home in England",
+  "suggested_target": "lib/occs/a-mystic-drurd-tar-from-her-home-in-england.lpc"
+}

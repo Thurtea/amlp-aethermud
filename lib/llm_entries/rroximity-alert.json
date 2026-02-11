@@ -1,0 +1,19 @@
+{
+  "id": "rroximity-alert",
+  "name": "RROXIMITY ALERT",
+  "slug": "rroximity-alert",
+  "section": "rcc",
+  "description": "SPEAKER",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13078,
+    13079
+  ],
+  "raw_snippet": "RROXIMITY ALERT SPEAKER",
+  "suggested_target": "lib/occs/rroximity-alert.lpc"
+}

@@ -1,0 +1,139 @@
+/* lib/secure/formatting.lpc
+ * Utility formatting helpers for terminal-aware output.
+ * Minimal, portable implementations suitable for the MUD lib.
+ */
+
+// Return a string containing items laid out in columns that fit within term_width.
+// items: array of strings
+// term_width: columns to fit into
+string format_columns(string *items, int term_width) {
+    if (!items) return "";
+    int n = sizeof(items);
+    if (n == 0) return "";
+    if (!term_width || term_width < 20) term_width = 80;
+
+    // Find longest item
+    int maxlen = 0;
+    for (int i = 0; i < n; i++) {
+        int l = strlen(items[i] || "");
+        if (l > maxlen) maxlen = l;
+    }
+    int colw = maxlen + 2; // padding
+    int cols = term_width / colw;
+    if (cols < 1) cols = 1;
+
+    string out = "";
+    for (int r = 0; r < ((n + cols - 1) / cols); r++) {
+        string line = "";
+        for (int c = 0; c < cols; c++) {
+            int idx = c * ((n + cols - 1) / cols) + r;
+            if (idx >= n) continue;
+            string it = items[idx] || "";
+            int pad = colw - strlen(it);
+            if (pad < 1) pad = 1;
+            line += it + repeat_string(" ", pad);
+        }
+        out += line + "\n";
+    }
+    return out;
+}
+
+// Simple word wrap with indent support
+string wrap_text(string text, int width, int indent) {
+    if (!text) return "";
+    if (!width || width < 20) width = 80;
+    if (!indent || indent < 0) indent = 0;
+    string out = "";
+    string word = "";
+    int col = 0;
+    for (int i = 0; i < strlen(text); i++) {
+        char ch = text[i];
+        if (ch == '\n') {
+            out += "\n";
+            col = 0;
+            continue;
+        }
+        if (isspace(ch)) {
+            if (strlen(word)) {
+                if (col + strlen(word) + 1 > width) {
+                    out += "\n" + repeat_string(" ", indent) + word;
+                    col = indent + strlen(word);
+                } else {
+                    if (col > 0) { out += " "; col += 1; }
+                    out += word;
+                    col += strlen(word);
+                }
+                word = "";
+            }
+            continue;
+        }
+        word += ch;
+    }
+    if (strlen(word)) {
+        if (col + strlen(word) + 1 > width) out += "\n" + repeat_string(" ", indent) + word;
+        else { if (col > 0) out += " "; out += word; }
+    }
+    return out + "\n";
+}
+
+// Format a simple table: headers array and rows as array of string arrays
+string format_table(string *headers, mixed *rows, int term_width) {
+    if (!headers) return "";
+    int cols = sizeof(headers);
+    int *widths = allocate(cols);
+    for (int i = 0; i < cols; i++) widths[i] = strlen(headers[i] || "");
+    for (int r = 0; r < sizeof(rows); r++) {
+        string *row = rows[r];
+        for (int c = 0; c < cols; c++) {
+            int l = strlen(row[c] || "");
+            if (l > widths[c]) widths[c] = l;
+        }
+    }
+    string out = "";
+    // header
+    for (int c = 0; c < cols; c++) {
+        out += headers[c] + repeat_string(" ", widths[c] - strlen(headers[c] || "") + 2);
+    }
+    out += "\n";
+    // separator
+    for (int c = 0; c < cols; c++) out += repeat_string("-", widths[c] + 2);
+    out += "\n";
+    // rows
+    for (int r = 0; r < sizeof(rows); r++) {
+        string *row = rows[r];
+        for (int c = 0; c < cols; c++) {
+            string cell = row[c] || "";
+            out += cell + repeat_string(" ", widths[c] - strlen(cell) + 2);
+        }
+        out += "\n";
+    }
+    return out;
+}
+
+string pad_string(string str, int width, string align) {
+    if (!str) str = "";
+    if (!width || width <= 0) return str;
+    int len = strlen(str);
+    if (len >= width) return substring(str, 0, width);
+    int pad = width - len;
+    if (!align || align == "left") return str + repeat_string(" ", pad);
+    if (align == "right") return repeat_string(" ", pad) + str;
+    // center
+    int left = pad / 2;
+    int right = pad - left;
+    return repeat_string(" ", left) + str + repeat_string(" ", right);
+}
+
+string truncate_string(string str, int max_width) {
+    if (!str) return "";
+    if (max_width <= 3) return substring(str, 0, max_width);
+    if (strlen(str) <= max_width) return str;
+    return substring(str, 0, max_width - 3) + "...";
+}
+
+/* helper: repeat a single-character string n times */
+string repeat_string(string s, int n) {
+    string out = "";
+    for (int i = 0; i < n; i++) out += s;
+    return out;
+}

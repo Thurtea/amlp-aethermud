@@ -1,0 +1,193 @@
+// /lib/obj/wiztools/staff_of_demotion.lpc
+inherit "/lib/obj/wiztools/base_wiztool";
+
+void create() {
+    ::create();
+    set_name("staff of demotion");
+    set_id(({ "staff", "staff of demotion", "demotion staff", "wizstaff" }));
+    set_short("a staff of demotion");
+    set_long("A polished staff used by administrators to manage wizard ranks.\n");
+    set_weight(1200);
+    set_value(0);
+}
+
+int check_wizard_level(object who) {
+    if (!who) return 0;
+    // Replace the following with your mudlib's privilege check.
+    // Example: return (who->query_wiz_level() >= WIZ_ADMIN);
+    return (int)call_other(who, "query_wiz_level") >= 2;
+}
+
+void init() {
+    ::init();
+    if (!environment() || !interactive(environment())) return;
+    if (!check_wizard_level(environment())) return;
+    add_action("cmd_promote", "promote");
+    add_action("cmd_demote", "demote");
+    add_action("cmd_check", "check");
+}
+
+int cmd_promote(string args) {
+    object user = environment();
+    string target_name, level_str;
+    int new_level;
+    object target;
+
+    if (!user) return 0;
+
+    notify_fail("Usage: promote <player> <level>\n");
+    if (!args || args == "") return 0;
+
+    if (sscanf(args, "%s %s", target_name, level_str) != 2) {
+        tell_object(user, "Usage: promote <player> <level>\nLevels: 0=player,1=wizard,2=admin\n");
+        return 1;
+    }
+
+    if (user->query_privilege_level() < 2) {
+        tell_object(user, "Permission denied: admin only.\n");
+        return 1;
+    }
+
+    new_level = to_int(level_str);
+    if (new_level < 0 || new_level > 2) {
+        tell_object(user, "Invalid level. Use 0 (player), 1 (wizard), or 2 (admin).\n");
+        return 1;
+    }
+
+    target_name = lower_case(target_name);
+    target = find_player(target_name);
+    if (!target) {
+        tell_object(user, "Player not found or not online: " + target_name + "\n");
+        return 1;
+    }
+
+    if (target == user) {
+        tell_object(user, "You cannot change your own privilege level with the staff.\n");
+        return 1;
+    }
+
+    int old_level = target->query_privilege_level();
+    if (old_level == new_level) {
+        tell_object(user, capitalize(target_name) + " is already at level " + new_level + ".\n");
+        return 1;
+    }
+
+    target->set_privilege_level(new_level);
+    if (function_exists("save_player", target)) target->save_player();
+
+    string *level_names = ({ "Player", "Wizard", "Admin" });
+    tell_object(user, sprintf("%s changed %s -> %s (level %d).\n",
+        capitalize(user->query_name()), capitalize(target_name), level_names[new_level], new_level));
+
+    tell_object(target, "\n*** Your privilege level has been changed by " + capitalize(user->query_name()) + " ***\n");
+    tell_object(target, "Old level: " + level_names[old_level] + "\nNew level: " + level_names[new_level] + "\n\n");
+
+    // Log action
+    string entry = sprintf("%s - %s promoted %s from %s to %s\n",
+        ctime(time()), capitalize(user->query_name()), capitalize(target_name), level_names[old_level], level_names[new_level]);
+    write_file("/log/promotions.log", entry, 1);
+
+    return 1;
+}
+
+int cmd_demote(string who) {
+    object user = environment();
+    object target;
+    string target_name;
+    int old_level, new_level;
+
+    if (!user) return 0;
+
+    notify_fail("Usage: demote <player>\n");
+    if (!who || who == "") return 0;
+
+    if (user->query_privilege_level() < 2) {
+        tell_object(user, "Permission denied: admin only.\n");
+        return 1;
+    }
+
+    target_name = lower_case(who);
+    if (target_name == lower_case(user->query_name())) {
+        tell_object(user, "You cannot demote yourself.\n");
+        return 1;
+    }
+
+    target = find_player(target_name);
+    if (!target) {
+        tell_object(user, "Player not found or not online: " + target_name + "\n");
+        return 1;
+    }
+
+    old_level = target->query_privilege_level();
+    if (old_level <= 0) {
+        tell_object(user, capitalize(target_name) + " is already a Player (level 0).\n");
+        return 1;
+    }
+
+    new_level = old_level - 1;
+    if (new_level < 0) new_level = 0;
+
+    target->set_privilege_level(new_level);
+    if (function_exists("save_player", target)) target->save_player();
+
+    string *level_names = ({ "Player", "Wizard", "Admin" });
+    tell_object(user, sprintf("%s demoted %s -> %s.\n",
+        capitalize(user->query_name()), capitalize(target_name), level_names[new_level]));
+
+    tell_object(target, "\n*** You have been demoted by " + capitalize(user->query_name()) + " ***\n");
+    tell_object(target, "Old level: " + level_names[old_level] + "\nNew level: " + level_names[new_level] + "\n\n");
+
+    // Log action
+    string entry = sprintf("%s - %s demoted %s from %s to %s\n",
+        ctime(time()), capitalize(user->query_name()), capitalize(target_name), level_names[old_level], level_names[new_level]);
+    write_file("/log/promotions.log", entry, 1);
+
+    return 1;
+}
+
+int cmd_check(string who) {
+    object user = environment();
+    object target;
+    string target_name;
+    string *lines;
+    int i;
+
+    if (!user) return 0;
+    if (!who || who == "") { write("Usage: check <player>\n"); return 1; }
+
+    if (user->query_privilege_level() < 1) {
+        tell_object(user, "Permission denied.\n");
+        return 1;
+    }
+
+    target_name = lower_case(who);
+    target = find_player(target_name);
+    if (!target) {
+        tell_object(user, "Player not found or not online: " + target_name + "\n");
+        return 1;
+    }
+
+    int level = target->query_privilege_level();
+    string *level_names = ({ "Player", "Wizard", "Admin" });
+    tell_object(user, capitalize(target_name) + " current level: " + level_names[level] + " (" + level + ")\n");
+
+    // Show last promotion/demotion from log (if present)
+    string log = read_file("/log/promotions.log");
+    if (log) {
+        lines = explode(log, "\n");
+        for (i = sizeof(lines)-1; i >= 0; i--) {
+            if (!lines[i] || lines[i] == "") continue;
+            if (strstr(lower_case(lines[i]), target_name) != -1) {
+                tell_object(user, "Last change: " + lines[i] + "\n");
+                return 1;
+            }
+        }
+    }
+
+    tell_object(user, "No promotion/demotion record found for " + capitalize(target_name) + ".\n");
+    return 1;
+}
+
+string query_long() {
+    return ::query_long() + "Use 'promote', 'demote', and 'check' when wielded.\n";
+}

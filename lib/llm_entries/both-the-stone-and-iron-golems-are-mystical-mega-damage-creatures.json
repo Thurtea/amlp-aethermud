@@ -1,0 +1,19 @@
+{
+  "id": "both-the-stone-and-iron-golems-are-mystical-mega-damage-creatures",
+  "name": "Both the stone and iron golems are mystical mega-damage creatures",
+  "slug": "both-the-stone-and-iron-golems-are-mystical-mega-damage-creatures",
+  "section": "rcc",
+  "description": "In the time hole time passes normally, so the character will age born of magic and almost indestructible. Since they are not of flesh",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "Saving Throw: None",
+  "source_range": [
+    11263,
+    11395
+  ],
+  "raw_snippet": "Both the stone and iron golems are mystical mega-damage creatures In the time hole time passes normally, so the character will age born of magic and almost indestructible. Since they are not of flesh normally. However, outside the time hole time is moving at much and blood, psychic and magic attacks designed for the human physiology slower rate, thus for every 12 hours inside a time hole, only two hours and mind do not affect them. That means charms, sleeps, bio-manipu- pass outside. This means the mage can spend two days/48 hours in the lation, illusions, paralysis, etc., have no effect. Since the horrid thing time hole but appear to have been gone for only eight hours. The mage was never alive, turn dead is useless, as is banishment, negation and can stay in a time hole for 24 hours…",
+  "suggested_target": "lib/occs/both-the-stone-and-iron-golems-are-mystical-mega-damage-creatures.lpc"
+}

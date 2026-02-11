@@ -1,0 +1,19 @@
+{
+  "id": "252",
+  "name": "252",
+  "slug": "252",
+  "section": "occ",
+  "description": "252",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    15181,
+    15182
+  ],
+  "raw_snippet": "252",
+  "suggested_target": "lib/occs/252.lpc"
+}

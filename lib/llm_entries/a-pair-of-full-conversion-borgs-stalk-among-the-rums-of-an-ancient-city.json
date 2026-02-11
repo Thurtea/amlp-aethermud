@@ -1,0 +1,19 @@
+{
+  "id": "a-pair-of-full-conversion-borgs-stalk-among-the-rums-of-an-ancient-city",
+  "name": "A pair of full conversion \"Borgs\" stalk among the rums of an ancient city",
+  "slug": "a-pair-of-full-conversion-borgs-stalk-among-the-rums-of-an-ancient-city",
+  "section": "rcc",
+  "description": "A pair of full conversion \"Borgs\" stalk among the rums of an ancient city",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9171,
+    9172
+  ],
+  "raw_snippet": "A pair of full conversion \"Borgs\" stalk among the rums of an ancient city",
+  "suggested_target": "lib/occs/a-pair-of-full-conversion-borgs-stalk-among-the-rums-of-an-ancient-city.lpc"
+}

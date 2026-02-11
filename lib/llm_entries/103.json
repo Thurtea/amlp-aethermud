@@ -1,0 +1,40 @@
+{
+  "id": "103",
+  "name": "103",
+  "slug": "103",
+  "section": "rcc",
+  "description": "The influence of ley line energy",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": [
+    "body armor",
+    "sleeping bag",
+    "back pack",
+    "utility/ammo",
+    "belt",
+    "canteen",
+    "sunglasses or tinted goggles",
+    "air filter or gas mask",
+    "food rations for",
+    "a week",
+    "and personal items. Weapons will include a knife",
+    "one",
+    "energy and one non",
+    "energy",
+    "player's choice.",
+    "Vehicle is limited to non",
+    "military means of transportation",
+    "and",
+    "may include hover vehicles or souped",
+    "up motorcycle or car."
+  ],
+  "money": "in saleable black market items.",
+  "cybernetics": "natural powers.",
+  "ppe": null,
+  "source_range": [
+    6449,
+    6491
+  ],
+  "raw_snippet": "103 The influence of ley line energy The duration and range of the burster's psychic powers are in- creased by 50% whenever on or near (one mile/1.6 km) a ley line. The duration, range, and damage of the powers are doubled when at or near (one mile/1.6 km) a ley line nexus point! Skills: Like most psychics, the burster has minimal education, having spent much of the time learning and mastering the pyrokinetic pow- ers. The individual has come to rely on those powers, wits, and experience. The typical burster is a cocky, self-confident adventurer who prefers to use his or her powers and courage rather than skills or machines. At first level the psychic can speak American and one other language at 90% proficiency, selects two piloting skills (both with a + 10% bonus), and can select six…",
+  "suggested_target": "lib/occs/103.lpc"
+}

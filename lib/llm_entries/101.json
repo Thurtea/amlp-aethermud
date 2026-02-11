@@ -1,0 +1,19 @@
+{
+  "id": "101",
+  "name": "101",
+  "slug": "101",
+  "section": "rcc",
+  "description": "could be reading someone's mind, or mentally manipulate others, or a psychic, and identifies the psychic by code number and photograph.",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "minutes, but must stay within range and concentrate on maintaining                ment of psychic abilities. The remaining Permanent P.P.E. Base\n   the fire. Melee actions are reduced by half and fighting is impossible\n                                                                                     is 2D6.\n   unless he breaks his concentration, causing the fire to disappear.\n   However, any combustible items set ablaze will continue to burn                I.S.P.: To determine the character's initial amount of Inner Strength\n   and the fire will spread until extinguished, even after the fire erup-            Points, take the number of M.E. as the base, roll 3D4 x 10 and add\n   tion is gone.                                                                     it to the base number. The character gets another 10 I.S.P. for each\n      Bonus to Strike: This is a little different than the usual strike              additional level of experience.\n   attack. The burster must learn to judge distances and focus his                       I.S.P. is regained at the rate of 2 per hour of activity, or 12 per\n   thoughts in order to create the eruption exactly where he wants it.               hour of meditation or sleep.\n   So instead of an attack bonus, there is a Base Skill: 48% +4%                         Considered a master psionic, needs a 10 or higher to save versus\n   per level of experience (roll percentile dice). A failed roll means               psionic attack.\n   the eruption happens 2D6 yards/meters off target.",
+  "source_range": [
+    6306,
+    6448
+  ],
+  "raw_snippet": "101 could be reading someone's mind, or mentally manipulate others, or a psychic, and identifies the psychic by code number and photograph. destroy a person with a thought. Unlike the practitioners of magic, who This can often be an embarrassing situation and many establishments must usually speak a spell or take some noticeable action before they will not allow psychics on the premises. Frequently, government strike, the psychic does not have to make any indication of his true facilities require that a psychic be escorted by a pair of psi- stalkers or nature to attack. He can be sitting down, drinking a cup of coffee, and a dog pack, especially in restricted areas, even if the authorities have kill somebody without so much as blinking, and nobody will be able authorized their access to…",
+  "suggested_target": "lib/occs/101.lpc"
+}

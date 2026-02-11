@@ -1,0 +1,19 @@
+{
+  "id": "219",
+  "name": "219",
+  "slug": "219",
+  "section": "rcc",
+  "description": "219",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13045,
+    13046
+  ],
+  "raw_snippet": "219",
+  "suggested_target": "lib/occs/219.lpc"
+}

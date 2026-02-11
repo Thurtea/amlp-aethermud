@@ -8,23 +8,24 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Necromancer");
     set_occ_id("necromancer");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "TODO: Add full O.C.C. description for ."
+        "A scholar of death magic and interactions with the dead. Conservative
+defaults added; review before use."
     );
     
-    // TODO: Configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "iq": 11,
+        "ps": 9
     ]));
     
-    // TODO: Configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "iq": 2,
+        "ps": 1
     ]));
     
     // Combat configuration
@@ -32,9 +33,13 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // TODO: Configure OCC skills
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "necromancy",
+        "occult_lore",
+        "ritual_magic",
+        "spellcraft",
+        "alchemy"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +59,10 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // TODO: Configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/academic_robe", "/obj/item/ritual_kit" }));
+    set_starting_credits(40, 250);
+    set_starting_weapons(({ "/obj/weapons/dagger" }));
+    set_starting_armor(({ "/obj/armor/robe" }));
     
     // Race restrictions
     set_race_requirements(({ }));

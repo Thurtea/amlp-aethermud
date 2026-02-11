@@ -1,0 +1,19 @@
+{
+  "id": "cut-away-view-of",
+  "name": "CUT-AWAY VIEW OF",
+  "slug": "cut-away-view-of",
+  "section": "occ",
+  "description": "RETRACTABLE BLADES HOUSED IN FORE-ARM",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    14465,
+    14467
+  ],
+  "raw_snippet": "CUT-AWAY VIEW OF RETRACTABLE BLADES HOUSED IN FORE-ARM",
+  "suggested_target": "lib/occs/cut-away-view-of.lpc"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "visual-targeting",
+  "name": "VISUAL TARGETING",
+  "slug": "visual-targeting",
+  "section": "rcc",
+  "description": "DISPLAY",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13053,
+    13055
+  ],
+  "raw_snippet": "VISUAL TARGETING DISPLAY",
+  "suggested_target": "lib/occs/visual-targeting.lpc"
+}

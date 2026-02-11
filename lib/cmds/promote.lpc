@@ -4,7 +4,7 @@
 int main(string args) {
     object player = this_player();
     if (!player) return 0;
-    // TODO: Implement promotion/demotion logic
-    write("Stub: promote command. Promotion/demotion not yet implemented.\n");
+    // Stub: promotion/demotion logic not implemented
+    write("Stub: promote command. Promotion/demotion not implemented.\n");
     return 1;
 }

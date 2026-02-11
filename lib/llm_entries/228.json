@@ -1,0 +1,19 @@
+{
+  "id": "228",
+  "name": "228",
+  "slug": "228",
+  "section": "rcc",
+  "description": "228",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13590,
+    13591
+  ],
+  "raw_snippet": "228",
+  "suggested_target": "lib/occs/228.lpc"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "reload-access",
+  "name": "RELOAD ACCESS",
+  "slug": "reload-access",
+  "section": "rcc",
+  "description": "RELOAD ACCESS",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13111,
+    13115
+  ],
+  "raw_snippet": "RELOAD ACCESS",
+  "suggested_target": "lib/occs/reload-access.lpc"
+}

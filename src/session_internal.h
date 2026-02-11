@@ -72,6 +72,9 @@ typedef struct PlayerSession {
     int is_color;                         /* ANSI color enabled (default 1) */
     int is_resting;                       /* Resting state (regen bonus) */
     int converse_mode;                    /* 1 = every input becomes "say" */
+    /* Terminal geometry (can be overridden by client/efun) */
+    int terminal_width;                    /* columns, default set on init */
+    int terminal_height;                   /* rows, default set on init */
 } PlayerSession;
 
 #endif /* SESSION_INTERNAL_H */

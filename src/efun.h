@@ -138,6 +138,10 @@ VMValue efun_get_dir(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_mkdir(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_rm(VirtualMachine *vm, VMValue *args, int arg_count);
 
+/* File metadata efuns */
+VMValue efun_file_mode(VirtualMachine *vm, VMValue *args, int arg_count);
+VMValue efun_file_mtime(VirtualMachine *vm, VMValue *args, int arg_count);
+
 /* ========== Object/Player Efuns (core) ========== */
 
 VMValue efun_call_other(VirtualMachine *vm, VMValue *args, int arg_count);
@@ -167,6 +171,11 @@ VMValue efun_debug_get_flags(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_debug_dump_call_stack(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_debug_dump_bytecode(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_debug_mem_stats(VirtualMachine *vm, VMValue *args, int arg_count);
+
+/* Terminal size efuns */
+VMValue efun_query_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count);
+VMValue efun_set_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count);
+VMValue efun_query_terminal_height(VirtualMachine *vm, VMValue *args, int arg_count);
 
 /**
  * Register all standard efuns

@@ -1,0 +1,19 @@
+{
+  "id": "the-xiticix",
+  "name": "The Xiticix",
+  "slug": "the-xiticix",
+  "section": "occ",
+  "description": "Each hive network or city has its own queen and distinctive scent",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    15183,
+    15331
+  ],
+  "raw_snippet": "The Xiticix Each hive network or city has its own queen and distinctive scent The Xiticix (pronounced Zy-tick-icks) are a race of insect-like (recognizable to other Xiticix and Dog Pack mutants). The living struc- humanoids from another dimension. The first Xiticix was recorded tures resemble giant mushrooms that tower four to eight stories high. about 20 years ago, but it is likely that a swarm was inadvertently Each holds scores of Xiticix. Warriors are found mostly in the upper transported into our world years earlier; they just were not noticed portions, while workers are found in the lower levels. The entrances because they inhabited the northern wilderness of Saskatchewan and to the mushroom towers are always located at the top of the structure. Manitoba. Humans have no idea as to…",
+  "suggested_target": "lib/occs/the-xiticix.lpc"
+}

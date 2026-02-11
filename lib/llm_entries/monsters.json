@@ -1,0 +1,19 @@
+{
+  "id": "monsters",
+  "name": "monsters",
+  "slug": "monsters",
+  "section": "rcc",
+  "description": "monsters",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9259,
+    9260
+  ],
+  "raw_snippet": "monsters",
+  "suggested_target": "lib/occs/monsters.lpc"
+}

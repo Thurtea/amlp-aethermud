@@ -1,0 +1,19 @@
+{
+  "id": "152",
+  "name": "152",
+  "slug": "152",
+  "section": "rcc",
+  "description": "152",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9169,
+    9170
+  ],
+  "raw_snippet": "152",
+  "suggested_target": "lib/occs/152.lpc"
+}

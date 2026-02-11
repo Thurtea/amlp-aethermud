@@ -8,23 +8,24 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Cosmo Knight");
     set_occ_id("cosmo_knight");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "TODO: Add full O.C.C. description for ."
+        "A heavily-armed warrior blending cosmic symbolism and martial skill.
+Conservative defaults applied for heavy combat role; please review."
     );
     
-    // TODO: Configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "ps": 11,
+        "me": 10
     ]));
     
-    // TODO: Configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "ps": 2,
+        "str": 1
     ]));
     
     // Combat configuration
@@ -32,9 +33,13 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // TODO: Configure OCC skills
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "heavy_weapons",
+        "melee_weapons",
+        "tactics",
+        "leadership",
+        "endurance"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +59,10 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // TODO: Configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/field_armor", "/obj/item/cosmo_emblem" }));
+    set_starting_credits(120, 500);
+    set_starting_weapons(({ "/obj/weapons/longsword" }));
+    set_starting_armor(({ "/obj/armor/heavy_plate" }));
     
     // Race restrictions
     set_race_requirements(({ }));

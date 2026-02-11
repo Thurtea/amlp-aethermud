@@ -1,0 +1,19 @@
+{
+  "id": "the-automatic-stabilization-system-is-a-synchronized-system-of",
+  "name": "The automatic stabilization system is a synchronized system of",
+  "slug": "the-automatic-stabilization-system-is-a-synchronized-system-of",
+  "section": "rcc",
+  "description": "jet thrusters and retractable reinforcement pylons in the legs that",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13187,
+    13259
+  ],
+  "raw_snippet": "The automatic stabilization system is a synchronized system of jet thrusters and retractable reinforcement pylons in the legs that hold the armor steady. The pylons and the jets fly into action the moment the Boom Gun is fired. Other Weapons Primary Purpose: Assault and Anti-Armor. Secondary Purpose: Anti-Aircraft Weight: Rail Gun: 867 lbs (390 kg). & Equipment Mega-Damage: One Boom Gun Flechette round holds 200 slugs that inflict 3D6x 10 M.D. E-Clip costs are pretty standard. Generally, a new, fully charged, Effects of the Sonic Boom: The GB suit is specially insulated from standard E-clip (short) will cost 5000 credits. Recharging an E-Clip the shock waves of the Boom Gun, however, everybody within 200 costs about 1500 credits. Some rifles can use what is called a \"long\" feet will be…",
+  "suggested_target": "lib/occs/the-automatic-stabilization-system-is-a-synchronized-system-of.lpc"
+}

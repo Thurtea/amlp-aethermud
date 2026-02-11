@@ -1,0 +1,19 @@
+{
+  "id": "distance-to-target",
+  "name": "DISTANCE TO TARGET",
+  "slug": "distance-to-target",
+  "section": "rcc",
+  "description": "DISTANCE TO TARGET",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13066,
+    13070
+  ],
+  "raw_snippet": "DISTANCE TO TARGET",
+  "suggested_target": "lib/occs/distance-to-target.lpc"
+}

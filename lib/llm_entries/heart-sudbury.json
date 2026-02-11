@@ -1,0 +1,19 @@
+{
+  "id": "heart-sudbury",
+  "name": "Heart (Sudbury)",
+  "slug": "heart-sudbury",
+  "section": "rcc",
+  "description": "Heart (Sudbury)",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9188,
+    9192
+  ],
+  "raw_snippet": "Heart (Sudbury)",
+  "suggested_target": "lib/occs/heart-sudbury.lpc"
+}

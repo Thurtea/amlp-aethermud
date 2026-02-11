@@ -1,0 +1,19 @@
+{
+  "id": "anti-sway-pylons-and-toe-hook",
+  "name": "ANTI-SWAY PYLONS AND TOE HOOK",
+  "slug": "anti-sway-pylons-and-toe-hook",
+  "section": "rcc",
+  "description": "ARE ACTIVATED JUST BEFORE",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13159,
+    13165
+  ],
+  "raw_snippet": "ANTI-SWAY PYLONS AND TOE HOOK ARE ACTIVATED JUST BEFORE GUN IS TO BE FIRED. G U N WILL NOT FIRE IF PYLONS ( O N E - EACH LEG) ARE NOT ACTIVATED. PYLONS ADD TOE HOOKS ARE INITIATED THROUGH HYDRAULICS, RELEASE",
+  "suggested_target": "lib/occs/anti-sway-pylons-and-toe-hook.lpc"
+}

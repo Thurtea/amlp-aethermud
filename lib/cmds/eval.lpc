@@ -4,7 +4,7 @@
 int main(string args) {
     object player = this_player();
     if (!player) return 0;
-    // TODO: Implement code evaluation logic
-    write("Stub: eval command. Code evaluation not yet implemented.\n");
+    // Stub: code evaluation logic not implemented
+    write("Stub: eval command. Code evaluation not implemented.\n");
     return 1;
 }

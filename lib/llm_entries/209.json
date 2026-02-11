@@ -1,0 +1,19 @@
+{
+  "id": "209",
+  "name": "209",
+  "slug": "209",
+  "section": "rcc",
+  "description": "knight's surcoat and even the helmet is often designed to resemble the",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    12530,
+    12541
+  ],
+  "raw_snippet": "209 knight's surcoat and even the helmet is often designed to resemble the European knights of old. • M.D.C. 55 • Weight 11 pounds ( 5 kg) • Full mobility, no prowl penalty! • Black market cost: 40,000 credits.",
+  "suggested_target": "lib/occs/209.lpc"
+}

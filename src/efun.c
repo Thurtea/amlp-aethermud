@@ -30,7 +30,7 @@
 #include <time.h>
 
 #define EFUN_INITIAL_CAPACITY 64
-
+#include "session_internal.h"
 /* ========== Registry Management ========== */
 
 EfunRegistry* efun_init(void) {
@@ -1063,6 +1063,55 @@ VMValue efun_file_size(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_int(-1);
 }
 
+/* Return human-readable mode string like "-rwxr-xr-x" for a path, or "" on error */
+VMValue efun_file_mode(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count != 1 || args[0].type != VALUE_STRING) return vm_value_create_string("");
+    const char *path = args[0].data.string_value;
+    if (!path) return vm_value_create_string("");
+
+    char resolved[PATH_MAX];
+    if (!resolve_safe_path(path, resolved, sizeof(resolved))) return vm_value_create_string("");
+
+    struct stat st;
+    if (stat(resolved, &st) != 0) return vm_value_create_string("");
+
+    char buf[16];
+    /* File type */
+    buf[0] = S_ISDIR(st.st_mode) ? 'd' : '-';
+    /* owner */
+    buf[1] = (st.st_mode & S_IRUSR) ? 'r' : '-';
+    buf[2] = (st.st_mode & S_IWUSR) ? 'w' : '-';
+    buf[3] = (st.st_mode & S_IXUSR) ? 'x' : '-';
+    /* group */
+    buf[4] = (st.st_mode & S_IRGRP) ? 'r' : '-';
+    buf[5] = (st.st_mode & S_IWGRP) ? 'w' : '-';
+    buf[6] = (st.st_mode & S_IXGRP) ? 'x' : '-';
+    /* others */
+    buf[7] = (st.st_mode & S_IROTH) ? 'r' : '-';
+    buf[8] = (st.st_mode & S_IWOTH) ? 'w' : '-';
+    buf[9] = (st.st_mode & S_IXOTH) ? 'x' : '-';
+    buf[10] = '\0';
+
+    return vm_value_create_string(strdup(buf));
+}
+
+/* Return file modification time (seconds since epoch) or -1 on error */
+VMValue efun_file_mtime(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count != 1 || args[0].type != VALUE_STRING) return vm_value_create_int(-1);
+    const char *path = args[0].data.string_value;
+    if (!path) return vm_value_create_int(-1);
+
+    char resolved[PATH_MAX];
+    if (!resolve_safe_path(path, resolved, sizeof(resolved))) return vm_value_create_int(-1);
+
+    struct stat st;
+    if (stat(resolved, &st) != 0) return vm_value_create_int(-1);
+
+    return vm_value_create_int((long)st.st_mtime);
+}
+
 /* ========== Directory efuns ========== */
 
 VMValue efun_get_dir(VirtualMachine *vm, VMValue *args, int arg_count) {
@@ -1750,6 +1799,40 @@ VMValue efun_debug_mem_stats(VirtualMachine *vm, VMValue *args, int arg_count) {
              bytes_outstanding);
 
     return vm_value_create_string(buffer);
+}
+
+/* ========== Terminal dimension efuns ========== */
+
+VMValue efun_query_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    void *po = get_current_player_object();
+    if (!po) return vm_value_create_int(80);
+    PlayerSession *sess = find_session_for_player(po);
+    if (!sess) return vm_value_create_int(80);
+    return vm_value_create_int(sess->terminal_width > 0 ? sess->terminal_width : 80);
+}
+
+VMValue efun_set_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count < 1 || args[0].type != VALUE_INT) return vm_value_create_int(0);
+    void *po = get_current_player_object();
+    if (!po) return vm_value_create_int(0);
+    PlayerSession *sess = find_session_for_player(po);
+    if (!sess) return vm_value_create_int(0);
+    int w = (int)args[0].data.int_value;
+    if (w < 20) w = 20;
+    if (w > 1000) w = 1000;
+    sess->terminal_width = w;
+    return vm_value_create_int(1);
+}
+
+VMValue efun_query_terminal_height(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    void *po = get_current_player_object();
+    if (!po) return vm_value_create_int(24);
+    PlayerSession *sess = find_session_for_player(po);
+    if (!sess) return vm_value_create_int(24);
+    return vm_value_create_int(sess->terminal_height > 0 ? sess->terminal_height : 24);
 }
 
 /* ========== String Search / Replace Efuns ========== */
@@ -2476,6 +2559,14 @@ int efun_register_all(EfunRegistry *registry) {
                   "int debug_dump_bytecode(string, string|void)");
     efun_register(registry, "debug_mem_stats", efun_debug_mem_stats, 0, 0,
                   "string debug_mem_stats()");
+
+    /* Terminal dimension efuns */
+    efun_register(registry, "query_terminal_width", efun_query_terminal_width, 0, 0, "int query_terminal_width()");
+    efun_register(registry, "set_terminal_width", efun_set_terminal_width, 1, 1, "int set_terminal_width(int)");
+    efun_register(registry, "query_terminal_height", efun_query_terminal_height, 0, 0, "int query_terminal_height()");
+    /* File metadata efuns */
+    efun_register(registry, "file_mode", efun_file_mode, 1, 1, "string file_mode(string)");
+    efun_register(registry, "file_mtime", efun_file_mtime, 1, 1, "int file_mtime(string)");
 
     int registered = registry->efun_count - before;
     printf("[Efun] Registered %d standard efuns\n", registered);

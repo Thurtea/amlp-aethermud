@@ -1,0 +1,19 @@
+{
+  "id": "173",
+  "name": "173",
+  "slug": "173",
+  "section": "rcc",
+  "description": "This unique magic enables the mage to step into shadows, becoming must have personally met the individual (even if only briefly) and must",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "Duration: 5 minutes (20 melees) per level of experience.                              The mystic can create a circle of flame around himself. No combus-\nSaving Throw: None                                                                 tible material is required. The flame is five feet tall and inflicts 6D6",
+  "source_range": [
+    10213,
+    10429
+  ],
+  "raw_snippet": "173 This unique magic enables the mage to step into shadows, becoming must have personally met the individual (even if only briefly) and must totally invisible, even to a \"see the invisible\" spell. The shadow must be within range. The call sends a telepathic message to that particular be at least five feet tall to become an effective hiding place. The shadow person, calling him or her by full name, and leaves an impression of serves as a superior means of hiding or moving unseen. The mage can where the mage can be found. A typical call message will be something move, walk, or run through the length of shadow or from shadow to like \"Erick Wujcik, come to me.\" or \"Richard Burke, I need you.\" shadow. While in shadow/darkness, the mage prowls at a 60% profi- Only the individual to whom the…",
+  "suggested_target": "lib/occs/173.lpc"
+}

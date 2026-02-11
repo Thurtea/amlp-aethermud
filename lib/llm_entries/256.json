@@ -1,0 +1,19 @@
+{
+  "id": "256",
+  "name": "256",
+  "slug": "256",
+  "section": "occ",
+  "description": "256",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    15371,
+    15371
+  ],
+  "raw_snippet": "256",
+  "suggested_target": "lib/occs/256.lpc"
+}

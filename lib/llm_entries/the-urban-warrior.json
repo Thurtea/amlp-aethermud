@@ -1,0 +1,19 @@
+{
+  "id": "the-urban-warrior",
+  "name": "The Urban Warrior",
+  "slug": "the-urban-warrior",
+  "section": "rcc",
+  "description": "Full Padded Environmental Body Armor",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    12550,
+    12567
+  ],
+  "raw_snippet": "The Urban Warrior Full Padded Environmental Body Armor A light weight body armor that has been popular with adventurers and many city law enforcement officers for over a decade. This armor is a full body suit with special flexible padding and strategic placement of light metal plates. Usually comes in white, light grey, and tan colors. • M.D.C. 50 • Weight 11 pounds ( 5 kg) • Good mobility, — 10% prowl penalty. • Black market cost: 35,000 credits Juicer Assassin's Plate Armor This is the famous medium weight armor worn by the chemically augmented Juicer. • M.D.C. 45 • Weight 18 pounds ( 8 kg) • Good mobility, —5% prowl penalty. ' • Black market cost: 28,000 credits",
+  "suggested_target": "lib/occs/the-urban-warrior.lpc"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "the-plastic-man",
+  "name": "The Plastic-Man",
+  "slug": "the-plastic-man",
+  "section": "rcc",
+  "description": "Full Plastic Environmental Body Armor",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    12542,
+    12549
+  ],
+  "raw_snippet": "The Plastic-Man Full Plastic Environmental Body Armor An inexpensive armor made of light weight polycarbonate plate • M.D.C. 35 • Weight 13 pounds ( 5.8 kg) • Fair mobility, — 10% prowl penalty. • Black market cost: 18,000 credits",
+  "suggested_target": "lib/occs/the-plastic-man.lpc"
+}

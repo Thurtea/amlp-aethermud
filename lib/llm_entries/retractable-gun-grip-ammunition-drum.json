@@ -1,0 +1,19 @@
+{
+  "id": "retractable-gun-grip-ammunition-drum",
+  "name": "RETRACTABLE GUN GRIP AMMUNITION DRUM",
+  "slug": "retractable-gun-grip-ammunition-drum",
+  "section": "rcc",
+  "description": "CLOSED OPEN",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13104,
+    13110
+  ],
+  "raw_snippet": "RETRACTABLE GUN GRIP AMMUNITION DRUM CLOSED OPEN DRUM HOLDS 100 ROUNDS OF 20,000 SLUGS",
+  "suggested_target": "lib/occs/retractable-gun-grip-ammunition-drum.lpc"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "targeting-sight",
+  "name": "TARGETING SIGHT",
+  "slug": "targeting-sight",
+  "section": "rcc",
+  "description": "TARGETING SIGHT",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13063,
+    13065
+  ],
+  "raw_snippet": "TARGETING SIGHT",
+  "suggested_target": "lib/occs/targeting-sight.lpc"
+}

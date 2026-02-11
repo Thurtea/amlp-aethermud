@@ -1,0 +1,19 @@
+{
+  "id": "163",
+  "name": "163",
+  "slug": "163",
+  "section": "rcc",
+  "description": "The Pursuit of Magic O.C.C. powers are special magic abilities that only practitioners of",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9486,
+    9492
+  ],
+  "raw_snippet": "163 The Pursuit of Magic O.C.C. powers are special magic abilities that only practitioners of that particular form of magic can perform. For example: Only the Ley Line Walker can teleport along a ley line without expending P.P.E.",
+  "suggested_target": "lib/occs/163.lpc"
+}

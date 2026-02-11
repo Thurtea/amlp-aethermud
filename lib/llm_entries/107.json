@@ -1,0 +1,19 @@
+{
+  "id": "107",
+  "name": "107",
+  "slug": "107",
+  "section": "rcc",
+  "description": "at Lone Star, the one animal used above all others is the dog. The dog Fourth, as a soldier, the dog offers several advantages. Besides the",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    6728,
+    6754
+  ],
+  "raw_snippet": "107 at Lone Star, the one animal used above all others is the dog. The dog Fourth, as a soldier, the dog offers several advantages. Besides the has proven to be the most desirable and reliable of all animals for obvious superiority in physical strength and endurance, dogs possess several reasons. several additional abilities. In general, the dog's sense of smell is a One, they have a long history of cohabitation with human beings. million times more sensitive than a human's and possess a much more Whether there is any real scientific reason for this special relationship sensitive range of hearing. This makes them much more alert and ideal between man and canine is doubtful. However, psychologically, humans for tracking. quickly accepted, trusted, and liked dogs. This leads to an…",
+  "suggested_target": "lib/occs/107.lpc"
+}

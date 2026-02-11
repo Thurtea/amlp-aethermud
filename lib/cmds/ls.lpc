@@ -1,10 +1,146 @@
-// /cmds/ls.lpc
-// List directory contents
+// lib/cmds/ls.lpc
+// Multi-column ls implementation using /secure/formatting and efuns
 
-int main(string args) {
+string usage() {
+    return "Usage: ls [-l1atxr] [path]\n";
+}
+
+private int is_dir(string path, string name) {
+    int s = file_size(path + "/" + name);
+    return s == -2;
+}
+
+private string join_path(string base, string name) {
+    if (!base || base == "") base = ".";
+    if (name[0] == '/') return name;
+    if (base == ".") return name;
+    return base + "/" + name;
+}
+
+int main(string arg) {
     object player = this_player();
     if (!player) return 0;
-    // TODO: Implement directory listing logic
-    write("Stub: ls command. Directory listing not yet implemented.\n");
+    string flags = "";
+    string path = "";
+    if (!arg) arg = "";
+
+    // parse simple flags
+    if (sscanf(arg, "%s %s", flags, path) < 1) {
+        flags = arg;
+        path = "";
+    }
+
+    int show_all = (strsrch(flags, "a") != -1);
+    int longfmt = (strsrch(flags, "l") != -1);
+    int onecol = (strsrch(flags, "1") != -1);
+    int t_sort = (strsrch(flags, "t") != -1);
+    int rev = (strsrch(flags, "r") != -1);
+
+    string target = path && path != "" ? path : ".";
+
+    // Use efun get_dir to read directory
+    mixed entries = get_dir(target);
+    if (!arrayp(entries)) {
+        write("Directory not found or inaccessible: " + target + "\n");
+        return 1;
+    }
+
+    // Filter hidden unless -a
+    string *names = ({});
+    for (int i = 0; i < sizeof(entries); i++) {
+        string n = entries[i];
+        if (!show_all && n[0] == '.') continue;
+        names += ({ n });
+    }
+
+    int n = sizeof(names);
+    if (n == 0) { write("\n"); return 1; }
+
+    // Build metadata arrays
+    int *mtimes = allocate(n);
+    int *sizes = allocate(n);
+    string *modes = allocate(n);
+    for (int i = 0; i < n; i++) {
+        string pname = join_path(target, names[i]);
+        sizes[i] = file_size(pname);
+        if (sizes[i] == -2) sizes[i] = 0; // directories
+        mtimes[i] = file_mtime(pname) || -1;
+        modes[i] = file_mode(pname) || "----------";
+    }
+
+    // Sorting via index array (small dir bubble sort is acceptable)
+    int *idx = allocate(n);
+    for (int i = 0; i < n; i++) idx[i] = i;
+    for (int i = 0; i < n; i++) {
+        for (int j = i+1; j < n; j++) {
+            int a = idx[i]; int b = idx[j];
+            int cmp;
+            if (t_sort) {
+                cmp = (mtimes[a] < mtimes[b]) ? 1 : ((mtimes[a] > mtimes[b]) ? -1 : 0);
+            } else {
+                cmp = (names[a] > names[b]) ? 1 : ((names[a] < names[b]) ? -1 : 0);
+            }
+            if (rev) cmp = -cmp;
+            if (cmp > 0) { int t = idx[i]; idx[i]=idx[j]; idx[j]=t; }
+        }
+    }
+
+    // Prepare display names (append / for dirs)
+    string *display = allocate(n);
+    for (int i = 0; i < n; i++) {
+        int k = idx[i];
+        string nm = names[k];
+        string full = join_path(target, nm);
+        if (file_size(full) == -2) nm += "/";
+        display[i] = nm;
+    }
+
+    // Terminal width
+    int termw = query_terminal_width();
+    if (!termw || termw < 20) termw = 80;
+
+    // Output formats
+    if (longfmt) {
+        for (int i = 0; i < n; i++) {
+            int k = idx[i];
+            string nm = names[k];
+            string full = join_path(target, nm);
+            string mode = modes[k];
+            int fsize = sizes[k];
+            int mtime = mtimes[k];
+            string timestr = (mtime > 0) ? ctime(mtime) : "-";
+            if (file_size(full) == -2) {
+                write(sprintf("%s %6d  %s  %s/\n", mode, fsize, timestr, nm));
+            } else {
+                write(sprintf("%s %6d  %s  %s\n", mode, fsize, timestr, nm));
+            }
+        }
+        return 1;
+    }
+
+    if (onecol) {
+        for (int i = 0; i < n; i++) write(display[i] + "\n");
+        return 1;
+    }
+
+    // Multi-column
+    object fmt = load_object("/secure/formatting");
+    if (!fmt) {
+        // fallback simple columns
+        int cols = termw / 20; if (cols < 1) cols = 1;
+        for (int i = 0; i < n; i++) {
+            write(display[i] + "\t");
+            if ((i+1) % cols == 0) write("\n");
+        }
+        if (n % cols != 0) write("\n");
+        return 1;
+    }
+
+    string out = fmt->format_columns(display, termw);
+    write(out);
     return 1;
+}
+
+void create() {
+    add_action("main", "ls");
 }

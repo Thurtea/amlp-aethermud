@@ -1,0 +1,19 @@
+{
+  "id": "armored-head-instrumentation",
+  "name": "ARMORED HEAD INSTRUMENTATION",
+  "slug": "armored-head-instrumentation",
+  "section": "rcc",
+  "description": "AMMO COUNTER",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13071,
+    13077
+  ],
+  "raw_snippet": "ARMORED HEAD INSTRUMENTATION AMMO COUNTER HYDRALIC. TEMP. WATER LEVEL RADAR. - MAP",
+  "suggested_target": "lib/occs/armored-head-instrumentation.lpc"
+}

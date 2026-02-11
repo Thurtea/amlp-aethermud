@@ -1,0 +1,19 @@
+{
+  "id": "bionics",
+  "name": "Bionics",
+  "slug": "bionics",
+  "section": "rcc",
+  "description": "Bionics is a cybernetic process designed to create super soldiers by",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": "gmentation is when an individual has one arm replaced with a more\ncosmetically altered to look human.                                               powerful bionic hand and arm. Even if the arm has several bionic\n                                                                                  weapons, all the work is limited or \"isolated\" to that one limb, not the\nWho can get bionics?                                                              majority of the body. The same is true when a person receives bionic\n   Only the Borg O.C.C. can get a full bionic conversion or a partial             lung or head implants. NOTE: The attribute limit is the same as partial\nreconstruction, which is the minimum that a Borg O.C.C. can receive.              reconstruction.\n   The Headhunter, Coalition Military Specialist, Coalition Dog Pack,",
+  "ppe": null,
+  "source_range": [
+    14171,
+    14185
+  ],
+  "raw_snippet": "Bionics Bionics is a cybernetic process designed to create super soldiers by removing the majority of human body parts and replacing them with Isolated Bionic Augmentation superior mechanical facsimiles. Bionics are specifically used for war Isolated augmentation is the term used when an individual receives or heavy labor. Consequently, they are larger, bulkier, and more obvi- minor bionic reconstruction or implants. An example of isolated au- ously mechanical than cybernetics. This means that they can not be gmentation is when an individual has one arm replaced with a more cosmetically altered to look human. powerful bionic hand and arm. Even if the arm has several bionic weapons, all the work is limited or \"isolated\" to that one limb, not the Who can get bionics? majority of the body.…",
+  "suggested_target": "lib/occs/bionics.lpc"
+}

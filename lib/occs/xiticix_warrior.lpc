@@ -1,0 +1,63 @@
+// /lib/occs/xiticix_warrior.lpc
+//  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
+//  Source: The Xiticix (parsed)
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Xiticix Warrior");
+    set_occ_id("xiticix_warrior");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "An aggressive, insect-like humanoid warrior from a hive society."
+        " Territorial and organized, Xiticix warriors defend their hive-city"
+        " with coordinated swarms and lethal natural weapons."
+    );
+
+    // stat bonuses (conservative, reviewable)
+    set_stat_bonuses(([
+        "ps": 4,
+        "pp": 2
+    ]));
+
+    // Combat configuration (matches parsed source: many natural attacks)
+    set_base_attacks(5);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("natural");
+
+    // Representative OCC skills (please review/update to engine skill names)
+    set_occ_skills(({ "language_american", "wilderness_survival", "track",
+                       "climb", "stealth" }));
+    set_occ_related_skills(({ }));
+    set_occ_skill_count(6);
+    set_elective_count(2);
+    set_secondary_count(4);
+
+    // Psionic / magic & reserves (parsed showed limited psionics)
+    set_base_ppe(40);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("limited");
+
+    // S.D.C. / pseudo-M.D.C. approximation (exoskeleton)
+    set_base_sdc(60);
+    set_sdc_per_level(0);
+
+    // Starting equipment (representative)
+    set_standard_equipment(({ "short_sword", "spear" }));
+    set_starting_credits(0, 0);
+    set_starting_weapons(({ }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+
+    // No cybernetics by default (natural creature)
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+}

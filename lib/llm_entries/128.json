@@ -1,0 +1,19 @@
+{
+  "id": "128",
+  "name": "128",
+  "slug": "128",
+  "section": "rcc",
+  "description": "A view of the transformed Earth Even from space, the most powerful ley lines can be seen",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    8211,
+    8221
+  ],
+  "raw_snippet": "128 A view of the transformed Earth Even from space, the most powerful ley lines can be seen Ley Line energy ripples across the land A group of adventurers marvel at the 300 foot wall of magic energy that is easily visible at night A swarm of insect-like humanoids swarm out of a rift The Xiticix are a mysterious race of insect-like humanoids A typical Ley Line walker, a practitioner of magic",
+  "suggested_target": "lib/occs/128.lpc"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "169",
+  "name": "169",
+  "slug": "169",
+  "section": "rcc",
+  "description": "will become fearful and panicky. There is a 60% chance that the The armor can be instantly created upon anyone, as long as the spell",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "Duration: 3 minutes (12 melees) per level of experience.                               This invocation enables the person to function normally without air,\nSaving Throw: Standard                                                               whether it be underwater or in a vacuum, or in an area with little or",
+  "source_range": [
+    9915,
+    10073
+  ],
+  "raw_snippet": "169 will become fearful and panicky. There is a 60% chance that the The armor can be instantly created upon anyone, as long as the spell frightened fellow will flee in terror. Those who hear the breathing, but caster invokes the spell while touching the intended recipient. do not run, will be — 2 to strike, and — 1 to parry and dodge as they shake in their boots. Saving Throw: Standard; those who save are not affected/fearful. Breathe Without Air Range: Self or others by touch. Duration: 12 melees (3 minutes) per level of experience. Levitation Saving Throw: None Range: Up to 60ft (18.3m) away. P.P.E.: Five Duration: 3 minutes (12 melees) per level of experience. This invocation enables the person to function normally without air, Saving Throw: Standard whether it be underwater or in a…",
+  "suggested_target": "lib/occs/169.lpc"
+}

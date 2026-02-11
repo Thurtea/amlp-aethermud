@@ -1,0 +1,19 @@
+{
+  "id": "145",
+  "name": "145",
+  "slug": "145",
+  "section": "rcc",
+  "description": "17. Kentucky and Tennessee. Both of these old American Empire",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    8797,
+    8863
+  ],
+  "raw_snippet": "145 17. Kentucky and Tennessee. Both of these old American Empire States are wildernesses with dense woodlands and rolling hills. Civili- zation is a rare thing in these parts, although there are many tiny settlements and feudal kingdoms. Magic is also strong in these areas, which make them prime locations for supernatural monsters. But the strangest occurrence is what natives call \"D-shifting.\" One moment you are walking along a forest path, the next moment the entire forest blurs and then shimmers with silver light. Suddenly, the forest has been replaced by an alien forest or a desert! You are still in the same geog- raphic location but the environment around you has changed. Nobody seems to have an explanation as to how the environment can change but the people remain. It's almost…",
+  "suggested_target": "lib/occs/145.lpc"
+}

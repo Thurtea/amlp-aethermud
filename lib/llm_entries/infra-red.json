@@ -1,0 +1,19 @@
+{
+  "id": "infra-red",
+  "name": "(INFRA-RED)",
+  "slug": "infra-red",
+  "section": "rcc",
+  "description": "(INFRA-RED)",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13139,
+    13143
+  ],
+  "raw_snippet": "(INFRA-RED)",
+  "suggested_target": "lib/occs/infra-red.lpc"
+}

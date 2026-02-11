@@ -1,0 +1,19 @@
+{
+  "id": "186",
+  "name": "186",
+  "slug": "186",
+  "section": "rcc",
+  "description": "Using ritual magic the mystic can turn a torrential rain into a drizzle,",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "Said to be the most powerful of all the metamorph magics, the mage\nCreate Zombie (ritual)                                                              can transform himself into a mist. As a mist, no physical or energy\n                                                                                    attacks can harm him. No locked door can stop him, for he can slip\nRange: Touch\n                                                                                    through the tiniest crack or keyhole. Although the mystic can not com-\nDuration: Exists until destroyed.\nSaving Throw: None                                                                  municate or cast magic, he can hear and see events around him as",
+  "source_range": [
+    11183,
+    11260
+  ],
+  "raw_snippet": "186 Using ritual magic the mystic can turn a torrential rain into a drizzle, reduce winds to a gentle breeze, shrink ocean waves to normal, disperse Metamorphosis: Mist Range: Self; or others through ritual magic. a tornado in an instant and get the sun to peek through clearing skies. Duration: 20 minutes per level of experience. Note: Calm Storms is effective against natural and magically induced Saving Throw: None; standard if an unwilling subject. storms. P.P.E.: Two Hundred Fifty Said to be the most powerful of all the metamorph magics, the mage Create Zombie (ritual) can transform himself into a mist. As a mist, no physical or energy attacks can harm him. No locked door can stop him, for he can slip Range: Touch through the tiniest crack or keyhole. Although the mystic can not com-…",
+  "suggested_target": "lib/occs/186.lpc"
+}

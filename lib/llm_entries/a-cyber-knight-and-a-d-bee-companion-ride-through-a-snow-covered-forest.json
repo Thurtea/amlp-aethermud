@@ -1,0 +1,19 @@
+{
+  "id": "a-cyber-knight-and-a-d-bee-companion-ride-through-a-snow-covered-forest",
+  "name": "A cyber-knight and a D-Bee companion ride through a snow covered forest",
+  "slug": "a-cyber-knight-and-a-d-bee-companion-ride-through-a-snow-covered-forest",
+  "section": "rcc",
+  "description": "A cyber-knight and a D-Bee companion ride through a snow covered forest",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9173,
+    9174
+  ],
+  "raw_snippet": "A cyber-knight and a D-Bee companion ride through a snow covered forest",
+  "suggested_target": "lib/occs/a-cyber-knight-and-a-d-bee-companion-ride-through-a-snow-covered-forest.lpc"
+}

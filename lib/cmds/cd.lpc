@@ -4,7 +4,7 @@
 int main(string args) {
     object player = this_player();
     if (!player) return 0;
-    // TODO: Implement directory change logic
-    write("Stub: cd command. Directory change not yet implemented.\n");
+    // Stub: directory change logic not implemented
+    write("Stub: cd command. Directory change not implemented.\n");
     return 1;
 }

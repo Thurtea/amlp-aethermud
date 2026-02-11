@@ -1,0 +1,19 @@
+{
+  "id": "gun-elevation",
+  "name": "GUN ELEVATION",
+  "slug": "gun-elevation",
+  "section": "rcc",
+  "description": "GUN ELEVATION",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13058,
+    13062
+  ],
+  "raw_snippet": "GUN ELEVATION",
+  "suggested_target": "lib/occs/gun-elevation.lpc"
+}

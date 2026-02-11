@@ -1,0 +1,19 @@
+{
+  "id": "rogues-and-other-antagonists",
+  "name": "Rogues and Other Antagonists",
+  "slug": "rogues-and-other-antagonists",
+  "section": "occ",
+  "description": "A Typical Coalition Grunt",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    15332,
+    15370
+  ],
+  "raw_snippet": "Rogues and Other Antagonists A Typical Coalition Grunt Alignment: Any. If a villain, anarchist or evil. Attributes: Average. Body Armor: 50 or 80 M.D.C. Dead Boy armor. Level of Experience: First. A Typical High-Tech Combat: Hand to Hand: Expert: Two attacks per melee, generally + 1 Bandit (Headhunter) to parry and dodge. Weapons: Alignment: Anarchist or evil. 1. C-18 laser pistol: 2D4 M.D., Range: 800 ft (244 m), Payload: Attributes: P.P. 10+ 1D6, all others average. 10 shots. Body Armor: 80 M.D.C. heavy armor. 2. C-12 heavy laser rifle: 2 settings; 2D6or4D6. Range: 2000 feet Level of Experience: Second level, but could range from 1-4. (610 m). Payload: 20, or 30 with canister. Combat: Hand to Hand: Expert: 2 attacks per melee, generally + 1 to 3. And/or C-14 Fire Breather energy rifle:…",
+  "suggested_target": "lib/occs/rogues-and-other-antagonists.lpc"
+}

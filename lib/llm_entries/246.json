@@ -1,0 +1,19 @@
+{
+  "id": "246",
+  "name": "246",
+  "slug": "246",
+  "section": "occ",
+  "description": "the cut is repaired, the tiny 'bots return to their carrying unit, refill Pocket Laser Distancer: A handy item, about the size of a cigarette",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    14819,
+    14887
+  ],
+  "raw_snippet": "246 the cut is repaired, the tiny 'bots return to their carrying unit, refill Pocket Laser Distancer: A handy item, about the size of a cigarette their supplies and wait till activated again. lighter, that is used for measuring distances. The unit also has a Equal to a paramedic suturing skill of 90%. Not effective against digital display and built-in calendar (day, month, year), clock, and internal injury, broken bone, or severe wounds. But great for cuts, alarm clock capability. Laser range is 4000 feet (1200 m). Cost: bruises, bullet and stab wounds. Cost: 24,000 credits. 1000 credits. IRMSS Internal Robot Medical Surgeon System: An amazing med- PDD Pocket Digital Disc Audio Player and Recorder: Basically a ical device that injects a dozen microscopic robot units, about the future CD…",
+  "suggested_target": "lib/occs/246.lpc"
+}

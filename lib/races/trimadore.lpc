@@ -8,37 +8,35 @@ inherit "/std/race";
 void create() {
     ::create();
     
-    set_race_name("");
+    set_race_name("Trimadore");
     set_race_id("trimadore");
-    set_race_plural("s");
+    set_race_plural("Trimadore");
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "TODO: Add full race description for ."
+        "Trimadore are a rugged folk from frontier lands. This placeholder"
+        " provides conservative defaults; expand with canonical details."
     );
     
-    // TODO: Configure physical characteristics
+    // Physical characteristics configured above
     set_size_category(SIZE_MEDIUM);
     set_height_range(60, 72);
     set_weight_range(120, 200);
     set_lifespan(80);
     
-    // TODO: Configure stat modifiers
     set_stat_modifiers(([
-        // Example: "ps": 2
+        "pe": 1,
+        "ps": 1
     ]));
     
-    // TODO: Configure racial abilities
-    set_racial_abilities(({ }));
+    set_racial_abilities(({ "endurance", "forage" }));
     
-    // TODO: Configure OCC restrictions
     set_allowed_occs(({ }));
     set_forbidden_occs(({ }));
-    set_recommended_occs(({ }));
+    set_recommended_occs(({ "wilderness_scout", "vagabond" }));
     
-    // TODO: Configure starting resources
-    set_starting_equipment(({ }));
-    set_starting_credits(100);
+    set_starting_equipment(({ "/obj/clothing/basic_clothes", "/obj/item/canteen" }));
+    set_starting_credits(90);
     
     set_languages(({ "american" }));
     set_primary_language("american");

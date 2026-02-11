@@ -1,0 +1,19 @@
+{
+  "id": "map-of-england",
+  "name": "Map of England",
+  "slug": "map-of-england",
+  "section": "rcc",
+  "description": "Virtually all of the British Isles are bathed in magic energy and",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9256,
+    9258
+  ],
+  "raw_snippet": "Map of England Virtually all of the British Isles are bathed in magic energy and avoided by most people The green areas are infamous for their",
+  "suggested_target": "lib/occs/map-of-england.lpc"
+}

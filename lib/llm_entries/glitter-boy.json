@@ -1,0 +1,19 @@
+{
+  "id": "glitter-boy",
+  "name": "GLITTER BOY",
+  "slug": "glitter-boy",
+  "section": "rcc",
+  "description": "RECOIL SUPPRESSION",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13146,
+    13156
+  ],
+  "raw_snippet": "GLITTER BOY RECOIL SUPPRESSION RECOIL DAMPENING THRUSTERS THRUSTERS ARE SYNCHRONIZED TO GUN ELEVATION AND SIDE TO SIDE SWEAP THRUSTERS FIRE ONLY WHEN GUN IS FlRED.",
+  "suggested_target": "lib/occs/glitter-boy.lpc"
+}

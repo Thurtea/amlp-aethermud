@@ -8,23 +8,28 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Crazy");
     set_occ_id("crazy");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "TODO: Add full O.C.C. description for ."
+        "A wildcard OCC representing characters driven by obsession, visions,"
+        " or other extreme mental states. This stub is conservative — review"
+        " and expand with specific flavour and mechanics from your source."
     );
     
-    // TODO: Configure stat requirements
+    // Stat requirements configured above
     set_stat_requirements(([
-        // Example: "iq": 10
+        // Minimal requirements — increase if needed for a particular variant
+        "iq": 8
     ]));
     
-    // TODO: Configure stat bonuses
+    // Stat bonuses configured above
     set_stat_bonuses(([
-        // Example: "ps": 2
+        // Conservative, reviewable bonuses
+        "me": 1,
+        "iq": 0
     ]));
     
     // Combat configuration
@@ -32,9 +37,10 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // TODO: Configure OCC skills
+    // OCC skills configured above
     set_occ_skills(({
-        "language_american"
+        "language_american", "prowl", "stealth", "intimidate",
+        "perception", "first_aid"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,9 +60,9 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // TODO: Configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
+    // Starting equipment configured above
+    set_standard_equipment(({ "/obj/clothing/basic_clothes", "/obj/item/rations_1week" }));
+    set_starting_credits(50, 200);
     set_starting_weapons(({ }));
     set_starting_armor(({ }));
     

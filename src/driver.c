@@ -34,6 +34,9 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+/* Terminal ioctl */
+#include <sys/ioctl.h>
+#include <termios.h>
 
 #include "vm.h"
 #include "compiler.h"
@@ -371,6 +374,18 @@ void init_session(PlayerSession *session, int fd, const char *ip, ConnectionType
     session->input_length = 0;
     session->ws_buffer_length = 0;
     session->is_color = 1;  /* ANSI color on by default */
+    /* Default terminal size until detected/overridden */
+    session->terminal_width = 80;
+    session->terminal_height = 24;
+
+    /* Try to detect terminal size if the fd is a controlling tty (may fail on sockets) */
+    if (conn_type == CONN_TELNET && fd >= 0) {
+        struct winsize ws;
+        if (ioctl(fd, TIOCGWINSZ, &ws) == 0) {
+            if (ws.ws_col > 0) session->terminal_width = (int)ws.ws_col;
+            if (ws.ws_row > 0) session->terminal_height = (int)ws.ws_row;
+        }
+    }
 }
 
 /* Free session resources */

@@ -1,0 +1,19 @@
+{
+  "id": "reason-is-that-two-dozen-ley-lines-slice-through-the-ruins-and-a-ley-line",
+  "name": "reason is that two dozen ley lines slice through the ruins and a ley line",
+  "slug": "reason-is-that-two-dozen-ley-lines-slice-through-the-ruins-and-a-ley-line",
+  "section": "rcc",
+  "description": "nexus sits in what was once the downtown metropolis, a few miles",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": "development of Missouri, which is quickly becoming a new haven for\n                                                                                    humankind. However, the State is lightly populated, with an estimated\n                                                                                    225,000 CS citizens and perhaps another 50,000 squatters. The land\n                                                                                    north of the Missouri River (an arm of the Mississippi River) is predo-\n                                                                                    minantly farms, with a couple dozen little communities and one major\n                                                                                    city, New Chillicothe, civilian population: 98,000. It is the seat of the",
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    8485,
+    8515
+  ],
+  "raw_snippet": "reason is that two dozen ley lines slice through the ruins and a ley line nexus sits in what was once the downtown metropolis, a few miles from the shores of Lake Michigan. This means that it is the source of strange occurrences, attracts magic and supernatural creatures, as well as admits strange, alien beings from rifts that periodically open. A typical patrol of 2-6 SAMAS or sky-cyclists cross the skies hourly, while ground patrols of Dog Packs, psi-hunters, urban assault robots, and eliminator squads make daily patrols into the city itself. Spider walkers defend the perimeter between the old ruins and Chi-town. Chi-town will not allow a magic, psychic, supernatural, or any other community to establish itself in Old Chicago, because of its close proximity, and because of the memory of…",
+  "suggested_target": "lib/occs/reason-is-that-two-dozen-ley-lines-slice-through-the-ruins-and-a-ley-line.lpc"
+}

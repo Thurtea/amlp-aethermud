@@ -1,0 +1,19 @@
+{
+  "id": "13-pecos-empire",
+  "name": "13 Pecos Empire",
+  "slug": "13-pecos-empire",
+  "section": "rcc",
+  "description": "The Americas & Atlantis",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9245,
+    9250
+  ],
+  "raw_snippet": "13 Pecos Empire The Americas & Atlantis Green area indicates the areas most troubled by",
+  "suggested_target": "lib/occs/13-pecos-empire.lpc"
+}

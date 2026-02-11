@@ -1,0 +1,19 @@
+{
+  "id": "178",
+  "name": "178",
+  "slug": "178",
+  "section": "rcc",
+  "description": "NOCTURNAL ANIMALS",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "The mystic can purify food or water, cleansing it of disease, bacteria\n                                                                                  and poison/toxins. Up to 50lbs (22kg) of food or 10 gallons of water/\nMetamorphosis: Animal                                                             fluids can be purified.\nRange:    Self or other by ritual.\nDuration: 20 minutes per level of experience.\nSaving Throw: None",
+  "source_range": [
+    10577,
+    10789
+  ],
+  "raw_snippet": "178 NOCTURNAL ANIMALS Abilities and Bonuses: 1. Extraordinary vision approximately 10 times better than a normal human's. This means the character can clearly see an 18 inch item up to two miles away (3.2km). 2. Nightvision — 600ft (183m); can see in the dark. 3. Extraordinary sense of smell allows the character to detect very faint scent traces. Tracking by smell is at a skill level of 35% + 5% per level of experience. Identify person by scent is a 48% chance. 4. Natural Prowl skill is 65%+ 5% per level of experience. Purification Range: Touch or 3ft (0.9m). Duration: Instant Saving Throw: None P.P.E.: Twenty The mystic can purify food or water, cleansing it of disease, bacteria and poison/toxins. Up to 50lbs (22kg) of food or 10 gallons of water/ Metamorphosis: Animal fluids can be…",
+  "suggested_target": "lib/occs/178.lpc"
+}

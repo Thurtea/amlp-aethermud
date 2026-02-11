@@ -1,0 +1,19 @@
+{
+  "id": "black-market",
+  "name": "Black Market",
+  "slug": "black-market",
+  "section": "rcc",
+  "description": "Cybernetics",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    14002,
+    14019
+  ],
+  "raw_snippet": "Black Market Cybernetics As a rule, any of the implants and cybernetics listed can be procured through a black market cyber-doc clinic or body-chop-shop. The independent and caring black market cyber-doc is a rarity. Cybernetics are simply too costly and dangerous to get unless one has a huge support organization. Because cybernetic augmentation is so desperately wanted by so many, the crime lords make a prosperous living providing it. Black market cyber-docs are seldom nice guys. They are usually self-serving criminals who work for a larger criminal organization. They prey on the desperation of the sick, the terror of those hunted by the Coalition, and the greed or power of the rich and corrupt to sell their services. They are seldom caring doctors who seek to help the unfortunate.…",
+  "suggested_target": "lib/occs/black-market.lpc"
+}

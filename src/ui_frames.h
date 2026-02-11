@@ -6,7 +6,8 @@
 typedef struct PlayerSession PlayerSession;
 
 /* Default frame width (inner content width, not counting borders) */
-#define FRAME_WIDTH 55
+/* NOTE: changed from 55 to a wider default; per-session width should be used when available */
+#define FRAME_WIDTH 80
 
 /* Box-drawing functions - all output via send_to_player */
 

@@ -1,0 +1,19 @@
+{
+  "id": "casing-ejector-laser-targeter",
+  "name": "CASING-EJECTOR LASER TARGETER",
+  "slug": "casing-ejector-laser-targeter",
+  "section": "rcc",
+  "description": "USED IN CONJUNCTION WITH COMPUTERIZED",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13116,
+    13123
+  ],
+  "raw_snippet": "CASING-EJECTOR LASER TARGETER USED IN CONJUNCTION WITH COMPUTERIZED TARGETING SYSTEM - LASER BEAM RANGE OF 4000 FEET.",
+  "suggested_target": "lib/occs/casing-ejector-laser-targeter.lpc"
+}

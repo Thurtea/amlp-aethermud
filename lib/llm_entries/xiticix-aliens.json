@@ -1,0 +1,19 @@
+{
+  "id": "xiticix-aliens",
+  "name": "Xiticix Aliens",
+  "slug": "xiticix-aliens",
+  "section": "rcc",
+  "description": "The Xiticix are a mysterious race of insect-like humanoids who, presumably, emerged from",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    8226,
+    8232
+  ],
+  "raw_snippet": "Xiticix Aliens The Xiticix are a mysterious race of insect-like humanoids who, presumably, emerged from a rift. They have established colonies in the northern wilderness of Minnesota and along the old USA and Canadian border. The Xiticix refuse to communicate with other intelligent life forms and are hostile to all who enter their domain.",
+  "suggested_target": "lib/occs/xiticix-aliens.lpc"
+}

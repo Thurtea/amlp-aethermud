@@ -1,0 +1,19 @@
+{
+  "id": "cybernetic-augmentation-mechanisms",
+  "name": "Cybernetic Augmentation Mechanisms",
+  "slug": "cybernetic-augmentation-mechanisms",
+  "section": "rcc",
+  "description": "Cybernetics for the purpose of augmentation are mechanisms that",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": "have special and superhuman capabilities. They are designed to make\nthe human body better, stronger, and more alert. Augmentation implants\nare usually mechanical and seldom utilize the melding of flesh and\nmachine that occurs in cybernetic bio-systems.",
+  "ppe": null,
+  "source_range": [
+    13666,
+    13673
+  ],
+  "raw_snippet": "Cybernetic Augmentation Mechanisms Cybernetics for the purpose of augmentation are mechanisms that have special and superhuman capabilities. They are designed to make the human body better, stronger, and more alert. Augmentation implants are usually mechanical and seldom utilize the melding of flesh and machine that occurs in cybernetic bio-systems.",
+  "suggested_target": "lib/occs/cybernetic-augmentation-mechanisms.lpc"
+}

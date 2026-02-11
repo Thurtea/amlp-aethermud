@@ -4,7 +4,8 @@
 CC = gcc
 # Allow users to override CFLAGS, but keep include dirs in CPPFLAGS so
 # they are not lost when CFLAGS is overridden on the make command line.
-CFLAGS = -Wall -Wextra -D_DEFAULT_SOURCE -g -O2 -std=c99
+# Default CFLAGS (can be overridden by target-specific assignments)
+CFLAGS ?= -Wall -Wextra -D_DEFAULT_SOURCE -g -O2 -std=c99
 CPPFLAGS += -Isrc
 LDFLAGS = -lm
 
@@ -21,6 +22,7 @@ TEST_COMMON_SOURCES = $(SRC_DIR)/vm.c \
                       $(SRC_DIR)/mapping.c \
                       $(SRC_DIR)/gc.c \
                       $(SRC_DIR)/efun.c \
+					  $(SRC_DIR)/test_stubs.c \
                       $(SRC_DIR)/compiler.c \
                       $(SRC_DIR)/program_loader.c \
                       $(SRC_DIR)/program.c \
@@ -58,7 +60,24 @@ C_RESET =
 C_BOLD =
 
 # Default target - just build the driver
-.PHONY: all driver tests clean distclean help test
+.PHONY: all driver tests clean distclean help test debug release asan asan_tests
+
+# Target-specific builds
+# Usage: `make debug` or `make release` or `make asan` (builds driver)
+# `make asan_tests` builds all tests with ASan/UBSan instrumentation and runs them.
+debug: CFLAGS := -Wall -Wextra -D_DEFAULT_SOURCE -g -O0 -std=c99
+debug: $(BUILD_DIR)/driver
+
+release: CFLAGS := -Wall -Wextra -D_DEFAULT_SOURCE -O2 -std=c99 -DNDEBUG
+release: $(BUILD_DIR)/driver
+
+asan: CFLAGS := -Wall -Wextra -D_DEFAULT_SOURCE -g -O1 -std=c99 -fsanitize=address,undefined -fno-omit-frame-pointer
+asan: $(BUILD_DIR)/driver
+
+# Build and run tests under ASan
+asan_tests: CFLAGS := -Wall -Wextra -D_DEFAULT_SOURCE -g -O1 -std=c99 -fsanitize=address,undefined -fno-omit-frame-pointer
+asan_tests: tests
+
 
 driver: $(BUILD_DIR)/driver
 

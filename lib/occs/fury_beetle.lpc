@@ -1,0 +1,56 @@
+// /lib/occs/fury_beetle.lpc
+//  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
+//  Source: Fury Beetle (parsed)
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Fury Beetle");
+    set_occ_id("fury_beetle");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "A massive, beetle-like megafauna — powerful, armored, and
+easily startled. Fury Beetles may be encountered as wild predators or
+occasionally trained as mounts by wilderness tribes."
+    );
+
+    set_stat_bonuses(([
+        "ps": 8,
+        "pe": 6
+    ]));
+
+    set_base_attacks(4);
+    set_attacks_per_level(1, 2);
+    set_hand_to_hand_type("natural");
+
+    set_occ_skills(({ "track", "wilderness_survival", "ride" }));
+    set_occ_related_skills(({ }));
+    set_occ_skill_count(3);
+    set_elective_count(0);
+    set_secondary_count(2);
+
+    // Large animal - high P.P.E. and natural resilience in source
+    set_base_ppe(10);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_sdc(200);
+    set_sdc_per_level(0);
+
+    set_standard_equipment(({ }));
+    set_starting_credits(0, 0);
+    set_starting_weapons(({ }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+}

@@ -1,0 +1,19 @@
+{
+  "id": "233",
+  "name": "233",
+  "slug": "233",
+  "section": "rcc",
+  "description": "The disadvantage, other than its more obvious nature, is that there",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    13965,
+    14001
+  ],
+  "raw_snippet": "233 The disadvantage, other than its more obvious nature, is that there is no true sense of touch, only sensors designed to respond to heat and pressure. The lack of touch can be emotionally and mentally debilitating. However, the mechanical substitute is still a marvelous alternative to no limb at all. Mechanical Statistics: Attribute maximums for hands and arms are P.S. 10, P.P. 10; S.D.C. 35. Weight: 12 Ibs. Legs are the same, with a maximum speed attribute of 10 and a S.D.C, of 50. Weight: 30 Ibs. Skill penalty of - 15% due to lack of full articulation and no sense of touch. Medical Statistics: If the appendage is subjected to minor damage from a cut or burn, only surface blemishes and disfigurement of the outer skin casing will result, but the mechanical functions are unim- paired.…",
+  "suggested_target": "lib/occs/233.lpc"
+}

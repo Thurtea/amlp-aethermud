@@ -8,23 +8,25 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Rogue Scientist");
     set_occ_id("rogue_scientist");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "TODO: Add full O.C.C. description for ."
+        "A fringe scientist who applies experimental knowledge outside
+traditional institutions. Conservative defaults applied; review for
+accuracy against canonical sources."
     );
     
-    // TODO: Configure stat requirements
+    // NOTE: Conservative stat requirements — adjust if needed.
     set_stat_requirements(([
-        // Example: "iq": 10
+        "iq": 10
     ]));
     
-    // TODO: Configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "iq": 1,
+        "me": 1
     ]));
     
     // Combat configuration
@@ -32,9 +34,14 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // TODO: Configure OCC skills
+    // Conservative skill set — human review recommended.
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "science_basic",
+        "repair",
+        "electronics",
+        "research_methods",
+        "first_aid"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +61,11 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // TODO: Configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    // Conservative starting gear
+    set_standard_equipment(({ "/obj/clothing/lab_coat", "/obj/toolkit/basic_kit" }));
+    set_starting_credits(50, 250);
+    set_starting_weapons(({ "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/light_vest" }));
     
     // Race restrictions
     set_race_requirements(({ }));

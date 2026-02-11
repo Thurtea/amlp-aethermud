@@ -1,0 +1,19 @@
+{
+  "id": "coalition-samas-power-armor-in-action",
+  "name": "Coalition SAMAS power armor in action",
+  "slug": "coalition-samas-power-armor-in-action",
+  "section": "rcc",
+  "description": "Coalition SAMAS power armor in action",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9177,
+    9178
+  ],
+  "raw_snippet": "Coalition SAMAS power armor in action",
+  "suggested_target": "lib/occs/coalition-samas-power-armor-in-action.lpc"
+}

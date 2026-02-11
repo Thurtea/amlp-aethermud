@@ -1,0 +1,19 @@
+{
+  "id": "189",
+  "name": "189",
+  "slug": "189",
+  "section": "rcc",
+  "description": "Anybody who braves the barrier must roll again; this time to save destination, some place he has visited or knows well. However, locations",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": "3. A place seen in a photo (the photograph is being looked at during\n   This spell creates a shimmering wall of light that no creature, weapon,            the moment of teleportation): 80%.\nor object may penetrate. Only a Dispel Magic Barrier spell or a powerful           4. A place never visited before, but described in detail: 58%.\nNegate Magic will destroy the wall. The spell caster is able to create             5. A place never before visited and known only by name or brief\na wall of force that measures 20 x 20 feet per level of experience. The               description: 20%.\nwall can be cast up to 100ft away.\n                                                                                                    Results of an Unsuccessful Teleport\n                                                                                               (Roll percentile dice for random occurrences.)\nRestoration\nRange: Touch or 3ft away (0.9m).                                                    1-40   Appear at the wrong place. No idea of present location;\nDuration: Instant/permanent                                                                3D6 x 100 miles off course.\nSaving Throw: None                                                                 41-75   Appear at the wrong place. No idea of present location;",
+  "source_range": [
+    11396,
+    11466
+  ],
+  "raw_snippet": "189 Anybody who braves the barrier must roll again; this time to save destination, some place he has visited or knows well. However, locations versus magic. A successful save means the character passes through seen in photographs or described in detail can also be reached, but there the barrier with only a headache and loses one attack that melee. A is always a chance of a miscalculation. failed save means the character must face an apparition of his greatest The mage can teleport himself alone, or other people and objects fear. The apparition is exactly like the sixth level invocation and will within 20ft (6.1m) of him. The total number of people and items which last as long as the barrier remains up. Only the mage who created the the mystic can teleport is limited by the amount of…",
+  "suggested_target": "lib/occs/189.lpc"
+}

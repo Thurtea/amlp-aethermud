@@ -1,0 +1,19 @@
+{
+  "id": "chi-town",
+  "name": "Chi-Town",
+  "slug": "chi-town",
+  "section": "rcc",
+  "description": "The heart of the Coalition",
+  "attribute_requirements": null,
+  "occ_skills": null,
+  "standard_equipment": null,
+  "money": null,
+  "cybernetics": null,
+  "ppe": null,
+  "source_range": [
+    9179,
+    9187
+  ],
+  "raw_snippet": "Chi-Town The heart of the Coalition Outside, Chi-Town rises above the squalor and human refugees of the \"Burbs\" like a man-made volcano Inside is an incredible megalopolis where the elite true, humans and their protectors live The upper levels are beautiful, white, and clean The lower levels are reserved for the poor and are dark and dirty There are five Coalition States Chi-Town (includes Northern Il- linois & Iowa), Lone Star (Texas), Missouri, Free Quebec, and Iron",
+  "suggested_target": "lib/occs/chi-town.lpc"
+}

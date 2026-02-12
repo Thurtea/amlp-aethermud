@@ -43,13 +43,13 @@ int main(string args) {
     }
     
     // Display file with line numbers
-    tell_object(player, "┌─ " + resolved + "\n");
+    tell_object(player, "+-- " + resolved + "\n");
     
     for (i = 0; i < sizeof(lines); i++) {
         tell_object(player, sprintf("%4d: %s\n", i + 1, lines[i]));
     }
     
-    tell_object(player, "└─ " + sprintf("%d lines\n", sizeof(lines)));
+    tell_object(player, "+-- " + sprintf("%d lines\n", sizeof(lines)));
     return 1;
 }
 

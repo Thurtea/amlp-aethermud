@@ -133,13 +133,13 @@ void show_file(object player, string file_path, string *lines) {
         return;
     }
     
-    tell_object(player, "┌─ " + file_path + "\n");
+    tell_object(player, "+-- " + file_path + "\n");
     
     for (i = 0; i < sizeof(lines); i++) {
         tell_object(player, sprintf("%3d: %s\n", i + 1, lines[i]));
     }
     
-    tell_object(player, "└─\n");
+    tell_object(player, "+--\n");
 }
 
 void save_file(object player, string file_path, string *lines) {

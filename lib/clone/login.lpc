@@ -25,12 +25,12 @@ void logon() {
     
     // If first-time setup, launch installation wizard
     if (needs_installation) {
-        write("\n╔════════════════════════════════════════════════════════════════╗\n");
-        write("║                                                                ║\n");
-        write("║         FIRST-TIME SETUP DETECTED                             ║\n");
-        write("║         Loading Installation Wizard...                        ║\n");
-        write("║                                                                ║\n");
-        write("╚════════════════════════════════════════════════════════════════╝\n\n");
+        write("\n+----------------------------------------------------------------+\n");
+        write("|                                                                |\n");
+        write("|         FIRST-TIME SETUP DETECTED                             |\n");
+        write("|         Loading Installation Wizard...                        |\n");
+        write("|                                                                |\n");
+        write("+----------------------------------------------------------------+\n\n");
         
         object install_wizard;
         mixed err;

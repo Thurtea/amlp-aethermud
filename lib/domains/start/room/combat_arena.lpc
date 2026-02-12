@@ -8,10 +8,9 @@ void create() {
     set_id("combat_arena");
     set_short("Combat Training Arena");
     set_long(
-        "You stand in a sandy training arena surrounded by wooden fencing.\n"
+        "The room opens into a sandy training arena surrounded by wooden fencing.\n"
         "This area is specifically designed for combat practice. Several\n"
         "practice dummies line the walls, and weapons racks hold training gear.\n\n"
-        
         "A sign on the wall reads: 'TEST YOUR COMBAT SKILLS HERE!'\n"
     );
     

@@ -9,9 +9,9 @@ void create() {
     
     set_short("Shore of Crystal Lake");
     set_long(
-        "You stand on the shore of a pristine crystal lake. The water is "
+        "The shore opens onto a pristine crystal lake. The water is "
         "clear and inviting, stretching about fifty feet to the far shore. "
-        "You can see the lake bed through the crystalline waters, and something "
+        "The lake bed is visible through the crystalline waters, and something "
         "metallic glints on the opposite shore.\n\n"
         "The lake looks deep enough to require swimming to cross. To the north "
         "is a path leading back to the village.\n"

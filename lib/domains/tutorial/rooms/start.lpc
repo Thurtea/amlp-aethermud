@@ -14,5 +14,5 @@ string query_short() {
 }
 
 string query_long() {
-    return "You are in a simple starting room. This is where your adventure begins.";
+    return "This simple starting room marks the beginning of the adventure.";
 }

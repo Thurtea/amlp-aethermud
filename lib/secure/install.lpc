@@ -14,18 +14,18 @@ private int screen_reader;
 
 void logon() {
     write("\n");
-    write("╔════════════════════════════════════════════════════════════════╗\n");
-    write("║                                                                ║\n");
-    write("║              AMLP MUD - INSTALLATION WIZARD                    ║\n");
-    write("║                                                                ║\n");
-    write("╚════════════════════════════════════════════════════════════════╝\n");
+    write("+----------------------------------------------------------------+\n");
+    write("|                                                                |\n");
+    write("|              AMLP MUD - INSTALLATION WIZARD                    |\n");
+    write("|                                                                |\n");
+    write("+----------------------------------------------------------------+\n");
     write("\n");
     write("Welcome to the AMLP MUD Installation Process!\n\n");
     write("You will be asked a series of questions to create the first\n");
     write("administrator account for this MUD.\n\n");
     write("This wizard will only run ONCE - on the first connection.\n");
     write("After setup, normal login will be activated.\n\n");
-    write("═══════════════════════════════════════════════════════════════\n\n");
+    write("-----------------------------------------------------------------\n\n");
     
     input_name();
 }
@@ -217,7 +217,7 @@ void create_admin() {
     mixed err;
     string workroom_path;
     
-    write("═══════════════════════════════════════════════════════════════\n");
+    write("-----------------------------------------------------------------\n");
     write("                   CREATING ADMIN ACCOUNT\n");
     write("═══════════════════════════════════════════════════════════════\n\n");
     
@@ -284,7 +284,7 @@ void create_admin() {
     admin->save_player();
     
     write("\n");
-    write("═══════════════════════════════════════════════════════════════\n");
+    write("-----------------------------------------------------------------\n");
     write("              INSTALLATION COMPLETE!\n");
     write("═══════════════════════════════════════════════════════════════\n\n");
     write("Admin account created successfully!\n\n");

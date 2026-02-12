@@ -10,7 +10,7 @@ void create() {
     set_id("welcome");
     set_short("The Welcome Hall");
     set_long(
-        "You stand in a minimalist hall with clean, simple architecture.\n" +
+        "The hall features clean, simple architecture with minimalist styling.\n" +
         "This is AMLP-MUD, a bare-bones LPC mudlib foundation.\n\n" +
         
         "ABOUT THIS PROJECT:\n" +

@@ -39,52 +39,73 @@ int main(string arg) {
     }
     
     output = "\n";
-    output += "=== AETHERMUD - ONLINE STAFF ===\n\n";
-    
+    output += "=== AETHERMUD - ONLINE PLAYERS & STAFF ===\n\n";
+
+    /* Wizards section: show names and titles to everyone;
+       show extra idle/location details only to wizards (privileged users). */
     if (sizeof(wizards) > 0) {
         output += "Wizards Online (available to help):\n";
         output += "------------------------------------\n";
-        
+
         for (i = 0; i < sizeof(wizards); i++) {
             string wiz_name = wizards[i]->query_name();
             string wiz_title = wizards[i]->query_title() || "";
             int idle_time = wizards[i]->query_idle();
-            
-            output += sprintf("  %-20s", capitalize(wiz_name));
-            
-            // Show wizard rank
-            if (wizards[i]->query_privilege_level() >= 5) {
-                output += " [ADMIN]";
-            } else if (wizards[i]->query_privilege_level() >= 3) {
-                output += " [SENIOR WIZ]";
-            } else {
-                output += " [WIZARD]";
-            }
-            
-            // Show idle time if significant
-            if (idle_time > 300) {
-                output += " (idle)";
-            }
-            
+            object wiz_env = environment(wizards[i]);
+            string wiz_loc = wiz_env && function_exists("query_short", wiz_env) ? wiz_env->query_short() : (wiz_env ? file_name(wiz_env) : "Unknown");
+
+            /* Always show name + title */
+            output += sprintf("  %-20s %s", capitalize(wiz_name), wiz_title);
             output += "\n";
+
+            /* Wizard-only extra details */
+            if (user->query_privilege_level() >= 1) {
+                string rank = "[WIZARD]";
+                if (wizards[i]->query_privilege_level() >= 5) rank = "[ADMIN]";
+                else if (wizards[i]->query_privilege_level() >= 3) rank = "[SENIOR WIZ]";
+
+                output += sprintf("    %-8s Idle: %4d sec  Loc: %s\n", rank, idle_time, wiz_loc);
+            }
         }
-        
-        output += "\n";
-        output += "To contact a wizard for help, skills, tattoos, or OCC changes:\n";
-        output += "  tell <wizard_name> <your message>\n";
-        output += "\nExample: tell gandalf I would like to request prowl skill\n";
-        output += "Example: tell merlin I would like the flaming_sword tattoo on my right arm\n";
-        
+
+        output += "\nTo contact a wizard for help, skills, tattoos, or OCC changes:\n";
+        output += "  tell <wizard_name> <your message>\n\n";
     } else {
-        output += "No wizards currently online.\n";
-        output += "Please check back later or leave a mudmail message.\n";
+        output += "No wizards currently online.\n\n";
     }
-    
-    output += "\n------------------------------------\n";
+
+    /* Players section: always visible to everyone (name + title).
+       Wizards (privileged users) see extra idle/location details for players too. */
+    if (sizeof(players) > 0) {
+        output += "Players Online:\n";
+        output += "----------------\n";
+
+        for (i = 0; i < sizeof(players); i++) {
+            string p_name = players[i]->query_name();
+            string p_title = players[i]->query_title() || "";
+            int p_idle = players[i]->query_idle();
+            object p_env = environment(players[i]);
+            string p_loc = p_env && function_exists("query_short", p_env) ? p_env->query_short() : (p_env ? file_name(p_env) : "Unknown");
+
+            /* Always show concise name + title */
+            output += sprintf("  %-20s %s\n", capitalize(p_name), p_title);
+
+            /* Extra details only for wizard viewers */
+            if (user->query_privilege_level() >= 1) {
+                output += sprintf("    Idle: %4d sec  Loc: %s\n", p_idle, p_loc);
+            }
+        }
+
+        output += "\n";
+    } else {
+        output += "No players currently online.\n\n";
+    }
+
+    output += "------------------------------------\n";
     output += "Server Population: " + population + "\n";
     output += "====================================\n\n";
-    
-    // If user is a wizard, show them the real count
+
+    /* Wizard staff-only summary (keeps the extra counts and staff view) */
     if (user->query_privilege_level() >= 1) {
         output += "\n[STAFF VIEW]\n";
         output += "Actual counts:\n";

@@ -1,6 +1,10 @@
 // /lib/occs/full_conversion_borg.lpc
 //  O.C.C. - Placeholder Implementation
 //
+// Source: archived-md/ttrpg-references.json ID: missouri-government-and-a-major-military-base-equipped-with-a-full, a-pair-of-full-conversion-borgs-stalk-among-the-rums-of-an-ancient-city
+// Generated: 2026-02-12
+// TODO: Review and expand with gameplay balance
+//
 // This is a stub file. Implement the full OCC details.
 
 inherit "/std/occ";

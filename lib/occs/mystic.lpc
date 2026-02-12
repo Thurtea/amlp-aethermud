@@ -1,6 +1,10 @@
 // /lib/occs/mystic.lpc
 //  O.C.C. - Placeholder Implementation
 //
+// Source: archived-md/ttrpg-references.json ID: a-mystic-drurd-tar-from-her-home-in-england, both-the-stone-and-iron-golems-are-mystical-mega-damage-creatures
+// Generated: 2026-02-12
+// TODO: Review and expand with gameplay balance
+//
 // This is a stub file. Implement the full OCC details.
 
 inherit "/std/occ";

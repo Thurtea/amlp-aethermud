@@ -1,166 +1,93 @@
-# AMLP Driver
+# AMLP Aethermud
 
-A modern LPC MUD driver written from scratch in C, featuring a complete LPC implementation with lexer, parser, bytecode compiler, and stack-based virtual machine.
+This repository is the single source of truth for the AMLP MUD system.
 
-## Overview
+It contains the driver, the LPC mudlib, documentation, tests, and the build system. Development is consolidated here and no longer requires copying code between separate repositories.
 
-AMLP Driver is a high-performance MUD (Multi-User Dungeon) driver that interprets LPC (Lars Pensjö C) code. It provides a complete object-oriented environment with garbage collection, dynamic arrays, mappings, and a rich set of built-in functions for game development.
+## Consolidation Notice
 
-**Key Features:**
+- The `amlp-driver` and `amlp-library` repositories are now archived and deprecated.
+- This repository replaces those projects as the canonical source for development and releases.
+- The aethermud-client remains separate for now and can be added as a git submodule when needed.
 
-- Complete LPC compiler and bytecode VM
-- Garbage-collected object system
-- Native support for .lpc file extension
-- Real-time compilation and object loading
-- Telnet and websocket connectivity
-- Comprehensive character creation system
+## Repository Structure
 
-## Quick Start
+Top-level layout and purpose:
+
+- `src/`  : C driver source code (compiler, VM, runtime)
+- `lib/`  : LPC mudlib, commands, objects, domains, and tests
+- `config/`: Runtime configuration files
+- `docs/` : Design notes, guides, and architecture documents
+- `scripts/`: Helper scripts for building and maintenance
+- `build/` : Build artifacts including the `driver` binary
+- `tools/` : Utility scripts and data used for development
+- `lpc-extension/`: Editor support for `.lpc` files (optional)
+
+## Development Workflow
+
+Edit, test, and commit directly in this repository. Do not copy code between repositories.
+
+1. Edit files in `src/` or `lib/`.
+2. Run the build and tests locally.
+3. Commit changes and push to the central repo.
+
+Recommended commands:
 
 ```bash
-# Build the driver
+# build the driver
 make clean && make driver
 
-# Start the MUD server
+# run unit or integration tests (where available)
+make test
+
+# control the running server
 ./mud.ctl start
-
-# Connect to your MUD
-telnet localhost 3000
+./mud.ctl stop
+./mud.ctl restart
 ```
 
-## Project Structure
+## Build Instructions
 
-```
-amlp-driver/
-├── src/              # C source code 
-│   ├── lexer.c       # LPC tokenization
-│   ├── parser.c      # Recursive descent parser
-│   ├── codegen.c     # Bytecode generation
-│   ├── vm.c          # Stack-based virtual machine
-│   ├── object.c      # Object system
-│   ├── gc.c          # Garbage collector
-│   └── efun.c        # Built-in functions
-├── lib/              # LPC mudlib 
-├── docs/             # Documentation
-├── config/           # Configuration files
-└── mud.ctl           # Server control script
-```
+Requirements:
 
-## LPC File Extension
-
-This driver uses the `.lpc` extension for all LPC library files, clearly distinguishing them from C driver code. For proper syntax highlighting in VS Code, use the AMLP LPC Extension included in this repository.
-
-**Installation:**
-
-```bash
-# From the amlp-driver directory:
-cp -r lpc-extension ~/.vscode/extensions/
-
-# Or install directly from the repo:
-cp -r /path/to/amlp-driver/lpc-extension ~/.vscode/extensions/
-
-# Restart VS Code
-# Your .lpc files will now have proper syntax highlighting!
-```
-
-The extension provides:
-- Syntax highlighting for LPC keywords and functions
-- Code snippets for common LPC patterns
-- Language configuration for proper bracket matching and auto-indentation
-- Quick reference guides for AMLP development
-
-## Usage
-
-### Server Management
-
-```bash
-./mud.ctl start      # Start the MUD server
-./mud.ctl stop       # Stop the server
-./mud.ctl restart    # Restart the server
-./mud.ctl status     # Check server status
-```
-
-### Configuration
-
-Edit `config/runtime.conf` to customize:
-
-- Port numbers (default: 3000 for telnet, 3001 for websocket)
-- Mudlib location
-- Master object path
-- Security settings
-
-### Connecting
-
-**Telnet:**
-
-```bash
-telnet localhost 3000
-```
-
-**Mudlet/TinTin++:**
-
-- Host: localhost
-- Port: 3000
-
-First player to connect receives admin privileges automatically.
-
-### Prompt Customization
-
-Players can customize their command prompt with status information.
-
-## Development
-
-### Building from Source
-
-**Requirements:**
-
-- GCC 4.9+ or Clang
+- GCC or Clang
 - GNU Make
-- POSIX-compliant system (Linux, macOS, WSL)
+- POSIX-compliant system (Linux is recommended)
 
-**Build:**
+To build the driver and tools:
 
 ```bash
-make clean           # Clean previous builds
-make driver          # Build driver only
-make all             # Build driver and utilities
+make clean
+make all
 ```
 
-**Understanding Build Warnings:**
+Start the server:
 
-When you run `make`, you may see compiler warnings. We've created comprehensive documentation explaining each warning:
+```bash
+./mud.ctl start
+```
 
-- **[diagnostics/INDEX.md](diagnostics/INDEX.md)** - Start here for overview
-- **[diagnostics/quick-reference.md](diagnostics/quick-reference.md)** - One-line solutions table
-- **[diagnostics/README.md](diagnostics/README.md)** - Detailed navigation guide
+Server logs are available at `lib/log/server.log`.
 
-The diagnostics directory contains detailed information about build warnings; consult diagnostics/README.md for guidance if needed.
+## Adding the Client as a Submodule (optional)
 
-## Architecture
+If you want to include the aethermud-client in this repo later, add it as a submodule:
 
-The driver implements a complete LPC environment:
+```bash
+git submodule add https://example.com/aethermud-client.git client
+git submodule update --init --recursive
+```
 
-- **Lexer** - Tokenizes LPC source code
-- **Parser** - Builds abstract syntax trees
-- **Compiler** - Generates bytecode
-- **VM** - Executes bytecode in a stack-based virtual machine
-- **Object System** - Manages LPC objects with inheritance
-- **Garbage Collector** - Reference-counted memory management
-- **Efuns** - Built-in functions for strings, arrays, math, I/O
+For now continue developing the client separately on your Windows environment.
 
-## Contributing
+## Notes and Recommendations
 
-Contributions are welcome! This project demonstrates:
-
-- Compiler construction techniques
-- Virtual machine design
-- Garbage collection implementation
-- Network protocol handling
+- The consolidated repo is the authoritative development workspace. Do not maintain parallel live changes in archived repos.
+- Keep `lib/` and `src/` in sync by editing here and running the test cycle.
+- If you need help converting CI or release scripts from the archived repos, open an issue or request assistance.
 
 ## License
 
 MIT License - See LICENSE for details
-
----
 
 **Version:** 0.7.0 | **Status:** Active Development | **Language:** C + LPC

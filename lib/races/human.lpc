@@ -87,6 +87,15 @@ void create() {
     set_homeland("Earth (Various Regions)");
     set_languages(({ "american", "spanish", "euro" }));
     set_primary_language("american");
+
+    // Aggressive defaults for humans: starter skill package to represent adaptability
+    set_property("starting_skill_package", ({
+        "language_american", "literacy_american", "streetwise",
+        "appraisal", "first_aid", "climbing"
+    }));
+    // Humans rarely have innate spells/psionics but may start with simple lore
+    set_property("starting_spells", ({ }));
+    set_property("starting_psionics", ({ }));
 }
 
 // Humans get a bonus to skill selection

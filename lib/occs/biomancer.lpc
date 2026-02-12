@@ -8,23 +8,25 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Biomancer");
     set_occ_id("biomancer");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Placeholder O.C.C. description."
+        "A practitioner who manipulates biological processes for healing
+or harm. Conservative defaults for life-science skills and starter gear; please
+review before committing."
     );
     
-    // Placeholder: configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "iq": 11,
+        "ps": 8
     ]));
     
-    // Placeholder: configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "iq": 2,
+        "ps": 1
     ]));
     
     // Combat configuration
@@ -32,9 +34,13 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // Placeholder: configure OCC skills
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "biology",
+        "medicine",
+        "chemistry",
+        "research_methods",
+        "first_aid"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +60,10 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // Placeholder: configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/lab_coat", "/obj/item/med_kit" }));
+    set_starting_credits(60, 300);
+    set_starting_weapons(({ "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/robe" }));
     
     // Race restrictions
     set_race_requirements(({ }));

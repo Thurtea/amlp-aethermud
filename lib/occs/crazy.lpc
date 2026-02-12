@@ -48,13 +48,13 @@ void create() {
     set_elective_count(4);
     set_secondary_count(6);
     
-    // Magic/Psionics (if applicable)
-    set_base_ppe(0);
-    set_ppe_per_level(0);
+    // Minor unpredictable psionic/mystical talent
+    set_base_ppe(5);
+    set_ppe_per_level(1);
     set_base_isp(0);
     set_isp_per_level(0);
-    set_magic_type("none");
-    set_psionic_type("none");
+    set_magic_type("chaos");
+    set_psionic_type("minor");
     
     // HP/SDC
     set_base_sdc(20);
@@ -66,6 +66,15 @@ void create() {
     set_starting_weapons(({ }));
     set_starting_armor(({ }));
     
+    // Starting equipment configured above
+    set_standard_equipment(({ "/obj/clothing/basic_clothes", "/obj/item/rations_1week" }));
+    set_starting_credits(50, 200);
+    set_starting_weapons(({ }));
+    set_starting_armor(({ }));
+
+    // Special unpredictable talents
+    set_special_powers(({ "unpredictable_luck", "confuse_enemy" }));
+
     // Race restrictions
     set_race_requirements(({ }));
     set_race_exclusions(({ }));

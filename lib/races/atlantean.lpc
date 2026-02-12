@@ -94,6 +94,15 @@ void create() {
     set_homeland("Atlantis (lost to Splugorth)");
     set_languages(({ "atlantean", "dragonese", "american" }));
     set_primary_language("atlantean");
+
+    // Aggressive full-game defaults: starting tattoos, spells, and tattoo slots
+    set_property("starting_tattoos", ({ "eyes_of_knowledge", "dragon", "phoenix" }));
+    // Atlanteans can hold many tattoos by default
+    set_property("max_tattoos", 12);
+    // Blessings / spells commonly known by Atlantean bloodlines
+    set_property("starting_spells", ({ "read_aura", "sense_ley_lines", "light", "detect_enchantment" }));
+    // Small psionic kernel for some Atlanteans
+    set_property("starting_psionics", ({ "sense_psychic_presence" }));
 }
 
 // Atlanteans get bonus to magic skills

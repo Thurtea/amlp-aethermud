@@ -8,23 +8,24 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Techno Wizard");
     set_occ_id("techno_wizard");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Placeholder O.C.C. description."
+        "A mage who blends technology and magic — engineering meets arcana.
+Conservative defaults: tech-magic skills, low cybernetics, moderate PPE."
     );
     
-    // Placeholder: configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "iq": 11,
+        "me": 10
     ]));
     
-    // Placeholder: configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "iq": 2,
+        "me": 1
     ]));
     
     // Combat configuration
@@ -32,33 +33,38 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // Placeholder: configure OCC skills
+    // Primary/secondary skills included — review ordering
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "spellcraft",
+        "electronics",
+        "programming",
+        "repair",
+        "alchemy"
     }));
     
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({ "technical_repair", "research_methods" }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
     
     // Magic/Psionics (if applicable)
-    set_base_ppe(0);
-    set_ppe_per_level(0);
+    // Techno-wizards have magic-like PPE and limited psionics
+    set_base_ppe(20);
+    set_ppe_per_level(2);
     set_base_isp(0);
     set_isp_per_level(0);
-    set_magic_type("none");
+    set_magic_type("techno");
     set_psionic_type("none");
     
     // HP/SDC
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // Placeholder: configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/arcane_jumpsuit", "/obj/item/tech_focus" }));
+    set_starting_credits(100, 400);
+    set_starting_weapons(({ "/obj/weapons/dagger" }));
+    set_starting_armor(({ "/obj/armor/robe" }));
     
     // Race restrictions
     set_race_requirements(({ }));

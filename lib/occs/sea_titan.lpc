@@ -8,23 +8,25 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Sea Titan");
     set_occ_id("sea_titan");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Placeholder O.C.C. description."
+        "A massive aquatic behemoth or mariner specialist adapted to sea
+operations. Conservative defaults for aquatic skills and strength; please
+review with canonical sources."
     );
     
-    // Placeholder: configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "str": 12,
+        "pe": 11
     ]));
     
-    // Placeholder: configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "str": 3,
+        "pe": 1
     ]));
     
     // Combat configuration
@@ -32,9 +34,13 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // Placeholder: configure OCC skills
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "swimming",
+        "navigation_sea",
+        "heavy_weapons",
+        "endurance",
+        "diving"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +60,10 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // Placeholder: configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/wet_suit", "/obj/item/sea_emblem" }));
+    set_starting_credits(100, 400);
+    set_starting_weapons(({ "/obj/weapons/trident" }));
+    set_starting_armor(({ "/obj/armor/reinforced_scale" }));
     
     // Race restrictions
     set_race_requirements(({ }));

@@ -993,6 +993,89 @@ void finalize_character(object player) {
     }
     
     // Mark creation complete
+    // -------------------------------------------------------------
+    // Apply starting packs from race and OCC (spells, psionics, tattoos, skills)
+    // Race-level starting_spells, starting_psionics, starting_tattoos,
+    // starting_skill_package may be provided by race files via properties.
+    // OCCs provide query_starting_spells() and query_occ_powers()/query_occ_skills().
+    // -------------------------------------------------------------
+    string *race_spells = ({});
+    string *race_psions = ({});
+    string *race_tattoos = ({});
+    string *race_skill_pkg = ({});
+    if (race) {
+        // Try query_starting_spells if implemented, otherwise query_property
+        if (functionp(race->query_starting_spells)) {
+            race_spells = race->query_starting_spells();
+        } else if (race->query_property("starting_spells")) {
+            race_spells = race->query_property("starting_spells");
+        }
+        if (race->query_property("starting_psionics")) {
+            race_psions = race->query_property("starting_psionics");
+        }
+        if (race->query_property("starting_tattoos")) {
+            race_tattoos = race->query_property("starting_tattoos");
+        }
+        if (race->query_property("starting_skill_package")) {
+            race_skill_pkg = race->query_property("starting_skill_package");
+        }
+        // Race max_tattoos
+        mixed rt = race->query_property("max_tattoos");
+        if (rt && intp(rt)) {
+            player->set_property("max_tattoos", rt);
+        }
+    }
+
+    // OCC-level starting lists
+    string *occ_spells = ({});
+    string *occ_psions = ({});
+    string *occ_tattoos = ({});
+    string *occ_skill_pkg = ({});
+    if (occ) {
+        if (functionp(occ->query_starting_spells)) occ_spells = occ->query_starting_spells();
+        if (functionp(occ->query_occ_powers)) occ_psions = occ->query_occ_powers();
+        if (occ->query_property("starting_tattoos")) occ_tattoos = occ->query_property("starting_tattoos");
+        if (occ->query_property("starting_skill_package")) occ_skill_pkg = occ->query_property("starting_skill_package");
+        // OCC max_tattoos
+        mixed ot = occ->query_property("max_tattoos");
+        if (ot && intp(ot)) {
+            player->set_property("max_tattoos", ot);
+        }
+    }
+
+    // Grant spells (race then occ)
+    foreach (string sp in race_spells + occ_spells) {
+        if (sp && sp != "") {
+            catch(player->add_spell(sp, 1));
+        }
+    }
+
+    // Grant psionics (try multiple adders)
+    foreach (string pp in race_psions + occ_psions) {
+        if (!pp || pp == "") continue;
+        if (!catch(player->add_psionic(pp, 1))) continue;
+        if (!catch(player->add_power(pp, 1))) continue;
+        catch(player->add_psionic_power(pp, 1));
+    }
+
+    // Grant tattoos (default location: chest)
+    foreach (string tt in race_tattoos + occ_tattoos) {
+        if (!tt || tt == "") continue;
+        catch(player->add_tattoo(tt, "chest"));
+        int cur = player->query_property("current_tattoos") || 0;
+        player->set_property("current_tattoos", cur + 1);
+    }
+
+    // Grant skill packages
+    foreach (string sk in race_skill_pkg + occ_skill_pkg) {
+        if (!sk || sk == "") continue;
+        // Default starting percentage: 30
+        catch(player->add_skill(sk, 30));
+    }
+
+    data["state"] = STATE_COMPLETE;
+    player->set_property("creation_complete", 1);
+    // -------------------------------------------------------------
     data["state"] = STATE_COMPLETE;
     player->set_property("creation_complete", 1);
     

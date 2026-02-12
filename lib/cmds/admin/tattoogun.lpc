@@ -161,7 +161,26 @@ int cmd(string args) {
     
     // Check tattoo limit
     current_tattoos = target->query_property("current_tattoos") || 0;
-    max_tattoos = target->query_property("max_tattoos") || 6;
+    // Compute sensible default for max tattoos based on race/occ/level
+    max_tattoos = target->query_property("max_tattoos");
+    if (!max_tattoos) {
+        int lvl = 0;
+        if (functionp(target->query_level)) {
+            lvl = catch(target->query_level());
+            if (intp(lvl) == 0) lvl = target->query_level();
+        } else {
+            lvl = target->query_level();
+        }
+        string race = target->query_race();
+        string occ = target->query_occ();
+        // Atlanteans get more tattoo slots; Sunaj and Tattoo Warrior get extras
+        if (race == "atlantean" || race == "true_atlantean" || occ == "tattoo_warrior" || occ == "sunaj_assassin") {
+            max_tattoos = 6 + (lvl / 2);
+        } else {
+            max_tattoos = 4 + (lvl / 3);
+        }
+        if (max_tattoos < 4) max_tattoos = 4;
+    }
     
     if (current_tattoos >= max_tattoos) {
         write(target->query_cap_name() + " has reached their tattoo limit!\n");

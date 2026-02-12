@@ -195,6 +195,13 @@ void create() {
     
     set_vehicle_type("none");  // May have horse or cycle
     set_special_training("cyber_knight_code");
+
+    // Aggressive defaults: grant core psi powers and suggest starting psionic load
+    set_property("starting_psionics", ({ "psi_sword", "psi_shield", "sense_evil" }));
+    // Cyber-Knights may get a low set of minor magical rituals in some orders
+    set_property("starting_spells", ({ "read_aura" }));
+    // Provide a recommended starting skill package for full-game readiness
+    set_property("starting_skill_package", ({ "wp_sword", "htoh_martial_arts", "sense_evil", "lore_demons_monsters", "first_aid" }));
     
     // Background
     set_background(

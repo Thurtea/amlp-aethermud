@@ -8,23 +8,25 @@ inherit "/std/occ";
 void create() {
     ::create();
     
-    set_occ_name("");
+    set_occ_name("Stone Master");
     set_occ_id("stone_master");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Placeholder O.C.C. description."
+        "A warrior attuned to earth and stone, favoring durable defenses and
+steady offense. Conservative defaults for strength and endurance; please
+review for game balance."
     );
     
-    // Placeholder: configure stat requirements
     set_stat_requirements(([
-        // Example: "iq": 10
+        "str": 11,
+        "pe": 10
     ]));
     
-    // Placeholder: configure stat bonuses
     set_stat_bonuses(([
-        // Example: "ps": 2
+        "str": 2,
+        "pe": 1
     ]));
     
     // Combat configuration
@@ -32,9 +34,13 @@ void create() {
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
     
-    // Placeholder: configure OCC skills
     set_occ_skills(({
-        "language_american"
+        "language_american",
+        "heavy_weapons",
+        "endurance",
+        "armorer_basic",
+        "tactics",
+        "climbing"
     }));
     
     set_occ_related_skills(({ }));
@@ -54,11 +60,10 @@ void create() {
     set_base_sdc(20);
     set_sdc_per_level(0);
     
-    // Placeholder: configure starting equipment
-    set_standard_equipment(({ }));
-    set_starting_credits(100, 500);
-    set_starting_weapons(({ }));
-    set_starting_armor(({ }));
+    set_standard_equipment(({ "/obj/clothing/stone_plate", "/obj/item/earth_amulet" }));
+    set_starting_credits(80, 350);
+    set_starting_weapons(({ "/obj/weapons/warhammer" }));
+    set_starting_armor(({ "/obj/armor/heavy_plate" }));
     
     // Race restrictions
     set_race_requirements(({ }));

@@ -15,8 +15,8 @@ mixed main(object caller, string arg) {
     string target_race, true_race;
     string *valid_races;
     
-    // Check if they have metamorph ability
-    if (!caller->query_property("has_metamorph")) {
+    // Check if they have metamorph ability (race or player-level flag)
+    if (!caller->query_property("has_metamorph") && !caller->query_property("can_metamorph")) {
         return "You don't possess the power of metamorphosis!";
     }
     
@@ -32,8 +32,11 @@ mixed main(object caller, string arg) {
         return revert_form(caller, true_race);
     }
     
-    // Get list of valid races
+    // Get list of valid races (prefer explicit property, fall back to armor list, then default)
     valid_races = caller->query_property("metamorph_races");
+    if (!valid_races || sizeof(valid_races) == 0) {
+        valid_races = caller->query_property("metamorph_armor_list");
+    }
     if (!valid_races || sizeof(valid_races) == 0) {
         valid_races = ({ "human", "elf", "dwarf", "dog_boy", "psi_stalker" });
     }
@@ -52,8 +55,8 @@ mixed main(object caller, string arg) {
         return "You are already in that form!";
     }
     
-    // Perform metamorphosis
-    race_ob = load_object("/races/" + target_race);
+    // Perform metamorphosis - load race definition from lib
+    race_ob = load_object("/lib/races/" + target_race);
     if (!race_ob) {
         return "Error: Could not load race data for " + target_race + ".";
     }
@@ -64,8 +67,19 @@ mixed main(object caller, string arg) {
         caller->set_property("original_long", caller->query_long());
     }
     
-    // Change race (appearance only)
+    // Change race (appearance only) and mark metamorph state
     caller->set_race(target_race);
+    caller->set_property("metamorph_active", 1);
+    caller->set_property("metamorphed_to", target_race);
+    // If this race/race-file indicates armor-fit override allowance, mirror it
+    if (caller->query_property("metamorph_armor_fit_override")) {
+        caller->set_property("armor_fit_override", 1);
+        // copy explicit list for runtime checks
+        mixed list = caller->query_property("metamorph_armor_list");
+        if (list && pointerp(list)) {
+            caller->set_property("metamorph_current_armor_list", list);
+        }
+    }
     
     // Update short description to match new race
     string new_short = caller->query_cap_name() + " the " + 
@@ -113,6 +127,11 @@ mixed revert_form(object caller, string true_race) {
     
     // Revert to original form
     caller->set_race(true_race);
+    // Clear metamorph state and armor overrides
+    caller->remove_property("metamorph_active");
+    caller->remove_property("metamorphed_to");
+    caller->remove_property("metamorph_current_armor_list");
+    caller->remove_property("armor_fit_override");
     
     // Restore original description
     string orig_short = caller->query_property("original_short");

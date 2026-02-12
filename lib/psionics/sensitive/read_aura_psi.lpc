@@ -73,7 +73,20 @@ int manifest(object manifester, object target, string args) {
     
     // Get level and power
     level = target->query_level();
-    aura_info += ({ "Power Level: " + level });
+    // Map numeric level to descriptive tier
+    string tier;
+    if (level <= 3) {
+        tier = "Very Low (1-3)";
+    } else if (level <= 5) {
+        tier = "Low (4-5)";
+    } else if (level <= 8) {
+        tier = "Medium (6-8)";
+    } else if (level <= 11) {
+        tier = "High (9-11)";
+    } else {
+        tier = "Very High (12+)";
+    }
+    aura_info += ({ "Power Tier: " + tier + " - Level " + level });
     
     // Get health status (psionics can sense life force)
     current_hp = target->query_hp();

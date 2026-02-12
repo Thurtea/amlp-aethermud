@@ -138,6 +138,12 @@ void create() {
     set_magic_type("tattoo");
     set_psionic_type("minor");
 
+    // Aggressive defaults: grant common tattoo spells and starting tattoo list
+    set_property("starting_tattoos", ({ "flaming_sword", "chains", "eyes_of_knowledge" }));
+    set_property("max_tattoos", 12);
+    set_property("starting_spells", ({ "tattoo_weapon", "tattoo_armor", "sense_magic", "read_aura" }));
+    set_property("starting_psionics", ({ "sense_psychic_presence" }));
+
     // Health - tough but not tank
     set_base_hp(0);    // PE + 1d6
     set_hp_per_level(0);   // 1d6

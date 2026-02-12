@@ -58,6 +58,18 @@ void create() {
         "human", "elf", "dwarf", "dog_boy", "psi_stalker", 
         "dragon_hatchling", "juicer", "crazy"
     }));
+    // Structured metamorph/armor compatibility fields for runtime checks
+    set_property("can_metamorph", 1);
+    // If true, metamorphed form may be allowed to wear armor conforming to
+    // the target race's form (runtime must check/obey this flag).
+    set_property("metamorph_armor_fit_override", 1);
+    // Explicit list of races/forms that this dragon can validly assume
+    // and for which armor-fitting should be permitted when metamorphed.
+    set_property("metamorph_armor_compat", ([ 
+        "human": 1, "elf": 1, "dwarf": 1, "psi_stalker": 1
+    ]));
+    // A convenience array listing the same targets for simpler checks.
+    set_property("metamorph_armor_list", ({ "human", "elf", "dwarf", "psi_stalker" }));
     
     // Magic and psionics
     set_base_ppe(100);  // Natural magic
@@ -76,6 +88,11 @@ void setup_player(object player) {
     if (player && living(player)) {
         player->set_property("has_metamorph", 1);
         player->set_property("true_race", "great_horned_dragon");
+        // Mirror race-level metamorph settings onto the player object for
+        // command/runtime checks.
+        player->set_property("can_metamorph", 1);
+        player->set_property("metamorph_armor_fit_override", 1);
+        player->set_property("metamorph_armor_list", ({ "human", "elf", "dwarf", "psi_stalker" }));
         
         // Dragons can breathe fire (future implementation)
         player->set_property("can_breathe_fire", 1);

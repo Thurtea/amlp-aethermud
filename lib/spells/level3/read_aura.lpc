@@ -78,21 +78,21 @@ int cast(object caster, object target, string args) {
         aura_info += ({ "Race: " + capitalize(true_race) });
     }
     
-    // Get level
+    // Get level and map to descriptive tier per project spec
     level = target->query_level();
-    if (level < 3) {
-        level_desc = "novice";
-    } else if (level < 6) {
-        level_desc = "experienced";
-    } else if (level < 10) {
-        level_desc = "veteran";
-    } else if (level < 15) {
-        level_desc = "master";
+    string tier;
+    if (level <= 3) {
+        tier = "Very Low (1-3)";
+    } else if (level <= 5) {
+        tier = "Low (4-5)";
+    } else if (level <= 8) {
+        tier = "Medium (6-8)";
+    } else if (level <= 11) {
+        tier = "High (9-11)";
     } else {
-        level_desc = "legendary";
+        tier = "Very High (12+)";
     }
-    
-    aura_info += ({ "Level of Power: " + level_desc + " (Level " + level + ")" });
+    aura_info += ({ "Level of Power: " + tier + " - Level " + level });
     
     // Get alignment if available
     alignment = target->query_alignment();

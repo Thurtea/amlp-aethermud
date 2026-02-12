@@ -1,0 +1,65 @@
+// lib/domains/start/npc/moxim.lpc
+// Moxim, the Rift Master
+
+inherit "/std/living";
+
+void create() {
+    ::create();
+
+    set_name("Moxim");
+    set_id(({ "moxim", "wizard", "rift master" }));
+    set_short("Moxim, the Rift Master");
+    set_long(
+        "Moxim is a mysterious figure in flowing robes, his eyes glittering with\
+arcane knowledge. He gestures with delicate hands and seems capable of bending\
+the fabric of space itself. Rumor says he can open rifts to distant places.\n"
+    );
+
+    set_gender("neuter");
+    set_race("human");
+    set_level(20);
+
+    set_property("no_attack", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_rift", "rift");
+}
+
+int cmd_rift(string dest) {
+    object player = this_player();
+    object room;
+
+    if (!dest || dest == "") {
+        tell_object(player, "Moxim asks: Where should I open the rift to?\n");
+        return 1;
+    }
+
+    // basic validation: check file presence
+    if (file_size(dest) < 0 && file_size(dest + ".c") < 0) {
+        tell_object(player, "Moxim studies the air and frowns: I cannot sense that destination.\n");
+        return 1;
+    }
+
+    room = environment(player);
+    tell_room(environment(this_object()), "Moxim begins chanting arcane words...\n");
+    call_out("open_rift", 3, dest, player, room);
+    return 1;
+}
+
+void open_rift(string dest, object who, object room) {
+    object rift;
+
+    if (!room) return;
+
+    rift = clone_object("/lib/obj/rift.lpc");
+    if (!rift) {
+        tell_room(room, "Moxim looks embarrassed — the weave resists him.\n");
+        return;
+    }
+
+    rift->set_destination(dest);
+    move_object(rift, room);
+    tell_room(room, "A shimmering rift tears open in the fabric of space!\n");
+}

@@ -1,0 +1,93 @@
+// lib/obj/rift.lpc
+// Simple rift object that transports players to a destination and auto-collapses
+
+inherit "/std/object";
+
+string destination_path;
+
+void create() {
+    ::create();
+    set_name("rift");
+    set_id(({ "rift", "portal", "gateway" }));
+    set_short("a shimmering rift in space");
+    set_long(
+        "A swirling vortex of energy crackles with arcane power. The edges of the\
+rift shimmer and pulses of light flow inward toward a dark, swirling center.\n"
+    );
+
+    set_weight(100);
+    set_value(0);
+    set_prevent_get("You cannot pick up the rift.");
+}
+
+void set_destination(string dest) {
+    destination_path = dest;
+    // schedule warnings and collapse
+    remove_call_out("warn1");
+    remove_call_out("warn2");
+    remove_call_out("collapse");
+    call_out("warn1", 7);
+    call_out("warn2", 9);
+    call_out("collapse", 10);
+}
+
+string query_destination() { return destination_path; }
+
+void init() {
+    ::init();
+    add_action("cmd_enter", "enter");
+    add_action("cmd_enter", "go");
+}
+
+int cmd_enter(string what) {
+    object ply = this_player();
+    object dest_ob;
+
+    if (!what) return 0;
+
+    if (what != "rift" && what != "the rift" && what != "portal" && what != "gateway")
+        return 0;
+
+    if (!destination_path) {
+        tell_room(environment(this_object()), "The rift shudders but seems to lead nowhere.\n");
+        return 1;
+    }
+
+    // validate destination exists (try .lpc and .c suffixes)
+    if (file_size(destination_path) < 0 && file_size(destination_path + ".c") < 0 && file_size(destination_path + ".lpc") < 0) {
+        tell_room(environment(this_object()), "The rift shudders and rejects the connection.\n");
+        return 1;
+    }
+
+    dest_ob = find_object(destination_path);
+    if (!dest_ob) {
+        dest_ob = load_object(destination_path);
+    }
+
+    if (!dest_ob) {
+        tell_room(environment(this_object()), "The rift rejects you — the destination fails to hold.\n");
+        return 1;
+    }
+
+    tell_room(environment(ply), ply->query_name() + " steps into the rift and vanishes.\n", ({ ply }));
+    move_object(ply, dest_ob);
+    tell_object(ply, "You step through the rift and arrive at your destination.\n");
+    tell_room(environment(ply), ply->query_name() + " tumbles through a shimmering rift and appears.\n", ({ ply }));
+    return 1;
+}
+
+void warn1() {
+    object room = environment(this_object());
+    if (room) tell_room(room, "The rift wavers, its edges fraying.\n");
+}
+
+void warn2() {
+    object room = environment(this_object());
+    if (room) tell_room(room, "The rift begins collapsing!\n");
+}
+
+void collapse() {
+    object room = environment(this_object());
+    if (room) tell_room(room, "The rift collapses with a thunderous crack!\n");
+    if (this_object()) destruct(this_object());
+}

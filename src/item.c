@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <strings.h>
 
 /* External function declaration */
@@ -525,16 +526,53 @@ Item* inventory_remove(Inventory *inv, const char *item_name) {
 
 /* Find item in inventory */
 Item* inventory_find(Inventory *inv, const char *item_name) {
-    if (!inv || !item_name) return NULL;
-    
+    if (!inv || !item_name || !item_name[0]) return NULL;
+
+    /* If argument starts with a digit, treat it as a 1-based inventory index */
+    if (isdigit((unsigned char)item_name[0])) {
+        int idx = atoi(item_name);
+        if (idx <= 0 || idx > inv->item_count) return NULL;
+
+        Item *curr = inv->items;
+        int i = 1;
+        while (curr) {
+            if (i == idx) return curr;
+            curr = curr->next;
+            i++;
+        }
+        return NULL;
+    }
+
+    /* Try exact match first (case-insensitive) */
     Item *curr = inv->items;
     while (curr) {
-        if (strcasecmp(curr->name, item_name) == 0) {
+        if (curr->name && strcasecmp(curr->name, item_name) == 0) {
             return curr;
         }
         curr = curr->next;
     }
-    
+
+    /* Try partial substring match (case-insensitive) */
+    char lower_search[256];
+    strncpy(lower_search, item_name, sizeof(lower_search) - 1);
+    lower_search[sizeof(lower_search) - 1] = '\0';
+    for (char *p = lower_search; *p; p++) *p = tolower((unsigned char)*p);
+
+    curr = inv->items;
+    while (curr) {
+        if (curr->name) {
+            char lower_name[256];
+            strncpy(lower_name, curr->name, sizeof(lower_name) - 1);
+            lower_name[sizeof(lower_name) - 1] = '\0';
+            for (char *q = lower_name; *q; q++) *q = tolower((unsigned char)*q);
+
+            if (strstr(lower_name, lower_search) != NULL) {
+                return curr;
+            }
+        }
+        curr = curr->next;
+    }
+
     return NULL;
 }
 

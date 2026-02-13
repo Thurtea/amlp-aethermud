@@ -1,0 +1,40 @@
+#!/usr/bin/expect -f
+set timeout 10
+spawn telnet localhost 3000
+
+expect "Enter your name:"
+send "testequip\r"
+
+expect "Password:"
+send "testpass\r"
+
+expect "Password:"
+send "testpass\r"
+
+# The chargen flow in this build may vary; attempt to accept defaults where prompts match
+expect {
+  -re "choice" { send "1\r"; exp_continue }
+  -re "stats" { send "yes\r"; exp_continue }
+  -re ">" { }
+  timeout { }
+}
+
+sleep 2
+send "inventory\r"
+
+sleep 1
+send "equip 1\r"
+
+sleep 1
+send "equip knife\r"
+
+sleep 1
+send "equip canteen\r"
+
+sleep 1
+send "inventory\r"
+
+sleep 1
+send "quit\r"
+
+expect eof

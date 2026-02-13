@@ -418,6 +418,10 @@ void chargen_roll_stats(PlayerSession *sess) {
 
     ch->natural_weapon_count = 0;
     for (i = 0; i < 8; i++) ch->natural_weapons[i] = NULL;
+    /* Default combat and death settings */
+    ch->attacks_per_round = 2;   /* Default 2 attacks per round */
+    ch->lives_remaining = 5;     /* Start with 5 lives */
+    ch->scar_count = 0;
 
     ch->introduced_count = 0;
     for (i = 0; i < 32; i++) ch->introduced_to[i] = NULL;
@@ -1138,7 +1142,7 @@ int save_character(PlayerSession *sess) {
      *  1 - original format
      *  3 - added LPC room path persistence (char *room_path) after room_id
      */
-    uint16_t version = 3;
+    uint16_t version = 4;
     fwrite(&version, sizeof(uint16_t), 1, f);
     
     /* Write username */
@@ -1353,6 +1357,25 @@ int save_character(PlayerSession *sess) {
         }
     }
 
+    /* Write death/lives/scars (version 4+) */
+    int lives = ch->lives_remaining;
+    if (lives < 0) lives = 5;
+    fwrite(&lives, sizeof(int), 1, f);
+    int scarc = ch->scar_count;
+    if (scarc < 0 || scarc > MAX_SCARS) scarc = 0;
+    fwrite(&scarc, sizeof(int), 1, f);
+    for (i = 0; i < scarc; i++) {
+        size_t loc_len = strlen(ch->scars[i].location);
+        fwrite(&loc_len, sizeof(size_t), 1, f);
+        if (loc_len > 0) fwrite(ch->scars[i].location, 1, loc_len, f);
+
+        size_t desc_len = strlen(ch->scars[i].description);
+        fwrite(&desc_len, sizeof(size_t), 1, f);
+        if (desc_len > 0) fwrite(ch->scars[i].description, 1, desc_len, f);
+
+        fwrite(&ch->scars[i].death_number, sizeof(int), 1, f);
+    }
+
     fclose(f);
 
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
@@ -1394,7 +1417,8 @@ int load_character(PlayerSession *sess, const char *username) {
         return 0;
     }
     
-    if (version != 1) {
+    /* Accept save versions between 1 and current supported version (4). */
+    if (version < 1 || version > 4) {
         ERROR_LOG("Unsupported save file version %d for '%s'", 
                 version, username);
         fclose(f);
@@ -1698,6 +1722,48 @@ int load_character(PlayerSession *sess, const char *username) {
         }
     }
 
+    /* Read lives/scars if saved by newer version (version >=4) */
+    if (version >= 4) {
+        if (fread(&ch->lives_remaining, sizeof(int), 1, f) != 1) {
+            ch->lives_remaining = 5;
+        }
+        if (fread(&ch->scar_count, sizeof(int), 1, f) != 1) {
+            ch->scar_count = 0;
+        }
+        if (ch->scar_count < 0 || ch->scar_count > MAX_SCARS) ch->scar_count = 0;
+        for (i = 0; i < ch->scar_count; i++) {
+            size_t loc_len = 0;
+            if (fread(&loc_len, sizeof(size_t), 1, f) == 1 && loc_len > 0 && loc_len < sizeof(ch->scars[i].location)) {
+                char buf_loc[128];
+                fread(buf_loc, 1, loc_len, f);
+                buf_loc[loc_len] = '\0';
+                strncpy(ch->scars[i].location, buf_loc, sizeof(ch->scars[i].location)-1);
+                ch->scars[i].location[sizeof(ch->scars[i].location)-1] = '\0';
+            } else {
+                if (loc_len > 0) fseek(f, loc_len, SEEK_CUR);
+                ch->scars[i].location[0] = '\0';
+            }
+
+            size_t desc_len = 0;
+            if (fread(&desc_len, sizeof(size_t), 1, f) == 1 && desc_len > 0 && desc_len < sizeof(ch->scars[i].description)) {
+                char buf_desc[256];
+                fread(buf_desc, 1, desc_len, f);
+                buf_desc[desc_len] = '\0';
+                strncpy(ch->scars[i].description, buf_desc, sizeof(ch->scars[i].description)-1);
+                ch->scars[i].description[sizeof(ch->scars[i].description)-1] = '\0';
+            } else {
+                if (desc_len > 0) fseek(f, desc_len, SEEK_CUR);
+                ch->scars[i].description[0] = '\0';
+            }
+
+            if (fread(&ch->scars[i].death_number, sizeof(int), 1, f) != 1) ch->scars[i].death_number = i+1;
+        }
+    } else {
+        /* Older saves: give default lives and no scars */
+        ch->lives_remaining = 5;
+        ch->scar_count = 0;
+    }
+
     fclose(f);
 
     INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)",
@@ -1734,27 +1800,28 @@ void cmd_inventory(PlayerSession *sess, const char *args) {
 /* Equip an item from inventory */
 void cmd_equip(PlayerSession *sess, const char *args) {
     if (!sess || !args || !*args) {
-        send_to_player(sess, "Equip what? Try 'equip <item name>'\n");
+        send_to_player(sess, "Equip what? Try 'equip <item name or number>'\n");
         return;
     }
-    
+
     Character *ch = &sess->character;
     Item *item = inventory_find(&ch->inventory, args);
-    
+
     if (!item) {
-        send_to_player(sess, "You don't have that item in your inventory.\n");
+        send_to_player(sess, "You don't have that item. Use 'inventory' to see your items.\n");
         return;
     }
-    
+
     if (item->is_equipped) {
-        send_to_player(sess, "You are already wearing/wielding that item.\n");
+        send_to_player(sess, "You are already wearing or wielding %s.\n", item->name);
         return;
     }
-    
+
+    /* Attempt to equip via equipment system */
     if (equipment_equip(ch, sess, item)) {
         send_to_player(sess, "You equip %s.\n", item->name);
     } else {
-        send_to_player(sess, "You can't equip that right now.\n");
+        send_to_player(sess, "You can't equip %s right now.\n", item->name);
     }
 }
 

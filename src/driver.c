@@ -976,12 +976,46 @@ static int clone_extract_int(const char *buf, const char *snake, const char *pas
     return atoi(p + 1);
 }
 
+/* Extract integer value from set_property("key", N) in LPC source.
+ * Returns 1 if found and sets *out, 0 otherwise. */
+static int clone_extract_property_int(const char *buf, const char *key, int *out) {
+    const char *p = buf;
+    char needle[128];
+    snprintf(needle, sizeof(needle), "set_property(\"%s\",", key);
+    p = strstr(buf, needle);
+    if (!p) return 0;
+    p = strchr(p, ',');
+    if (!p) return 0;
+    *out = atoi(p + 1);
+    return 1;
+}
+
+/* Extract string value from set_property("key", "value") in LPC source.
+ * Returns malloc'd string or NULL. */
+static char* clone_extract_property_string(const char *buf, const char *key) {
+    char needle[128];
+    snprintf(needle, sizeof(needle), "set_property(\"%s\",", key);
+    const char *p = strstr(buf, needle);
+    if (!p) return NULL;
+    p = strchr(p, '"');
+    if (!p) return NULL;
+    p++;
+    const char *end = strchr(p, '"');
+    if (!end) return NULL;
+    size_t len = (size_t)(end - p);
+    char *val = malloc(len + 1);
+    if (!val) return NULL;
+    memcpy(val, p, len);
+    val[len] = '\0';
+    return val;
+}
+
 /* Resolve an LPC-style clone argument to a filesystem path.
  * Handles: /lib/objects/weapons/sword, lib/objects/weapons/sword,
  *          objects/weapons/sword, /lib/objects/weapons/sword.lpc
  * Writes the result into out_path (max out_size bytes).
  * Returns 1 if the resolved file exists, 0 otherwise. */
-static int resolve_lpc_path(const char *args, char *out_path, size_t out_size) {
+int resolve_lpc_path(const char *args, char *out_path, size_t out_size) {
     /* Strip leading slash */
     const char *p = (args[0] == '/') ? args + 1 : args;
 
@@ -996,12 +1030,27 @@ static int resolve_lpc_path(const char *args, char *out_path, size_t out_size) {
 
     /* Build candidate paths in order of preference */
     const char *fmts[] = {
-        "%s.lpc",       /* already has lib/ prefix */
-        "lib/%s.lpc",   /* needs lib/ prefix */
+        "%s.lpc",                 /* exact path or already has lib/ prefix */
+        "lib/%s.lpc",             /* relative to lib/ */
+        "lib/objects/%s.lpc",     /* common objects folder */
+        "lib/objects/%s/%s.lpc",  /* try nested under a folder matching base */
+        "lib/psionics/%s.lpc",    /* psionics folder */
+        "lib/objects/psionic/%s.lpc",
+        "lib/occs/%s.lpc",
         NULL
     };
 
     for (int i = 0; fmts[i]; i++) {
+        if (strstr(fmts[i], "%s/%s.lpc")) {
+            /* attempt to split clean into folder/name if it contains a '/'
+             * otherwise try common folder + clean */
+            snprintf(out_path, out_size, "lib/objects/%s.lpc", clean);
+            if (access(out_path, R_OK) == 0) {
+                fprintf(stderr, "[Clone] Resolved '%s' -> '%s'\n", args, out_path);
+                return 1;
+            }
+            continue;
+        }
         snprintf(out_path, out_size, fmts[i], clean);
         if (access(out_path, R_OK) == 0) {
             fprintf(stderr, "[Clone] Resolved '%s' -> '%s'\n", args, out_path);
@@ -1017,7 +1066,7 @@ static int resolve_lpc_path(const char *args, char *out_path, size_t out_size) {
 /* Parse a simple LPC object file and create a C Item from it.
  * Extracts property setters from the source text to populate a C Item struct.
  * Supports both snake_case (set_short) and PascalCase (SetShort) naming. */
-static Item* item_create_from_lpc(const char *fs_path) {
+Item* item_create_from_lpc(const char *fs_path) {
     FILE *f = fopen(fs_path, "r");
     if (!f) {
         fprintf(stderr, "[Clone] fopen failed for '%s': %s\n", fs_path, strerror(errno));
@@ -1058,17 +1107,53 @@ static Item* item_create_from_lpc(const char *fs_path) {
     item->weight = clone_extract_int(buf, "set_weight(", "SetMass(");
     item->value  = clone_extract_int(buf, "set_value(",  "SetBaseCost(");
 
+    /* Extract known set_property(...) values used in many LPC objects */
+    int tmp;
+    if (clone_extract_property_int(buf, "damage_dice", &tmp)) {
+        item->stats.damage_dice = tmp;
+    }
+    if (clone_extract_property_int(buf, "damage_sides", &tmp)) {
+        item->stats.damage_sides = tmp;
+    }
+    if (clone_extract_property_int(buf, "damage_bonus", &tmp)) {
+        item->stats.damage_bonus = tmp;
+    }
+    if (clone_extract_property_int(buf, "is_mega_damage", &tmp)) {
+        item->stats.is_mega_damage = tmp ? true : false;
+    }
+    if (clone_extract_property_int(buf, "strike_bonus", &tmp)) {
+        item->stats.strike_bonus = tmp;
+    }
+    if (clone_extract_property_int(buf, "parry_bonus", &tmp)) {
+        item->stats.parry_bonus = tmp;
+    }
+    if (clone_extract_property_int(buf, "ar", &tmp)) {
+        item->stats.ar = tmp;
+    }
+    /* weapon_type may be set via set_property("weapon_type", "sword") */
+    char *wtype = clone_extract_property_string(buf, "weapon_type");
+    if (wtype) {
+        if (strstr(wtype, "sword")) item->weapon_type = WEAPON_SWORD;
+        else if (strstr(wtype, "knife")) item->weapon_type = WEAPON_KNIFE;
+        else if (strstr(wtype, "axe")) item->weapon_type = WEAPON_AXE;
+        else if (strstr(wtype, "pistol")) item->weapon_type = WEAPON_PISTOL;
+        else if (strstr(wtype, "rifle")) item->weapon_type = WEAPON_RIFLE;
+        free(wtype);
+    }
+
+    /* If the LPC explicitly indicates damage fields via set_property, prefer them over filename heuristics */
+
     /* Infer type from path keywords */
     if (strstr(fs_path, "weapon") || strstr(fs_path, "weap")) {
         item->type = ITEM_WEAPON_MELEE;
-        item->weapon_type = WEAPON_SWORD;
-        item->stats.damage_dice = 1;
-        item->stats.damage_sides = 6;
+        if (item->stats.damage_dice == 0) item->stats.damage_dice = 1;
+        if (item->stats.damage_sides == 0) item->stats.damage_sides = 6;
+        if (item->weapon_type == WEAPON_UNARMED) item->weapon_type = WEAPON_SWORD;
     } else if (strstr(fs_path, "armor")) {
         item->type = ITEM_ARMOR;
-        item->stats.ar = 10;
-        item->stats.sdc_mdc = 30;
-        item->current_durability = 30;
+        if (item->stats.ar == 0) item->stats.ar = 10;
+        if (item->stats.sdc_mdc == 0) item->stats.sdc_mdc = 30;
+        if (item->current_durability == 0) item->current_durability = item->stats.sdc_mdc;
     }
 
     fprintf(stderr, "[Clone] Created item from '%s': name='%s' weight=%d value=%d\n",
@@ -3538,12 +3623,15 @@ void check_session_timeouts(void) {
             time_t idle = now - sessions[i]->last_activity;
             
             if (idle > SESSION_TIMEOUT) {
-                send_to_player(sessions[i], 
-                    "\r\nYou have been idle too long. Disconnecting...\r\n");
-                fprintf(stderr, "[Server] Timeout disconnect: %s (slot %d)\n",
-                       sessions[i]->username[0] ? sessions[i]->username : "guest",
-                       i);
-                sessions[i]->state = STATE_DISCONNECTING;
+                // Exempt wizards/admins from idle timeout
+                if (sessions[i]->privilege_level == 0) {
+                    send_to_player(sessions[i], "You have been idle too long. Disconnecting...");
+                    fprintf(stderr, "[Server] Timeout disconnect: %s (slot %d)\n",
+                           sessions[i]->username[0] ? sessions[i]->username : "guest",
+                           i);
+                    sessions[i]->state = STATE_DISCONNECTING;
+                }
+                // Wizards (level 1+) are never kicked for idle
             }
         }
     }

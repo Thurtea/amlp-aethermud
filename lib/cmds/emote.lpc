@@ -1,0 +1,62 @@
+/* /lib/cmds/emote.lpc - Emote (player action) implementation
+ *
+ * Adapted to AMLP from DeadSouls style emote implementation.
+ */
+
+#include <globals.h>
+
+int main(string args) {
+    object user = previous_object();
+    object room;
+    object *inv;
+    int i;
+
+    if (!user) return 0;
+
+    room = user->query_environment();
+
+    /* No args -> default self/emote message */
+    if (!args || args == "") {
+        tell_object(user, "You are feeling emotional.\n");
+        if (!room) return 1;
+        inv = all_inventory(room);
+        for (i = 0; i < sizeof(inv); i++) {
+            if (inv[i] != user && living(inv[i])) {
+                string seen = user->query_introduction_name(inv[i]);
+                tell_object(inv[i], seen + " looks emotional.\n");
+            }
+        }
+        return 1;
+    }
+
+    /* Allow short form: emote 'smiles  -> prints "Name smiles" */
+    if (args[0] != '\'') args = " " + args;
+
+    if (!room) {
+        tell_object(user, "You are nowhere.\n");
+        return 1;
+    }
+
+    inv = all_inventory(room);
+    for (i = 0; i < sizeof(inv); i++) {
+        if (!living(inv[i])) continue;
+        if (inv[i] == user) {
+            tell_object(user, "You emote: " + user->query_name() + args + "\n");
+        } else {
+            string seen = user->query_introduction_name(inv[i]);
+            tell_object(inv[i], seen + args + "\n");
+        }
+    }
+
+    return 1;
+}
+
+string query_help() {
+    return "EMOTE - Express an action to the room\n\n"
+        "Usage:\n"
+        "  emote <message>       Perform an action seen by others\n"
+        "  '<message>            Short form (leading apostrophe)\n\n"
+        "Example:\n"
+        "  emote waves cheerfully.\n\n"
+        "See also: SAY, WHISPER, TELL\n";
+}

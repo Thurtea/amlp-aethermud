@@ -48,6 +48,14 @@ typedef enum {
     HP_ONLY       /* Only HP (no SDC) */
 } HealthType;
 
+/* Lives and scars (death system) */
+#define MAX_SCARS 5
+typedef struct Scar {
+    char location[64];
+    char description[128];
+    int death_number;
+} Scar;
+
 typedef struct Character {
     char *race;
     char *occ;
@@ -107,10 +115,19 @@ typedef struct Character {
     char *languages[16];       /* Known languages (max 16) */
     int num_languages;         /* Number of known languages */
     char *current_language;    /* Default language for say command */
+        /* Lives and scars (death system) */
+    
+        int lives_remaining;      /* Remaining lives (starts at 5) */
+        /* scars array and Scar type are defined above the Character struct */
+        Scar scars[MAX_SCARS];
+        int scar_count;
 } Character;
 
 /* Chargen initialization */
 void chargen_init(PlayerSession *sess);
+
+/* Death handler (implemented in src/death.c) */
+void handle_player_death(struct PlayerSession *sess, struct PlayerSession *killer);
 
 /* Chargen state machine */
 void chargen_process_input(PlayerSession *sess, const char *input);

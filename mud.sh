@@ -18,11 +18,12 @@ rotate_logs() {
     MAX_SIZE=$((10 * 1024 * 1024)) # 10MB
 
     mkdir -p logs
-    for log in logs/*.log; do
+    for log in logs/*.log lib/log/*.log; do
         if [ -f "$log" ]; then
             SIZE=$(stat -c%s "$log" 2>/dev/null || stat -f%z "$log" 2>/dev/null || echo 0)
             if [ "$SIZE" -gt "$MAX_SIZE" ]; then
                 mv "$log" "${log}.${TIMESTAMP}"
+                touch "$log"
                 gzip -9 "${log}.${TIMESTAMP}" &
                 echo "Rotated: $log (${SIZE} bytes)"
             fi

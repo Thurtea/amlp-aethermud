@@ -2,6 +2,7 @@
 #define ITEM_H
 
 #include <stdbool.h>
+#include <stddef.h>  // For size_t
 
 /* Forward declarations to avoid circular includes */
 typedef struct PlayerSession PlayerSession;
@@ -112,6 +113,12 @@ void equipment_get_bonuses(EquipmentSlots *eq, int *strike, int *parry, int *dod
 bool equipment_can_equip(struct Character *ch, Item *item);
 void equipment_free(EquipmentSlots *eq);
 void equipment_display(PlayerSession *sess);
+
+/* Create an Item by parsing an LPC source file (used by clone parsing)
+ * Returns a newly allocated Item or NULL on failure. */
+Item* item_create_from_lpc(const char *fs_path);
+/* Resolve LPC path helper (used by clone/wizard helpers) */
+int resolve_lpc_path(const char *args, char *out_path, size_t out_size);
 
 /* Item Database */
 #define TOTAL_ITEM_TEMPLATES 50

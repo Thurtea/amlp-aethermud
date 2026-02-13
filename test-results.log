@@ -1,0 +1,48 @@
+=== AMLP MUD Test Suite ===
+
+[TEST] Connection test...
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+
+=========================================
+    AMLP Driver - Development Server
+             Version 0.1.0
+=========================================
+
+Welcome to the AMLP MUD!
+
+[TEST] Command test...
+Trying 127.0.0.1...
+Connected to localhost.
+
+=========================================
+    AMLP Driver - Development Server
+             Version 0.1.0
+=========================================
+
+Welcome to the AMLP MUD!
+
+Enter your name: 
+Welcome, help! You appear to be new here.
+Choose a password: Password must be at least 6 characters.
+Choose a password: Password must be at least 6 characters.
+Choose a password: Connection closed by foreign host.
+
+[TEST] Chargen test...
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+
+=========================================
+    AMLP Driver - Development Server
+             Version 0.1.0
+=========================================
+
+Welcome to the AMLP MUD!
+
+Enter your name: 
+Welcome, testuser! You appear to be new here.
+Choose a password: Confirm password: Connection closed by foreign host.
+
+=== Test Complete ===

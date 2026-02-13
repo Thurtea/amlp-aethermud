@@ -18,6 +18,7 @@
 #include "efun.h"
 #include "driver.h"
 #include "object.h"
+#include "item.h"
 #include "skills.h"
 #include <time.h>
 
@@ -350,6 +351,50 @@ int wiz_heal(PlayerSession *sess, const char *target_name) {
 /* Clone an LPC object and give to a target player or leave in room */
 int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name) {
     if (!sess || sess->privilege_level < 4 || !lpc_path) return 0;
+
+    /* Prefer creating a C Item from the LPC source file when possible so
+     * the driver-side inventory/equipment/examine system can interact
+     * with the item. Fall back to VM-level clone if the source file
+     * cannot be located or parsed. */
+    char fs_path[512];
+    if (resolve_lpc_path(lpc_path, fs_path, sizeof(fs_path))) {
+        Item *new_item = item_create_from_lpc(fs_path);
+        if (!new_item) {
+            send_to_player(sess, "Failed to parse LPC object: %s\n", fs_path);
+            return 0;
+        }
+
+        /* If a target player is given, add to their inventory */
+        if (target_name && target_name[0]) {
+            PlayerSession *target = find_player_by_name(target_name);
+            if (!target) {
+                item_free(new_item);
+                send_to_player(sess, "Player '%s' not found.\n", target_name);
+                return 0;
+            }
+            if (!inventory_add(&target->character.inventory, new_item)) {
+                item_free(new_item);
+                send_to_player(sess, "Could not add item to %s's inventory (weight limit?).\n", target->username);
+                return 0;
+            }
+            send_to_player(target, "An object '%s' has been created for you by %s.\n", new_item->name, sess->username);
+            send_to_player(sess, "Created %s and moved to %s.\n", new_item->name, target->username);
+            wiz_log("%s cloned %s -> %s", sess->username ? sess->username : "<unknown>", fs_path, target->username);
+            return 1;
+        }
+
+        /* No target: add to wizard's inventory */
+        if (!inventory_add(&sess->character.inventory, new_item)) {
+            item_free(new_item);
+            send_to_player(sess, "Could not add item to your inventory (weight limit?).\n");
+            return 0;
+        }
+        send_to_player(sess, "Created %s and added to your inventory.\n", new_item->name);
+        wiz_log("%s cloned %s -> self", sess->username ? sess->username : "<unknown>", fs_path);
+        return 1;
+    }
+
+    /* Fallback: do a VM-level clone if file couldn't be resolved */
     VMValue path_val = vm_value_create_string(lpc_path);
     VMValue res = efun_clone_object(global_vm, &path_val, 1);
     vm_value_release(&path_val);

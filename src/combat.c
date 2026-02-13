@@ -632,19 +632,46 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
 
     combat_apply_damage(defender, &result);
 
-    // Combat messages
-    char msg[256];
-    if (result.is_critical) {
-        snprintf(msg, sizeof(msg),
-                 "CRITICAL! %s hits %s for %d damage!\n",
-                 attacker->name, defender->name, result.damage);
-    } else {
-        snprintf(msg, sizeof(msg),
-                 "%s hits %s for %d damage (%d+%d=%d)\n",
-                 attacker->name, defender->name, result.damage, attack_roll, strike_bonus, total_strike);
+    /* If kill occurred, trigger death handler for player victims */
+    if (result.is_kill && defender->session) {
+        handle_player_death(defender->session, attacker->session);
     }
-    combat_send_to_participant(attacker, msg);
-    combat_send_to_participant(defender, msg);
+
+    /* Descriptive combat messages (no numeric damage shown) */
+    {
+        int max_pool = defender->character->max_hp + defender->character->max_sdc + (defender->character->max_mdc * 100);
+        if (max_pool <= 0) max_pool = 1;
+        int pct = (result.damage * 100) / max_pool;
+        const char *severity = "mildly";
+        if (pct <= 10) severity = "mildly";
+        else if (pct <= 30) severity = "lightly";
+        else if (pct <= 60) severity = "severely";
+        else severity = result.is_critical ? "critically" : "viciously";
+
+        const char *verb = "hits";
+        /* Choose verb by attacker's race or weapon */
+        if (attacker->character && attacker->character->race && strcasestr(attacker->character->race, "Dragon")) {
+            verb = "claws";
+        } else {
+            /* If primary weapon is energy/ranged, use ranged verbs */
+            if (attacker->character && attacker->character->equipment.weapon_primary) {
+                Item *w = attacker->character->equipment.weapon_primary;
+                if (w->type == ITEM_WEAPON_RANGED) {
+                    verb = "shoots";
+                } else {
+                    verb = "strikes";
+                }
+            } else {
+                verb = "strikes";
+            }
+        }
+
+        char bufmsg[256];
+        snprintf(bufmsg, sizeof(bufmsg), "%s %s %s %s!\n",
+                 attacker->name, verb, defender->name, severity);
+        combat_send_to_participant(attacker, bufmsg);
+        combat_send_to_participant(defender, bufmsg);
+    }
 
     return result;
 }
@@ -709,18 +736,35 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
 
     combat_apply_damage(defender, &result);
 
-    char msg[256];
-    if (result.is_critical) {
-        snprintf(msg, sizeof(msg),
-                 "CRITICAL! %s shoots %s for %d damage!\n",
-                 attacker->name, defender->name, result.damage);
-    } else {
-        snprintf(msg, sizeof(msg),
-                 "%s shoots %s for %d damage (%d+%d=%d)\n",
-                 attacker->name, defender->name, result.damage, attack_roll, strike_bonus, total_strike);
+    /* If kill occurred, trigger death handler for player victims */
+    if (result.is_kill && defender->session) {
+        handle_player_death(defender->session, attacker->session);
     }
-    combat_send_to_participant(attacker, msg);
-    combat_send_to_participant(defender, msg);
+
+    /* Descriptive ranged messages */
+    {
+        int max_pool = defender->character->max_hp + defender->character->max_sdc + (defender->character->max_mdc * 100);
+        if (max_pool <= 0) max_pool = 1;
+        int pct = (result.damage * 100) / max_pool;
+        const char *severity = "mildly";
+        if (pct <= 10) severity = "mildly";
+        else if (pct <= 30) severity = "lightly";
+        else if (pct <= 60) severity = "severely";
+        else severity = result.is_critical ? "critically" : "devastates";
+
+        const char *verb = "grazes";
+        if (attacker->character && attacker->character->equipment.weapon_primary) {
+            Item *w = attacker->character->equipment.weapon_primary;
+            if (w->weapon_type == WEAPON_ENERGY) verb = "grazes";
+            else verb = "hits";
+        }
+
+        char bufmsg[256];
+        snprintf(bufmsg, sizeof(bufmsg), "%s %s %s %s!\n",
+                 attacker->name, verb, defender->name, severity);
+        combat_send_to_participant(attacker, bufmsg);
+        combat_send_to_participant(defender, bufmsg);
+    }
 
     return result;
 }

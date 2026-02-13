@@ -249,6 +249,10 @@ typedef struct {
     VMProfileStats profile;
 } VirtualMachine;
 
+/* Expose a global VM pointer for C modules that need to invoke LPC objects
+ * (set by the driver during initialization). */
+extern VirtualMachine *global_vm;
+
 /* ========== VM API Functions ========== */
 
 /**

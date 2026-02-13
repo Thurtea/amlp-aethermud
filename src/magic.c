@@ -1,6 +1,9 @@
 #include "magic.h"
 #include "chargen.h"
 #include "session_internal.h"
+#include "vm.h"
+#include "object.h"
+#include "efun.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -14,6 +17,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     /* WARLOCK GRADE SPELLS (0-7) - Level 1-5 */
     {
         .id = 0, .name = "Magic Armor", .description = "AR +4, 1d6 armor per caster level",
+        .lpc_id = "magic_armor",
         .ppe_cost = 1, .ppe_per_round = 0, .duration_rounds = 60, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_WARLOCK, .level_name = "Level 1",
@@ -22,6 +26,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 1, .name = "Detect Magic", .description = "Sense magical auras in area",
+        .lpc_id = "detect_magic",
         .ppe_cost = 1, .ppe_per_round = 0, .duration_rounds = 10, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 100,
         .area_effect_feet = 50, .school = SPELL_WARLOCK, .level_name = "Level 1",
@@ -30,6 +35,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 2, .name = "Light", .description = "Create bright magical light source",
+        .lpc_id = "light",
         .ppe_cost = 1, .ppe_per_round = 0, .duration_rounds = 120, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 50,
         .area_effect_feet = 20, .school = SPELL_WARLOCK, .level_name = "Level 1",
@@ -38,6 +44,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 3, .name = "Mend", .description = "Repair broken item",
+        .lpc_id = "mend",
         .ppe_cost = 2, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 10,
         .area_effect_feet = 0, .school = SPELL_WARLOCK, .level_name = "Level 2",
@@ -46,6 +53,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 4, .name = "Magic Shield", .description = "Protective barrier, +2 AR",
+        .lpc_id = "magic_shield",
         .ppe_cost = 2, .ppe_per_round = 1, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_WARLOCK, .level_name = "Level 2",
@@ -54,6 +62,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 5, .name = "Identify", .description = "Learn item properties and history",
+        .lpc_id = "identify",
         .ppe_cost = 3, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 10,
         .area_effect_feet = 0, .school = SPELL_WARLOCK, .level_name = "Level 3",
@@ -62,6 +71,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 6, .name = "Alarm", .description = "Set magical trap on object/location",
+        .lpc_id = "alarm",
         .ppe_cost = 2, .ppe_per_round = 0, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_WARLOCK, .level_name = "Level 2",
@@ -70,6 +80,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 7, .name = "Dispel Magic Barrier", .description = "Remove magical protections",
+        .lpc_id = "dispel_magic_barrier",
         .ppe_cost = 4, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 50,
         .area_effect_feet = 0, .school = SPELL_WARLOCK, .level_name = "Level 4",
@@ -80,6 +91,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     /* MYSTIC/WARLOCK SPELLS (8-15) - Level 5-10 */
     {
         .id = 8, .name = "Fireball", .description = "4d6 MD in 10-foot radius",
+        .lpc_id = "fireball",
         .ppe_cost = 5, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 4, .damage_sides = 6, .is_mega_damage = true, .range_feet = 150,
         .area_effect_feet = 10, .school = SPELL_MYSTIC, .level_name = "Level 5",
@@ -88,6 +100,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 9, .name = "Lightning Bolt", .description = "2d6 MD ranged electrical bolt",
+        .lpc_id = "lightning_bolt",
         .ppe_cost = 5, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 2, .damage_sides = 6, .is_mega_damage = true, .range_feet = 200,
         .area_effect_feet = 0, .school = SPELL_MYSTIC, .level_name = "Level 5",
@@ -96,6 +109,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 10, .name = "Teleport", .description = "Move to known location (up to 1 mile)",
+        .lpc_id = "teleport",
         .ppe_cost = 8, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = -1,
         .area_effect_feet = 0, .school = SPELL_MYSTIC, .level_name = "Level 8",
@@ -104,6 +118,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 11, .name = "Ice Shards", .description = "3d6 MD frozen projectiles",
+        .lpc_id = "ice_shards",
         .ppe_cost = 4, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 3, .damage_sides = 6, .is_mega_damage = true, .range_feet = 120,
         .area_effect_feet = 8, .school = SPELL_MYSTIC, .level_name = "Level 5",
@@ -112,6 +127,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 12, .name = "Web of Protection", .description = "Immobilize enemies in area",
+        .lpc_id = "web_of_protection",
         .ppe_cost = 3, .ppe_per_round = 1, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 60,
         .area_effect_feet = 20, .school = SPELL_MYSTIC, .level_name = "Level 5",
@@ -120,6 +136,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 13, .name = "Summon Lesser Creature", .description = "Call elemental (1d4 rounds)",
+        .lpc_id = "summon_lesser_creature",
         .ppe_cost = 6, .ppe_per_round = 0, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 30,
         .area_effect_feet = 0, .school = SPELL_MYSTIC, .level_name = "Level 6",
@@ -128,6 +145,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 14, .name = "Frenzy", .description = "Target attacks faster (+3 attacks)",
+        .lpc_id = "frenzy",
         .ppe_cost = 4, .ppe_per_round = 0, .duration_rounds = 6, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 30,
         .area_effect_feet = 0, .school = SPELL_BATTLE_MAGE, .level_name = "Level 5",
@@ -136,6 +154,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 15, .name = "Mirror Image", .description = "Create 1d4 duplicate illusions",
+        .lpc_id = "mirror_image",
         .ppe_cost = 4, .ppe_per_round = 0, .duration_rounds = 20, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_MYSTIC, .level_name = "Level 6",
@@ -146,6 +165,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     /* WIZARD GRADE SPELLS (16-25) - Level 10-15 */
     {
         .id = 16, .name = "Rift Teleportation", .description = "Open dimensional portal (50 feet)",
+        .lpc_id = "rift_teleportation",
         .ppe_cost = 10, .ppe_per_round = 0, .duration_rounds = 10, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = -1,
         .area_effect_feet = 0, .school = SPELL_WIZARD, .level_name = "Level 10",
@@ -154,6 +174,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 17, .name = "Magic Missile", .description = "1d6+1 per missile (up to IQ missiles)",
+        .lpc_id = "magic_missile",
         .ppe_cost = 3, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 1, .damage_sides = 6, .is_mega_damage = true, .range_feet = 200,
         .area_effect_feet = 0, .school = SPELL_WIZARD, .level_name = "Level 4",
@@ -162,6 +183,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 18, .name = "Plague", .description = "Disease spreads to enemies in area",
+        .lpc_id = "plague",
         .ppe_cost = 8, .ppe_per_round = 0, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 100,
         .area_effect_feet = 30, .school = SPELL_WIZARD, .level_name = "Level 12",
@@ -170,6 +192,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 19, .name = "Summon Greater Creature", .description = "Call powerful demon",
+        .lpc_id = "summon_greater_creature",
         .ppe_cost = 10, .ppe_per_round = 0, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 50,
         .area_effect_feet = 0, .school = SPELL_WIZARD, .level_name = "Level 12",
@@ -178,6 +201,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 20, .name = "Meteor Storm", .description = "6d6 MD over 30-foot radius",
+        .lpc_id = "meteor_storm",
         .ppe_cost = 12, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 6, .damage_sides = 6, .is_mega_damage = true, .range_feet = 300,
         .area_effect_feet = 30, .school = SPELL_WIZARD, .level_name = "Level 15",
@@ -186,6 +210,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 21, .name = "Time Dilation", .description = "Move at 2x speed for 1d6 rounds",
+        .lpc_id = "time_dilation",
         .ppe_cost = 10, .ppe_per_round = 0, .duration_rounds = 6, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_WIZARD, .level_name = "Level 12",
@@ -194,6 +219,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 22, .name = "Stone to Flesh", .description = "Reverse petrification curse",
+        .lpc_id = "stone_to_flesh",
         .ppe_cost = 7, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 50,
         .area_effect_feet = 0, .school = SPELL_RITUAL, .level_name = "Level 10",
@@ -202,6 +228,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 23, .name = "Healing Circle", .description = "Heal all allies 3d6 HP",
+        .lpc_id = "healing_circle",
         .ppe_cost = 6, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 3, .damage_sides = 6, .is_mega_damage = false, .range_feet = 50,
         .area_effect_feet = 30, .school = SPELL_RITUAL, .level_name = "Level 10",
@@ -210,6 +237,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 24, .name = "Enchant Item", .description = "Add magic bonuses to equipment",
+        .lpc_id = "enchant_item",
         .ppe_cost = 5, .ppe_per_round = 0, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_RITUAL, .level_name = "Level 8",
@@ -218,6 +246,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 25, .name = "Scrying", .description = "See through remote scrying orb",
+        .lpc_id = "scrying",
         .ppe_cost = 4, .ppe_per_round = 1, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 5280,
         .area_effect_feet = 0, .school = SPELL_WIZARD, .level_name = "Level 8",
@@ -228,6 +257,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     /* BATTLE MAGE SPELLS (26-31) - Combat Focused */
     {
         .id = 26, .name = "Power Fist", .description = "+2d6 damage to melee attack",
+        .lpc_id = "power_fist",
         .ppe_cost = 3, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 2, .damage_sides = 6, .is_mega_damage = true, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_BATTLE_MAGE, .level_name = "Level 3",
@@ -236,6 +266,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 27, .name = "Armor Enhancement", .description = "+50 MDC armor temporarily",
+        .lpc_id = "armor_enhancement",
         .ppe_cost = 4, .ppe_per_round = 0, .duration_rounds = 10, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_BATTLE_MAGE, .level_name = "Level 4",
@@ -244,6 +275,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 28, .name = "Smite", .description = "+4d6 damage on next attack",
+        .lpc_id = "smite",
         .ppe_cost = 5, .ppe_per_round = 0, .duration_rounds = 2, .base_damage = 0,
         .damage_dice = 4, .damage_sides = 6, .is_mega_damage = true, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_BATTLE_MAGE, .level_name = "Level 6",
@@ -252,6 +284,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 29, .name = "Protective Circle", .description = "Shield allies, +3 AR",
+        .lpc_id = "protective_circle",
         .ppe_cost = 6, .ppe_per_round = 1, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 20,
         .area_effect_feet = 15, .school = SPELL_BATTLE_MAGE, .level_name = "Level 7",
@@ -260,6 +293,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 30, .name = "Spell Reflection", .description = "Bounce magical attacks",
+        .lpc_id = "spell_reflection",
         .ppe_cost = 5, .ppe_per_round = 1, .duration_rounds = -1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_WIZARD, .level_name = "Level 9",
@@ -268,6 +302,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 31, .name = "Combat Healing", .description = "Heal 2d6 HP during fight",
+        .lpc_id = "combat_healing",
         .ppe_cost = 3, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 2, .damage_sides = 6, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_BATTLE_MAGE, .level_name = "Level 3",
@@ -278,6 +313,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     /* RITUAL/CEREMONIAL SPELLS (32-33) */
     {
         .id = 32, .name = "Ritual Healing", .description = "Cure disease, poison, curses",
+        .lpc_id = "ritual_healing",
         .ppe_cost = 4, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_RITUAL, .level_name = "Level 5",
@@ -286,6 +322,7 @@ MagicSpell MAGIC_SPELLS[34] = {
     },
     {
         .id = 33, .name = "Resurrection", .description = "Bring character back from death",
+        .lpc_id = "resurrection",
         .ppe_cost = 20, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 0,
         .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false, .range_feet = 0,
         .area_effect_feet = 0, .school = SPELL_RITUAL, .level_name = "Level 20",
@@ -533,28 +570,76 @@ bool magic_continue_casting(struct Character *ch) {
 
 bool magic_complete_cast(PlayerSession *sess, struct Character *ch) {
     if (!sess || !ch) return false;
-    
+
     if (!ch->magic.is_casting) return false;
-    
+
     int spell_id = ch->magic.casting_spell_id;
     MagicSpell *spell = magic_find_spell_by_id(spell_id);
-    
+
     if (!spell) {
-        ch->magic.is_casting = false;
+        send_to_player(sess, "Casting failed - unknown spell.\n");
+        magic_interrupt_cast(ch);
         return false;
     }
-    
-    /* Spend PPE */
+
+    /* Spend PPE (already validated earlier) */
     magic_spend_ppe(ch, spell->ppe_cost);
     magic_record_spell_cast(ch, spell_id);
-    
-    /* Simple feedback */
-    send_to_player(sess, "You cast %s! (PPE: %d/%d)\n",
-                   spell->name, ch->magic.ppe_current, ch->magic.ppe_max);
-    
+
+    /* Load spells daemon via efun */
+    VMValue path_val = vm_value_create_string("/daemon/spells");
+    VMValue load_res = efun_load_object(global_vm, &path_val, 1);
+    vm_value_release(&path_val);
+
+    if (load_res.type != VALUE_OBJECT || !load_res.data.object_value) {
+        send_to_player(sess, "Casting failed - spell system unavailable.\n");
+        magic_interrupt_cast(ch);
+        vm_value_release(&load_res);
+        return false;
+    }
+
+    obj_t *spells_daemon = (obj_t *)load_res.data.object_value;
+
+    /* Get caster LPC object from session */
+    obj_t *caster_obj = (obj_t *)sess->player_object;
+    if (!caster_obj) {
+        send_to_player(sess, "Casting failed - player object not found.\n");
+        magic_interrupt_cast(ch);
+        vm_value_release(&load_res);
+        return false;
+    }
+
+    /* Resolve target - TODO: implement target_name resolution. Use caster as default */
+    obj_t *target_obj = caster_obj;
+
+    /* Prepare arguments: (string spell_id, object caster, object target) */
+    VMValue args[3];
+    args[0] = vm_value_create_string(spell->lpc_id ? spell->lpc_id : spell->name);
+    args[1].type = VALUE_OBJECT; args[1].data.object_value = (void *)caster_obj;
+    args[2].type = VALUE_OBJECT; args[2].data.object_value = (void *)target_obj;
+
+    VMValue cast_res = obj_call_method(global_vm, spells_daemon, "cast_spell", args, 3);
+
+    /* Release temporary string arg */
+    vm_value_release(&args[0]);
+    vm_value_release(&load_res);
+
+    bool success = (cast_res.type == VALUE_INT && cast_res.data.int_value == 1);
+    if (success) {
+        send_to_player(sess, "You complete your spell: %s.\n", spell->name);
+    } else {
+        send_to_player(sess, "Your spell fizzles: %s.\n", spell->name);
+    }
+
+    /* Clean up casting state */
     ch->magic.is_casting = false;
     ch->magic.casting_spell_id = -1;
-    return true;
+    ch->magic.casting_rounds_remaining = 0;
+
+    /* cast_res may hold allocated strings; release if needed */
+    vm_value_release(&cast_res);
+
+    return success;
 }
 
 void magic_interrupt_cast(struct Character *ch) {
@@ -637,16 +722,24 @@ void magic_check_spell_rank_advance(struct Character *ch, int spell_id) {
 
 /* =============== TICKS =============== */
 
-void magic_spell_tick(struct Character *ch) {
-    if (!ch) return;
-    
+void magic_spell_tick(struct Character *ch, struct PlayerSession *sess) {
+    if (!ch || !sess) return;
+
     /* Recover PPE naturally each round */
     magic_recover_ppe(ch, ch->magic.ppe_recovery_rate);
-    
-    /* Handle ongoing casting */
-    if (ch->magic.is_casting) {
-        if (!magic_continue_casting(ch)) {
-            /* Casting complete - would call magic_complete_cast here */
+
+    /* Handle active casting */
+    if (ch->magic.is_casting && ch->magic.casting_rounds_remaining > 0) {
+        ch->magic.casting_rounds_remaining--;
+        if (ch->magic.casting_rounds_remaining <= 0) {
+            /* Casting complete - trigger the spell */
+            magic_complete_cast(sess, ch);
+        } else {
+            MagicSpell *spell = magic_find_spell_by_id(ch->magic.casting_spell_id);
+            if (spell) {
+                send_to_player(sess, "You continue casting %s... (%d rounds remaining)\n",
+                               spell->name, ch->magic.casting_rounds_remaining);
+            }
         }
     }
 }

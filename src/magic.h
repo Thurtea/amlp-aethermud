@@ -23,6 +23,7 @@ typedef struct {
     int id;                         /* Unique ID (0-33) */
     char *name;                     /* "Fireball" */
     char *description;
+    const char *lpc_id;             /* LPC spell id string (e.g. "fireball") */
     int ppe_cost;                   /* Base cost to cast */
     int ppe_per_round;              /* 0 if instant, >0 if sustained */
     int duration_rounds;            /* 0=instant, -1=until dispelled */
@@ -104,7 +105,7 @@ void magic_record_spell_cast(struct Character *ch, int spell_id);
 void magic_check_spell_rank_advance(struct Character *ch, int spell_id);
 
 /* Ticks */
-void magic_spell_tick(struct Character *ch);
+void magic_spell_tick(struct Character *ch, struct PlayerSession *sess);
 void magic_meditate_tick(struct Character *ch);
 
 /* =============== SPELL TEMPLATES ARRAY =============== */

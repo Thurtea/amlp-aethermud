@@ -9,8 +9,206 @@
 
 #include "wiz_tools.h"
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include "room.h"
+#include "session_internal.h"
+#include "vm.h"
+#include "efun.h"
+#include "driver.h"
+
+/* Forward declarations for driver helpers used here (defined in driver.c) */
+extern PlayerSession* find_player_by_name(const char *name);
+extern void room_add_player(Room *room, PlayerSession *player);
+extern void room_remove_player(Room *room, PlayerSession *player);
+extern Room* room_get_by_path(const char *lpc_path);
+extern Room* room_get_by_id(int id);
+extern void room_broadcast(Room *room, const char *message, PlayerSession *exclude);
+extern void cmd_look(PlayerSession *sess, const char *args);
+extern int save_character(PlayerSession *sess);
+extern void broadcast_message(const char *message, PlayerSession *exclude);
+extern void send_to_player(PlayerSession *sess, const char *fmt, ...);
+extern VMValue execute_command(PlayerSession *session, const char *command);
+extern PlayerSession *sessions[];
+extern VirtualMachine *global_vm;
+
+/* Simple wizard action logger */
+static void wiz_log(const char *fmt, ...) {
+    FILE *f = fopen("logs/wizard.log", "a");
+    if (!f) return;
+    time_t now = time(NULL);
+    char tbuf[32];
+    struct tm *tm = localtime(&now);
+    strftime(tbuf, sizeof(tbuf), "%Y-%m-%d %H:%M:%S", tm);
+    fprintf(f, "[%s] ", tbuf);
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(f, fmt, ap);
+    va_end(ap);
+    fprintf(f, "\n");
+    fclose(f);
+}
+
+/* ------------------------------------------------------------------ */
+/* Wizard/admin helper functions (wrap common driver admin actions) */
+
+/* Teleport the wizard themselves to a room (by LPC path or numeric id) */
+int wiz_goto(PlayerSession *sess, const char *room_arg) {
+    /* Level 3 required for movement/visibility wizard actions */
+    if (!sess || sess->privilege_level < 3 || !room_arg) return 0;
+    Room *target = NULL;
+    if (room_arg[0] == '/') {
+        target = room_get_by_path(room_arg);
+        if (!target) return 0;
+    } else {
+        int id = atoi(room_arg);
+        target = room_get_by_id(id);
+        if (!target) return 0;
+    }
+
+    if (sess->current_room) {
+        room_remove_player(sess->current_room, sess);
+        char leave_msg[256];
+        snprintf(leave_msg, sizeof(leave_msg), "%s vanishes in a puff of smoke.\r\n", sess->username);
+        room_broadcast(sess->current_room, leave_msg, NULL);
+    }
+
+    sess->current_room = target;
+    room_add_player(target, sess);
+
+    char arrive_msg[256];
+    snprintf(arrive_msg, sizeof(arrive_msg), "%s appears in a puff of smoke.\r\n", sess->username);
+    room_broadcast(target, arrive_msg, sess);
+
+    cmd_look(sess, "");
+    wiz_log("%s used goto -> %s", sess->username ? sess->username : "<unknown>", room_arg);
+    return 1;
+}
+
+/* Summon another player into the wizard's current room */
+int wiz_summon(PlayerSession *sess, const char *player_name) {
+    /* Level 3 required for summon */
+    if (!sess || sess->privilege_level < 3 || !player_name) return 0;
+    if (!sess->current_room) return 0;
+    PlayerSession *target = find_player_by_name(player_name);
+    if (!target || target == sess) return 0;
+
+    if (target->current_room) {
+        char leave_msg[256];
+        snprintf(leave_msg, sizeof(leave_msg), "%s vanishes in a flash of light.\r\n", target->username);
+        room_broadcast(target->current_room, leave_msg, target);
+        room_remove_player(target->current_room, target);
+    }
+
+    target->current_room = sess->current_room;
+    room_add_player(sess->current_room, target);
+
+    char arrive_msg[256];
+    snprintf(arrive_msg, sizeof(arrive_msg), "%s appears in a flash of light.\r\n", target->username);
+    room_broadcast(sess->current_room, arrive_msg, target);
+
+    send_to_player(target, "You have been summoned by %s!\r\n", sess->username);
+    cmd_look(target, "");
+    wiz_log("%s summoned %s to room id=%d", sess->username ? sess->username : "<unknown>", target->username, sess->current_room ? sess->current_room->id : -1);
+    return 1;
+}
+
+/* Teleport a player to a specified room (by path or id) */
+int wiz_teleport(PlayerSession *sess, const char *player_name, const char *room_arg) {
+    /* Level 4 required for player manipulation (teleport others) */
+    if (!sess || sess->privilege_level < 4 || !player_name || !room_arg) return 0;
+    PlayerSession *target = find_player_by_name(player_name);
+    if (!target) return 0;
+
+    Room *dest = NULL;
+    if (room_arg[0] == '/') {
+        dest = room_get_by_path(room_arg);
+        if (!dest) return 0;
+    } else {
+        int id = atoi(room_arg);
+        dest = room_get_by_id(id);
+        if (!dest) return 0;
+    }
+
+    if (target->current_room) {
+        char leave_msg[256];
+        snprintf(leave_msg, sizeof(leave_msg), "%s vanishes in a flash of light.\r\n", target->username);
+        room_broadcast(target->current_room, leave_msg, target);
+        room_remove_player(target->current_room, target);
+    }
+
+    target->current_room = dest;
+    room_add_player(dest, target);
+
+    char arrive_msg[256];
+    snprintf(arrive_msg, sizeof(arrive_msg), "%s appears in a flash of light.\r\n", target->username);
+    room_broadcast(dest, arrive_msg, target);
+    send_to_player(target, "You have been teleported by %s!\r\n", sess->username);
+    cmd_look(target, "");
+    wiz_log("%s teleported %s -> %s", sess->username ? sess->username : "<unknown>", target->username, room_arg);
+    return 1;
+}
+
+/* Force a player to execute a command (admin-only) */
+int wiz_force(PlayerSession *sess, const char *target_name, const char *command) {
+    /* Level 4 required for forcing commands */
+    if (!sess || sess->privilege_level < 4 || !target_name || !command) return 0;
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) return 0;
+    if (target == sess) return 0;
+
+    send_to_player(target, "%s forces you to: %s\r\n", sess->username, command);
+    /* Execute command through existing driver path */
+    VMValue res = execute_command(target, command);
+    /* Release VM return value if any */
+    if (res.type != VALUE_NULL) vm_value_release(&res);
+    wiz_log("%s forced %s to: %s", sess->username ? sess->username : "<unknown>", target->username, command);
+    return 1;
+}
+
+/* Initiate graceful server shutdown (admin-only). If delay_seconds > 0, announce it. */
+int wiz_shutdown(PlayerSession *sess, int delay_seconds) {
+    /* Level 5 required for destructive/dangerous ops */
+    if (!sess || sess->privilege_level < 5) return 0;
+
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
+            save_character(sessions[i]);
+        }
+    }
+
+    char msg[256];
+    if (delay_seconds > 0) {
+        snprintf(msg, sizeof(msg), "[SYSTEM] Admin %s is shutting down the server in %d seconds. All characters saved.\r\n", sess->username, delay_seconds);
+    } else {
+        snprintf(msg, sizeof(msg), "[SYSTEM] Admin %s is shutting down the server NOW. All characters saved.\r\n", sess->username);
+    }
+    broadcast_message(msg, NULL);
+
+    fprintf(stderr, "[Server] Shutdown initiated by %s\n", sess->username);
+    server_running = 0;
+    wiz_log("%s initiated shutdown (delay=%d)", sess->username ? sess->username : "<unknown>", delay_seconds);
+    return 1;
+}
+
+/* Reload an LPC object or daemon via efun load_object */
+int wiz_reload(PlayerSession *sess, const char *lpc_path) {
+    /* Level 2: read-only / testing reloads */
+    if (!sess || sess->privilege_level < 2 || !lpc_path) return 0;
+    VMValue path_val = vm_value_create_string(lpc_path);
+    VMValue res = efun_load_object(global_vm, &path_val, 1);
+    vm_value_release(&path_val);
+    /* If result is an object, consider successful; basic check: not null */
+    if (res.type != VALUE_NULL) {
+        vm_value_release(&res);
+        wiz_log("%s reloaded %s", sess->username ? sess->username : "<unknown>", lpc_path);
+        return 1;
+    }
+    return 0;
+}
+
+/* ------------------------------------------------------------------ */
 
 /* ============================================================================
  * O.C.C. SKILL CONFIGURATIONS (from Palladium Rifts)

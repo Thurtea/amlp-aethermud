@@ -71,8 +71,8 @@
 #include "session_internal.h"
 
 /* Global state */
-static volatile sig_atomic_t server_running = 1;
-static VirtualMachine *global_vm = NULL;
+int server_running = 1;
+VirtualMachine *global_vm = NULL;
 PlayerSession *sessions[MAX_CLIENTS];
 static int first_player_created = 0;  /* Track if first player has logged in */
 
@@ -809,27 +809,138 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
         }
     }
     
-    /* TODO: Check for items in room/inventory */
+    /* Check inventory */
+    Item *inv_item = inventory_find(&session->character.inventory, arg);
+    if (inv_item) {
+        send_to_player(session, "%s (%s)\n", inv_item->name, item_type_to_string(inv_item->type));
+        send_to_player(session, "%s\n", inv_item->description);
+        if (inv_item->type == ITEM_WEAPON_MELEE || inv_item->type == ITEM_WEAPON_RANGED) {
+            send_to_player(session, "Damage: %dd%d %s  Weight: %d lbs  Value: %d cr\n",
+                inv_item->stats.damage_dice, inv_item->stats.damage_sides,
+                inv_item->stats.is_mega_damage ? "MD" : "SDC",
+                inv_item->weight, inv_item->value);
+        } else if (inv_item->type == ITEM_ARMOR) {
+            send_to_player(session, "AR: %d  MDC/SDC: %d/%d  Weight: %d lbs  Value: %d cr\n",
+                inv_item->stats.ar, inv_item->current_durability, inv_item->stats.sdc_mdc,
+                inv_item->weight, inv_item->value);
+        } else {
+            send_to_player(session, "Weight: %d lbs  Value: %d cr\n",
+                inv_item->weight, inv_item->value);
+        }
+        return 1;
+    }
+
+    /* Check room items */
+    Item *room_item2 = room_find_item(room, arg);
+    if (room_item2) {
+        send_to_player(session, "%s (%s)\n", room_item2->name, item_type_to_string(room_item2->type));
+        send_to_player(session, "%s\n", room_item2->description);
+        return 1;
+    }
+
+    /* Check room details (examinable scenery from LPC set_items) */
+    const char *detail_desc = room_find_detail(room, arg);
+    if (detail_desc) {
+        send_to_player(session, "%s\n", detail_desc);
+        return 1;
+    }
+
     send_to_player(session, "You don't see that here.\n");
-    
+
     return 1;
 }
 
 /* 10. GIVE - Give items to other players */
 static int cmd_give_item(PlayerSession *session, const char *arg) {
     if (!arg || !*arg) {
-        send_to_player(session, "Usage: give <item> <player>\n");
+        send_to_player(session, "Usage: give <item> to <player>\n");
         return 1;
     }
-    
+
     if (!session->current_room) {
         send_to_player(session, "You are nowhere.\n");
         return 1;
     }
-    
-    /* TODO: Implement when item system is ready */
-    send_to_player(session, "You don't have that item.\n");
-    
+
+    /* Parse "item to player" or "item player" */
+    char item_name[128], target_name[64];
+    const char *sep = strcasestr(arg, " to ");
+    if (sep) {
+        size_t ilen = (size_t)(sep - arg);
+        if (ilen >= sizeof(item_name)) ilen = sizeof(item_name) - 1;
+        strncpy(item_name, arg, ilen);
+        item_name[ilen] = '\0';
+        strncpy(target_name, sep + 4, sizeof(target_name) - 1);
+        target_name[sizeof(target_name) - 1] = '\0';
+    } else {
+        /* Try last word as player name */
+        const char *last_space = strrchr(arg, ' ');
+        if (!last_space) {
+            send_to_player(session, "Usage: give <item> to <player>\n");
+            return 1;
+        }
+        size_t ilen = (size_t)(last_space - arg);
+        if (ilen >= sizeof(item_name)) ilen = sizeof(item_name) - 1;
+        strncpy(item_name, arg, ilen);
+        item_name[ilen] = '\0';
+        strncpy(target_name, last_space + 1, sizeof(target_name) - 1);
+        target_name[sizeof(target_name) - 1] = '\0';
+    }
+
+    /* Trim whitespace */
+    char *p = item_name + strlen(item_name) - 1;
+    while (p > item_name && *p == ' ') *p-- = '\0';
+    p = target_name;
+    while (*p == ' ') p++;
+    if (p != target_name) memmove(target_name, p, strlen(p) + 1);
+
+    /* Find target player in same room */
+    PlayerSession *target = NULL;
+    Room *room = session->current_room;
+    for (int i = 0; i < room->num_players; i++) {
+        if (room->players[i] && room->players[i] != session &&
+            strcasecmp(room->players[i]->username, target_name) == 0) {
+            target = room->players[i];
+            break;
+        }
+    }
+    if (!target) {
+        send_to_player(session, "%s is not here.\n", target_name);
+        return 1;
+    }
+
+    /* Find item in giver's inventory */
+    Item *item = inventory_find(&session->character.inventory, item_name);
+    if (!item) {
+        send_to_player(session, "You don't have '%s'.\n", item_name);
+        return 1;
+    }
+
+    /* Check if equipped */
+    if (item->is_equipped) {
+        send_to_player(session, "You need to unequip %s first.\n", item->name);
+        return 1;
+    }
+
+    /* Check if target can carry it */
+    if (!inventory_can_carry(&target->character.inventory, item->weight)) {
+        send_to_player(session, "%s can't carry that much weight.\n", target->username);
+        return 1;
+    }
+
+    /* Transfer */
+    Item *removed = inventory_remove(&session->character.inventory, item_name);
+    if (removed) {
+        inventory_add(&target->character.inventory, removed);
+        send_to_player(session, "You give %s to %s.\n", removed->name, target->username);
+        send_to_player(target, "%s gives you %s.\n", session->username, removed->name);
+
+        char msg[256];
+        snprintf(msg, sizeof(msg), "%s gives %s to %s.\n",
+                 session->username, removed->name, target->username);
+        room_broadcast(room, msg, session);
+    }
+
     return 1;
 }
 
@@ -1777,16 +1888,29 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         if (session->privilege_level < 1) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
-        
+
         if (!args || *args == '\0') {
             return vm_value_create_string(
-                "Usage: goto <room_id>\r\n"
-                "Available rooms: 0=Void, 1=Chi-Town Plaza, 2=Coalition HQ, 3=Merchant District\r\n");
+                "Usage: goto <room_id>  or  goto /domains/path/to/room\r\n"
+                "Bootstrap rooms: 0=Void, 1=Chi-Town Plaza, 2=Coalition HQ, 3=Merchant District\r\n"
+                "LPC rooms: goto /domains/staff_castle/room/courtyard\r\n");
         }
-        
-        int room_id = atoi(args);
-        Room *target_room = room_get_by_id(room_id);
-        
+
+        Room *target_room = NULL;
+
+        /* If argument starts with / it's an LPC path */
+        if (args[0] == '/') {
+            target_room = room_get_by_path(args);
+            if (!target_room) {
+                send_to_player(session, "Could not load LPC room '%s'.\r\n", args);
+                result.type = VALUE_NULL;
+                return result;
+            }
+        } else {
+            int room_id = atoi(args);
+            target_room = room_get_by_id(room_id);
+        }
+
         if (!target_room) {
             return vm_value_create_string("Invalid room ID.\r\n");
         }
@@ -2209,10 +2333,14 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             return vm_value_create_string("You are nowhere.\r\n");
         }
 
-        /* Clear room items */
+        /* Free and clear room items */
         Room *room = session->current_room;
-        /* Items are a linked list - free them */
-        /* (room items use InventoryItem which is same as Item linked list) */
+        Item *ri2 = room->items;
+        while (ri2) {
+            Item *next = ri2->next;
+            item_free(ri2);
+            ri2 = next;
+        }
         room->items = NULL;
 
         room_broadcast(room, "The room shimmers and resets.\r\n", NULL);
@@ -2527,9 +2655,10 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
         /* Try room items */
         if (session->current_room) {
-            InventoryItem *room_item = room_find_item(session->current_room, args);
+            Item *room_item = room_find_item(session->current_room, args);
             if (room_item) {
                 room_remove_item(session->current_room, room_item);
+                item_free(room_item);
                 char response[256];
                 snprintf(response, sizeof(response), "Destructed '%s' from the room.\r\n", args);
                 return vm_value_create_string(response);
@@ -2548,7 +2677,13 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             return vm_value_create_string("You are nowhere.\r\n");
         }
 
-        /* Clear all room items */
+        /* Free and clear all room items */
+        Item *ri = session->current_room->items;
+        while (ri) {
+            Item *next = ri->next;
+            item_free(ri);
+            ri = next;
+        }
         session->current_room->items = NULL;
         room_broadcast(session->current_room,
             "A magical wind sweeps through, clearing the room of debris.\r\n", NULL);

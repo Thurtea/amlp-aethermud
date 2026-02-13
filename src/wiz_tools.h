@@ -12,9 +12,6 @@
 
 /* Forward declarations */
 typedef struct PlayerSession PlayerSession;
-typedef struct Character {
-    char *name;
-} Character;
 
 /* ============================================================================
  * SKILL ASSIGNMENT FRAMEWORK
@@ -167,6 +164,14 @@ void skill_tool_init(void);
 int cmd_skill_assign(PlayerSession *sess, const char *occ, const char *player);
 int cmd_demotion(PlayerSession *sess, const char *player, const char *action, int value);
 int cmd_tattoo_gun(PlayerSession *sess, const char *action, const char *player, const char *tattoo);
+
+/* Additional wizard helper prototypes */
+int wiz_snoop(PlayerSession *sess, const char *target_name, int enable);
+int wiz_invisible(PlayerSession *sess, int enable);
+int wiz_set_stat(PlayerSession *sess, const char *target_name, const char *stat, int value);
+int wiz_grant_xp(PlayerSession *sess, const char *target_name, int xp_amount);
+int wiz_heal(PlayerSession *sess, const char *target_name);
+int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name);
 
 /* Skill configuration loader */
 OCCSkillConfig *get_occ_skill_config(const char *occ_name);

@@ -17,6 +17,8 @@
 #include "vm.h"
 #include "efun.h"
 #include "driver.h"
+#include "object.h"
+#include <time.h>
 
 /* Forward declarations for driver helpers used here (defined in driver.c) */
 extern PlayerSession* find_player_by_name(const char *name);
@@ -207,6 +209,198 @@ int wiz_reload(PlayerSession *sess, const char *lpc_path) {
     }
     return 0;
 }
+
+/* ---------------- Batch 2: additional wizard helpers ---------------- */
+
+/* Start/stop snooping on a player (monitor their output) */
+int wiz_snoop(PlayerSession *sess, const char *target_name, int enable) {
+    if (!sess || sess->privilege_level < 3 || !target_name) return 0;
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) return 0;
+
+    if (enable) {
+        if (sess->snooping) {
+            send_to_player(sess, "You are already snooping %s.\n", sess->snooping->username);
+            return 0;
+        }
+        sess->snooping = target;
+        target->snooped_by = sess;
+        send_to_player(sess, "You are now snooping %s.\n", target->username);
+        wiz_log("%s started snooping %s", sess->username ? sess->username : "<unknown>", target->username);
+    } else {
+        if (sess->snooping != target) {
+            send_to_player(sess, "You are not snooping %s.\n", target->username);
+            return 0;
+        }
+        sess->snooping = NULL;
+        target->snooped_by = NULL;
+        send_to_player(sess, "Stopped snooping %s.\n", target->username);
+        wiz_log("%s stopped snooping %s", sess->username ? sess->username : "<unknown>", target->username);
+    }
+    return 1;
+}
+
+/* Toggle wizard invisibility */
+int wiz_invisible(PlayerSession *sess, int enable) {
+    if (!sess || sess->privilege_level < 3) return 0;
+    sess->is_invisible = enable ? 1 : 0;
+    send_to_player(sess, "You are now %svisible.\n", sess->is_invisible ? "" : "not ");
+    wiz_log("%s set invisible=%d", sess->username ? sess->username : "<unknown>", sess->is_invisible);
+    return 1;
+}
+
+/* Set a numeric stat on a target player or their Character struct */
+int wiz_set_stat(PlayerSession *sess, const char *target_name, const char *stat, int value) {
+    if (!sess || sess->privilege_level < 4 || !target_name || !stat) return 0;
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) return 0;
+    Character *ch = &target->character;
+
+    if (strcasecmp(stat, "hp") == 0) {
+        ch->hp = value;
+        if (ch->hp > ch->max_hp) ch->hp = ch->max_hp;
+    } else if (strcasecmp(stat, "max_hp") == 0 || strcasecmp(stat, "maxhp") == 0) {
+        ch->max_hp = value;
+        if (ch->hp > ch->max_hp) ch->hp = ch->max_hp;
+    } else if (strcasecmp(stat, "sdc") == 0) {
+        ch->sdc = value;
+        if (ch->sdc > ch->max_sdc) ch->sdc = ch->max_sdc;
+    } else if (strcasecmp(stat, "max_sdc") == 0) {
+        ch->max_sdc = value;
+        if (ch->sdc > ch->max_sdc) ch->sdc = ch->max_sdc;
+    } else if (strcasecmp(stat, "ppe") == 0) {
+        ch->ppe = value;
+        if (ch->ppe > ch->max_ppe) ch->ppe = ch->max_ppe;
+    } else if (strcasecmp(stat, "max_ppe") == 0) {
+        ch->max_ppe = value;
+        if (ch->ppe > ch->max_ppe) ch->ppe = ch->max_ppe;
+    } else if (strcasecmp(stat, "isp") == 0) {
+        ch->isp = value;
+        if (ch->isp > ch->max_isp) ch->isp = ch->max_isp;
+    } else if (strcasecmp(stat, "max_isp") == 0) {
+        ch->max_isp = value;
+        if (ch->isp > ch->max_isp) ch->isp = ch->max_isp;
+    } else if (strcasecmp(stat, "xp") == 0) {
+        ch->xp = value;
+    } else if (strcasecmp(stat, "level") == 0) {
+        ch->level = value;
+    } else if (strcasecmp(stat, "credits") == 0) {
+        ch->credits = value;
+    } else if (strcasecmp(stat, "iq") == 0) {
+        ch->stats.iq = value;
+    } else if (strcasecmp(stat, "me") == 0) {
+        ch->stats.me = value;
+    } else if (strcasecmp(stat, "ma") == 0) {
+        ch->stats.ma = value;
+    } else if (strcasecmp(stat, "ps") == 0) {
+        ch->stats.ps = value;
+    } else if (strcasecmp(stat, "pp") == 0) {
+        ch->stats.pp = value;
+    } else if (strcasecmp(stat, "pe") == 0) {
+        ch->stats.pe = value;
+    } else if (strcasecmp(stat, "pb") == 0) {
+        ch->stats.pb = value;
+    } else if (strcasecmp(stat, "spd") == 0) {
+        ch->stats.spd = value;
+    } else {
+        send_to_player(sess, "Unknown stat '%s'.\n", stat);
+        return 0;
+    }
+
+    send_to_player(sess, "Set %s's %s = %d\n", target->username, stat, value);
+    send_to_player(target, "Your %s was set to %d by %s\n", stat, value, sess->username);
+    wiz_log("%s set %s.%s = %d", sess->username ? sess->username : "<unknown>", target->username, stat, value);
+    return 1;
+}
+
+/* Grant XP to a player */
+int wiz_grant_xp(PlayerSession *sess, const char *target_name, int xp_amount) {
+    if (!sess || sess->privilege_level < 4 || !target_name) return 0;
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) return 0;
+    Character *ch = &target->character;
+    ch->xp += xp_amount;
+    send_to_player(sess, "Granted %d XP to %s (total XP=%d)\n", xp_amount, target->username, ch->xp);
+    send_to_player(target, "You were awarded %d XP by %s\n", xp_amount, sess->username);
+    wiz_log("%s granted %d XP to %s (total %d)", sess->username ? sess->username : "<unknown>", xp_amount, target->username, ch->xp);
+    return 1;
+}
+
+/* Heal a player fully */
+int wiz_heal(PlayerSession *sess, const char *target_name) {
+    if (!sess || sess->privilege_level < 4 || !target_name) return 0;
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) return 0;
+    Character *ch = &target->character;
+    ch->hp = ch->max_hp;
+    ch->sdc = ch->max_sdc;
+    ch->ppe = ch->max_ppe;
+    ch->isp = ch->max_isp;
+    ch->mdc = ch->max_mdc;
+    send_to_player(target, "You feel fully restored by %s's magic.\n", sess->username);
+    send_to_player(sess, "Healed %s to full health.\n", target->username);
+    wiz_log("%s healed %s (hp=%d sdc=%d ppe=%d isp=%d)", sess->username ? sess->username : "<unknown>", target->username, ch->hp, ch->sdc, ch->ppe, ch->isp);
+    return 1;
+}
+
+/* Clone an LPC object and give to a target player or leave in room */
+int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name) {
+    if (!sess || sess->privilege_level < 4 || !lpc_path) return 0;
+    VMValue path_val = vm_value_create_string(lpc_path);
+    VMValue res = efun_clone_object(global_vm, &path_val, 1);
+    vm_value_release(&path_val);
+    if (res.type != VALUE_OBJECT || !res.data.object_value) {
+        if (res.type != VALUE_NULL) vm_value_release(&res);
+        send_to_player(sess, "Failed to clone object: %s\n", lpc_path);
+        return 0;
+    }
+
+    void *cloned_obj = res.data.object_value;
+
+    /* If a target player is provided, try to move object into their inventory */
+    if (target_name && target_name[0]) {
+        PlayerSession *target = find_player_by_name(target_name);
+        if (!target) {
+            vm_value_release(&res);
+            send_to_player(sess, "Player '%s' not found.\n", target_name);
+            return 0;
+        }
+
+        if (target->player_object) {
+            VMValue arg;
+            arg.type = VALUE_OBJECT;
+            arg.data.object_value = target->player_object;
+            /* Call move_to on the cloned object to move into player */
+            obj_call_method(global_vm, (obj_t *)cloned_obj, "move_to", &arg, 1);
+            send_to_player(target, "An object %s has been cloned for you by %s.\n", lpc_path, sess->username);
+            send_to_player(sess, "Cloned %s and moved to %s.\n", lpc_path, target->username);
+            wiz_log("%s cloned %s -> %s", sess->username ? sess->username : "<unknown>", lpc_path, target->username);
+        } else {
+            vm_value_release(&res);
+            send_to_player(sess, "Target player has no LPC object to receive the cloned object.\n");
+            return 0;
+        }
+    } else {
+        /* No target: attempt to move into wizard's room by calling move_to with their player_object if present */
+        if (sess->player_object) {
+            VMValue arg;
+            arg.type = VALUE_OBJECT;
+            arg.data.object_value = sess->player_object;
+            obj_call_method(global_vm, (obj_t *)cloned_obj, "move_to", &arg, 1);
+            send_to_player(sess, "Cloned %s and moved into your inventory/room.\n", lpc_path);
+            wiz_log("%s cloned %s -> self", sess->username ? sess->username : "<unknown>", lpc_path);
+        } else {
+            vm_value_release(&res);
+            send_to_player(sess, "No player object to receive the cloned item.\n");
+            return 0;
+        }
+    }
+
+    /* Release the cloned object VMValue reference */
+    vm_value_release(&res);
+    return 1;
+}
+
 
 /* ------------------------------------------------------------------ */
 

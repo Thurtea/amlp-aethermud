@@ -1,0 +1,22 @@
+=== CANDIDATE MATCHES ===
+lib/domains/start/npc/test_goblin.lpc
+lib/occs/city_rat.lpc
+lib/occs/cosmo_knight.lpc
+lib/occs/full_conversion_borg.lpc
+lib/occs/line_walker.lpc
+lib/occs/mystic.lpc
+lib/occs/power_armor_pilot.lpc
+lib/occs/psi-stalker-r-c-c.lpc
+lib/occs/psi_healer.lpc
+lib/occs/psi_stalker.lpc
+lib/occs/robot_pilot.lpc
+lib/occs/rogue_scholar.lpc
+lib/occs/rogue_scientist.lpc
+lib/occs/stone_master.lpc
+lib/occs/wilderness_scout.lpc
+lib/occs/xiticix_warrior.lpc
+lib/occs/xiticix_worker.lpc
+lib/psionics/healing/bio_regeneration.lpc
+lib/skills/pilot/pilot_automobile.lpc
+lib/spells/level1/globe_of_daylight.lpc
+lib/spells/level1/see_the_invisible.lpc

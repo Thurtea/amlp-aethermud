@@ -1,0 +1,47 @@
+lib/races/noli.lpc:4:// This is a stub file. Implement the full race details.
+lib/races/noli.lpc:18:        " This placeholder gives conservative defaults; replace with canonical"
+lib/races/promethean.lpc:4:// This is a stub file. Implement the full race details.
+lib/races/promethean.lpc:18:        " and limited techno-magic. This stub is conservative — please refine"
+lib/races/trimadore.lpc:4:// This is a stub file. Implement the full race details.
+lib/races/trimadore.lpc:17:        "Trimadore are a rugged folk from frontier lands. This placeholder"
+lib/races/simvan.lpc:4:// This is a stub file. Implement the full race details.
+lib/races/eandroth.lpc:4:// This is a stub file. Implement the full race details.
+lib/races/eandroth.lpc:19:        " Expand this stub from source material as needed."
+lib/races/uteni.lpc:4:// This is a stub file. Implement the full race details.
+lib/races/uteni.lpc:19:        " This stub is conservative; please expand from canonical sources."
+lib/races/dwarf.lpc:24:        "are fierce warriors when provoked. While gruff and stubborn, dwarves are "
+lib/races/dragon_hatchling.lpc:4:// This is a stub file. Implement the full race details.
+lib/occs/crazy.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/crazy.lpc:18:        " or other extreme mental states. This stub is conservative — review"
+lib/occs/line_walker.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/rogue_scholar.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/psi_healer.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/sea_titan.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/stone_master.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/biomancer.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/full_conversion_borg.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/fury_beetle.lpc:2://  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
+lib/occs/robot_pilot.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/mind_melter.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/psi_stalker.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/special_forces.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/burster.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/techno_wizard.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/mystic.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/temporal_wizard.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/city_rat.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/xiticix_worker.lpc:2://  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
+lib/occs/power_armor_pilot.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/cosmo_knight.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/shifter.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/battle_magus.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/elemental_fusionist.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/necromancer.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/warlock.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/psi-stalker-r-c-c.lpc:2://  R.C.C. - Auto-generated conservative stub from archived-md/ttrpg-references.txt
+lib/occs/xiticix_warrior.lpc:2://  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
+lib/occs/mercenary.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/wilderness_scout.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/occs/rogue_scientist.lpc:4:// This is a stub file. Implement the full OCC details.
+lib/daemon/login.lpc:10:// Daemon stub - functionality in /clone/login.c
+lib/domains/start/npc/test_goblin.lpc:36:    // Drop some loot (placeholder for now)

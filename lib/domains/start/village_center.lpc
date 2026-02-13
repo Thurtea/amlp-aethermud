@@ -8,9 +8,10 @@ void create() {
     
     set_short("Village Center");
     set_long(
-        "You stand in the center of a small village. A well-worn path leads "
-        "south to a beautiful lake, north to the wizard's castle, and east to "
-        "Grok's General Store. West leads to the training grounds.\n"
+        "A weathered fountain marks the heart of the village green, its basin "
+        "catching splashes of light. Cobbled paths fan out toward the market, "
+        "the inn, and the road to the north. Low stone benches line the edges, "
+        "and the murmur of the town drifts on the air.\n"
     );
     
     set_exits(([

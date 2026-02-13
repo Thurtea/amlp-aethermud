@@ -21,7 +21,8 @@ TEST_COMMON_SOURCES = $(SRC_DIR)/vm.c \
                       $(SRC_DIR)/array.c \
                       $(SRC_DIR)/mapping.c \
                       $(SRC_DIR)/gc.c \
-                      $(SRC_DIR)/efun.c \
+					  $(SRC_DIR)/efun.c \
+					  $(TEST_DIR)/test_driver_stub.c \
 					  $(SRC_DIR)/test_stubs.c \
                       $(SRC_DIR)/compiler.c \
                       $(SRC_DIR)/program_loader.c \

@@ -1,0 +1,6 @@
+=== STUB INVENTORY SUMMARY ===
+
+Total files with stub markers:
+40
+
+By directory:

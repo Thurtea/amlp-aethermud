@@ -1,0 +1,28 @@
+=== STUB TO JSON MATCHING REPORT ===
+
+Total minimal stubs analyzed: 46
+Matched with JSON data: 1
+No JSON match found: 45
+
+=== MATCHED STUBS (have JSON data) ===
+
+File: lib/occs/mystic.lpc (1.9K)
+  Matches:
+    - ID: a-mystic-drurd-tar-from-her-home-in-england, Name: A mystic drurd tar from her home in England
+      Section: rcc, Has description: False, Has skills: False
+    - ID: both-the-stone-and-iron-golems-are-mystical-mega-damage-creatures, Name: Both the stone and iron golems are mystical mega-damage creatures
+      Section: rcc, Has description: True, Has skills: False
+
+
+=== UNMATCHED STUBS (no JSON data) ===
+
+lib/occs/battle_magus.lpc (1.8K) - basename: battle magus
+lib/occs/biomancer.lpc (1.8K) - basename: biomancer
+lib/occs/burster.lpc (1.9K) - basename: burster
+lib/occs/city_rat.lpc (1.8K) - basename: city rat
+lib/occs/cosmo_knight.lpc (1.8K) - basename: cosmo knight
+lib/occs/elemental_fusionist.lpc (1.8K) - basename: elemental fusionist
+lib/occs/full_conversion_borg.lpc (1.9K) - basename: full conversion borg
+lib/occs/fury_beetle.lpc (1.5K) - basename: fury beetle
+lib/occs/line_walker.lpc (1.8K) - basename: line walker
+lib/occs/mercenary.lpc (1.8K) - basename: mercenary

@@ -10,6 +10,8 @@
 /* Forward declarations */
 typedef struct Room Room;
 
+#define MAX_CLIENTS 100
+
 #define INPUT_BUFFER_SIZE 2048
 #define WS_BUFFER_SIZE 65536
 

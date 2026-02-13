@@ -18,6 +18,7 @@
 #include "efun.h"
 #include "driver.h"
 #include "object.h"
+#include "skills.h"
 #include <time.h>
 
 /* Forward declarations for driver helpers used here (defined in driver.c) */
@@ -34,6 +35,9 @@ extern void send_to_player(PlayerSession *sess, const char *fmt, ...);
 extern VMValue execute_command(PlayerSession *session, const char *command);
 extern PlayerSession *sessions[];
 extern VirtualMachine *global_vm;
+
+/* Forward declarations for helpers implemented later in this file */
+int assign_primary_skills(Character *player, const char *occ_name);
 
 /* Simple wizard action logger */
 static void wiz_log(const char *fmt, ...) {
@@ -404,6 +408,139 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
 
 /* ------------------------------------------------------------------ */
 
+/* Destroy an LPC object by path or object name. Admin-only (level 5). */
+int wiz_destruct(PlayerSession *sess, const char *target) {
+    if (!sess || sess->privilege_level < 5 || !target) return 0;
+
+    /* If looks like a path, try to find/load object */
+    VMValue path_val = vm_value_create_string(target);
+    VMValue found = efun_find_object(global_vm, &path_val, 1);
+    vm_value_release(&path_val);
+
+    if (found.type == VALUE_OBJECT && found.data.object_value) {
+        obj_t *o = (obj_t *)found.data.object_value;
+        obj_destroy(o);
+        vm_value_release(&found);
+        send_to_player(sess, "Destructed object: %s\n", target);
+        wiz_log("%s destructed %s", sess->username ? sess->username : "<unknown>", target);
+        return 1;
+    }
+
+    if (found.type != VALUE_NULL) vm_value_release(&found);
+    send_to_player(sess, "Object not found: %s\n", target);
+    return 0;
+}
+
+/* Promote or set a player's privilege level. Admin-only (level 5). */
+int wiz_promote(PlayerSession *sess, const char *target_name, int new_level) {
+    if (!sess || sess->privilege_level < 5 || !target_name) return 0;
+    PlayerSession *target = find_player_by_name(target_name);
+    if (!target) {
+        send_to_player(sess, "Player not found: %s\n", target_name);
+        return 0;
+    }
+    if (target == sess) {
+        send_to_player(sess, "You cannot change your own level.\n");
+        return 0;
+    }
+    int old = target->privilege_level;
+    target->privilege_level = new_level;
+    save_character(target);
+    send_to_player(sess, "%s -> %s set to level %d\n", target->username, target->username, new_level);
+    send_to_player(target, "Your privilege level was changed by %s to %d\n", sess->username, new_level);
+    wiz_log("%s changed %s from %d -> %d", sess->username ? sess->username : "<unknown>", target->username, old, new_level);
+    return 1;
+}
+
+/* Wrapper command for promotion actions (C-level command wrapper) */
+int cmd_promotion(PlayerSession *sess, const char *player_name, int new_level) {
+    if (!sess || !player_name) return 0;
+    return wiz_promote(sess, player_name, new_level);
+}
+
+/* Simple ban/unban implementation: account name or IP string. Admin-only (level 5). */
+static int write_line_to_file(const char *path, const char *line) {
+    FILE *f = fopen(path, "a");
+    if (!f) return 0;
+    fprintf(f, "%s\n", line);
+    fclose(f);
+    return 1;
+}
+
+static int remove_line_from_file(const char *path, const char *needle) {
+    char tmp_path[512];
+    snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", path);
+    FILE *in = fopen(path, "r");
+    FILE *out = fopen(tmp_path, "w");
+    int found = 0;
+    if (!in || !out) {
+        if (in) fclose(in);
+        if (out) fclose(out);
+        return 0;
+    }
+    char buf[512];
+    while (fgets(buf, sizeof(buf), in)) {
+        /* strip newline */
+        char *nl = strchr(buf, '\n'); if (nl) *nl = '\0';
+        if (strcmp(buf, needle) == 0) { found = 1; continue; }
+        fprintf(out, "%s\n", buf);
+    }
+    fclose(in);
+    fclose(out);
+    if (found) {
+        remove(path);
+        rename(tmp_path, path);
+    } else {
+        remove(tmp_path);
+    }
+    return found;
+}
+
+int wiz_ban(PlayerSession *sess, const char *target) {
+    if (!sess || sess->privilege_level < 5 || !target) return 0;
+    /* decide if IP (contains dot) or username */
+    if (strchr(target, '.') != NULL) {
+        /* treat as IP */
+        if (!write_line_to_file("data/banned_ips.txt", target)) {
+            send_to_player(sess, "Failed to write ban list.\n");
+            return 0;
+        }
+        send_to_player(sess, "Banned IP: %s\n", target);
+        wiz_log("%s banned IP %s", sess->username ? sess->username : "<unknown>", target);
+        return 1;
+    } else {
+        if (!write_line_to_file("data/banned_accounts.txt", target)) {
+            send_to_player(sess, "Failed to write ban list.\n");
+            return 0;
+        }
+        send_to_player(sess, "Banned account: %s\n", target);
+        wiz_log("%s banned account %s", sess->username ? sess->username : "<unknown>", target);
+        return 1;
+    }
+}
+
+int wiz_unban(PlayerSession *sess, const char *target) {
+    if (!sess || sess->privilege_level < 5 || !target) return 0;
+    if (strchr(target, '.') != NULL) {
+        if (!remove_line_from_file("data/banned_ips.txt", target)) {
+            send_to_player(sess, "IP not found in ban list: %s\n", target);
+            return 0;
+        }
+        send_to_player(sess, "Unbanned IP: %s\n", target);
+        wiz_log("%s unbanned IP %s", sess->username ? sess->username : "<unknown>", target);
+        return 1;
+    } else {
+        if (!remove_line_from_file("data/banned_accounts.txt", target)) {
+            send_to_player(sess, "Account not found in ban list: %s\n", target);
+            return 0;
+        }
+        send_to_player(sess, "Unbanned account: %s\n", target);
+        wiz_log("%s unbanned account %s", sess->username ? sess->username : "<unknown>", target);
+        return 1;
+    }
+}
+
+
 /* ============================================================================
  * O.C.C. SKILL CONFIGURATIONS (from Palladium Rifts)
  * ============================================================================ */
@@ -600,41 +737,26 @@ static const SkillConfigEntry skill_configs[] = {
     {NULL, NULL}  /* Sentinel */
 };
 
-/* OCC pool skills - available for OCC-related and secondary selection */
-static SkillDef occ_pool_skills[] = {
-    /* Combat Skills */
-    {"Hand to Hand: Boxing", 30, 2, 1, 0},
-    {"Hand to Hand: Wrestling", 25, 2, 1, 0},
-    {"Axe", 40, 3, 1, 0},
-    {"Hammer/Mace", 45, 3, 1, 0},
-    {"Crossbow", 40, 3, 1, 0},
-    {"Energy Pistol", 45, 3, 1, 0},
-    {"Energy Rifle", 50, 3, 1, 0},
-    {"Armor Repair", 40, 3, 1, 0},
-    {"Weapon Repair", 40, 3, 1, 0},
-    
-    /* Survival Skills */
-    {"Preserve Food", 35, 2, 1, 0},
-    {"Animal Husbandry", 40, 2, 1, 0},
-    {"Herbal Lore", 40, 3, 1, 0},
-    {"Cooking", 45, 1, 1, 0},
-    {"Rope Use", 50, 2, 1, 0},
-    {"Cryptography", 35, 4, 1, 0},
-    
-    /* Knowledge Skills */
-    {"Lore: Geography", 40, 2, 1, 0},
-    {"Lore: Technology", 30, 3, 1, 0},
-    {"Heraldry", 35, 2, 1, 0},
-    {"Alchemy", 30, 3, 1, 0},
-    {"Metallurgy", 35, 3, 1, 0},
-    
-    /* Social Skills */
-    {"Etiquette", 45, 1, 1, 0},
-    {"Seduction", 40, 3, 1, 0},
-    {"Performance", 40, 2, 1, 0},
-    {"Dance", 35, 2, 1, 0},
-    {"Play Instrument", 30, 3, 1, 0},
-    {NULL, 0, 0, 0, 0}  /* Sentinel */
+/* Simplified OCC pool skills - just names for now */
+static const char *occ_pool_combat[] = {
+    "Hand to Hand: Boxing", "Hand to Hand: Wrestling", "Axe",
+    "Hammer/Mace", "Crossbow", "Energy Pistol", "Energy Rifle",
+    "Armor Repair", "Weapon Repair", NULL
+};
+
+static const char *occ_pool_wilderness[] = {
+    "Preserve Food", "Animal Husbandry", "Herbal Lore",
+    "Cooking", "Rope Use", "Cryptography", NULL
+};
+
+static const char *occ_pool_scholar[] = {
+    "Lore: Geography", "Lore: Technology", "Heraldry",
+    "Alchemy", "Metallurgy", NULL
+};
+
+static const char *occ_pool_rogue[] = {
+    "Etiquette", "Seduction", "Performance",
+    "Dance", "Play Instrument", NULL
 };
 
 /* ============================================================================
@@ -670,12 +792,29 @@ int cmd_skill_assign(PlayerSession *sess, const char *player_name, const char *o
     if (!sess || !player_name || !occ_name) {
         return 0;
     }
-    
-    /* TODO: Implement player lookup */
-    /* TODO: Implement OCC verification */
-    /* TODO: Implement primary skill assignment */
-    /* TODO: Create skill assignment request for tracking */
-    
+    /* Basic implementation: find player and assign occ primary skills */
+    PlayerSession *target = find_player_by_name(player_name);
+    if (!target) {
+        send_to_player(sess, "Player not found: %s\n", player_name);
+        return 0;
+    }
+
+    OCCSkillConfig *cfg = get_occ_skill_config(occ_name);
+    if (!cfg) {
+        send_to_player(sess, "Unknown O.C.C.: %s\n", occ_name);
+        return 0;
+    }
+
+    /* Assign occ name and primary skills (basic assignment)
+     * Note: assign_primary_skills should be expanded to set real skill records
+     */
+    if (target->character.occ) free(target->character.occ);
+    target->character.occ = strdup(occ_name);
+    int assigned = assign_primary_skills(&target->character, occ_name);
+    save_character(target);
+    send_to_player(sess, "Assigned O.C.C. %s to %s (%d primary skills set)\n", occ_name, target->username, assigned);
+    send_to_player(target, "A wizard has assigned you the O.C.C. %s\n", occ_name);
+    wiz_log("%s assigned O.C.C. %s -> %s", sess->username ? sess->username : "<unknown>", occ_name, target->username);
     return 1;
 }
 
@@ -700,13 +839,45 @@ int cmd_demotion(PlayerSession *sess, const char *player_name, const char *actio
     if (!sess || !player_name || !action) {
         return 0;
     }
-    
-    /* TODO: Implement player lookup */
-    /* TODO: Implement level demotion */
-    /* TODO: Implement OCC stripping */
-    /* TODO: Implement skill reset */
-    /* TODO: Log demotion action */
-    
+    PlayerSession *target = find_player_by_name(player_name);
+    if (!target) {
+        send_to_player(sess, "Player not found: %s\n", player_name);
+        return 0;
+    }
+
+    if (target == sess) {
+        send_to_player(sess, "You cannot demote yourself.\n");
+        return 0;
+    }
+
+    if (strcmp(action, "level") == 0) {
+        /* Set or reduce level to value */
+        if (value < 0) value = 0;
+        target->character.level = value;
+        /* Adjust HP to reasonable values (simple clamp) */
+        if (target->character.max_hp < 1) target->character.max_hp = 10;
+        if (target->character.hp > target->character.max_hp) target->character.hp = target->character.max_hp;
+        send_to_player(sess, "%s's level set to %d\n", target->username, value);
+        send_to_player(target, "You have been demoted to level %d by %s\n", value, sess->username);
+        wiz_log("%s demoted %s -> level %d", sess->username ? sess->username : "<unknown>", target->username, value);
+    } else if (strcmp(action, "strip-occ") == 0) {
+        if (target->character.occ) free(target->character.occ);
+        target->character.occ = strdup("Awaiting Wizard Assignment");
+        send_to_player(sess, "Stripped O.C.C. from %s\n", target->username);
+        send_to_player(target, "Your O.C.C. has been removed by a wizard.\n");
+        wiz_log("%s stripped O.C.C. from %s", sess->username ? sess->username : "<unknown>", target->username);
+    } else if (strcmp(action, "reset-skills") == 0) {
+        target->character.num_skills = 0;
+        memset(target->character.skills, 0, sizeof(target->character.skills));
+        send_to_player(sess, "Reset skills for %s\n", target->username);
+        send_to_player(target, "Your skills have been reset by a wizard.\n");
+        wiz_log("%s reset skills for %s", sess->username ? sess->username : "<unknown>", target->username);
+    } else {
+        send_to_player(sess, "Unknown demotion action: %s\n", action);
+        return 0;
+    }
+
+    save_character(target);
     return 1;
 }
 
@@ -740,12 +911,22 @@ int cmd_tattoo_gun(PlayerSession *sess, const char *action,
         return 1;
     }
     
-    /* TODO: Implement show tattoos */
-    /* TODO: Implement apply tattoo */
-    /* TODO: Implement remove tattoo */
-    /* TODO: Validate tattoo applicability to O.C.C. */
-    /* TODO: Log tattoo applications */
-    
+    /* Stubs for tattoo actions until tattoo system exists */
+    if (strcmp(action, "show") == 0) {
+        send_to_player(sess, "Tattoo display not implemented yet.\n");
+        return 1;
+    }
+
+    if (strcmp(action, "apply") == 0) {
+        send_to_player(sess, "Tattoo application is not implemented; TODO.\n");
+        return 1;
+    }
+
+    if (strcmp(action, "remove") == 0) {
+        send_to_player(sess, "Tattoo removal is not implemented; TODO.\n");
+        return 1;
+    }
+
     return 1;
 }
 
@@ -772,18 +953,12 @@ OCCSkillConfig *get_occ_skill_config(const char *occ_name) {
 
 /**
  * get_skill_definition()
- * Look up a skill in the OCC pool
+ * Delegate to the central skills system
  */
-const SkillDef *get_skill_definition(const char *skill_name) {
+const SkillDef* get_skill_definition(const char *skill_name) {
     if (!skill_name) return NULL;
-    
-    for (int i = 0; occ_pool_skills[i].skill_name != NULL; i++) {
-        if (strcmp(occ_pool_skills[i].skill_name, skill_name) == 0) {
-            return &occ_pool_skills[i];
-        }
-    }
-    
-    return NULL;
+    /* Use the global skills system from skills.c */
+    return skill_get_by_name(skill_name);
 }
 
 /**
@@ -823,15 +998,29 @@ int validate_skill_assignment(const char *occ_name, const char *skill_name,
  * These are mandatory and don't require wizard selection
  */
 int assign_primary_skills(Character *player, const char *occ_name) {
+    if (!player || !occ_name) return 0;
     OCCSkillConfig *config = get_occ_skill_config(occ_name);
-    if (!config) {
-        return 0;
+    if (!config) return 0;
+
+    /* Clear current primary entries from character (simple reset) */
+    player->num_skills = 0;
+
+    int assigned = 0;
+    for (int i = 0; i < config->primary_count; i++) {
+        if (!config->primary_skills[i].skill_name) continue;
+        /* Map skill name to global skill id if available */
+        int skill_id = skill_get_id_by_name(config->primary_skills[i].skill_name);
+        if (skill_id < 0) continue; /* skill not found in global db */
+
+        if (player->num_skills >= MAX_PLAYER_SKILLS) break;
+        player->skills[player->num_skills].skill_id = skill_id;
+        player->skills[player->num_skills].percentage = config->primary_skills[i].base_percent;
+        player->skills[player->num_skills].uses = 0;
+        player->num_skills++;
+        assigned++;
     }
-    
-    /* TODO: Actually assign skills to player object */
-    /* For now, just verify structure works */
-    
-    return config->primary_count;
+
+    return assigned;
 }
 
 /* ============================================================================

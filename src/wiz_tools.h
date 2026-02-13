@@ -33,12 +33,12 @@ typedef struct {
     int level_bonus;       /* Additional % per level */
     int max_occ_slots;     /* How many OCC-related slots this requires */
     int is_mandatory;      /* 1 if all members of OCC must have it */
-} SkillDef;
+} WizSkillDef;
 
 typedef struct {
     char *occ_name;
     int primary_count;        /* Number of primary skills */
-    SkillDef primary_skills[MAX_PRIMARY_SKILLS];
+    WizSkillDef primary_skills[MAX_PRIMARY_SKILLS];
     int occ_related_max;       /* Max selectable OCC-related skills */
     int secondary_max;         /* Max selectable secondary skills */
 } OCCSkillConfig;
@@ -84,9 +84,9 @@ typedef struct {
 typedef struct {
     char *player_name;
     char *occ_name;                        /* OCC being assigned */
-    SkillDef selected_skills[MAX_OCC_RELATED_SKILLS];  /* Selected OCC-related */
+    WizSkillDef selected_skills[MAX_OCC_RELATED_SKILLS];  /* Selected OCC-related */
     int selected_count;                    /* Count of selected */
-    SkillDef selected_secondary[MAX_SECONDARY_SKILLS]; /* Selected secondary */
+    WizSkillDef selected_secondary[MAX_SECONDARY_SKILLS]; /* Selected secondary */
     int secondary_count;
 } CharacterSkillAssignment;
 
@@ -164,6 +164,7 @@ void skill_tool_init(void);
 int cmd_skill_assign(PlayerSession *sess, const char *occ, const char *player);
 int cmd_demotion(PlayerSession *sess, const char *player, const char *action, int value);
 int cmd_tattoo_gun(PlayerSession *sess, const char *action, const char *player, const char *tattoo);
+int cmd_promotion(PlayerSession *sess, const char *player, int new_level);
 
 /* Additional wizard helper prototypes */
 int wiz_snoop(PlayerSession *sess, const char *target_name, int enable);

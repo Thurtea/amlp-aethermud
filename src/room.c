@@ -1,19 +1,531 @@
 #include "room.h"
+#include "item.h"
 #include "session_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <errno.h>
 
 #define MAX_ROOMS 100
+#define LPC_ROOM_ID_BASE 1000
 
-/* World data */
+/* World data - bootstrap C rooms */
 static Room world_rooms[MAX_ROOMS];
 static int num_rooms = 0;
 
+/* Dynamic LPC room pool */
+static Room **lpc_rooms = NULL;
+static int num_lpc_rooms = 0;
+static int max_lpc_rooms = 0;
+static int next_lpc_room_id = LPC_ROOM_ID_BASE;
+
+/* Path lookup table for LPC rooms */
+typedef struct {
+    char *path;
+    Room *room;
+} RoomPathEntry;
+static RoomPathEntry *path_table = NULL;
+static int num_path_entries = 0;
+static int max_path_entries = 0;
+
 /* External function from session.c */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
+
+/* ========== LPC TEXT-SCRAPING HELPERS ========== */
+
+/* Preprocess LPC source: resolve DIR_DOMAINS and DIR_STD macros.
+ * Copies 'in' to 'out', replacing DIR_DOMAINS + " with "/domains
+ * and DIR_STD + " with "/std so the parser sees plain quoted strings. */
+static void preprocess_lpc_macros(char *out, const char *in, size_t max_out) {
+    size_t olen = 0;
+    while (*in && olen < max_out - 1) {
+        if (strncmp(in, "DIR_DOMAINS", 11) == 0) {
+            const char *p = in + 11;
+            while (*p == ' ' || *p == '+') p++;
+            if (*p == '"') {
+                /* Output: "/domains  (replaces DIR_DOMAINS + ") */
+                out[olen++] = '"';
+                const char *pfx = "/domains";
+                while (*pfx && olen < max_out - 1) out[olen++] = *pfx++;
+                in = p + 1;  /* skip past the opening " */
+                continue;
+            }
+        }
+        if (strncmp(in, "DIR_STD", 7) == 0) {
+            const char *p = in + 7;
+            while (*p == ' ' || *p == '+') p++;
+            if (*p == '"') {
+                out[olen++] = '"';
+                const char *pfx = "/std";
+                while (*pfx && olen < max_out - 1) out[olen++] = *pfx++;
+                in = p + 1;
+                continue;
+            }
+        }
+        out[olen++] = *in++;
+    }
+    out[olen] = '\0';
+}
+
+/* Extract and concatenate all quoted strings from a setter call.
+ * Handles multiline string concatenation with + or adjacent strings.
+ * Example: set_short("Town Square") or set_long("line1\n" + "line2\n")
+ * Returns malloc'd string or NULL. */
+static char* room_extract_string(const char *buf, const char *setter_name) {
+    const char *p = strstr(buf, setter_name);
+    if (!p) return NULL;
+
+    p += strlen(setter_name);
+
+    /* Find opening paren */
+    while (*p && *p != '(') p++;
+    if (!*p) return NULL;
+    p++;
+
+    /* Track parenthesis nesting so we stop at the matching ) */
+    int depth = 1;
+    char result[16384];
+    size_t rlen = 0;
+
+    while (*p && depth > 0) {
+        if (*p == '(') {
+            depth++;
+            p++;
+        } else if (*p == ')') {
+            depth--;
+            if (depth == 0) break;
+            p++;
+        } else if (*p == '"') {
+            p++;  /* skip opening quote */
+            while (*p && !(*p == '"' && *(p - 1) != '\\')) {
+                if (*p == '\\' && p[1]) {
+                    switch (p[1]) {
+                        case 'n':  if (rlen < sizeof(result)-1) result[rlen++] = '\n'; break;
+                        case 't':  if (rlen < sizeof(result)-1) result[rlen++] = '\t'; break;
+                        case '\\': if (rlen < sizeof(result)-1) result[rlen++] = '\\'; break;
+                        case '"':  if (rlen < sizeof(result)-1) result[rlen++] = '"'; break;
+                        default:
+                            if (rlen < sizeof(result)-2) {
+                                result[rlen++] = '\\';
+                                result[rlen++] = p[1];
+                            }
+                            break;
+                    }
+                    p += 2;
+                } else {
+                    if (rlen < sizeof(result)-1) result[rlen++] = *p;
+                    p++;
+                }
+            }
+            if (*p == '"') p++;  /* skip closing quote */
+        } else {
+            p++;  /* skip whitespace, +, newlines, etc. */
+        }
+    }
+
+    result[rlen] = '\0';
+    return rlen > 0 ? strdup(result) : NULL;
+}
+
+/* Parse all add_exit("direction", "path") calls from LPC source.
+ * Populates exits_out array, returns count. */
+static int room_parse_add_exits(const char *buf, RoomExit **exits_out) {
+    int count = 0;
+    int capacity = 8;
+    RoomExit *exits = malloc(sizeof(RoomExit) * capacity);
+
+    const char *p = buf;
+    while ((p = strstr(p, "add_exit(")) != NULL) {
+        p += 9;  /* skip "add_exit(" */
+
+        /* First quoted string: direction */
+        const char *q = strchr(p, '"');
+        if (!q) break;
+        q++;
+        const char *end = strchr(q, '"');
+        if (!end) break;
+
+        size_t dlen = end - q;
+        char *direction = malloc(dlen + 1);
+        memcpy(direction, q, dlen);
+        direction[dlen] = '\0';
+
+        /* Second quoted string: path */
+        q = strchr(end + 1, '"');
+        if (!q) { free(direction); break; }
+        q++;
+        end = strchr(q, '"');
+        if (!end) { free(direction); break; }
+
+        size_t plen = end - q;
+        char *path = malloc(plen + 1);
+        memcpy(path, q, plen);
+        path[plen] = '\0';
+
+        if (count >= capacity) {
+            capacity *= 2;
+            exits = realloc(exits, sizeof(RoomExit) * capacity);
+        }
+        exits[count].direction = direction;
+        exits[count].target_path = path;
+        count++;
+
+        p = end + 1;
+    }
+
+    *exits_out = count > 0 ? exits : NULL;
+    if (count == 0) free(exits);
+    return count;
+}
+
+/* Parse set_exits(([ "dir": "path", ... ])) mapping from LPC source.
+ * Populates exits_out array, returns count. */
+static int room_parse_set_exits(const char *buf, RoomExit **exits_out) {
+    const char *p = strstr(buf, "set_exits(");
+    if (!p) { *exits_out = NULL; return 0; }
+
+    p = strstr(p, "([");
+    if (!p) { *exits_out = NULL; return 0; }
+    p += 2;
+
+    const char *map_end = strstr(p, "])");
+    if (!map_end) { *exits_out = NULL; return 0; }
+
+    int count = 0;
+    int capacity = 8;
+    RoomExit *exits = malloc(sizeof(RoomExit) * capacity);
+
+    while (p < map_end) {
+        /* Find "key" */
+        const char *q = strchr(p, '"');
+        if (!q || q >= map_end) break;
+        q++;
+        const char *ke = strchr(q, '"');
+        if (!ke || ke >= map_end) break;
+
+        size_t klen = ke - q;
+        char *key = malloc(klen + 1);
+        memcpy(key, q, klen);
+        key[klen] = '\0';
+
+        /* Find : separator */
+        p = strchr(ke + 1, ':');
+        if (!p || p >= map_end) { free(key); break; }
+        p++;
+
+        /* Find "value" */
+        q = strchr(p, '"');
+        if (!q || q >= map_end) { free(key); break; }
+        q++;
+        const char *ve = strchr(q, '"');
+        if (!ve || ve >= map_end) { free(key); break; }
+
+        size_t vlen = ve - q;
+        char *value = malloc(vlen + 1);
+        memcpy(value, q, vlen);
+        value[vlen] = '\0';
+
+        if (count >= capacity) {
+            capacity *= 2;
+            exits = realloc(exits, sizeof(RoomExit) * capacity);
+        }
+        exits[count].direction = key;
+        exits[count].target_path = value;
+        count++;
+
+        p = ve + 1;
+    }
+
+    *exits_out = count > 0 ? exits : NULL;
+    if (count == 0) free(exits);
+    return count;
+}
+
+/* Parse set_items(([ "keyword": "description", ... ])) from LPC source.
+ * Populates details_out array, returns count. */
+static int room_parse_set_items(const char *buf, RoomDetail **details_out) {
+    const char *p = strstr(buf, "set_items(");
+    if (!p) { *details_out = NULL; return 0; }
+
+    p = strstr(p, "([");
+    if (!p) { *details_out = NULL; return 0; }
+    p += 2;
+
+    const char *map_end = strstr(p, "])");
+    if (!map_end) { *details_out = NULL; return 0; }
+
+    int count = 0;
+    int capacity = 8;
+    RoomDetail *details = malloc(sizeof(RoomDetail) * capacity);
+
+    while (p < map_end) {
+        const char *q = strchr(p, '"');
+        if (!q || q >= map_end) break;
+        q++;
+        const char *ke = strchr(q, '"');
+        if (!ke || ke >= map_end) break;
+
+        size_t klen = ke - q;
+        char *keyword = malloc(klen + 1);
+        memcpy(keyword, q, klen);
+        keyword[klen] = '\0';
+
+        p = strchr(ke + 1, ':');
+        if (!p || p >= map_end) { free(keyword); break; }
+        p++;
+
+        q = strchr(p, '"');
+        if (!q || q >= map_end) { free(keyword); break; }
+        q++;
+        const char *ve = strchr(q, '"');
+        if (!ve || ve >= map_end) { free(keyword); break; }
+
+        size_t vlen = ve - q;
+        char *desc = malloc(vlen + 1);
+        memcpy(desc, q, vlen);
+        desc[vlen] = '\0';
+
+        if (count >= capacity) {
+            capacity *= 2;
+            details = realloc(details, sizeof(RoomDetail) * capacity);
+        }
+        details[count].keyword = keyword;
+        details[count].description = desc;
+        count++;
+
+        p = ve + 1;
+    }
+
+    *details_out = count > 0 ? details : NULL;
+    if (count == 0) free(details);
+    return count;
+}
+
+/* Parse set_property("key", value) occurrences and set simple flags on Room.
+ * Supported keys: "light" (int), "indoors" (0/1), "no_magic" (0/1), "no_combat" (0/1)
+ */
+static void room_parse_properties(const char *buf, Room *room) {
+    const char *p = buf;
+    while ((p = strstr(p, "set_property(")) != NULL) {
+        p += strlen("set_property(");
+
+        /* Skip whitespace */
+        while (*p && (*p == ' ' || *p == '\t' || *p == '\n')) p++;
+
+        /* Expect first argument: quoted key */
+        const char *q = strchr(p, '"');
+        if (!q) break;
+        q++;
+        const char *qe = strchr(q, '"');
+        if (!qe) break;
+        size_t klen = qe - q;
+        char key[64];
+        if (klen >= sizeof(key)) klen = sizeof(key)-1;
+        memcpy(key, q, klen);
+        key[klen] = '\0';
+
+        /* Find comma after key */
+        const char *comma = strchr(qe, ',');
+        if (!comma) { p = qe + 1; continue; }
+        p = comma + 1;
+
+        /* Skip whitespace */
+        while (*p && (*p == ' ' || *p == '\t' || *p == '\n')) p++;
+
+        /* Read numeric value (or quoted number) */
+        int val = 0;
+        if (*p == '"') {
+            p++;
+            const char *ve = strchr(p, '"');
+            if (ve) {
+                char vbuf[32];
+                size_t vlen = ve - p;
+                if (vlen >= sizeof(vbuf)) vlen = sizeof(vbuf)-1;
+                memcpy(vbuf, p, vlen); vbuf[vlen] = '\0';
+                val = atoi(vbuf);
+            }
+        } else {
+            val = atoi(p);
+        }
+
+        /* Apply recognized properties */
+        if (strcasecmp(key, "light") == 0) {
+            if (val < 0) val = 0;
+            if (val > 3) val = 3;
+            room->light_level = val;
+        } else if (strcasecmp(key, "indoors") == 0) {
+            room->is_indoors = (val != 0);
+        } else if (strcasecmp(key, "no_magic") == 0) {
+            room->no_magic = (val != 0);
+        } else if (strcasecmp(key, "no_combat") == 0) {
+            room->no_combat = (val != 0);
+        }
+
+        p = qe + 1;
+    }
+}
+
+/* ========== LPC ROOM LOADING ========== */
+
+/* Load a room from an LPC file by text-scraping its setter calls.
+ * Assigns an auto-incrementing ID and registers in the path table.
+ * Documentation: docs/lpc-room-system.md
+ * Note: this loader uses static text parsing of common setter calls
+ * and does NOT execute LPC code. See the documentation for limitations.
+ */
+static Room* room_load_from_lpc(const char *lpc_path) {
+    /* Resolve LPC path to filesystem path */
+    char fs_path[512];
+    if (lpc_path[0] == '/') {
+        snprintf(fs_path, sizeof(fs_path), "lib%s.lpc", lpc_path);
+    } else {
+        snprintf(fs_path, sizeof(fs_path), "lib/%s.lpc", lpc_path);
+    }
+
+    /* Also try without .lpc extension (already has it) */
+    if (access(fs_path, R_OK) != 0) {
+        /* Try as-is (maybe path already includes lib/ or .lpc) */
+        size_t plen = strlen(lpc_path);
+        if (plen > 4 && strcmp(lpc_path + plen - 4, ".lpc") == 0) {
+            if (lpc_path[0] == '/') {
+                snprintf(fs_path, sizeof(fs_path), "lib%s", lpc_path);
+            } else {
+                snprintf(fs_path, sizeof(fs_path), "lib/%s", lpc_path);
+            }
+        }
+    }
+
+    FILE *f = fopen(fs_path, "r");
+    if (!f) {
+        fprintf(stderr, "[Room] Failed to open LPC room '%s' (%s): %s\n",
+                lpc_path, fs_path, strerror(errno));
+        return NULL;
+    }
+
+    /* Read entire file */
+    char raw[16384];
+    size_t n = fread(raw, 1, sizeof(raw) - 1, f);
+    fclose(f);
+    raw[n] = '\0';
+
+    /* Preprocess macros (DIR_DOMAINS, DIR_STD) */
+    char buf[16384];
+    preprocess_lpc_macros(buf, raw, sizeof(buf));
+
+    /* Allocate room */
+    Room *room = calloc(1, sizeof(Room));
+    if (!room) return NULL;
+
+    room->id = next_lpc_room_id++;
+    room->lpc_path = strdup(lpc_path);
+    /* Default room properties */
+    room->light_level = 2; /* normal/lit */
+    room->is_indoors = false;
+    room->no_magic = false;
+    room->no_combat = false;
+
+    /* Initialize cardinal exits to -1 (unused for LPC rooms) */
+    room->exits.north = -1;
+    room->exits.south = -1;
+    room->exits.east = -1;
+    room->exits.west = -1;
+    room->exits.up = -1;
+    room->exits.down = -1;
+
+    /* Extract properties via text-scraping */
+    room->name = room_extract_string(buf, "set_short");
+    if (!room->name) room->name = strdup("An LPC Room");
+
+    room->description = room_extract_string(buf, "set_long");
+    if (!room->description) room->description = strdup("An empty room.");
+
+    /* Parse exits: try add_exit() calls first, then set_exits() mapping */
+    RoomExit *exits = NULL;
+    int exit_count = room_parse_add_exits(buf, &exits);
+    if (exit_count == 0) {
+        exit_count = room_parse_set_exits(buf, &exits);
+    }
+    room->flex_exits = exits;
+    room->num_flex_exits = exit_count;
+
+    /* Parse examinable details from set_items() */
+    room->details = NULL;
+    room->num_details = room_parse_set_items(buf, &room->details);
+
+    /* Parse set_property(...) calls for light/indoors/no_magic/no_combat */
+    room_parse_properties(buf, room);
+
+    /* Initialize player tracking */
+    room->players = calloc(10, sizeof(PlayerSession*));
+    room->num_players = 0;
+    room->max_players = 10;
+    room->items = NULL;
+
+    /* Register in LPC room pool */
+    if (num_lpc_rooms >= max_lpc_rooms) {
+        max_lpc_rooms = max_lpc_rooms == 0 ? 32 : max_lpc_rooms * 2;
+        lpc_rooms = realloc(lpc_rooms, sizeof(Room*) * max_lpc_rooms);
+    }
+    lpc_rooms[num_lpc_rooms++] = room;
+
+    /* Register in path lookup table */
+    if (num_path_entries >= max_path_entries) {
+        max_path_entries = max_path_entries == 0 ? 64 : max_path_entries * 2;
+        path_table = realloc(path_table, sizeof(RoomPathEntry) * max_path_entries);
+    }
+    path_table[num_path_entries].path = strdup(lpc_path);
+    path_table[num_path_entries].room = room;
+    num_path_entries++;
+
+    fprintf(stderr, "[Room] Loaded LPC room '%s' (id=%d, %d exits, %d details) from %s\n",
+            room->name, room->id, room->num_flex_exits, room->num_details, fs_path);
+
+    return room;
+}
+
+/* Look up an LPC room by path, loading it on-demand if not cached. */
+Room* room_get_by_path(const char *lpc_path) {
+    if (!lpc_path) return NULL;
+
+    /* Check path table for already-loaded room */
+    for (int i = 0; i < num_path_entries; i++) {
+        if (strcmp(path_table[i].path, lpc_path) == 0) {
+            return path_table[i].room;
+        }
+    }
+
+    /* Not cached - load on demand */
+    return room_load_from_lpc(lpc_path);
+}
+
+/* Find an examinable detail in a room by keyword (case-insensitive). */
+const char* room_find_detail(Room *room, const char *keyword) {
+    if (!room || !keyword) return NULL;
+    for (int i = 0; i < room->num_details; i++) {
+        if (strcasecmp(room->details[i].keyword, keyword) == 0) {
+            return room->details[i].description;
+        }
+    }
+    return NULL;
+}
+
+/* Check if input matches a flex exit direction (with cardinal abbreviations). */
+static int direction_matches(const char *input, const char *exit_dir) {
+    if (strcasecmp(input, exit_dir) == 0) return 1;
+    if (strlen(input) == 1) {
+        char c = tolower((unsigned char)input[0]);
+        if (c == 'n' && strcasecmp(exit_dir, "north") == 0) return 1;
+        if (c == 's' && strcasecmp(exit_dir, "south") == 0) return 1;
+        if (c == 'e' && strcasecmp(exit_dir, "east") == 0) return 1;
+        if (c == 'w' && strcasecmp(exit_dir, "west") == 0) return 1;
+        if (c == 'u' && strcasecmp(exit_dir, "up") == 0) return 1;
+        if (c == 'd' && strcasecmp(exit_dir, "down") == 0) return 1;
+    }
+    return 0;
+}
 
 /* Helper to initialize a room */
 static void init_room(int id, const char *name, const char *desc,
@@ -32,6 +544,11 @@ static void init_room(int id, const char *name, const char *desc,
     r->players = calloc(10, sizeof(PlayerSession*));
     r->num_players = 0;
     r->max_players = 10;
+    /* Default C room properties */
+    r->light_level = 2;
+    r->is_indoors = false;
+    r->no_magic = false;
+    r->no_combat = false;
 }
 
 /* Initialize the game world */
@@ -302,17 +819,66 @@ void room_init_world(void) {
 
 /* Cleanup world */
 void room_cleanup_world(void) {
+    /* Free bootstrap rooms */
     for (int i = 0; i < num_rooms; i++) {
         if (world_rooms[i].name) free(world_rooms[i].name);
         if (world_rooms[i].description) free(world_rooms[i].description);
         if (world_rooms[i].players) free(world_rooms[i].players);
     }
+
+    /* Free LPC rooms */
+    for (int i = 0; i < num_lpc_rooms; i++) {
+        Room *r = lpc_rooms[i];
+        if (!r) continue;
+        if (r->name) free(r->name);
+        if (r->description) free(r->description);
+        if (r->lpc_path) free(r->lpc_path);
+        if (r->players) free(r->players);
+        for (int j = 0; j < r->num_flex_exits; j++) {
+            free(r->flex_exits[j].direction);
+            free(r->flex_exits[j].target_path);
+        }
+        free(r->flex_exits);
+        for (int j = 0; j < r->num_details; j++) {
+            free(r->details[j].keyword);
+            free(r->details[j].description);
+        }
+        free(r->details);
+        /* Free ground items */
+        Item *item = r->items;
+        while (item) {
+            Item *next = item->next;
+            item_free(item);
+            item = next;
+        }
+        free(r);
+    }
+    free(lpc_rooms);
+    lpc_rooms = NULL;
+    num_lpc_rooms = 0;
+    max_lpc_rooms = 0;
+
+    /* Free path table */
+    for (int i = 0; i < num_path_entries; i++) {
+        free(path_table[i].path);
+    }
+    free(path_table);
+    path_table = NULL;
+    num_path_entries = 0;
+    max_path_entries = 0;
 }
 
-/* Get room by ID */
+/* Get room by ID (checks bootstrap rooms, then LPC rooms) */
 Room* room_get_by_id(int id) {
-    if (id < 0 || id >= num_rooms) return NULL;
-    return &world_rooms[id];
+    /* Bootstrap rooms: IDs 0 .. num_rooms-1 */
+    if (id >= 0 && id < num_rooms) return &world_rooms[id];
+
+    /* LPC rooms: IDs >= LPC_ROOM_ID_BASE */
+    for (int i = 0; i < num_lpc_rooms; i++) {
+        if (lpc_rooms[i]->id == id) return lpc_rooms[i];
+    }
+
+    return NULL;
 }
 
 /* Get starting room */
@@ -349,23 +915,39 @@ void room_remove_player(Room *room, PlayerSession *player) {
     }
 }
 
-/* Add item to room */
-void room_add_item(Room *room, InventoryItem *item) {
-    (void)room; (void)item;
-    /* TODO: implement when room items are fully wired */
+/* Add item to room's ground list */
+void room_add_item(Room *room, Item *item) {
+    if (!room || !item) return;
+    item->next = room->items;
+    room->items = item;
 }
 
-/* Find item in room by name */
-InventoryItem* room_find_item(Room *room, const char *name) {
-    (void)room; (void)name;
-    /* TODO: implement when room items are fully wired */
+/* Find item in room by name (case-insensitive) */
+Item* room_find_item(Room *room, const char *name) {
+    if (!room || !name) return NULL;
+    Item *curr = room->items;
+    while (curr) {
+        if (strcasecmp(curr->name, name) == 0) return curr;
+        curr = curr->next;
+    }
     return NULL;
 }
 
-/* Remove item from room */
-void room_remove_item(Room *room, InventoryItem *item) {
-    (void)room; (void)item;
-    /* TODO: implement when room items are fully wired */
+/* Remove item from room's ground list (does not free it) */
+void room_remove_item(Room *room, Item *item) {
+    if (!room || !item) return;
+    Item *prev = NULL;
+    Item *curr = room->items;
+    while (curr) {
+        if (curr == item) {
+            if (prev) prev->next = curr->next;
+            else room->items = curr->next;
+            curr->next = NULL;
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
 }
 
 /* Broadcast message to all players in room (optionally excluding one) */
@@ -385,23 +967,38 @@ void cmd_look(PlayerSession *sess, const char *args) {
         send_to_player(sess, "You are nowhere.\n");
         return;
     }
-    
+
     Room *room = sess->current_room;
-    
+
     send_to_player(sess, "\n%s\n", room->name);
     send_to_player(sess, "%s\n", room->description);
-    
-    /* List exits */
+    /* Show light level hints */
+    if (room->light_level == 0) {
+        send_to_player(sess, "[It is dark here.]\n");
+    } else if (room->light_level == 1) {
+        send_to_player(sess, "[A dim glow illuminates the area.]\n");
+    } else if (room->light_level == 3) {
+        send_to_player(sess, "[Bright light fills the room.]\n");
+    }
+    /* Collect exit directions from both flex exits and cardinal exits */
     int exit_count = 0;
-    char *exit_dirs[6];
-    
-    if (room->exits.north >= 0) exit_dirs[exit_count++] = "north";
-    if (room->exits.south >= 0) exit_dirs[exit_count++] = "south";
-    if (room->exits.east >= 0) exit_dirs[exit_count++] = "east";
-    if (room->exits.west >= 0) exit_dirs[exit_count++] = "west";
-    if (room->exits.up >= 0) exit_dirs[exit_count++] = "up";
-    if (room->exits.down >= 0) exit_dirs[exit_count++] = "down";
-    
+    const char *exit_dirs[32];
+
+    /* Flex exits (LPC rooms) */
+    for (int i = 0; i < room->num_flex_exits && exit_count < 32; i++) {
+        exit_dirs[exit_count++] = room->flex_exits[i].direction;
+    }
+
+    /* Cardinal exits (C bootstrap rooms) - only if no flex exits */
+    if (exit_count == 0) {
+        if (room->exits.north >= 0) exit_dirs[exit_count++] = "north";
+        if (room->exits.south >= 0) exit_dirs[exit_count++] = "south";
+        if (room->exits.east >= 0) exit_dirs[exit_count++] = "east";
+        if (room->exits.west >= 0) exit_dirs[exit_count++] = "west";
+        if (room->exits.up >= 0) exit_dirs[exit_count++] = "up";
+        if (room->exits.down >= 0) exit_dirs[exit_count++] = "down";
+    }
+
     if (exit_count == 0) {
         send_to_player(sess, "There are no exits.\n");
     } else if (exit_count == 1) {
@@ -416,13 +1013,22 @@ void cmd_look(PlayerSession *sess, const char *args) {
         }
         send_to_player(sess, "\033[0m\n");
     }
-    
+
+    /* List items on the ground */
+    if (room->items) {
+        Item *curr = room->items;
+        while (curr) {
+            send_to_player(sess, "%s is lying here.\n", curr->name);
+            curr = curr->next;
+        }
+    }
+
     /* List other players by race (until introduced) */
     if (room->num_players > 1) {
         for (int i = 0; i < room->num_players; i++) {
             if (room->players[i] != sess && room->players[i]->character.race) {
                 const char *race = room->players[i]->character.race;
-                
+
                 /* Convert race name to lowercase for display */
                 char lowercase_race[128];
                 int j;
@@ -430,15 +1036,15 @@ void cmd_look(PlayerSession *sess, const char *args) {
                     lowercase_race[j] = tolower((unsigned char)race[j]);
                 }
                 lowercase_race[j] = '\0';
-                
+
                 /* Determine article (a/an) based on first letter */
                 char article = 'A';
-                if (lowercase_race[0] == 'a' || lowercase_race[0] == 'e' || 
-                    lowercase_race[0] == 'i' || lowercase_race[0] == 'o' || 
+                if (lowercase_race[0] == 'a' || lowercase_race[0] == 'e' ||
+                    lowercase_race[0] == 'i' || lowercase_race[0] == 'o' ||
                     lowercase_race[0] == 'u') {
                     article = 'n';
                 }
-                
+
                 if (article == 'n') {
                     send_to_player(sess, "An %s is standing around.\n", lowercase_race);
                 } else {
@@ -449,62 +1055,75 @@ void cmd_look(PlayerSession *sess, const char *args) {
     }
 }
 
-/* Move command */
+/* Move command - checks flex exits (LPC) first, then cardinal exits (C) */
 void cmd_move(PlayerSession *sess, const char *direction) {
     if (!sess || !sess->current_room || !direction) {
         send_to_player(sess, "You can't move.\n");
         return;
     }
-    
+
     Room *current = sess->current_room;
-    int next_room_id = -1;
-    
-    /* Determine direction */
-    if (strcmp(direction, "north") == 0 || strcmp(direction, "n") == 0) {
-        next_room_id = current->exits.north;
-    } else if (strcmp(direction, "south") == 0 || strcmp(direction, "s") == 0) {
-        next_room_id = current->exits.south;
-    } else if (strcmp(direction, "east") == 0 || strcmp(direction, "e") == 0) {
-        next_room_id = current->exits.east;
-    } else if (strcmp(direction, "west") == 0 || strcmp(direction, "w") == 0) {
-        next_room_id = current->exits.west;
-    } else if (strcmp(direction, "up") == 0 || strcmp(direction, "u") == 0) {
-        next_room_id = current->exits.up;
-    } else if (strcmp(direction, "down") == 0 || strcmp(direction, "d") == 0) {
-        next_room_id = current->exits.down;
+    Room *next_room = NULL;
+
+    /* Check flexible exits first (LPC rooms) */
+    for (int i = 0; i < current->num_flex_exits; i++) {
+        if (direction_matches(direction, current->flex_exits[i].direction)) {
+            next_room = room_get_by_path(current->flex_exits[i].target_path);
+            if (!next_room) {
+                send_to_player(sess, "That way seems blocked.\n");
+                return;
+            }
+            break;
+        }
     }
-    
-    if (next_room_id < 0) {
+
+    /* Fall back to cardinal exits (C bootstrap rooms) */
+    if (!next_room) {
+        int next_room_id = -1;
+        if (strcmp(direction, "north") == 0 || strcmp(direction, "n") == 0) {
+            next_room_id = current->exits.north;
+        } else if (strcmp(direction, "south") == 0 || strcmp(direction, "s") == 0) {
+            next_room_id = current->exits.south;
+        } else if (strcmp(direction, "east") == 0 || strcmp(direction, "e") == 0) {
+            next_room_id = current->exits.east;
+        } else if (strcmp(direction, "west") == 0 || strcmp(direction, "w") == 0) {
+            next_room_id = current->exits.west;
+        } else if (strcmp(direction, "up") == 0 || strcmp(direction, "u") == 0) {
+            next_room_id = current->exits.up;
+        } else if (strcmp(direction, "down") == 0 || strcmp(direction, "d") == 0) {
+            next_room_id = current->exits.down;
+        }
+
+        if (next_room_id >= 0) {
+            next_room = room_get_by_id(next_room_id);
+        }
+    }
+
+    if (!next_room) {
         send_to_player(sess, "You can't go that way.\n");
         return;
     }
-    
-    Room *next_room = room_get_by_id(next_room_id);
-    if (!next_room) {
-        send_to_player(sess, "That room doesn't exist!\n");
-        return;
-    }
-    
+
     /* Notify room of departure */
     for (int i = 0; i < current->num_players; i++) {
         if (current->players[i] != sess) {
-            send_to_player(current->players[i], "%s leaves %s.\n", 
+            send_to_player(current->players[i], "%s leaves %s.\n",
                           sess->username, direction);
         }
     }
-    
+
     /* Move player */
     room_remove_player(current, sess);
     room_add_player(next_room, sess);
     sess->current_room = next_room;
-    
+
     /* Notify new room of arrival */
     for (int i = 0; i < next_room->num_players; i++) {
         if (next_room->players[i] != sess) {
             send_to_player(next_room->players[i], "%s arrives.\n", sess->username);
         }
     }
-    
+
     /* Auto-look */
     cmd_look(sess, "");
 }

@@ -56,6 +56,9 @@ typedef struct PlayerSession {
     int chargen_temp_choice; /* Temporary storage for menu selection */
     Character character;
     Room *current_room;
+    /* For LPC rooms persistence: store original LPC path (if any).
+     * New in save format version 3. NULL when not used. */
+    char *current_room_path;
 
     /* Wizard tools */
     struct PlayerSession *snooping;      /* Session being snooped on */

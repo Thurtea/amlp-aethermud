@@ -529,7 +529,9 @@ static void chargen_show_zones(PlayerSession *sess) {
     send_to_player(sess, "                    Atlantis. Market Center.\n");
     send_to_player(sess, "  3. Chi-Town     - The Coalition States' fortress city.\n");
     send_to_player(sess, "                    Transit Hub.\n");
-    send_to_player(sess, "\nEnter choice (1-3): ");
+    send_to_player(sess, "  4. Welcome Area (LPC) - Beginner tutorial and help rooms.\n");
+    send_to_player(sess, "  5. Castle Entry (LPC) - A noble castle's entry courtyard.\n");
+    send_to_player(sess, "\nEnter choice (1-5): ");
 }
 
 /* Display available secondary skills for selection */
@@ -866,16 +868,18 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
 
         case CHARGEN_ZONE_SELECT:
             {
-                static const int zone_rooms[] = { 4, 11, 23 };
-                static const char *zone_names[] = {
-                    "New Camelot", "Splynn", "Chi-Town"
-                };
+                sess->chargen_temp_choice = 0; /* Reset for secondary skill picks */
+                /* Hard-coded LPC starting zones (Option A) */
                 if (choice >= 1 && choice <= 3) {
-                    sess->chargen_temp_choice = 0; /* Reset for secondary skill picks */
+                    static const int zone_rooms[] = { 4, 11, 23 };
+                    static const char *zone_names[] = { "New Camelot", "Splynn", "Chi-Town" };
                     int selected_room = zone_rooms[choice - 1];
                     send_to_player(sess, "\nStarting zone: %s\n", zone_names[choice - 1]);
 
-                    /* Store selected room for chargen_complete */
+                    /* Clear any existing LPC room path */
+                    if (sess->current_room_path) { free(sess->current_room_path); sess->current_room_path = NULL; }
+
+                    /* Store selected C bootstrap room */
                     Room *zone_room = room_get_by_id(selected_room);
                     if (zone_room) {
                         sess->current_room = zone_room;
@@ -884,8 +888,29 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     /* Transition to secondary skills */
                     sess->chargen_state = CHARGEN_SECONDARY_SKILLS;
                     chargen_show_secondary_skills(sess);
+                } else if (choice == 4 || choice == 5) {
+                    /* LPC starting rooms */
+                    const char *path = (choice == 4) ? "/domains/start/room/welcome" : "/domains/castle/room/entry";
+                    send_to_player(sess, "\nStarting zone: %s (LPC)\n", path);
+
+                    /* Free previous path if any */
+                    if (sess->current_room_path) { free(sess->current_room_path); sess->current_room_path = NULL; }
+                    sess->current_room_path = strdup(path);
+
+                    /* Load LPC room on-demand */
+                    Room *zone_room = room_get_by_path(path);
+                    if (zone_room) {
+                        sess->current_room = zone_room;
+                    } else {
+                        send_to_player(sess, "Warning: LPC start room '%s' could not be loaded now; defaulting to starter zone.\n", path);
+                        sess->current_room = room_get_start();
+                    }
+
+                    /* Transition to secondary skills */
+                    sess->chargen_state = CHARGEN_SECONDARY_SKILLS;
+                    chargen_show_secondary_skills(sess);
                 } else {
-                    send_to_player(sess, "Invalid choice. Enter 1-3: ");
+                    send_to_player(sess, "Invalid choice. Enter 1-5: ");
                 }
             }
             break;
@@ -1108,8 +1133,12 @@ int save_character(PlayerSession *sess) {
     uint32_t magic = 0x414D4C50;  /* "AMLP" in hex */
     fwrite(&magic, sizeof(uint32_t), 1, f);
     
-    /* Write version (for future compatibility) */
-    uint16_t version = 1;
+    /* Write version (for future compatibility)
+     * Version history:
+     *  1 - original format
+     *  3 - added LPC room path persistence (char *room_path) after room_id
+     */
+    uint16_t version = 3;
     fwrite(&version, sizeof(uint16_t), 1, f);
     
     /* Write username */
@@ -1181,6 +1210,16 @@ int save_character(PlayerSession *sess) {
     /* Write current room ID */
     int room_id = sess->current_room ? sess->current_room->id : 0;
     fwrite(&room_id, sizeof(int), 1, f);
+    /* Write LPC room path (new in version 3). Write size_t length followed by bytes.
+     * For C/bootstrap rooms write length 0. */
+    if (sess->current_room && sess->current_room->lpc_path) {
+        size_t path_len = strlen(sess->current_room->lpc_path);
+        fwrite(&path_len, sizeof(size_t), 1, f);
+        fwrite(sess->current_room->lpc_path, 1, path_len, f);
+    } else {
+        size_t zero = 0;
+        fwrite(&zero, sizeof(size_t), 1, f);
+    }
 
     /* Write natural weapons */
     int nw = ch->natural_weapon_count;
@@ -1288,6 +1327,30 @@ int save_character(PlayerSession *sess) {
     } else {
         size_t zero = 0;
         fwrite(&zero, sizeof(size_t), 1, f);
+    }
+
+    /* Write inventory (appended after alignment for backwards compatibility).
+     * Format: item_count, then for each item: template_id + equip_slot.
+     * equip_slot: 0=not equipped, 1=primary weapon, 2=secondary weapon,
+     *             3=armor, 4=accessory1, 5=accessory2, 6=accessory3 */
+    {
+        int item_count = ch->inventory.item_count;
+        fwrite(&item_count, sizeof(int), 1, f);
+        Item *curr = ch->inventory.items;
+        while (curr) {
+            fwrite(&curr->id, sizeof(int), 1, f);
+            uint8_t slot = 0;
+            if (curr->is_equipped) {
+                if (curr == ch->equipment.weapon_primary)   slot = 1;
+                else if (curr == ch->equipment.weapon_secondary) slot = 2;
+                else if (curr == ch->equipment.armor)        slot = 3;
+                else if (curr == ch->equipment.accessory1)   slot = 4;
+                else if (curr == ch->equipment.accessory2)   slot = 5;
+                else if (curr == ch->equipment.accessory3)   slot = 6;
+            }
+            fwrite(&slot, sizeof(uint8_t), 1, f);
+            curr = curr->next;
+        }
     }
 
     fclose(f);
@@ -1430,6 +1493,25 @@ int load_character(PlayerSession *sess, const char *username) {
     /* Read current room ID */
     int room_id;
     fread(&room_id, sizeof(int), 1, f);
+    /* Read LPC room path if save version supports it (version >= 3) */
+    sess->current_room_path = NULL;
+    if (version >= 3) {
+        size_t path_len = 0;
+        if (fread(&path_len, sizeof(size_t), 1, f) == 1 && path_len > 0 && path_len < 1024) {
+            char *path_buf = malloc(path_len + 1);
+            if (path_buf) {
+                if (fread(path_buf, 1, path_len, f) == path_len) {
+                    path_buf[path_len] = '\0';
+                    sess->current_room_path = path_buf;
+                } else {
+                    free(path_buf);
+                }
+            }
+        } else if (path_len > 0) {
+            /* Skip unexpected large length */
+            fseek(f, path_len, SEEK_CUR);
+        }
+    }
 
     /* Read natural weapons */
     int nw = 0;
@@ -1583,13 +1665,57 @@ int load_character(PlayerSession *sess, const char *username) {
         }
     }
 
+    /* Read inventory (appended after alignment, may not exist in older saves).
+     * Format: item_count, then for each item: template_id (int) + equip_slot (uint8_t).
+     * equip_slot: 0=not equipped, 1=primary, 2=secondary, 3=armor, 4-6=accessories */
+    {
+        int item_count = 0;
+        if (fread(&item_count, sizeof(int), 1, f) == 1 && item_count > 0 && item_count < 200) {
+            for (int i = 0; i < item_count; i++) {
+                int template_id = -1;
+                uint8_t slot = 0;
+                if (fread(&template_id, sizeof(int), 1, f) != 1) break;
+                if (fread(&slot, sizeof(uint8_t), 1, f) != 1) break;
+
+                Item *item = item_create(template_id);
+                if (!item) continue;
+
+                inventory_add(&ch->inventory, item);
+
+                if (slot > 0) {
+                    item->is_equipped = true;
+                    switch (slot) {
+                        case 1: ch->equipment.weapon_primary   = item; break;
+                        case 2: ch->equipment.weapon_secondary = item; break;
+                        case 3: ch->equipment.armor            = item; break;
+                        case 4: ch->equipment.accessory1       = item; break;
+                        case 5: ch->equipment.accessory2       = item; break;
+                        case 6: ch->equipment.accessory3       = item; break;
+                        default: item->is_equipped = false; break;
+                    }
+                }
+            }
+        }
+    }
+
     fclose(f);
 
     INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)",
             username, filepath, time(NULL) - saved_time);
 
-    /* Set room pointer */
-    sess->current_room = room_get_by_id(room_id);
+    /* Set room pointer: prefer LPC path (saved in version >=3), fall back to numeric ID. */
+    sess->current_room = NULL;
+    if (sess->current_room_path && sess->current_room_path[0]) {
+        Room *r = room_get_by_path(sess->current_room_path);
+        if (r) {
+            sess->current_room = r;
+        } else {
+            /* Path couldn't be resolved; fall back to numeric ID */
+            sess->current_room = room_get_by_id(room_id);
+        }
+    } else {
+        sess->current_room = room_get_by_id(room_id);
+    }
     if (!sess->current_room) {
         sess->current_room = room_get_start();  /* Fallback to start room */
     }
@@ -1655,31 +1781,66 @@ void cmd_worn(PlayerSession *sess, const char *args) {
     equipment_display(sess);
 }
 
-/* Get/pick up item (stub - would need room items) */
+/* Get/pick up item from room */
 void cmd_get(PlayerSession *sess, const char *args) {
     if (!sess || !args || !*args) {
         send_to_player(sess, "Get what? Try 'get <item name>'\n");
         return;
     }
-    
-    send_to_player(sess, "There is no '%s' here to pick up.\n", args);
-    /* TODO: Implement room items in future phase */
+
+    if (!sess->current_room) {
+        send_to_player(sess, "You are nowhere.\n");
+        return;
+    }
+
+    Item *item = room_find_item(sess->current_room, args);
+    if (!item) {
+        send_to_player(sess, "There is no '%s' here to pick up.\n", args);
+        return;
+    }
+
+    if (!inventory_can_carry(&sess->character.inventory, item->weight)) {
+        send_to_player(sess, "You can't carry that much weight.\n");
+        return;
+    }
+
+    room_remove_item(sess->current_room, item);
+    inventory_add(&sess->character.inventory, item);
+    send_to_player(sess, "You pick up %s.\n", item->name);
+
+    char msg[256];
+    snprintf(msg, sizeof(msg), "%s picks up %s.\n", sess->username, item->name);
+    room_broadcast(sess->current_room, msg, sess);
 }
 
-/* Drop item (stub - would need room items) */
+/* Drop item from inventory to room */
 void cmd_drop(PlayerSession *sess, const char *args) {
     if (!sess || !args || !*args) {
         send_to_player(sess, "Drop what? Try 'drop <item name>'\n");
         return;
     }
-    
-    Character *ch = &sess->character;
-    Item *item = inventory_remove(&ch->inventory, args);
-    
+
+    if (!sess->current_room) {
+        send_to_player(sess, "You are nowhere.\n");
+        return;
+    }
+
+    /* Unequip first if equipped */
+    Item *check = inventory_find(&sess->character.inventory, args);
+    if (check && check->is_equipped) {
+        send_to_player(sess, "You unequip %s first.\n", check->name);
+        equipment_unequip(&sess->character, args);
+        check->is_equipped = false;
+    }
+
+    Item *item = inventory_remove(&sess->character.inventory, args);
     if (item) {
+        room_add_item(sess->current_room, item);
         send_to_player(sess, "You drop %s.\n", item->name);
-        item_free(item); /* For now, just destroy it */
-        /* TODO: Add to room items in future phase */
+
+        char msg[256];
+        snprintf(msg, sizeof(msg), "%s drops %s.\n", sess->username, item->name);
+        room_broadcast(sess->current_room, msg, sess);
     } else {
         send_to_player(sess, "You don't have that item.\n");
     }

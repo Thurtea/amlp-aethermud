@@ -69,6 +69,12 @@ Start the server:
 
 Server logs are available at `lib/log/server.log`.
 
+## LPC Room Support
+
+This driver supports loading rooms from LPC source files on-demand. The loader text-scrapes `set_short()`, `set_long()`, `set_exits()`/`add_exit()`, and `set_items()` from LPC files under `lib/domains/*/room/` and exposes them at runtime.
+
+See `docs/lpc-room-system.md` for usage, supported `set_property()` keys, and limitations.
+
 ## Adding the Client as a Submodule (optional)
 
 If you want to include the aethermud-client in this repo later, add it as a submodule:

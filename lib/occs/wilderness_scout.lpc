@@ -1,6 +1,10 @@
 // /lib/occs/wilderness_scout.lpc
 //  O.C.C. - Placeholder Implementation
 //
+// Source: archived-md/ttrpg-references.json ID: north-america-is-mostly-wilderness-with-the-greatest-human-popu
+// Generated: 2026-02-12
+// TODO: Review and expand with gameplay balance
+//
 // This is a stub file. Implement the full OCC details.
 
 inherit "/std/occ";

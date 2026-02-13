@@ -1,6 +1,8 @@
 // /lib/occs/xiticix_worker.lpc
 //  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
 //  Source: The Xiticix (parsed) - worker variant
+// Generated: 2026-02-12
+// TODO: Review and expand with gameplay balance
 
 inherit "/std/occ";
 

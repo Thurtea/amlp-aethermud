@@ -1,6 +1,10 @@
 // /lib/occs/power_armor_pilot.lpc
 //  O.C.C. - Placeholder Implementation
 //
+// Source: archived-md/ttrpg-references.json ID: at-second-level-the-psychic-can-select-a-total-of-three-powers-from, coalition-samas-power-armor-in-action, glitter-boy-pilot-helmet, armored-head-instrumentation
+// Generated: 2026-02-12
+// TODO: Review and expand with gameplay balance
+//
 // This is a stub file. Implement the full OCC details.
 
 inherit "/std/occ";

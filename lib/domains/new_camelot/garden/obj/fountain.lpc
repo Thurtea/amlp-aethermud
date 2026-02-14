@@ -1,0 +1,8 @@
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_short("an ornate garden fountain");
+    set_long("A beautifully carved fountain of smooth white stone. The water is clear and cold, and small figures are carved around the rim.");
+    set_property("no_get", 1);
+}

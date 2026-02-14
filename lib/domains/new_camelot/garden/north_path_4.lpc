@@ -1,0 +1,16 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Garden Pathway - North 4");
+    set_long(
+        "This part of the garden feels wild and untamed; brambles push at the path.\n"
+        "A faint trail to the east disappears among the undergrowth. The path continues north."
+    );
+
+    add_exit("south", "/domains/new_camelot/garden/north_path_3");
+    add_exit("north", "/domains/new_camelot/garden/north_path_5");
+    add_exit("east", "/domains/new_camelot/garden/east_4_1");
+
+    set_property("light", 2);
+}

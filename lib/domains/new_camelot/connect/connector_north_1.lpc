@@ -1,0 +1,14 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("A leafy approach path");
+    set_long(
+        "A gentle path that curves northward between hedgerows. The route feels like an approach toward a secluded garden.\n"
+        "The path turns west ahead toward a tucked-away gate."
+    );
+
+    add_exit("south", "/domains/new_camelot/connect/connector_west_1");
+    add_exit("west", "/domains/new_camelot/connect/connector_west_2");
+    set_property("light", 2);
+}

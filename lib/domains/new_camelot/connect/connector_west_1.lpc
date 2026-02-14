@@ -1,0 +1,14 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Quiet side-street");
+    set_long(
+        "A quiet, narrow side-street lined with low cottages and clipped hedges.\n"
+        "The lane continues west; to the east is the lane that runs toward the town square."
+    );
+
+    add_exit("east", "/domains/new_camelot/connect/connector_south");
+    add_exit("west", "/domains/new_camelot/connect/connector_north_1");
+    set_property("light", 2);
+}

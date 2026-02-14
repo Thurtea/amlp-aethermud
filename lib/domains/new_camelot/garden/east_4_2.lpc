@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Wild Thicket - 2");
+    set_long("Tangled roots crisscross the path here; small animals flit among the foliage.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_4_1");
+    add_exit("east", "/domains/new_camelot/garden/east_4_3");
+
+    set_property("light", 2);
+}

@@ -1,0 +1,40 @@
+inherit "/lib/std/living.lpc";
+
+void create() {
+    ::create();
+    set_name("magic bush");
+    set_race("plant");
+    set_short("a small magic bush");
+    set_long("A low, leafy bush whose leaves shimmer faintly with a hint of magic. It rustles even when there is no wind.");
+
+    set_level(1);
+    init_health(0, 8, 0, 0); // SDC creature: 8 HP, 0 SDC
+    set_creature_size(1); // small
+
+    // Passive NPC; players may attack for practice
+    // Not aggressive by default
+
+    // Combat defaults
+    max_attacks = 1;
+
+    // Ensure commands enabled for possible behaviors
+    enable_commands();
+}
+
+// Override die to schedule respawn
+void die(object killer) {
+    string home = "/domains/new_camelot/garden/east_2_4";
+    // Schedule respawn in 5 minutes (300 seconds)
+    call_out("respawn_bush", 300, home);
+    ::die(killer);
+}
+
+void respawn_bush(string home) {
+    object room = load_object(home);
+    if (!room) return;
+
+    object bush = clone_object("/domains/new_camelot/garden/npc/magic_bush");
+    if (!bush) return;
+
+    bush->move(room);
+}

@@ -1,0 +1,14 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Gatehouse path to the garden");
+    set_long(
+        "A narrow path that passes a small gatehouse; beyond the gate a scent of flowers hangs in the air.\n"
+        "A short westward step will bring you into a hidden garden."
+    );
+
+    add_exit("east", "/domains/new_camelot/connect/connector_north_1");
+    add_exit("west", "/domains/new_camelot/garden/fountain");
+    set_property("light", 2);
+}

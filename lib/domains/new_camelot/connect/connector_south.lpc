@@ -1,0 +1,14 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("A narrow lane south of Town Square");
+    set_long(
+        "A short cobbled lane that leads away from the bustle of the town square.\n"
+        "To the north lies the town square; a worn path continues west toward quieter streets."
+    );
+
+    add_exit("north", "/domains/new_camelot/town_square");
+    add_exit("west", "/domains/new_camelot/connect/connector_west_1");
+    set_property("light", 2);
+}

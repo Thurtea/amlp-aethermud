@@ -1,0 +1,16 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Garden Pathway - North 3");
+    set_long(
+        "Topiary shapes and sculpted hedges give this stretch a formal air.\n"
+        "A narrow exit to the east leads into an area of sculpted bushes. The path continues north."
+    );
+
+    add_exit("south", "/domains/new_camelot/garden/north_path_2");
+    add_exit("north", "/domains/new_camelot/garden/north_path_4");
+    add_exit("east", "/domains/new_camelot/garden/east_3_1");
+
+    set_property("light", 2);
+}

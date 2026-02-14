@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Herb Garden - 4");
+    set_long("A secluded glade within the herb garden; a small magical bush grows here, its leaves shimmering faintly.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_2_3");
+    add_exit("east", "/domains/new_camelot/garden/north_path_2");
+
+    set_property("light", 2);
+}

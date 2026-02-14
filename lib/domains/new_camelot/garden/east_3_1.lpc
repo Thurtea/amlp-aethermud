@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Topiary Lane - 1");
+    set_long("Neatly clipped topiary creatures line the path; the sculpted hedges give the area a formal feel.");
+
+    add_exit("west", "/domains/new_camelot/garden/north_path_3");
+    add_exit("east", "/domains/new_camelot/garden/east_3_2");
+
+    set_property("light", 2);
+}

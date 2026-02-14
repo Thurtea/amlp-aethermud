@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Topiary Lane - 4");
+    set_long("The topiary work here is elaborate; pathways curve back toward the main north path.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_3_3");
+    add_exit("east", "/domains/new_camelot/garden/north_path_3");
+
+    set_property("light", 2);
+}

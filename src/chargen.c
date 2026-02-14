@@ -447,7 +447,8 @@ void chargen_display_stats(PlayerSession *sess) {
 
     Character *ch = &sess->character;
     int w = FRAME_WIDTH;
-    char buf[128];
+    int i;
+    char buf[256];
 
     send_to_player(sess, "\r\n");
     frame_top(sess, w);
@@ -507,6 +508,22 @@ void chargen_display_stats(PlayerSession *sess) {
 
     snprintf(buf, sizeof(buf), "Credits: %d", ch->credits);
     frame_line(sess, buf, w);
+
+    /* Show lives and scars (death system) */
+    snprintf(buf, sizeof(buf), "Lives remaining: %d/5", ch->lives_remaining);
+    frame_line(sess, buf, w);
+    if (ch->scar_count <= 0) {
+        frame_line(sess, "Scars: None", w);
+    } else {
+        frame_line(sess, "Scars:", w);
+        for (i = 0; i < ch->scar_count && i < MAX_SCARS; i++) {
+            char sline[256];
+            const char *loc = ch->scars[i].location[0] ? ch->scars[i].location : "unknown";
+            const char *desc = ch->scars[i].description[0] ? ch->scars[i].description : "(no description)";
+            snprintf(sline, sizeof(sline), " - %s: %s (death %d)", loc, desc, ch->scars[i].death_number);
+            frame_line(sess, sline, w);
+        }
+    }
 
     frame_bottom(sess, w);
 }

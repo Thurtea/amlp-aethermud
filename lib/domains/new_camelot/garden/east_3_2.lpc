@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Topiary Lane - 2");
+    set_long("Topiary creatures stand frozen mid-gesture. Paths wind between them to the east and west.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_3_1");
+    add_exit("east", "/domains/new_camelot/garden/east_3_3");
+
+    set_property("light", 2);
+}

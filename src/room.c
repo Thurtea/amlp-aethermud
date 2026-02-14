@@ -654,6 +654,21 @@ void room_init_world(void) {
         "offering passage to distant lands.",
         5, 8, 6, 7, -1, -1);
 
+    /* Add LPC flex exit from New Camelot Town Square -> garden connector
+     * This creates a load-on-demand LPC exit 'south' that points to the
+     * connector chain under lib/domains/new_camelot/connect/connector_south.lpc
+     */
+    if (!world_rooms[4].flex_exits) {
+        world_rooms[4].num_flex_exits = 1;
+        world_rooms[4].flex_exits = calloc(1, sizeof(RoomExit));
+    }
+    /* Populate the first flex exit */
+    if (world_rooms[4].num_flex_exits < 1) world_rooms[4].num_flex_exits = 1;
+    free(world_rooms[4].flex_exits[0].direction);
+    free(world_rooms[4].flex_exits[0].target_path);
+    world_rooms[4].flex_exits[0].direction = strdup("south");
+    world_rooms[4].flex_exits[0].target_path = strdup("/domains/new_camelot/connect/connector_south");
+
     init_room(5, "The Silver Unicorn Tavern",
         "A warm tavern with heavy wooden beams and a roaring fireplace.\n"
         "Travelers from across AetherMUD share tales of adventure over\n"

@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Topiary Lane - 3");
+    set_long("A small clearing among the topiaries. One bush here seems to shimmer at the edge of sight.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_3_2");
+    add_exit("east", "/domains/new_camelot/garden/east_3_4");
+
+    set_property("light", 2);
+}

@@ -1,0 +1,19 @@
+// lib/domains/new_camelot/garden/fountain.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Garden Fountain");
+    set_long(
+        "You stand before an ornate stone fountain set at the center of a small, hidden garden.\n"
+        "Water trickles softly from a carved spout into a shallow basin. Moss and small flowers grow\n"
+        "in the cracks between the paving stones. To the north a winding path leads deeper into\n"
+        "the garden. To the south is the town beyond."
+    );
+
+    add_exit("north", "/domains/new_camelot/garden/north_path_1");
+    // NOTE: Connect to the town (C bootstrap 'New Camelot - Town Square') from the C side.
+    // See integration instructions in docs or modify src/room.c to link room id 4 to this LPC room.
+
+    set_property("light", 2);
+}

@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Wild Thicket - 4");
+    set_long("A ring of ancient stones marks the end of this wild path; a short eastward course returns you to the main north path.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_4_3");
+    add_exit("east", "/domains/new_camelot/garden/north_path_4");
+
+    set_property("light", 2);
+}

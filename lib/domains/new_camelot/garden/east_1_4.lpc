@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Rose Walk - 4");
+    set_long("A circular bed of roses rings a small fountain off the path. A short eastward turn returns you to the main north path.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_1_3");
+    add_exit("east", "/domains/new_camelot/garden/north_path_1");
+
+    set_property("light", 2);
+}

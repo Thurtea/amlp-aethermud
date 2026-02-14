@@ -1,0 +1,12 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Rose Walk - 3");
+    set_long("A small arbor provides shade here; roses climb the lattice. The path continues east and west.");
+
+    add_exit("west", "/domains/new_camelot/garden/east_1_2");
+    add_exit("east", "/domains/new_camelot/garden/east_1_4");
+
+    set_property("light", 2);
+}

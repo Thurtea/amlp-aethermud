@@ -15,6 +15,13 @@ lib/log/
 lib/save/
 lib/tmp/
 
+# Explicit log/test output patterns
+logs/*.log
+logs/*.txt
+
+# LLM index entries (generated)
+/lib/llm_entries/
+
 # Backup files
 *.backup
 *.bak
@@ -35,3 +42,4 @@ Thumbs.db
 # AI context files (local only, do not commit)
 **/llm_breadcrumb.md
 archived-md/
+lib/llm_entries/

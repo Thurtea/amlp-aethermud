@@ -9,10 +9,12 @@
 #include <string.h>
 #include <time.h>
 #include <strings.h>
+#include <ctype.h>
 #include "debug.h"
 #include "ui_frames.h"
 #include <stdint.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <sys/types.h>
 #include <errno.h>
 
@@ -25,124 +27,9 @@ extern PlayerSession* find_player_by_name(const char *name);
 /* External from room.c - movement command */
 extern void cmd_move(PlayerSession *sess, const char *direction);
 
-/* ========== COMPLETE RACE AND OCC DATABASE ========== */
-
-
-/* MERGED RACE DATABASE - Rifts + AetherMUD (72 Total) */
-const RaceOCCInfo ALL_RACES[] = {
-    /* Core Humanoid Races */
-    {"Human", "Baseline race, adaptable and determined"},
-    {"Elf", "Graceful and magical, attuned to nature"},
-    {"Dwarf", "Stout and resilient, master craftsmen"},
-    {"Gnome", "Small magical being, tech-savvy"},
-    {"Halfling", "Small folk, lucky and brave"},
-    {"Orc", "Savage warrior race"},
-    {"Goblin", "Small cunning supernatural creature"},
-    {"Hobgoblin", "Larger, fierce goblinoid"},
-    {"Ogre", "Large brutish humanoid"},
-    {"Troll", "Regenerating savage humanoid"},
-    {"Minotaur", "Bull-headed warrior of great strength"},
-    
-    /* Atlantean Types */
-    {"Atlantean", "Dimensional traveler with tattoo magic"},
-    {"True Atlantean", "Pure-blood Atlantean lineage"},
-    
-    /* Giant Races */
-    {"Algor Frost Giant", "Ice-dwelling giant of the north"},
-    {"Nimro Fire Giant", "Flame-wielding massive warrior"},
-    {"Jotan", "Stone giant, master of earth"},
-    {"Titan", "Divine giant of legendary power"},
-    
-    /* Dragons (All Types) */
-    {"Fire Dragon", "Ancient wyrm of flame and destruction"},
-    {"Ice Dragon", "Frost wyrm of the frozen wastes"},
-    {"Great Horned Dragon", "Massive horned draconic lord"},
-    {"Thunder Lizard Dragon", "Storm-calling dragon beast"},
-    {"Dragon Hatchling", "Young but powerful dragon"},
-    {"Adult Dragon", "Mature draconic being"},
-    {"Ancient Dragon", "Millenia-old legendary wyrm"},
-    {"Thorny Dragon", "Spiked dragon variant"},
-    
-    /* Fae & Supernatural */
-    {"Changeling", "Shapeshifting fae creature"},
-    {"Common Faerie", "Tiny winged fae being"},
-    {"Common Pixie", "Mischievous tiny fae"},
-    {"Frost Pixie", "Ice-aligned pixie variant"},
-    {"Green Wood Faerie", "Forest-dwelling fae guardian"},
-    {"Night-Elves Faerie", "Dark fae of the shadows"},
-    {"Silver Bells Faerie", "Musical enchanting faerie"},
-    {"Tree Sprite", "Nature spirit of the woods"},
-    {"Water Sprite", "Aquatic elemental spirit"},
-    {"Brownie", "Helpful household fae"},
-    {"Bogie", "Mischievous shadow fae"},
-    
-    /* Bestial & Shapeshifters */
-    {"Dog Boy", "Canine mutant bred by Coalition"},
-    {"Bearman", "Ursine humanoid warrior"},
-    {"Kankoran", "Wolf-kin nomadic hunter"},
-    {"Rahu-man", "Tiger-folk warrior race"},
-    {"Ratling", "Cunning rat-like humanoid"},
-    {"Werewolf", "Shapeshifting wolf-human"},
-    {"Werebear", "Shapeshifting bear-human"},
-    {"Weretiger", "Shapeshifting tiger-human"},
-    {"Wolfen", "Noble lupine warrior race"},
-    {"Cat Girl", "Feline humanoid, agile and curious"},
-    {"Mutant Animal", "Uplifted animal with intelligence"},
-    
-    /* Avian & Exotic */
-    {"Gargoyle", "Stone-skinned supernatural guardian"},
-    {"Gurgoyle", "Aquatic gargoyle variant"},
-    {"Hawrke Duhk", "Hawk-folk aerial warrior"},
-    {"Hawrk-ka", "Elite hawk-rider variant"},
-    {"Equinoid", "Horse-kin centauroid race"},
-    
-    /* Psychic & Psionic RCCs */
-    {"Burster", "Pyrokinetic psychic warrior"},
-    {"Mind Melter", "Master psychic, multiple disciplines"},
-    {"Conservator", "Psionic defender of nature"},
-    {"Psi-Stalker", "Anti-magic psionic hunter (CS)"},
-    {"Wild Psi-Stalker", "Feral psionic hunter"},
-    {"Psi-Ghost", "Psychic entity, telekinetic mastery"},
-    {"Psi-Healer", "Psychic healing specialist"},
-    {"Mind Bleeder", "Psychic vampire, drains ISP"},
-    
-    /* Supernatural & Undead */
-    {"Vampire", "Undead blood drinker"},
-    {"Secondary Vampire", "Lesser vampire spawn"},
-    {"Wild Vampire", "Feral uncontrolled vampire"},
-    {"Demon", "Powerful supernatural evil entity"},
-    {"Deevil", "Lesser demon from dark dimensions"},
-    {"Basilisk", "Serpentine gaze-weapon creature"},
-    {"Nightbane", "Shape-shifter between human/monster"},
-    {"Godling", "Offspring of divine beings"},
-    
-    /* Dimensional & Alien */
-    {"D-Bee", "Dimensional being from another reality"},
-    {"Coyle", "Alien symbiote shapeshifter"},
-    {"Noli", "Four-armed alien symbiote race"},
-    {"Eandroth", "Insectoid alien warrior race"},
-    {"Quick-Flex", "Incredibly fast alien species"},
-    {"Trimadore", "Crystalline energy being"},
-    {"Uteni", "Fur-covered peaceful alien"},
-    {"Promethean", "Artificial life seeking humanity"},
-    
-    /* Specialized & Unique */
-    {"Brodkill", "Demon-cursed mutant super-soldier"},
-    {"Cosmo-Knight", "Cosmic guardian with stellar powers"},
-    {"Dragon Juicer", "Dragon blood-enhanced soldier"},
-    {"Mega-Juicer", "Ultra-enhanced combat juicer"},
-    {"Titan Juicer", "Massive juicer, extended lifespan"},
-    {"Pogtal - Dragon Slayer", "Anti-dragon specialist race"},
-    
-    /* Splugorth Slaves & Minions */
-    {"Splugorth", "Ancient evil intelligence"},
-    {"Splugorth Minion", "Enslaved warrior of Splugorth"},
-    {"Splynn Slave", "Enslaved from dimensional market"},
-    {"Minion", "Bio-wizard creation, enslaved"},
-    
-    /* Special */
-    {"Simvan", "Monster-riding nomadic warrior"}
-};
+/* ========== RACE DATABASE - dynamically loaded from lib/races/*.lpc ========== */
+/* loaded_races[] and num_loaded_races are populated by race_loader_scan_races()
+ * at startup.  See race_loader.c for the scanning logic. */
 
 /* MERGED OCC DATABASE - Rifts + AetherMUD (65 Total) */
 const RaceOCCInfo ALL_OCCS[] = {
@@ -244,7 +131,7 @@ const RaceOCCInfo ALL_OCCS[] = {
     {"Palmer", "Dimensional traveler"}
 };
 
-#define NUM_RACES (sizeof(ALL_RACES) / sizeof(RaceOCCInfo))
+#define NUM_RACES_VAR num_loaded_races
 #define NUM_OCCS (sizeof(ALL_OCCS) / sizeof(RaceOCCInfo))
 #define ITEMS_PER_PAGE 10
 
@@ -338,6 +225,277 @@ static void assign_starting_languages(Character *ch) {
     }
 }
 
+/* Create the wizard workroom LPC file on disk if it doesn't exist.
+ * Returns 1 on success (or already exists), 0 on failure. */
+static int create_wizard_workroom(const char *username) {
+    if (!username || !username[0]) return 0;
+
+    /* Build lowercase username for path */
+    char lower_name[64];
+    for (int i = 0; username[i] && i < 63; i++)
+        lower_name[i] = tolower((unsigned char)username[i]);
+    lower_name[strlen(username) < 63 ? strlen(username) : 63] = '\0';
+
+    /* Create directory: lib/domains/wizard/<username>/ */
+    char dir_path[512];
+    snprintf(dir_path, sizeof(dir_path), "lib/domains/wizard/%s", lower_name);
+
+    struct stat st;
+    if (stat(dir_path, &st) != 0) {
+        /* Create lib/domains/wizard/ first if needed */
+        char parent[512];
+        snprintf(parent, sizeof(parent), "lib/domains/wizard");
+        mkdir(parent, 0755);
+        if (mkdir(dir_path, 0755) != 0 && errno != EEXIST) {
+            fprintf(stderr, "[Chargen] Failed to create wizard dir '%s': %s\n",
+                    dir_path, strerror(errno));
+            return 0;
+        }
+    }
+
+    /* Create workroom.lpc */
+    char file_path[512];
+    snprintf(file_path, sizeof(file_path), "%s/workroom.lpc", dir_path);
+
+    if (stat(file_path, &st) == 0) {
+        return 1; /* Already exists */
+    }
+
+    FILE *f = fopen(file_path, "w");
+    if (!f) {
+        fprintf(stderr, "[Chargen] Failed to create workroom '%s': %s\n",
+                file_path, strerror(errno));
+        return 0;
+    }
+
+    fprintf(f,
+        "// %s's Wizard Workroom\n"
+        "inherit \"/lib/std/room.lpc\";\n"
+        "\n"
+        "void create() {\n"
+        "    ::create();\n"
+        "    set_short(\"%s's Workroom\");\n"
+        "    set_long(\n"
+        "        \"A private wizard's workroom. Arcane symbols cover the walls\\n\"\n"
+        "        \"and a large desk sits in the center, covered in scrolls and\\n\"\n"
+        "        \"strange devices. A wooden chest sits in the corner, marked\\n\"\n"
+        "        \"with arcane symbols. A shimmering portal leads back to the world.\"\n"
+        "    );\n"
+        "    add_exit(\"out\", \"/domains/new_camelot/town_square\");\n"
+        "    set_property(\"light\", 2);\n"
+        "    set_property(\"indoors\", 1);\n"
+        "}\n",
+        username, username);
+
+    fclose(f);
+    fprintf(stderr, "[Chargen] Created wizard workroom: %s\n", file_path);
+    return 1;
+}
+
+/* Create admin character, skipping chargen entirely */
+void chargen_create_admin(PlayerSession *sess) {
+    if (!sess) return;
+
+    Character *ch = &sess->character;
+
+    /* Set race only - no OCC for admin (assign later via 'set') */
+    ch->race = strdup("Human");
+    ch->occ = NULL;
+
+    /* Solid baseline stats (all 15) */
+    ch->stats.iq = 15;
+    ch->stats.me = 15;
+    ch->stats.ma = 15;
+    ch->stats.ps = 15;
+    ch->stats.pp = 15;
+    ch->stats.pe = 15;
+    ch->stats.pb = 15;
+    ch->stats.spd = 15;
+
+    /* Derived pools */
+    ch->level = 1;
+    ch->xp = 0;
+    ch->hp = ch->stats.pe + roll_1d6();
+    ch->max_hp = ch->hp;
+    ch->sdc = 20;
+    ch->max_sdc = 20;
+    ch->health_type = HP_SDC;
+    ch->mdc = 0;
+    ch->max_mdc = 0;
+    ch->isp = 0;
+    ch->max_isp = 0;
+    ch->ppe = 0;
+    ch->max_ppe = 0;
+    ch->credits = 1000;
+    ch->alignment = strdup("Scrupulous");
+    ch->clan = NULL;
+
+    /* Lives */
+    ch->lives_remaining = 5;
+    ch->scar_count = 0;
+
+    /* Combat defaults */
+    ch->attacks_per_round = 2;
+    ch->parries_per_round = 2;
+    ch->racial_auto_parry = 0;
+    ch->racial_auto_dodge = 0;
+    ch->auto_parry_enabled = 1;
+    ch->auto_dodge_enabled = 1;
+    ch->wimpy_threshold = 0;
+
+    /* Natural weapons */
+    ch->natural_weapon_count = 0;
+
+    /* Introduced list */
+    ch->introduced_count = 0;
+
+    /* No skills for admin - assign via OCC later */
+    ch->num_skills = 0;
+
+    /* Initialize inventory and equipment */
+    inventory_init(&ch->inventory, ch->stats.ps);
+    equipment_init(&ch->equipment);
+
+    /* Initialize psionics and magic (empty pools) */
+    psionics_init_abilities(ch);
+    magic_init_abilities(ch);
+
+    /* Starting language */
+    assign_starting_languages(ch);
+
+    /* No starting gear for admin */
+
+    /* Create wizard workroom and place admin there */
+    char lower_name[64];
+    for (int i = 0; sess->username[i] && i < 63; i++)
+        lower_name[i] = tolower((unsigned char)sess->username[i]);
+    lower_name[strlen(sess->username) < 63 ? strlen(sess->username) : 63] = '\0';
+
+    char workroom_path[256];
+    snprintf(workroom_path, sizeof(workroom_path),
+             "/domains/wizard/%s/workroom", lower_name);
+
+    if (create_wizard_workroom(sess->username)) {
+        Room *workroom = room_get_by_path(workroom_path);
+        if (workroom) {
+            sess->current_room = workroom;
+            room_add_player(workroom, sess);
+
+            /* Place wiz-tool items in workroom */
+            /* Chest (non-pickable container) */
+            Item *chest = (Item*)calloc(1, sizeof(Item));
+            chest->id = -1;
+            chest->name = strdup("wizard's chest");
+            chest->description = strdup(
+                "A sturdy oak chest with arcane symbols carved into its lid.\n"
+                "The symbols pulse faintly with residual magical energy.\n"
+                "Type 'look in chest' or 'examine chest' to see its contents.");
+            chest->type = ITEM_MISC;
+            chest->weight = 999;  /* Too heavy to pick up */
+            chest->value = 0;
+            room_add_item(workroom, chest);
+
+            /* Staff */
+            Item *staff = (Item*)calloc(1, sizeof(Item));
+            staff->id = -2;
+            staff->name = strdup("wizard's staff");
+            staff->description = strdup(
+                "A gnarled wooden staff crackling with arcane power.\n"
+                "Runes etched along its length glow faintly.\n"
+                "\n"
+                "+---------- WIZARD COMMANDS ----------+\n"
+                "| goto <player|room>  Teleport        |\n"
+                "| set <player> <stat> Set player stat  |\n"
+                "| heal <player>       Restore HP/pools |\n"
+                "| clone <object>      Clone an object  |\n"
+                "| eval <expr>         Evaluate LPC     |\n"
+                "| update <file>       Reload LPC file  |\n"
+                "+--------------------------------------+");
+            staff->type = ITEM_TOOL;
+            staff->weight = 999;
+            staff->value = 0;
+            room_add_item(workroom, staff);
+
+            /* Handbook */
+            Item *handbook = (Item*)calloc(1, sizeof(Item));
+            handbook->id = -3;
+            handbook->name = strdup("wizard's handbook");
+            handbook->description = strdup(
+                "A leather-bound book with gold-leaf lettering:\n"
+                "'The AetherMUD Wizard's Handbook'\n"
+                "Type 'read handbook' for the wizard guide.");
+            handbook->type = ITEM_MISC;
+            handbook->weight = 999;
+            handbook->value = 0;
+            room_add_item(workroom, handbook);
+
+            /* Crystal */
+            Item *crystal = (Item*)calloc(1, sizeof(Item));
+            crystal->id = -4;
+            crystal->name = strdup("viewing crystal");
+            crystal->description = strdup(
+                "A swirling crystal orb resting on a silver stand.\n"
+                "Shadows of distant places shift within its depths.\n"
+                "\n"
+                "+-------- MONITORING COMMANDS --------+\n"
+                "| who                List all online  |\n"
+                "| finger <player>    Player details   |\n"
+                "| snoop <player>     Watch a session  |\n"
+                "| users              Connection info  |\n"
+                "+-------------------------------------+");
+            crystal->type = ITEM_TOOL;
+            crystal->weight = 999;
+            crystal->value = 0;
+            room_add_item(workroom, crystal);
+        } else {
+            /* Fallback to start room if LPC load fails */
+            fprintf(stderr, "[Chargen] Workroom LPC load failed, using start room\n");
+            Room *start = room_get_start();
+            if (start) {
+                sess->current_room = start;
+                room_add_player(start, sess);
+            }
+        }
+    } else {
+        Room *start = room_get_start();
+        if (start) {
+            sess->current_room = start;
+            room_add_player(start, sess);
+        }
+    }
+
+    /* Mark chargen as complete */
+    sess->chargen_state = CHARGEN_COMPLETE;
+    sess->state = STATE_PLAYING;
+
+    /* Welcome message */
+    send_to_player(sess, "\n");
+    send_to_player(sess, "=========================================\n");
+    send_to_player(sess, "  Welcome, Administrator!\n");
+    send_to_player(sess, "=========================================\n");
+    send_to_player(sess, "\n");
+    send_to_player(sess, "Your admin character has been auto-created.\n");
+    send_to_player(sess, "You are standing in your private workroom.\n");
+    send_to_player(sess, "\n");
+    send_to_player(sess, "Your workroom contains a chest with wiz-tools for your role.\n");
+    send_to_player(sess, "Use 'home' command to return to your workroom anytime.\n");
+    send_to_player(sess, "\n");
+    send_to_player(sess, "Admin commands: promote, goto, set, users, force, eval\n");
+    send_to_player(sess, "Type 'help' for the full command reference.\n");
+    send_to_player(sess, "\n");
+
+    /* Auto-save */
+    if (save_character(sess)) {
+        send_to_player(sess, "Character saved.\n\n");
+    } else {
+        send_to_player(sess, "Warning: Failed to save character.\n\n");
+    }
+
+    /* Show starting room */
+    cmd_look(sess, "");
+    send_to_player(sess, "\n> ");
+}
+
 /* Init car generation */
 void chargen_init(PlayerSession *sess) {
     if (!sess) return;
@@ -353,28 +511,31 @@ void chargen_init(PlayerSession *sess) {
     send_to_player(sess, "=========================================\n");
     send_to_player(sess, "\n");
     
+    /* Ensure races are scanned from disk */
+    if (num_loaded_races == 0) race_loader_scan_races();
+
     /* Display first page of races */
-    int total_pages = (NUM_RACES + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-    send_to_player(sess, "=== SELECT YOUR RACE (Page %d/%d) ===\n\n", 
+    int total_pages = (num_loaded_races + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+    send_to_player(sess, "=== SELECT YOUR RACE (Page %d/%d) ===\n\n",
                    sess->chargen_page + 1, total_pages);
-    
+
     int start = sess->chargen_page * ITEMS_PER_PAGE;
     int end = start + ITEMS_PER_PAGE;
-    if (end > NUM_RACES) end = NUM_RACES;
-    
+    if (end > num_loaded_races) end = num_loaded_races;
+
     for (int i = start; i < end; i++) {
-        send_to_player(sess, "  %2d. %s - %s\n", 
-                      i + 1, ALL_RACES[i].name, ALL_RACES[i].desc);
+        send_to_player(sess, "  %2d. %s - %s\n",
+                      i + 1, loaded_races[i].name, loaded_races[i].desc);
     }
-    
+
     send_to_player(sess, "\n");
     if (sess->chargen_page > 0) {
         send_to_player(sess, "  Type 'p' for previous page\n");
     }
-    if (end < NUM_RACES) {
+    if (end < num_loaded_races) {
         send_to_player(sess, "  Type 'n' for next page\n");
     }
-    send_to_player(sess, "\nEnter choice (1-%d): ", NUM_RACES);
+    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_races);
 }
 
 /* Roll character stats */
@@ -721,7 +882,7 @@ void chargen_complete(PlayerSession *sess) {
     /* Auto-save new character */
     send_to_player(sess, "\nSaving your character...\n");
     if (save_character(sess)) {
-        send_to_player(sess, "✓ Character saved!\n");
+        send_to_player(sess, "Character saved.\n");
     } else {
         send_to_player(sess, " Warning: Failed to save character.\n");
     }
@@ -744,32 +905,32 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
         case CHARGEN_RACE_SELECT:
             /* Handle pagination */
             if (input[0] == 'n' || input[0] == 'N') {
-                int total_pages = (NUM_RACES + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+                int total_pages = (num_loaded_races + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
                 if (sess->chargen_page < total_pages - 1) {
                     sess->chargen_page++;
                     /* Redisplay */
-                    send_to_player(sess, "\n=== SELECT YOUR RACE (Page %d/%d) ===\n\n", 
+                    send_to_player(sess, "\n=== SELECT YOUR RACE (Page %d/%d) ===\n\n",
                                    sess->chargen_page + 1, total_pages);
-                    
+
                     int start = sess->chargen_page * ITEMS_PER_PAGE;
                     int end = start + ITEMS_PER_PAGE;
-                    if (end > NUM_RACES) end = NUM_RACES;
-                    
+                    if (end > num_loaded_races) end = num_loaded_races;
+
                     for (int i = start; i < end; i++) {
-                        send_to_player(sess, "  %2d. %s - %s\n", 
-                                      i + 1, ALL_RACES[i].name, ALL_RACES[i].desc);
+                        send_to_player(sess, "  %2d. %s - %s\n",
+                                      i + 1, loaded_races[i].name, loaded_races[i].desc);
                     }
-                    
+
                     send_to_player(sess, "\n");
                     if (sess->chargen_page > 0) {
                         send_to_player(sess, "  Type 'p' for previous page\n");
                     }
-                    if (end < NUM_RACES) {
+                    if (end < num_loaded_races) {
                         send_to_player(sess, "  Type 'n' for next page\n");
                     }
-                    send_to_player(sess, "\nEnter choice (1-%d): ", NUM_RACES);
+                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_races);
                 } else {
-                    send_to_player(sess, "Already on last page.\nEnter choice (1-%d): ", NUM_RACES);
+                    send_to_player(sess, "Already on last page.\nEnter choice (1-%d): ", num_loaded_races);
                 }
                 return;
             }
@@ -778,36 +939,36 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 if (sess->chargen_page > 0) {
                     sess->chargen_page--;
                     /* Redisplay */
-                    int total_pages = (NUM_RACES + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                    send_to_player(sess, "\n=== SELECT YOUR RACE (Page %d/%d) ===\n\n", 
+                    int total_pages = (num_loaded_races + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+                    send_to_player(sess, "\n=== SELECT YOUR RACE (Page %d/%d) ===\n\n",
                                    sess->chargen_page + 1, total_pages);
-                    
+
                     int start = sess->chargen_page * ITEMS_PER_PAGE;
                     int end = start + ITEMS_PER_PAGE;
-                    if (end > NUM_RACES) end = NUM_RACES;
-                    
+                    if (end > num_loaded_races) end = num_loaded_races;
+
                     for (int i = start; i < end; i++) {
-                        send_to_player(sess, "  %2d. %s - %s\n", 
-                                      i + 1, ALL_RACES[i].name, ALL_RACES[i].desc);
+                        send_to_player(sess, "  %2d. %s - %s\n",
+                                      i + 1, loaded_races[i].name, loaded_races[i].desc);
                     }
-                    
+
                     send_to_player(sess, "\n");
                     if (sess->chargen_page > 0) {
                         send_to_player(sess, "  Type 'p' for previous page\n");
                     }
-                    if (end < NUM_RACES) {
+                    if (end < num_loaded_races) {
                         send_to_player(sess, "  Type 'n' for next page\n");
                     }
-                    send_to_player(sess, "\nEnter choice (1-%d): ", NUM_RACES);
+                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_races);
                 } else {
-                    send_to_player(sess, "Already on first page.\nEnter choice (1-%d): ", NUM_RACES);
+                    send_to_player(sess, "Already on first page.\nEnter choice (1-%d): ", num_loaded_races);
                 }
                 return;
             }
             
             /* Handle selection */
-            if (choice >= 1 && choice <= NUM_RACES) {
-                ch->race = strdup(ALL_RACES[choice - 1].name);
+            if (choice >= 1 && choice <= num_loaded_races) {
+                ch->race = strdup(loaded_races[choice - 1].name);
 
                 send_to_player(sess, "\nYou selected: %s\n\n", ch->race);
 
@@ -1110,14 +1271,39 @@ void cmd_flee(PlayerSession *sess, const char *args) {
 /* ========== CHARACTER PERSISTENCE ========== */
 
 /* Check if a character save file exists */
-int character_exists(const char *username) {
+int character_exists(const char *username, char *found_name, size_t found_size) {
     if (!username || !username[0]) return 0;
-    
-    char filepath[512];
-    snprintf(filepath, sizeof(filepath), "lib/save/players/%s.dat", username);
-    
-    struct stat st;
-    return (stat(filepath, &st) == 0);
+
+    DIR *dir = opendir("lib/save/players");
+    if (!dir) return 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        /* Match *.dat files only */
+        const char *dot = strrchr(entry->d_name, '.');
+        if (!dot || strcmp(dot, ".dat") != 0) continue;
+
+        /* Extract name portion (before .dat) */
+        size_t name_len = dot - entry->d_name;
+        if (name_len == 0 || name_len >= 64) continue;
+
+        char base[64];
+        memcpy(base, entry->d_name, name_len);
+        base[name_len] = '\0';
+
+        if (strcasecmp(base, username) == 0) {
+            /* Found it — return the on-disk capitalization */
+            if (found_name && found_size > 0) {
+                strncpy(found_name, base, found_size - 1);
+                found_name[found_size - 1] = '\0';
+            }
+            closedir(dir);
+            return 1;
+        }
+    }
+
+    closedir(dir);
+    return 0;
 }
 
 /* Save character to disk */

@@ -1,0 +1,31 @@
+CYBER-KNIGHT (O.C.C.)
+
+Description:
+  Cyber-Knights are techno-warriors who blend cybernetic
+  enhancement with psionic discipline. They are champions of
+  justice, wandering Rifts Earth to protect the innocent.
+  The order follows a strict code of honor.
+
+Abilities:
+  - Psi-Sword: Manifest a psychic blade at will
+  - Cyber Armor: Psionic force field (30 MDC)
+  - ISP Pool: 40 starting ISP
+  - SDC Bonus: +50 SDC
+
+Starting Skills:
+  Primary (auto-assigned):
+    Weapon Proficiency (Sword), Body Building,
+    Hand-to-Hand Expert, Lore: Demons & Monsters,
+    Detect Ambush
+
+Starting Equipment:
+  Vibro-Blade, Light EBA, Food Ration, Water Canteen
+
+Starting Credits: 1,000
+
+Role-play Notes:
+  Cyber-Knights follow a code of chivalry. They oppose
+  tyranny (especially the Coalition States) and protect
+  the weak. They are widely respected across Rifts Earth.
+
+See also: help occs, help psionics, help combat

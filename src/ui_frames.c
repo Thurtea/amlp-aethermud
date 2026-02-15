@@ -7,15 +7,15 @@
 /* External from session.c */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
 
-/* UTF-8 box-drawing characters */
-#define BOX_TL "\xe2\x94\x8c"  /* ┌ */
-#define BOX_TR "\xe2\x94\x90"  /* ┐ */
-#define BOX_BL "\xe2\x94\x94"  /* └ */
-#define BOX_BR "\xe2\x94\x98"  /* ┘ */
-#define BOX_H  "\xe2\x94\x80"  /* ─ */
-#define BOX_V  "\xe2\x94\x82"  /* │ */
-#define BOX_LT "\xe2\x94\x9c"  /* ├ */
-#define BOX_RT "\xe2\x94\xa4"  /* ┤ */
+/* ASCII box-drawing characters (plain telnet compatible) */
+#define BOX_TL "+"
+#define BOX_TR "+"
+#define BOX_BL "+"
+#define BOX_BR "+"
+#define BOX_H  "-"
+#define BOX_V  "|"
+#define BOX_LT "+"
+#define BOX_RT "+"
 
 /* Draw a horizontal line of width box-chars */
 static void draw_hline(PlayerSession *sess, int width) {

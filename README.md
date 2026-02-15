@@ -42,58 +42,142 @@ make test
 
 # control the running server
 ./mud.ctl start
-./mud.ctl stop
-./mud.ctl restart
+# AMLP Driver
+
+A modern LPC MUD driver written from scratch in C, featuring a complete LPC implementation with lexer, parser, bytecode compiler, and stack-based virtual machine.
+
+## Overview
+
+AMLP Driver is a high-performance MUD (Multi-User Dungeon) driver that interprets LPC (Lars Pensjö C) code. It provides a complete object-oriented environment with garbage collection, dynamic arrays, mappings, and a rich set of built-in functions for game development.
+
+Key Features:
+- Complete LPC compiler and bytecode VM
+- Garbage-collected object system
+- Native support for .lpc file extension
+- Real-time compilation and object loading
+- Telnet and websocket connectivity
+- Comprehensive character creation system
+
+## Quick Start
+
+```bash
+# Build the driver
+make clean && make driver
+
+# Start the MUD server
+./mud.ctl start
+
+# Connect to your MUD
+telnet localhost 3000
 ```
 
-## Build Instructions
+## Project Structure
+
+```
+amlp-driver/
+├── src/              # C source code 
+│   ├── lexer.c       # LPC tokenization
+│   ├── parser.c      # Recursive descent parser
+│   ├── codegen.c     # Bytecode generation
+│   ├── vm.c          # Stack-based virtual machine
+│   ├── object.c      # Object system
+│   ├── gc.c          # Garbage collector
+│   └── efun.c        # Built-in functions
+├── lib/              # LPC mudlib 
+├── docs/             # Documentation
+├── config/           # Configuration files
+└── mud.ctl           # Server control script
+```
+
+## LPC File Extension
+
+This driver uses the `.lpc` extension for all LPC library files, clearly distinguishing them from C driver code. For proper syntax highlighting in VS Code, use the AMLP LPC Extension included in this repository.
+
+Installation:
+```bash
+# From the amlp-driver directory:
+cp -r lpc-extension ~/.vscode/extensions/
+
+# Or install directly from the repo:
+cp -r /path/to/amlp-driver/lpc-extension ~/.vscode/extensions/
+
+# Restart VS Code
+# Your .lpc files will now have proper syntax highlighting!
+```
+
+The extension provides:
+- Syntax highlighting for LPC keywords and functions
+- Code snippets for common LPC patterns
+- Language configuration for proper bracket matching and auto-indentation
+- Quick reference guides for AMLP development
+
+## Usage
+
+### Server Management
+
+```bash
+./mud.ctl start      # Start the MUD server
+./mud.ctl stop       # Stop the server
+./mud.ctl restart    # Restart the server
+./mud.ctl status     # Check server status
+```
+
+### Configuration
+
+Edit `config/runtime.conf` to customize:
+- Port numbers (default: 3000 for telnet, 3001 for websocket)
+- Mudlib location
+- Master object path
+- Security settings
+
+### Connecting
+
+**Telnet:**
+```bash
+telnet localhost 3000
+```
+
+**Mudlet/TinTin++:**
+- Host: localhost
+- Port: 3000
+
+First player to connect receives admin privileges automatically.
+
+## Development
+
+### Building from Source
 
 Requirements:
-
-- GCC or Clang
+- GCC 4.9+ or Clang
 - GNU Make
-- POSIX-compliant system (Linux is recommended)
+- POSIX-compliant system (Linux, macOS, WSL)
 
-To build the driver and tools:
-
+Build:
 ```bash
-make clean
-make all
+make clean           # Clean previous builds
+make driver          # Build driver only
+make all             # Build driver and utilities
 ```
 
-Start the server:
+### Architecture
 
-```bash
-./mud.ctl start
-```
+The driver implements a complete LPC environment:
+- **Lexer** - Tokenizes LPC source code
+- **Parser** - Builds abstract syntax trees
+- **Compiler** - Generates bytecode
+- **VM** - Executes bytecode in a stack-based virtual machine
+- **Object System** - Manages LPC objects with inheritance
+- **Garbage Collector** - Reference-counted memory management
+- **Efuns** - Built-in functions for strings, arrays, math, I/O
 
-Server logs are available at `lib/log/server.log`.
+## Contributing
 
-## LPC Room Support
-
-This driver supports loading rooms from LPC source files on-demand. The loader text-scrapes `set_short()`, `set_long()`, `set_exits()`/`add_exit()`, and `set_items()` from LPC files under `lib/domains/*/room/` and exposes them at runtime.
-
-See `docs/lpc-room-system.md` for usage, supported `set_property()` keys, and limitations.
-
-## Adding the Client as a Submodule (optional)
-
-If you want to include the aethermud-client in this repo later, add it as a submodule:
-
-```bash
-git submodule add https://example.com/aethermud-client.git client
-git submodule update --init --recursive
-```
-
-For now continue developing the client separately on your Windows environment.
-
-## Notes and Recommendations
-
-- The consolidated repo is the authoritative development workspace. Do not maintain parallel live changes in archived repos.
-- Keep `lib/` and `src/` in sync by editing here and running the test cycle.
-- If you need help converting CI or release scripts from the archived repos, open an issue or request assistance.
+Contributions are welcome! This project demonstrates:
+- Compiler construction techniques
+- Virtual machine design
+- Garbage collection implementation
+- Network protocol handling
 
 ## License
 
 MIT License - See LICENSE for details
-
-**Version:** 0.7.0 | **Status:** Active Development | **Language:** C + LPC

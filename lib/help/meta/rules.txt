@@ -1,0 +1,25 @@
+AETHERMUD RULES
+
+1. RESPECT       Treat all players with respect. No harassment,
+                 hate speech, or personal attacks.
+
+2. ROLEPLAY      This is an RP-encouraged MUD. Stay in character
+                 when possible. Use 'ooc' for out-of-character talk.
+
+3. NO CHEATING   Do not exploit bugs. Report them to wizards.
+                 Using exploits may result in character deletion.
+
+4. PVP           Player-vs-player combat requires mutual consent
+                 unless in designated PVP zones.
+
+5. NAMES         Choose appropriate character names. No offensive
+                 names, real-world references, or joke names.
+
+6. MULTIPLAY     One character per player. Do not use multiple
+                 connections simultaneously.
+
+7. WIZARDS       Wizard commands are for administration only.
+                 Abuse of wizard powers will result in demotion.
+
+Violations may result in warnings, temporary bans, or
+permanent removal at admin discretion.

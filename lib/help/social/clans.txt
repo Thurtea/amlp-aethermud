@@ -1,0 +1,21 @@
+CLANS
+
+Clans are organizations that characters can join for special
+abilities and role-play opportunities.
+
+COMMANDS
+  clan                View your current clan status
+  clan <name>         Join a clan (if eligible)
+
+AVAILABLE CLANS
+  Aerihman            Atlantean secret society
+    Requirement: Atlantean race
+    Benefit: Unlocks Sunaj Assassin OCC
+    Command: clan aerihman
+
+JOINING A CLAN
+  Type 'clan aerihman' to request membership. You must meet
+  the race requirement. Once joined, your OCC changes and
+  new skills are assigned automatically.
+
+See also: help sunaj-assassin, help occs

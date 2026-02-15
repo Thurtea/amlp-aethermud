@@ -1,0 +1,14 @@
+COMBAT COMMANDS
+
+  attack <target>     Engage a target in combat
+  stop                Disengage from combat
+  flee                Attempt to escape combat
+  assist <player>     Join an ally's fight
+  autoparry           Toggle automatic parry
+  autododge           Toggle automatic dodge
+  wimpy <percent>     Set auto-flee HP threshold (0 = off)
+  rest                Sit down to regenerate faster
+  wake                Stand up from resting
+
+Combat is real-time with a 2-second heartbeat tick.
+Auto-parry and auto-dodge are enabled by default.

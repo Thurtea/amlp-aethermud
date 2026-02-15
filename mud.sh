@@ -88,8 +88,8 @@ case "$1" in
         read -p "Type 'YES' to confirm: " confirm
         if [ "$confirm" = "YES" ]; then
             echo "Wiping player saves..."
-            find save -type f -name "*.o" -delete 2>/dev/null || true
-            find lib/save -type f -name "*.o" -delete 2>/dev/null || true
+            find save -type f \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true
+            find lib/save -type f \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true
             echo "Player saves wiped"
         else
             echo "Cancelled"
@@ -100,21 +100,22 @@ case "$1" in
         read -p "Type 'YES' to confirm: " confirm
         if [ "$confirm" = "YES" ]; then
             echo "Wiping wizard saves..."
-            find save -type f -path "*/wizards/*" -name "*.o" -delete 2>/dev/null || true
-            find lib/save -type f -path "*/wizards/*" -name "*.o" -delete 2>/dev/null || true
+            find save -type f -path "*/wizards/*" \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true
+            find lib/save -type f -path "*/wizards/*" \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true
             echo "Wizard saves wiped"
         else
             echo "Cancelled"
         fi
         ;;
     wipe-all)
-        echo "WARNING: This will DELETE ALL save files (players, wizards, rooms)!"
+        echo "WARNING: This will DELETE ALL save files (players, wizards, rooms, workrooms)!"
         read -p "Type 'WIPE ALL' to confirm: " confirm
         if [ "$confirm" = "WIPE ALL" ]; then
             echo "Wiping all saves..."
-            find save -type f -name "*.o" -delete 2>/dev/null || true
-            find lib/save -type f -name "*.o" -delete 2>/dev/null || true
+            find save -type f \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true
+            find lib/save -type f \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true
             rm -f data/*.dat 2>/dev/null || true
+            rm -rf lib/domains/wizard/ 2>/dev/null || true
             echo "All saves wiped"
         else
             echo "Cancelled"
@@ -133,6 +134,14 @@ case "$1" in
         $0 stop || true
         make clean && make driver
         $0 start
+        ;;
+    build)
+        echo "Building driver..."
+        make driver
+        ;;
+    rebuild)
+        echo "Rebuilding driver (clean + build)..."
+        make clean && make driver
         ;;
     test-connect)
         echo "Testing telnet connection to localhost:3000..."
@@ -156,7 +165,7 @@ EXPECT
         /tmp/amlp_test.exp
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|tail|wipe-players|wipe-wizards|wipe-all|reload-lib|clean-build|test-connect|auto-test|rotate-logs}"
+        echo "Usage: $0 {start|stop|restart|status|tail|wipe-players|wipe-wizards|wipe-all|reload-lib|clean-build|build|rebuild|test-connect|auto-test|rotate-logs}"
         exit 1
         ;;
 esac

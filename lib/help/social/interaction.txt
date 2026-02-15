@@ -1,0 +1,12 @@
+SOCIAL COMMANDS
+
+  introduce <player>  Introduce yourself to another player
+  remember            List players you have been introduced to
+  who                 Show players currently online
+  title <text>        Set your title on the who list
+  clan                View your clan status
+  clan aerihman       Join the Aerihman clan (Atlantean only)
+  credits / balance   Check your credit balance
+
+Until you introduce yourself, other players see you by race
+(e.g. "A human") rather than by name.

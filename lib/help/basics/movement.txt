@@ -1,0 +1,13 @@
+MOVEMENT COMMANDS
+
+  north / n           Move north
+  south / s           Move south
+  east / e            Move east
+  west / w            Move west
+  up / u              Move up
+  down / d            Move down
+  go <exit>           Use any exit by name (e.g. go out)
+  rift <dest>         Rift travel between towns (500 credits)
+
+You can also type exit names directly. For example, if a room
+has an "out" exit, just type: out

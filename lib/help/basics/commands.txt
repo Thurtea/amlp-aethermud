@@ -1,0 +1,12 @@
+BASIC COMMANDS
+
+  help                Show help topics or help <topic>
+  look / l            Look around the room
+  inventory / i       Check carried items
+  stats / score       View your character sheet
+  skills              Show all known skills
+  pskills / sskills   Primary / secondary skills
+  save                Save your character
+  quit / logout       Save and disconnect
+  examine <target>    Inspect an object or player
+  brief               Toggle brief room descriptions

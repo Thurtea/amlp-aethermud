@@ -1,0 +1,13 @@
+COMMUNICATION COMMANDS
+
+  say <msg>           Speak in your current language
+  ooc <msg>           Out-of-character talk (no language)
+  tell <player> <msg> Send a private message
+  reply <msg>         Reply to the last tell you received
+  chat <msg>          Global chat channel
+  shout <msg>         Shout to nearby rooms
+  whisper <who> <msg> Whisper to someone in the room
+  emote <action>      Perform a custom emote
+  converse            Toggle conversation mode (. to exit)
+  speak <language>    Change your speaking language
+  languages / langs   List your known languages

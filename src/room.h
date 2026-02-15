@@ -57,6 +57,7 @@ void room_cleanup_world(void);
 Room* room_get_by_id(int id);
 Room* room_get_start(void);
 Room* room_get_by_path(const char *lpc_path);  /* Load-on-demand LPC room */
+Room* room_reload_lpc(const char *lpc_path);   /* Reload LPC room from disk */
 
 /* Room operations */
 void room_add_player(Room *room, PlayerSession *player);

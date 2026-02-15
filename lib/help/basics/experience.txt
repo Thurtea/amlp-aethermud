@@ -1,0 +1,27 @@
+EXPERIENCE AND LEVELS
+
+Experience points (XP) are earned through combat, quests, and
+exploration. As you gain levels, your abilities improve.
+
+XP SOURCES
+  Combat kills          Variable based on target difficulty
+  Quest completion      Awarded by game content
+  Wizard awards         Admins can grant XP via 'award' command
+
+LEVEL PROGRESSION
+  Level 1    0 XP          Level 6    16,000 XP
+  Level 2    2,000 XP      Level 7    24,000 XP
+  Level 3    4,000 XP      Level 8    34,000 XP
+  Level 4    8,000 XP      Level 9    50,000 XP
+  Level 5    12,000 XP     Level 10   70,000 XP
+
+PER-LEVEL GAINS
+  +1d6 HP
+  +1 attack per round (every 3 levels)
+  Skill percentages increase
+
+DEATH
+  You have 5 lives. Dying costs 1 life. At 0 lives, the character
+  is permanently dead. Deaths may leave scars.
+
+See also: help stats, help combat

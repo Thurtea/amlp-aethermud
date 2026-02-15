@@ -1,0 +1,33 @@
+VAGABOND (O.C.C.)
+
+Description:
+  The Vagabond is the jack-of-all-trades wanderer of Rifts Earth.
+  Unskilled but adaptable, they survive on wits, luck, and a
+  willingness to do whatever it takes. Many adventurers begin as
+  Vagabonds before finding their true calling.
+
+Abilities:
+  - No special powers or magic
+  - Broad secondary skill selection
+  - Adaptable to any play style
+
+Starting Skills:
+  Primary (auto-assigned):
+    Wilderness Survival, First Aid, Land Navigation,
+    Climbing, General Athletics
+
+  Secondary (choose 3 during chargen):
+    Selected from full secondary skill list
+
+Starting Equipment:
+  Steel Knife, Food Ration, Water Canteen
+
+Starting Credits: 1,000
+
+Role-play Notes:
+  Vagabonds are the everyman of Rifts Earth. They might be
+  farmers displaced by war, traveling merchants, or simply
+  people trying to survive in a dangerous world. Wizards can
+  reassign your OCC later with 'set <name> occ <class>'.
+
+See also: help occs, help stats, help skills

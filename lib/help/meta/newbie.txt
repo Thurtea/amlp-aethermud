@@ -1,0 +1,38 @@
+NEW PLAYER GUIDE
+
+Welcome to AetherMUD! Here's how to get started:
+
+1. LOOK AROUND
+   Type 'look' to see your surroundings. Read the room
+   description for clues about exits and features.
+
+2. MOVE
+   Type direction names to move: north, south, east, west,
+   up, down. Or type any exit name shown in the exits list.
+
+3. CHECK YOUR CHARACTER
+   'stats' or 'score' - View your character sheet
+   'skills'           - See your abilities
+   'inventory'        - Check your gear
+
+4. TALK TO PEOPLE
+   'say hello'        - Speak to the room
+   'ooc hi everyone'  - Out-of-character chat
+   'tell <name> hi'   - Private message
+
+5. COMBAT
+   'attack <target>'  - Start a fight
+   'flee'             - Run away
+   'stop'             - Disengage
+
+6. SAVE YOUR PROGRESS
+   'save'             - Save your character
+   'quit'             - Save and disconnect
+
+7. GET HELP
+   'help'             - List help topics
+   'help <topic>'     - Read about a topic
+   'help combat'      - Learn about fighting
+   'help occs'        - Browse character classes
+
+See also: help basics, help movement, help stats

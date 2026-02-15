@@ -1,0 +1,30 @@
+SKILLS
+
+Skills represent your character's learned abilities. Each skill
+has a percentage chance of success that improves with use.
+
+COMMANDS
+  skills              Show all known skills
+  pskills             Show primary skills (from OCC)
+  sskills             Show secondary skills (player-chosen)
+
+SKILL TYPES
+  Primary Skills    Auto-assigned from your OCC (5 skills)
+  Secondary Skills  Chosen during chargen (3 skills)
+
+SKILL IMPROVEMENT
+  Skills improve through use. Each successful use adds to the
+  skill's experience counter. At certain thresholds, the
+  percentage increases.
+
+SKILL CATEGORIES
+  Combat              Weapon proficiencies, martial arts
+  Technical           Mechanics, electronics, demolitions
+  Medical             First aid, paramedic, surgery
+  Wilderness          Survival, tracking, land navigation
+  Language            Languages and literacy
+  Lore                Knowledge of magic, demons, history
+  Physical            Athletics, climbing, swimming
+  Rogue               Prowl, pick locks, streetwise
+
+See also: help stats, help occs

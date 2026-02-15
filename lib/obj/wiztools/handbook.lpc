@@ -1,0 +1,56 @@
+// Wizard's Handbook - guide and reference
+// Placed in wizard chest during workroom creation
+
+inherit "/lib/std/object.lpc";
+
+void create() {
+    ::create();
+    set_short("wizard's handbook");
+    set_long(
+        "A leather-bound book with gold-leaf lettering:\n"
+        "'The AetherMUD Wizard's Handbook'\n"
+        "Type 'read handbook' for the wizard guide."
+    );
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+string get_read_text() {
+    return
+        "+========= THE WIZARD'S HANDBOOK =========+\n"
+        "\n"
+        "  RESPONSIBILITIES\n"
+        "  ----------------\n"
+        "  - Build and maintain your domain area\n"
+        "  - Help new players learn the world\n"
+        "  - Report and fix bugs you discover\n"
+        "  - Do not abuse wizard powers on mortals\n"
+        "\n"
+        "  BUILDING BASICS\n"
+        "  ----------------\n"
+        "  Your domain: /domains/wizard/<name>/\n"
+        "  Start here:  workroom.lpc\n"
+        "  Use 'ed' to edit LPC files in-game\n"
+        "  Use 'update' to reload changed files\n"
+        "  Use 'clone' to test objects you create\n"
+        "\n"
+        "  FILESYSTEM\n"
+        "  ----------------\n"
+        "  ls [path]       List directory\n"
+        "  cd [path]       Change directory\n"
+        "  cat <file>      View file contents\n"
+        "  more <file>     Paged file viewer\n"
+        "  ed <file>       Line editor\n"
+        "  pwd             Print working dir\n"
+        "\n"
+        "  PLAYER MANAGEMENT\n"
+        "  ----------------\n"
+        "  who              List online players\n"
+        "  finger <name>    Player info\n"
+        "  tell <name> msg  Private message\n"
+        "  set <p> <s> <v>  Modify player stats\n"
+        "  heal <player>    Restore all pools\n"
+        "\n"
+        "  See 'help wizard' for more details.\n"
+        "+==========================================+\n";
+}

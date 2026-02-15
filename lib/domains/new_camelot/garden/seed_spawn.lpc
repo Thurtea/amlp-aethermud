@@ -1,0 +1,26 @@
+/* seed_spawn.lpc
+ * Helper to place an initial Magic Bush in the New Camelot garden.
+ * Usage (as a wizard/creator):
+ *   call_other("/domains/new_camelot/garden/seed_spawn", "spawn_magic_bush");
+ */
+
+void create() {
+    seteuid(getuid());
+}
+
+void spawn_magic_bush() {
+    object room, bush;
+    room = load_object("/domains/new_camelot/garden/east_2_4");
+    if (!room) {
+        log_file("seed_spawn", "failed to load room /domains/new_camelot/garden/east_2_4 at " + ctime(time()) + "\n");
+        return;
+    }
+    bush = clone_object("/domains/new_camelot/garden/npc/magic_bush");
+    if (!bush) {
+        log_file("seed_spawn", "failed to clone magic_bush at " + ctime(time()) + "\n");
+        return;
+    }
+    bush->move(room);
+    tell_room(room, "A small magical bush shimmers into being.\n");
+    log_file("seed_spawn", "spawned magic_bush in " + file_name(room) + " at " + ctime(time()) + "\n");
+}

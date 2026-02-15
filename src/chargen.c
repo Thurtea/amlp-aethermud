@@ -333,6 +333,12 @@ void chargen_create_admin(PlayerSession *sess) {
     /* Lives */
     ch->lives_remaining = 5;
     ch->scar_count = 0;
+    ch->description = NULL;
+    ch->position = NULL;
+    ch->original_race = NULL;
+    ch->original_occ = NULL;
+    ch->original_hp_max = 0;
+    ch->original_mdc_max = 0;
 
     /* Combat defaults */
     ch->attacks_per_round = 2;
@@ -382,19 +388,6 @@ void chargen_create_admin(PlayerSession *sess) {
             room_add_player(workroom, sess);
 
             /* Place wiz-tool items in workroom */
-            /* Chest (non-pickable container) */
-            Item *chest = (Item*)calloc(1, sizeof(Item));
-            chest->id = -1;
-            chest->name = strdup("wizard's chest");
-            chest->description = strdup(
-                "A sturdy oak chest with arcane symbols carved into its lid.\n"
-                "The symbols pulse faintly with residual magical energy.\n"
-                "Type 'look in chest' or 'examine chest' to see its contents.");
-            chest->type = ITEM_MISC;
-            chest->weight = 999;  /* Too heavy to pick up */
-            chest->value = 0;
-            room_add_item(workroom, chest);
-
             /* Staff */
             Item *staff = (Item*)calloc(1, sizeof(Item));
             staff->id = -2;
@@ -412,7 +405,7 @@ void chargen_create_admin(PlayerSession *sess) {
                 "| update <file>       Reload LPC file  |\n"
                 "+--------------------------------------+");
             staff->type = ITEM_TOOL;
-            staff->weight = 999;
+            staff->weight = 5;
             staff->value = 0;
             room_add_item(workroom, staff);
 
@@ -425,7 +418,7 @@ void chargen_create_admin(PlayerSession *sess) {
                 "'The AetherMUD Wizard's Handbook'\n"
                 "Type 'read handbook' for the wizard guide.");
             handbook->type = ITEM_MISC;
-            handbook->weight = 999;
+            handbook->weight = 2;
             handbook->value = 0;
             room_add_item(workroom, handbook);
 
@@ -444,7 +437,7 @@ void chargen_create_admin(PlayerSession *sess) {
                 "| users              Connection info  |\n"
                 "+-------------------------------------+");
             crystal->type = ITEM_TOOL;
-            crystal->weight = 999;
+            crystal->weight = 1;
             crystal->value = 0;
             room_add_item(workroom, crystal);
         } else {
@@ -583,6 +576,12 @@ void chargen_roll_stats(PlayerSession *sess) {
     ch->attacks_per_round = 2;   /* Default 2 attacks per round */
     ch->lives_remaining = 5;     /* Start with 5 lives */
     ch->scar_count = 0;
+    ch->description = NULL;
+    ch->position = NULL;
+    ch->original_race = NULL;
+    ch->original_occ = NULL;
+    ch->original_hp_max = 0;
+    ch->original_mdc_max = 0;
 
     ch->introduced_count = 0;
     for (i = 0; i < 32; i++) ch->introduced_to[i] = NULL;
@@ -777,8 +776,17 @@ void chargen_complete(PlayerSession *sess) {
     assign_starting_languages(&sess->character);
     
     /* Add starting equipment based on OCC */
+    if (!sess->character.occ) {
+        /* No OCC assigned yet - give basic starter gear */
+        Item *knife = item_create(7); /* Steel Knife */
+        if (knife) {
+            inventory_add(&sess->character.inventory, knife);
+            equipment_equip(&sess->character, sess, knife);
+        }
+        sess->character.credits = 1000;
+    }
     /* Dragon RCC: no equipment, natural form only */
-    if (strcasestr(sess->character.occ, "Dragon Hatchling")) {
+    else if (strcasestr(sess->character.occ, "Dragon Hatchling")) {
         /* Dragons don't use equipment - they ARE the weapon */
         send_to_player(sess, "As a dragon, you rely on your natural abilities.\n");
         sess->character.credits = 500;
@@ -857,7 +865,7 @@ void chargen_complete(PlayerSession *sess) {
     }
 
     /* Non-dragon characters get basic supplies */
-    if (!strcasestr(sess->character.occ, "Dragon Hatchling")) {
+    if (!sess->character.occ || !strcasestr(sess->character.occ, "Dragon Hatchling")) {
         Item *ration = item_create(48); /* Food Ration */
         Item *water = item_create(49); /* Water Canteen */
         if (ration) inventory_add(&sess->character.inventory, ration);
@@ -978,10 +986,10 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     send_to_player(sess, "As a %s, your O.C.C. is Dragon Hatchling RCC.\n", ch->race);
                     send_to_player(sess, "Dragons are a Racial Character Class with innate abilities.\n\n");
                 } else {
-                    /* Default OCC: Vagabond (wizard can reassign via 'set <player> occ <name>') */
-                    ch->occ = strdup("Vagabond");
-                    send_to_player(sess, "Your starting O.C.C. is Vagabond (jack of all trades).\n");
-                    send_to_player(sess, "A wizard can assign a specialized O.C.C. later.\n\n");
+                    /* OCC will be assigned by wizards or through in-game progression */
+                    ch->occ = NULL;
+                    send_to_player(sess, "\nYou will receive your Occupational Character Class (O.C.C.)\n");
+                    send_to_player(sess, "through in-game progression and roleplay.\n\n");
                 }
 
                 send_to_player(sess, "Rolling your attributes...\n");
@@ -992,7 +1000,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 send_to_player(sess, "\n");
                 send_to_player(sess, "Accept these stats? (yes/reroll): ");
             } else {
-                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", NUM_RACES);
+                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
             }
             break;
 
@@ -1006,12 +1014,13 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
                 /* Auto-assign OCC primary skills, except for dragon RCCs which use racial skills */
                 if (ch->occ && strcasestr(ch->occ, "Dragon Hatchling") != NULL) {
-                    send_to_player(sess, "\nAs a dragon, your racial abilities apply instead of OCC primary skills.\n");
-                    send_to_player(sess, "You will select secondary skills next.\n");
-                } else {
+                    send_to_player(sess, "\nAs a dragon, your racial abilities define your capabilities.\n");
+                } else if (ch->occ) {
                     occ_assign_skills(sess, ch->occ);
                     send_to_player(sess, "\nYour primary skills have been assigned based on your O.C.C.\n");
                     skill_display_list(sess);
+                } else {
+                    send_to_player(sess, "\nYou will receive skills through in-game training and progression.\n");
                 }
 
                 /* Transition to alignment selection */
@@ -1067,9 +1076,9 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         sess->current_room = zone_room;
                     }
 
-                    /* Transition to secondary skills */
-                    sess->chargen_state = CHARGEN_SECONDARY_SKILLS;
-                    chargen_show_secondary_skills(sess);
+                    /* Secondary skills can be learned through in-game training */
+                    send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
+                    chargen_complete(sess);
                 } else if (choice == 4 || choice == 5) {
                     /* LPC starting rooms */
                     const char *path = (choice == 4) ? "/domains/start/room/welcome" : "/domains/castle/room/entry";
@@ -1088,56 +1097,20 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         sess->current_room = room_get_start();
                     }
 
-                    /* Transition to secondary skills */
-                    sess->chargen_state = CHARGEN_SECONDARY_SKILLS;
-                    chargen_show_secondary_skills(sess);
+                    /* Secondary skills can be learned through in-game training */
+                    send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
+                    chargen_complete(sess);
                 } else {
                     send_to_player(sess, "Invalid choice. Enter 1-5: ");
                 }
             }
             break;
 
+        /*
         case CHARGEN_SECONDARY_SKILLS:
-            {
-                int pick = atoi(input);
-                /* Build list of available skills (not already assigned) */
-                int available[16];
-                int num_available = 0;
-                for (int si = 0; si < NUM_SKILLS && si < 16; si++) {
-                    int already_has = 0;
-                    for (int j = 0; j < ch->num_skills; j++) {
-                        if (ch->skills[j].skill_id == si) {
-                            already_has = 1;
-                            break;
-                        }
-                    }
-                    if (!already_has) {
-                        available[num_available++] = si;
-                    }
-                }
-                if (pick >= 1 && pick <= num_available) {
-                    int skill_id = available[pick - 1];
-                    SkillDef *skill = skill_get_by_id(skill_id);
-                    if (skill && ch->num_skills < MAX_PLAYER_SKILLS) {
-                        ch->skills[ch->num_skills].skill_id = skill_id;
-                        ch->skills[ch->num_skills].percentage = skill->base_percentage;
-                        ch->skills[ch->num_skills].uses = 0;
-                        ch->num_skills++;
-                        sess->chargen_temp_choice++;
-                        send_to_player(sess, "Learned: %s (%d%%)\n",
-                            skill->name, skill->base_percentage);
-                    }
-                    if (sess->chargen_temp_choice >= 3) {
-                        send_to_player(sess, "\nSecondary skills selection complete.\n");
-                        chargen_complete(sess);
-                    } else {
-                        chargen_show_secondary_skills(sess);
-                    }
-                } else {
-                    send_to_player(sess, "Invalid choice. Enter a number from the list: ");
-                }
-            }
+            // DISABLED - secondary skills handled post-chargen via in-game training
             break;
+        */
 
         default:
             break;
@@ -1579,6 +1552,34 @@ int save_character(PlayerSession *sess) {
         fwrite(&ch->scars[i].death_number, sizeof(int), 1, f);
     }
 
+    /* Save description */
+    size_t desc_len = ch->description ? strlen(ch->description) : 0;
+    fwrite(&desc_len, sizeof(size_t), 1, f);
+    if (desc_len > 0) {
+        fwrite(ch->description, 1, desc_len, f);
+    }
+
+    /* Save position */
+    size_t pos_len = ch->position ? strlen(ch->position) : 0;
+    fwrite(&pos_len, sizeof(size_t), 1, f);
+    if (pos_len > 0) {
+        fwrite(ch->position, 1, pos_len, f);
+    }
+
+    /* Save original race/occ (for wizard demotion) */
+    size_t orig_race_len = ch->original_race ? strlen(ch->original_race) : 0;
+    fwrite(&orig_race_len, sizeof(size_t), 1, f);
+    if (orig_race_len > 0) {
+        fwrite(ch->original_race, 1, orig_race_len, f);
+    }
+    size_t orig_occ_len = ch->original_occ ? strlen(ch->original_occ) : 0;
+    fwrite(&orig_occ_len, sizeof(size_t), 1, f);
+    if (orig_occ_len > 0) {
+        fwrite(ch->original_occ, 1, orig_occ_len, f);
+    }
+    fwrite(&ch->original_hp_max, sizeof(int), 1, f);
+    fwrite(&ch->original_mdc_max, sizeof(int), 1, f);
+
     fclose(f);
 
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
@@ -1967,6 +1968,66 @@ int load_character(PlayerSession *sess, const char *username) {
         ch->scar_count = 0;
     }
 
+    /* Load description (appended after scars, may not exist in older saves) */
+    ch->description = NULL;
+    {
+        size_t desc_len = 0;
+        if (fread(&desc_len, sizeof(size_t), 1, f) == 1 && desc_len > 0 && desc_len < 4096) {
+            ch->description = malloc(desc_len + 1);
+            if (fread(ch->description, 1, desc_len, f) == desc_len) {
+                ch->description[desc_len] = '\0';
+            } else {
+                free(ch->description);
+                ch->description = NULL;
+            }
+        }
+    }
+
+    /* Load position (appended after description, may not exist in older saves) */
+    ch->position = NULL;
+    {
+        size_t pos_len = 0;
+        if (fread(&pos_len, sizeof(size_t), 1, f) == 1 && pos_len > 0 && pos_len < 512) {
+            ch->position = malloc(pos_len + 1);
+            if (fread(ch->position, 1, pos_len, f) == pos_len) {
+                ch->position[pos_len] = '\0';
+            } else {
+                free(ch->position);
+                ch->position = NULL;
+            }
+        }
+    }
+
+    /* Load original race/occ (for wizard demotion, may not exist in older saves) */
+    ch->original_race = NULL;
+    ch->original_occ = NULL;
+    ch->original_hp_max = 0;
+    ch->original_mdc_max = 0;
+    {
+        size_t orig_race_len = 0;
+        if (fread(&orig_race_len, sizeof(size_t), 1, f) == 1 && orig_race_len > 0 && orig_race_len < 256) {
+            ch->original_race = malloc(orig_race_len + 1);
+            if (fread(ch->original_race, 1, orig_race_len, f) == orig_race_len) {
+                ch->original_race[orig_race_len] = '\0';
+            } else {
+                free(ch->original_race);
+                ch->original_race = NULL;
+            }
+        }
+        size_t orig_occ_len = 0;
+        if (fread(&orig_occ_len, sizeof(size_t), 1, f) == 1 && orig_occ_len > 0 && orig_occ_len < 256) {
+            ch->original_occ = malloc(orig_occ_len + 1);
+            if (fread(ch->original_occ, 1, orig_occ_len, f) == orig_occ_len) {
+                ch->original_occ[orig_occ_len] = '\0';
+            } else {
+                free(ch->original_occ);
+                ch->original_occ = NULL;
+            }
+        }
+        if (fread(&ch->original_hp_max, sizeof(int), 1, f) != 1) ch->original_hp_max = 0;
+        if (fread(&ch->original_mdc_max, sizeof(int), 1, f) != 1) ch->original_mdc_max = 0;
+    }
+
     fclose(f);
 
     INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)",
@@ -2197,13 +2258,13 @@ void cmd_meditate(PlayerSession *sess, const char *args) {
         return;
     }
     
-    /* Start meditation for both systems */
+    /* Start meditation for both systems (3 rounds = 6 seconds of recovery) */
     ch->psionics.is_meditating = true;
-    ch->psionics.meditation_rounds_active = 1;
+    ch->psionics.meditation_rounds_active = 3;
     ch->magic.is_meditating = true;
-    ch->magic.meditation_rounds_active = 1;
-    
-    send_to_player(sess, "You begin to meditate, centering yourself...\n");
+    ch->magic.meditation_rounds_active = 3;
+
+    send_to_player(sess, "You begin to meditate, centering yourself... (3 rounds)\n");
 }
 
 /* ========== CLAN SYSTEM ========== */
@@ -2216,6 +2277,12 @@ void cmd_clan(PlayerSession *sess, const char *args) {
         return;
     }
 
+    /* Hide clan system from player discovery - unlocked through quests */
+    send_to_player(sess, "Clans are unlocked through in-game quests and roleplay.\n");
+    send_to_player(sess, "Explore the world to discover hidden factions.\n");
+    return;
+
+    /* Internal quest trigger code below (kept for future quest system) */
     Character *ch = &sess->character;
 
     /* No argument: show current clan or list available */
@@ -2367,6 +2434,50 @@ void cmd_languages(PlayerSession *sess, const char *args) {
     frame_sep(sess, w);
     frame_line(sess, "Use 'speak <language>' to change default.", w);
     frame_bottom(sess, w);
+}
+
+/* ========== SWIM COMMAND ========== */
+
+void cmd_swim(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+
+    /* Find the Swimming skill (ID 2) */
+    int swim_pct = 0;
+    for (int i = 0; i < ch->num_skills; i++) {
+        if (ch->skills[i].skill_id == 2) {
+            swim_pct = ch->skills[i].percentage;
+            break;
+        }
+    }
+
+    if (swim_pct == 0) {
+        send_to_player(sess, "You don't know how to swim!\n");
+        return;
+    }
+
+    if (skill_check(swim_pct)) {
+        send_to_player(sess, "You swim skillfully through the water. [Skill check: %d%% - Success]\n", swim_pct);
+        Room *room = sess->current_room;
+        if (room) {
+            char msg[256];
+            snprintf(msg, sizeof(msg), "%s swims through the water.\r\n", sess->username);
+            room_broadcast(room, msg, sess);
+        }
+    } else {
+        send_to_player(sess, "You struggle in the water, barely keeping afloat! [Skill check: %d%% - Failed]\n", swim_pct);
+        /* Take minor damage on failure */
+        int dmg = 1 + (rand() % 4);  /* 1d4 damage */
+        ch->hp -= dmg;
+        if (ch->hp < 1) ch->hp = 1;  /* Don't kill from swimming */
+        send_to_player(sess, "You take %d damage from thrashing about.\n", dmg);
+        Room *room = sess->current_room;
+        if (room) {
+            char msg[256];
+            snprintf(msg, sizeof(msg), "%s flails around in the water!\r\n", sess->username);
+            room_broadcast(room, msg, sess);
+        }
+    }
 }
 
 /* ========== WIZARD GRANT/REVOKE COMMANDS ========== */

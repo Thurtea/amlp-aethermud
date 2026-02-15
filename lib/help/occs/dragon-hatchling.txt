@@ -1,0 +1,35 @@
+DRAGON HATCHLING (R.C.C.)
+
+Description:
+  Dragon Hatchlings are young dragons, among the most powerful
+  beings on Rifts Earth. As an RCC (Racial Character Class),
+  the dragon's race IS their class -- they do not select a
+  separate OCC.
+
+Abilities:
+  - MDC Creature: 200 base MDC (no HP/SDC)
+  - Natural Weapons: Claws, bite, tail
+  - Flight: Natural flight ability
+  - Psionics: Innate psionic powers
+  - Magic: Innate magical ability
+  - Fire Breath: Ranged natural attack
+
+Starting Skills:
+  All skills are secondary (no OCC primary skills).
+  Choose 3 during character creation.
+
+Starting Equipment:
+  None (dragons rely on natural abilities)
+
+Starting Credits: 500
+
+Available Dragon Races:
+  Great Horned Dragon, Fire Dragon, Ice Dragon,
+  Thunder Lizard, Serpent of the Wind, and more.
+
+Role-play Notes:
+  Dragons are feared and respected. Most humanoids will
+  react with caution or hostility. Young dragons often
+  disguise themselves to interact with smaller races.
+
+See also: help occs, help psionics, help magic

@@ -1,0 +1,29 @@
+// Wizard's Staff - command reference tool
+// Placed in wizard chest during workroom creation
+
+inherit "/lib/std/object.lpc";
+
+void create() {
+    ::create();
+    set_short("wizard's staff");
+    set_long(
+        "A gnarled wooden staff crackling with arcane power.\n"
+        "Runes etched along its length glow faintly.\n"
+        "Type 'examine staff' for a list of wizard commands."
+    );
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+string get_examine_text() {
+    return
+        "+---------- WIZARD COMMANDS ----------+\n"
+        "| goto <player|room>  Teleport        |\n"
+        "| set <player> <stat> Set player stat  |\n"
+        "| heal <player>       Restore HP/pools |\n"
+        "| clone <object>      Clone an object  |\n"
+        "| eval <expr>         Evaluate LPC     |\n"
+        "| update <file>       Reload LPC file  |\n"
+        "+--------------------------------------+\n"
+        "The staff hums with approval.\n";
+}

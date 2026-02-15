@@ -1,0 +1,12 @@
+EQUIPMENT AND INVENTORY
+
+  inventory / i       List items you are carrying
+  equip <item>        Equip an item (weapon, armor, accessory)
+  unequip <item>      Remove an equipped item
+  worn                Show currently equipped items
+  get <item>          Pick up an item from the room
+  drop <item>         Drop an item on the ground
+  examine <item>      Inspect an item's details
+
+Equipment slots: primary weapon, secondary weapon, armor,
+and up to 3 accessories.

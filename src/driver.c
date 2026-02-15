@@ -36,6 +36,8 @@
 #include <arpa/inet.h>
 /* Terminal ioctl */
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <dirent.h>
 #include <termios.h>
 
 #include "vm.h"
@@ -121,6 +123,8 @@ int cmd_ls_filesystem(PlayerSession *session, const char *args);
 int cmd_cd_filesystem(PlayerSession *session, const char *args);
 int cmd_pwd_filesystem(PlayerSession *session);
 int cmd_cat_filesystem(PlayerSession *session, const char *args);
+int cmd_more_filesystem(PlayerSession *session, const char *args);
+int cmd_ed_filesystem(PlayerSession *session, const char *args);
 
 /* Priority gameplay command functions */
 static int cmd_tell(PlayerSession *session, const char *arg);
@@ -129,6 +133,7 @@ static int cmd_whisper(PlayerSession *session, const char *arg);
 static int cmd_shout(PlayerSession *session, const char *arg);
 static int cmd_exits(PlayerSession *session, const char *arg);
 static int cmd_examine(PlayerSession *session, const char *arg);
+static int cmd_read(PlayerSession *session, const char *arg);
 static int cmd_give_item(PlayerSession *session, const char *arg);
 
 static const char *value_type_name(ValueType type) {
@@ -801,8 +806,8 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
             } else {
                 send_to_player(session, "You examine %s.\n", target->username);
                 send_to_player(session, "Race: %s  O.C.C.: %s\n",
-                              target->character.race,
-                              target->character.occ);
+                              target->character.race ? target->character.race : "Unknown",
+                              target->character.occ ? target->character.occ : "None");
                 send_to_player(session, "They appear to be in good health.\n");
             }
             return 1;
@@ -847,6 +852,79 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
 
     send_to_player(session, "You don't see that here.\n");
 
+    return 1;
+}
+
+/* READ - Read an object (books, handbooks, signs) */
+static int cmd_read(PlayerSession *session, const char *arg) {
+    if (!arg || !*arg) {
+        send_to_player(session, "Read what?\n");
+        return 1;
+    }
+
+    if (!session->current_room) {
+        send_to_player(session, "You are nowhere.\n");
+        return 1;
+    }
+
+    Room *room = session->current_room;
+
+    /* Check room items first, then inventory */
+    Item *item = room_find_item(room, arg);
+    if (!item) {
+        item = inventory_find(&session->character.inventory, arg);
+    }
+
+    if (!item) {
+        send_to_player(session, "You don't see '%s' to read.\n", arg);
+        return 1;
+    }
+
+    /* Hardcoded read text for wiz-tool handbook (id == -3) */
+    if (item->id == -3) {
+        send_to_player(session, "\n");
+        send_to_player(session,
+            "+========= THE WIZARD'S HANDBOOK =========+\n"
+            "\n"
+            "  RESPONSIBILITIES\n"
+            "  ----------------\n"
+            "  - Build and maintain your domain area\n"
+            "  - Help new players learn the world\n"
+            "  - Report and fix bugs you discover\n"
+            "  - Do not abuse wizard powers on mortals\n"
+            "\n"
+            "  BUILDING BASICS\n"
+            "  ----------------\n"
+            "  Your domain: /domains/wizard/<name>/\n"
+            "  Start here:  workroom.lpc\n"
+            "  Use 'ed' to edit LPC files in-game\n"
+            "  Use 'update' to reload changed files\n"
+            "  Use 'clone' to test objects you create\n"
+            "\n"
+            "  FILESYSTEM\n"
+            "  ----------------\n"
+            "  ls [path]       List directory\n"
+            "  cd [path]       Change directory\n"
+            "  cat <file>      View file contents\n"
+            "  more <file>     Paged file viewer\n"
+            "  ed <file>       Line editor\n"
+            "  pwd             Print working dir\n"
+            "\n"
+            "  PLAYER MANAGEMENT\n"
+            "  ----------------\n"
+            "  who              List online players\n"
+            "  finger <name>    Player info\n"
+            "  tell <name> msg  Private message\n"
+            "  set <p> <s> <v>  Modify player stats\n"
+            "  heal <player>    Restore all pools\n"
+            "\n"
+            "  See 'help wizard' for more details.\n"
+            "+==========================================+\n");
+        return 1;
+    }
+
+    /* Generic fallback - not a readable object */
+    send_to_player(session, "There is nothing written on %s.\n", item->name);
     return 1;
 }
 
@@ -1201,28 +1279,108 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             cmd_ls_filesystem(session, args);
             return vm_value_create_string("");
         }
-        
+
         if (strcmp(cmd, "cd") == 0) {
             command_debug_set_context(command, cmd, args ? args : "", "filesystem");
             cmd_cd_filesystem(session, args);
             return vm_value_create_string("");
         }
-        
+
         if (strcmp(cmd, "pwd") == 0) {
             command_debug_set_context(command, cmd, args ? args : "", "filesystem");
             cmd_pwd_filesystem(session);
             return vm_value_create_string("");
         }
-        
-        if (strcmp(cmd, "cat") == 0 || strcmp(cmd, "more") == 0) {
+
+        if (strcmp(cmd, "cat") == 0) {
             command_debug_set_context(command, cmd, args ? args : "", "filesystem");
             cmd_cat_filesystem(session, args);
             return vm_value_create_string("");
+        }
+
+        if (strcmp(cmd, "more") == 0) {
+            command_debug_set_context(command, cmd, args ? args : "", "filesystem");
+            cmd_more_filesystem(session, args);
+            return vm_value_create_string("");
+        }
+
+        if (strcmp(cmd, "ed") == 0) {
+            command_debug_set_context(command, cmd, args ? args : "", "filesystem");
+            cmd_ed_filesystem(session, args);
+            return vm_value_create_string("");
+        }
+
+        if (strcmp(cmd, "update") == 0) {
+            if (!args || *args == '\0') {
+                send_to_player(session, "Usage: update <lpc_path>\r\n");
+                send_to_player(session, "Example: update /domains/wizard/thurtea/workroom\r\n");
+                result.type = VALUE_NULL;
+                return result;
+            }
+            Room *reloaded = room_reload_lpc(args);
+            if (reloaded) {
+                send_to_player(session, "Reloaded: %s (%s)\r\n", args, reloaded->name);
+                /* If we're standing in it, re-look */
+                if (session->current_room == reloaded) {
+                    cmd_look(session, "");
+                }
+            } else {
+                send_to_player(session, "Failed to reload '%s'.\r\n", args);
+            }
+            result.type = VALUE_NULL;
+            return result;
         }
     }
     
     /* If player object exists, route command through it. Set the
      * current VM session so efuns like this_player() can access it. */
+    /* Prefer LPC room rendering when available: if the current room
+     * is LPC-backed, try to call its `look()` method in the VM and
+     * use the returned string. Fall back to the C `cmd_look()`.
+     */
+    if (strcmp(cmd, "look") == 0 || strcmp(cmd, "l") == 0) {
+        if (session->current_room && session->current_room->lpc_path) {
+            /* Try to find an existing loaded LPC room object */
+            VMValue path_val = vm_value_create_string(session->current_room->lpc_path);
+            VMValue found = efun_find_object(global_vm, &path_val, 1);
+            vm_value_release(&path_val);
+
+            if (found.type == VALUE_OBJECT && found.data.object_value) {
+                obj_t *room_obj = (obj_t *)found.data.object_value;
+                VMValue vres = obj_call_method(global_vm, room_obj, "look", NULL, 0);
+                vm_value_release(&found);
+                if (vres.type == VALUE_STRING && vres.data.string_value) {
+                    return vres; /* caller will send and release */
+                }
+                if (vres.type != VALUE_NULL) vm_value_release(&vres);
+            } else {
+                if (found.type != VALUE_NULL) vm_value_release(&found);
+
+                /* Not loaded: attempt a transient clone, call look(), then release */
+                VMValue p2 = vm_value_create_string(session->current_room->lpc_path);
+                VMValue cloned = efun_clone_object(global_vm, &p2, 1);
+                vm_value_release(&p2);
+                if (cloned.type == VALUE_OBJECT && cloned.data.object_value) {
+                    obj_t *room_obj2 = (obj_t *)cloned.data.object_value;
+                    VMValue cres = obj_call_method(global_vm, room_obj2, "look", NULL, 0);
+                    /* release our reference to the cloned object */
+                    vm_value_release(&cloned);
+                    if (cres.type == VALUE_STRING && cres.data.string_value) {
+                        return cres;
+                    }
+                    if (cres.type != VALUE_NULL) vm_value_release(&cres);
+                } else {
+                    if (cloned.type != VALUE_NULL) vm_value_release(&cloned);
+                }
+            }
+        }
+
+        /* Fallback to C implementation */
+        cmd_look(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (session->player_object) {
         command_debug_set_context(command, cmd, args ? args : "", "vm");
         set_current_session(session);
@@ -1296,87 +1454,171 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
     
     if (strcmp(cmd, "help") == 0) {
-        int w = FRAME_WIDTH;
-        send_to_player(session, "\r\n");
-        frame_top(session, w);
-        frame_title(session, "AETHERMUD COMMAND REFERENCE", w);
-        frame_header(session, "BASIC", w);
-        frame_line(session, "help                - Show this help", w);
-        frame_line(session, "look / l            - Look around", w);
-        frame_line(session, "inventory / i       - Check inventory", w);
-        frame_line(session, "stats / score       - Character sheet", w);
-        frame_line(session, "skills              - Show all skills", w);
-        frame_line(session, "pskills / sskills   - Primary / secondary", w);
-        frame_line(session, "save                - Save character", w);
-        frame_line(session, "quit / logout       - Save and disconnect", w);
-        frame_header(session, "MOVEMENT", w);
-        frame_line(session, "north/south/east/west  (or n/s/e/w)", w);
-        frame_line(session, "up / down              (or u/d)", w);
-        frame_line(session, "rift <dest>         - Rift travel (500 cr)", w);
-        frame_header(session, "COMMUNICATION", w);
-        frame_line(session, "say <msg>           - Speak (in language)", w);
-        frame_line(session, "tell <player> <msg> - Private message", w);
-        frame_line(session, "reply <msg>         - Reply to last tell", w);
-        frame_line(session, "chat <msg>          - Global chat", w);
-        frame_line(session, "shout <msg>         - Shout nearby", w);
-        frame_line(session, "whisper <who> <msg> - Whisper in room", w);
-        frame_line(session, "emote <action>      - Perform an emote", w);
-        frame_line(session, "converse            - Toggle talk mode", w);
-        frame_line(session, "speak <language>    - Change language", w);
-        frame_line(session, "languages / langs   - List languages", w);
-        frame_header(session, "COMBAT", w);
-        frame_line(session, "attack <target>     - Engage combat", w);
-        frame_line(session, "stop                - Disengage", w);
-        frame_line(session, "flee                - Attempt escape", w);
-        frame_line(session, "assist <player>     - Help an ally", w);
-        frame_line(session, "autoparry/autododge - Toggle auto-defense", w);
-        frame_line(session, "wimpy <percent>     - Auto-flee threshold", w);
-        frame_line(session, "rest / wake         - Rest / stand up", w);
-        frame_header(session, "SOCIAL", w);
-        frame_line(session, "introduce <player>  - Introduce yourself", w);
-        frame_line(session, "remember            - Known introductions", w);
-        frame_line(session, "who                 - Players online", w);
-        frame_line(session, "title <text>        - Set who-list title", w);
-        frame_header(session, "OTHER", w);
-        frame_line(session, "credits / balance   - Check credits", w);
-        frame_line(session, "clan                - View/join a clan", w);
-        frame_line(session, "scan                - Peek adjacent rooms", w);
-        frame_line(session, "examine <target>    - Inspect object/player", w);
-        frame_line(session, "map                 - ASCII area map", w);
-        frame_line(session, "brief               - Toggle brief mode", w);
-        frame_line(session, "spells / powers     - Magic / psionics", w);
-        if (session->privilege_level >= 1) {
-            frame_header(session, "WIZARD (Level 1+)", w);
-            frame_line(session, "wiztool / wiz       - Wizard command ref", w);
-            frame_line(session, "goto <room>         - Teleport to room", w);
-            frame_line(session, "set <p> <f> <v>     - Set player attr", w);
-            frame_line(session, "heal <player>       - Restore all pools", w);
-            frame_line(session, "slay <target>       - Instant kill", w);
-            frame_line(session, "trans/summon <p>    - Teleport player", w);
-            frame_line(session, "finger <player>     - Detailed info", w);
-            frame_line(session, "award <p> <xp>      - Give experience", w);
-            frame_line(session, "clone <path>        - Clone object", w);
-            frame_line(session, "eval <code>         - Execute LPC", w);
-            frame_line(session, "snoop / invis       - Spy / hide", w);
-            frame_line(session, "godmode             - Toggle immunity", w);
-            frame_line(session, "peace               - End room combat", w);
-            frame_line(session, "ls/cd/pwd/cat       - Filesystem", w);
+        /* Help subdirectories to search (in order) */
+        static const char *help_dirs[] = {
+            "lib/help/basics", "lib/help/occs", "lib/help/systems",
+            "lib/help/social", "lib/help/meta", NULL
+        };
+        static const char *help_dir_names[] = {
+            "basics", "occs", "systems", "social", "meta"
+        };
+        static const char *help_dir_descs[] = {
+            "Core commands, movement, combat, equipment",
+            "Character classes (O.C.C.s and R.C.C.s)",
+            "Psionics, magic, skills, languages",
+            "Communication, clans, social interaction",
+            "Rules, tips, wizard/admin commands"
+        };
+
+        if (args && *args) {
+            /* Sanitize: no slashes, no dots */
+            const char *t = args;
+            int valid = 1;
+            for (int ci = 0; t[ci]; ci++) {
+                if (t[ci] == '/' || t[ci] == '.') { valid = 0; break; }
+            }
+            if (!valid) {
+                send_to_player(session, "Invalid topic name.\r\n");
+                result.type = VALUE_NULL;
+                return result;
+            }
+
+            /* Check if arg matches a subdirectory name -> list its contents */
+            for (int di = 0; help_dirs[di]; di++) {
+                if (strcasecmp(args, help_dir_names[di]) == 0) {
+                    DIR *hdir = opendir(help_dirs[di]);
+                    if (!hdir) {
+                        send_to_player(session, "Help category '%s' not available.\r\n", args);
+                        result.type = VALUE_NULL;
+                        return result;
+                    }
+                    send_to_player(session, "\r\nHelp topics in '%s':\r\n", help_dir_names[di]);
+                    send_to_player(session, "------------------------------------------------\r\n");
+
+                    /* Collect filenames, strip .txt, show in columns */
+                    char names[100][64];
+                    int count = 0;
+                    struct dirent *de;
+                    while ((de = readdir(hdir)) != NULL && count < 100) {
+                        if (de->d_name[0] == '.') continue;
+                        const char *dot = strrchr(de->d_name, '.');
+                        if (!dot || strcmp(dot, ".txt") != 0) continue;
+                        int nlen = (int)(dot - de->d_name);
+                        if (nlen >= 64) nlen = 63;
+                        memcpy(names[count], de->d_name, nlen);
+                        names[count][nlen] = '\0';
+                        count++;
+                    }
+                    closedir(hdir);
+
+                    /* Sort alphabetically */
+                    for (int a = 0; a < count - 1; a++) {
+                        for (int b = a + 1; b < count; b++) {
+                            if (strcmp(names[a], names[b]) > 0) {
+                                char tmp[64];
+                                memcpy(tmp, names[a], 64);
+                                memcpy(names[a], names[b], 64);
+                                memcpy(names[b], tmp, 64);
+                            }
+                        }
+                    }
+
+                    /* Display in 3 columns */
+                    for (int i = 0; i < count; i++) {
+                        send_to_player(session, "  %-22s", names[i]);
+                        if ((i + 1) % 3 == 0 || i == count - 1)
+                            send_to_player(session, "\r\n");
+                    }
+                    send_to_player(session, "------------------------------------------------\r\n");
+                    send_to_player(session, "Type 'help <topic>' to read any topic.\r\n\r\n");
+                    result.type = VALUE_NULL;
+                    return result;
+                }
+            }
+
+            /* Search all subdirectories for the topic file */
+            FILE *hf = NULL;
+            for (int di = 0; help_dirs[di]; di++) {
+                char help_path[256];
+                snprintf(help_path, sizeof(help_path), "%s/%s.txt", help_dirs[di], args);
+                hf = fopen(help_path, "r");
+                if (hf) break;
+            }
+
+            if (!hf) {
+                send_to_player(session, "No help on '%s'. Type 'help' for topics.\r\n", args);
+                result.type = VALUE_NULL;
+                return result;
+            }
+
+            send_to_player(session, "\r\n");
+            char hline[256];
+            while (fgets(hline, sizeof(hline), hf)) {
+                char *lf = strchr(hline, '\n');
+                if (lf) *lf = '\0';
+                send_to_player(session, "%s\r\n", hline);
+            }
+            fclose(hf);
+            send_to_player(session, "\r\n");
+        } else {
+            /* help (no args) -- show category index */
+            send_to_player(session, "\r\n");
+            send_to_player(session, "AetherMUD Help System\r\n");
+            send_to_player(session, "================================================\r\n");
+            for (int di = 0; help_dirs[di]; di++) {
+                /* Hide wizard/admin topics from regular players */
+                if (strcmp(help_dir_names[di], "meta") == 0 &&
+                    session->privilege_level < 1) {
+                    send_to_player(session, "  %-12s %s\r\n", "meta",
+                                  "Rules and tips");
+                    continue;
+                }
+                send_to_player(session, "  %-12s %s\r\n",
+                              help_dir_names[di], help_dir_descs[di]);
+            }
+            send_to_player(session, "================================================\r\n");
+            send_to_player(session, "  help <category>   List topics in a category\r\n");
+            send_to_player(session, "  help <topic>      Read a specific topic\r\n");
+            send_to_player(session, "  help newbie        New player guide\r\n");
+            send_to_player(session, "\r\n");
         }
-        if (session->privilege_level >= 2) {
-            frame_header(session, "ADMIN (Level 2)", w);
-            frame_line(session, "promote <p> <lvl>   - Set privilege", w);
-            frame_line(session, "force <p> <cmd>     - Force command", w);
-            frame_line(session, "shutdown / reboot   - Server control", w);
-            frame_line(session, "kick / ban <player> - Remove player", w);
-            frame_line(session, "broadcast <msg>     - Message all", w);
-            frame_line(session, "users               - User listing", w);
-        }
-        frame_bottom(session, w);
         result.type = VALUE_NULL;
         return result;
     }
     
     if (strcmp(cmd, "look") == 0 || strcmp(cmd, "l") == 0) {
+        if (session->current_room && session->current_room->lpc_path) {
+            VMValue path_val = vm_value_create_string(session->current_room->lpc_path);
+            VMValue found = efun_find_object(global_vm, &path_val, 1);
+            vm_value_release(&path_val);
+
+            if (found.type == VALUE_OBJECT && found.data.object_value) {
+                obj_t *room_obj = (obj_t *)found.data.object_value;
+                VMValue vres = obj_call_method(global_vm, room_obj, "look", NULL, 0);
+                vm_value_release(&found);
+                if (vres.type == VALUE_STRING && vres.data.string_value) {
+                    return vres;
+                }
+                if (vres.type != VALUE_NULL) vm_value_release(&vres);
+            } else {
+                if (found.type != VALUE_NULL) vm_value_release(&found);
+                VMValue p2 = vm_value_create_string(session->current_room->lpc_path);
+                VMValue cloned = efun_clone_object(global_vm, &p2, 1);
+                vm_value_release(&p2);
+                if (cloned.type == VALUE_OBJECT && cloned.data.object_value) {
+                    obj_t *room_obj2 = (obj_t *)cloned.data.object_value;
+                    VMValue cres = obj_call_method(global_vm, room_obj2, "look", NULL, 0);
+                    vm_value_release(&cloned);
+                    if (cres.type == VALUE_STRING && cres.data.string_value) {
+                        return cres;
+                    }
+                    if (cres.type != VALUE_NULL) vm_value_release(&cres);
+                } else {
+                    if (cloned.type != VALUE_NULL) vm_value_release(&cloned);
+                }
+            }
+        }
+
         cmd_look(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
@@ -1661,8 +1903,14 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
     
+    if (strcmp(cmd, "swim") == 0) {
+        cmd_swim(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     /* Psionics commands (Phase 5) */
-    if (strcmp(cmd, "use") == 0) {
+    if (strcmp(cmd, "use") == 0 || strcmp(cmd, "manifest") == 0) {
         cmd_use_power(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
@@ -1734,10 +1982,20 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                         }
                     }
                     if (!speaker_name) {
-                        speaker_name = speaker_ch->race ? speaker_ch->race : "Someone";
-                        /* Prepend "A " for race description */
+                        const char *raw_race = speaker_ch->race ? speaker_ch->race : "someone";
+                        char lowercase_race[128];
+                        int lr_i;
+                        for (lr_i = 0; raw_race[lr_i] && lr_i < 127; lr_i++)
+                            lowercase_race[lr_i] = tolower((unsigned char)raw_race[lr_i]);
+                        lowercase_race[lr_i] = '\0';
+
+                        /* Determine article */
+                        int vowel = (lowercase_race[0] == 'a' || lowercase_race[0] == 'e' ||
+                                     lowercase_race[0] == 'i' || lowercase_race[0] == 'o' ||
+                                     lowercase_race[0] == 'u');
                         char race_desc[128];
-                        snprintf(race_desc, sizeof(race_desc), "A %s", speaker_name);
+                        snprintf(race_desc, sizeof(race_desc), "%s %s",
+                                vowel ? "An" : "A", lowercase_race);
 
                         /* Check if listener knows the language */
                         int knows_lang = 0;
@@ -1787,15 +2045,96 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         }
     }
     
-    if (strcmp(cmd, "emote") == 0) {
+    if (strcmp(cmd, "ooc") == 0) {
         if (args && *args) {
-            char msg[BUFFER_SIZE];
-            snprintf(msg, sizeof(msg), "%s %s\r\n", session->username, args);
-            broadcast_message(msg, session);
-            return vm_value_create_string(msg);
+            Character *speaker_ch = &session->character;
+
+            /* Message to speaker */
+            char self_msg[BUFFER_SIZE];
+            snprintf(self_msg, sizeof(self_msg), "You [OOC]: %s\r\n", args);
+
+            /* Broadcast to room - no language check */
+            if (session->current_room) {
+                Room *room = session->current_room;
+                for (int i = 0; i < room->num_players; i++) {
+                    PlayerSession *listener = room->players[i];
+                    if (!listener || listener == session) continue;
+
+                    /* Determine display name: username if introduced, else "A <race>" */
+                    Character *lch = &listener->character;
+                    const char *speaker_name = NULL;
+                    for (int j = 0; j < lch->introduced_count; j++) {
+                        if (lch->introduced_to[j] &&
+                            strcasecmp(lch->introduced_to[j], session->username) == 0) {
+                            speaker_name = session->username;
+                            break;
+                        }
+                    }
+
+                    char listener_msg[BUFFER_SIZE];
+                    if (speaker_name) {
+                        snprintf(listener_msg, sizeof(listener_msg),
+                            "%s [OOC]: %s\r\n", speaker_name, args);
+                    } else {
+                        const char *race = speaker_ch->race ? speaker_ch->race : "Someone";
+                        snprintf(listener_msg, sizeof(listener_msg),
+                            "A %s [OOC]: %s\r\n", race, args);
+                    }
+                    send_to_player(listener, "%s", listener_msg);
+                }
+            }
+
+            return vm_value_create_string(self_msg);
         } else {
+            return vm_value_create_string("OOC what?\r\n");
+        }
+    }
+
+    if (strcmp(cmd, "emote") == 0) {
+        if (!args || !*args) {
             return vm_value_create_string("Emote what?\r\n");
         }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        /* Show to self */
+        send_to_player(session, "You %s\n", args);
+
+        /* Show to others with introduction check */
+        Room *emote_room = session->current_room;
+        for (int i = 0; i < emote_room->num_players; i++) {
+            PlayerSession *other = emote_room->players[i];
+            if (!other || other == session) continue;
+
+            /* Check if other player knows session's identity */
+            int intro = 0;
+            for (int k = 0; k < other->character.introduced_count; k++) {
+                if (other->character.introduced_to[k] &&
+                    strcasecmp(other->character.introduced_to[k], session->username) == 0) {
+                    intro = 1;
+                    break;
+                }
+            }
+
+            if (intro) {
+                send_to_player(other, "%s %s\n", session->username, args);
+            } else {
+                const char *race = session->character.race ? session->character.race : "someone";
+                char lr[128];
+                int j;
+                for (j = 0; race[j] && j < 127; j++)
+                    lr[j] = tolower((unsigned char)race[j]);
+                lr[j] = '\0';
+
+                int vowel = (lr[0] == 'a' || lr[0] == 'e' ||
+                             lr[0] == 'i' || lr[0] == 'o' || lr[0] == 'u');
+                send_to_player(other, "%s %s %s\n", vowel ? "An" : "A", lr, args);
+            }
+        }
+
+        result.type = VALUE_NULL;
+        return result;
     }
     
     /* Priority gameplay commands */
@@ -1834,7 +2173,13 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result.type = VALUE_NULL;
         return result;
     }
-    
+
+    if (strcmp(cmd, "read") == 0) {
+        cmd_read(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "give") == 0) {
         cmd_give_item(session, args ? args : "");
         result.type = VALUE_NULL;
@@ -1900,47 +2245,229 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         if (session->privilege_level < 2) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
-        
+
         if (!args || *args == '\0') {
             return vm_value_create_string(
                 "Usage: promote <player> <level>\r\n"
                 "Levels: 0=player, 1=wizard, 2=admin\r\n");
         }
-        
+
         char target_name[64];
-        int new_level;
+        int new_level = -1;
         if (sscanf(args, "%63s %d", target_name, &new_level) != 2) {
             return vm_value_create_string(
                 "Usage: promote <player> <level>\r\n"
                 "Levels: 0=player, 1=wizard, 2=admin\r\n");
         }
-        
+
         if (new_level < 0 || new_level > 2) {
             return vm_value_create_string("Invalid level. Use 0 (player), 1 (wizard), or 2 (admin).\r\n");
         }
-        
-        // Find and promote player
-        int promoted = 0;
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (sessions[i] && sessions[i]->state == STATE_PLAYING &&
-                strcmp(sessions[i]->username, target_name) == 0) {
-                sessions[i]->privilege_level = new_level;
-                promoted = 1;
-                break;
+
+        /* Find target player */
+        PlayerSession *target = find_player_by_name(target_name);
+        if (!target) {
+            send_to_player(session, "Player '%s' not found or not online.\n", target_name);
+            result.type = VALUE_NULL;
+            return result;
+        }
+
+        int old_level = target->privilege_level;
+        Character *tch = &target->character;
+
+        /* PROMOTION TO WIZARD (level 1) from player */
+        if (new_level == 1 && old_level == 0) {
+            /* Backup original race data */
+            if (tch->race) {
+                if (tch->original_race) free(tch->original_race);
+                tch->original_race = strdup(tch->race);
+                free(tch->race);
             }
+            if (tch->occ) {
+                if (tch->original_occ) free(tch->original_occ);
+                tch->original_occ = strdup(tch->occ);
+                free(tch->occ);
+            }
+            tch->original_hp_max = tch->max_hp;
+            tch->original_mdc_max = tch->max_mdc;
+
+            /* Transform to Wizard race */
+            tch->race = strdup("Wizard");
+            tch->occ = strdup("Immortal");
+
+            /* Enhance stats for wizard duties */
+            tch->max_hp = 500;  tch->hp = 500;
+            tch->max_mdc = 1000; tch->mdc = 1000;
+            tch->max_ppe = 500;  tch->ppe = 500;
+            tch->max_isp = 200;  tch->isp = 200;
+
+            target->privilege_level = 1;
+
+            send_to_player(session, "You promote %s to Wizard.\n", target->username);
+            send_to_player(target,
+                "\n=========================================\n"
+                "     WIZARD PROMOTION GRANTED\n"
+                "=========================================\n"
+                "You have been promoted to Wizard!\n"
+                "Your mortal form transforms into an immortal being.\n"
+                "\nNew abilities:\n"
+                "  goto <player|room>  Teleport anywhere\n"
+                "  trans <player>      Summon players\n"
+                "  here                Show room debug info\n"
+                "  more                View room source code\n"
+                "  clone <path>        Clone LPC objects\n"
+                "\nYour original race (%s) has been preserved.\n"
+                "=========================================\n",
+                tch->original_race ? tch->original_race : "unknown"
+            );
         }
-        
-        if (promoted) {
-            char msg[256];
-            const char *level_name = (new_level == 2) ? "Admin" : 
-                                     (new_level == 1) ? "Wizard" : "Player";
-            snprintf(msg, sizeof(msg), 
-                    "Promoted %s to %s (level %d).\r\n", 
-                    target_name, level_name, new_level);
-            return vm_value_create_string(msg);
-        } else {
-            return vm_value_create_string("Player not found.\r\n");
+        /* PROMOTION TO ADMIN (level 2) */
+        else if (new_level == 2 && old_level < 2) {
+            if (old_level == 0) {
+                /* Backup if coming from player */
+                if (tch->race) {
+                    if (tch->original_race) free(tch->original_race);
+                    tch->original_race = strdup(tch->race);
+                    free(tch->race);
+                }
+                if (tch->occ) {
+                    if (tch->original_occ) free(tch->original_occ);
+                    tch->original_occ = strdup(tch->occ);
+                    free(tch->occ);
+                }
+                tch->original_hp_max = tch->max_hp;
+                tch->original_mdc_max = tch->max_mdc;
+
+                tch->race = strdup("Wizard");
+                tch->occ = strdup("Immortal");
+            }
+
+            /* Admin powers */
+            tch->max_hp = 9999;  tch->hp = 9999;
+            tch->max_mdc = 9999; tch->mdc = 9999;
+            tch->max_ppe = 9999; tch->ppe = 9999;
+            tch->max_isp = 9999; tch->isp = 9999;
+
+            target->privilege_level = 2;
+
+            send_to_player(session, "You promote %s to Admin.\n", target->username);
+            send_to_player(target,
+                "\n=========================================\n"
+                "      ADMINISTRATOR POWERS GRANTED\n"
+                "=========================================\n"
+                "You are now an Administrator!\n"
+                "All wizard commands plus:\n"
+                "  promote <player> <level>\n"
+                "  demote <player>\n"
+                "  shutdown\n"
+                "=========================================\n"
+            );
         }
+        /* DEMOTION TO PLAYER (level 0) */
+        else if (new_level == 0 && old_level > 0) {
+            /* Restore original race */
+            if (tch->original_race) {
+                if (tch->race) free(tch->race);
+                tch->race = strdup(tch->original_race);
+                free(tch->original_race);
+                tch->original_race = NULL;
+            }
+            if (tch->original_occ) {
+                if (tch->occ) free(tch->occ);
+                tch->occ = strdup(tch->original_occ);
+                free(tch->original_occ);
+                tch->original_occ = NULL;
+            }
+
+            /* Restore original stats */
+            tch->max_hp = tch->original_hp_max > 0 ? tch->original_hp_max : 20;
+            tch->hp = tch->max_hp;
+            tch->max_mdc = tch->original_mdc_max;
+            tch->mdc = tch->max_mdc;
+            tch->original_hp_max = 0;
+            tch->original_mdc_max = 0;
+
+            target->privilege_level = 0;
+
+            send_to_player(session, "You demote %s to Player.\n", target->username);
+            send_to_player(target,
+                "\nYou have been returned to mortal form.\n"
+                "Your race has been restored to: %s\n"
+                "Wizard commands are no longer available.\n",
+                tch->race ? tch->race : "unknown"
+            );
+        }
+        /* DEMOTION FROM ADMIN TO WIZARD */
+        else if (new_level == 1 && old_level == 2) {
+            tch->max_hp = 500;  tch->hp = 500;
+            tch->max_mdc = 1000; tch->mdc = 1000;
+            tch->max_ppe = 500;  tch->ppe = 500;
+            tch->max_isp = 200;  tch->isp = 200;
+
+            target->privilege_level = 1;
+
+            send_to_player(session, "You demote %s from Admin to Wizard.\n", target->username);
+            send_to_player(target, "Your admin powers have been revoked. You remain a Wizard.\n");
+        }
+        else {
+            send_to_player(session, "%s is already at level %d.\n", target->username, old_level);
+        }
+
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* DEMOTE command - alias for promote <player> 0 */
+    if (strcmp(cmd, "demote") == 0) {
+        if (session->privilege_level < 2) {
+            return vm_value_create_string("You don't have permission to use that command.\r\n");
+        }
+        if (!args || !args[0]) {
+            return vm_value_create_string("Usage: demote <player>\r\n");
+        }
+
+        PlayerSession *target = find_player_by_name(args);
+        if (!target) {
+            send_to_player(session, "Player '%s' not found.\n", args);
+            result.type = VALUE_NULL;
+            return result;
+        }
+        if (target->privilege_level == 0) {
+            send_to_player(session, "%s is already a player.\n", args);
+            result.type = VALUE_NULL;
+            return result;
+        }
+
+        Character *tch = &target->character;
+
+        /* Restore original race */
+        if (tch->original_race) {
+            if (tch->race) free(tch->race);
+            tch->race = strdup(tch->original_race);
+            free(tch->original_race);
+            tch->original_race = NULL;
+        }
+        if (tch->original_occ) {
+            if (tch->occ) free(tch->occ);
+            tch->occ = strdup(tch->original_occ);
+            free(tch->original_occ);
+            tch->original_occ = NULL;
+        }
+
+        tch->max_hp = tch->original_hp_max > 0 ? tch->original_hp_max : 20;
+        tch->hp = tch->max_hp;
+        tch->max_mdc = tch->original_mdc_max;
+        tch->mdc = tch->max_mdc;
+        tch->original_hp_max = 0;
+        tch->original_mdc_max = 0;
+        target->privilege_level = 0;
+
+        send_to_player(session, "You demote %s to Player.\n", target->username);
+        send_to_player(target, "You have been demoted to Player. Race restored: %s\n",
+                      tch->race ? tch->race : "unknown");
+
+        result.type = VALUE_NULL;
+        return result;
     }
     
     if (strcmp(cmd, "users") == 0) {
@@ -1968,6 +2495,56 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return vm_value_create_string(msg);
     }
     
+    /* Home command - return to workroom (wizards/admins) */
+    if (strcmp(cmd, "home") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have a workroom.\r\n");
+        }
+
+        /* Build workroom path: /domains/wizard/<lowercase_name>/workroom */
+        char lower_name[64];
+        const char *uname = session->username;
+        int hi;
+        for (hi = 0; uname[hi] && hi < 63; hi++)
+            lower_name[hi] = (uname[hi] >= 'A' && uname[hi] <= 'Z') ? uname[hi] + 32 : uname[hi];
+        lower_name[hi] = '\0';
+
+        char workroom_path[256];
+        snprintf(workroom_path, sizeof(workroom_path),
+                 "/domains/wizard/%s/workroom", lower_name);
+
+        Room *workroom = room_get_by_path(workroom_path);
+        if (!workroom) {
+            send_to_player(session, "Your workroom could not be found.\r\n");
+            result.type = VALUE_NULL;
+            return result;
+        }
+
+        /* Already there? */
+        if (session->current_room == workroom) {
+            return vm_value_create_string("You are already in your workroom.\r\n");
+        }
+
+        /* Remove from current room */
+        if (session->current_room) {
+            room_remove_player(session->current_room, session);
+            char leave_msg[256];
+            snprintf(leave_msg, sizeof(leave_msg),
+                    "%s fades away.\r\n", session->username);
+            room_broadcast(session->current_room, leave_msg, NULL);
+        }
+
+        /* Move to workroom */
+        session->current_room = workroom;
+        room_add_player(workroom, session);
+
+        send_to_player(session, "You return to your workroom.\r\n\r\n");
+        cmd_look(session, "");
+
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     /* Wizard commands */
     if (strcmp(cmd, "goto") == 0) {
         if (session->privilege_level < 1) {
@@ -1976,9 +2553,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
         if (!args || *args == '\0') {
             return vm_value_create_string(
-                "Usage: goto <room_id>  or  goto /domains/path/to/room\r\n"
-                "Bootstrap rooms: 0=Void, 1=Chi-Town Plaza, 2=Coalition HQ, 3=Merchant District\r\n"
-                "LPC rooms: goto /domains/staff_castle/room/courtyard\r\n");
+                "Usage: goto <player>  or  goto <room_id>  or  goto /domains/path/to/room\r\n"
+                "Examples: goto thurtest | goto 4 | goto /domains/start/room/welcome\r\n");
         }
 
         Room *target_room = NULL;
@@ -1991,13 +2567,26 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 result.type = VALUE_NULL;
                 return result;
             }
-        } else {
+        } else if (args[0] >= '0' && args[0] <= '9') {
+            /* Numeric argument = room ID */
             int room_id = atoi(args);
             target_room = room_get_by_id(room_id);
+        } else {
+            /* Try player name lookup */
+            PlayerSession *target_player = find_player_by_name(args);
+            if (target_player && target_player != session && target_player->current_room) {
+                target_room = target_player->current_room;
+            } else if (target_player == session) {
+                return vm_value_create_string("You are already here.\r\n");
+            } else if (!target_player) {
+                send_to_player(session, "Player '%s' not found or not online.\r\n", args);
+                result.type = VALUE_NULL;
+                return result;
+            }
         }
 
         if (!target_room) {
-            return vm_value_create_string("Invalid room ID.\r\n");
+            return vm_value_create_string("Invalid room or player not in a valid location.\r\n");
         }
         
         /* Remove from current room */
@@ -2025,7 +2614,123 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result.type = VALUE_NULL;
         return result;
     }
-    
+
+    /* HERE - Show current room debug info (wizard only) */
+    if (strcmp(cmd, "here") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use this command.\r\n");
+        }
+        Room *room = session->current_room;
+        if (!room) {
+            return vm_value_create_string("You are not in a valid room.\r\n");
+        }
+        send_to_player(session, "\n=== ROOM DEBUG INFO ===\n");
+        send_to_player(session, "Room ID: %d\n", room->id);
+        send_to_player(session, "Room Name: %s\n", room->name);
+        if (room->lpc_path) {
+            send_to_player(session, "LPC Path: %s\n", room->lpc_path);
+        } else {
+            send_to_player(session, "Type: Bootstrap C Room\n");
+        }
+        send_to_player(session, "Light Level: %d\n", room->light_level);
+        send_to_player(session, "Players: %d\n", room->num_players);
+        send_to_player(session, "========================\n");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* MORE - Show LPC source or C room details (wizard only) */
+    if (strcmp(cmd, "more") == 0) {
+        if (session->privilege_level < 1) {
+            return vm_value_create_string("You don't have permission to use this command.\r\n");
+        }
+        Room *room = session->current_room;
+        if (!room) {
+            return vm_value_create_string("You are not in a valid room.\r\n");
+        }
+        if (room->lpc_path) {
+            char filepath[512];
+            snprintf(filepath, sizeof(filepath), "lib%s.lpc", room->lpc_path);
+            FILE *f = fopen(filepath, "r");
+            if (!f) {
+                send_to_player(session, "Cannot open LPC file: %s\n", filepath);
+                result.type = VALUE_NULL;
+                return result;
+            }
+            send_to_player(session, "\n=== LPC SOURCE: %s ===\n", room->lpc_path);
+            char line[512];
+            int line_num = 1;
+            while (fgets(line, sizeof(line), f)) {
+                send_to_player(session, "%4d: %s", line_num++, line);
+            }
+            fclose(f);
+            send_to_player(session, "=== END SOURCE ===\n");
+        } else {
+            send_to_player(session, "\n=== C ROOM SOURCE ===\n");
+            send_to_player(session, "Room ID: %d\n", room->id);
+            send_to_player(session, "Name: %s\n", room->name);
+            send_to_player(session, "Description: %s\n", room->description);
+            send_to_player(session, "Bootstrap C room - source in src/room.c:room_init_world()\n");
+            send_to_player(session, "===================\n");
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* DESCRIPTION - Set character description */
+    if (strcmp(cmd, "description") == 0 || strcmp(cmd, "desc") == 0) {
+        if (!args || !args[0]) {
+            if (session->character.description) {
+                send_to_player(session, "\nYour current description:\n%s\n\n", session->character.description);
+            } else {
+                send_to_player(session, "You have no description set.\n");
+            }
+            send_to_player(session, "Usage: description <text>\n");
+            send_to_player(session, "Set your character's physical description.\n");
+            result.type = VALUE_NULL;
+            return result;
+        }
+        if (session->character.description) {
+            free(session->character.description);
+        }
+        session->character.description = strdup(args);
+        send_to_player(session, "Description updated:\n%s\n", session->character.description);
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* POSITION - Set custom position text */
+    if (strcmp(cmd, "position") == 0 || strcmp(cmd, "pos") == 0) {
+        if (!args || !args[0]) {
+            if (session->character.position) {
+                send_to_player(session, "Your current position: %s\n", session->character.position);
+            } else {
+                send_to_player(session, "Your default position: is standing around\n");
+            }
+            send_to_player(session, "Usage: position <text>\n");
+            send_to_player(session, "Example: position is sitting by the fountain\n");
+            send_to_player(session, "Type 'position reset' to restore default.\n");
+            result.type = VALUE_NULL;
+            return result;
+        }
+        if (strcmp(args, "reset") == 0) {
+            if (session->character.position) {
+                free(session->character.position);
+                session->character.position = NULL;
+            }
+            send_to_player(session, "Position reset to default: is standing around\n");
+            result.type = VALUE_NULL;
+            return result;
+        }
+        if (session->character.position) {
+            free(session->character.position);
+        }
+        session->character.position = strdup(args);
+        send_to_player(session, "Position updated: %s\n", session->character.position);
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     /* Clone command: creates objects from LPC files or item templates.
      * Until full LPC command dispatch is wired up, this C handler reads
      * LPC object files, extracts properties, and creates C Items that
@@ -3154,9 +3859,15 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
     /* BRIEF - Toggle brief room descriptions */
     if (strcmp(cmd, "brief") == 0) {
-        session->is_brief = !session->is_brief;
+        if (args && strcasecmp(args, "on") == 0) {
+            session->is_brief = 1;
+        } else if (args && strcasecmp(args, "off") == 0) {
+            session->is_brief = 0;
+        } else {
+            session->is_brief = !session->is_brief;
+        }
         if (session->is_brief) {
-            return vm_value_create_string("Brief mode ON. Room descriptions will be shortened.\r\n");
+            return vm_value_create_string("Brief mode ON. Room descriptions will be hidden.\r\n");
         } else {
             return vm_value_create_string("Brief mode OFF. Full room descriptions will be shown.\r\n");
         }
@@ -3296,10 +4007,30 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return vm_value_create_string("Server shutdown initiated.\r\n");
     }
     
+    /* "go <direction>" command */
+    if (strcmp(cmd, "go") == 0 && args && *args) {
+        cmd_move(session, args);
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* Try the command itself as a flex exit direction (e.g. "out", "southeast")
+     * before giving up with "Unknown command". */
+    if (session->current_room) {
+        Room *room = session->current_room;
+        for (int i = 0; i < room->num_flex_exits; i++) {
+            if (strcasecmp(cmd, room->flex_exits[i].direction) == 0) {
+                cmd_move(session, cmd);
+                result.type = VALUE_NULL;
+                return result;
+            }
+        }
+    }
+
     /* Unknown command */
     command_debug_set_context(command, cmd, args ? args : "", "unknown");
     char error_msg[512];
-    snprintf(error_msg, sizeof(error_msg), 
+    snprintf(error_msg, sizeof(error_msg),
             "Unknown command: %.200s\r\nType 'help' for available commands.\r\n", cmd);
     return vm_value_create_string(error_msg);
 }
@@ -3359,15 +4090,18 @@ void process_login_state(PlayerSession *session, const char *input) {
 
             strncpy(session->username, start, sizeof(session->username) - 1);
 
-            /* Check if character exists */
-            if (character_exists(session->username)) {
-                send_to_player(session, 
-                    "\r\nWelcome back, %s!\r\n", 
+            /* Case-insensitive check for existing character */
+            char found_name[64];
+            if (character_exists(session->username, found_name, sizeof(found_name))) {
+                /* Adopt the capitalization from the save file */
+                strncpy(session->username, found_name, sizeof(session->username) - 1);
+                send_to_player(session,
+                    "\r\nWelcome back, %s!\r\n",
                     session->username);
                 session->state = STATE_GET_PASSWORD;
             } else {
-                send_to_player(session, 
-                    "\r\nWelcome, %s! You appear to be new here.\r\n", 
+                send_to_player(session,
+                    "\r\nWelcome, %s! You appear to be new here.\r\n",
                     session->username);
                 session->state = STATE_NEW_PASSWORD;
             }
@@ -3474,20 +4208,22 @@ void process_login_state(PlayerSession *session, const char *input) {
                 return;
             }
             
-            /* First player becomes admin */
+            /* Clear password buffer */
+            memset(session->password_buffer, 0, sizeof(session->password_buffer));
+
+            /* First player becomes admin and skips chargen */
             if (!first_player_created) {
                 session->privilege_level = 2;  /* Admin */
                 first_player_created = 1;
                 fprintf(stderr, "[Server] First player created: %s (privilege: Admin)\n",
                        session->username);
+                chargen_create_admin(session);
             } else {
                 session->privilege_level = 0;  /* Regular player */
+                /* Start character generation */
+                session->state = STATE_CHARGEN;
+                chargen_init(session);
             }
-            
-            /* Start character generation */
-            memset(session->password_buffer, 0, sizeof(session->password_buffer));
-            session->state = STATE_CHARGEN;
-            chargen_init(session);
             break;
             
         default:
@@ -4079,6 +4815,28 @@ int main(int argc, char **argv) {
         if (now - last_combat_tick >= COMBAT_TICK_SECS) {
             combat_tick();
             combat_regen_tick();
+
+            /* Magic, psionics, and meditation ticks */
+            for (int i = 0; i < MAX_CLIENTS; i++) {
+                if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
+                    Character *ch = &sessions[i]->character;
+                    magic_spell_tick(ch, sessions[i]);
+                    psionics_power_tick(ch);
+                    if (ch->magic.is_meditating) {
+                        magic_meditate_tick(ch);
+                        if (!ch->magic.is_meditating)
+                            send_to_player(sessions[i], "Your meditation ends. (PPE: %d/%d)\n",
+                                ch->magic.ppe_current, ch->magic.ppe_max);
+                    }
+                    if (ch->psionics.is_meditating) {
+                        psionics_meditate_tick(ch);
+                        if (!ch->psionics.is_meditating)
+                            send_to_player(sessions[i], "Your meditation ends. (ISP: %d/%d)\n",
+                                ch->psionics.isp_current, ch->psionics.isp_max);
+                    }
+                }
+            }
+
             last_combat_tick = now;
         }
     }

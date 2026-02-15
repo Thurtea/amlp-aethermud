@@ -1,0 +1,28 @@
+PSIONICS
+
+Psionics are mental powers fueled by Inner Strength Points (ISP).
+Many OCCs have innate psionic abilities.
+
+COMMANDS
+  use <power>         Activate a psionic power
+  powers              List your known powers
+  isp                 Show current ISP pool
+
+ISP POOL
+  ISP regenerates passively over time. The rate depends on
+  your OCC and Mental Endurance (ME) stat.
+
+PSIONIC CATEGORIES
+  Healing       Psychic surgery, bio-regeneration
+  Physical      Telekinesis, ectoplasm
+  Sensitive     Telepathy, clairvoyance, sixth sense
+  Super         Mind bolt, pyrokinesis, hydrokinesis
+
+PSIONIC OCCS
+  Mind Melter       Master of all psionic disciplines
+  Burster           Pyrokinetic specialist
+  Psi-Healer        Healing psionic
+  Psi-Stalker       Anti-magic psionic hunter
+  Cyber-Knight      Psi-sword and cyber armor
+
+See also: help magic, help combat, help stats

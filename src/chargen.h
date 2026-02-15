@@ -121,10 +121,21 @@ typedef struct Character {
         /* scars array and Scar type are defined above the Character struct */
         Scar scars[MAX_SCARS];
         int scar_count;
+    char *description;            /* Player-written character description */
+    char *position;               /* Custom position text (default: "is standing around") */
+
+    /* Pre-promotion backup (for demotion) */
+    char *original_race;          /* Race before becoming wizard */
+    char *original_occ;           /* O.C.C. before becoming wizard */
+    int original_hp_max;          /* HP before wizard transformation */
+    int original_mdc_max;         /* MDC before wizard transformation */
 } Character;
 
 /* Chargen initialization */
 void chargen_init(PlayerSession *sess);
+
+/* Create admin character (skip chargen for first player) */
+void chargen_create_admin(PlayerSession *sess);
 
 /* Death handler (implemented in src/death.c) */
 void handle_player_death(struct PlayerSession *sess, struct PlayerSession *killer);
@@ -164,6 +175,9 @@ void cmd_isp(PlayerSession *sess, const char *args);
 /* Clan command */
 void cmd_clan(PlayerSession *sess, const char *args);
 
+/* Swim command */
+void cmd_swim(PlayerSession *sess, const char *args);
+
 /* Language commands */
 void cmd_speak(PlayerSession *sess, const char *args);
 void cmd_languages(PlayerSession *sess, const char *args);
@@ -181,7 +195,7 @@ void cmd_meditate(PlayerSession *sess, const char *args);
 /* Character persistence */
 int save_character(PlayerSession *sess);
 int load_character(PlayerSession *sess, const char *username);
-int character_exists(const char *username);
+int character_exists(const char *username, char *found_name, size_t found_size);
 
 #endif /* CHARGEN_H */
 

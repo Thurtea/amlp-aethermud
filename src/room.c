@@ -501,6 +501,190 @@ Room* room_get_by_path(const char *lpc_path) {
     return room_load_from_lpc(lpc_path);
 }
 
+/* Reload an LPC room from disk, updating the cached Room in place.
+ * Players in the room stay; only description/exits/details refresh. */
+Room* room_reload_lpc(const char *lpc_path) {
+    if (!lpc_path) return NULL;
+
+    /* Find existing cached room */
+    Room *old_room = NULL;
+    int cache_idx = -1;
+    for (int i = 0; i < num_path_entries; i++) {
+        if (strcmp(path_table[i].path, lpc_path) == 0) {
+            old_room = path_table[i].room;
+            cache_idx = i;
+            break;
+        }
+    }
+
+    if (!old_room) {
+        /* Not cached yet, just load fresh */
+        return room_load_from_lpc(lpc_path);
+    }
+
+    /* Load the new version into a temporary room */
+    /* Temporarily remove from cache so room_load_from_lpc creates a new entry */
+    /* Instead, load the file directly and update the existing room in place */
+
+    /* Resolve path */
+    char fs_path[512];
+    if (lpc_path[0] == '/') {
+        snprintf(fs_path, sizeof(fs_path), "lib%s.lpc", lpc_path);
+    } else {
+        snprintf(fs_path, sizeof(fs_path), "lib/%s.lpc", lpc_path);
+    }
+    if (access(fs_path, R_OK) != 0) {
+        size_t plen = strlen(lpc_path);
+        if (plen > 4 && strcmp(lpc_path + plen - 4, ".lpc") == 0) {
+            if (lpc_path[0] == '/') {
+                snprintf(fs_path, sizeof(fs_path), "lib%s", lpc_path);
+            } else {
+                snprintf(fs_path, sizeof(fs_path), "lib/%s", lpc_path);
+            }
+        }
+    }
+
+    FILE *f = fopen(fs_path, "r");
+    if (!f) {
+        fprintf(stderr, "[Room] reload failed: cannot open '%s'\n", fs_path);
+        return NULL;
+    }
+
+    char raw[16384];
+    size_t len = fread(raw, 1, sizeof(raw) - 1, f);
+    fclose(f);
+    raw[len] = '\0';
+
+    /* Free old description data (keep players, keep id) */
+    if (old_room->name) free(old_room->name);
+    if (old_room->description) free(old_room->description);
+    for (int i = 0; i < old_room->num_flex_exits; i++) {
+        if (old_room->flex_exits[i].direction) free(old_room->flex_exits[i].direction);
+        if (old_room->flex_exits[i].target_path) free(old_room->flex_exits[i].target_path);
+    }
+    free(old_room->flex_exits);
+    old_room->flex_exits = NULL;
+    old_room->num_flex_exits = 0;
+    for (int i = 0; i < old_room->num_details; i++) {
+        if (old_room->details[i].keyword) free(old_room->details[i].keyword);
+        if (old_room->details[i].description) free(old_room->details[i].description);
+    }
+    free(old_room->details);
+    old_room->details = NULL;
+    old_room->num_details = 0;
+
+    /* Re-parse set_short */
+    old_room->name = strdup("Reloaded Room");
+    char *short_start = strstr(raw, "set_short(");
+    if (short_start) {
+        char *q1 = strchr(short_start, '"');
+        if (q1) {
+            char *q2 = strchr(q1 + 1, '"');
+            if (q2) {
+                free(old_room->name);
+                int slen = (int)(q2 - q1 - 1);
+                old_room->name = strndup(q1 + 1, slen);
+            }
+        }
+    }
+
+    /* Re-parse set_long */
+    old_room->description = strdup("");
+    char *long_start = strstr(raw, "set_long(");
+    if (long_start) {
+        /* Collect all quoted string fragments between set_long( and ); */
+        char desc_buf[4096] = "";
+        int desc_pos = 0;
+        char *p = long_start + 9;
+        while (*p && !(p[0] == ')' && p[1] == ';')) {
+            if (*p == '"') {
+                p++;
+                while (*p && *p != '"') {
+                    if (*p == '\\' && p[1] == 'n') {
+                        if (desc_pos < (int)sizeof(desc_buf) - 2) desc_buf[desc_pos++] = '\n';
+                        p += 2;
+                    } else {
+                        if (desc_pos < (int)sizeof(desc_buf) - 1) desc_buf[desc_pos++] = *p;
+                        p++;
+                    }
+                }
+                if (*p == '"') p++;
+            } else {
+                p++;
+            }
+        }
+        desc_buf[desc_pos] = '\0';
+        free(old_room->description);
+        old_room->description = strdup(desc_buf);
+    }
+
+    /* Re-parse add_exit */
+    {
+        int max_exits = 16;
+        old_room->flex_exits = calloc(max_exits, sizeof(RoomExit));
+        old_room->num_flex_exits = 0;
+
+        char *pos = raw;
+        while ((pos = strstr(pos, "add_exit(")) != NULL) {
+            char *q1 = strchr(pos, '"');
+            if (!q1) break;
+            char *q2 = strchr(q1 + 1, '"');
+            if (!q2) break;
+            char *q3 = strchr(q2 + 1, '"');
+            if (!q3) break;
+            char *q4 = strchr(q3 + 1, '"');
+            if (!q4) break;
+
+            int dlen = (int)(q2 - q1 - 1);
+            int plen2 = (int)(q4 - q3 - 1);
+
+            if (old_room->num_flex_exits < max_exits) {
+                old_room->flex_exits[old_room->num_flex_exits].direction = strndup(q1 + 1, dlen);
+                old_room->flex_exits[old_room->num_flex_exits].target_path = strndup(q3 + 1, plen2);
+                old_room->num_flex_exits++;
+            }
+            pos = q4 + 1;
+        }
+    }
+
+    /* Re-parse set_property */
+    old_room->light_level = 2;
+    old_room->is_indoors = 0;
+    old_room->no_magic = 0;
+    old_room->no_combat = 0;
+    {
+        char *pos = raw;
+        while ((pos = strstr(pos, "set_property(")) != NULL) {
+            char *q1 = strchr(pos, '"');
+            if (!q1) break;
+            char *q2 = strchr(q1 + 1, '"');
+            if (!q2) break;
+            int klen = (int)(q2 - q1 - 1);
+            char key[64];
+            if (klen >= (int)sizeof(key)) klen = sizeof(key) - 1;
+            memcpy(key, q1 + 1, klen);
+            key[klen] = '\0';
+
+            /* Find the value after the comma */
+            char *comma = strchr(q2, ',');
+            int val = 0;
+            if (comma) {
+                val = atoi(comma + 1);
+            }
+
+            if (strcmp(key, "light") == 0) old_room->light_level = val;
+            else if (strcmp(key, "indoors") == 0) old_room->is_indoors = val;
+            else if (strcmp(key, "no_magic") == 0) old_room->no_magic = val;
+            else if (strcmp(key, "no_fight") == 0 || strcmp(key, "no_combat") == 0) old_room->no_combat = val;
+
+            pos = q2 + 1;
+        }
+    }
+
+    fprintf(stderr, "[Room] Reloaded LPC room '%s' from %s\n", old_room->name, fs_path);
+    return old_room;
+}
+
 /* Find an examinable detail in a room by keyword (case-insensitive). */
 const char* room_find_detail(Room *room, const char *keyword) {
     if (!room || !keyword) return NULL;
@@ -635,80 +819,16 @@ void room_init_world(void) {
     market->max_players = 10;
     
     /* ============================================================ */
-    /* NEW CAMELOT (Rooms 4-10)                                     */
-    /* Layout:                                                      */
-    /*                [5: Tavern]                                    */
-    /*                    |                                          */
-    /* [7: Blacksmith]--[4: Town Square]--[6: Training]--[9: Stables]*/
-    /*                    |                                          */
-    /*                [8: Chapel]                                    */
-    /*                    |                                          */
-    /*                [10: Gate]                                     */
+    /* NEW CAMELOT (Rooms 4-10) - LPC-backed stubs                  */
+    /* Actual room data loaded on-demand from lib/domains/new_camelot/ */
     /* ============================================================ */
-
-    init_room(4, "New Camelot - Town Square",
-        "The central square of New Camelot, a human kingdom built on the\n"
-        "ideals of chivalry and honor. Stone buildings surround a marble\n"
-        "fountain. Knights in gleaming armor patrol the cobblestone streets.\n"
-        "A shimmering figure -- the Moxim -- stands near the fountain,\n"
-        "offering passage to distant lands.",
-        5, 8, 6, 7, -1, -1);
-
-    /* Add LPC flex exit from New Camelot Town Square -> garden connector
-     * This creates a load-on-demand LPC exit 'south' that points to the
-     * connector chain under lib/domains/new_camelot/connect/connector_south.lpc
-     */
-    if (!world_rooms[4].flex_exits) {
-        world_rooms[4].num_flex_exits = 1;
-        world_rooms[4].flex_exits = calloc(1, sizeof(RoomExit));
-    }
-    /* Populate the first flex exit */
-    if (world_rooms[4].num_flex_exits < 1) world_rooms[4].num_flex_exits = 1;
-    free(world_rooms[4].flex_exits[0].direction);
-    free(world_rooms[4].flex_exits[0].target_path);
-    world_rooms[4].flex_exits[0].direction = strdup("south");
-    world_rooms[4].flex_exits[0].target_path = strdup("/domains/new_camelot/connect/connector_south");
-
-    init_room(5, "The Silver Unicorn Tavern",
-        "A warm tavern with heavy wooden beams and a roaring fireplace.\n"
-        "Travelers from across AetherMUD share tales of adventure over\n"
-        "mugs of ale. A bard plays softly in the corner. The barkeep\n"
-        "nods a greeting from behind the counter.",
-        -1, 4, -1, -1, -1, -1);
-
-    init_room(6, "Training Grounds",
-        "An open dirt yard where knights and warriors practice their combat\n"
-        "skills. Wooden training dummies stand in rows and weapon racks line\n"
-        "the edges. The clash of practice swords echoes off the stone walls.\n"
-        "The town square is to the west, and stables lie to the east.",
-        -1, -1, 9, 4, -1, -1);
-
-    init_room(7, "Blacksmith's Forge",
-        "The heat of the forge washes over you as bellows pump air into\n"
-        "glowing coals. An old blacksmith hammers away at a blade on the\n"
-        "anvil. Finished weapons and armor hang from hooks on the walls.\n"
-        "The town square lies to the east.",
-        -1, -1, 4, -1, -1, -1);
-
-    init_room(8, "Chapel of Light",
-        "A quiet stone chapel with stained glass windows depicting heroes\n"
-        "of ages past. Candles flicker on a simple altar. The air carries\n"
-        "a faint scent of incense. Wooden pews face the front, worn smooth\n"
-        "by years of use. The town square is north, the gate south.",
-        4, 10, -1, -1, -1, -1);
-
-    init_room(9, "Stables",
-        "A large barn housing horses and other riding animals. Hay bales\n"
-        "are stacked against the walls and the smell of leather and feed\n"
-        "fills the air. A stable hand tends to a warhorse in the far stall.\n"
-        "The training grounds are to the west.",
-        -1, -1, -1, 6, -1, -1);
-
-    init_room(10, "New Camelot Gate",
-        "The southern gate of New Camelot. Heavy iron-banded doors stand\n"
-        "open, flanked by guards in plate armor. A dirt road leads south\n"
-        "into the wilderness beyond the kingdom walls. The chapel is north.",
-        8, -1, -1, -1, -1, -1);
+    init_room(4, "New Camelot - Town Square", "", -1, -1, -1, -1, -1, -1);
+    init_room(5, "The Silver Unicorn Tavern", "", -1, -1, -1, -1, -1, -1);
+    init_room(6, "Training Grounds", "", -1, -1, -1, -1, -1, -1);
+    init_room(7, "Blacksmith's Forge", "", -1, -1, -1, -1, -1, -1);
+    init_room(8, "Chapel of Light", "", -1, -1, -1, -1, -1, -1);
+    init_room(9, "Stables", "", -1, -1, -1, -1, -1, -1);
+    init_room(10, "New Camelot Gate", "", -1, -1, -1, -1, -1, -1);
 
     /* ============================================================ */
     /* SPLYNN (Rooms 11-17)                                         */
@@ -883,8 +1003,34 @@ void room_cleanup_world(void) {
     max_path_entries = 0;
 }
 
-/* Get room by ID (checks bootstrap rooms, then LPC rooms) */
+/* Room ID -> LPC path redirect table.
+ * When a stub room ID is requested, the driver loads and returns
+ * the LPC room instead of the empty C stub. */
+static struct {
+    int id;
+    const char *lpc_path;
+} lpc_room_redirects[] = {
+    { 4,  "/domains/new_camelot/town_square" },
+    { 5,  "/domains/new_camelot/tavern" },
+    { 6,  "/domains/new_camelot/training_grounds" },
+    { 7,  "/domains/new_camelot/blacksmith_forge" },
+    { 8,  "/domains/new_camelot/chapel" },
+    { 9,  "/domains/new_camelot/stables" },
+    { 10, "/domains/new_camelot/gate" },
+};
+#define NUM_LPC_REDIRECTS (sizeof(lpc_room_redirects) / sizeof(lpc_room_redirects[0]))
+
+/* Get room by ID (checks LPC redirects, then bootstrap rooms, then LPC pool) */
 Room* room_get_by_id(int id) {
+    /* Check LPC redirects first (migrated rooms) */
+    for (int i = 0; i < (int)NUM_LPC_REDIRECTS; i++) {
+        if (lpc_room_redirects[i].id == id) {
+            Room *r = room_get_by_path(lpc_room_redirects[i].lpc_path);
+            if (r) return r;
+            break;  /* fall through to bootstrap stub */
+        }
+    }
+
     /* Bootstrap rooms: IDs 0 .. num_rooms-1 */
     if (id >= 0 && id < num_rooms) return &world_rooms[id];
 
@@ -977,6 +1123,107 @@ void room_broadcast(Room *room, const char *message, PlayerSession *exclude) {
 }
 
 /* Look command */
+/* Helper: display a player's examine info to the looker. */
+static void look_at_player(PlayerSession *sess, PlayerSession *target) {
+    if (target == sess) {
+        /* Look at self -> show a brief self-description instead of full sheet */
+        send_to_player(sess, "You look at yourself.\n");
+        send_to_player(sess, "Name: %s\n", sess->username);
+        send_to_player(sess, "Race: %s  O.C.C.: %s\n",
+                       sess->character.race ? sess->character.race : "Unknown",
+                       sess->character.occ ? sess->character.occ : "None");
+
+        /* Health hint (reuse same logic as for others) */
+        Character *tch = &sess->character;
+        int hp_pct = tch->max_hp > 0 ? (tch->hp * 100 / tch->max_hp) : 100;
+        if (hp_pct >= 90)
+            send_to_player(sess, "You feel in excellent health.\n");
+        else if (hp_pct >= 50)
+            send_to_player(sess, "You feel a bit roughed up.\n");
+        else if (hp_pct >= 25)
+            send_to_player(sess, "You feel seriously wounded.\n");
+        else
+            send_to_player(sess, "You are barely standing.\n");
+
+        /* Inventory summary */
+        int inv_count = sess->character.inventory.item_count;
+        if (inv_count == 0) {
+            send_to_player(sess, "You are carrying: nothing.\n");
+        } else {
+            send_to_player(sess, "You are carrying %d item%s. Use 'inventory' to view.\n",
+                           inv_count, inv_count == 1 ? "" : "s");
+        }
+
+        return;
+    }
+
+    /* Check if introduced */
+    Character *lch = &sess->character;
+    int introduced = 0;
+    for (int j = 0; j < lch->introduced_count; j++) {
+        if (lch->introduced_to[j] &&
+            strcasecmp(lch->introduced_to[j], target->username) == 0) {
+            introduced = 1;
+            break;
+        }
+    }
+
+    if (introduced) {
+        send_to_player(sess, "You look at %s.\n", target->username);
+        if (target->character.description) {
+            send_to_player(sess, "%s\n", target->character.description);
+        }
+        send_to_player(sess, "Race: %s  O.C.C.: %s\n",
+                      target->character.race ? target->character.race : "Unknown",
+                      target->character.occ ? target->character.occ : "None");
+    } else {
+        const char *race = target->character.race ? target->character.race : "someone";
+        char lower_race[128];
+        int ri;
+        for (ri = 0; race[ri] && ri < 127; ri++)
+            lower_race[ri] = tolower((unsigned char)race[ri]);
+        lower_race[ri] = '\0';
+
+        int vowel = (lower_race[0] == 'a' || lower_race[0] == 'e' ||
+                     lower_race[0] == 'i' || lower_race[0] == 'o' ||
+                     lower_race[0] == 'u');
+        send_to_player(sess, "You see %s %s.\n",
+                      vowel ? "an" : "a", lower_race);
+        send_to_player(sess, "Use 'introduce' to learn their identity.\n");
+    }
+
+    /* Health hint */
+    Character *tch = &target->character;
+    int hp_pct = tch->max_hp > 0 ? (tch->hp * 100 / tch->max_hp) : 100;
+    if (hp_pct >= 90)
+        send_to_player(sess, "They appear to be in good health.\n");
+    else if (hp_pct >= 50)
+        send_to_player(sess, "They look a bit roughed up.\n");
+    else if (hp_pct >= 25)
+        send_to_player(sess, "They look seriously wounded.\n");
+    else
+        send_to_player(sess, "They are barely standing.\n");
+}
+
+/* Helper: display item details to looker. */
+static void look_at_item(PlayerSession *sess, Item *item) {
+    send_to_player(sess, "%s (%s)\n", item->name, item_type_to_string(item->type));
+    send_to_player(sess, "%s\n", item->description);
+    if (item->type == ITEM_WEAPON_MELEE || item->type == ITEM_WEAPON_RANGED) {
+        send_to_player(sess, "Damage: %dd%d %s  Weight: %d lbs  Value: %d cr\n",
+            item->stats.damage_dice, item->stats.damage_sides,
+            item->stats.is_mega_damage ? "MD" : "SDC",
+            item->weight, item->value);
+    } else if (item->type == ITEM_ARMOR) {
+        send_to_player(sess, "AR: %d  MDC/SDC: %d/%d  Weight: %d lbs  Value: %d cr\n",
+            item->stats.ar, item->current_durability, item->stats.sdc_mdc,
+            item->weight, item->value);
+    } else {
+        send_to_player(sess, "Weight: %d lbs  Value: %d cr\n",
+            item->weight, item->value);
+    }
+}
+
 void cmd_look(PlayerSession *sess, const char *args) {
     if (!sess || !sess->current_room) {
         send_to_player(sess, "You are nowhere.\n");
@@ -985,8 +1232,89 @@ void cmd_look(PlayerSession *sess, const char *args) {
 
     Room *room = sess->current_room;
 
+    /* ---- LOOK AT TARGET ---- */
+    if (args && *args) {
+        const char *target = args;
+
+        /* Strip leading "at " if present */
+        if (strncasecmp(target, "at ", 3) == 0) {
+            target = target + 3;
+            while (*target == ' ') target++;
+        }
+
+        if (!*target) goto show_room;  /* "look at" with nothing after */
+
+        /* 1. "me" / "self" -> own character sheet */
+        if (strcasecmp(target, "me") == 0 || strcasecmp(target, "self") == 0 ||
+            strcasecmp(target, "myself") == 0) {
+            look_at_player(sess, sess);
+            return;
+        }
+
+        /* 2. Exact player name match in room */
+        for (int i = 0; i < room->num_players; i++) {
+            PlayerSession *p = room->players[i];
+            if (p && strcasecmp(p->username, target) == 0) {
+                look_at_player(sess, p);
+                return;
+            }
+        }
+
+        /* 3. Partial player name match in room */
+        {
+            int tlen = (int)strlen(target);
+            for (int i = 0; i < room->num_players; i++) {
+                PlayerSession *p = room->players[i];
+                if (p && p != sess && strncasecmp(p->username, target, tlen) == 0) {
+                    look_at_player(sess, p);
+                    return;
+                }
+            }
+        }
+
+        /* 4. Race name match (for unintroduced players) */
+        for (int i = 0; i < room->num_players; i++) {
+            PlayerSession *p = room->players[i];
+            if (p && p != sess && p->character.race) {
+                if (strcasestr(p->character.race, target) != NULL) {
+                    look_at_player(sess, p);
+                    return;
+                }
+            }
+        }
+
+        /* 5. Room items */
+        Item *ritem = room_find_item(room, target);
+        if (ritem) {
+            look_at_item(sess, ritem);
+            return;
+        }
+
+        /* 6. Inventory items */
+        Item *iitem = inventory_find(&sess->character.inventory, target);
+        if (iitem) {
+            look_at_item(sess, iitem);
+            return;
+        }
+
+        /* 7. Room details (examinable scenery from LPC set_items) */
+        const char *detail = room_find_detail(room, target);
+        if (detail) {
+            send_to_player(sess, "%s\n", detail);
+            return;
+        }
+
+        send_to_player(sess, "You don't see '%s' here.\n", target);
+        return;
+    }
+
+    /* ---- LOOK AT ROOM (no args) ---- */
+show_room:
+
     send_to_player(sess, "\n%s\n", room->name);
-    send_to_player(sess, "%s\n", room->description);
+    if (!sess->is_brief) {
+        send_to_player(sess, "%s\n", room->description);
+    }
     /* Show light level hints */
     if (room->light_level == 0) {
         send_to_player(sess, "[It is dark here.]\n");
@@ -1033,38 +1361,47 @@ void cmd_look(PlayerSession *sess, const char *args) {
     if (room->items) {
         Item *curr = room->items;
         while (curr) {
-            send_to_player(sess, "%s is lying here.\n", curr->name);
+            send_to_player(sess, "%s\n", curr->name);
             curr = curr->next;
         }
     }
 
-    /* List other players by race (until introduced) */
+    /* List other players (race if not introduced, name if introduced) */
     if (room->num_players > 1) {
         for (int i = 0; i < room->num_players; i++) {
-            if (room->players[i] != sess && room->players[i]->character.race) {
-                const char *race = room->players[i]->character.race;
+            PlayerSession *other = room->players[i];
+            if (!other || other == sess) continue;
 
-                /* Convert race name to lowercase for display */
-                char lowercase_race[128];
+            /* Check if introduced */
+            int introduced = 0;
+            for (int j = 0; j < sess->character.introduced_count; j++) {
+                if (sess->character.introduced_to[j] &&
+                    strcasecmp(sess->character.introduced_to[j], other->username) == 0) {
+                    introduced = 1;
+                    break;
+                }
+            }
+
+            const char *position = other->character.position ?
+                other->character.position : "is standing around";
+
+            if (introduced) {
+                send_to_player(sess, "%s %s.\n", other->username, position);
+            } else {
+                const char *race = other->character.race;
+                if (!race) race = "someone";
+
+                char lower_race[128];
                 int j;
-                for (j = 0; race[j] && j < 127; j++) {
-                    lowercase_race[j] = tolower((unsigned char)race[j]);
-                }
-                lowercase_race[j] = '\0';
+                for (j = 0; race[j] && j < 127; j++)
+                    lower_race[j] = tolower((unsigned char)race[j]);
+                lower_race[j] = '\0';
 
-                /* Determine article (a/an) based on first letter */
-                char article = 'A';
-                if (lowercase_race[0] == 'a' || lowercase_race[0] == 'e' ||
-                    lowercase_race[0] == 'i' || lowercase_race[0] == 'o' ||
-                    lowercase_race[0] == 'u') {
-                    article = 'n';
-                }
-
-                if (article == 'n') {
-                    send_to_player(sess, "An %s is standing around.\n", lowercase_race);
-                } else {
-                    send_to_player(sess, "A %s is standing around.\n", lowercase_race);
-                }
+                int vowel = (lower_race[0] == 'a' || lower_race[0] == 'e' ||
+                             lower_race[0] == 'i' || lower_race[0] == 'o' ||
+                             lower_race[0] == 'u');
+                send_to_player(sess, "%s %s %s.\n",
+                              vowel ? "An" : "A", lower_race, position);
             }
         }
     }

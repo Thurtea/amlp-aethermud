@@ -1,0 +1,24 @@
+CHARACTER STATS
+
+AetherMUD uses the Palladium RPG stat system with 8 attributes:
+
+  IQ  - Intelligence Quotient   Affects: skill learning, tech use
+  ME  - Mental Endurance         Affects: psionic resistance, willpower
+  MA  - Mental Affinity          Affects: persuasion, trust, leadership
+  PS  - Physical Strength        Affects: melee damage, carry capacity
+  PP  - Physical Prowess         Affects: strike/parry bonuses
+  PE  - Physical Endurance       Affects: max HP, poison/disease saves
+  PB  - Physical Beauty          Affects: social interactions
+  SPD - Speed                    Affects: movement, initiative
+
+Stats are rolled as 3d6 (range 3-18) during character creation.
+Exceptional stats (16+) grant additional bonuses.
+
+DERIVED VALUES
+  HP   = PE + 1d6 per level    Hit Points
+  SDC  = 20 base               Structural Damage Capacity
+  MDC  = Race-specific         Mega Damage Capacity (dragons, etc.)
+  ISP  = OCC-based             Inner Strength Points (psionics)
+  PPE  = OCC-based             Potential Psychic Energy (magic)
+
+See also: help experience, help combat

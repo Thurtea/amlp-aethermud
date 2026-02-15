@@ -1,0 +1,14 @@
+MAGIC AND PSIONICS
+
+  cast <spell>        Cast a magic spell (costs PPE)
+  spells              List your known spells
+  ppe                 Show current PPE pool
+  meditate            Regenerate PPE faster
+
+  use <power>         Use a psionic power (costs ISP)
+  powers              List your known psionic powers
+  isp                 Show current ISP pool
+
+Spells and powers are assigned based on your O.C.C.
+PPE regenerates slowly over time; meditate speeds it up.
+ISP regenerates passively.

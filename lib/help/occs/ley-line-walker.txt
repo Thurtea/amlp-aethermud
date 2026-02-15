@@ -1,0 +1,32 @@
+LEY LINE WALKER (O.C.C.)
+
+Description:
+  Ley Line Walkers are masters of magical ley line energy.
+  They can sense, tap, and manipulate the mystical rivers
+  of power that crisscross Rifts Earth. Among the most
+  powerful magic users in the world.
+
+Abilities:
+  - PPE Pool: Variable (OCC-based)
+  - Spell Casting: Wide range of spells
+  - Ley Line Sense: Detect ley lines and nexus points
+  - Ley Line Phasing: Walk along ley lines at speed
+
+Starting Skills:
+  Primary (auto-assigned):
+    Lore: Magic, Language: Dragonese, Literacy,
+    Mathematics, Wilderness Survival
+
+Starting Equipment:
+  TW Fire Bolt Staff, Healing Potion,
+  Food Ration, Water Canteen
+
+Starting Credits: 1,000
+
+Role-play Notes:
+  Ley Line Walkers are scholars as much as warriors.
+  They seek magical knowledge and often serve as advisors
+  to communities near ley lines. The Coalition considers
+  them dangerous enemies.
+
+See also: help occs, help magic, help spells

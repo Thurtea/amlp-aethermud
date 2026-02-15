@@ -1,0 +1,27 @@
+LANGUAGES
+
+Characters know one or more languages based on their race.
+The language system affects the 'say' command.
+
+COMMANDS
+  speak <language>    Switch your speaking language
+  languages / langs   List your known languages
+
+LANGUAGE EFFECTS
+  When you use 'say', your message is spoken in your current
+  language. Listeners who know the language see your words.
+  Listeners who don't see: "says something unintelligible."
+
+  Use 'ooc' to speak out-of-character (bypasses language).
+
+STARTING LANGUAGES (by race)
+  Human/Default       American
+  Elf                 Elven, American
+  Dwarf               Dwarven, American
+  Dragon              Dragonese, American
+  Atlantean           American, Euro
+  Goblin/Orc/Troll    Gobblely, American
+  Demon/Deevil        Demonic, American
+  Faerie/Pixie        Faerie, American
+
+See also: help communication, help ooc, help social

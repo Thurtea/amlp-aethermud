@@ -1,0 +1,19 @@
+CREDITS
+
+Credits are the universal currency on Rifts Earth. Used for
+trading, rift travel, and purchasing services.
+
+COMMANDS
+  credits / balance   Check your current credit balance
+
+STARTING CREDITS
+  Most characters start with 1,000 credits. Some OCCs vary:
+    Dragon Hatchling    500 credits
+    Sunaj Assassin      800 credits
+    All others          1,000 credits
+
+SPENDING CREDITS
+  Rift travel           500 credits per jump
+  (More uses coming in future updates)
+
+See also: help rift, help equipment

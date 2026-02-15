@@ -11,6 +11,19 @@ DEFAULT_PORT=3000
 
 cd "$MUDLIB_DIR" || exit 1
 
+port_listener_pid() {
+    local pid=""
+    if command -v lsof >/dev/null 2>&1; then
+        pid=$(lsof -tiTCP:"$DEFAULT_PORT" -sTCP:LISTEN 2>/dev/null || true)
+    elif command -v ss >/dev/null 2>&1; then
+        pid=$(ss -ltnp 2>/dev/null | awk -v port=":$DEFAULT_PORT" '
+            $4 ~ port { for(i=1;i<=NF;i++) if($i ~ /pid=/) { gsub("pid=","",$i); split($i,a,","); print a[1]; exit } }')
+    else
+        pid=""
+    fi
+    echo "$pid"
+}
+
 start_server() {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
@@ -30,19 +43,6 @@ start_server() {
     fi
     
     # Check if the port is already bound by some process (prevent bind() failed)
-    port_listener_pid() {
-        local pid=""
-        if command -v lsof >/dev/null 2>&1; then
-            pid=$(lsof -tiTCP:"$DEFAULT_PORT" -sTCP:LISTEN 2>/dev/null || true)
-        elif command -v ss >/dev/null 2>&1; then
-                pid=$(ss -ltnp 2>/dev/null | awk -v port=":$DEFAULT_PORT" '
-                    $4 ~ port { for(i=1;i<=NF;i++) if($i ~ /pid=/) { gsub("pid=","",$i); split($i,a,","); print a[1]; exit } }')
-        else
-            pid=""
-        fi
-        echo "$pid"
-    }
-
     EXIST_PID=$(port_listener_pid)
     if [ -n "$EXIST_PID" ]; then
         echo "Error: Port $DEFAULT_PORT appears to be in use by PID $EXIST_PID."
@@ -57,28 +57,39 @@ start_server() {
     WS_PORT=$((DEFAULT_PORT + 1))
     nohup "$SERVER_BIN" "$DEFAULT_PORT" "$WS_PORT" "lib/secure/master.lpc" >> "$LOG_FILE" 2>&1 &
     SERVER_PID=$!
-    echo "$SERVER_PID" > "$PID_FILE"
-    
+    # Give the driver a moment to daemonize and bind the port
     sleep 1
-    if kill -0 "$SERVER_PID" 2>/dev/null; then
-        echo "Server started successfully (PID: $SERVER_PID)"
+
+    # Prefer the PID of the process actually listening on the port (the real server)
+    ACTIVE_PID=$(port_listener_pid)
+    if [ -n "$ACTIVE_PID" ]; then
+        echo "$ACTIVE_PID" > "$PID_FILE"
+        echo "Server started successfully (PID: $ACTIVE_PID)"
         echo "Log file: $LOG_FILE"
         return 0
-    else
-        echo "Server failed to start. Check $LOG_FILE"
-        rm -f "$PID_FILE"
-        return 1
     fi
+
+    # Fallback to the shell's child PID
+    if kill -0 "$SERVER_PID" 2>/dev/null; then
+        echo "$SERVER_PID" > "$PID_FILE"
+        echo "Server started (PID: $SERVER_PID) — port listener not detected yet" 
+        echo "Log file: $LOG_FILE"
+        return 0
+    fi
+
+    echo "Server failed to start. Check $LOG_FILE"
+    rm -f "$PID_FILE"
+    return 1
 }
 
 stop_server() {
     if [ ! -f "$PID_FILE" ]; then
         echo "Server not running (no PID file)"
         
-        # Check for orphaned processes
-        ORPHAN=$(pgrep -f "mud_server.*$DEFAULT_PORT" | head -1)
+        # Check for orphaned processes listening on the server port
+        ORPHAN=$(port_listener_pid | head -n1)
         if [ -n "$ORPHAN" ]; then
-            echo "Found orphaned server process (PID: $ORPHAN)"
+            echo "Found orphaned server process listening on port (PID: $ORPHAN)"
             echo "Killing orphaned process..."
             kill -TERM "$ORPHAN" 2>/dev/null
             sleep 1
@@ -94,6 +105,17 @@ stop_server() {
     if ! kill -0 "$PID" 2>/dev/null; then
         echo "Server not running (stale PID: $PID)"
         rm -f "$PID_FILE"
+        # Try to find any process still listening on the port and kill it
+        FALLBACK=$(port_listener_pid | head -n1)
+        if [ -n "$FALLBACK" ]; then
+            echo "Also found listener PID $FALLBACK — killing it." 
+            kill -TERM "$FALLBACK" 2>/dev/null || true
+            sleep 1
+            if kill -0 "$FALLBACK" 2>/dev/null; then
+                kill -KILL "$FALLBACK" 2>/dev/null || true
+            fi
+            echo "Listener process terminated"
+        fi
         return 0
     fi
     

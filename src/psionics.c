@@ -1,6 +1,7 @@
 #include "psionics.h"
 #include "chargen.h"
 #include "session_internal.h"
+#include "room.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -409,28 +410,139 @@ bool psionics_can_use_power(Character *ch, int power_id) {
     return true;
 }
 
-/* =============== POWER ACTIVATION (STUB) =============== */
+/* =============== POWER ACTIVATION =============== */
+
+/* External declarations */
+extern PlayerSession* find_player_by_name(const char *name);
+extern void room_broadcast(Room *room, const char *message, PlayerSession *exclude);
 
 bool psionics_activate_power(PlayerSession *sess, struct Character *ch,
                              int power_id, const char *target_name) {
     if (!sess || !ch) return false;
-    
+
     if (!psionics_can_use_power(ch, power_id)) {
         send_to_player(sess, "You don't have enough ISP to use that power.\n");
         return false;
     }
-    
+
     PsionicPower *power = psionics_find_power_by_id(power_id);
     if (!power) return false;
-    
+
     /* Spend ISP */
     psionics_spend_isp(ch, power->isp_cost);
     psionics_record_power_use(ch, power_id);
-    
-    /* Simple feedback */
-    send_to_player(sess, "You use %s! (ISP: %d/%d)\n", 
-                   power->name, ch->psionics.isp_current, ch->psionics.isp_max);
-    
+
+    /* Apply effects based on power category and properties */
+    switch (power->category) {
+        case PSION_HEALING: {
+            /* Healing powers: restore HP based on damage_dice/sides */
+            if (power->damage_dice > 0 && power->damage_sides > 0) {
+                int heal = 0;
+                for (int d = 0; d < power->damage_dice; d++)
+                    heal += 1 + (rand() % power->damage_sides);
+                /* Bio-Regeneration (id 6) gets +1d4 bonus */
+                if (power_id == 6) heal += 1 + (rand() % 4);
+                /* Psychic Healing (id 7) gets +2 bonus */
+                if (power_id == 7) heal += 2;
+
+                int old_hp = ch->hp;
+                ch->hp += heal;
+                if (ch->hp > ch->max_hp) ch->hp = ch->max_hp;
+                int actual = ch->hp - old_hp;
+                send_to_player(sess, "You use %s and restore %d HP! (HP: %d/%d, ISP: %d/%d)\n",
+                    power->name, actual, ch->hp, ch->max_hp,
+                    ch->psionics.isp_current, ch->psionics.isp_max);
+            } else {
+                /* Non-healing healing powers (Disease Immunity, Poison Immunity, etc.) */
+                send_to_player(sess, "You use %s! (ISP: %d/%d)\n",
+                    power->name, ch->psionics.isp_current, ch->psionics.isp_max);
+            }
+            break;
+        }
+
+        case PSION_PHYSICAL: {
+            /* Damage powers: Electrokinesis, Pyrokinesis */
+            if (power->damage_dice > 0 && power->damage_sides > 0 && target_name && *target_name) {
+                PlayerSession *target = find_player_by_name(target_name);
+                if (!target) {
+                    send_to_player(sess, "You unleash %s but there's no '%s' here.\n",
+                        power->name, target_name);
+                    /* ISP already spent - power fires into nothing */
+                    break;
+                }
+                int dmg = 0;
+                for (int d = 0; d < power->damage_dice; d++)
+                    dmg += 1 + (rand() % power->damage_sides);
+
+                Character *tch = &target->character;
+                const char *dmg_type = power->is_mega_damage ? "MD" : "SD";
+
+                if (power->is_mega_damage && tch->health_type == MDC_ONLY) {
+                    tch->mdc -= dmg;
+                    if (tch->mdc < 0) tch->mdc = 0;
+                    send_to_player(sess, "You blast %s with %s for %d %s! (ISP: %d/%d)\n",
+                        target->username, power->name, dmg, dmg_type,
+                        ch->psionics.isp_current, ch->psionics.isp_max);
+                    send_to_player(target, "%s blasts you with %s for %d %s! (MDC: %d/%d)\n",
+                        sess->username, power->name, dmg, dmg_type,
+                        tch->mdc, tch->max_mdc);
+                } else {
+                    /* Apply to SDC first, then HP */
+                    int remaining = dmg;
+                    if (tch->sdc > 0) {
+                        int sdc_dmg = (remaining > tch->sdc) ? tch->sdc : remaining;
+                        tch->sdc -= sdc_dmg;
+                        remaining -= sdc_dmg;
+                    }
+                    if (remaining > 0) {
+                        tch->hp -= remaining;
+                    }
+                    send_to_player(sess, "You blast %s with %s for %d %s! (ISP: %d/%d)\n",
+                        target->username, power->name, dmg, dmg_type,
+                        ch->psionics.isp_current, ch->psionics.isp_max);
+                    send_to_player(target, "%s blasts you with %s for %d %s! (HP: %d/%d SDC: %d/%d)\n",
+                        sess->username, power->name, dmg, dmg_type,
+                        tch->hp, tch->max_hp, tch->sdc, tch->max_sdc);
+                }
+            } else if (power->damage_dice > 0 && power->damage_sides > 0) {
+                /* Damage power but no target specified */
+                send_to_player(sess, "Use: manifest %s <target>\n", power->name);
+            } else {
+                /* Non-damage physical powers (Telekinesis, Hydrokinesis, Levitation) */
+                send_to_player(sess, "You activate %s! (ISP: %d/%d)\n",
+                    power->name, ch->psionics.isp_current, ch->psionics.isp_max);
+            }
+            break;
+        }
+
+        case PSION_SUPER: {
+            /* Mind Block, Mental Acceleration, Meditation */
+            if (power_id == 2) {
+                /* Mental Acceleration: +3 init, +20% dodge feedback */
+                send_to_player(sess, "You activate Mental Acceleration! Your reflexes sharpen. (ISP: %d/%d)\n",
+                    ch->psionics.isp_current, ch->psionics.isp_max);
+            } else {
+                send_to_player(sess, "You activate %s! (ISP: %d/%d)\n",
+                    power->name, ch->psionics.isp_current, ch->psionics.isp_max);
+            }
+            break;
+        }
+
+        case PSION_SENSITIVE:
+        case PSION_TELEPATHY:
+        default:
+            send_to_player(sess, "You use %s! (ISP: %d/%d)\n",
+                power->name, ch->psionics.isp_current, ch->psionics.isp_max);
+            break;
+    }
+
+    /* Broadcast to room */
+    if (sess->current_room) {
+        char msg[256];
+        snprintf(msg, sizeof(msg), "%s uses %s.\r\n", sess->username, power->name);
+        room_broadcast(sess->current_room, msg, sess);
+    }
+
     return true;
 }
 
@@ -443,12 +555,16 @@ void psionics_power_tick(struct Character *ch) {
 
 void psionics_meditate_tick(struct Character *ch) {
     if (!ch) return;
-    
+
     if (ch->psionics.is_meditating && ch->psionics.meditation_rounds_active > 0) {
         /* Recover +1d6 ISP per meditation round */
         int recover = 1 + (rand() % 6);  /* 1d6 */
         psionics_recover_isp(ch, recover);
         ch->psionics.meditation_rounds_active--;
+
+        if (ch->psionics.meditation_rounds_active <= 0) {
+            ch->psionics.is_meditating = false;
+        }
     }
 }
 

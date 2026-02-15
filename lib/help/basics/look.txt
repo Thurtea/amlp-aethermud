@@ -1,0 +1,32 @@
+LOOK COMMAND
+
+Usage:
+  look                    Show the room description
+  look <target>           Look at something or someone
+  look at <target>        Same as above
+  l                       Short form of look
+  l <target>              Short form of look at target
+
+TARGETS
+  look me / look self     View your own character sheet
+  look <player name>      Examine a player (or partial name)
+  look <race>             Look at an unintroduced player by race
+  look <item>             Inspect an item in the room
+  look <object>           Also checks your inventory
+
+INTRODUCTION SYSTEM
+  If you haven't been introduced to a player, you see them
+  by race (e.g. "a human") rather than by name. Looking at
+  an unintroduced player shows their race and a health hint
+  but not their name.
+
+  Use 'introduce' to share your identity with others.
+
+HEALTH HINTS
+  When looking at another player, you'll see a health status:
+    "in good health"        90-100% HP
+    "a bit roughed up"      50-89% HP
+    "seriously wounded"      25-49% HP
+    "barely standing"       under 25% HP
+
+See also: help examine, help basics, help movement

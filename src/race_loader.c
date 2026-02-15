@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <dirent.h>
 
 /* External */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
@@ -560,4 +561,205 @@ void check_and_apply_level_up(PlayerSession *sess) {
         /* Auto-save */
         save_character(sess);
     }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Directory scanning: populate loaded_races[] / loaded_occs[]        */
+/* ------------------------------------------------------------------ */
+
+LoadedRace loaded_races[MAX_LOADED_RACES];
+int num_loaded_races = 0;
+
+LoadedOCC loaded_occs[MAX_LOADED_OCCS];
+int num_loaded_occs = 0;
+
+/* Extract a short description (first sentence, max ~120 chars) from a
+ * multi-line set_race_description("...") or set_occ_description("...") call.
+ * Falls back to set_long("...") if the primary isn't found. */
+static void extract_short_desc(const char *buf, char *out, size_t out_sz,
+                               const char *primary_func, const char *fallback_func) {
+    out[0] = '\0';
+    const char *p = NULL;
+    if (primary_func) p = strstr(buf, primary_func);
+    if (!p && fallback_func) p = strstr(buf, fallback_func);
+    if (!p) { snprintf(out, out_sz, "No description"); return; }
+
+    /* Find opening quote after the '(' */
+    const char *paren = strchr(p, '(');
+    if (!paren) { snprintf(out, out_sz, "No description"); return; }
+    const char *q = strchr(paren, '"');
+    if (!q) { snprintf(out, out_sz, "No description"); return; }
+    q++; /* skip past opening quote */
+
+    /* Collect chars until closing ");  or end-of-string.
+     * LPC multi-line strings are adjacent quoted segments:  "foo " "bar"
+     * We concatenate them, collapsing whitespace. */
+    size_t j = 0;
+    int in_quote = 1;
+    while (*q && j + 1 < out_sz) {
+        if (in_quote) {
+            if (*q == '"') {
+                in_quote = 0;
+                q++;
+                continue;
+            }
+            if (*q == '\\' && *(q+1) == 'n') { q += 2; continue; } /* skip \n */
+            if (*q == '\n' || *q == '\r') { q++; continue; }
+            /* First sentence: stop at period followed by space or quote */
+            if (*q == '.' && j > 20) {
+                out[j++] = '.';
+                break;
+            }
+            out[j++] = *q;
+            q++;
+        } else {
+            /* Between quoted segments: skip whitespace and find next quote */
+            if (*q == '"') { in_quote = 1; q++; continue; }
+            if (*q == ')') break; /* end of function call */
+            q++;
+        }
+    }
+    out[j] = '\0';
+
+    /* Truncate if too long */
+    if (j >= out_sz - 1) {
+        out[out_sz - 4] = '.';
+        out[out_sz - 3] = '.';
+        out[out_sz - 2] = '.';
+        out[out_sz - 1] = '\0';
+    }
+}
+
+/* Compare function for qsort - sort races alphabetically by name */
+static int cmp_loaded_race(const void *a, const void *b) {
+    return strcasecmp(((const LoadedRace*)a)->name, ((const LoadedRace*)b)->name);
+}
+
+static int cmp_loaded_occ(const void *a, const void *b) {
+    return strcasecmp(((const LoadedOCC*)a)->name, ((const LoadedOCC*)b)->name);
+}
+
+void race_loader_scan_races(void) {
+    const char *dir_path = "lib/races";
+    DIR *d = opendir(dir_path);
+    if (!d) {
+        fprintf(stderr, "[RaceLoader] Cannot open %s\n", dir_path);
+        return;
+    }
+
+    num_loaded_races = 0;
+    struct dirent *ent;
+    while ((ent = readdir(d)) != NULL && num_loaded_races < MAX_LOADED_RACES) {
+        /* Only .lpc files */
+        size_t nlen = strlen(ent->d_name);
+        if (nlen < 5 || strcmp(ent->d_name + nlen - 4, ".lpc") != 0) continue;
+
+        char path[512];
+        snprintf(path, sizeof(path), "%s/%s", dir_path, ent->d_name);
+
+        char *buf = read_file_to_buffer(path);
+        if (!buf) continue;
+
+        LoadedRace *r = &loaded_races[num_loaded_races];
+        memset(r, 0, sizeof(*r));
+
+        /* Extract filename (without .lpc) */
+        snprintf(r->filename, sizeof(r->filename), "%.*s", (int)(nlen - 4), ent->d_name);
+
+        /* Extract display name: try set_race_name() first, then set_short() */
+        char *name = lpc_extract_string(buf, "set_race_name(", NULL);
+        if (!name) name = lpc_extract_string(buf, "set_short(", NULL);
+        if (!name) name = lpc_extract_string(buf, "set_name(", NULL);
+        if (name) {
+            snprintf(r->name, sizeof(r->name), "%s", name);
+            free(name);
+        } else {
+            /* Fallback: convert filename to title case */
+            snprintf(r->name, sizeof(r->name), "%s", r->filename);
+            r->name[0] = toupper((unsigned char)r->name[0]);
+            for (size_t k = 0; r->name[k]; k++) {
+                if (r->name[k] == '_') r->name[k] = ' ';
+                if (k > 0 && r->name[k-1] == ' ')
+                    r->name[k] = toupper((unsigned char)r->name[k]);
+            }
+        }
+
+        /* Extract short description */
+        extract_short_desc(buf, r->desc, sizeof(r->desc),
+                          "set_race_description(", "set_long(");
+
+        /* Detect RCC: check for set_is_rcc(1) or set_mdc_creature(1) or "Dragon" in name */
+        r->is_rcc = 0;
+        if (lpc_extract_int(buf, "set_is_rcc(", NULL, 0) == 1) {
+            r->is_rcc = 1;
+        } else if (strcasestr(r->name, "Dragon") != NULL) {
+            r->is_rcc = 1;
+        } else if (lpc_extract_int(buf, "set_mdc_creature(", NULL, 0) == 1 &&
+                   lpc_extract_int(buf, "set_base_mdc(", NULL, 0) > 0) {
+            r->is_rcc = 1;  /* MDC creatures with base MDC are likely RCCs */
+        }
+
+        free(buf);
+        num_loaded_races++;
+    }
+    closedir(d);
+
+    /* Sort alphabetically */
+    qsort(loaded_races, num_loaded_races, sizeof(LoadedRace), cmp_loaded_race);
+
+    fprintf(stderr, "[RaceLoader] Loaded %d races from %s\n", num_loaded_races, dir_path);
+}
+
+void race_loader_scan_occs(void) {
+    const char *dir_path = "lib/occs";
+    DIR *d = opendir(dir_path);
+    if (!d) {
+        fprintf(stderr, "[RaceLoader] Cannot open %s\n", dir_path);
+        return;
+    }
+
+    num_loaded_occs = 0;
+    struct dirent *ent;
+    while ((ent = readdir(d)) != NULL && num_loaded_occs < MAX_LOADED_OCCS) {
+        size_t nlen = strlen(ent->d_name);
+        if (nlen < 5 || strcmp(ent->d_name + nlen - 4, ".lpc") != 0) continue;
+
+        char path[512];
+        snprintf(path, sizeof(path), "%s/%s", dir_path, ent->d_name);
+
+        char *buf = read_file_to_buffer(path);
+        if (!buf) continue;
+
+        LoadedOCC *o = &loaded_occs[num_loaded_occs];
+        memset(o, 0, sizeof(*o));
+
+        snprintf(o->filename, sizeof(o->filename), "%.*s", (int)(nlen - 4), ent->d_name);
+
+        char *name = lpc_extract_string(buf, "set_occ_name(", NULL);
+        if (!name) name = lpc_extract_string(buf, "set_short(", NULL);
+        if (!name) name = lpc_extract_string(buf, "set_name(", NULL);
+        if (name) {
+            snprintf(o->name, sizeof(o->name), "%s", name);
+            free(name);
+        } else {
+            snprintf(o->name, sizeof(o->name), "%s", o->filename);
+            o->name[0] = toupper((unsigned char)o->name[0]);
+            for (size_t k = 0; o->name[k]; k++) {
+                if (o->name[k] == '_') o->name[k] = ' ';
+                if (k > 0 && o->name[k-1] == ' ')
+                    o->name[k] = toupper((unsigned char)o->name[k]);
+            }
+        }
+
+        extract_short_desc(buf, o->desc, sizeof(o->desc),
+                          "set_occ_description(", "set_long(");
+
+        free(buf);
+        num_loaded_occs++;
+    }
+    closedir(d);
+
+    qsort(loaded_occs, num_loaded_occs, sizeof(LoadedOCC), cmp_loaded_occ);
+
+    fprintf(stderr, "[RaceLoader] Loaded %d OCCs from %s\n", num_loaded_occs, dir_path);
 }

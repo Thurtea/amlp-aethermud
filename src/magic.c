@@ -746,11 +746,15 @@ void magic_spell_tick(struct Character *ch, struct PlayerSession *sess) {
 
 void magic_meditate_tick(struct Character *ch) {
     if (!ch) return;
-    
+
     if (ch->magic.is_meditating && ch->magic.meditation_rounds_active > 0) {
         /* Recover +1d6 PPE per meditation round */
         int recover = 1 + (rand() % 6);  /* 1d6 */
         magic_recover_ppe(ch, recover);
         ch->magic.meditation_rounds_active--;
+
+        if (ch->magic.meditation_rounds_active <= 0) {
+            ch->magic.is_meditating = false;
+        }
     }
 }

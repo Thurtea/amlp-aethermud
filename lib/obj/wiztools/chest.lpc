@@ -1,0 +1,20 @@
+// Wizard's Chest - contains starter wiz-tools
+// Placed in wizard workrooms during creation
+
+inherit "/lib/std/container.lpc";
+
+void create() {
+    ::create();
+    set_short("wizard's chest");
+    set_long(
+        "A sturdy oak chest with arcane symbols carved into its lid.\n"
+        "The symbols pulse faintly with residual magical energy.\n"
+        "Type 'look in chest' to see its contents."
+    );
+    set_property("no_get", 1);
+    set_max_weight(5000);
+
+    add_item(load_object("/obj/wiztools/staff"));
+    add_item(load_object("/obj/wiztools/handbook"));
+    add_item(load_object("/obj/wiztools/crystal"));
+}

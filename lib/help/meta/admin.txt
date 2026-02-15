@@ -1,0 +1,11 @@
+ADMIN COMMANDS (Privilege Level 2)
+
+  promote <p> <level> Set a player's privilege level
+                      0 = player, 1 = wizard, 2 = admin
+  force <p> <cmd>     Force a player to execute a command
+  shutdown            Shut down the server
+  reboot              Restart the server
+  kick <player>       Disconnect a player
+  ban <player>        Ban a player or IP address
+  broadcast <msg>     Send a message to all players
+  users               Show detailed user listing

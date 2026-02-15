@@ -1,0 +1,27 @@
+// Viewing Crystal - monitoring tool
+// Placed in wizard chest during workroom creation
+
+inherit "/lib/std/object.lpc";
+
+void create() {
+    ::create();
+    set_short("viewing crystal");
+    set_long(
+        "A swirling crystal orb resting on a silver stand.\n"
+        "Shadows of distant places shift within its depths.\n"
+        "Type 'examine crystal' for monitoring commands."
+    );
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+string get_examine_text() {
+    return
+        "+-------- MONITORING COMMANDS --------+\n"
+        "| who                List all online  |\n"
+        "| finger <player>    Player details   |\n"
+        "| snoop <player>     Watch a session  |\n"
+        "| users              Connection info  |\n"
+        "+-------------------------------------+\n"
+        "The crystal pulses softly.\n";
+}

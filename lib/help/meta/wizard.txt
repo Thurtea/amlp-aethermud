@@ -1,0 +1,26 @@
+WIZARD COMMANDS (Privilege Level 1+)
+
+  home                Return to your workroom
+  goto <room>         Teleport to a room (ID or LPC path)
+  set <p> <f> <v>     Set a player's attribute
+  heal <player>       Restore all HP/SDC/ISP/PPE pools
+  slay <target>       Instantly kill a target
+  trans <player>      Teleport a player to you
+  summon <player>     Same as trans
+  finger <player>     View detailed player info
+  award <p> <xp>      Award experience points
+  clone <path>        Clone an LPC object
+  eval <code>         Execute LPC code
+  snoop <player>      See what a player sees
+  invis               Toggle wizard invisibility
+  godmode             Toggle damage immunity
+  peace               End all combat in the room
+  update <path>       Reload an LPC file
+
+FILESYSTEM
+  ls / dir            List directory contents
+  cd <path>           Change directory (cd ~ for home)
+  pwd                 Print working directory
+  cat <file>          Display file contents
+  more <file>         Paginated file viewer
+  ed <file>           Line editor for LPC files

@@ -1,0 +1,17 @@
+DEATH SYSTEM
+
+Characters begin with 5 lives. When HP reaches 0:
+  - You lose 1 life
+  - You may gain a scar (visible in 'score')
+  - You respawn at the starting area
+  - Your stats and equipment are preserved
+
+At 0 lives remaining, the character is permanently dead.
+
+AVOIDING DEATH
+  - Use 'wimpy <percent>' to auto-flee at low HP
+  - Use 'flee' to attempt escape from combat
+  - Rest between fights to regenerate HP
+  - Use healing items or psionic healing
+
+See also: help combat, help experience

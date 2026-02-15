@@ -1,0 +1,17 @@
+// lib/domains/new_camelot/stables.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Stables");
+    set_long(
+        "A large barn housing horses and other riding animals. Hay bales\n"
+        "are stacked against the walls and the smell of leather and feed\n"
+        "fills the air. A stable hand tends to a warhorse in the far stall.\n"
+        "The training grounds are to the west."
+    );
+
+    add_exit("west", "/domains/new_camelot/training_grounds");
+
+    set_property("light", 2);
+}

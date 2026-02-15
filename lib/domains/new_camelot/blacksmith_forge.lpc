@@ -1,0 +1,17 @@
+// lib/domains/new_camelot/blacksmith_forge.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Blacksmith's Forge");
+    set_long(
+        "The heat of the forge washes over you as bellows pump air into\n"
+        "glowing coals. An old blacksmith hammers away at a blade on the\n"
+        "anvil. Finished weapons and armor hang from hooks on the walls.\n"
+        "The town square lies to the east."
+    );
+
+    add_exit("east", "/domains/new_camelot/town_square");
+
+    set_property("light", 2);
+}

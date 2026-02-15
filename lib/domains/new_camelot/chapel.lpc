@@ -1,0 +1,17 @@
+// lib/domains/new_camelot/chapel.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Chapel of Light");
+    set_long(
+        "A quiet stone chapel with stained glass windows depicting heroes\n"
+        "of ages past. Candles flicker on a simple altar. The air carries\n"
+        "a faint scent of incense. Wooden pews face the front, worn smooth\n"
+        "by years of use. The town square is north, the gate south."
+    );
+
+    add_exit("south", "/domains/new_camelot/gate");
+
+    set_property("light", 2);
+}

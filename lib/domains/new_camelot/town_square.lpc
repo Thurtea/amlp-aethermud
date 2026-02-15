@@ -1,0 +1,23 @@
+// lib/domains/new_camelot/town_square.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("New Camelot - Town Square");
+    set_long(
+        "The central square of New Camelot, a human kingdom built on the\n"
+        "ideals of chivalry and honor. Stone buildings surround a marble\n"
+        "fountain. Knights in gleaming armor patrol the cobblestone streets.\n"
+        "A shimmering figure -- the Moxim -- stands near the fountain,\n"
+        "offering passage to distant lands."
+    );
+
+    add_exit("north", "/domains/new_camelot/tavern");
+    add_exit("east", "/domains/new_camelot/training_grounds");
+    add_exit("west", "/domains/new_camelot/blacksmith_forge");
+    /* South is a C-side flex exit that loads the LPC connector on demand */
+        add_exit("south", "/domains/new_camelot/connect/connector_south");
+        add_exit("southeast", "/domains/new_camelot/gate");
+
+    set_property("light", 2);
+}

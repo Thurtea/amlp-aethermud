@@ -1,0 +1,17 @@
+// lib/domains/new_camelot/tavern.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("The Silver Unicorn Tavern");
+    set_long(
+        "A warm tavern with heavy wooden beams and a roaring fireplace.\n"
+        "Travelers from across AetherMUD share tales of adventure over\n"
+        "mugs of ale. A bard plays softly in the corner. The barkeep\n"
+        "nods a greeting from behind the counter."
+    );
+
+    add_exit("south", "/domains/new_camelot/town_square");
+
+    set_property("light", 2);
+}

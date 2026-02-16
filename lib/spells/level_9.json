@@ -1,0 +1,49 @@
+[
+  {
+    "id": "familiar-link",
+    "name": "Familiar Link",
+    "level": 9,
+    "range": "Self and animal / 600 ft (183 m)",
+    "duration": "Indefinite",
+    "saving_throw": "None",
+    "ppe_cost": 55,
+    "description": "Creates a permanent telepathic/empathic bond between the caster and a small animal familiar. The caster gains sensory access to the familiar (see, hear, smell, taste, feel) and both parties share certain effects; if the familiar is harmed the caster may take shock and suffer consequences.",
+    "effects": [
+      "Share senses with familiar (sight/hearing/smell/feel)",
+      "Familiar becomes docile and obedient",
+      "Caster gains +6 hit points while link exists",
+      "If familiar is killed caster loses 10 HP and may suffer shock (coma 1-6 hours)"
+    ]
+  },
+  {
+    "id": "curse-phobia",
+    "name": "Curse: Phobia",
+    "level": 9,
+    "range": "Touch or 20 ft (6 m)",
+    "duration": "24 hours per caster level",
+    "saving_throw": "Standard",
+    "ppe_cost": 40,
+    "description": "Imposes an intense, irrational phobia on the target. The caster selects a specific fear (or roll randomly). The victim suffers severe phobic reactions whenever encountering the stimulus until removed by a remove curse or negation.",
+    "effects": [
+      "Target gains an intense, recurring phobic reaction",
+      "Behavioral avoidance and penalties when encountering phobia",
+      "Only Remove Curse fully cures; Negation has 25% chance"
+    ]
+  },
+  {
+    "id": "metamorphosis-insect",
+    "name": "Metamorphosis: Insect",
+    "level": 9,
+    "range": "Self (or others via ritual)",
+    "duration": "20 minutes per caster level",
+    "saving_throw": "None",
+    "ppe_cost": 60,
+    "description": "Transforms the caster (or a willing target via ritual) into an insect form (spiders, beetles, etc.). The subject retains I.Q., memory and hit points but cannot cast spells while in insect form and loses human skills.",
+    "effects": [
+      "Change into insect form (size limits apply)",
+      "Retains mental stats and hit points; loses ability to use speech and most human skills",
+      "Typical insect abilities: climbing, limited flight, bite/sting (nonpoisonous 1 HP or S.D.C., poisonous 1D6 damage)"
+    ],
+    "damage": "Bite/sting: nonpoisonous 1 HP/S.D.C.; poisonous 1D6"
+  }
+]

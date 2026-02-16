@@ -1,0 +1,124 @@
+{
+  "level": 12,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Amulet",
+      "level": 12,
+      "range": "Holder/wearer of the amulet",
+      "duration": "Exists as long as the medallion is not destroyed",
+      "saving_throw": "None",
+      "ppe_cost": 290,
+      "description": "The amulet is a potent invocation that instills a medallion or charm with mystic properties that will protect an individual from magic or supernatural forces. The only requirement is that the amulet be made of one metal purified by fire or made of semiprecious stone. Types include: Charm (+1 to save vs magic/psychic, 290 PPE), Protection Against Sickness (+6 to save, 290 PPE), Protection Against Insanity (+4 to save, 320 PPE), Protection Against the Supernatural (+2 to save vs horror factor, 300 PPE), See the Invisible (500 PPE), Sense Presence of Spirits (60 ft range, 310 PPE), Turn the Undead (400 PPE).",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "protection",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 2,
+      "name": "Calm Storms",
+      "level": 12,
+      "range": "Immediate area around the mage, 1 mile area per level",
+      "duration": "1 hour per level",
+      "saving_throw": "None",
+      "ppe_cost": 200,
+      "description": "The arcanist can calm the tumultuous tempest of nature with a simple invocation and 200 points of potential psychic energy. As a spell, the mage can slow a downpour to a light rain, reduce wind speed by half, reduce waves by half and lighten the dark, stormy skies. Using ritual magic the mystic can turn a torrential rain into a drizzle, reduce winds to a gentle breeze, shrink ocean waves to normal, disperse a tornado in an instant and get the sun to peek through clearing skies. Note: Calm Storms is effective against natural and magically induced storms.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "weather",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 3,
+      "name": "Metamorphosis: Mist",
+      "level": 12,
+      "range": "Self; or others through ritual magic",
+      "duration": "20 minutes per level",
+      "saving_throw": "None; standard if unwilling subject",
+      "ppe_cost": 250,
+      "description": "Said to be the most powerful of all the metamorph magics, the mage can transform himself into a mist. As a mist, no physical or energy attacks can harm him. No locked door can stop him, for he can slip through the tiniest crack or keyhole. Although the mystic can not communicate or cast magic, he can hear and see events around him as would a normal human being. The mist moves at a maximum speed of 14. Prowls at an 80% skill proficiency, is completely silent, can hover up to 100 ft high and is semitransparent.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "transformation",
+        "target": "self",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 4,
+      "name": "Create Zombie",
+      "level": 12,
+      "range": "Touch",
+      "duration": "Exists until destroyed",
+      "saving_throw": "None",
+      "ppe_cost": 250,
+      "description": "The zombie invocation is a necromantic ritual that turns a corpse into the undead. The zombie is more intelligent than the mummy and can speak, read simple signs and sentences, perform simple tasks and even drive a car. Like the mummy, a zombie is a walking corpse that feels no pain, no fears. Bullets, knives, clubs do NO damage. Mental assaults, magic charms, illusions, sleeps, curses, sickness, paralysis do no damage. However, the zombie is vulnerable to magical energy attacks, normal fire, and weapons made of or covered in silver.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "summoning",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 5,
+      "name": "Summon and Control Entity",
+      "level": 12,
+      "range": "Not applicable",
+      "duration": "24 hours per level",
+      "saving_throw": "None",
+      "ppe_cost": 250,
+      "description": "An impressive ritual, the magic invocation plucks an entity (specific type can be designated) out of its native dimension, and magically teleports it to appear before the conjurer. The alien being is automatically under the mage's control and will obey him without question. The entity can be used for any purpose: manual labor, protection, assault, etc. The supernatural creature can be returned to its own world at any time before the duration time elapses. After the duration time elapses, the mage loses control.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "summoning",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 6,
+      "name": "Summon and Control Rain",
+      "level": 12,
+      "range": "Immediate area around the mage or up to 10 miles away per level",
+      "duration": "1 hour per level",
+      "saving_throw": "None",
+      "ppe_cost": 200,
+      "description": "The sorcerer can create a rainstorm out of thin air. The rain can be controlled to be a drizzle, light rain or downpour. One mile per level of experience can be affected by the rain. A heavy storm will reduce visibility and slow travel.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "weather",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 7,
+      "name": "Time Hole",
+      "level": 12,
+      "range": "Self",
+      "duration": "Special",
+      "saving_throw": "None",
+      "ppe_cost": 210,
+      "description": "The mage can teleport himself and his possession into a sort of stasis field in limbo-like dimension. The time hole is a white void in which the wizard inhabits/controls a 20 foot area per level of experience. He can not go beyond his area of control. The advantage of the time hole is that a man of magic can effectively disappear for days or weeks and be nowhere to be found. In this way the mage can hide away from enemies when he needs to recover from physical or P.P.E. damage/exhaustion.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "utility",
+        "target": "self",
+        "area_effect": false
+      }
+    }
+  ]
+}

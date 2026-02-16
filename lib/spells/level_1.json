@@ -1,0 +1,162 @@
+{
+  "level": 1,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Blinding Flash",
+      "level": 1,
+      "range": "10 ft radius, up to 60 ft",
+      "duration": "Instant",
+      "saving_throw": "Standard",
+      "ppe_cost": 1,
+      "description": "Creates a sudden burst of intense white light, temporarily blinding everyone in a 10 ft radius. Victims are blinded for 1-4 melees, -5 to strike, -10 to parry and dodge; chance of falling 50% every 10 ft. Does not affect bionic/cybernetic eyes.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "utility",
+        "target": "area",
+        "area_effect": true,
+        "save_negates": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "Cloud of Smoke",
+      "level": 1,
+      "range": "90 ft",
+      "duration": "4 melees per level",
+      "saving_throw": "None",
+      "ppe_cost": 2,
+      "description": "Creates a dense black smoke cloud (max 30 ft x 30 ft x 30 ft) up to 90 ft away. Victims inside see only 3 ft, suffer -5 to strike/parry/dodge.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "obscuration",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 3,
+      "name": "Death Trance",
+      "level": 1,
+      "range": "Self",
+      "duration": "10 melees per level",
+      "saving_throw": "None",
+      "ppe_cost": 1,
+      "description": "Induces a trance making the caster appear dead (no breathing, pulse, heartbeat). The caster is helpless and cannot act; magic can be canceled at will.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "utility",
+        "target": "self",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 4,
+      "name": "Globe of Daylight",
+      "level": 1,
+      "range": "Near self or up to 30 ft",
+      "duration": "12 melees per level",
+      "saving_throw": "None",
+      "ppe_cost": 2,
+      "description": "Creates a small sphere of true daylight, lighting 12 ft per caster level. Wards off vampires. Globe may be moved mentally up to 30 ft; max travel speed equals speed attribute 12.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "light",
+        "target": "self",
+        "area_effect": true,
+        "radius_feet": 12,
+        "mobile": true
+      }
+    },
+    {
+      "id": 5,
+      "name": "See Aura",
+      "level": 1,
+      "range": "100 ft",
+      "duration": "1 melee",
+      "saving_throw": "None",
+      "ppe_cost": 6,
+      "description": "Reveals auras of organic and inorganic things: approximate experience level, presence of magic or psychic abilities, P.P.E. level, possession, or unusual aberrations. Cannot determine alignment.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "sensing",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 6,
+      "name": "See the Invisible",
+      "level": 1,
+      "range": "200 ft",
+      "duration": "1 minute per level",
+      "saving_throw": "None",
+      "ppe_cost": 4,
+      "description": "Allows caster to see invisible forces, objects, and creatures (ghosts, entities, astral bodies).",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "sensing",
+        "target": "self",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 7,
+      "name": "Sense Evil",
+      "level": 1,
+      "range": "90 ft area",
+      "duration": "2 minutes per level",
+      "saving_throw": "None",
+      "ppe_cost": 2,
+      "description": "Detects presence and approximate number/intensity of supernatural evil within 90 ft; can localize to rooms/objects/people. Human evil less distinct.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "sensing",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 8,
+      "name": "Sense Magic",
+      "level": 1,
+      "range": "120 ft area",
+      "duration": "2 minutes per level",
+      "saving_throw": "None",
+      "ppe_cost": 4,
+      "description": "Detects presence and relative proximity of magic (like a Geiger counter); indicates if an object or person is enchanted.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "sensing",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 9,
+      "name": "Thunderclap",
+      "level": 1,
+      "range": "Immediate area (30 ft around caster)",
+      "duration": "Instant",
+      "saving_throw": "Save vs Horror Factor",
+      "ppe_cost": 4,
+      "description": "Produces a booming clap of thunder audible up to a mile, startling and creating a horror factor; grants caster +5 initiative, +1 to strike/parry/dodge.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "intimidation",
+        "target": "area",
+        "area_effect": true,
+        "save_negates": true
+      }
+    }
+  ]
+}

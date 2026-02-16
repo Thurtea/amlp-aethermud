@@ -1,0 +1,68 @@
+[
+  {
+    "id": "commune-with-spirits",
+    "name": "Commune with Spirits",
+    "level": 8,
+    "range": "Self, or others by ritual; 200ft (61m) distance",
+    "duration": "5 minutes per level of experience",
+    "saving_throw": "None",
+    "ppe_cost": 25,
+    "description": "Enables the caster to see and speak with spirits, poltergeists, trapped entities and similar beings for information or dialogue.",
+    "effects": ["Communicate with spirits","Gather lore or guidance"]
+  },
+  {
+    "id": "hallucination",
+    "name": "Hallucination",
+    "level": 8,
+    "range": "Touch or 3ft (0.9m)",
+    "duration": "3 minutes (12 melees) per level of experience",
+    "saving_throw": "Standard",
+    "ppe_cost": 30,
+    "description": "Implant a vivid, personalized illusion or delusion in a single target's mind; only the victim experiences the hallucination.",
+    "effects": ["Single-target illusion/delusion","May fool senses and reactions"]
+  },
+  {
+    "id": "locate",
+    "name": "Locate",
+    "level": 8,
+    "range": "15 miles per level of experience",
+    "duration": "Instant",
+    "saving_throw": "None",
+    "ppe_cost": 30,
+    "description": "Sense the general location of a person or object previously encountered or depicted (photo/object); returns a general area rather than precise coordinates.",
+    "effects": ["Reveal general location","Requires prior knowledge or image"]
+  },
+  {
+    "id": "exorcism",
+    "name": "Exorcism",
+    "level": 8,
+    "range": "30ft (9.1m)",
+    "duration": "3 minutes (results can persist up to 6 months or longer)",
+    "saving_throw": "Standard (12 by spell or 16 by ritual)",
+    "ppe_cost": 30,
+    "description": "Force a possessing supernatural intelligence to relinquish control of a host; ritual versions improve chances of success.",
+    "effects": ["Expel possessing entities","Provides bonuses vs possession for targets"]
+  },
+  {
+    "id": "eyes-of-the-wolf",
+    "name": "Eyes of the Wolf",
+    "level": 8,
+    "range": "Self or other by touch",
+    "duration": "20 melees per level of experience",
+    "saving_throw": "None",
+    "ppe_cost": 25,
+    "description": "Grants exceptional nocturnal senses: nightvision (60ft), improved smell, tracking and a strong prowling ability; includes bonuses to perception-related checks.",
+    "effects": ["Nightvision 60ft","See invisible 75% chance","Tracking and sensory bonuses"]
+  },
+  {
+    "id": "luck-curse",
+    "name": "Luck Curse",
+    "level": 8,
+    "range": "Touch or 10ft (3m)",
+    "duration": "24 hours per level of experience",
+    "saving_throw": "Standard (12 by spell, 16 by ritual)",
+    "ppe_cost": 40,
+    "description": "Inflicts a powerful curse of bad luck: removes bonuses to strike, parry, dodge, initiative and related mechanics; criticals and other effects are penalized.",
+    "effects": ["Reduce combat/skill bonuses","Severe penalties to success rates"]
+  }
+]

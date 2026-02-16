@@ -1,6 +1,7 @@
 #include "chargen.h"
 #include "session_internal.h"
 #include "room.h"
+#include "npc.h"
 #include "skills.h"
 #include "combat.h"
 #include "race_loader.h"
@@ -31,108 +32,7 @@ extern void cmd_move(PlayerSession *sess, const char *direction);
 /* loaded_races[] and num_loaded_races are populated by race_loader_scan_races()
  * at startup.  See race_loader.c for the scanning logic. */
 
-/* MERGED OCC DATABASE - Rifts + AetherMUD (65 Total) */
-const RaceOCCInfo ALL_OCCS[] = {
-    /* Atlantean Specialists */
-    {"Atlantean Nomad", "Wandering Atlantean explorer"},
-    {"Atlantean Slave", "Enslaved Atlantean survivor"},
-    
-    /* Combat & Military OCCs */
-    {"Cyber-Knight", "Techno-warrior with psionic powers"},
-    {"Juicer", "Chemical-enhanced super soldier"},
-    {"Ninja Juicer", "Stealth-enhanced juicer assassin"},
-    {"Delphi Juicer", "Intelligence-boosted juicer variant"},
-    {"Hyperion Juicer", "Enhanced strength juicer type"},
-    {"Crazy", "Augmented insane super soldier"},
-    {"Headhunter", "Bounty hunter, armor specialist"},
-    {"Glitter Boy Pilot", "Elite powered armor operator"},
-    {"Full Conversion Borg", "Complete cyborg conversion"},
-    {"Special Forces", "Elite military operative (Merc)"},
-    
-    /* Coalition States Military */
-    {"CS Grunt", "Coalition infantry soldier"},
-    {"CS Ranger", "Coalition wilderness specialist"},
-    {"CS Military Specialist", "Coalition technical expert"},
-    {"CS SAMAS RPA Pilot", "Coalition flying armor pilot"},
-    {"CS Technical Officer", "Coalition tech specialist"},
-    
-    /* Magic Users */
-    {"Ley Line Walker", "Master of magical energies"},
-    {"Line Walker", "Ley line manipulator"},
-    {"Warlock", "Elemental pact magic user"},
-    {"Air Warlock", "Air elemental magic specialist"},
-    {"Mystic", "Spiritual magic user"},
-    {"Techno-Wizard", "Blend of magic and technology"},
-    {"Battle Magus", "Combat mage, magic and weapons"},
-    {"Biomancer", "Life magic specialist"},
-    {"Necromancer", "Death magic practitioner"},
-    {"Stone Master", "Earth and stone magic user"},
-    {"Temporal Wizard", "Time magic specialist"},
-    {"Shifter", "Dimensional magic specialist"},
-    {"Elemental Fusionist", "Combines elemental magic"},
-    {"Tattooed Man", "Tattoo magic warrior"},
-    
-    /* Psychics */
-    {"Mind Melter", "Master psychic disciplines"},
-    {"Burster", "Pyrokinetic psychic warrior"},
-    {"Psi-Healer", "Psychic healing specialist"},
-    {"Psi-Stalker", "Anti-magic psionic hunter"},
-    {"Nega-Psychic", "Psychic nullifier"},
-    
-    /* Technical & Medical */
-    {"Body Fixer", "Cybernetic doctor and surgeon"},
-    {"Cyber-Doc", "Advanced cybernetics specialist"},
-    {"Operator", "Mechanical genius, vehicle expert"},
-    {"Rogue Scientist", "Tech expert and inventor"},
-    {"Rogue Scholar", "Knowledge seeker, multi-skilled"},
-    {"Kittani Field Mechanic", "Alien tech specialist"},
-    {"NGR Mechanic", "New German Republic technician"},
-    
-    /* Wilderness & Survival */
-    {"Wilderness Scout", "Tracker and survivalist"},
-    {"Vagabond", "Jack-of-all-trades wanderer"},
-    {"City Rat", "Urban survivor, street smart"},
-    
-    /* Specialized Soldiers */
-    {"Bounty Hunter", "Professional manhunter"},
-    {"Master Assassin", "Elite silent killer"},
-    {"Kittani Warrior", "Alien combat specialist"},
-    {"NGR Soldier", "New German Republic trooper"},
-    {"Knight", "European noble warrior"},
-    {"Royal Knight", "Elite European knight"},
-    
-    /* Criminal & Underworld */
-    {"Professional Thief", "Master burglar and pickpocket"},
-    {"Forger", "Document and art counterfeiter"},
-    {"Smuggler", "Black market transporter"},
-    {"Freelance Spy", "Independent intelligence agent"},
-    
-    /* ISS (Iron Star Security) */
-    {"ISS Peacekeeper", "Iron Star law enforcer"},
-    {"ISS Specter", "Iron Star covert operative"},
-    {"NTSET Protector", "NTSET security specialist"},
-    
-    /* Naval & Piracy */
-    {"Pirate", "South American sea raider"},
-    {"Sailor", "South American seaman"},
-    
-    /* Special & Unique */
-    {"Gifted Gypsy", "Fortune-telling wanderer"},
-    {"Sunaj Assassin", "Elite Atlantean assassin (Limited)"},
-    {"Maxi-Man", "Bio-enhanced super soldier (Limited)"},
-    {"Cosmo-Knight", "Cosmic power armor knight"},
-    {"Power Armor Pilot", "Elite mech pilot"},
-    {"Robot Pilot", "Giant robot operator"},
-    {"Sea Titan", "Ocean-based warrior"},
-    {"Dragon Hatchling RCC", "Young dragon racial class"},
-    {"Anarchist", "Anti-establishment rebel"},
-    {"Horror Factor", "Fear-inducing specialist"},
-    {"Mercenary", "Professional soldier for hire"},
-    {"Palmer", "Dimensional traveler"}
-};
-
-#define NUM_RACES_VAR num_loaded_races
-#define NUM_OCCS (sizeof(ALL_OCCS) / sizeof(RaceOCCInfo))
+/* OCC database dynamically loaded from lib/occs/*.lpc by race_loader_scan_occs() */
 #define ITEMS_PER_PAGE 10
 
 /* Dice rolling */
@@ -980,17 +880,125 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
 
                 send_to_player(sess, "\nYou selected: %s\n\n", ch->race);
 
-                /* Dragon races auto-assign Dragon Hatchling RCC */
-                if (strcasestr(ch->race, "Dragon") != NULL) {
-                    ch->occ = strdup("Dragon Hatchling RCC");
-                    send_to_player(sess, "As a %s, your O.C.C. is Dragon Hatchling RCC.\n", ch->race);
-                    send_to_player(sess, "Dragons are a Racial Character Class with innate abilities.\n\n");
+                /* RCC races (dragons, etc.) skip OCC selection */
+                if (loaded_races[choice - 1].is_rcc) {
+                    ch->occ = strdup(loaded_races[choice - 1].name);
+                    /* Append "RCC" if not already present */
+                    if (!strcasestr(ch->occ, "RCC") && !strcasestr(ch->occ, "R.C.C.")) {
+                        char rcc_name[128];
+                        snprintf(rcc_name, sizeof(rcc_name), "%s RCC", ch->race);
+                        free(ch->occ);
+                        ch->occ = strdup(rcc_name);
+                    }
+                    send_to_player(sess, "As a %s, your class is %s.\n", ch->race, ch->occ);
+                    send_to_player(sess, "Racial Character Classes have innate abilities.\n\n");
+
+                    send_to_player(sess, "Rolling your attributes...\n");
+                    chargen_roll_stats(sess);
+                    chargen_display_stats(sess);
+
+                    sess->chargen_state = CHARGEN_STATS_CONFIRM;
+                    send_to_player(sess, "\n");
+                    send_to_player(sess, "Accept these stats? (yes/reroll): ");
                 } else {
-                    /* OCC will be assigned by wizards or through in-game progression */
+                    /* Non-RCC: proceed to OCC selection */
                     ch->occ = NULL;
-                    send_to_player(sess, "\nYou will receive your Occupational Character Class (O.C.C.)\n");
-                    send_to_player(sess, "through in-game progression and roleplay.\n\n");
+                    sess->chargen_state = CHARGEN_OCC_SELECT;
+                    sess->chargen_page = 0;
+
+                    /* Ensure OCCs are scanned from disk */
+                    if (num_loaded_occs == 0) race_loader_scan_occs();
+
+                    int total_pages = (num_loaded_occs + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n",
+                                   sess->chargen_page + 1, total_pages);
+
+                    int start = sess->chargen_page * ITEMS_PER_PAGE;
+                    int end = start + ITEMS_PER_PAGE;
+                    if (end > num_loaded_occs) end = num_loaded_occs;
+
+                    for (int i = start; i < end; i++) {
+                        send_to_player(sess, "  %2d. %s - %s\n",
+                                      i + 1, loaded_occs[i].name, loaded_occs[i].desc);
+                    }
+
+                    send_to_player(sess, "\n");
+                    if (end < num_loaded_occs) {
+                        send_to_player(sess, "  Type 'n' for next page\n");
+                    }
+                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_occs);
                 }
+            } else {
+                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
+            }
+            break;
+
+        case CHARGEN_OCC_SELECT:
+            /* Handle pagination */
+            if (input[0] == 'n' || input[0] == 'N') {
+                int total_pages = (num_loaded_occs + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+                if (sess->chargen_page < total_pages - 1) {
+                    sess->chargen_page++;
+                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n",
+                                   sess->chargen_page + 1, total_pages);
+
+                    int start = sess->chargen_page * ITEMS_PER_PAGE;
+                    int end = start + ITEMS_PER_PAGE;
+                    if (end > num_loaded_occs) end = num_loaded_occs;
+
+                    for (int i = start; i < end; i++) {
+                        send_to_player(sess, "  %2d. %s - %s\n",
+                                      i + 1, loaded_occs[i].name, loaded_occs[i].desc);
+                    }
+
+                    send_to_player(sess, "\n");
+                    if (sess->chargen_page > 0) {
+                        send_to_player(sess, "  Type 'p' for previous page\n");
+                    }
+                    if (end < num_loaded_occs) {
+                        send_to_player(sess, "  Type 'n' for next page\n");
+                    }
+                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_occs);
+                } else {
+                    send_to_player(sess, "Already on last page.\nEnter choice (1-%d): ", num_loaded_occs);
+                }
+                return;
+            }
+
+            if (input[0] == 'p' || input[0] == 'P') {
+                if (sess->chargen_page > 0) {
+                    sess->chargen_page--;
+                    int total_pages = (num_loaded_occs + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n",
+                                   sess->chargen_page + 1, total_pages);
+
+                    int start = sess->chargen_page * ITEMS_PER_PAGE;
+                    int end = start + ITEMS_PER_PAGE;
+                    if (end > num_loaded_occs) end = num_loaded_occs;
+
+                    for (int i = start; i < end; i++) {
+                        send_to_player(sess, "  %2d. %s - %s\n",
+                                      i + 1, loaded_occs[i].name, loaded_occs[i].desc);
+                    }
+
+                    send_to_player(sess, "\n");
+                    if (sess->chargen_page > 0) {
+                        send_to_player(sess, "  Type 'p' for previous page\n");
+                    }
+                    if (end < num_loaded_occs) {
+                        send_to_player(sess, "  Type 'n' for next page\n");
+                    }
+                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_occs);
+                } else {
+                    send_to_player(sess, "Already on first page.\nEnter choice (1-%d): ", num_loaded_occs);
+                }
+                return;
+            }
+
+            /* Handle OCC selection */
+            if (choice >= 1 && choice <= num_loaded_occs) {
+                ch->occ = strdup(loaded_occs[choice - 1].name);
+                send_to_player(sess, "\nYou selected O.C.C.: %s\n\n", ch->occ);
 
                 send_to_player(sess, "Rolling your attributes...\n");
                 chargen_roll_stats(sess);
@@ -1000,14 +1008,8 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 send_to_player(sess, "\n");
                 send_to_player(sess, "Accept these stats? (yes/reroll): ");
             } else {
-                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
+                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_occs);
             }
-            break;
-
-        case CHARGEN_OCC_SELECT:
-            /* OCC selection is handled post-chargen by wizards via 'set <player> occ <name>' */
-            send_to_player(sess, "O.C.C. selection is handled by game administrators.\n");
-            send_to_player(sess, "Please contact a wizard for your O.C.C. assignment.\n");
             break;
             
         case CHARGEN_STATS_CONFIRM:
@@ -1164,34 +1166,33 @@ void cmd_attack(PlayerSession *sess, const char *args) {
         sess->is_resting = 0;
     }
 
-    /* Find target player in room */
+    /* Find target in room (player or NPC) */
     if (!sess->current_room) {
         send_to_player(sess, "You are nowhere.\n");
         return;
     }
 
-    PlayerSession *target = NULL;
     Room *room = sess->current_room;
-    for (int i = 0; i < room->num_players; i++) {
-        if (room->players[i] && room->players[i] != sess &&
-            room->players[i]->username &&
-            strcasecmp(room->players[i]->username, args) == 0) {
-            target = room->players[i];
-            break;
-        }
-    }
+    PlayerSession *target_player = NULL;
+    NPC *target_npc = NULL;
+    int result = resolve_target(room, args, sess, &target_player, &target_npc);
 
-    if (!target) {
+    if (result == 0) {
         send_to_player(sess, "You don't see '%s' here.\n", args);
         return;
     }
 
-    if (target == sess) {
-        send_to_player(sess, "You can't attack yourself.\n");
-        return;
+    if (result == 1) {
+        /* Player target */
+        if (target_player == sess) {
+            send_to_player(sess, "You can't attack yourself.\n");
+            return;
+        }
+        combat_engage(sess, target_player);
+    } else if (result == 2) {
+        /* NPC target */
+        combat_engage_npc(sess, target_npc);
     }
-
-    combat_engage(sess, target);
 }
 
 void cmd_strike(PlayerSession *sess, const char *args) {
@@ -2216,23 +2217,81 @@ void cmd_isp(PlayerSession *sess, const char *args) {
 /* Cast a magic spell */
 void cmd_cast(PlayerSession *sess, const char *args) {
     if (!sess) return;
-    
+
     if (!args || !*args) {
         send_to_player(sess, "Cast what spell? Try 'cast <spell name>'\n");
         magic_display_spells(sess);
         return;
     }
-    
+
     Character *ch = &sess->character;
-    MagicSpell *spell = magic_find_spell_by_name(args);
-    
+
+    /*
+     * Parse spell name + optional target from args.
+     * Spell names can be multi-word ("Magic Missile", "Rift Teleportation").
+     * Strategy: try full args as spell name, then progressively strip
+     * the last word and treat stripped words as target name.
+     * e.g. "fireball goblin" -> try "fireball goblin" (fail),
+     *       then "fireball" (match!) with target "goblin"
+     */
+    char buf[256];
+    strncpy(buf, args, sizeof(buf) - 1);
+    buf[sizeof(buf) - 1] = '\0';
+
+    MagicSpell *spell = NULL;
+    const char *target_name = NULL;
+
+    /* First try full string as spell name (no target) */
+    spell = magic_find_spell_by_name(buf);
+    if (!spell) {
+        /* Strip words from the end, trying each prefix as spell name */
+        char *last_space = strrchr(buf, ' ');
+        while (last_space && !spell) {
+            *last_space = '\0';
+            spell = magic_find_spell_by_name(buf);
+            if (spell) {
+                /* Everything after this point in the original args is the target */
+                target_name = args + (last_space - buf) + 1;
+                /* Skip leading spaces in target */
+                while (target_name && *target_name == ' ') target_name++;
+                break;
+            }
+            last_space = strrchr(buf, ' ');
+        }
+    }
+
     if (!spell) {
         send_to_player(sess, "Unknown spell '%s'.\n", args);
         return;
     }
-    
+
+    /* Resolve target */
+    sess->spell_target = NULL;
+
+    if (target_name && *target_name) {
+        /* Search room for matching player */
+        Room *room = sess->current_room;
+        if (room) {
+            for (int i = 0; i < room->num_players; i++) {
+                if (room->players[i] && room->players[i] != sess &&
+                    strcasecmp(room->players[i]->username, target_name) == 0) {
+                    sess->spell_target = room->players[i];
+                    break;
+                }
+            }
+        }
+        if (!sess->spell_target) {
+            send_to_player(sess, "You don't see '%s' here.\n", target_name);
+            return;
+        }
+    } else if (sess->in_combat && sess->combat_target) {
+        /* No explicit target: default to combat opponent */
+        sess->spell_target = sess->combat_target;
+    }
+    /* else: spell_target stays NULL (self-cast) */
+
     /* Try to start casting */
-    magic_start_casting(sess, ch, spell->id, "");
+    magic_start_casting(sess, ch, spell->id, target_name ? target_name : "");
 }
 
 /* Display known spells */

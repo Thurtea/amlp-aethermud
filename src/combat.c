@@ -1,4 +1,6 @@
 #include "combat.h"
+#include "npc.h"
+#include "room.h"
 #include "skills.h"
 #include "item.h"
 #include "session_internal.h"
@@ -7,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 #include <strings.h>
 
 // External function declarations
@@ -250,6 +253,95 @@ CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender) {
     return combat;
 }
 
+CombatRound* combat_engage_npc(PlayerSession *attacker, NPC *npc) {
+    if (!attacker || !npc) return NULL;
+
+    /* Check if attacker already in combat */
+    CombatRound *existing = combat_get_active(attacker);
+    if (existing) {
+        send_to_player(attacker, "You are already in combat!\n");
+        return existing;
+    }
+
+    /* Create new combat */
+    CombatRound *combat = malloc(sizeof(CombatRound));
+    if (!combat) return NULL;
+
+    combat->state = COMBAT_ACTIVE;
+    combat->participants = NULL;
+    combat->round_number = 1;
+    combat->tick_in_round = 0;
+    combat->num_participants = 0;
+    combat->next = NULL;
+
+    CombatParticipant *ap = combat_create_participant(attacker, &attacker->character);
+    CombatParticipant *dp = malloc(sizeof(CombatParticipant));
+    if (!ap || !dp) {
+        if (ap) combat_free_participant(ap);
+        free(dp);
+        free(combat);
+        return NULL;
+    }
+
+    /* Initialize NPC participant */
+    dp->name = strdup(npc->name);
+    dp->is_player = false;
+    dp->session = NULL;
+    dp->character = &npc->character;
+    dp->attacks_used_this_round = 0;
+    dp->parries_used_this_round = 0;
+    dp->target = NULL;
+    dp->next = NULL;
+
+    combat_add_participant(combat, ap);
+    combat_add_participant(combat, dp);
+
+    ap->target = dp;
+    dp->target = ap;
+
+    /* Update state */
+    attacker->in_combat = 1;
+    attacker->combat_target = NULL;
+    attacker->is_resting = 0;
+    npc->in_combat = 1;
+    npc->combat_target_player = attacker;
+
+    /* Link to global list */
+    combat->next = active_combats;
+    active_combats = combat;
+
+    /* Announce */
+    char display[64];
+    snprintf(display, sizeof(display), "%s", npc->name);
+    display[0] = (char)toupper((unsigned char)display[0]);
+
+    char msg[256];
+    snprintf(msg, sizeof(msg), "\n>>> COMBAT! %s attacks %s! <<<\n",
+             attacker->username, display);
+    send_to_player(attacker, "%s", msg);
+
+    /* Broadcast to room */
+    if (npc->current_room) {
+        room_broadcast(npc->current_room, msg, attacker);
+    }
+
+    send_to_player(attacker, "  You have %d attack%s per melee round.\n",
+                   attacker->character.attacks_per_round,
+                   attacker->character.attacks_per_round == 1 ? "" : "s");
+
+    return combat;
+}
+
+CombatRound* combat_get_active_by_participant(CombatParticipant *target) {
+    if (!target) return NULL;
+    for (CombatRound *c = active_combats; c; c = c->next) {
+        for (CombatParticipant *p = c->participants; p; p = p->next) {
+            if (p == target) return c;
+        }
+    }
+    return NULL;
+}
+
 void combat_disengage(PlayerSession *session) {
     if (!session) return;
 
@@ -378,9 +470,22 @@ static void combat_auto_attack(CombatParticipant *attacker, CombatParticipant *d
     if (result.is_kill) {
         combat_award_experience(attacker, defender);
 
-        // Get the combat before removing participant
+        // Get the combat — try player session first, fall back to participant search
         CombatRound *combat = NULL;
-        if (attacker->session) combat = combat_get_active(attacker->session);
+        if (attacker->session) {
+            combat = combat_get_active(attacker->session);
+        }
+        if (!combat) {
+            combat = combat_get_active_by_participant(attacker);
+        }
+
+        // Handle NPC defender death
+        if (!defender->is_player) {
+            NPC *dead_npc = npc_find_by_character(defender->character);
+            if (dead_npc) {
+                npc_handle_death(dead_npc, attacker->session);
+            }
+        }
 
         if (combat) {
             combat_remove_participant(combat, defender);
@@ -394,6 +499,16 @@ static void combat_auto_attack(CombatParticipant *attacker, CombatParticipant *d
 
             // End combat if only one left
             if (combat->num_participants <= 1) {
+                // Clear remaining participants' NPC state
+                for (CombatParticipant *r = combat->participants; r; r = r->next) {
+                    if (!r->is_player) {
+                        NPC *n = npc_find_by_character(r->character);
+                        if (n) {
+                            n->in_combat = 0;
+                            n->combat_target_player = NULL;
+                        }
+                    }
+                }
                 combat_end(combat);
                 return;
             }
@@ -614,6 +729,16 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
             damage_sides = weapon->stats.damage_sides;
             weapon_bonus = weapon->stats.damage_bonus;
             is_mega_damage = weapon->stats.is_mega_damage;
+        }
+    } else if (!attacker->is_player) {
+        /* NPC: use template weapon data */
+        NPC *npc = npc_find_by_character(attacker->character);
+        if (npc && npc->template_id >= 0 && npc->template_id < NPC_TEMPLATE_COUNT) {
+            const NpcTemplate *t = &NPC_TEMPLATES[npc->template_id];
+            damage_dice = t->weapon_dice;
+            damage_sides = t->weapon_sides;
+            /* MDC creatures deal mega-damage */
+            is_mega_damage = (t->health_type == MDC_ONLY);
         }
     }
 
@@ -875,7 +1000,26 @@ void combat_apply_damage(CombatParticipant *target, DamageResult *dmg) {
 
     int damage_remaining = dmg->damage;
 
-    // Armor absorption
+    /* MDC-only creatures: apply damage directly to MDC pool */
+    if (target->character->health_type == MDC_ONLY) {
+        /* MDC weapons do full damage; SDC weapons do 1/100 */
+        if (!dmg->is_mega_damage) {
+            damage_remaining = damage_remaining / 100;
+            if (damage_remaining < 1) damage_remaining = 1;
+        }
+        if (damage_remaining >= target->character->mdc) {
+            target->character->mdc = 0;
+        } else {
+            target->character->mdc -= damage_remaining;
+        }
+
+        if (combat_check_death(target)) {
+            dmg->is_kill = true;
+        }
+        return;
+    }
+
+    // Armor absorption (SDC/HP creatures only)
     Item *armor = target->character->equipment.armor;
     if (armor && armor->current_durability > 0) {
         if (damage_remaining >= armor->current_durability) {
@@ -924,14 +1068,30 @@ void combat_apply_damage(CombatParticipant *target, DamageResult *dmg) {
 bool combat_check_death(CombatParticipant *p) {
     if (!p || !p->character) return false;
 
-    if (p->character->hp <= 0) {
+    bool dead = false;
+
+    /* MDC-only creatures die when MDC reaches 0 */
+    if (p->character->health_type == MDC_ONLY) {
+        dead = (p->character->mdc <= 0);
+    } else {
+        dead = (p->character->hp <= 0);
+    }
+
+    if (dead) {
         char msg[256];
         snprintf(msg, sizeof(msg),
                  "\n>>> %s has been defeated! <<<\n\n",
                  p->name);
         combat_send_to_participant(p, msg);
 
-        CombatRound *combat = combat_get_active(p->session);
+        /* Find combat via session or participant pointer */
+        CombatRound *combat = NULL;
+        if (p->session) {
+            combat = combat_get_active(p->session);
+        }
+        if (!combat) {
+            combat = combat_get_active_by_participant(p);
+        }
         if (combat) {
             combat_broadcast(combat, msg);
         }

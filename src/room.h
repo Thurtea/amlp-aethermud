@@ -7,6 +7,9 @@
 
 /* Forward declare from session_internal.h */
 typedef struct PlayerSession PlayerSession;
+typedef struct NPC NPC;
+
+#define MAX_NPCS_PER_ROOM 8
 
 /* Flexible exit: supports any direction name + LPC path destinations */
 typedef struct {
@@ -44,6 +47,8 @@ typedef struct Room {
     PlayerSession **players;  /* Array of players in room */
     int num_players;
     int max_players;
+    NPC *npcs[MAX_NPCS_PER_ROOM];  /* NPCs currently in room */
+    int num_npcs;
     /* Room properties parsed from LPC set_property() calls */
     int light_level;     /* 0=dark,1=dim,2=normal(lit),3=bright */
     bool is_indoors;     /* true if indoors */
@@ -66,6 +71,8 @@ void room_add_item(Room *room, Item *item);
 Item* room_find_item(Room *room, const char *name);
 void room_remove_item(Room *room, Item *item);
 void room_broadcast(Room *room, const char *message, PlayerSession *exclude);
+void room_add_npc(Room *room, NPC *npc);
+void room_remove_npc(Room *room, NPC *npc);
 const char* room_find_detail(Room *room, const char *keyword);
 
 /* Room commands */

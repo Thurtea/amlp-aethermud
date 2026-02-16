@@ -1,0 +1,93 @@
+{
+  "level": 14,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Close Rift",
+      "level": 14,
+      "range": "100 feet (30.5 m)",
+      "duration": "Instant results",
+      "saving_throw": "Standard",
+      "ppe_cost": 200,
+      "description": "The master of magic can close a rift by sheer force of will. However, the monumental effort permanently drains the mage of two P.P.E. points from his permanent base, whether successful or not. The mystic nature of the dimensional gateway gives it an automatic save versus magic attack, consequently a Close Rift Ritual will increase one's odds for success (16). The rift will instantly vanish if successful. A failure means the rift is not affected and the wizard has lost 2 P.P.E. forever.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "dimensional",
+        "target": "single",
+        "area_effect": false,
+        "save_negates": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "Id Barrier",
+      "level": 14,
+      "range": "Up to 200 ft away, plus 100 ft per level",
+      "duration": "3 minutes (12 melees) per level",
+      "saving_throw": "Standard, and vs horror factor",
+      "ppe_cost": 600,
+      "description": "The character can erect a powerful, defensive shield of semitransparent energy. The barrier itself emanates horror, and a character must save vs horror factor 14 to even come within 10 ft of it. Those who fail to save vs horror factor can not pass through the barrier. Anybody who braves the barrier must roll again; this time to save versus magic. A successful save means the character passes through with only a headache and loses one attack that melee. A failed save means the character must face an apparition of his greatest fear.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "protection",
+        "target": "area",
+        "area_effect": true,
+        "save_negates": true
+      }
+    },
+    {
+      "id": 3,
+      "name": "Impenetrable Wall of Force",
+      "level": 14,
+      "range": "100 ft (30.5 m)",
+      "duration": "5 melees per level",
+      "saving_throw": "None",
+      "ppe_cost": 600,
+      "description": "This spell creates a shimmering wall of light that no creature, weapon, or object may penetrate. Only a Dispel Magic Barrier spell or a powerful Negate Magic will destroy the wall. The spell caster is able to create a wall of force that measures 20 x 20 feet per level of experience. The wall can be cast up to 100 ft away.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "protection",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 4,
+      "name": "Restoration",
+      "level": 14,
+      "range": "Touch or 3 ft away (0.9 m)",
+      "duration": "Instant/permanent",
+      "saving_throw": "None",
+      "ppe_cost": 750,
+      "description": "This is a powerful healing incantation. The magic will instantly, and completely, heal wounds, cuts, bruises, burns, etc., restoring full S.D.C. and hit points, while leaving only minimal scarring. It is so powerful a magic that it can heal internal organs and mend bones. Even bullets or shrapnel will magically disappear and the wounds heal. The invocation can also restore severed limbs, such as a hand, arm, finger, foot, leg, etc., providing that the limb has not been severed from its body for more than 48 hours.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "healing",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 5,
+      "name": "Transformation",
+      "level": 14,
+      "range": "Touch",
+      "duration": "3 days per level",
+      "saving_throw": "Standard (minus) -3 to save",
+      "ppe_cost": 2000,
+      "description": "Transformation is a powerful spell that transforms a normal human being into a grisly, demonic monster. After the transformation is completed, the pitiful creature will be a mindless slave of the mage who transformed him/her. As a monster, the character has no recollection of his/her life as a human, retains no skills, knowledge or memory, or even attributes. The thing will obey the mage without question most of the time. However, principled, scrupulous and unprincipled characters will not kill or hurt a child, or a very dear friend or loved one.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "transformation",
+        "target": "single",
+        "area_effect": false,
+        "save_negates": false
+      }
+    }
+  ]
+}

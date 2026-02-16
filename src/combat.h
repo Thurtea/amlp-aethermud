@@ -72,11 +72,13 @@ void combat_regen_tick(void);
 
 // Engage/disengage combat
 CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender);
+CombatRound* combat_engage_npc(PlayerSession *attacker, struct NPC *npc);
 void combat_disengage(PlayerSession *session);
 
 // Legacy API (still used by slay, peace, etc.)
 void combat_end(CombatRound *combat);
 CombatRound* combat_get_active(PlayerSession *sess);
+CombatRound* combat_get_active_by_participant(CombatParticipant *target);
 
 // Participant management
 CombatParticipant* combat_create_participant(PlayerSession *sess, Character *ch);

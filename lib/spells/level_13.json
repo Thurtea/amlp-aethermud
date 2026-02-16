@@ -1,0 +1,107 @@
+{
+  "level": 13,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Protection Circle: Superior",
+      "level": 13,
+      "range": "Radius of the circle",
+      "duration": "24 hours; can be reactivated at 20 PPE",
+      "saving_throw": "None",
+      "ppe_cost": 250,
+      "description": "In principle and function, the superior protection circle is just like the simple circle, only stronger. The arcanist must recite the invocation while drawing the circle. The superior protection circle will protect everybody inside its radius by preventing all supernatural creatures from coming any closer than 20 ft from its edge. Even greater beings are held at bay. Lesser beings can not stand to be within line of sight of the circle and are forced to leave. The circle also provides: +5 to save vs all magic and psychic attacks, impervious to possession, +8 to save vs horror factor, plus an extra 10 P.P.E. to each mage and 10 I.S.P. to each psychic.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "protection",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "Create Golem",
+      "level": 13,
+      "range": "Touch",
+      "duration": "Exists until destroyed",
+      "saving_throw": "None",
+      "ppe_cost": 700,
+      "description": "The sorcerer first draws a pentagram in animal blood. Second, he sculpts a golem (humanoid shape) from clay. Third, he places two onyx gems, valued at no less than 1000 credits each, for eyes. Fourth, he places a heart, molded out of iron, into the clay body. Lastly, the mage recites the ritual ceremony. At the end of the ritual, the mystic places a single drop of his blood on the behemoth's forehead to bring it to life. The process permanently drains the mage of 6 S.D.C. points.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "summoning",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 3,
+      "name": "Summon and Control Storm",
+      "level": 13,
+      "range": "Immediate area or up to 10 miles away",
+      "duration": "1 hour per level",
+      "saving_throw": "None",
+      "ppe_cost": 300,
+      "description": "The spell caster can create a destructive storm out of thin air. A rainstorm will create a torrential downpour of 4 inches of rain per hour, causing flooding. Poor visibility will slow travel to about 20 mph. A windstorm may be accompanied by light rain, but the real threat is high winds gusting up to 70 and 90 mph, uprooting small trees, knocking down tree branches and electrical wires, and even overturning an occasional car. Travel on foot is very difficult, reducing a character's speed by 90%.",
+      "effects": {
+        "damage_dice": 2,
+        "damage_sides": 6,
+        "bonus_type": "weather",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 4,
+      "name": "Summon Lesser Being",
+      "level": 13,
+      "range": "Not applicable",
+      "duration": "24 hours per level",
+      "saving_throw": "None",
+      "ppe_cost": 425,
+      "description": "An impressive ritual that plucks a supernatural being out of its native dimension and magically places it before the mystic in our world. A specific lesser monster can be summoned if desired, or a random creature can be called for. The supernatural being is automatically under the arcanist's control and will obey him without question. The only things it will not do is commit suicide and it may not fight to the death. The monster can be returned to its own world at any time before the duration time elapses.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "summoning",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 5,
+      "name": "Sanctum",
+      "level": 13,
+      "range": "30 x 30 ft room; can be created up to 200 miles away",
+      "duration": "Lifetime of the mage or until canceled",
+      "saving_throw": "None",
+      "ppe_cost": 390,
+      "description": "The mage can protect a room of up to 30 x 30 ft from mystic influence by using the sanctum invocation. The room is instantly turned into a safe haven, or sanctum, free of mystic disturbance. While inside the room, the mage can not be found by the locate spell, can not be seen by second sight, and can not be affected by bonding magic. Even more impressive is that animated dead and undead can not enter the sanctum. Lesser monsters can not enter unless they save vs magic; greater beings and humans are not affected.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "protection",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 6,
+      "name": "Talisman",
+      "level": 13,
+      "range": "Varies with type of spell",
+      "duration": "Talisman exists until destroyed",
+      "saving_throw": "Standard",
+      "ppe_cost": 500,
+      "description": "A talisman is designed to perform one function only. The invocation enables the arcanist to empower an ordinary object with magic powers. The object can not be larger than two feet tall, long or wide. Once an object is transformed into a talisman, the arcanist can empower it with one magic spell from levels one through eight. The talisman can be used to cast its one spell for a total of three times. After all three have been cast, the object is drained. The mystic who created the talisman can recharge it at a cost of 50 P.P.E. plus the cost of the spell invocation.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "utility",
+        "target": "single",
+        "area_effect": false
+      }
+    }
+  ]
+}

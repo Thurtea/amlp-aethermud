@@ -1,0 +1,109 @@
+{
+  "level": 11,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Anti-Magic Cloud",
+      "level": 11,
+      "range": "100 ft (30.5 m) radius per level",
+      "duration": "20 melees per level",
+      "saving_throw": "Special",
+      "ppe_cost": 140,
+      "description": "This incredible spell creates an ominous, dark grey-brown cloud large enough to hang over an entire town. It can not be dispelled magically or by manipulating elemental/atmospheric conditions. The cloud's effect negates all magic! Spell casters can not use magic of any kind, techno-wizard devices, potions and charms are impotent. Any object of magic (except runes and magic weapons) is rendered harmless. Only the creator of the cloud is not affected. Only an 18 to 20 saves against the cloud, and even these lucky few will find their magic reduced to half strength.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "negation",
+        "target": "area",
+        "area_effect": true,
+        "save_negates": false
+      }
+    },
+    {
+      "id": 2,
+      "name": "Create Mummy",
+      "level": 11,
+      "range": "Touch",
+      "duration": "Exists until destroyed",
+      "saving_throw": "None",
+      "ppe_cost": 160,
+      "description": "The mummy invocation is a necromantic ritual that turns a corpse into one of the undead. The ritual involves treating pure linen strips of cloth with a mystic solution and wrapping the body in the cloth. The incantation brings to life a sort of humanoid robot devoid of emotions and fearless. Like a machine, the barely intelligent thing follows simple orders to the best of its ability. The mummy is incapable of understanding complex commands. It is simply a lumbering corpse with near indestructibility, making it an ideal guardian.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "summoning",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 3,
+      "name": "Create Magic Scroll",
+      "level": 11,
+      "range": "Identical to spell placed on scroll",
+      "duration": "As per scroll",
+      "saving_throw": "Standard magic save; 12 or higher",
+      "ppe_cost": 100,
+      "description": "This spell is similar to the amulet and talisman spells in that the arcanist is able to transfer mystic energy and powers into an inanimate object. In this case, the mage can magically make the words to a magic spell appear on paper. The only real limitation other than sufficient P.P.E. is that the mage must be able to read and write. Because the paper has been charged with P.P.E., anyone who can read the language can read the scroll and the magic spell will be cast. The words disappear the moment they are read aloud.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "utility",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 4,
+      "name": "Remove Curse",
+      "level": 11,
+      "range": "Touch or 10 ft (3 m)",
+      "duration": "Instant removal",
+      "saving_throw": "None",
+      "ppe_cost": 140,
+      "description": "The mage can attempt to remove any type of curse using this incantation. To determine success a 20-sided die is rolled (plus bonuses) to save vs magic. A successful save means that the curse is instantly gone. A failed roll means the curse is still in effect. The remove curse is a powerful magic that provides bonuses to save vs magic: Spell +5 to save, Ritual +10 to save.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "removal",
+        "target": "single",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 5,
+      "name": "Summon and Control Animals",
+      "level": 11,
+      "range": "600 ft (183 m)",
+      "duration": "5 hours per level",
+      "saving_throw": "Standard for animals",
+      "ppe_cost": 125,
+      "description": "A superior summoning pentacle, the invocation empowers the arcanist to summon and control any type of animal. Tiny animals like frogs and mice: 40 per level. Medium-sized animals like dogs and cats (up to 30 lbs): 8 per level. Large animals like horses: 6 per level. Exotic animals, including animals not indigenous to the area: one per level. Any animal which comes into the arcanist's 600 ft range while in the pentagram will obey the mage unless it makes a successful save vs magic. Familiars are not influenced.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "summoning",
+        "target": "area",
+        "area_effect": true,
+        "save_negates": true
+      }
+    },
+    {
+      "id": 6,
+      "name": "Summon Fog",
+      "level": 11,
+      "range": "Up to 10 miles away per level",
+      "duration": "1 hour per level",
+      "saving_throw": "None",
+      "ppe_cost": 140,
+      "description": "The spell caster can call forth a dense fog that will impair vision and make travel difficult. The fog is so thick that a person can see clearly for four feet and see only blurred, shadowy figures for about another 10 ft. Anything beyond 10 ft is totally obscured. Safe travel is slowed to a crawl. On foot, a safe speed is 10 or less with a 30% chance of tripping every 30 ft. The fog adds +20% to prowl skills. All long-range attacks are -5 to strike and opponents are +2 to dodge.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "obscuration",
+        "target": "area",
+        "area_effect": true
+      }
+    }
+  ]
+}

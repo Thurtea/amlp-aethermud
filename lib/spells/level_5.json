@@ -1,0 +1,134 @@
+[
+  {
+    "id": "calling",
+    "name": "Calling",
+    "level": 5,
+    "range": "Long/Area",
+    "duration": "Varies",
+    "saving_throw": "Varies",
+    "ppe_cost": 8,
+    "description": "Summons or calls forth creatures or entities appropriate to the invocation; specifics depend on caster and ritual.",
+    "effects": ["Summons entities","Requires control or binding"]
+  },
+  {
+    "id": "escape",
+    "name": "Escape",
+    "level": 5,
+    "range": "Self/Touch",
+    "duration": "Instant/Short",
+    "saving_throw": "None",
+    "ppe_cost": 8,
+    "description": "Enables rapid disengagement or teleport-like escape from immediate danger or bonds.",
+    "effects": ["Break free from restraints","Rapid relocation"]
+  },
+  {
+    "id": "heal-wounds",
+    "name": "Heal Wounds",
+    "level": 5,
+    "range": "Touch",
+    "duration": "Instant",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "Heals injuries, restoring hit points or S.D.C.; more effective on less severe wounds.",
+    "effects": ["Restore hit points","Stitch or close wounds"]
+  },
+  {
+    "id": "horror",
+    "name": "Horror",
+    "level": 5,
+    "range": "Area",
+    "duration": "Instant/short",
+    "saving_throw": "Horror factor save (d20)",
+    "ppe_cost": 10,
+    "description": "Creates an overwhelming aura or illusion that can momentarily stun or terrify affected creatures.",
+    "effects": ["May stun or incapacitate targets","Affects morale and initiative"]
+  },
+  {
+    "id": "id-barrier",
+    "name": "Id Barrier",
+    "level": 5,
+    "range": "Area",
+    "duration": "Sustained",
+    "saving_throw": "Varies",
+    "ppe_cost": 600,
+    "description": "A very powerful protective barrier of identity/psychic shielding (high-level invocation).",
+    "effects": ["Strong psychic/magical protection","High P.P.E. cost"]
+  },
+  {
+    "id": "influence-the-beast",
+    "name": "Influence the Beast",
+    "level": 5,
+    "range": "Area/Target",
+    "duration": "Short",
+    "saving_throw": "Will/animal behavior check",
+    "ppe_cost": 10,
+    "description": "Affects animals' behavior causing them to be calm, hostile, or to follow simple commands.",
+    "effects": ["Affects animal reactions","Useful for taming or pacifying"]
+  },
+  {
+    "id": "magic-shield",
+    "name": "Magic Shield",
+    "level": 5,
+    "range": "Personal/Touch",
+    "duration": "Sustained",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "Conjures a protective magical shield that reduces or blocks incoming damage.",
+    "effects": ["Absorb/block damage","Requires concentration to maintain"]
+  },
+  {
+    "id": "repel-animals",
+    "name": "Repel Animals",
+    "level": 5,
+    "range": "Area",
+    "duration": "Short",
+    "saving_throw": "Will (animals)",
+    "ppe_cost": 7,
+    "description": "Causes animals in the area to avoid or flee the caster; effective for crowding or predators.",
+    "effects": ["Animals flee/avoid area","Does not affect humanoids unless specified"]
+  },
+  {
+    "id": "shockwave",
+    "name": "Shockwave",
+    "level": 5,
+    "range": "Area",
+    "duration": "Instant",
+    "saving_throw": "Reflex",
+    "ppe_cost": 12,
+    "description": "Unleashes a concussive blast that damages and may knock down or stun targets in an area.",
+    "effects": ["Deals concussive damage","May knock prone or stun"]
+  },
+  {
+    "id": "superhuman-strength",
+    "name": "Superhuman Strength",
+    "level": 5,
+    "range": "Self/Touch",
+    "duration": "Short/Sustained",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "Temporarily increases the subject's physical strength well beyond normal limits.",
+    "effects": ["Increase P.S./melee damage","Useful for feats of strength"]
+  },
+  {
+    "id": "sustain",
+    "name": "Sustain",
+    "level": 5,
+    "range": "Touch/Personal",
+    "duration": "Sustained",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "Maintains life functions or ongoing beneficial effects, halting deterioration.",
+    "effects": ["Halts ongoing harmful effects","Maintains vital functions"]
+  },
+  {
+    "id": "wisps-of-confusion",
+    "name": "Wisps of Confusion",
+    "level": 5,
+    "range": "Area",
+    "duration": "Short",
+    "saving_throw": "Will",
+    "ppe_cost": 40,
+    "description": "Creates illusory wisps that confuse and disorient targets, causing misperception and errors.",
+    "effects": ["Confuses targets","May impose action penalties"]
+  }
+]

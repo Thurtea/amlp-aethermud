@@ -6,6 +6,7 @@
 
 /* Forward declarations */
 typedef struct PlayerSession PlayerSession;
+typedef struct NPC NPC;
 struct Character;
 
 /* Magic Spell Schools */
@@ -73,6 +74,7 @@ void magic_init(void);
 /* Spell lookup and functions */
 MagicSpell* magic_find_spell_by_id(int spell_id);
 MagicSpell* magic_find_spell_by_name(const char *name);
+MagicSpell* magic_find_spell_by_lpc_id(const char *lpc_id);
 KnownSpell* magic_find_known_spell(struct Character *ch, int spell_id);
 
 /* Ability management */
@@ -95,6 +97,14 @@ bool magic_start_casting(PlayerSession *sess, struct Character *ch,
 bool magic_continue_casting(struct Character *ch);
 bool magic_complete_cast(PlayerSession *sess, struct Character *ch);
 void magic_interrupt_cast(struct Character *ch);
+void magic_apply_effect(PlayerSession *caster, PlayerSession *target,
+                        MagicSpell *spell);
+void magic_apply_effect_npc(PlayerSession *caster, NPC *target,
+                            MagicSpell *spell);
+
+/* Spell as direct command (e.g. "fireball bob" instead of "cast fireball bob") */
+bool magic_spell_command(PlayerSession *sess, const char *cmd,
+                         const char *args);
 
 /* Display */
 void magic_display_spells(PlayerSession *sess);

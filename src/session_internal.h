@@ -71,6 +71,10 @@ typedef struct PlayerSession {
     struct PlayerSession *combat_target;  /* Current combat target */
     int in_combat;                        /* 1 if in active combat */
 
+    /* Spell targeting */
+    struct PlayerSession *spell_target;   /* Resolved target for current spell */
+    struct NPC *spell_target_npc;         /* Resolved NPC target for current spell */
+
     /* Social/RP state */
     char last_tell_from[64];              /* Username of last tell sender (for reply) */
     int is_brief;                         /* Brief mode: skip long room descriptions */

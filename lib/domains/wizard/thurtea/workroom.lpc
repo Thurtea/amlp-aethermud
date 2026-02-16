@@ -1,0 +1,16 @@
+// Thurtea's Wizard Workroom
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Thurtea's Workroom");
+    set_long(
+        "A private wizard's workroom. Arcane symbols cover the walls\n"
+        "and a large desk sits in the center, covered in scrolls and\n"
+        "strange devices. A wooden chest sits in the corner, marked\n"
+        "with arcane symbols. A shimmering portal leads back to the world."
+    );
+    add_exit("out", "/domains/new_camelot/town_square");
+    set_property("light", 2);
+    set_property("indoors", 1);
+}

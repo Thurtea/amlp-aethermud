@@ -1,12 +1,17 @@
 #include "magic.h"
 #include "chargen.h"
 #include "session_internal.h"
+#include "room.h"
+#include "npc.h"
 #include "vm.h"
 #include "object.h"
 #include "efun.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
+
+extern PlayerSession *sessions[];
 
 /* Forward declaration */
 void send_to_player(PlayerSession *session, const char *format, ...);
@@ -354,9 +359,21 @@ MagicSpell* magic_find_spell_by_id(int spell_id) {
 
 MagicSpell* magic_find_spell_by_name(const char *name) {
     if (!name) return NULL;
-    
+
     for (int i = 0; i < MAGIC_SPELL_COUNT; i++) {
         if (strcasecmp(MAGIC_SPELLS[i].name, name) == 0) {
+            return &MAGIC_SPELLS[i];
+        }
+    }
+    return NULL;
+}
+
+MagicSpell* magic_find_spell_by_lpc_id(const char *lpc_id) {
+    if (!lpc_id) return NULL;
+
+    for (int i = 0; i < MAGIC_SPELL_COUNT; i++) {
+        if (MAGIC_SPELLS[i].lpc_id &&
+            strcasecmp(MAGIC_SPELLS[i].lpc_id, lpc_id) == 0) {
             return &MAGIC_SPELLS[i];
         }
     }
@@ -582,53 +599,39 @@ bool magic_complete_cast(PlayerSession *sess, struct Character *ch) {
         return false;
     }
 
-    /* Spend PPE (already validated earlier) */
+    /* Spend PPE */
     magic_spend_ppe(ch, spell->ppe_cost);
     magic_record_spell_cast(ch, spell_id);
 
-    /* Load spells daemon via efun */
-    VMValue path_val = vm_value_create_string("/daemon/spells");
-    VMValue load_res = efun_load_object(global_vm, &path_val, 1);
-    vm_value_release(&path_val);
+    /* Resolve target: explicit spell_target/spell_target_npc > combat_target > NULL (self) */
+    PlayerSession *target_sess = NULL;
+    NPC *target_npc = NULL;
 
-    if (load_res.type != VALUE_OBJECT || !load_res.data.object_value) {
-        send_to_player(sess, "Casting failed - spell system unavailable.\n");
-        magic_interrupt_cast(ch);
-        vm_value_release(&load_res);
-        return false;
+    if (sess->spell_target_npc) {
+        target_npc = sess->spell_target_npc;
+    } else if (sess->spell_target) {
+        target_sess = sess->spell_target;
+    } else if (sess->in_combat && sess->combat_target) {
+        target_sess = sess->combat_target;
     }
 
-    obj_t *spells_daemon = (obj_t *)load_res.data.object_value;
-
-    /* Get caster LPC object from session */
-    obj_t *caster_obj = (obj_t *)sess->player_object;
-    if (!caster_obj) {
-        send_to_player(sess, "Casting failed - player object not found.\n");
-        magic_interrupt_cast(ch);
-        vm_value_release(&load_res);
-        return false;
-    }
-
-    /* Resolve target - TODO: implement target_name resolution. Use caster as default */
-    obj_t *target_obj = caster_obj;
-
-    /* Prepare arguments: (string spell_id, object caster, object target) */
-    VMValue args[3];
-    args[0] = vm_value_create_string(spell->lpc_id ? spell->lpc_id : spell->name);
-    args[1].type = VALUE_OBJECT; args[1].data.object_value = (void *)caster_obj;
-    args[2].type = VALUE_OBJECT; args[2].data.object_value = (void *)target_obj;
-
-    VMValue cast_res = obj_call_method(global_vm, spells_daemon, "cast_spell", args, 3);
-
-    /* Release temporary string arg */
-    vm_value_release(&args[0]);
-    vm_value_release(&load_res);
-
-    bool success = (cast_res.type == VALUE_INT && cast_res.data.int_value == 1);
-    if (success) {
-        send_to_player(sess, "You complete your spell: %s.\n", spell->name);
+    /* Apply the spell effect */
+    if (target_npc) {
+        magic_apply_effect_npc(sess, target_npc, spell);
     } else {
-        send_to_player(sess, "Your spell fizzles: %s.\n", spell->name);
+        magic_apply_effect(sess, target_sess, spell);
+    }
+
+    /* Clear spell targets after use */
+    sess->spell_target = NULL;
+    sess->spell_target_npc = NULL;
+
+    /* Broadcast to room */
+    if (sess->current_room) {
+        char room_msg[256];
+        snprintf(room_msg, sizeof(room_msg), "%s completes a spell: %s!\r\n",
+                 sess->username, spell->name);
+        room_broadcast(sess->current_room, room_msg, sess);
     }
 
     /* Clean up casting state */
@@ -636,10 +639,240 @@ bool magic_complete_cast(PlayerSession *sess, struct Character *ch) {
     ch->magic.casting_spell_id = -1;
     ch->magic.casting_rounds_remaining = 0;
 
-    /* cast_res may hold allocated strings; release if needed */
-    vm_value_release(&cast_res);
+    return true;
+}
 
-    return success;
+/* =============== SPELL EFFECT APPLICATION =============== */
+
+void magic_apply_effect(PlayerSession *caster, PlayerSession *target,
+                        MagicSpell *spell) {
+    if (!caster || !spell) return;
+
+    Character *caster_ch = &caster->character;
+    Character *target_ch = target ? &target->character : NULL;
+    const char *target_name = target ? target->username : caster->username;
+
+    /* --- Damage spells --- */
+    if (spell->damage_dice > 0 && spell->damage_sides > 0) {
+        /* Need a valid target that isn't the caster for offensive spells */
+        if (!target || target == caster) {
+            send_to_player(caster,
+                "You must be in combat to cast %s offensively.\n", spell->name);
+            return;
+        }
+
+        /* Roll damage */
+        int damage = 0;
+        for (int i = 0; i < spell->damage_dice; i++) {
+            damage += (rand() % spell->damage_sides) + 1;
+        }
+
+        /* Rank bonus: +1 damage per rank above 1 */
+        KnownSpell *ks = magic_find_known_spell(caster_ch, spell->id);
+        if (ks && ks->rank > 1) {
+            damage += ks->rank - 1;
+        }
+
+        /* Check for healing keywords */
+        if (strstr(spell->keywords, "heal") != NULL) {
+            /* Healing spell: apply to target (or caster if self-targeted) */
+            PlayerSession *heal_target = target ? target : caster;
+            Character *heal_ch = &heal_target->character;
+
+            if (heal_ch->health_type == MDC_ONLY) {
+                heal_ch->mdc += damage;
+                if (heal_ch->mdc > heal_ch->max_mdc) heal_ch->mdc = heal_ch->max_mdc;
+                send_to_player(caster, "Your %s restores %d M.D.C. to %s!\n",
+                               spell->name, damage, heal_target->username);
+            } else {
+                heal_ch->hp += damage;
+                if (heal_ch->hp > heal_ch->max_hp) heal_ch->hp = heal_ch->max_hp;
+                send_to_player(caster, "Your %s heals %s for %d HP!\n",
+                               spell->name, heal_target->username, damage);
+            }
+            if (heal_target != caster) {
+                send_to_player(heal_target,
+                    "%s's %s heals you for %d!\n",
+                    caster->username, spell->name, damage);
+            }
+            return;
+        }
+
+        /* Offensive damage */
+        if (spell->is_mega_damage) {
+            /* MDC damage - apply to MDC pool first, overflow to SDC/HP */
+            if (target_ch->health_type == MDC_ONLY) {
+                /* Godmode check */
+                if (target->is_godmode) {
+                    send_to_player(caster,
+                        "Your %s fizzles against %s's divine protection!\n",
+                        spell->name, target_name);
+                    return;
+                }
+                target_ch->mdc -= damage;
+                if (target_ch->mdc < 0) target_ch->mdc = 0;
+                send_to_player(caster,
+                    "Your %s blasts %s for %d M.D.C.!\n",
+                    spell->name, target_name, damage);
+                send_to_player(target,
+                    "%s's %s hits you for %d M.D.C.!\n",
+                    caster->username, spell->name, damage);
+            } else {
+                /* MDC spell vs SDC creature: x100 conversion */
+                int sdc_damage = damage * 100;
+                if (target->is_godmode) {
+                    send_to_player(caster,
+                        "Your %s fizzles against %s's divine protection!\n",
+                        spell->name, target_name);
+                    return;
+                }
+                /* Apply to SDC first, overflow to HP */
+                if (sdc_damage > 0 && target_ch->sdc > 0) {
+                    if (sdc_damage >= target_ch->sdc) {
+                        sdc_damage -= target_ch->sdc;
+                        target_ch->sdc = 0;
+                    } else {
+                        target_ch->sdc -= sdc_damage;
+                        sdc_damage = 0;
+                    }
+                }
+                if (sdc_damage > 0) {
+                    target_ch->hp -= sdc_damage;
+                    if (target_ch->hp < 0) target_ch->hp = 0;
+                }
+                send_to_player(caster,
+                    "Your %s devastates %s for %d M.D. (%d S.D.C. equivalent)!\n",
+                    spell->name, target_name, damage, damage * 100);
+                send_to_player(target,
+                    "%s's %s devastates you for %d M.D.!\n",
+                    caster->username, spell->name, damage);
+            }
+        } else {
+            /* SDC damage */
+            if (target->is_godmode) {
+                send_to_player(caster,
+                    "Your %s fizzles against %s's divine protection!\n",
+                    spell->name, target_name);
+                return;
+            }
+            int remaining = damage;
+            if (remaining > 0 && target_ch->sdc > 0) {
+                if (remaining >= target_ch->sdc) {
+                    remaining -= target_ch->sdc;
+                    target_ch->sdc = 0;
+                } else {
+                    target_ch->sdc -= remaining;
+                    remaining = 0;
+                }
+            }
+            if (remaining > 0) {
+                target_ch->hp -= remaining;
+                if (target_ch->hp < 0) target_ch->hp = 0;
+            }
+            send_to_player(caster,
+                "Your %s hits %s for %d S.D.C.!\n",
+                spell->name, target_name, damage);
+            send_to_player(target,
+                "%s's %s hits you for %d S.D.C.!\n",
+                caster->username, spell->name, damage);
+        }
+
+        /* Check for death */
+        if (target_ch->hp <= 0) {
+            send_to_player(caster, "%s collapses from your spell!\n", target_name);
+            handle_player_death(target, caster);
+        }
+        return;
+    }
+
+    /* --- Passive/buff spells --- */
+    if (spell->is_passive_bonus) {
+        send_to_player(caster,
+            "You cast %s! %s\n", spell->name, spell->description);
+        return;
+    }
+
+    /* --- Utility/other spells --- */
+    send_to_player(caster,
+        "You cast %s. %s\n", spell->name, spell->description);
+}
+
+/* Apply spell effect to an NPC target */
+void magic_apply_effect_npc(PlayerSession *caster, NPC *target, MagicSpell *spell) {
+    if (!caster || !target || !spell) return;
+
+    Character *caster_ch = &caster->character;
+    Character *target_ch = &target->character;
+    char display[64];
+    snprintf(display, sizeof(display), "%s", target->name);
+    display[0] = (char)toupper((unsigned char)display[0]);
+
+    /* Only handle damage spells on NPCs */
+    if (spell->damage_dice <= 0 || spell->damage_sides <= 0) {
+        send_to_player(caster, "That spell has no effect on %s.\n", display);
+        return;
+    }
+
+    /* Roll damage */
+    int damage = 0;
+    for (int i = 0; i < spell->damage_dice; i++) {
+        damage += (rand() % spell->damage_sides) + 1;
+    }
+
+    /* Rank bonus */
+    KnownSpell *ks = magic_find_known_spell(caster_ch, spell->id);
+    if (ks && ks->rank > 1) {
+        damage += ks->rank - 1;
+    }
+
+    /* Apply damage based on health type */
+    if (target_ch->health_type == MDC_ONLY) {
+        if (spell->is_mega_damage) {
+            target_ch->mdc -= damage;
+            if (target_ch->mdc < 0) target_ch->mdc = 0;
+            send_to_player(caster, "Your %s blasts %s for %d M.D.C.!\n",
+                           spell->name, display, damage);
+        } else {
+            /* SDC spell vs MDC creature: 1/100 */
+            int md = damage / 100;
+            if (md < 1) md = 1;
+            target_ch->mdc -= md;
+            if (target_ch->mdc < 0) target_ch->mdc = 0;
+            send_to_player(caster, "Your %s barely scratches %s for %d M.D.C.!\n",
+                           spell->name, display, md);
+        }
+    } else {
+        /* SDC/HP creature */
+        int remaining = damage;
+        if (spell->is_mega_damage) remaining *= 100;
+        if (remaining > 0 && target_ch->sdc > 0) {
+            if (remaining >= target_ch->sdc) {
+                remaining -= target_ch->sdc;
+                target_ch->sdc = 0;
+            } else {
+                target_ch->sdc -= remaining;
+                remaining = 0;
+            }
+        }
+        if (remaining > 0) {
+            target_ch->hp -= remaining;
+            if (target_ch->hp < 0) target_ch->hp = 0;
+        }
+        send_to_player(caster, "Your %s hits %s for %d damage!\n",
+                       spell->name, display, damage);
+    }
+
+    /* Check for death */
+    bool dead = false;
+    if (target_ch->health_type == MDC_ONLY) {
+        dead = (target_ch->mdc <= 0);
+    } else {
+        dead = (target_ch->hp <= 0);
+    }
+
+    if (dead) {
+        npc_handle_death(target, caster);
+    }
 }
 
 void magic_interrupt_cast(struct Character *ch) {
@@ -647,6 +880,51 @@ void magic_interrupt_cast(struct Character *ch) {
     ch->magic.is_casting = false;
     ch->magic.casting_spell_id = -1;
     ch->magic.casting_rounds_remaining = 0;
+}
+
+/* =============== SPELL COMMAND HANDLER =============== */
+
+bool magic_spell_command(PlayerSession *sess, const char *cmd,
+                         const char *args) {
+    if (!sess || !cmd) return false;
+
+    /* Look up spell by lpc_id (e.g. "fireball", "magic_missile") */
+    MagicSpell *spell = magic_find_spell_by_lpc_id(cmd);
+    if (!spell) return false;
+
+    /* Check if the player knows this spell */
+    Character *ch = &sess->character;
+    if (!magic_find_known_spell(ch, spell->id)) {
+        return false;  /* Don't claim the command if they don't know it */
+    }
+
+    /* Resolve target from args */
+    sess->spell_target = NULL;
+    sess->spell_target_npc = NULL;
+
+    if (args && *args) {
+        Room *room = sess->current_room;
+        if (room) {
+            PlayerSession *tp = NULL;
+            NPC *tn = NULL;
+            int res = resolve_target(room, args, sess, &tp, &tn);
+            if (res == 1) {
+                sess->spell_target = tp;
+            } else if (res == 2) {
+                sess->spell_target_npc = tn;
+            } else {
+                send_to_player(sess, "You don't see '%s' here.\n", args);
+                return true;
+            }
+        }
+    } else if (sess->in_combat && sess->combat_target) {
+        sess->spell_target = sess->combat_target;
+    }
+    /* else: spell_target stays NULL (self-cast) */
+
+    /* Start casting */
+    magic_start_casting(sess, ch, spell->id, args ? args : "");
+    return true;
 }
 
 /* =============== DISPLAY =============== */

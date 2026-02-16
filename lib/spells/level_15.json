@@ -1,0 +1,39 @@
+{
+  "level": 15,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Dimensional Portal",
+      "level": 15,
+      "range": "A few feet away",
+      "duration": "30 seconds (2 melees) per level, or 1 minute (4 melees) per level as ritual",
+      "saving_throw": "None",
+      "ppe_cost": 1000,
+      "description": "The dimensional portal invocation opens a two-way door to another dimension. The mage can open a door to a specific world or randomly. This is the only way a greater being can enter into our dimension. Once the dimensional portal closes, the only way back in or out is to open another portal. One of the real dangers of using this magic is that some thing unwanted always slips through.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "dimensional",
+        "target": "area",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 2,
+      "name": "Teleport: Superior",
+      "level": 15,
+      "range": "Self or others; distance of 300 miles per level",
+      "duration": "Instant",
+      "saving_throw": "None",
+      "ppe_cost": 600,
+      "description": "The arcanist can instantly transport himself and up to 1000 lbs per level of experience, hundreds of miles away. To teleport, the mage must have a mental picture of his destination. Chances of success: Familiar location or visible destination: 99%. Place seen a few times (2-6): 85%. Place seen in photo: 80%. Place never visited but described in detail: 58%. Place known only by name or brief description: 20%. Failed teleports can result in appearing at the wrong location, falling damage, or instant death if teleporting into an object.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "teleportation",
+        "target": "self",
+        "area_effect": false
+      }
+    }
+  ]
+}

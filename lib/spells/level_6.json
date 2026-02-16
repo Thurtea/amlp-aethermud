@@ -1,0 +1,75 @@
+[
+  {
+    "id": "metamorphosis-superior",
+    "name": "Metamorphosis: Superior",
+    "level": 6,
+    "range": "Self (or other by ritual)",
+    "duration": "20 minutes per level of experience",
+    "saving_throw": "None (standard if unwilling)",
+    "ppe_cost": 100,
+    "description": "Transform the caster (or, by ritual, another target) into any real, living creature. The transformed individual retains I.Q., memory, S.D.C. and hit points; physical appearance and non-mental attributes change.",
+    "effects": [
+      "Change physical form/appearance",
+      "Retains mental stats (I.Q., memory)",
+      "Ritual required to affect others"
+    ]
+  },
+  {
+    "id": "call-lightning",
+    "name": "Call Lightning",
+    "level": 6,
+    "range": "300ft (91m); must be within caster's line of vision",
+    "duration": "Instant",
+    "saving_throw": "None",
+    "ppe_cost": 15,
+    "description": "Summon a lightning bolt from the sky to strike a specific target or point within range.",
+    "damage": "1D6 M.D.C. per level of caster",
+    "effects": [
+      "Direct electrical (M.D.C.) damage",
+      "Instant area/target strike"
+    ]
+  },
+  {
+    "id": "summon-shadow-beast",
+    "name": "Summon Shadow Beast",
+    "level": 6,
+    "range": "Immediate",
+    "duration": "Special (remains until slain or mission completed; combat control typically 6 melees per caster level)",
+    "saving_throw": "None",
+    "ppe_cost": 140,
+    "description": "Summons a large inter-dimensional shadow creature to serve the caster. Shadow beasts are stealthy in darkness/shadows and extremely dangerous; there is a chance it will not return to its home dimension.",
+    "effects": [
+      "Summons powerful companion/assailant",
+      "Invisibility while merged with shadows",
+      "May become uncontrolled (chance to remain in our world)"
+    ]
+  },
+  {
+    "id": "compulsion",
+    "name": "Compulsion",
+    "level": 6,
+    "range": "60ft (18.3m) and within line of vision",
+    "duration": "24 hours",
+    "saving_throw": "Standard",
+    "ppe_cost": 20,
+    "description": "Implants a powerful, irresistible desire in the victim to pursue a simple, attainable action or object. The subject is consumed with the impulse for the spell's duration; a remove curse will negate the effect.",
+    "effects": [
+      "Imposes obsessive desire/behavior",
+      "Limited mind-influence (non-lethal, non-complex commands)"
+    ]
+  },
+  {
+    "id": "cure-illness",
+    "name": "Cure Illness",
+    "level": 6,
+    "range": "Touch or 3ft (0.9m)",
+    "duration": "Instant (cures ordinary disease)",
+    "saving_throw": "None (standard if the person resists treatment)",
+    "ppe_cost": 15,
+    "description": "Powerful healing invocation that cures ordinary diseases and illnesses (fever, flu, common infections). Does not cure cancer, internal organ damage, or magically induced sicknesses.",
+    "effects": [
+      "Removes ordinary disease/illness",
+      "Instant cure for eligible ailments"
+    ]
+  }
+]

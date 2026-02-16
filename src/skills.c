@@ -10,7 +10,6 @@
 
 /* External declarations */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
-extern const RaceOCCInfo ALL_OCCS[];  /* Defined in chargen.c */
 
 /* ========== SKILL DATABASE ========== */
 

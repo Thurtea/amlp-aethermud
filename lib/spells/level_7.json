@@ -1,0 +1,142 @@
+[
+  {
+    "id": "calm-storms",
+    "name": "Calm Storms",
+    "level": 7,
+    "range": "Immediate area around the mage (one mile / level)",
+    "duration": "1 hour per level of experience",
+    "saving_throw": "None",
+    "ppe_cost": 200,
+    "description": "Reduce or dissipate storm conditions (wind, rain, waves) over a broad area; useful for calming tempestuous weather.",
+    "effects": [
+      "Weather control: reduce wind, rain, waves",
+      "Affects up to one mile per caster level"
+    ]
+  },
+  {
+    "id": "agony",
+    "name": "Agony",
+    "level": 7,
+    "range": "5ft (1.5m) per level of experience",
+    "duration": "1 minute (4 melees)",
+    "saving_throw": "Standard",
+    "ppe_cost": 20,
+    "description": "Inflicts intense, debilitating pain on the victim. The subject is incapacitated (no attacks, cannot move or speak) but does not suffer physical damage; effects linger briefly after spell ends.",
+    "effects": [
+      "Incapsulates target in extreme pain",
+      "Reduces attacks and speed; penalties to strike/parry/dodge"
+    ]
+  },
+  {
+    "id": "create-zombie",
+    "name": "Create Zombie (ritual)",
+    "level": 7,
+    "range": "Touch",
+    "duration": "Exists until destroyed",
+    "saving_throw": "None",
+    "ppe_cost": 250,
+    "description": "Ritual to animate a recently deceased corpse into an obedient undead zombie. The zombie is resilient to many magics and must be destroyed or exorcised to stop it.",
+    "effects": [
+      "Creates undead servant (zombie)",
+      "Zombie resists many magics; vulnerable to energy attacks and fire"
+    ]
+  },
+  {
+    "id": "animate-control-dead",
+    "name": "Animate and Control Dead",
+    "level": 7,
+    "range": "400ft (122m) / line of vision",
+    "duration": "5 minutes (20 melees) per level of experience",
+    "saving_throw": "None",
+    "ppe_cost": 20,
+    "description": "Animate corpses or control existing undead within line of vision, commanding them as mindless servants while within range.",
+    "effects": [
+      "Animate corpses and control undead",
+      "Limited to line of vision and quantity restrictions"
+    ]
+  },
+  {
+    "id": "constrain-being",
+    "name": "Constrain Being",
+    "level": 7,
+    "range": "30ft (9.1m)",
+    "duration": "2 minutes per level of experience",
+    "saving_throw": "Standard",
+    "ppe_cost": 20,
+    "description": "Hold or restrain a lesser supernatural creature or being at bay with simple commands; effective against many lesser entities.",
+    "effects": [
+      "Restrains or holds supernatural creatures at bay",
+      "Prevents simple actions while maintained"
+    ]
+  },
+  {
+    "id": "dispel-magic-barriers",
+    "name": "Dispel Magic Barriers",
+    "level": 7,
+    "range": "100ft (30.5m)",
+    "duration": "Instant",
+    "saving_throw": "Standard",
+    "ppe_cost": 20,
+    "description": "Negates or destroys magical barriers, seals, wards and similar constructs within range; the target barrier may roll a save against the attempt.",
+    "effects": [
+      "Remove/negate magic barriers and wards",
+      "Barrier receives a standard save vs the dispel"
+    ]
+  },
+  {
+    "id": "summon-entity",
+    "name": "Summon and Control Entity (ritual)",
+    "level": 7,
+    "range": "Not applicable (ritual summons to caster)",
+    "duration": "24 hours per level of experience",
+    "saving_throw": "None",
+    "ppe_cost": 250,
+    "description": "Ritual to pluck a supernatural entity from its native dimension and place it under the caster's control for the duration; powerful and potentially risky if the entity remains when duration lapses.",
+    "effects": [
+      "Summons a powerful supernatural being",
+      "Entity is under caster's control for duration"
+    ]
+  },
+  {
+    "id": "summon-rain",
+    "name": "Summon and Control Rain (ritual)",
+    "level": 7,
+    "range": "Immediate area or up to 10 miles per level",
+    "duration": "1 hour per level of experience",
+    "saving_throw": "None",
+    "ppe_cost": 200,
+    "description": "Create and control rainstorms over a wide area; intensity and coverage scale with caster level.",
+    "effects": [
+      "Generate rainstorm; control intensity (drizzle to downpour)",
+      "Affects travel and visibility over area"
+    ]
+  },
+  {
+    "id": "time-hole",
+    "name": "Time Hole",
+    "level": 7,
+    "range": "Self",
+    "duration": "Special (stasis-like pocket; temporal dilation)",
+    "saving_throw": "None",
+    "ppe_cost": 210,
+    "description": "Place the caster and possessions into a stasis-like pocket (a white void) where outside time passes more quickly; useful for hiding and recovery.",
+    "effects": [
+      "Temporal stasis pocket for caster and gear",
+      "Aging occurs normally inside; outside time moves slower"
+    ]
+  },
+  {
+    "id": "globe-of-silence",
+    "name": "Globe of Silence",
+    "level": 7,
+    "range": "90ft (28m)",
+    "duration": "6 melees per level of caster",
+    "saving_throw": "None",
+    "ppe_cost": 20,
+    "description": "Create an invisible 10ft radius globe which absorbs all sound, preventing speech and sonic effects within its area.",
+    "effects": [
+      "Total silence inside globe; prevents spoken incantations",
+      "Can be fixed in place or mentally moved by caster"
+    ]
+  }
+]

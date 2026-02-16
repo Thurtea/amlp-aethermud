@@ -1,0 +1,143 @@
+[
+  {
+    "id": "astral-projection",
+    "name": "Astral Projection",
+    "level": 4,
+    "range": "Self",
+    "duration": "5 minutes per level of experience",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "The caster frees the inner/astral body from the physical form; a silver cord links astral and physical bodies. If the cord is severed the caster may die; the physical body lapses into a helpless coma while astral travel occurs.",
+    "effects": [
+      "Astral form can travel separately from body",
+      "Physical body is in coma-like trance and vulnerable",
+      "Severing the silver cord risks death"
+    ]
+  },
+  {
+    "id": "chameleon",
+    "name": "Chameleon",
+    "level": 4,
+    "range": "Self/Touch",
+    "duration": "Varies with use (sustained)",
+    "saving_throw": "None",
+    "ppe_cost": 6,
+    "description": "Alters the caster's appearance and coloration to blend with surroundings; used for concealment and stealth.",
+    "effects": [
+      "Grants camouflage and reduced detectability",
+      "Useful for infiltration and escape"
+    ]
+  },
+  {
+    "id": "energy-field",
+    "name": "Energy Field",
+    "level": 4,
+    "range": "Touch/Personal",
+    "duration": "Short duration (sustained)",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "Generates a protective energy barrier around the target that resists or negates attacks while active.",
+    "effects": [
+      "Provides an energy barrier against attacks",
+      "May absorb or deflect certain damage types"
+    ]
+  },
+  {
+    "id": "fire-bolt",
+    "name": "Fire Bolt",
+    "level": 4,
+    "range": "Short/Medium",
+    "duration": "Instant",
+    "saving_throw": "Partial (fire resistance)",
+    "ppe_cost": 7,
+    "description": "A focused bolt of flame launched at a target, dealing immediate fire damage and capable of igniting flammable materials.",
+    "effects": [
+      "Deals direct fire damage on hit",
+      "Can ignite combustibles"
+    ]
+  },
+  {
+    "id": "levitate",
+    "name": "Levitate",
+    "level": 4,
+    "range": "Self/Touch",
+    "duration": "Minutes per level (sustained)",
+    "saving_throw": "None",
+    "ppe_cost": 5,
+    "description": "Allows the caster or a touched subject to float and move vertically, negating normal gravity effects while active.",
+    "effects": [
+      "Negates gravity for target",
+      "Enables vertical movement and hover"
+    ]
+  },
+  {
+    "id": "magic-net",
+    "name": "Magic Net",
+    "level": 4,
+    "range": "Short",
+    "duration": "Short (until broken)",
+    "saving_throw": "Reflex/escape check",
+    "ppe_cost": 7,
+    "description": "Conjures a semi-material net of magical energy that entangles and restrains targets until they escape or the net is dispelled.",
+    "effects": [
+      "Entangles and restrains targets",
+      "May require strength/skill to escape"
+    ]
+  },
+  {
+    "id": "repel-animals",
+    "name": "Repel Animals",
+    "level": 4,
+    "range": "Area",
+    "duration": "Short (minutes)",
+    "saving_throw": "Will (animals may flee)",
+    "ppe_cost": 7,
+    "description": "Creates an effect causing animals within the area to avoid or flee the caster, useful for herd-control or avoiding predators.",
+    "effects": [
+      "Causes ambient animals to flee or avoid area",
+      "Does not affect humanoids or summoned creatures unless specified"
+    ]
+  },
+  {
+    "id": "sustain",
+    "name": "Sustain",
+    "level": 4,
+    "range": "Touch/Personal",
+    "duration": "Varies (sustained)",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "Sustains life functions or ongoing effects on a subject, halting deterioration from toxins, exhaustion, or similar ongoing effects while active.",
+    "effects": [
+      "Halts or slows ongoing harmful effects",
+      "Maintains vital functions in hostile environments"
+    ]
+  },
+  {
+    "id": "trance",
+    "name": "Trance",
+    "level": 4,
+    "range": "Self",
+    "duration": "Variable (minutes to hours)",
+    "saving_throw": "None",
+    "ppe_cost": 10,
+    "description": "Induces a meditative/suspended state (death-like or focused trance) to protect from certain effects, prepare psychic work, or enter altered states of consciousness.",
+    "effects": [
+      "Slows metabolism and external effects",
+      "Useful as preparation for psychic/astral operations"
+    ]
+  },
+  {
+    "id": "float-in-air",
+    "name": "Float in Air",
+    "level": 4,
+    "range": "Self",
+    "duration": "Minutes per level",
+    "saving_throw": "None",
+    "ppe_cost": 5,
+    "description": "Allows the caster to remain suspended in mid-air and move slowly while aloft; essentially a controlled hover.",
+    "effects": [
+      "Grants hovering/slow aerial movement",
+      "Does not grant full flight speed (limited maneuverability)"
+    ]
+  }
+]

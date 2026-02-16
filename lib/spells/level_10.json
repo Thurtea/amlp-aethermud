@@ -1,0 +1,127 @@
+{
+  "level": 10,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Banishment",
+      "level": 10,
+      "range": "100 ft (30.5 m)",
+      "duration": "2 weeks per level",
+      "saving_throw": "Standard",
+      "ppe_cost": 65,
+      "description": "A useful invocation for controlling supernatural beings is Banishment. The magic forces one lesser supernatural being/demon, per experience level of the spell caster, to leave the immediate area (600 ft/183 m radius). The creature(s) can not return for at least two weeks per level of experience. Each lesser being gets to roll to save vs the magic. A successful save means it is not banished and can stay to cause trouble. As always, a banishment ritual has a greater chance of success (16 or higher is needed to save).",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "banishment",
+        "target": "multiple",
+        "area_effect": true,
+        "save_negates": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "Control/Enslave Entity",
+      "level": 10,
+      "range": "30 ft (9.1 m)",
+      "duration": "48 hours per level",
+      "saving_throw": "Standard",
+      "ppe_cost": 80,
+      "description": "Another incantation used to control supernatural forces. This magic does not summon entities, but does enable the mage to control them when encountered. The arcanist can control two entities per each of his levels of experience. All varieties of entities are susceptible to this enchantment. Each individual entity gets to make a saving throw vs magic. A successful save means it is not controlled by the arcanist. A failed roll means it will obey the arcanist to the best of its ability (some are barely intelligent).",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "control",
+        "target": "multiple",
+        "area_effect": false,
+        "save_negates": true
+      }
+    },
+    {
+      "id": 3,
+      "name": "Metamorphosis: Superior",
+      "level": 10,
+      "range": "Self, or other by ritual only",
+      "duration": "20 minutes per level",
+      "saving_throw": "None; standard if unwilling victim",
+      "ppe_cost": 100,
+      "description": "This incantation enables the spell caster to transform himself into any real, living creature: animal, human, D-Bee or insect. The usual limitations and abilities still apply. The mage can also transform himself to resemble a supernatural creature, but does not possess any of its powers or abilities, only his own normal, human abilities (I.Q., memory, attributes, hit points, S.D.C. etc.). A person other than the arcanist can be transformed, but a lengthy ritual magic must be performed to do so.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "transformation",
+        "target": "self",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 4,
+      "name": "Mystic Portal",
+      "level": 10,
+      "range": "20 ft (6.1 m)",
+      "duration": "4 melees per level",
+      "saving_throw": "None",
+      "ppe_cost": 60,
+      "description": "This spell creates a dimensional rift in the fabric of space allowing the spell caster to pass through solid walls (portal provides a 12 ft deep passage per level) or teleport people to another location known to the caster. The portal can be placed on a vertical wall; looking into it shows the other side. Range for teleport is 100 ft per level. Major limitation: the portal provides only one-way passage.",
+      "effects": {
+        "damage_dice": 0,
+        "damage_sides": 0,
+        "bonus_type": "teleportation",
+        "target": "area",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 5,
+      "name": "Summon & Control Rodents",
+      "level": 10,
+      "range": "600 ft (183 m)",
+      "duration": "5 hours per level",
+      "saving_throw": "Standard",
+      "ppe_cost": 70,
+      "description": "This pentacle/ritual produces an army of mice or rats that obey the arcanist. The sorcerer can summon 30 rodents per level of experience. Mice and rat bites inflict one point of damage each. Mice have one attack per melee, rats have two. All are +1 to dodge and are excellent climbers. Familiars are not affected.",
+      "effects": {
+        "damage_dice": 1,
+        "damage_sides": 1,
+        "bonus_type": "summoning",
+        "target": "area",
+        "area_effect": true
+      }
+    },
+    {
+      "id": 6,
+      "name": "Summon Shadow Beast",
+      "level": 10,
+      "range": "Immediate",
+      "duration": "Special",
+      "saving_throw": "None",
+      "ppe_cost": 140,
+      "description": "This inter-dimensional spell summons a creature not of this world to do the bidding of the spell caster. Shadow beasts are large, vicious predators from another world, standing 9 to 12 ft tall with sharp claws and fangs. They can completely merge into the smallest shadow, becoming undetectable. There is a 15% chance a summoned shadow beast will not return to its dimension and may remain in our world wreaking havoc.",
+      "effects": {
+        "damage_dice": 6,
+        "damage_sides": 6,
+        "bonus_type": "summoning",
+        "target": "self",
+        "area_effect": false
+      }
+    },
+    {
+      "id": 7,
+      "name": "Wards",
+      "level": 10,
+      "range": "Touch",
+      "duration": "150 years per level or until triggered",
+      "saving_throw": "Standard (base 12; ritual base 16)",
+      "ppe_cost": 90,
+      "description": "The ward invocation creates mystic symbols to protect items, dwellings, or act as traps. Wards must be physically drawn; the invocation creates two wards (three for ritual). Effects include Alarm, Fear, Fire Bolt (6D6), Paralysis, Sleep, Agony, Curse, and Banishment. After triggering, the ward disappears. Wards can last centuries if undisturbed.",
+      "effects": {
+        "damage_dice": 6,
+        "damage_sides": 6,
+        "bonus_type": "protection",
+        "target": "single",
+        "area_effect": false,
+        "save_negates": true
+      }
+    }
+  ]
+}

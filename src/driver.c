@@ -56,6 +56,7 @@
 #include "room.h"
 #include "chargen.h"
 #include "race_loader.h"
+#include "npc.h"
 #include "ui_frames.h"
 
 #define MAX_CLIENTS 100
@@ -1930,24 +1931,31 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
     
     /* Magic commands (Phase 5) */
+    /* Spell names as direct commands (e.g. "fireball bob", "magic_missile") */
+    if (magic_spell_command(session, cmd, args ? args : "")) {
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "cast") == 0) {
+        /* Legacy "cast <spell> <target>" still supported */
         cmd_cast(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
-    
+
     if (strcmp(cmd, "spells") == 0 || strcmp(cmd, "grimoire") == 0) {
         cmd_spells(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
-    
+
     if (strcmp(cmd, "ppe") == 0 || strcmp(cmd, "ppp") == 0) {
         cmd_ppe(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
-    
+
     if (strcmp(cmd, "meditate") == 0) {
         cmd_meditate(session, args ? args : "");
         result.type = VALUE_NULL;
@@ -4629,7 +4637,14 @@ int main(int argc, char **argv) {
     
     /* Initialize magic system (Phase 5) */
     magic_init();
-    
+
+    /* Initialize NPC system and spawn mobs */
+    npc_init();
+    npc_spawn(NPC_GOBLIN, 6);    /* Training Grounds: 2x Goblin */
+    npc_spawn(NPC_GOBLIN, 6);
+    npc_spawn(NPC_DOG_BOY, 7);   /* Blacksmith: 1x Dog Boy */
+    npc_spawn(NPC_DEAD_BOY, 10); /* Gate: 1x Dead Boy */
+
     for (int i = 0; i < MAX_CLIENTS; i++) {
         sessions[i] = NULL;
     }
@@ -4815,6 +4830,7 @@ int main(int argc, char **argv) {
         if (now - last_combat_tick >= COMBAT_TICK_SECS) {
             combat_tick();
             combat_regen_tick();
+            npc_tick();
 
             /* Magic, psionics, and meditation ticks */
             for (int i = 0; i < MAX_CLIENTS; i++) {

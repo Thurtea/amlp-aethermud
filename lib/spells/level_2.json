@@ -1,0 +1,258 @@
+{
+  "level": 2,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Apparition",
+      "level": 2,
+      "range": "Variable (see description)",
+      "duration": "Varies",
+      "saving_throw": "Standard",
+      "ppe_cost": 20,
+      "description": "Creates a terrifying image or phantasm (an apparition) tailored to the victim; may cause panic, flight or horror effects. Results and defenses depend on victim's save vs magic/terror.",
+      "effects": {"target":"single/area","area_effect":false}
+    },
+    {
+      "id": 2,
+      "name": "Befuddle",
+      "level": 2,
+      "range": "Touch or short range",
+      "duration": "1-5 melees (variable)",
+      "saving_throw": "Standard",
+      "ppe_cost": 3,
+      "description": "Causes confusion and mental disorientation in the target, lowering combat performance and decision-making temporarily.",
+      "effects": {"target":"single","mental":true}
+    },
+    {
+      "id": 3,
+      "name": "Chameleon",
+      "level": 2,
+      "range": "Self/Touch",
+      "duration": "5 minutes per level",
+      "saving_throw": "None",
+      "ppe_cost": 6,
+      "description": "Grants near-invisibility by altering appearance; provides large bonus to stealth and concealment checks vs casual observation.",
+      "effects": {"target":"self","bonus_type":"stealth","area_effect":false}
+    },
+    {
+      "id": 4,
+      "name": "Climb",
+      "level": 2,
+      "range": "Self/Target",
+      "duration": "5 melees per level",
+      "saving_throw": "None",
+      "ppe_cost": 3,
+      "description": "Grants supernatural climbing ability (adhesive surface movement) to the target, allowing vertical movement without tools.",
+      "effects": {"target":"single","mobility":true}
+    },
+    {
+      "id": 5,
+      "name": "Concealment",
+      "level": 2,
+      "range": "Small objects to 40 ft",
+      "duration": "5 minutes per level",
+      "saving_throw": "Standard",
+      "ppe_cost": 6,
+      "description": "Makes a small object effectively invisible to normal perception; affects perception rather than true invisibility.",
+      "effects": {"target":"object","area_effect":false}
+    },
+    {
+      "id": 6,
+      "name": "Detect Concealment",
+      "level": 2,
+      "range": "100 ft",
+      "duration": "1 melee",
+      "saving_throw": "None",
+      "ppe_cost": 6,
+      "description": "Reveals attempts at concealment or hidden items/doors within range; counters simple concealment spells.",
+      "effects": {"target":"area","sensing":true}
+    },
+    {
+      "id": 7,
+      "name": "Fear",
+      "level": 2,
+      "range": "30-60 ft",
+      "duration": "Instant/short",
+      "saving_throw": "Standard",
+      "ppe_cost": 5,
+      "description": "Instills panic or terror in targets; affected creatures may flee or suffer combat penalties.",
+      "effects": {"target":"area","status":"fear","save_negates":true}
+    },
+    {
+      "id": 8,
+      "name": "Heavy Breathing",
+      "level": 2,
+      "range": "Area/target",
+      "duration": "Short",
+      "saving_throw": "Standard",
+      "ppe_cost": 3,
+      "description": "Creates audible, intimidating breathing noise around the caster or target, imposing -2 to strike and -1 to parry/dodge on frightened victims in close quarters.",
+      "effects": {"target":"area","status":"intimidation"}
+    },
+    {
+      "id": 9,
+      "name": "Levitation",
+      "level": 2,
+      "range": "Up to 60 ft",
+      "duration": "3 minutes (12 melees) per level",
+      "saving_throw": "None",
+      "ppe_cost": 5,
+      "description": "Allows a target to levitate and move vertically within range; caster can suspend self or others and control vertical position.",
+      "effects": {"target":"single","mobility":true}
+    },
+    {
+      "id": 10,
+      "name": "Mystic Alarm",
+      "level": 2,
+      "range": "Touch/Area",
+      "duration": "Varies (minutes per level)",
+      "saving_throw": "None",
+      "ppe_cost": 5,
+      "description": "Sets a magical alert on an object or area that signals the caster when disturbed or entered.",
+      "effects": {"target":"area","utility":true}
+    },
+    {
+      "id": 11,
+      "name": "Turn Dead",
+      "level": 2,
+      "range": "30-60 ft",
+      "duration": "Instant/short",
+      "saving_throw": "Standard",
+      "ppe_cost": 6,
+      "description": "Repels or disrupts lesser undead for a brief period; stronger undead may resist or be immune.",
+      "effects": {"target":"area","undead_effect":true}
+    },
+    {
+      "id": 12,
+      "name": "Mystic Portal",
+      "level": 2,
+      "range": "Special/ritual",
+      "duration": "Short (ritual-dependent)",
+      "saving_throw": "Varies",
+      "ppe_cost": 60,
+      "description": "Creates a small temporary portal or gateway to an allied planar location or a pre-known site; often ritual and situational.",
+      "effects": {"target":"area","teleportation":true}
+    },
+    {
+      "id": 13,
+      "name": "Call Lightning",
+      "level": 2,
+      "range": "Sky/area",
+      "duration": "Instant/per melee",
+      "saving_throw": "Standard",
+      "ppe_cost": 15,
+      "description": "Summons a bolt or localized storm lightning to strike targets in an area; damage and area depend on caster power.",
+      "effects": {"damage_dice":0,"damage_sides":0,"area_effect":true}
+    },
+    {
+      "id": 14,
+      "name": "Compulsion",
+      "level": 2,
+      "range": "30-90 ft",
+      "duration": "Short (melees)",
+      "saving_throw": "Standard",
+      "ppe_cost": 20,
+      "description": "Mentally overrides a target's free will briefly, forcing simple actions or movement.",
+      "effects": {"target":"single","mental_control":true}
+    },
+    {
+      "id": 15,
+      "name": "Cure Illness",
+      "level": 2,
+      "range": "Touch",
+      "duration": "Instant",
+      "saving_throw": "None",
+      "ppe_cost": 15,
+      "description": "Cures common illnesses and poisons; may not affect major curses or supernatural diseases without higher power.",
+      "effects": {"target":"single","healing":true}
+    },
+    {
+      "id": 16,
+      "name": "Fire Ball",
+      "level": 2,
+      "range": "30-90 ft",
+      "duration": "Instant",
+      "saving_throw": "Standard (partial)",
+      "ppe_cost": 10,
+      "description": "Hurls a sphere of fire that explodes on impact dealing area fire damage.",
+      "effects": {"damage_type":"fire","area_effect":true}
+    },
+    {
+      "id": 17,
+      "name": "Impervious to Energy",
+      "level": 2,
+      "range": "Self/Touch",
+      "duration": "Short (melees per level)",
+      "saving_throw": "None",
+      "ppe_cost": 20,
+      "description": "Provides strong resistance or immunity to a specific energy type for a short duration.",
+      "effects": {"damage_reduction":true}
+    },
+    {
+      "id": 18,
+      "name": "Memory Bank",
+      "level": 2,
+      "range": "Touch",
+      "duration": "Months per level (stored)",
+      "saving_throw": "None if willing; Standard if unwilling",
+      "ppe_cost": 12,
+      "description": "Implants or stores a block of memory/information in a subject that can be retrieved later.",
+      "effects": {"target":"single","utility":true}
+    },
+    {
+      "id": 19,
+      "name": "Reduce: Self",
+      "level": 2,
+      "range": "Self",
+      "duration": "Varies",
+      "saving_throw": "None",
+      "ppe_cost": 20,
+      "description": "Reduces size/strength of self (or other) for specific mechanical benefits; used for fit/escape or stealth.",
+      "effects": {"target":"self","size_change":true}
+    },
+    {
+      "id": 20,
+      "name": "Teleport: Lesser",
+      "level": 2,
+      "range": "Short/known locations",
+      "duration": "Instant",
+      "saving_throw": "Varies",
+      "ppe_cost": 15,
+      "description": "Short-range teleportation to a known or seen location within limits; small chance of miscalculation if destination is vague.",
+      "effects": {"teleportation":true}
+    },
+    {
+      "id": 21,
+      "name": "Time Slip",
+      "level": 2,
+      "range": "Self",
+      "duration": "Short (melees)",
+      "saving_throw": "None",
+      "ppe_cost": 20,
+      "description": "Briefly alters local time flow for the caster (speeding or slowing) for tactical advantage.",
+      "effects": {"time_manipulation":true}
+    },
+    {
+      "id": 22,
+      "name": "Tongues",
+      "level": 2,
+      "range": "Self or touch",
+      "duration": "3 minutes (12 melees) per level",
+      "saving_throw": "None",
+      "ppe_cost": 12,
+      "description": "Grants the ability to understand and speak all spoken languages with high proficiency.",
+      "effects": {"target":"single","utility":true}
+    },
+    {
+      "id": 23,
+      "name": "Words of Truth",
+      "level": 2,
+      "range": "5 ft",
+      "duration": "Instant",
+      "saving_throw": "None",
+      "ppe_cost": 15,
+      "description": "A short invocation that compels a simple truth or reveals falsehoods in a small area.",
+      "effects": {"target":"area","utility":true}
+    }
+  ]
+}

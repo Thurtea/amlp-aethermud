@@ -1,0 +1,115 @@
+{
+  "level": 3,
+  "spells": [
+    {
+      "id": 1,
+      "name": "Breathe Without Air",
+      "level": 3,
+      "range": "Self or others by touch",
+      "duration": "12 melees (3 minutes) per level",
+      "saving_throw": "Standard",
+      "ppe_cost": 5,
+      "description": "Allows the target to survive without air (underwater or vacuum) for the duration; normal activity possible.",
+      "effects": {"target":"single","utility":true}
+    },
+    {
+      "id": 2,
+      "name": "Energy Bolt",
+      "level": 3,
+      "range": "Ranged (line of sight)",
+      "duration": "Instant",
+      "saving_throw": "Standard (partial)",
+      "ppe_cost": 5,
+      "description": "Fires a concentrated bolt of magical energy at a target, dealing energy damage depending on caster power.",
+      "effects": {"damage_type":"energy","target":"single"}
+    },
+    {
+      "id": 3,
+      "name": "Fingers of Wind",
+      "level": 3,
+      "range": "Touch/short",
+      "duration": "Instant/short",
+      "saving_throw": "Standard",
+      "ppe_cost": 5,
+      "description": "Creates razor gusts or slicing wind from the caster's fingertips, able to cut or shove opponents and small objects.",
+      "effects": {"damage_type":"cutting","area_effect":false}
+    },
+    {
+      "id": 4,
+      "name": "Fool's Gold",
+      "level": 3,
+      "range": "Touch/10 ft",
+      "duration": "Varies",
+      "saving_throw": "Standard",
+      "ppe_cost": 10,
+      "description": "Transmutes or disguises ordinary materials into convincing but worthless gold; often used to deceive.",
+      "effects": {"target":"object","utility":true}
+    },
+    {
+      "id": 5,
+      "name": "Impervious to Fire",
+      "level": 3,
+      "range": "Self/Touch",
+      "duration": "Short (melees per level)",
+      "saving_throw": "None",
+      "ppe_cost": 5,
+      "description": "Grants resistance or immunity to fire damage for the duration.",
+      "effects": {"damage_reduction":"fire"}
+    },
+    {
+      "id": 6,
+      "name": "Impervious to Poison",
+      "level": 3,
+      "range": "Self/Touch",
+      "duration": "Short",
+      "saving_throw": "None",
+      "ppe_cost": 5,
+      "description": "Grants strong resistance to common poisons and toxins for a short duration.",
+      "effects": {"resistance":"poison"}
+    },
+    {
+      "id": 7,
+      "name": "Invisibility: Simple",
+      "level": 3,
+      "range": "Self/Touch",
+      "duration": "5 minutes per level",
+      "saving_throw": "None",
+      "ppe_cost": 6,
+      "description": "Makes the subject effectively invisible to normal perception; limited by magical/technological detection.",
+      "effects": {"target":"single","stealth":true}
+    },
+    {
+      "id": 8,
+      "name": "Multiple Image",
+      "level": 3,
+      "range": "Self",
+      "duration": "Short (melees)",
+      "saving_throw": "None",
+      "ppe_cost": 7,
+      "description": "Creates illusory duplicates of the caster to confuse attackers, granting defensive bonuses.",
+      "effects": {"target":"self","illusion":true}
+    },
+    {
+      "id": 9,
+      "name": "Paralysis: Lesser",
+      "level": 3,
+      "range": "Touch/short",
+      "duration": "Short (melees)",
+      "saving_throw": "Standard",
+      "ppe_cost": 5,
+      "description": "Partial paralysis that reduces mobility and actions for affected targets unless they save.",
+      "effects": {"target":"single","status":"paralysis","save_negates":true}
+    },
+    {
+      "id": 10,
+      "name": "Telekinesis",
+      "level": 3,
+      "range": "Varies (up to 60 ft typical)",
+      "duration": "Short (melees per level)",
+      "saving_throw": "Standard",
+      "ppe_cost": 6,
+      "description": "Manipulate, lift, and hurl objects or apply force to creatures at range; effectiveness scales with caster power.",
+      "effects": {"target":"single/area","telekinetic":true}
+    }
+  ]
+}

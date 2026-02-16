@@ -1,4 +1,5 @@
 #include "room.h"
+#include "npc.h"
 #include "item.h"
 #include "session_internal.h"
 #include <stdio.h>
@@ -1076,6 +1077,27 @@ void room_remove_player(Room *room, PlayerSession *player) {
     }
 }
 
+/* Add NPC to room */
+void room_add_npc(Room *room, NPC *npc) {
+    if (!room || !npc) return;
+    if (room->num_npcs >= MAX_NPCS_PER_ROOM) return;
+    room->npcs[room->num_npcs++] = npc;
+}
+
+/* Remove NPC from room */
+void room_remove_npc(Room *room, NPC *npc) {
+    if (!room || !npc) return;
+    for (int i = 0; i < room->num_npcs; i++) {
+        if (room->npcs[i] == npc) {
+            for (int j = i; j < room->num_npcs - 1; j++) {
+                room->npcs[j] = room->npcs[j + 1];
+            }
+            room->num_npcs--;
+            return;
+        }
+    }
+}
+
 /* Add item to room's ground list */
 void room_add_item(Room *room, Item *item) {
     if (!room || !item) return;
@@ -1283,21 +1305,54 @@ void cmd_look(PlayerSession *sess, const char *args) {
             }
         }
 
-        /* 5. Room items */
+        /* 5. NPC keyword match */
+        {
+            NPC *n = npc_find_in_room(room, target);
+            if (n) {
+                char display[64];
+                snprintf(display, sizeof(display), "%s", n->name);
+                display[0] = (char)toupper((unsigned char)display[0]);
+                send_to_player(sess, "%s\n", display);
+                Character *nch = &n->character;
+                if (nch->health_type == MDC_ONLY) {
+                    send_to_player(sess, "Level %d  MDC: %d/%d\n",
+                                   nch->level, nch->mdc, nch->max_mdc);
+                } else {
+                    send_to_player(sess, "Level %d  HP: %d/%d  SDC: %d/%d\n",
+                                   nch->level, nch->hp, nch->max_hp, nch->sdc, nch->max_sdc);
+                }
+                int hp_pct;
+                if (nch->health_type == MDC_ONLY)
+                    hp_pct = nch->max_mdc > 0 ? (nch->mdc * 100 / nch->max_mdc) : 100;
+                else
+                    hp_pct = nch->max_hp > 0 ? (nch->hp * 100 / nch->max_hp) : 100;
+                if (hp_pct >= 90)
+                    send_to_player(sess, "It appears to be in good health.\n");
+                else if (hp_pct >= 50)
+                    send_to_player(sess, "It looks a bit roughed up.\n");
+                else if (hp_pct >= 25)
+                    send_to_player(sess, "It looks seriously wounded.\n");
+                else
+                    send_to_player(sess, "It is barely standing.\n");
+                return;
+            }
+        }
+
+        /* 6. Room items */
         Item *ritem = room_find_item(room, target);
         if (ritem) {
             look_at_item(sess, ritem);
             return;
         }
 
-        /* 6. Inventory items */
+        /* 7. Inventory items */
         Item *iitem = inventory_find(&sess->character.inventory, target);
         if (iitem) {
             look_at_item(sess, iitem);
             return;
         }
 
-        /* 7. Room details (examinable scenery from LPC set_items) */
+        /* 8. Room details (examinable scenery from LPC set_items) */
         const char *detail = room_find_detail(room, target);
         if (detail) {
             send_to_player(sess, "%s\n", detail);
@@ -1403,6 +1458,17 @@ show_room:
                 send_to_player(sess, "%s %s %s.\n",
                               vowel ? "An" : "A", lower_race, position);
             }
+        }
+    }
+
+    /* List NPCs in room */
+    for (int i = 0; i < room->num_npcs; i++) {
+        NPC *n = room->npcs[i];
+        if (n && n->is_alive) {
+            char display[64];
+            snprintf(display, sizeof(display), "%s", n->name);
+            display[0] = (char)toupper((unsigned char)display[0]);
+            send_to_player(sess, "%s is here.\n", display);
         }
     }
 }

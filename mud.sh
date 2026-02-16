@@ -1,8 +1,8 @@
 #!/bin/bash
 # MUD Control Script
 
-PID_FILE="logs/driver.pid"
-LOG_FILE="logs/driver.log"
+PID_FILE="mud.pid"
+LOG_FILE="lib/log/server.log"
 DRIVER_BIN="./build/driver"
 if [ ! -x "$DRIVER_BIN" ]; then
     if [ -x ./driver ]; then

@@ -2055,32 +2055,50 @@ void cmd_get(PlayerSession *sess, const char *args) {
         return;
     }
 
-    /* Handle "get all" */
-    if (strcasecmp(args, "all") == 0) {
+    /* Handle "get all" and "get all.<filter>" */
+    if (strncasecmp(args, "all", 3) == 0) {
         if (!sess->current_room || !sess->current_room->items) {
             send_to_player(sess, "There is nothing here to pick up.\n");
             return;
         }
 
+        const char *filter = NULL;
+        if (args[3] == '.' && args[4] != '\0') filter = args + 4; /* all.<substr> */
+
         int picked = 0;
         int skipped = 0;
-        /* Iterate over room items; move items until weight limit reached */
         Item *iter = sess->current_room->items;
-        /* We collect items to move in an array because moving alters the room list */
-        Item *to_move[256];
+        Item *to_move[512];
         int tm_count = 0;
-        while (iter && tm_count < 256) {
+        while (iter && tm_count < 512) {
             to_move[tm_count++] = iter;
             iter = iter->next;
         }
 
+        /* lowercase filter for case-insensitive match */
+        char lower_filter[256] = "";
+        if (filter) {
+            strncpy(lower_filter, filter, sizeof(lower_filter)-1);
+            for (char *p = lower_filter; *p; p++) *p = tolower((unsigned char)*p);
+        }
+
         for (int i = 0; i < tm_count; i++) {
             Item *it = to_move[i];
+            if (!it) continue;
+
+            /* If filter present, only pick items whose name contains the filter */
+            if (filter) {
+                char lower_name[256];
+                strncpy(lower_name, it->name ? it->name : "", sizeof(lower_name)-1);
+                lower_name[sizeof(lower_name)-1] = '\0';
+                for (char *p = lower_name; *p; p++) *p = tolower((unsigned char)*p);
+                if (!strstr(lower_name, lower_filter)) continue;
+            }
+
             if (!inventory_can_carry(&sess->character.inventory, it->weight)) {
                 skipped++;
                 continue;
             }
-            /* Remove from room and add to inventory */
             room_remove_item(sess->current_room, it);
             if (inventory_add(&sess->character.inventory, it)) {
                 picked++;
@@ -2088,13 +2106,12 @@ void cmd_get(PlayerSession *sess, const char *args) {
                 snprintf(msg, sizeof(msg), "%s picks up %s.\n", sess->username, it->name);
                 room_broadcast(sess->current_room, msg, sess);
             } else {
-                /* Should not usually happen, but restore to room */
                 room_add_item(sess->current_room, it);
                 skipped++;
             }
         }
 
-        send_to_player(sess, "You pick up %d item(s). %d skipped (weight limit).\n", picked, skipped);
+        send_to_player(sess, "You pick up %d item(s). %d skipped (weight limit or filter).\n", picked, skipped);
         return;
     }
 
@@ -2131,29 +2148,44 @@ void cmd_drop(PlayerSession *sess, const char *args) {
         return;
     }
 
-    /* Handle "drop all" */
-    if (strcasecmp(args, "all") == 0) {
+    /* Handle "drop all" and "drop all.<filter>" */
+    if (strncasecmp(args, "all", 3) == 0) {
         Character *ch = &sess->character;
         if (!ch->inventory.items) {
             send_to_player(sess, "You have nothing to drop.\n");
             return;
         }
+        const char *filter = NULL;
+        if (args[3] == '.' && args[4] != '\0') filter = args + 4; /* all.<substr> */
 
         int dropped = 0;
         int skipped = 0;
-        /* We need to iterate and remove non-equipped items */
         Item *curr = ch->inventory.items;
-        Item *next;
-        /* Use a temp array to avoid concurrent modification issues */
-        Item *to_drop[256];
+        Item *to_drop[512];
         int td = 0;
-        while (curr && td < 256) {
+        while (curr && td < 512) {
             if (!curr->is_equipped) to_drop[td++] = curr;
             curr = curr->next;
         }
 
+        char lower_filter[256] = "";
+        if (filter) {
+            strncpy(lower_filter, filter, sizeof(lower_filter)-1);
+            for (char *p = lower_filter; *p; p++) *p = tolower((unsigned char)*p);
+        }
+
         for (int i = 0; i < td; i++) {
             Item *it = to_drop[i];
+            if (!it) continue;
+
+            if (filter) {
+                char lower_name[256];
+                strncpy(lower_name, it->name ? it->name : "", sizeof(lower_name)-1);
+                lower_name[sizeof(lower_name)-1] = '\0';
+                for (char *p = lower_name; *p; p++) *p = tolower((unsigned char)*p);
+                if (!strstr(lower_name, lower_filter)) continue;
+            }
+
             Item *removed = inventory_remove(&ch->inventory, it->name);
             if (removed) {
                 room_add_item(sess->current_room, removed);

@@ -1,0 +1,770 @@
+# LPC Library Analysis
+
+## .gitattributes
+- Purpose: .gitattributes directory in lib/
+- File count: 1
+- Files:
+
+  - lib/.gitattributes (1 lines) - ⬜ stub/missing
+## .gitignore
+- Purpose: .gitignore directory in lib/
+- File count: 1
+- Files:
+
+  - lib/.gitignore (29 lines) - ⚠️ partial
+## Makefile
+- Purpose: Makefile directory in lib/
+- File count: 1
+- Files:
+
+  - lib/Makefile (9 lines) - ⬜ stub/missing
+## clone
+- Purpose: clone directory in lib/
+- File count: 4
+- Files:
+
+  - lib/clone/login.lpc (257 lines) - ✅ complete
+  - lib/clone/simple_user.lpc (25 lines) - ⚠️ partial
+  - lib/clone/simple_user_min.lpc (7 lines) - ⬜ stub/missing
+  - lib/clone/user.lpc (252 lines) - ✅ complete
+## cmds
+- Purpose: cmds directory in lib/
+- File count: 96
+- Files:
+
+  - lib/cmds/admin/demote.lpc (96 lines) - ⚠️ partial
+  - lib/cmds/admin/goto.lpc (32 lines) - ⚠️ partial
+  - lib/cmds/admin/grantskill.lpc (172 lines) - ⚠️ partial
+  - lib/cmds/admin/promote.lpc (122 lines) - ⚠️ partial
+  - lib/cmds/admin/setocc.lpc (119 lines) - ⚠️ partial
+  - lib/cmds/admin/shutdown.lpc (15 lines) - ⬜ stub/missing
+  - lib/cmds/admin/stat.lpc (45 lines) - ⚠️ partial
+  - lib/cmds/admin/tattoogun.lpc (291 lines) - ✅ complete
+  - lib/cmds/admin/testskill.lpc (136 lines) - ⚠️ partial
+  - lib/cmds/admin/wiz.lpc (72 lines) - ⚠️ partial
+  - lib/cmds/admin/wiztool.lpc (87 lines) - ⚠️ partial
+  - lib/cmds/attack.lpc (99 lines) - ⚠️ partial
+  - lib/cmds/balance.lpc (9 lines) - ⬜ stub/missing
+  - lib/cmds/buy.lpc (121 lines) - ⚠️ partial
+  - lib/cmds/cast.lpc (145 lines) - ⚠️ partial
+  - lib/cmds/cat.lpc (89 lines) - ⚠️ partial
+  - lib/cmds/cd.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/chat.lpc (44 lines) - ⚠️ partial
+  - lib/cmds/clone.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/creator/cat.lpc (59 lines) - ⚠️ partial
+  - lib/cmds/creator/cd.lpc (46 lines) - ⚠️ partial
+  - lib/cmds/creator/clone.lpc (52 lines) - ⚠️ partial
+  - lib/cmds/creator/destruct.lpc (55 lines) - ⚠️ partial
+  - lib/cmds/creator/ed.lpc (197 lines) - ⚠️ partial
+  - lib/cmds/creator/eval.lpc (68 lines) - ⚠️ partial
+  - lib/cmds/creator/find.lpc (194 lines) - ⚠️ partial
+  - lib/cmds/creator/force.lpc (53 lines) - ⚠️ partial
+  - lib/cmds/creator/grep.lpc (207 lines) - ✅ complete
+  - lib/cmds/creator/head.lpc (117 lines) - ⚠️ partial
+  - lib/cmds/creator/load.lpc (45 lines) - ⚠️ partial
+  - lib/cmds/creator/ls.lpc (146 lines) - ⚠️ partial
+  - lib/cmds/creator/mkdir.lpc (138 lines) - ⚠️ partial
+  - lib/cmds/creator/mkobject.lpc (262 lines) - ✅ complete
+  - lib/cmds/creator/mkroom.lpc (299 lines) - ✅ complete
+  - lib/cmds/creator/pwd.lpc (18 lines) - ⬜ stub/missing
+  - lib/cmds/creator/tail.lpc (139 lines) - ⚠️ partial
+  - lib/cmds/creator/update.lpc (52 lines) - ⚠️ partial
+  - lib/cmds/credits.lpc (24 lines) - ⚠️ partial
+  - lib/cmds/dragon/breath.lpc (137 lines) - ⚠️ partial
+  - lib/cmds/drive.lpc (74 lines) - ⚠️ partial
+  - lib/cmds/drop.lpc (105 lines) - ⚠️ partial
+  - lib/cmds/emote.lpc (62 lines) - ⚠️ partial
+  - lib/cmds/enter.lpc (63 lines) - ⚠️ partial
+  - lib/cmds/equipment.lpc (100 lines) - ⚠️ partial
+  - lib/cmds/eval.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/examine.lpc (202 lines) - ✅ complete
+  - lib/cmds/exits.lpc (55 lines) - ⚠️ partial
+  - lib/cmds/flee.lpc (144 lines) - ⚠️ partial
+  - lib/cmds/forget.lpc (68 lines) - ⚠️ partial
+  - lib/cmds/get.lpc (121 lines) - ⚠️ partial
+  - lib/cmds/give.lpc (132 lines) - ⚠️ partial
+  - lib/cmds/go.lpc (69 lines) - ⚠️ partial
+  - lib/cmds/goto.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/help.lpc (58 lines) - ⚠️ partial
+  - lib/cmds/introduce.lpc (91 lines) - ⚠️ partial
+  - lib/cmds/inventory.lpc (52 lines) - ⚠️ partial
+  - lib/cmds/kill.lpc (29 lines) - ⚠️ partial
+  - lib/cmds/language.lpc (58 lines) - ⚠️ partial
+  - lib/cmds/languages.lpc (59 lines) - ⚠️ partial
+  - lib/cmds/look.lpc (170 lines) - ⚠️ partial
+  - lib/cmds/ls.lpc (146 lines) - ⚠️ partial
+  - lib/cmds/manifest.lpc (147 lines) - ⚠️ partial
+  - lib/cmds/metamorph.lpc (185 lines) - ⚠️ partial
+  - lib/cmds/money.lpc (9 lines) - ⬜ stub/missing
+  - lib/cmds/pilot.lpc (69 lines) - ⚠️ partial
+  - lib/cmds/players/emote.c (38 lines) - ⚠️ partial
+  - lib/cmds/position.lpc (46 lines) - ⚠️ partial
+  - lib/cmds/promote.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/prompt.lpc (110 lines) - ⚠️ partial
+  - lib/cmds/put.lpc (153 lines) - ⚠️ partial
+  - lib/cmds/pwd.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/quit.lpc (38 lines) - ⚠️ partial
+  - lib/cmds/remember.lpc (70 lines) - ⚠️ partial
+  - lib/cmds/remove.lpc (99 lines) - ⚠️ partial
+  - lib/cmds/repair.lpc (193 lines) - ⚠️ partial
+  - lib/cmds/say.lpc (88 lines) - ⚠️ partial
+  - lib/cmds/score.lpc (28 lines) - ⚠️ partial
+  - lib/cmds/sell.lpc (86 lines) - ⚠️ partial
+  - lib/cmds/shout.lpc (79 lines) - ⚠️ partial
+  - lib/cmds/shutdown.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/skills.lpc (64 lines) - ⚠️ partial
+  - lib/cmds/start.lpc (65 lines) - ⚠️ partial
+  - lib/cmds/stats.lpc (32 lines) - ⚠️ partial
+  - lib/cmds/stop.lpc (57 lines) - ⚠️ partial
+  - lib/cmds/surname.lpc (145 lines) - ⚠️ partial
+  - lib/cmds/take.lpc (176 lines) - ⚠️ partial
+  - lib/cmds/tattoos.lpc (114 lines) - ⚠️ partial
+  - lib/cmds/tell.lpc (57 lines) - ⚠️ partial
+  - lib/cmds/test.lpc (8 lines) - ⬜ stub/missing
+  - lib/cmds/unwield.lpc (126 lines) - ⚠️ partial
+  - lib/cmds/users.lpc (10 lines) - ⬜ stub/missing
+  - lib/cmds/vstatus.lpc (44 lines) - ⚠️ partial
+  - lib/cmds/wear.lpc (111 lines) - ⚠️ partial
+  - lib/cmds/whisper.lpc (73 lines) - ⚠️ partial
+  - lib/cmds/who.lpc (119 lines) - ⚠️ partial
+  - lib/cmds/wield.lpc (125 lines) - ⚠️ partial
+## daemon
+- Purpose: daemon directory in lib/
+- File count: 8
+- Files:
+
+  - lib/daemon/chargen.lpc (1111 lines) - ✅ complete
+  - lib/daemon/combat.lpc (827 lines) - ✅ complete
+  - lib/daemon/command.lpc (295 lines) - ✅ complete
+  - lib/daemon/languages.lpc (184 lines) - ⚠️ partial
+  - lib/daemon/login.lpc (10 lines) - ⬜ stub/missing
+  - lib/daemon/psionics.lpc (205 lines) - ✅ complete
+  - lib/daemon/skills.lpc (243 lines) - ✅ complete
+  - lib/daemon/spells.lpc (207 lines) - ✅ complete
+## data
+- Purpose: data directory in lib/
+- File count: 7
+- Files:
+
+  - lib/data/help/commands/attack (77 lines) - ⚠️ partial
+  - lib/data/help/commands/introduce (43 lines) - ⚠️ partial
+  - lib/data/help/concepts/combat (103 lines) - ⚠️ partial
+  - lib/data/help/concepts/getting-started (84 lines) - ⚠️ partial
+  - lib/data/help/concepts/identity (127 lines) - ⚠️ partial
+  - lib/data/help/systems/occs (62 lines) - ⚠️ partial
+  - lib/data/help/systems/races (85 lines) - ⚠️ partial
+## domains
+- Purpose: domains directory in lib/
+- File count: 75
+- Files:
+
+  - lib/domains/castle/entry.lpc (52 lines) - ⚠️ partial
+  - lib/domains/castle/hawk.lpc (269 lines) - ✅ complete
+  - lib/domains/castle/spike.lpc (92 lines) - ⚠️ partial
+  - lib/domains/death/healer_npc.lpc (74 lines) - ⚠️ partial
+  - lib/domains/death/recovery_room.lpc (108 lines) - ⚠️ partial
+  - lib/domains/forest/rooms/void.lpc (0 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/blacksmith_forge.lpc (17 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/chapel.lpc (17 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/connect/connector_north_1.lpc (14 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/connect/connector_south.lpc (14 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/connect/connector_west_1.lpc (14 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/connect/connector_west_2.lpc (14 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_1_1.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_1_2.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_1_3.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_1_4.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_2_1.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_2_2.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_2_3.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_2_4.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_3_1.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_3_2.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_3_3.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_3_4.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_4_1.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_4_2.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_4_3.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/east_4_4.lpc (12 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/fountain.lpc (19 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/north_path_1.lpc (16 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/north_path_2.lpc (16 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/north_path_3.lpc (16 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/north_path_4.lpc (16 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/north_path_5.lpc (16 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/npc/magic_bush.lpc (40 lines) - ⚠️ partial
+  - lib/domains/new_camelot/garden/obj/fountain.lpc (8 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/garden/seed_spawn.lpc (26 lines) - ⚠️ partial
+  - lib/domains/new_camelot/gate.lpc (17 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/stables.lpc (17 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/tavern.lpc (17 lines) - ⬜ stub/missing
+  - lib/domains/new_camelot/town_square.lpc (23 lines) - ⚠️ partial
+  - lib/domains/new_camelot/training_grounds.lpc (18 lines) - ⬜ stub/missing
+  - lib/domains/staff_castle/npc/spike.lpc (154 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/courtyard.lpc (57 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/dining_hall.lpc (49 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/garden.lpc (46 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/hedge_maze.lpc (29 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/kitchen.lpc (44 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/library.lpc (46 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/main_hall.lpc (48 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/maze_center.lpc (24 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/maze_east.lpc (20 lines) - ⬜ stub/missing
+  - lib/domains/staff_castle/room/maze_west.lpc (21 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/observatory.lpc (44 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/stables.lpc (44 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/stairs.lpc (30 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/throne_room.lpc (47 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/upper_hall.lpc (39 lines) - ⚠️ partial
+  - lib/domains/staff_castle/room/war_room.lpc (45 lines) - ⚠️ partial
+  - lib/domains/start/lake_far_shore.lpc (96 lines) - ⚠️ partial
+  - lib/domains/start/lake_shore.lpc (100 lines) - ⚠️ partial
+  - lib/domains/start/npc/moxim.lpc (65 lines) - ⚠️ partial
+  - lib/domains/start/npc/test_goblin.lpc (48 lines) - ⚠️ partial
+  - lib/domains/start/npcs/grok_merchant.lpc (85 lines) - ⚠️ partial
+  - lib/domains/start/objects/technowizard_hilt.lpc (298 lines) - ✅ complete
+  - lib/domains/start/room/combat_arena.lpc (38 lines) - ⚠️ partial
+  - lib/domains/start/room/documentation.lpc (56 lines) - ⚠️ partial
+  - lib/domains/start/room/void.lpc (20 lines) - ⬜ stub/missing
+  - lib/domains/start/room/welcome.lpc (35 lines) - ⚠️ partial
+  - lib/domains/start/shop_general.lpc (61 lines) - ⚠️ partial
+  - lib/domains/start/village_center.lpc (26 lines) - ⚠️ partial
+  - lib/domains/tutorial/npc/guard.lpc (24 lines) - ⚠️ partial
+  - lib/domains/tutorial/objects/weapon.lpc (41 lines) - ⚠️ partial
+  - lib/domains/tutorial/rooms/start.lpc (18 lines) - ⬜ stub/missing
+  - lib/domains/wizard/thurtea/workroom.lpc (16 lines) - ⬜ stub/missing
+## help
+- Purpose: help directory in lib/
+- File count: 25
+- Files:
+
+  - lib/help/basics/combat.txt (14 lines) - ⬜ stub/missing
+  - lib/help/basics/commands.txt (12 lines) - ⬜ stub/missing
+  - lib/help/basics/credits.txt (19 lines) - ⬜ stub/missing
+  - lib/help/basics/death.txt (17 lines) - ⬜ stub/missing
+  - lib/help/basics/equipment.txt (12 lines) - ⬜ stub/missing
+  - lib/help/basics/experience.txt (27 lines) - ⚠️ partial
+  - lib/help/basics/look.txt (32 lines) - ⚠️ partial
+  - lib/help/basics/movement.txt (13 lines) - ⬜ stub/missing
+  - lib/help/basics/stats.txt (24 lines) - ⚠️ partial
+  - lib/help/meta/admin.txt (11 lines) - ⬜ stub/missing
+  - lib/help/meta/newbie.txt (38 lines) - ⚠️ partial
+  - lib/help/meta/rules.txt (25 lines) - ⚠️ partial
+  - lib/help/meta/wizard.txt (26 lines) - ⚠️ partial
+  - lib/help/occs/cyber-knight.txt (31 lines) - ⚠️ partial
+  - lib/help/occs/dragon-hatchling.txt (35 lines) - ⚠️ partial
+  - lib/help/occs/ley-line-walker.txt (32 lines) - ⚠️ partial
+  - lib/help/occs/sunaj-assassin.txt (37 lines) - ⚠️ partial
+  - lib/help/occs/vagabond.txt (33 lines) - ⚠️ partial
+  - lib/help/social/clans.txt (21 lines) - ⚠️ partial
+  - lib/help/social/communication.txt (13 lines) - ⬜ stub/missing
+  - lib/help/social/interaction.txt (12 lines) - ⬜ stub/missing
+  - lib/help/systems/languages.txt (27 lines) - ⚠️ partial
+  - lib/help/systems/magic.txt (14 lines) - ⬜ stub/missing
+  - lib/help/systems/psionics.txt (28 lines) - ⚠️ partial
+  - lib/help/systems/skills.txt (30 lines) - ⚠️ partial
+## include
+- Purpose: include directory in lib/
+- File count: 7
+- Files:
+
+  - lib/include/combat.h (272 lines) - ⚠️ partial
+  - lib/include/config.h (5 lines) - ⬜ stub/missing
+  - lib/include/dirs.h (10 lines) - ⬜ stub/missing
+  - lib/include/globals.h (105 lines) - ⚠️ partial
+  - lib/include/occs.h (83 lines) - ⚠️ partial
+  - lib/include/races.h (62 lines) - ⚠️ partial
+  - lib/include/stats.h (65 lines) - ⚠️ partial
+## languages
+- Purpose: languages directory in lib/
+- File count: 12
+- Files:
+
+  - lib/languages/american.lpc (24 lines) - ⚠️ partial
+  - lib/languages/atlantean.lpc (21 lines) - ⚠️ partial
+  - lib/languages/demonic.lpc (21 lines) - ⚠️ partial
+  - lib/languages/dragonese.lpc (22 lines) - ⚠️ partial
+  - lib/languages/dwarven.lpc (21 lines) - ⚠️ partial
+  - lib/languages/elven.lpc (21 lines) - ⚠️ partial
+  - lib/languages/euro.lpc (22 lines) - ⚠️ partial
+  - lib/languages/faerie.lpc (22 lines) - ⚠️ partial
+  - lib/languages/goblin.lpc (21 lines) - ⚠️ partial
+  - lib/languages/japanese.lpc (21 lines) - ⚠️ partial
+  - lib/languages/spanish.lpc (21 lines) - ⚠️ partial
+  - lib/languages/techno_can.lpc (22 lines) - ⚠️ partial
+## llm_entries
+- Purpose: llm_entries directory in lib/
+- File count: 155
+- Files:
+
+  - lib/llm_entries/101.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/103.json (40 lines) - ⚠️ partial
+  - lib/llm_entries/105.json (38 lines) - ⚠️ partial
+  - lib/llm_entries/106.json (39 lines) - ⚠️ partial
+  - lib/llm_entries/107.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/108.json (25 lines) - ⚠️ partial
+  - lib/llm_entries/111.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/112.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/114.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/115.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/116.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/119.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/121.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/122.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/125.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/127.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/128.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/13-pecos-empire.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/137.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/138.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/140.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/144.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/145.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/146.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/149.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/150.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/151.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/152.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/161.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/163.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/166.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/167.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/168.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/169.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/171.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/173.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/176.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/177.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/178.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/181.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/182.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/186.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/187.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/189.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/190.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/191.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/192.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/203.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/204.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/207.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/209.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/210.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/213.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/215.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/219.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/220.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/221.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/222.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/223.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/224.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/225.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/226.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/228.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/229.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/230.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/231.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/232.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/233.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/236.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/237.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/246.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/247.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/248.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/249.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/250.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/252.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/256.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/a-cyber-knight-and-a-d-bee-companion-ride-through-a-snow-covered-forest.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/a-demon-from-a-rift.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/a-mystic-drurd-tar-from-her-home-in-england.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/a-pair-of-full-conversion-borgs-stalk-among-the-rums-of-an-ancient-city.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/a-typical-operator-in-traveling-clothes-a-wild-psi-stalker.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/a-world-overview.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/ammunition-sight-array.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/amulet.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/and-cyber-doc.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/anti-sway-pylons-and-toe-hook.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/armored-head-instrumentation.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/art-by-kevin-long.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/art-by-larry-macdougall.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/at-second-level-the-psychic-can-select-a-total-of-three-powers-from.json (54 lines) - ⚠️ partial
+  - lib/llm_entries/bionic-bone-structure.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/bionics.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/black-market-prices.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/black-market.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/both-the-stone-and-iron-golems-are-mystical-mega-damage-creatures.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/c-27-heavy.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/c-40r-coalition.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/casing-ejector-laser-targeter.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/chi-town.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/coalition-samas-power-armor-in-action.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/colors-by-adam-and-kevin-siembieda.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/cut-away-view-of.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/cybernetic-augmentation-mechanisms.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/cybernetics-in-the.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/distance-to-target.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/game-master-s-section.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/glitter-boy-pilot-helmet.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/glitter-boy.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/gun-elevation.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/heart-sudbury.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/infra-red.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/intelligent.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/large-retractable-blades.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/laser-drill.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/learning-spells.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/level-twelve.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/map-of-england.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/map-of-the.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/mega-damage-capacity.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/microphone.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/missouri-government-and-a-major-military-base-equipped-with-a-full.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/monsters.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/north-america-is-mostly-wilderness-with-the-greatest-human-popu.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/passive.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/psi-stalker-r-c-c.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/reactor-and.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/reason-is-that-two-dozen-ley-lines-slice-through-the-ruins-and-a-ley-line.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/reload-access.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/retractable-gun-grip-ammunition-drum.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/return-to-original-position.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/rogues-and-other-antagonists.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/rroximity-alert.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/sensitive.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/sensor-mode.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/sensory-implants.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/summary-02-15.md (261 lines) - ✅ complete
+  - lib/llm_entries/supernatural-beings-and-creatures-from-the-rifts.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/targeting-sight.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/telescoping-anti-sway-pylons-with-laser-drill.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-automatic-stabilization-system-is-a-synchronized-system-of.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-coalition-states-cs-have-a-standardized-army-with-standard.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-essay-continues-with-references-to-hitler-s-genius-and-his.json (43 lines) - ⚠️ partial
+  - lib/llm_entries/the-highway-man.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-huntsman.json (25 lines) - ⚠️ partial
+  - lib/llm_entries/the-northern.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-plastic-man.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-urban-warrior.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-wastelander.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/the-xiticix.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/visionaries-who-helped-to-build-the-industrial-city-out-of-the-ashes-of.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/visual-targeting.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/water-nutrient.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/will-not-prevent-psychic-attacks-or-the-creature-s-use-of-its-natural.json (19 lines) - ⬜ stub/missing
+  - lib/llm_entries/xiticix-aliens.json (19 lines) - ⬜ stub/missing
+## llm_index.json
+- Purpose: llm_index.json directory in lib/
+- File count: 1
+- Files:
+
+  - lib/llm_index.json (3103 lines) - ✅ complete
+## llm_index_README.md
+- Purpose: llm_index_README.md directory in lib/
+- File count: 1
+- Files:
+
+  - lib/llm_index_README.md (39 lines) - ⚠️ partial
+## log
+- Purpose: log directory in lib/
+- File count: 3
+- Files:
+
+  - lib/log/asan.18096 (390 lines) - ✅ complete
+  - lib/log/command_debug.log (0 lines) - ⬜ stub/missing
+  - lib/log/server.log (47137 lines) - ✅ complete
+## master.lpc
+- Purpose: master.lpc directory in lib/
+- File count: 1
+- Files:
+
+  - lib/master.lpc (43 lines) - ⚠️ partial
+## obj
+- Purpose: obj directory in lib/
+- File count: 7
+- Files:
+
+  - lib/obj/rift.lpc (93 lines) - ⚠️ partial
+  - lib/obj/wiztools/base_wiztool.lpc (45 lines) - ⚠️ partial
+  - lib/obj/wiztools/chest.lpc (20 lines) - ⬜ stub/missing
+  - lib/obj/wiztools/crystal.lpc (27 lines) - ⚠️ partial
+  - lib/obj/wiztools/handbook.lpc (56 lines) - ⚠️ partial
+  - lib/obj/wiztools/staff.lpc (29 lines) - ⚠️ partial
+  - lib/obj/wiztools/staff_of_demotion.lpc (193 lines) - ⚠️ partial
+## objects
+- Purpose: objects directory in lib/
+- File count: 20
+- Files:
+
+  - lib/objects/armor/heavy_armor.lpc (27 lines) - ⚠️ partial
+  - lib/objects/armor/light_armor.lpc (25 lines) - ⚠️ partial
+  - lib/objects/armor/medium_armor.lpc (25 lines) - ⚠️ partial
+  - lib/objects/armor/shield.lpc (12 lines) - ⬜ stub/missing
+  - lib/objects/psionic/psi_sword_weapon.lpc (117 lines) - ⚠️ partial
+  - lib/objects/supplies/medkit.lpc (93 lines) - ⚠️ partial
+  - lib/objects/supplies/rations.lpc (21 lines) - ⚠️ partial
+  - lib/objects/supplies/rope.lpc (22 lines) - ⚠️ partial
+  - lib/objects/supplies/torch.lpc (22 lines) - ⚠️ partial
+  - lib/objects/vehicles/behemoth/airlock.lpc (91 lines) - ⚠️ partial
+  - lib/objects/vehicles/behemoth/cargo_hold.lpc (63 lines) - ⚠️ partial
+  - lib/objects/vehicles/behemoth/cockpit.lpc (110 lines) - ⚠️ partial
+  - lib/objects/vehicles/behemoth/crew_quarters.lpc (78 lines) - ⚠️ partial
+  - lib/objects/vehicles/behemoth/engineering.lpc (145 lines) - ⚠️ partial
+  - lib/objects/vehicles/behemoth/turret.lpc (157 lines) - ⚠️ partial
+  - lib/objects/vehicles/ex5_behemoth.lpc (215 lines) - ✅ complete
+  - lib/objects/weapons/ion_blaster.lpc (27 lines) - ⚠️ partial
+  - lib/objects/weapons/sword.lpc (12 lines) - ⬜ stub/missing
+  - lib/objects/weapons/vibro_blade.lpc (25 lines) - ⚠️ partial
+  - lib/objects/weapons/wilks_laser.lpc (26 lines) - ⚠️ partial
+## occs
+- Purpose: occs directory in lib/
+- File count: 41
+- Files:
+
+  - lib/occs/battle_magus.lpc (75 lines) - ⚠️ partial
+  - lib/occs/biomancer.lpc (75 lines) - ⚠️ partial
+  - lib/occs/body_fixer.lpc (206 lines) - ✅ complete
+  - lib/occs/burster.lpc (77 lines) - ⚠️ partial
+  - lib/occs/city_rat.lpc (78 lines) - ⚠️ partial
+  - lib/occs/cosmo_knight.lpc (78 lines) - ⚠️ partial
+  - lib/occs/crazy.lpc (85 lines) - ⚠️ partial
+  - lib/occs/cyber_knight.lpc (235 lines) - ✅ complete
+  - lib/occs/dragon_hatchling_rcc.lpc (165 lines) - ⚠️ partial
+  - lib/occs/elemental_fusionist.lpc (75 lines) - ⚠️ partial
+  - lib/occs/full_conversion_borg.lpc (81 lines) - ⚠️ partial
+  - lib/occs/fury_beetle.lpc (56 lines) - ⚠️ partial
+  - lib/occs/glitter_boy_pilot.lpc (231 lines) - ✅ complete
+  - lib/occs/headhunter.lpc (202 lines) - ✅ complete
+  - lib/occs/juicer.lpc (254 lines) - ✅ complete
+  - lib/occs/ley_line_walker.lpc (169 lines) - ⚠️ partial
+  - lib/occs/line_walker.lpc (74 lines) - ⚠️ partial
+  - lib/occs/mercenary.lpc (74 lines) - ⚠️ partial
+  - lib/occs/mind_melter.lpc (75 lines) - ⚠️ partial
+  - lib/occs/mystic.lpc (81 lines) - ⚠️ partial
+  - lib/occs/necromancer.lpc (74 lines) - ⚠️ partial
+  - lib/occs/operator.lpc (204 lines) - ✅ complete
+  - lib/occs/power_armor_pilot.lpc (78 lines) - ⚠️ partial
+  - lib/occs/psi-stalker-r-c-c.lpc (71 lines) - ⚠️ partial
+  - lib/occs/psi_healer.lpc (79 lines) - ⚠️ partial
+  - lib/occs/psi_stalker.lpc (80 lines) - ⚠️ partial
+  - lib/occs/robot_pilot.lpc (78 lines) - ⚠️ partial
+  - lib/occs/rogue_scholar.lpc (74 lines) - ⚠️ partial
+  - lib/occs/rogue_scientist.lpc (77 lines) - ⚠️ partial
+  - lib/occs/sea_titan.lpc (75 lines) - ⚠️ partial
+  - lib/occs/shifter.lpc (74 lines) - ⚠️ partial
+  - lib/occs/special_forces.lpc (156 lines) - ⚠️ partial
+  - lib/occs/stone_master.lpc (75 lines) - ⚠️ partial
+  - lib/occs/sunaj_assassin.lpc (236 lines) - ✅ complete
+  - lib/occs/techno_wizard.lpc (76 lines) - ⚠️ partial
+  - lib/occs/temporal_wizard.lpc (74 lines) - ⚠️ partial
+  - lib/occs/vagabond.lpc (169 lines) - ⚠️ partial
+  - lib/occs/warlock.lpc (74 lines) - ⚠️ partial
+  - lib/occs/wilderness_scout.lpc (78 lines) - ⚠️ partial
+  - lib/occs/xiticix_warrior.lpc (63 lines) - ⚠️ partial
+  - lib/occs/xiticix_worker.lpc (57 lines) - ⚠️ partial
+## psionics
+- Purpose: psionics directory in lib/
+- File count: 14
+- Files:
+
+  - lib/psionics/healing/bio_regeneration.lpc (68 lines) - ⚠️ partial
+  - lib/psionics/healing/deaden_pain.lpc (91 lines) - ⚠️ partial
+  - lib/psionics/healing/healing_touch.lpc (122 lines) - ⚠️ partial
+  - lib/psionics/physical/levitation.lpc (91 lines) - ⚠️ partial
+  - lib/psionics/physical/psi_sword.lpc (125 lines) - ⚠️ partial
+  - lib/psionics/physical/telekinesis.lpc (63 lines) - ⚠️ partial
+  - lib/psionics/sensitive/empathy.lpc (119 lines) - ⚠️ partial
+  - lib/psionics/sensitive/mind_block.lpc (68 lines) - ⚠️ partial
+  - lib/psionics/sensitive/presence_sense.lpc (100 lines) - ⚠️ partial
+  - lib/psionics/sensitive/read_aura_psi.lpc (148 lines) - ⚠️ partial
+  - lib/psionics/sensitive/sixth_sense.lpc (38 lines) - ⚠️ partial
+  - lib/psionics/sensitive/telepathy.lpc (107 lines) - ⚠️ partial
+  - lib/psionics/super/mind_block.lpc (44 lines) - ⚠️ partial
+  - lib/psionics/super/psi_sword.lpc (128 lines) - ⚠️ partial
+## races
+- Purpose: races directory in lib/
+- File count: 52
+- Files:
+
+  - lib/races/adult_dragon.lpc (117 lines) - ⚠️ partial
+  - lib/races/ancient_dragon.lpc (121 lines) - ⚠️ partial
+  - lib/races/atlantean.lpc (116 lines) - ⚠️ partial
+  - lib/races/brodkil.lpc (104 lines) - ⚠️ partial
+  - lib/races/burster.lpc (109 lines) - ⚠️ partial
+  - lib/races/cat_girl.lpc (165 lines) - ⚠️ partial
+  - lib/races/changeling.lpc (138 lines) - ⚠️ partial
+  - lib/races/cosmo_knight.lpc (101 lines) - ⚠️ partial
+  - lib/races/deevil.lpc (152 lines) - ⚠️ partial
+  - lib/races/demon.lpc (147 lines) - ⚠️ partial
+  - lib/races/dog_boy.lpc (192 lines) - ⚠️ partial
+  - lib/races/dragon_hatchling.lpc (69 lines) - ⚠️ partial
+  - lib/races/dragon_juicer.lpc (118 lines) - ⚠️ partial
+  - lib/races/dwarf.lpc (122 lines) - ⚠️ partial
+  - lib/races/eandroth.lpc (44 lines) - ⚠️ partial
+  - lib/races/elf.lpc (113 lines) - ⚠️ partial
+  - lib/races/gargoyle.lpc (156 lines) - ⚠️ partial
+  - lib/races/gnome.lpc (132 lines) - ⚠️ partial
+  - lib/races/goblin.lpc (129 lines) - ⚠️ partial
+  - lib/races/godling.lpc (157 lines) - ⚠️ partial
+  - lib/races/great_horned_dragon.lpc (100 lines) - ⚠️ partial
+  - lib/races/halfling.lpc (125 lines) - ⚠️ partial
+  - lib/races/hobgoblin.lpc (131 lines) - ⚠️ partial
+  - lib/races/human.lpc (109 lines) - ⚠️ partial
+  - lib/races/mega_juicer.lpc (183 lines) - ⚠️ partial
+  - lib/races/mind_bleeder.lpc (107 lines) - ⚠️ partial
+  - lib/races/mind_melter.lpc (105 lines) - ⚠️ partial
+  - lib/races/minion.lpc (164 lines) - ⚠️ partial
+  - lib/races/minotaur.lpc (97 lines) - ⚠️ partial
+  - lib/races/mutant_animal.lpc (160 lines) - ⚠️ partial
+  - lib/races/nightbane.lpc (146 lines) - ⚠️ partial
+  - lib/races/noli.lpc (44 lines) - ⚠️ partial
+  - lib/races/ogre.lpc (135 lines) - ⚠️ partial
+  - lib/races/orc.lpc (137 lines) - ⚠️ partial
+  - lib/races/promethean.lpc (44 lines) - ⚠️ partial
+  - lib/races/psi_ghost.lpc (108 lines) - ⚠️ partial
+  - lib/races/psi_healer.lpc (108 lines) - ⚠️ partial
+  - lib/races/psi_stalker.lpc (149 lines) - ⚠️ partial
+  - lib/races/quick_flex.lpc (107 lines) - ⚠️ partial
+  - lib/races/simvan.lpc (44 lines) - ⚠️ partial
+  - lib/races/splugorth.lpc (130 lines) - ⚠️ partial
+  - lib/races/splugorth_minion.lpc (173 lines) - ⚠️ partial
+  - lib/races/splynn_slave.lpc (144 lines) - ⚠️ partial
+  - lib/races/thorny_dragon.lpc (120 lines) - ⚠️ partial
+  - lib/races/titan_juicer.lpc (162 lines) - ⚠️ partial
+  - lib/races/trimadore.lpc (43 lines) - ⚠️ partial
+  - lib/races/troll.lpc (139 lines) - ⚠️ partial
+  - lib/races/true_atlantean.lpc (89 lines) - ⚠️ partial
+  - lib/races/uteni.lpc (48 lines) - ⚠️ partial
+  - lib/races/vampire.lpc (142 lines) - ⚠️ partial
+  - lib/races/werewolf.lpc (138 lines) - ⚠️ partial
+  - lib/races/wolfen.lpc (99 lines) - ⚠️ partial
+## save
+- Purpose: save directory in lib/
+- File count: 2
+- Files:
+
+  - lib/save/players/Thurtea.dat (3 lines) - ⬜ stub/missing
+  - lib/save/players/Thurtea.o (3 lines) - ⬜ stub/missing
+## secure
+- Purpose: secure directory in lib/
+- File count: 4
+- Files:
+
+  - lib/secure/formatting.lpc (139 lines) - ⚠️ partial
+  - lib/secure/install.lpc (371 lines) - ✅ complete
+  - lib/secure/master.lpc (201 lines) - ✅ complete
+  - lib/secure/simul_efun.lpc (6 lines) - ⬜ stub/missing
+## single
+- Purpose: single directory in lib/
+- File count: 14
+- Files:
+
+  - lib/single/armor/deadboy_armor_medium.lpc (49 lines) - ⚠️ partial
+  - lib/single/armor/glitterboy_armor_medium.lpc (48 lines) - ⚠️ partial
+  - lib/single/armor/leather_armor_medium.lpc (34 lines) - ⚠️ partial
+  - lib/single/armor/leather_armor_small.lpc (35 lines) - ⚠️ partial
+  - lib/single/armor/plate_armor_large.lpc (42 lines) - ⚠️ partial
+  - lib/single/healing_potion.lpc (21 lines) - ⚠️ partial
+  - lib/single/laser_pistol.lpc (32 lines) - ⚠️ partial
+  - lib/single/leather_armor.lpc (22 lines) - ⚠️ partial
+  - lib/single/rations.lpc (22 lines) - ⚠️ partial
+  - lib/single/shield.lpc (22 lines) - ⚠️ partial
+  - lib/single/stim_pack.lpc (22 lines) - ⚠️ partial
+  - lib/single/sword.lpc (21 lines) - ⚠️ partial
+  - lib/single/urban_warrior_armor.lpc (37 lines) - ⚠️ partial
+  - lib/single/vibro_blade.lpc (30 lines) - ⚠️ partial
+## skills
+- Purpose: skills directory in lib/
+- File count: 10
+- Files:
+
+  - lib/skills/medical/first_aid.lpc (37 lines) - ⚠️ partial
+  - lib/skills/physical/climbing.lpc (32 lines) - ⚠️ partial
+  - lib/skills/physical/swimming.lpc (29 lines) - ⚠️ partial
+  - lib/skills/pilot/pilot_automobile.lpc (32 lines) - ⚠️ partial
+  - lib/skills/pilot_aircraft.lpc (73 lines) - ⚠️ partial
+  - lib/skills/pilot_power_armor.lpc (91 lines) - ⚠️ partial
+  - lib/skills/pilot_robot.lpc (96 lines) - ⚠️ partial
+  - lib/skills/pilot_spacecraft.lpc (69 lines) - ⚠️ partial
+  - lib/skills/technical/literacy.lpc (29 lines) - ⚠️ partial
+  - lib/skills/weapons/wp_knife.lpc (44 lines) - ⚠️ partial
+## spells
+- Purpose: spells directory in lib/
+- File count: 34
+- Files:
+
+  - lib/spells/level1/armor_of_ithan.lpc (73 lines) - ⚠️ partial
+  - lib/spells/level1/blinding_flash.lpc (100 lines) - ⚠️ partial
+  - lib/spells/level1/globe_of_daylight.lpc (68 lines) - ⚠️ partial
+  - lib/spells/level1/see_the_invisible.lpc (64 lines) - ⚠️ partial
+  - lib/spells/level1/sense_evil.lpc (94 lines) - ⚠️ partial
+  - lib/spells/level1/sense_magic.lpc (117 lines) - ⚠️ partial
+  - lib/spells/level2/chameleon.lpc (69 lines) - ⚠️ partial
+  - lib/spells/level2/fear.lpc (130 lines) - ⚠️ partial
+  - lib/spells/level2/levitation.lpc (72 lines) - ⚠️ partial
+  - lib/spells/level2/swim_as_a_fish.lpc (84 lines) - ⚠️ partial
+  - lib/spells/level3/energy_bolt.lpc (95 lines) - ⚠️ partial
+  - lib/spells/level3/fireball.lpc (92 lines) - ⚠️ partial
+  - lib/spells/level3/invisibility_simple.lpc (88 lines) - ⚠️ partial
+  - lib/spells/level3/read_aura.lpc (140 lines) - ⚠️ partial
+  - lib/spells/level3/telekinesis.lpc (105 lines) - ⚠️ partial
+  - lib/spells/level5/heal_wounds.lpc (119 lines) - ⚠️ partial
+  - lib/spells/level6/lightning_bolt.lpc (110 lines) - ⚠️ partial
+  - lib/spells/level6/magic_shield.lpc (119 lines) - ⚠️ partial
+  - lib/spells/level6/tongues.lpc (93 lines) - ⚠️ partial
+  - lib/spells/level_1.json (162 lines) - ⚠️ partial
+  - lib/spells/level_10.json (127 lines) - ⚠️ partial
+  - lib/spells/level_11.json (109 lines) - ⚠️ partial
+  - lib/spells/level_12.json (124 lines) - ⚠️ partial
+  - lib/spells/level_13.json (107 lines) - ⚠️ partial
+  - lib/spells/level_14.json (93 lines) - ⚠️ partial
+  - lib/spells/level_15.json (39 lines) - ⚠️ partial
+  - lib/spells/level_2.json (258 lines) - ✅ complete
+  - lib/spells/level_3.json (115 lines) - ⚠️ partial
+  - lib/spells/level_4.json (143 lines) - ⚠️ partial
+  - lib/spells/level_5.json (134 lines) - ⚠️ partial
+  - lib/spells/level_6.json (75 lines) - ⚠️ partial
+  - lib/spells/level_7.json (142 lines) - ⚠️ partial
+  - lib/spells/level_8.json (68 lines) - ⚠️ partial
+  - lib/spells/level_9.json (49 lines) - ⚠️ partial
+## std
+- Purpose: std directory in lib/
+- File count: 18
+- Files:
+
+  - lib/std/companion.lpc (207 lines) - ✅ complete
+  - lib/std/container.lpc (39 lines) - ⚠️ partial
+  - lib/std/corpse.lpc (73 lines) - ⚠️ partial
+  - lib/std/daemon.lpc (13 lines) - ⬜ stub/missing
+  - lib/std/language.lpc (208 lines) - ✅ complete
+  - lib/std/living.lpc (2047 lines) - ✅ complete
+  - lib/std/object.lpc (305 lines) - ✅ complete
+  - lib/std/occ.lpc (1108 lines) - ✅ complete
+  - lib/std/player.lpc (1097 lines) - ✅ complete
+  - lib/std/psionic.lpc (161 lines) - ⚠️ partial
+  - lib/std/race.lpc (906 lines) - ✅ complete
+  - lib/std/room.lpc (138 lines) - ⚠️ partial
+  - lib/std/shop.lpc (216 lines) - ✅ complete
+  - lib/std/skill.lpc (196 lines) - ⚠️ partial
+  - lib/std/spell.lpc (195 lines) - ⚠️ partial
+  - lib/std/vehicle.lpc (429 lines) - ✅ complete
+  - lib/std/vehicle_room.lpc (315 lines) - ✅ complete
+  - lib/std/wiztool.lpc (639 lines) - ✅ complete
+## test
+- Purpose: test directory in lib/
+- File count: 8
+- Files:
+
+  - lib/test/clone_test.lpc (6 lines) - ⬜ stub/missing
+  - lib/test/test_dragon.lpc (133 lines) - ⚠️ partial
+  - lib/test/test_increment.lpc (8 lines) - ⬜ stub/missing
+  - lib/test/test_logical.lpc (13 lines) - ⬜ stub/missing
+  - lib/test/test_mapping.lpc (5 lines) - ⬜ stub/missing
+  - lib/test/test_persistence.lpc (136 lines) - ⚠️ partial
+  - lib/test/test_simple.lpc (10 lines) - ⬜ stub/missing
+  - lib/test/test_subscript.lpc (12 lines) - ⬜ stub/missing
+## tools
+- Purpose: tools directory in lib/
+- File count: 1
+- Files:
+
+  - lib/tools/generate_stubs.sh (172 lines) - ⚠️ partial

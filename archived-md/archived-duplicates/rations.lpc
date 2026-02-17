@@ -1,0 +1,22 @@
+// Rations - Basic food item
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("rations");
+    set_id("rations");
+    set_id_alt("food");
+    set_short("a package of rations");
+    set_long(
+        "This is a standard military ration pack. It contains dehydrated food, "
+        "energy bars, and a water purification tablet. Not delicious, but nutritious "
+        "and guaranteed to keep you alive in the field.\n"
+    );
+    
+    set_type("food");
+    set_property("healing", 0);
+    set_property("filling", 1);
+    
+    set_weight(1);
+    set_value(20);
+}

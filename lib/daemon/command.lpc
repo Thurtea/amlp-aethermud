@@ -305,3 +305,54 @@ string *query_commands() {
 mapping query_command_map() {
     return copy(commands);
 }
+
+// Return commands visible to a given player, filtered by privilege level
+string *query_available_commands(object player) {
+    if (!player) return sort_array(keys(commands), 1);
+
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+
+    string role = "";
+    if (function_exists("query_property", player))
+        role = player->query_property("wizard_role");
+    if (!role) role = "";
+
+    string *all = keys(commands);
+    string *out = ({});
+
+    // Admins see everything
+    if (priv >= 2) {
+        return sort_array(all, 1);
+    }
+
+    foreach (string v in all) {
+        string p = commands[v];
+
+        // Creator/QCS commands: only domain/coding/admin wizards
+        if (strsrch(p, "/cmds/creator/") == 0) {
+            if (priv >= 1 && (role == "domain" || role == "coding" || role == "admin"))
+                out += ({ v });
+            continue;
+        }
+
+        // Admin-only commands
+        if (strsrch(p, "/cmds/admin/") == 0) {
+            if (role == "admin" || priv >= 2)
+                out += ({ v });
+            continue;
+        }
+
+        // Wizard tooling commands: only visible to wizards (priv >=1)
+        if (strsrch(p, "/cmds/wizard/") == 0) {
+            if (priv >= 1) out += ({ v });
+            continue;
+        }
+
+        // Default: general player commands
+        out += ({ v });
+    }
+
+    return sort_array(out, 1);
+}

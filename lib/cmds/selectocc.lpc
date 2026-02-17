@@ -13,6 +13,15 @@ int main(string arg) {
         return 1;
     }
 
+    // Only wizards may run this command in production - restrict for players
+    if (function_exists("query_privilege_level", player)) {
+        int plevel = player->query_privilege_level();
+        if (!plevel || plevel == 0) {
+            write("This command is reserved for wizards.\n");
+            return 1;
+        }
+    }
+
     // Prevent re-selection if already set
     if (function_exists("query_occ_id", player)) {
         mixed cur = player->query_occ_id();

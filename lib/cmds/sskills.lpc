@@ -1,0 +1,28 @@
+// lib/cmds/sskills.lpc
+// Show secondary skills (player chosen)
+
+int main(string arg) {
+    object player = this_player();
+    if (!player) return 0;
+
+    mapping sec = ([ ]);
+    if (function_exists("query_secondary_skills", player)) {
+        sec = player->query_secondary_skills();
+    }
+
+    if (!sec || !sizeof(sec)) {
+        write("No secondary skills selected.\n");
+        return 1;
+    }
+
+    write("Secondary Skills:\n");
+    foreach (string k, mixed v in sec) {
+        int pct = intp(v) ? v : 0;
+        write(sprintf("  %-30s %3d%%\n", k, pct));
+    }
+    return 1;
+}
+
+string query_help() {
+    return "SSKILLS - Show secondary skills chosen by the player\n\nUsage:\n  sskills\n\nDisplays secondary skills and proficiency percentages.\n";
+}

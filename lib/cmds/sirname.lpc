@@ -1,0 +1,57 @@
+// lib/cmds/sirname.lpc
+// Allow level 10+ players to set an honorific/title (Lord/Lady/etc)
+
+int main(string arg) {
+    object user = this_player();
+    if (!user) return 0;
+
+    int level = 0;
+    if (function_exists("query_level", user)) level = user->query_level();
+
+    if (!arg || arg == "") {
+        string cur = "";
+        if (function_exists("query_property", user)) cur = user->query_property("sirname");
+        if (cur && cur != "") {
+            tell_object(user, "Your title: " + cur + "\n");
+        } else {
+            if (level >= 10) {
+                tell_object(user, "You have not set a title yet.\n");
+                tell_object(user, "Usage: sirname <title>\n");
+            } else {
+                tell_object(user, "You must reach level 10 to earn a title.\n");
+            }
+        }
+        return 1;
+    }
+
+    if (level < 10) {
+        tell_object(user, "You must reach level 10 to set a title.\n");
+        return 1;
+    }
+
+    string newtitle = arg;
+    // Basic validation: short and letters/spaces
+    while (newtitle && newtitle[0] == ' ') newtitle = newtitle[1..];
+    int len = strlen(newtitle);
+    while (len > 0 && newtitle[len-1] == ' ') { newtitle = newtitle[0..len-2]; len = strlen(newtitle); }
+    if (len < 2 || len > 20) {
+        tell_object(user, "Title must be 2-20 characters long.\n");
+        return 1;
+    }
+
+    // Save as a property so display logic elsewhere can include it
+    if (function_exists("set_property", user)) {
+        user->set_property("sirname", newtitle);
+        tell_object(user, "Title set: " + newtitle + "\n");
+        // Save if possible
+        if (function_exists("save_player_data", user)) user->save_player_data();
+    } else {
+        tell_object(user, "Unable to set title.\n");
+    }
+
+    return 1;
+}
+
+string query_help() {
+    return "SIRNAME - Set an honorific/title (Level 10+)\n\nUsage:\n  sirname <title>\n\nExamples:\n  sirname Lord\n  sirname Lady\n\nTitle is displayed with your name in appropriate places once set.\n";
+}

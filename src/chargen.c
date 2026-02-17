@@ -587,7 +587,7 @@ void chargen_display_stats(PlayerSession *sess) {
     snprintf(buf, sizeof(buf), "Name: %s", sess->username);
     frame_line(sess, buf, w);
     snprintf(buf, sizeof(buf), "Race: %-20s O.C.C.: %s",
-             ch->race ? ch->race : "None", ch->occ ? ch->occ : "None");
+             ch->race ? ch->race : "None", ch->occ ? ch->occ : "Pending");
     frame_line(sess, buf, w);
     if (ch->alignment) {
         snprintf(buf, sizeof(buf), "Alignment: %s", ch->alignment);

@@ -1,0 +1,28 @@
+// lib/cmds/pskills.lpc
+// Show primary skills (from OCC)
+
+int main(string arg) {
+    object player = this_player();
+    if (!player) return 0;
+
+    mapping prim = ([ ]);
+    if (function_exists("query_primary_skills", player)) {
+        prim = player->query_primary_skills();
+    }
+
+    if (!prim || !sizeof(prim)) {
+        write("No primary skills assigned.\n");
+        return 1;
+    }
+
+    write("Primary Skills:\n");
+    foreach (string k, mixed v in prim) {
+        int pct = intp(v) ? v : 0;
+        write(sprintf("  %-30s %3d%%\n", k, pct));
+    }
+    return 1;
+}
+
+string query_help() {
+    return "PSKILLS - Show primary skills assigned by your O.C.C.\n\nUsage:\n  pskills\n\nDisplays the primary skills and their starting percentages.\n";
+}

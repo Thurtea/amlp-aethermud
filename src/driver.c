@@ -853,7 +853,7 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
                 send_to_player(session, "You examine %s.\n", target->username);
                 send_to_player(session, "Race: %s  O.C.C.: %s\n",
                               target->character.race ? target->character.race : "Unknown",
-                              target->character.occ ? target->character.occ : "None");
+                              target->character.occ ? target->character.occ : "Pending");
                 send_to_player(session, "They appear to be in good health.\n");
             }
             return 1;
@@ -3522,7 +3522,7 @@ more_room_source:
         time_t idle = time(NULL) - target->last_activity;
         time_t online = time(NULL) - target->connect_time;
 
-        snprintf(info, sizeof(info),
+            snprintf(info, sizeof(info),
             "=== FINGER: %s ===\r\n"
             "  Race:    %s\r\n"
             "  O.C.C.:  %s\r\n"
@@ -3542,7 +3542,7 @@ more_room_source:
             "==================\r\n",
             target->username,
             ch->race ? ch->race : "None",
-            ch->occ ? ch->occ : "None",
+            ch->occ ? ch->occ : "Pending",
             ch->level, ch->xp,
             ch->hp, ch->max_hp,
             ch->sdc, ch->max_sdc,
@@ -4513,12 +4513,30 @@ void broadcast_message(const char *message, PlayerSession *exclude) {
 
 /* Send a message only to staff (privilege_level >= 1) */
 void staff_message(const char *message, PlayerSession *exclude) {
+    /* Strip ANSI color codes from staff messages to ensure plain text */
+    char clean[BUFFER_SIZE];
+    int ci = 0;
+    for (const char *p = message; *p && ci < (int)sizeof(clean) - 1; p++) {
+        if (*p == '\033') {
+            /* Skip ANSI escape sequence starting with ESC [ and ending with 'm' */
+            if (*(p + 1) == '[') {
+                p += 2;
+                while (*p && *p != 'm') p++;
+                continue;
+            }
+            /* Fallback: skip lone ESC */
+            continue;
+        }
+        clean[ci++] = *p;
+    }
+    clean[ci] = '\0';
+
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (sessions[i] &&
             sessions[i]->state == STATE_PLAYING &&
             sessions[i]->privilege_level >= 1 &&
             sessions[i] != exclude) {
-            send_to_player(sessions[i], "%s", message);
+            send_to_player(sessions[i], "%s", clean);
         }
     }
 }

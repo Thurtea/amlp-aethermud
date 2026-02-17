@@ -1235,8 +1235,8 @@ static void look_at_player(PlayerSession *sess, PlayerSession *target) {
         send_to_player(sess, "You look at yourself.\n");
         send_to_player(sess, "Name: %s\n", sess->username);
         send_to_player(sess, "Race: %s  O.C.C.: %s\n",
-                       sess->character.race ? sess->character.race : "Unknown",
-                       sess->character.occ ? sess->character.occ : "None");
+                   sess->character.race ? sess->character.race : "Unknown",
+                   sess->character.occ ? sess->character.occ : "Pending");
 
         /* Health hint (reuse same logic as for others) */
         Character *tch = &sess->character;
@@ -1283,8 +1283,8 @@ static void look_at_player(PlayerSession *sess, PlayerSession *target) {
             send_to_player(sess, "%s\n", target->character.description);
         }
         send_to_player(sess, "Race: %s  O.C.C.: %s\n",
-                      target->character.race ? target->character.race : "Unknown",
-                      target->character.occ ? target->character.occ : "None");
+                   target->character.race ? target->character.race : "Unknown",
+                   target->character.occ ? target->character.occ : "Pending");
     } else {
         const char *race = target->character.race ? target->character.race : "someone";
         char lower_race[128];

@@ -551,7 +551,7 @@ string cmd_stats() {
     // Basic info
     result += sprintf("Level: %d     Experience: %d\n", level, experience);
     result += sprintf("Race: %s     O.C.C.: %s\n",
-                     query_race_name(), query_occ_id() ? query_occ_id() : "None");
+                     query_race_name(), query_occ_id() ? query_occ_id() : "Pending");
     result += "----------------------------------------\n";
     
     // Phase 1, Step 5b: Enhanced health display

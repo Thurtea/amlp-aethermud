@@ -1,0 +1,40 @@
+// lib/cmds/description.lpc
+// Let players enter a multi-line description using '.' on a blank line to finish
+
+static void _desc_collect(string line) {
+    object ply = this_player();
+    if (!ply) return;
+
+    if (!line) line = "";
+    if (line == ".") {
+        string buf = ply->query_temp("desc_buffer") || "";
+        // Save as the player's long description
+        if (function_exists("set_long", ply)) {
+            ply->set_long(buf);
+            write("Description saved.\n");
+        } else {
+            write("Unable to save description.\n");
+        }
+        ply->set_temp("desc_buffer", 0);
+        return;
+    }
+
+    string cur = ply->query_temp("desc_buffer") || "";
+    cur += line + "\n";
+    ply->set_temp("desc_buffer", cur);
+    input_to("_desc_collect");
+}
+
+int main(string arg) {
+    object ply = this_player();
+    if (!ply) return 0;
+
+    write("Enter your description ('.' on blank line to finish):\n");
+    ply->set_temp("desc_buffer", "");
+    input_to("_desc_collect");
+    return 1;
+}
+
+string query_help() {
+    return "DESCRIPTION - Edit your personal description\n\nUsage:\n  description\n\nEnter multiple lines; end with a single '.' on its own line to save.\n";
+}

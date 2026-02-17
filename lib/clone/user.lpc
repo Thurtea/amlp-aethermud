@@ -87,6 +87,10 @@ string query_title() {
     }
 }
 
+// Brief/verbose mode helper (driver may manage brief mode server-side).
+// Provide a conservative default so LPC code can query this safely.
+int GetBriefMode() { return 0; }
+
 void enter_world() {
     object room;
     

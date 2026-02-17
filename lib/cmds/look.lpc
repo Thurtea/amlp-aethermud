@@ -106,15 +106,21 @@ int main(string arg) {
 
     // Just "look" - show room
     string desc = "";
-
-    // Room name
-    if (function_exists("query_short", room)) {
-        desc += room->query_short() + "\n";
+    object viewer = user;
+    int brief_mode = 0;
+    if (viewer && function_exists("GetBriefMode", viewer)) {
+        brief_mode = (int)viewer->GetBriefMode();
     }
 
-    // Room description
-    if (function_exists("query_long", room)) {
-        desc += room->query_long();
+    // Header: respect brief/verbose preferences
+    if (brief_mode) {
+        if (function_exists("query_short", room)) {
+            desc += room->query_short() + "\n";
+        }
+    } else {
+        if (function_exists("query_long", room)) {
+            desc += room->query_long() + "\n";
+        }
     }
 
     // Show exits
@@ -159,8 +165,16 @@ int main(string arg) {
                     desc += "\nYou see:\n";
                     found_items = 1;
                 }
-                string item_desc = ob->query_short ? ob->query_short() : "something";
-                desc += "  " + capitalize(item_desc) + "\n";
+                // Prefer room-provided renderer to include articles/punctuation
+                string rendered = "";
+                if (function_exists("render_item_description", room)) {
+                    rendered = room->render_item_description(ob, user);
+                }
+                if (!rendered || rendered == "") {
+                    string item_desc = ob->query_short ? ob->query_short() : "something";
+                    rendered = capitalize(item_desc) + ".";
+                }
+                desc += "  " + rendered + "\n";
             }
         }
     }

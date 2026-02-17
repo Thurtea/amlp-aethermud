@@ -1,0 +1,18 @@
+selectocc - Choose your Occupational Character Class (O.C.C.) after chargen
+
+Usage:
+  selectocc <occ_id>
+
+Description:
+  After character creation you may choose to select an O.C.C. (Occupational
+  Character Class) at any time using this command. This will apply the OCC's
+  primary skills, abilities, and any starting spells or powers to your
+  character. Use 'help occs' or 'help systems/occs' to list and inspect
+  available OCCs.
+
+Examples:
+  selectocc rogue_scientist
+
+Notes:
+  - You must meet an OCC's stat and race requirements to select it.
+  - This action will be saved to your character file.

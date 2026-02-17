@@ -1903,9 +1903,33 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result.type = VALUE_NULL;
         return result;
     }
-    
+
+    if (strcmp(cmd, "charge") == 0) {
+        cmd_charge(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "activate") == 0) {
+        cmd_activate(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "deactivate") == 0) {
+        cmd_deactivate(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "swim") == 0) {
         cmd_swim(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    if (strcmp(cmd, "metamorph") == 0 || strcmp(cmd, "shapeshift") == 0) {
+        cmd_metamorph(session, args ? args : "");
         result.type = VALUE_NULL;
         return result;
     }
@@ -4219,8 +4243,8 @@ void process_login_state(PlayerSession *session, const char *input) {
             /* Clear password buffer */
             memset(session->password_buffer, 0, sizeof(session->password_buffer));
 
-            /* First player becomes admin and skips chargen */
-            if (!first_player_created) {
+                 /* First player becomes admin and skips chargen only if no saved players exist */
+                 if (!first_player_created && !any_saved_players()) {
                 session->privilege_level = 2;  /* Admin */
                 first_player_created = 1;
                 fprintf(stderr, "[Server] First player created: %s (privilege: Admin)\n",

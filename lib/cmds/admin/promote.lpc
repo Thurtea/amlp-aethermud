@@ -98,6 +98,31 @@ int main(string arg) {
         }
         tell_object(target, "\n");
     }
+
+    /* If this was a promotion to Wizard or higher, teleport the target
+     * to the Staff Castle courtyard and send a short welcome message.
+     * Also log the promotion+teleport if `log_file` is available. */
+    if (new_level > old_level && new_level >= PRIV_WIZARD) {
+        string courtyard = "/domains/staff_castle/room/courtyard";
+        object room;
+        room = find_object(courtyard);
+        if (!room) { room = load_object(courtyard); }
+
+        if (room) {
+            target->move(courtyard);
+            tell_object(target, "\nYou feel a brief tug as the world shifts around you...\n");
+            tell_object(target, "Welcome — you are now a " + new_title + ".\n");
+            tell_object(target, "Use 'home' to return to your workroom. The Staff Castle contains an area explaining wizard abilities.\n\n");
+            tell_room(room, capitalize(target_name) + " appears in a shimmer of light.\n", ({ target }));
+        } else {
+            tell_object(target, "\n(Unable to teleport to the Staff Castle courtyard; please 'goto /domains/staff_castle/room/courtyard' to find it.)\n");
+        }
+
+        /* Log the promotion and teleport for audit purposes. */
+        log_file("promotions", ctime(time()) + " " + capitalize(target_name) +
+                 " promoted from " + old_title + " to " + new_title +
+                 " by " + user->query_name() + " and teleported to " + courtyard + "\n");
+    }
     
     return 1;
 }

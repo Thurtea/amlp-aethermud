@@ -3,6 +3,8 @@
 
 inherit "/lib/std/object.lpc";
 
+string *keywords = ({"handbook", "wizard's handbook"});
+
 void create() {
     ::create();
     set_short("wizard's handbook");

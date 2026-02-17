@@ -108,9 +108,17 @@ case "$1" in
         fi
         ;;
     wipe-all)
+        FORCE=false
+        if [ "$2" = "--force" ] || [ "$2" = "-f" ]; then
+            FORCE=true
+        fi
         echo "WARNING: This will DELETE ALL save files (players, wizards, rooms, workrooms)!"
-        read -p "Type 'WIPE ALL' to confirm: " confirm
-        if [ "$confirm" = "WIPE ALL" ]; then
+        if [ "$FORCE" = "true" ]; then
+            echo "Force flag detected; skipping interactive confirmation."
+        else
+            read -p "Type 'WIPE ALL' to confirm: " confirm
+        fi
+        if [ "$FORCE" = "true" ] || [ "$confirm" = "WIPE ALL" ]; then
             echo "Wiping all saves..."
             find save -type f \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true
             find lib/save -type f \( -name "*.o" -o -name "*.dat" \) -delete 2>/dev/null || true

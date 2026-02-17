@@ -64,6 +64,9 @@ typedef struct Item {
     bool is_equipped;           /* Currently equipped flag */
     int stack_count;            /* For stackable items */
     int current_durability;     /* Current condition (for armor) */
+    int ppe_stored;             /* PPE stored in item (TW hilt) */
+    int ppe_max_storage;        /* Max PPE storage capacity */
+    int charged;                /* Activated state (TW hilt blade) */
     struct Item *next;          /* Linked list */
 } Item;
 
@@ -120,8 +123,13 @@ Item* item_create_from_lpc(const char *fs_path);
 /* Resolve LPC path helper (used by clone/wizard helpers) */
 int resolve_lpc_path(const char *args, char *out_path, size_t out_size);
 
+/* Techno-Wizard Hilt commands */
+void cmd_charge(PlayerSession *sess, const char *args);
+void cmd_activate(PlayerSession *sess, const char *args);
+void cmd_deactivate(PlayerSession *sess, const char *args);
+
 /* Item Database */
-#define TOTAL_ITEM_TEMPLATES 50
+#define TOTAL_ITEM_TEMPLATES 51
 
 extern Item ITEM_TEMPLATES[TOTAL_ITEM_TEMPLATES];
 

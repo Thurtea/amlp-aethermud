@@ -484,6 +484,15 @@ static Room* room_load_from_lpc(const char *lpc_path) {
     fprintf(stderr, "[Room] Loaded LPC room '%s' (id=%d, %d exits, %d details) from %s\n",
             room->name, room->id, room->num_flex_exits, room->num_details, fs_path);
 
+    /* Auto-spawn items for specific LPC rooms */
+    if (strcmp(lpc_path, "/domains/start/lake_far_shore") == 0) {
+        Item *hilt = item_create(50);  /* Techno-Wizard Hilt */
+        if (hilt) {
+            room_add_item(room, hilt);
+            fprintf(stderr, "[Room] Spawned Techno-Wizard Hilt in lake_far_shore\n");
+        }
+    }
+
     return room;
 }
 
@@ -1105,14 +1114,25 @@ void room_add_item(Room *room, Item *item) {
     room->items = item;
 }
 
-/* Find item in room by name (case-insensitive) */
+/* Find item in room by name. First try exact (case-insensitive) match,
+ * then fall back to substring/keyword match (case-insensitive). */
 Item* room_find_item(Room *room, const char *name) {
     if (!room || !name) return NULL;
     Item *curr = room->items;
+
+    /* Exact match first */
     while (curr) {
-        if (strcasecmp(curr->name, name) == 0) return curr;
+        if (curr->name && strcasecmp(curr->name, name) == 0) return curr;
         curr = curr->next;
     }
+
+    /* Substring/keyword match (first match wins) */
+    curr = room->items;
+    while (curr) {
+        if (curr->name && strcasestr(curr->name, name) != NULL) return curr;
+        curr = curr->next;
+    }
+
     return NULL;
 }
 
@@ -1416,7 +1436,36 @@ show_room:
     if (room->items) {
         Item *curr = room->items;
         while (curr) {
-            send_to_player(sess, "%s\n", curr->name);
+            char outbuf[256];
+            const char *iname = curr->name && curr->name[0] ? curr->name : "something";
+            /* Check for existing article (a/an/the) */
+            char first[32] = "";
+            sscanf(iname, "%31s", first);
+            int has_article = 0;
+            if (first[0]) {
+                if (strcasecmp(first, "a") == 0 || strcasecmp(first, "an") == 0 || strcasecmp(first, "the") == 0) {
+                    has_article = 1;
+                }
+            }
+
+            if (!has_article) {
+                /* Choose A/An by vowel rule on first character */
+                char lc = tolower((unsigned char)iname[0]);
+                int vowel = (lc == 'a' || lc == 'e' || lc == 'i' || lc == 'o' || lc == 'u');
+                snprintf(outbuf, sizeof(outbuf), "%s %s", vowel ? "An" : "A", iname);
+            } else {
+                /* Use the existing short but ensure capitalization */
+                snprintf(outbuf, sizeof(outbuf), "%s", iname);
+                outbuf[0] = (char)toupper((unsigned char)outbuf[0]);
+            }
+
+            /* Ensure trailing punctuation */
+            size_t olen = strlen(outbuf);
+            if (olen > 0 && outbuf[olen-1] != '.' && outbuf[olen-1] != '!') {
+                if (olen + 1 < sizeof(outbuf)) outbuf[olen] = '.', outbuf[olen+1] = '\0';
+            }
+
+            send_to_player(sess, "%s\n", outbuf);
             curr = curr->next;
         }
     }

@@ -37,3 +37,52 @@ void set_max_weight(int weight) {
 int query_current_weight() {
     return current_weight;
 }
+
+// Return a nicely formatted listing of internal contents for "look in".
+string GetInternalDesc() {
+    object *inv = query_inventory();
+    if (!inv || sizeof(inv) == 0) {
+        return "It is empty.";
+    }
+
+    string out = "";
+    foreach (object item : inv) {
+        string item_desc;
+        if (function_exists("query_short", item)) {
+            item_desc = item->query_short();
+        } else {
+            item_desc = "something";
+        }
+
+        if (!item_desc || item_desc == "") continue;
+
+        string lc = lower_case(item_desc);
+        string article = "";
+        if (startswith(lc, "a ") || startswith(lc, "an ") || startswith(lc, "the ")) {
+            article = "";
+        } else {
+            string first = lc[0..0];
+            if (member(({ 'a','e','i','o','u' }), first) != -1) {
+                article = "An";
+            } else {
+                article = "A";
+            }
+        }
+
+        string line;
+        if (article != "") {
+            line = article + " " + item_desc;
+        } else {
+            line = item_desc;
+        }
+        line = capitalize(line);
+        if (line[<1] != '.' && line[<1] != '!') line += ".";
+
+        out += "  " + line + "\n";
+    }
+
+    return out;
+}
+
+// Make interior contents visible by default
+int inventory_visible() { return 1; }

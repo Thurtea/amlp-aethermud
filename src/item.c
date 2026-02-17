@@ -1,5 +1,6 @@
 #include "item.h"
 #include "chargen.h"
+#include "room.h"
 #include "session_internal.h"
 #include "debug.h"
 #include <stdio.h>
@@ -380,6 +381,16 @@ void item_init(void) {
         .stats = {.damage_dice = 0, .damage_sides = 0}
     };
     
+    /* 50: Techno-Wizard Flaming Sword Hilt */
+    ITEM_TEMPLATES[50] = (Item){
+        .id = 50, .name = strdup("Techno-Wizard Hilt"),
+        .description = strdup("An ornate metallic sword hilt covered in glowing runes and techno-magical circuitry. Etched on the pommel: 'Charge with P.P.E.'"),
+        .type = ITEM_WEAPON_MELEE, .weapon_type = WEAPON_SWORD, .weight = 2, .value = 5000,
+        .stats = {.damage_dice = 1, .damage_sides = 4, .damage_bonus = 0,
+                  .is_mega_damage = false, .strike_bonus = 0},
+        .ppe_stored = 0, .ppe_max_storage = 20, .charged = 0
+    };
+
     DEBUG_LOG("Initialized %d item templates", TOTAL_ITEM_TEMPLATES);
 }
 
@@ -499,19 +510,40 @@ bool inventory_add(Inventory *inv, Item *item) {
 /* Remove item from inventory by name */
 Item* inventory_remove(Inventory *inv, const char *item_name) {
     if (!inv || !item_name || !inv->items) return NULL;
-    
     Item *prev = NULL;
     Item *curr = inv->items;
-    
-    while (curr) {
-        if (strcasecmp(curr->name, item_name) == 0) {
-            /* Found it */
-            if (prev) {
-                prev->next = curr->next;
-            } else {
-                inv->items = curr->next;
+
+    /* If argument starts with a digit, treat it as a 1-based inventory index */
+    if (isdigit((unsigned char)item_name[0])) {
+        int idx = atoi(item_name);
+        if (idx <= 0 || idx > inv->item_count) return NULL;
+
+        int i = 1;
+        while (curr) {
+            if (i == idx) {
+                if (prev) prev->next = curr->next;
+                else inv->items = curr->next;
+
+                inv->total_weight -= curr->weight;
+                inv->item_count--;
+                curr->next = NULL;
+                return curr;
             }
-            
+            prev = curr;
+            curr = curr->next;
+            i++;
+        }
+        return NULL;
+    }
+
+    /* Try exact match first (case-insensitive) */
+    prev = NULL;
+    curr = inv->items;
+    while (curr) {
+        if (curr->name && strcasecmp(curr->name, item_name) == 0) {
+            if (prev) prev->next = curr->next;
+            else inv->items = curr->next;
+
             inv->total_weight -= curr->weight;
             inv->item_count--;
             curr->next = NULL;
@@ -520,7 +552,36 @@ Item* inventory_remove(Inventory *inv, const char *item_name) {
         prev = curr;
         curr = curr->next;
     }
-    
+
+    /* Try partial substring match (case-insensitive) */
+    char lower_search[256];
+    strncpy(lower_search, item_name, sizeof(lower_search) - 1);
+    lower_search[sizeof(lower_search) - 1] = '\0';
+    for (char *p = lower_search; *p; p++) *p = tolower((unsigned char)*p);
+
+    prev = NULL;
+    curr = inv->items;
+    while (curr) {
+        if (curr->name) {
+            char lower_name[256];
+            strncpy(lower_name, curr->name, sizeof(lower_name) - 1);
+            lower_name[sizeof(lower_name) - 1] = '\0';
+            for (char *q = lower_name; *q; q++) *q = tolower((unsigned char)*q);
+
+            if (strstr(lower_name, lower_search) != NULL) {
+                if (prev) prev->next = curr->next;
+                else inv->items = curr->next;
+
+                inv->total_weight -= curr->weight;
+                inv->item_count--;
+                curr->next = NULL;
+                return curr;
+            }
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+
     return NULL;
 }
 
@@ -848,4 +909,171 @@ void equipment_display(struct PlayerSession *sess) {
     snprintf(buf, sizeof(buf), "  Strike: +%d, Parry: +%d, Dodge: +%d, AR: %d\n",
         strike, parry, dodge, ar);
     send_to_player(sess, buf);
+}
+
+/* ========== TECHNO-WIZARD HILT COMMANDS ========== */
+
+/* Find a TW hilt in player's inventory or equipment */
+static Item* find_tw_hilt(Character *ch) {
+    /* Check equipped weapons first */
+    if (ch->equipment.weapon_primary && ch->equipment.weapon_primary->id == 50)
+        return ch->equipment.weapon_primary;
+    if (ch->equipment.weapon_secondary && ch->equipment.weapon_secondary->id == 50)
+        return ch->equipment.weapon_secondary;
+    /* Check inventory */
+    for (Item *it = ch->inventory.items; it; it = it->next) {
+        if (it->id == 50) return it;
+    }
+    return NULL;
+}
+
+void cmd_charge(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+
+    Item *hilt = find_tw_hilt(ch);
+    if (!hilt) {
+        send_to_player(sess, "You don't have a Techno-Wizard Hilt to charge.\n");
+        return;
+    }
+
+    int player_ppe = ch->ppe;
+    if (player_ppe < 1) {
+        send_to_player(sess, "You don't have enough P.P.E. to charge the hilt!\n");
+        return;
+    }
+
+    /* Parse amount from args (e.g. "charge hilt with 10 ppe" or "charge 10") */
+    int amount = 10; /* default */
+    if (args && *args) {
+        int parsed = 0;
+        if (sscanf(args, "%d", &parsed) == 1 && parsed > 0) {
+            amount = parsed;
+        } else {
+            /* Try parsing "hilt with N ppe" pattern */
+            sscanf(args, "hilt with %d", &parsed);
+            if (parsed > 0) amount = parsed;
+        }
+    }
+
+    /* Cap at available PPE */
+    if (amount > player_ppe) amount = player_ppe;
+
+    /* Cap at hilt capacity */
+    int space = hilt->ppe_max_storage - hilt->ppe_stored;
+    if (space <= 0) {
+        send_to_player(sess, "The hilt is already fully charged! (%d/%d PPE)\n",
+                       hilt->ppe_stored, hilt->ppe_max_storage);
+        return;
+    }
+    if (amount > space) amount = space;
+
+    /* Transfer PPE */
+    ch->ppe -= amount;
+    if (ch->magic.ppe_current > ch->ppe)
+        ch->magic.ppe_current = ch->ppe;
+    hilt->ppe_stored += amount;
+
+    send_to_player(sess, "You channel %d P.P.E. into the hilt!\n", amount);
+    send_to_player(sess, "The runes on the hilt glow brightly as they absorb your magical energy.\n");
+    send_to_player(sess, "Hilt P.P.E.: %d/%d\n", hilt->ppe_stored, hilt->ppe_max_storage);
+
+    Room *room = sess->current_room;
+    if (room) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "%s's hands glow with magical energy as they channel P.P.E. into a hilt.\r\n",
+                 sess->username);
+        room_broadcast(room, msg, sess);
+    }
+
+    if (hilt->ppe_stored >= 10 && !hilt->charged) {
+        send_to_player(sess, "\nThe hilt has enough energy to activate!\n");
+        send_to_player(sess, "Type 'activate hilt' to ignite the flaming blade.\n");
+    }
+}
+
+void cmd_activate(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+
+    Item *hilt = find_tw_hilt(ch);
+    if (!hilt) {
+        send_to_player(sess, "You don't have a Techno-Wizard Hilt.\n");
+        return;
+    }
+
+    if (hilt->charged) {
+        send_to_player(sess, "The blade is already active!\n");
+        return;
+    }
+
+    if (hilt->ppe_stored < 10) {
+        send_to_player(sess, "The hilt doesn't have enough P.P.E. to activate! (Need 10, have %d)\n",
+                       hilt->ppe_stored);
+        send_to_player(sess, "Use 'charge hilt with ppe' or 'charge 10' to add energy.\n");
+        return;
+    }
+
+    /* Activate the blade */
+    hilt->charged = 1;
+    free(hilt->name);
+    hilt->name = strdup("Flaming TW Sword");
+    free(hilt->description);
+    hilt->description = strdup(
+        "A techno-wizard weapon blazing with a three-foot blade of pure flame! "
+        "The blade crackles and hisses, casting flickering red light.");
+    hilt->stats.damage_dice = 3;
+    hilt->stats.damage_sides = 6;
+    hilt->stats.damage_bonus = 6;
+    hilt->stats.is_mega_damage = true;
+    hilt->stats.strike_bonus = 2;
+
+    send_to_player(sess, "\nWHOOOOSH!\n");
+    send_to_player(sess, "A blazing blade of flame erupts from the hilt!\n");
+    send_to_player(sess, "You now wield a flaming techno-wizard sword! (3d6+6 M.D.)\n");
+
+    Room *room = sess->current_room;
+    if (room) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "A blade of pure flame erupts from %s's hilt with a thunderous WHOOSH!\r\n",
+                 sess->username);
+        room_broadcast(room, msg, sess);
+    }
+}
+
+void cmd_deactivate(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+
+    Item *hilt = find_tw_hilt(ch);
+    if (!hilt || !hilt->charged) {
+        send_to_player(sess, "You don't have an active blade to deactivate.\n");
+        return;
+    }
+
+    hilt->charged = 0;
+    free(hilt->name);
+    hilt->name = strdup("Techno-Wizard Hilt");
+    free(hilt->description);
+    hilt->description = strdup(
+        "An ornate metallic sword hilt covered in glowing runes and techno-magical circuitry. "
+        "Etched on the pommel: 'Charge with P.P.E.'");
+    hilt->stats.damage_dice = 1;
+    hilt->stats.damage_sides = 4;
+    hilt->stats.damage_bonus = 0;
+    hilt->stats.is_mega_damage = false;
+    hilt->stats.strike_bonus = 0;
+
+    send_to_player(sess, "The flaming blade dissipates with a soft hiss.\n");
+    send_to_player(sess, "Hilt P.P.E. remaining: %d/%d\n", hilt->ppe_stored, hilt->ppe_max_storage);
+
+    Room *room = sess->current_room;
+    if (room) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "The flaming blade on %s's sword dissipates.\r\n", sess->username);
+        room_broadcast(room, msg, sess);
+    }
 }

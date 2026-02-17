@@ -901,116 +901,26 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     send_to_player(sess, "\n");
                     send_to_player(sess, "Accept these stats? (yes/reroll): ");
                 } else {
-                    /* Non-RCC: proceed to OCC selection */
+                    /* Non-RCC: DO NOT force O.C.C. selection during chargen.
+                     * Players may choose an O.C.C. in-game via the 'selectocc'
+                     * command. Proceed directly to rolling attributes. */
                     ch->occ = NULL;
-                    sess->chargen_state = CHARGEN_OCC_SELECT;
-                    sess->chargen_page = 0;
 
-                    /* Ensure OCCs are scanned from disk */
-                    if (num_loaded_occs == 0) race_loader_scan_occs();
+                    send_to_player(sess, "You may select an O.C.C. later in-game using 'selectocc'.\n\n");
+                    send_to_player(sess, "Rolling your attributes...\n");
+                    chargen_roll_stats(sess);
+                    chargen_display_stats(sess);
 
-                    int total_pages = (num_loaded_occs + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n",
-                                   sess->chargen_page + 1, total_pages);
-
-                    int start = sess->chargen_page * ITEMS_PER_PAGE;
-                    int end = start + ITEMS_PER_PAGE;
-                    if (end > num_loaded_occs) end = num_loaded_occs;
-
-                    for (int i = start; i < end; i++) {
-                        send_to_player(sess, "  %2d. %s - %s\n",
-                                      i + 1, loaded_occs[i].name, loaded_occs[i].desc);
-                    }
-
+                    sess->chargen_state = CHARGEN_STATS_CONFIRM;
                     send_to_player(sess, "\n");
-                    if (end < num_loaded_occs) {
-                        send_to_player(sess, "  Type 'n' for next page\n");
-                    }
-                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_occs);
+                    send_to_player(sess, "Accept these stats? (yes/reroll): ");
                 }
             } else {
                 send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
             }
             break;
 
-        case CHARGEN_OCC_SELECT:
-            /* Handle pagination */
-            if (input[0] == 'n' || input[0] == 'N') {
-                int total_pages = (num_loaded_occs + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                if (sess->chargen_page < total_pages - 1) {
-                    sess->chargen_page++;
-                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n",
-                                   sess->chargen_page + 1, total_pages);
-
-                    int start = sess->chargen_page * ITEMS_PER_PAGE;
-                    int end = start + ITEMS_PER_PAGE;
-                    if (end > num_loaded_occs) end = num_loaded_occs;
-
-                    for (int i = start; i < end; i++) {
-                        send_to_player(sess, "  %2d. %s - %s\n",
-                                      i + 1, loaded_occs[i].name, loaded_occs[i].desc);
-                    }
-
-                    send_to_player(sess, "\n");
-                    if (sess->chargen_page > 0) {
-                        send_to_player(sess, "  Type 'p' for previous page\n");
-                    }
-                    if (end < num_loaded_occs) {
-                        send_to_player(sess, "  Type 'n' for next page\n");
-                    }
-                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_occs);
-                } else {
-                    send_to_player(sess, "Already on last page.\nEnter choice (1-%d): ", num_loaded_occs);
-                }
-                return;
-            }
-
-            if (input[0] == 'p' || input[0] == 'P') {
-                if (sess->chargen_page > 0) {
-                    sess->chargen_page--;
-                    int total_pages = (num_loaded_occs + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                    send_to_player(sess, "\n=== SELECT YOUR O.C.C. (Page %d/%d) ===\n\n",
-                                   sess->chargen_page + 1, total_pages);
-
-                    int start = sess->chargen_page * ITEMS_PER_PAGE;
-                    int end = start + ITEMS_PER_PAGE;
-                    if (end > num_loaded_occs) end = num_loaded_occs;
-
-                    for (int i = start; i < end; i++) {
-                        send_to_player(sess, "  %2d. %s - %s\n",
-                                      i + 1, loaded_occs[i].name, loaded_occs[i].desc);
-                    }
-
-                    send_to_player(sess, "\n");
-                    if (sess->chargen_page > 0) {
-                        send_to_player(sess, "  Type 'p' for previous page\n");
-                    }
-                    if (end < num_loaded_occs) {
-                        send_to_player(sess, "  Type 'n' for next page\n");
-                    }
-                    send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_occs);
-                } else {
-                    send_to_player(sess, "Already on first page.\nEnter choice (1-%d): ", num_loaded_occs);
-                }
-                return;
-            }
-
-            /* Handle OCC selection */
-            if (choice >= 1 && choice <= num_loaded_occs) {
-                ch->occ = strdup(loaded_occs[choice - 1].name);
-                send_to_player(sess, "\nYou selected O.C.C.: %s\n\n", ch->occ);
-
-                send_to_player(sess, "Rolling your attributes...\n");
-                chargen_roll_stats(sess);
-                chargen_display_stats(sess);
-
-                sess->chargen_state = CHARGEN_STATS_CONFIRM;
-                send_to_player(sess, "\n");
-                send_to_player(sess, "Accept these stats? (yes/reroll): ");
-            } else {
-                send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_occs);
-            }
-            break;
+        /* O.C.C. selection step removed: players choose O.C.C. in-game via 'selectocc'. */
             
         case CHARGEN_STATS_CONFIRM:
             if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
@@ -1276,6 +1186,26 @@ int character_exists(const char *username, char *found_name, size_t found_size) 
         }
     }
 
+    closedir(dir);
+    return 0;
+}
+
+/* Return 1 if any saved player files exist on disk (used to determine
+ * whether the current new player should be treated as the true first-ever
+ * account). Returns 0 if no player .dat files are present or the save
+ * directory cannot be opened. */
+int any_saved_players(void) {
+    DIR *dir = opendir("lib/save/players");
+    if (!dir) return 0;
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        const char *dot = strrchr(entry->d_name, '.');
+        if (!dot) continue;
+        if (strcmp(dot, ".dat") == 0) {
+            closedir(dir);
+            return 1;
+        }
+    }
     closedir(dir);
     return 0;
 }
@@ -2536,6 +2466,115 @@ void cmd_swim(PlayerSession *sess, const char *args) {
             snprintf(msg, sizeof(msg), "%s flails around in the water!\r\n", sess->username);
             room_broadcast(room, msg, sess);
         }
+    }
+}
+
+/* ========== METAMORPH COMMAND ========== */
+
+/* Check if race has metamorph ability */
+static int race_has_metamorph(const char *race) {
+    if (!race) return 0;
+    return (strcasecmp(race, "Great Horned Dragon") == 0 ||
+            strcasecmp(race, "Ancient Dragon") == 0 ||
+            strcasecmp(race, "Adult Dragon") == 0);
+}
+
+/* Valid metamorph target forms */
+static const char *metamorph_valid_forms[] = {
+    "human", "elf", "dwarf", "dog boy", "psi-stalker",
+    "dragon hatchling", "juicer", "crazy", NULL
+};
+
+void cmd_metamorph(PlayerSession *sess, const char *args) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+
+    /* Check if character's true race supports metamorph */
+    const char *base_race = ch->true_race ? ch->true_race : ch->race;
+    if (!race_has_metamorph(base_race)) {
+        send_to_player(sess, "You don't possess the power of metamorphosis!\n");
+        return;
+    }
+
+    /* No args or "revert" - return to true form */
+    if (!args || *args == '\0' || strcasecmp(args, "revert") == 0 ||
+        strcasecmp(args, "normal") == 0 || strcasecmp(args, "true") == 0) {
+        if (!ch->metamorph_active) {
+            send_to_player(sess, "You are already in your true form!\n");
+            return;
+        }
+
+        /* Revert */
+        free(ch->race);
+        ch->race = strdup(ch->true_race);
+        free(ch->true_race);
+        ch->true_race = NULL;
+        ch->metamorph_active = 0;
+
+        send_to_player(sess, "\nYour disguise dissolves!\n");
+        send_to_player(sess, "Your true draconic form reasserts itself!\n");
+        send_to_player(sess, "You have returned to your natural state.\n");
+
+        Room *room = sess->current_room;
+        if (room) {
+            char msg[256];
+            snprintf(msg, sizeof(msg),
+                     "%s blazes with crimson light!\nThe illusion shatters, revealing a %s!\r\n",
+                     sess->username, ch->race);
+            room_broadcast(room, msg, sess);
+        }
+        return;
+    }
+
+    /* Check valid target form */
+    int valid = 0;
+    for (int i = 0; metamorph_valid_forms[i]; i++) {
+        if (strcasecmp(args, metamorph_valid_forms[i]) == 0) {
+            valid = 1;
+            break;
+        }
+    }
+
+    if (!valid) {
+        send_to_player(sess, "You cannot metamorph into that race!\n");
+        send_to_player(sess, "Valid forms: ");
+        for (int i = 0; metamorph_valid_forms[i]; i++) {
+            send_to_player(sess, "%s%s", metamorph_valid_forms[i],
+                          metamorph_valid_forms[i + 1] ? ", " : "\n");
+        }
+        return;
+    }
+
+    /* Already in that form? */
+    if (ch->metamorph_active && strcasecmp(ch->race, args) == 0) {
+        send_to_player(sess, "You are already in that form!\n");
+        return;
+    }
+
+    /* Save true race if not already metamorphed */
+    if (!ch->metamorph_active) {
+        ch->true_race = strdup(ch->race);
+    }
+
+    /* Apply metamorphosis */
+    free(ch->race);
+    ch->race = strdup(args);
+    /* Capitalize first letter */
+    if (ch->race[0] >= 'a' && ch->race[0] <= 'z')
+        ch->race[0] -= 32;
+    ch->metamorph_active = 1;
+
+    send_to_player(sess, "\nYour body shimmers and shifts!\n");
+    send_to_player(sess, "Your draconic form melts away and reforms into a %s!\n", args);
+    send_to_player(sess, "You are now disguised as a %s.\n", args);
+
+    Room *room = sess->current_room;
+    if (room) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "%s shimmers with golden light!\nWhen the light fades, they have transformed into a %s!\r\n",
+                 sess->username, args);
+        room_broadcast(room, msg, sess);
     }
 }
 

@@ -12,6 +12,7 @@ void create() {
 
     add_exit("north", "/domains/new_camelot/chapel");
     add_exit("northwest", "/domains/new_camelot/town_square");
+    add_exit("south", "/domains/start/village_center");
 
     set_property("light", 2);
 }

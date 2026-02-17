@@ -1,0 +1,88 @@
+// /lib/cmds/selectocc.lpc
+// Allow a logged-in player to select an O.C.C. after chargen.
+
+int main(string arg) {
+    object player = this_player();
+    if (!player) {
+        write("Error: No player context.\n");
+        return 1;
+    }
+
+    if (!arg || arg == "") {
+        write("Usage: selectocc <occ_id>\nType 'help occs' to list available OCCs.\n");
+        return 1;
+    }
+
+    // Prevent re-selection if already set
+    if (function_exists("query_occ_id", player)) {
+        mixed cur = player->query_occ_id();
+        if (cur && cur != "") {
+            write("You already have an O.C.C.: " + cur + "\n");
+            return 1;
+        }
+    }
+
+    string occ_path = "/occs/" + arg;
+    object occ = find_object(occ_path);
+    if (!occ) occ = load_object(occ_path);
+    if (!occ) {
+        write("Unknown O.C.C.: " + arg + "\n");
+        return 1;
+    }
+
+    // Race compatibility check if supported by OCC
+    string race_id = "";
+    if (function_exists("query_race_id", player)) {
+        race_id = player->query_race_id();
+    }
+    if (function_exists("race_can_select", occ) && !occ->race_can_select(race_id)) {
+        write("Your race cannot select that O.C.C.\n");
+        return 1;
+    }
+
+    // Stat requirement check if supported
+    if (function_exists("meets_stat_requirements", occ)) {
+        if (!occ->meets_stat_requirements(player)) {
+            write("You do not meet the stat requirements for that O.C.C.\n");
+            return 1;
+        }
+    }
+
+    // Apply OCC to player
+    if (function_exists("set_occ_id", player)) {
+        player->set_occ_id(arg);
+    }
+
+    if (function_exists("apply_to_player", occ)) {
+        catch(occ->apply_to_player(player));
+    }
+
+    // Assign primary skills if provided by OCC
+    if (function_exists("query_occ_skills", occ)) {
+        mixed skills = occ->query_occ_skills();
+        if (skills && sizeof(skills)) {
+            if (function_exists("set_primary_skills", player)) {
+                player->set_primary_skills(skills);
+            }
+
+            object sd = find_object("/daemon/skills");
+            if (!sd) sd = load_object("/daemon/skills");
+            foreach (string sk in skills) {
+                int pct = 30;
+                if (sd && function_exists("calculate_skill_percentage", sd)) {
+                    pct = sd->calculate_skill_percentage(sk, player, 1);
+                }
+                if (function_exists("add_skill", player)) {
+                    player->add_skill(sk, pct);
+                }
+            }
+        }
+    }
+
+    // Persist change
+    if (function_exists("save_player", player)) player->save_player();
+
+    write("O.C.C. set to: " + arg + ".\n");
+    write("Primary skills and abilities applied. Use 'stats' to view your sheet.\n");
+    return 1;
+}

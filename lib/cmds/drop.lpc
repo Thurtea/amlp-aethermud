@@ -24,13 +24,19 @@ int main(string arg) {
     if (arg == "all") {
         object *inv = all_inventory(user);
         int count = 0;
-        
+
         if (!inv || sizeof(inv) == 0) {
             tell_object(user, "You're not carrying anything.\n");
             return 1;
         }
-        
+
         foreach (object obj in inv) {
+            // Skip no-drop items
+            if (function_exists("query_no_drop", obj) && obj->query_no_drop()) continue;
+            // Skip equipped/wielded/worn items
+            if (function_exists("query_wielded", obj) && obj->query_wielded()) continue;
+            if (function_exists("query_worn", obj) && obj->query_worn()) continue;
+
             if (function_exists("move", obj)) {
                 obj->move(room);
             } else {
@@ -38,19 +44,23 @@ int main(string arg) {
             }
             count++;
         }
-        
-        tell_object(user, sprintf("You drop %d item%s.\n", 
-            count, (count == 1 ? "" : "s")));
-        
-        // Tell room with identity-aware names
-        object *people = all_inventory(room);
-        foreach (object person in people) {
-            if (living(person) && person != user) {
-                string actor_name = user->query_introduction_name(person);
-                tell_object(person, sprintf("%s drops everything.\n", actor_name));
+
+        if (count > 0) {
+            tell_object(user, sprintf("You drop %d item%s.\n",
+                count, (count == 1 ? "" : "s")));
+
+            // Tell room with identity-aware names
+            object *people = all_inventory(room);
+            foreach (object person in people) {
+                if (living(person) && person != user) {
+                    string actor_name = user->query_introduction_name(person);
+                    tell_object(person, sprintf("%s drops some items.\n", actor_name));
+                }
             }
+        } else {
+            tell_object(user, "You have nothing you can drop.\n");
         }
-        
+
         return 1;
     }
     

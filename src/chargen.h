@@ -19,7 +19,6 @@ typedef struct {
 /* Character generation states */
 typedef enum {
     CHARGEN_RACE_SELECT,
-    CHARGEN_OCC_SELECT,
     CHARGEN_STATS_ROLL,
     CHARGEN_STATS_CONFIRM,
     CHARGEN_ALIGNMENT_SELECT,
@@ -124,6 +123,10 @@ typedef struct Character {
     char *description;            /* Player-written character description */
     char *position;               /* Custom position text (default: "is standing around") */
 
+    /* Metamorphosis (session-only, not saved) */
+    char *true_race;              /* Original race before metamorph (NULL = not metamorphed) */
+    int metamorph_active;         /* 1 if currently shape-shifted */
+
     /* Pre-promotion backup (for demotion) */
     char *original_race;          /* Race before becoming wizard */
     char *original_occ;           /* O.C.C. before becoming wizard */
@@ -178,6 +181,9 @@ void cmd_clan(PlayerSession *sess, const char *args);
 /* Swim command */
 void cmd_swim(PlayerSession *sess, const char *args);
 
+/* Metamorph command (dragon shapeshifting) */
+void cmd_metamorph(PlayerSession *sess, const char *args);
+
 /* Language commands */
 void cmd_speak(PlayerSession *sess, const char *args);
 void cmd_languages(PlayerSession *sess, const char *args);
@@ -196,6 +202,7 @@ void cmd_meditate(PlayerSession *sess, const char *args);
 int save_character(PlayerSession *sess);
 int load_character(PlayerSession *sess, const char *username);
 int character_exists(const char *username, char *found_name, size_t found_size);
+int any_saved_players(void);
 
 #endif /* CHARGEN_H */
 

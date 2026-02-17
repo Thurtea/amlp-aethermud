@@ -15,7 +15,7 @@ void create() {
     );
     
     set_exits(([
-        "north": "/domains/castle/entry",
+        "north": "/domains/new_camelot/gate",
         "south": "/domains/start/lake_shore",
         "east": "/domains/start/shop_general",
         "west": "/domains/start/training_grounds"

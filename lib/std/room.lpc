@@ -47,12 +47,21 @@ string look() {
     object *contents;
     object *living_things = ({ });
     object *items = ({ });
-    
-    // Add short description with color
-    desc += "\033[1;36m" + query_short() + "\033[0m\n";
-    
-    // Add long description
-    desc += query_long() + "\n";
+    object viewer = this_player();
+    int brief_mode = 0;
+
+    if (viewer && function_exists("GetBriefMode", viewer)) {
+        brief_mode = (int)viewer->GetBriefMode();
+    }
+
+    // Render header based on brief/verbose preference
+    if (brief_mode) {
+        // Brief mode: show the short only
+        desc += "\033[1;36m" + query_short() + "\033[0m\n";
+    } else {
+        // Verbose: show the long description only (avoid duplicating short)
+        desc += query_long() + "\n";
+    }
     
     // Get room contents
     contents = all_inventory(this_object());
@@ -114,7 +123,16 @@ string look() {
                 if (item_desc && sizeof(item_desc) > 0) {
                     item_desc = capitalize(item_desc);
                 }
-                
+
+                // Use centralized renderer when possible to add articles/punctuation
+                if (function_exists("render_item_description", this_object())) {
+                    string rendered = render_item_description(item, viewer);
+                    if (rendered && rendered != "") {
+                        desc += "  " + rendered + "\n";
+                        continue;
+                    }
+                }
+
                 desc += "  " + item_desc + " is here.\n";
             }
         }
@@ -135,4 +153,64 @@ string look() {
     }
     
     return desc;
+}
+
+// Helper: return a nicely-phrased single-line description for an item
+string render_item_description(object item, object viewer) {
+    string short_desc;
+    string article = "";
+    string out;
+
+    if (!objectp(item)) return "";
+
+    // Living things should use their introduction name if available
+    if (living(item)) {
+        if (function_exists("query_introduction_name", item)) {
+            out = item->query_introduction_name(viewer);
+            if (out && sizeof(out) > 0) {
+                out = capitalize(out);
+                // Ensure trailing punctuation
+                if (out[<1] != '.' && out[<1] != '!') out += ".";
+                return out;
+            }
+        }
+    }
+
+    // Non-living: attempt to get a short
+    if (function_exists("query_short", item)) {
+        short_desc = item->query_short();
+    } else {
+        short_desc = "something";
+    }
+
+    if (!short_desc || short_desc == "") return "";
+
+    // If object provides an explicit article hook, use it
+    if (function_exists("query_article", item)) {
+        article = item->query_article();
+    } else {
+        // If the short already begins with an article, don't add another
+        string lc = lower_case(short_desc);
+        if (startswith(lc, "a ") || startswith(lc, "an ") || startswith(lc, "the ")) {
+            article = "";
+        } else {
+            // Simple vowel rule for indefinite article
+            string first = lc[0..0];
+            if (member(({ 'a','e','i','o','u' }), first) != -1) {
+                article = "An";
+            } else {
+                article = "A";
+            }
+        }
+    }
+
+    // Assemble and ensure capitalization and punctuation
+    if (article && article != "") {
+        out = article + " " + short_desc;
+    } else {
+        out = short_desc;
+    }
+    out = capitalize(out);
+    if (out[<1] != '.' && out[<1] != '!') out += ".";
+    return out;
 }

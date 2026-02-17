@@ -2331,26 +2331,26 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 const char *invis_tag = sessions[i]->is_invisible ? " (invis)" : "";
                 const char *title_str = sessions[i]->title[0] ? sessions[i]->title : "";
 
-                /* Build colored role tag */
+                /* Build colored role tag (prefix before name, trailing space) */
                 char role_tag[64] = "";
                 if (sessions[i]->privilege_level >= 1) {
                     const char *role = sessions[i]->wizard_role;
                     if (strcmp(role, "admin") == 0)
-                        snprintf(role_tag, sizeof(role_tag), " \033[1;31m[Admin]\033[0m");
+                        snprintf(role_tag, sizeof(role_tag), "\033[1;31m[Admin]\033[0m ");
                     else if (strcmp(role, "domain") == 0)
-                        snprintf(role_tag, sizeof(role_tag), " \033[1;34m[Domain]\033[0m");
+                        snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
                     else if (strcmp(role, "code") == 0)
-                        snprintf(role_tag, sizeof(role_tag), " \033[1;36m[Code]\033[0m");
+                        snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
                     else
-                        snprintf(role_tag, sizeof(role_tag), " \033[1;32m[Roleplay]\033[0m");
+                        snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
                 }
 
                 if (title_str[0]) {
-                    snprintf(buf, sizeof(buf), "%-16s%s%s %s  (%lds idle)",
-                            sessions[i]->username, role_tag, invis_tag, title_str, idle);
+                    snprintf(buf, sizeof(buf), "%s%-16s%s %s  (%lds idle)",
+                            role_tag, sessions[i]->username, invis_tag, title_str, idle);
                 } else {
-                    snprintf(buf, sizeof(buf), "%-16s%s%s  (%lds idle)",
-                            sessions[i]->username, role_tag, invis_tag, idle);
+                    snprintf(buf, sizeof(buf), "%s%-16s%s  (%lds idle)",
+                            role_tag, sessions[i]->username, invis_tag, idle);
                 }
                 frame_line(session, buf, w);
                 count++;

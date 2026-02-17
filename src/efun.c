@@ -16,6 +16,7 @@
 #include "program_loader.h"
 #include "object.h"
 #include "session.h"
+#include "room.h"
 #include <sys/stat.h>
 #include <libgen.h>
 #include <limits.h>
@@ -874,6 +875,95 @@ VMValue efun_tell_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     }
 
     return vm_value_create_int(1);
+}
+
+/* Forward declaration (defined later in this file) */
+static ObjManager *get_global_obj_manager(void);
+
+/* tell_room(room, message) - broadcast message to all players in the given room */
+VMValue efun_tell_room(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count < 2) return vm_value_create_int(0);
+    if (args[1].type != VALUE_STRING) return vm_value_create_int(0);
+
+    const char *message = args[1].data.string_value;
+    if (!message) return vm_value_create_int(0);
+
+    /* Get room path from obj_t name or string arg */
+    const char *room_path = NULL;
+    if (args[0].type == VALUE_OBJECT) {
+        obj_t *room_obj = (obj_t *)args[0].data.object_value;
+        if (room_obj) room_path = room_obj->name;
+    } else if (args[0].type == VALUE_STRING) {
+        room_path = args[0].data.string_value;
+    }
+    if (!room_path) return vm_value_create_int(0);
+
+    extern PlayerSession *sessions[];
+    int sent = 0;
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        PlayerSession *s = sessions[i];
+        if (!s || !s->player_object) continue;
+        /* Match on LPC room path stored in session */
+        const char *sp = s->current_room_path;
+        if (sp && strcmp(sp, room_path) == 0) {
+            send_message_to_player_session(s->player_object, message);
+            sent++;
+            continue;
+        }
+        /* Fallback: match C room lpc_path */
+        if (s->current_room && s->current_room->lpc_path &&
+            strcmp(s->current_room->lpc_path, room_path) == 0) {
+            send_message_to_player_session(s->player_object, message);
+            sent++;
+        }
+    }
+    return vm_value_create_int(sent);
+}
+
+/* children(filepath) - return array of all loaded objects from the given path */
+VMValue efun_children(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count < 1 || args[0].type != VALUE_STRING) return vm_value_create_null();
+    const char *filepath = args[0].data.string_value;
+    if (!filepath) return vm_value_create_null();
+
+    /* Strip trailing .lpc for matching (both forms accepted) */
+    char base[PATH_MAX];
+    strncpy(base, filepath, sizeof(base) - 1);
+    base[sizeof(base) - 1] = '\0';
+    size_t blen = strlen(base);
+    if (blen > 4 && strcmp(base + blen - 4, ".lpc") == 0)
+        base[blen - 4] = '\0';
+
+    ObjManager *mgr = get_global_obj_manager();
+    if (!mgr || !vm || !vm->gc) return vm_value_create_null();
+
+    array_t *result = array_new(vm->gc, 8);
+    if (!result) return vm_value_create_null();
+
+    for (int i = 0; i < mgr->object_count; i++) {
+        obj_t *o = mgr->objects[i];
+        if (!o || !o->name) continue;
+        /* Match exact path or path without .lpc */
+        const char *oname = o->name;
+        char obase[PATH_MAX];
+        strncpy(obase, oname, sizeof(obase) - 1);
+        obase[sizeof(obase) - 1] = '\0';
+        size_t olen = strlen(obase);
+        if (olen > 4 && strcmp(obase + olen - 4, ".lpc") == 0)
+            obase[olen - 4] = '\0';
+        if (strcmp(obase, base) == 0) {
+            VMValue v;
+            v.type = VALUE_OBJECT;
+            v.data.object_value = o;
+            array_push(result, v);
+        }
+    }
+
+    VMValue ret;
+    ret.type = VALUE_ARRAY;
+    ret.data.array_value = result;
+    return ret;
 }
 
 /* ========== File path helpers ========== */
@@ -2482,6 +2572,8 @@ int efun_register_all(EfunRegistry *registry) {
     
     /* I/O functions */
     efun_register(registry, "tell_object", efun_tell_object, 2, 2, "int tell_object(object, string)");
+    efun_register(registry, "tell_room", efun_tell_room, 2, 2, "int tell_room(object, string)");
+    efun_register(registry, "children", efun_children, 1, 1, "object* children(string)");
     efun_register(registry, "read_file", efun_read_file, 1, 3, "string read_file(string, int, int)");
     efun_register(registry, "write_file", efun_write_file, 2, 2, "int write_file(string, string)");
     efun_register(registry, "file_size", efun_file_size, 1, 1, "int file_size(string)");

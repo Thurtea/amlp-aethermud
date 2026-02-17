@@ -75,6 +75,10 @@ void room_add_npc(Room *room, NPC *npc);
 void room_remove_npc(Room *room, NPC *npc);
 const char* room_find_detail(Room *room, const char *keyword);
 
+/* Shared item-name formatter: lowercases words, preserves ALL-CAPS acronyms
+   and words containing apostrophes (e.g. Wilk's). */
+void format_item_name(const char *iname, char *out, size_t out_sz);
+
 /* Room commands */
 void cmd_look(PlayerSession *sess, const char *args);
 void cmd_move(PlayerSession *sess, const char *direction);

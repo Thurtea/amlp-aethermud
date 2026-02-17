@@ -2286,11 +2286,19 @@ void cmd_get(PlayerSession *sess, const char *args) {
 
     room_remove_item(sess->current_room, item);
     inventory_add(&sess->character.inventory, item);
-    send_to_player(sess, "You pick up %s.\n", item->name);
 
-    char msg[256];
-    snprintf(msg, sizeof(msg), "%s picks up %s.\n", sess->username, item->name);
-    room_broadcast(sess->current_room, msg, sess);
+    {
+        char fmt_name[256];
+        format_item_name(item->name ? item->name : "it", fmt_name, sizeof(fmt_name));
+        int vowel = (fmt_name[0] == 'a' || fmt_name[0] == 'e' || fmt_name[0] == 'i' ||
+                     fmt_name[0] == 'o' || fmt_name[0] == 'u');
+        send_to_player(sess, "You pick up %s %s.\n", vowel ? "an" : "a", fmt_name);
+
+        char msg[256];
+        snprintf(msg, sizeof(msg), "%s picks up %s %s.\n",
+                 sess->username, vowel ? "an" : "a", fmt_name);
+        room_broadcast(sess->current_room, msg, sess);
+    }
 }
 
 /* Drop item from inventory to room */

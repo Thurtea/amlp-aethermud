@@ -8,7 +8,7 @@
  * acronyms (ALLCAPS) and obvious proper-nouns with apostrophes
  * (e.g. Wilk's). Writes result into `out` (must be at least out_sz).
  */
-static void format_item_name(const char *iname, char *out, size_t out_sz) {
+void format_item_name(const char *iname, char *out, size_t out_sz) {
     if (!iname || !iname[0]) {
         if (out_sz > 0) out[0] = '\0';
         return;

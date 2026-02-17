@@ -682,15 +682,17 @@ void inventory_display(struct PlayerSession *sess) {
         while (curr) {
             const char *dmg_type = curr->stats.is_mega_damage ? "MD" : "SDC";
             
-            /* Add indefinite article (A/An) for inventory readability */
+            /* Add indefinite article (a/an) with formatted (lowercase) name */
             const char *name = curr->name;
             char name_buf[256];
             if (name && name[0]) {
-                char first = tolower((unsigned char)name[0]);
+                char fmt[256];
+                format_item_name(name, fmt, sizeof(fmt));
+                char first = fmt[0];
                 if (first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u') {
-                    snprintf(name_buf, sizeof(name_buf), "An %s", name);
+                    snprintf(name_buf, sizeof(name_buf), "An %s", fmt);
                 } else {
-                    snprintf(name_buf, sizeof(name_buf), "A %s", name);
+                    snprintf(name_buf, sizeof(name_buf), "A %s", fmt);
                 }
             } else {
                 snprintf(name_buf, sizeof(name_buf), "%s", name ? name : "item");

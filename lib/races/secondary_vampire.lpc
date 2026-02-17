@@ -1,0 +1,36 @@
+// /lib/races/secondary_vampire.lpc
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Secondary Vampire");
+    set_race_id("secondary_vampire");
+    set_race_plural("Secondary Vampires");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "A created vampire that lacks some of the mastery of true elders, "
+        "but retains core vampiric powers and the ability to create more." 
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(60,78);
+    set_weight_range(100,240);
+
+    set_stat_modifiers(([
+        "ps": 6,
+        "spd": 4,
+        "pe": 3
+    ]));
+
+    set_natural_mdc(180);
+    set_mdc_creature(1);
+    set_natural_armor(12);
+
+    add_natural_weapon("bite", 2, 6, 4);
+    add_natural_weapon("claw", 2, 4, 2);
+
+    set_is_rcc(1);
+    set_can_have_occ(0);
+    add_racial_ability("create_secondary_vampire",1);
+}

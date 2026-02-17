@@ -1,4 +1,39 @@
 // /lib/races/great_horned_dragon.lpc
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Great Horned Dragon");
+    set_race_id("great_horned_dragon");
+    set_race_plural("Great Horned Dragons");
+    set_race_category(RACE_CAT_DRAGON);
+
+    set_race_description(
+        "A powerful draconic lineage with great horns and massive wings. "
+        "Suited for metamorph testing and large-form playtesting."
+    );
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(240,480);
+    set_weight_range(2000,8000);
+
+    set_stat_modifiers(([
+        "ps": 20,
+        "pe": 12,
+        "spd": 2
+    ]));
+
+    set_natural_mdc(800);
+    set_mdc_creature(1);
+    set_natural_armor(40);
+
+    add_natural_weapon("bite", 6, 10, 12);
+    add_natural_weapon("claw", 4, 8, 8);
+
+    set_is_rcc(1);
+    set_can_have_occ(1);
+}
+// /lib/races/great_horned_dragon.lpc
 // Great Horned Dragon - Powerful RCC with metamorph ability
 // Phase 2 - Dragon shapeshifting ability
 

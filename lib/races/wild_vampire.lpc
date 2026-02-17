@@ -1,0 +1,36 @@
+// /lib/races/wild_vampire.lpc
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Wild Vampire");
+    set_race_id("wild_vampire");
+    set_race_plural("Wild Vampires");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "A feral branch of vampires adapted to survive in the wilds. "
+        "They are less sophisticated than urban vampires but fierce predators."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(62,76);
+    set_weight_range(110,220);
+
+    set_stat_modifiers(([
+        "ps": 8,
+        "spd": 6,
+        "pe": 4
+    ]));
+
+    set_natural_sdc(0);
+    set_natural_mdc(150);
+    set_mdc_creature(1);
+    set_natural_armor(10);
+
+    add_natural_weapon("bite", 2, 6, 3);
+    add_natural_weapon("claw", 2, 4, 2);
+
+    set_is_rcc(1);
+    set_can_have_occ(0);
+}

@@ -13,6 +13,11 @@ void create() {
 
     add_exit("west", "/domains/new_camelot/town_square");
     add_exit("east", "/domains/new_camelot/stables");
+    // Spawn a training dummy if one isn't already present
+    if (!present("training_dummy", this_object())) {
+        object d = clone_object("/lib/objects/npcs/training_dummy.lpc");
+        if (d) d->move(this_object());
+    }
 
     set_property("light", 2);
 }

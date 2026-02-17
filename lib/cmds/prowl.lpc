@@ -1,0 +1,44 @@
+// prowl command - vampire stealth
+int main(string args) {
+    object player = previous_object();
+    if (!args || args == "") {
+        tell_object(player, "Usage: prowl <direction>\n");
+        return 1;
+    }
+
+    object env = environment(player);
+    if (!env) {
+        tell_object(player, "You are nowhere.\n");
+        return 1;
+    }
+
+    object dest = env->query_exit(args);
+    if (!dest) {
+        tell_object(player, "You can't go that way.\n");
+        return 1;
+    }
+
+    int skill = 0;
+    if (function_exists("query_skill", player)) skill = player->query_skill("prowl");
+    if (!skill) skill = 0;
+
+    int roll = random(100);
+    if (roll < skill) {
+        // success: silent move
+        player->move_player(dest);
+        tell_object(player, "You prowl silently " + args + ".\n");
+        return 1;
+    }
+
+    // failure: normal move (announce)
+    tell_object(player, "You fail to prowl quietly and move normally.\n");
+    // delegate to normal move
+    if (function_exists("cmd_move", player)) return player->cmd_move(args);
+    // fallback
+    player->move_player(dest);
+    return 1;
+}
+
+void help() {
+    write("Usage: prowl <direction>\nAttempts a stealthy move using your prowl skill. Success is skill% chance.\n");
+}

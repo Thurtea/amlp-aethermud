@@ -1,0 +1,26 @@
+// E-Clip ammo for TX-500 (100 shots)
+inherit "/std/object";
+
+private int shots;
+
+void create() {
+    ::create();
+    set_name("e-clip");
+    set_id(({"e-clip","eclip","clip","ammo"}));
+    set_short("E-Clip (100 shots)");
+    set_long("A rechargeable energy clip for the TX-500 rifle. Holds up to 100 shots.\n");
+    set_weight(1);
+    set_value(800);
+    shots = 100;
+}
+
+string query_ammo_type() { return "e_clip"; }
+
+int query_shots() { return shots; }
+
+int consume_shot() {
+    if (shots <= 0) return 0;
+    shots--;
+    set_short("E-Clip (" + shots + " shots)");
+    return 1;
+}

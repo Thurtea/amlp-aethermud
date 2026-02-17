@@ -878,7 +878,7 @@ void chargen_complete(PlayerSession *sess) {
 
     char staff_msg[256];
     snprintf(staff_msg, sizeof(staff_msg),
-            "\033[1;34m[Staff] %s created a new character (%s %s).\033[0m\r\n",
+            "[Staff] %s created a new character (%s %s).\r\n",
             sess->username,
             sess->character.race ? sess->character.race : "unknown",
             sess->character.occ ? sess->character.occ : "Vagabond");
@@ -1346,6 +1346,27 @@ int save_character(PlayerSession *sess) {
     /* Write wizard role (fixed 32 bytes) */
     fwrite(sess->wizard_role, 1, 32, f);
 
+    /* Write custom title and messages (version 6 additions) - fixed 128 bytes each */
+    {
+        char tmp[128];
+        /* title */
+        memset(tmp, 0, sizeof(tmp));
+        if (sess->title) strncpy(tmp, sess->title, sizeof(tmp) - 1);
+        fwrite(tmp, 1, sizeof(tmp), f);
+        /* enter_msg */
+        memset(tmp, 0, sizeof(tmp));
+        if (sess->enter_msg) strncpy(tmp, sess->enter_msg, sizeof(tmp) - 1);
+        fwrite(tmp, 1, sizeof(tmp), f);
+        /* leave_msg */
+        memset(tmp, 0, sizeof(tmp));
+        if (sess->leave_msg) strncpy(tmp, sess->leave_msg, sizeof(tmp) - 1);
+        fwrite(tmp, 1, sizeof(tmp), f);
+        /* goto_msg */
+        memset(tmp, 0, sizeof(tmp));
+        if (sess->goto_msg) strncpy(tmp, sess->goto_msg, sizeof(tmp) - 1);
+        fwrite(tmp, 1, sizeof(tmp), f);
+    }
+
     /* Write password hash (for security) */
     size_t hash_len = strlen(sess->password_hash);
     fwrite(&hash_len, sizeof(size_t), 1, f);
@@ -1638,8 +1659,8 @@ int load_character(PlayerSession *sess, const char *username) {
         return 0;
     }
     
-    /* Accept save versions between 1 and current supported version (4). */
-    if (version < 1 || version > 4) {
+    /* Accept save versions between 1 and current supported version (6). */
+    if (version < 1 || version > 6) {
         ERROR_LOG("Unsupported save file version %d for '%s'", 
                 version, username);
         fclose(f);
@@ -1672,6 +1693,41 @@ int load_character(PlayerSession *sess, const char *username) {
         } else {
             sess->wizard_role[0] = '\0';
         }
+    }
+
+    /* If save version >=6, read title and messages which were written after wizard_role */
+    if (version >= 6) {
+        /* Read fixed-size 128-byte fields and ensure NUL termination */
+        if (fread(sess->title, 1, 128, f) == 128) {
+            sess->title[127] = '\0';
+        } else {
+            sess->title[0] = '\0';
+            if (!feof(f)) fseek(f, 128, SEEK_CUR);
+        }
+        if (fread(sess->enter_msg, 1, 128, f) == 128) {
+            sess->enter_msg[127] = '\0';
+        } else {
+            sess->enter_msg[0] = '\0';
+            if (!feof(f)) fseek(f, 128, SEEK_CUR);
+        }
+        if (fread(sess->leave_msg, 1, 128, f) == 128) {
+            sess->leave_msg[127] = '\0';
+        } else {
+            sess->leave_msg[0] = '\0';
+            if (!feof(f)) fseek(f, 128, SEEK_CUR);
+        }
+        if (fread(sess->goto_msg, 1, 128, f) == 128) {
+            sess->goto_msg[127] = '\0';
+        } else {
+            sess->goto_msg[0] = '\0';
+            if (!feof(f)) fseek(f, 128, SEEK_CUR);
+        }
+    } else {
+        /* Older saves: clear these fields */
+        sess->title[0] = '\0';
+        sess->enter_msg[0] = '\0';
+        sess->leave_msg[0] = '\0';
+        sess->goto_msg[0] = '\0';
     }
 
     /* Read password hash (for authentication) */

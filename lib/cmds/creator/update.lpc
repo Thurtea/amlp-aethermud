@@ -13,15 +13,31 @@ int main(string args) {
     
     if (!args || args == "") {
         tell_object(player, "Syntax: update <object_path>\n");
+        tell_object(player, "Special: 'update here' to reload current room.\n");
         return 1;
     }
-    
-    resolved = player->resolve_path(args);
-    
-    if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
-        resolved += ".lpc";
+
+    // Support 'here' to reload current room
+    if (args == "here" || args == ".") {
+        object room = environment(player);
+        if (!room) {
+            tell_object(player, "You are not in a room to update.\n");
+            return 1;
+        }
+        resolved = file_name(room);
+    } else {
+        // Try resolving relative paths first
+        resolved = player->resolve_path(args);
+        // If the player gave a short object name, try to find it directly
+        if (!file_size(resolved) && !find_object(resolved)) {
+            // try as given
+            if (find_object(args)) resolved = file_name(find_object(args));
+        }
+        if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
+            resolved += ".lpc";
+        }
     }
-    
+
     // Find existing object
     ob = find_object(resolved);
     if (ob) {

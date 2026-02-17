@@ -119,9 +119,9 @@ string look() {
                     item_desc = "something";
                 }
                 
-                // Capitalize first letter
+                // Format item short description (lowercase except acronyms/proper nouns)
                 if (item_desc && sizeof(item_desc) > 0) {
-                    item_desc = capitalize(item_desc);
+                    item_desc = format_item_short(item_desc);
                 }
 
                 // Use centralized renderer when possible to add articles/punctuation
@@ -156,6 +156,31 @@ string look() {
 }
 
 // Helper: return a nicely-phrased single-line description for an item
+// Format item short description to lowercase while preserving acronyms
+// (e.g. EBA) and obvious proper-nouns with apostrophes (e.g. Wilk's)
+string format_item_short(string s) {
+    if (!s || s == "") return s;
+    string orig = s;
+    string lc = lower_case(orig);
+    string *ow = explode(orig, " ");
+    string *lw = explode(lc, " ");
+    int n = sizeof(lw);
+    int m = sizeof(ow);
+    for (int i = 0; i < n; i++) {
+        string o = (i < m) ? ow[i] : lw[i];
+        string a, b;
+        if (upper_case(o) == o && strlen(o) > 1) {
+            lw[i] = o;
+            continue;
+        }
+        if (sscanf(o, "%s'%s", a, b) == 2 && a[0] == upper_case(a[0])) {
+            lw[i] = o;
+            continue;
+        }
+    }
+    return implode(lw, " ");
+}
+
 string render_item_description(object item, object viewer) {
     string short_desc;
     string article = "";
@@ -185,6 +210,8 @@ string render_item_description(object item, object viewer) {
 
     if (!short_desc || short_desc == "") return "";
 
+    
+
     // If object provides an explicit article hook, use it
     if (function_exists("query_article", item)) {
         article = item->query_article();
@@ -204,13 +231,15 @@ string render_item_description(object item, object viewer) {
         }
     }
 
-    // Assemble and ensure capitalization and punctuation
+    // Assemble and ensure punctuation; use formatted short (lowercase
+    // except acronyms/proper nouns) and lowercase articles.
+    string formatted = format_item_short(short_desc);
     if (article && article != "") {
-        out = article + " " + short_desc;
+        article = lower_case(article);
+        out = article + " " + formatted;
     } else {
-        out = short_desc;
+        out = formatted;
     }
-    out = capitalize(out);
     if (out[<1] != '.' && out[<1] != '!') out += ".";
     return out;
 }

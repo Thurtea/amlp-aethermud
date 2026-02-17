@@ -1,0 +1,36 @@
+// JR-5 Knight Armor
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("jr5 knight armor");
+    set_id(({"jr5_knight","knight armor","jr5","armor"}));
+    set_short("JR-5 Knight Armor (medium)");
+    set_long("A sleek mid-century knight suit repurposed with modern plating. Fits medium-sized humanoids.\n");
+    set_weight(18);
+    set_value(8500);
+    set_property("armor",1);
+    set_property("armor_type","medium");
+    set_property("size","medium");
+    set_property("fit_races",({"human","atlantean"}));
+    set_property("sdc_bonus",60);
+}
+
+int set_worn(int on) {
+    object wearer = previous_object();
+    if (!wearer) return 0;
+
+    if (on) {
+        // store previous short for restore
+        if (function_exists("query_property", wearer)) {
+            wearer->set_property("_orig_short", wearer->short());
+        }
+        wearer->set_short("Knight is standing around.");
+    } else {
+        string orig = 0;
+        if (function_exists("query_property", wearer)) orig = wearer->query_property("_orig_short");
+        if (orig && orig != "") wearer->set_short(orig);
+        else wearer->set_short(wearer->query_name() + " the " + (wearer->query_privilege_title() || "Player"));
+    }
+    return 1;
+}

@@ -81,7 +81,7 @@ const NpcTemplate NPC_TEMPLATES[NPC_TEMPLATE_COUNT] = {
     /* Moxim: L15, MDC creature, rift travel NPC — non-aggro, very tough */
     {
         .template_id = NPC_MOXIM,
-        .name = "a shimmering Moxim", .keyword = "moxim",
+        .name = "Moxim", .keyword = "moxim",
         .level = 15, .health_type = MDC_ONLY,
         .hp = 800, .max_hp = 800, .sdc = 0, .max_sdc = 0, .mdc = 800, .max_mdc = 800,
         .attacks_per_round = 8, .parries_per_round = 6,

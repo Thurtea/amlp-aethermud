@@ -1,0 +1,32 @@
+// Sunaj Assassin Armor
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("sunaj assassin armor");
+    set_id(({"sunaj_assassin","assassin armor","sunaj","armor"}));
+    set_short("Sunaj Assassin Armor (medium)");
+    set_long("A shadow-clinging suit favored by Sunaj assassins. Light and stealthy, fits medium humanoids.\n");
+    set_weight(14);
+    set_value(9200);
+    set_property("armor",1);
+    set_property("armor_type","medium");
+    set_property("size","medium");
+    set_property("fit_races",({"human","atlantean"}));
+    set_property("sdc_bonus",40);
+}
+
+int set_worn(int on) {
+    object wearer = previous_object();
+    if (!wearer) return 0;
+    if (on) {
+        if (function_exists("query_property", wearer)) wearer->set_property("_orig_short", wearer->short());
+        wearer->set_short("Assassin is standing around.");
+    } else {
+        string orig = 0;
+        if (function_exists("query_property", wearer)) orig = wearer->query_property("_orig_short");
+        if (orig && orig != "") wearer->set_short(orig);
+        else wearer->set_short(wearer->query_name() + " the " + (wearer->query_privilege_title() || "Player"));
+    }
+    return 1;
+}

@@ -1,0 +1,32 @@
+// Armor of the Beast
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("armor of the beast");
+    set_id(({"armor_beast","beast armor","armor_beast","armor"}));
+    set_short("Armor of the Beast (large)");
+    set_long("A hulking plate made to fit towering silhouettes. Best suited for Titans and Great Horned Dragons.\n");
+    set_weight(40);
+    set_value(14000);
+    set_property("armor",1);
+    set_property("armor_type","large");
+    set_property("size","large");
+    set_property("fit_races",({"titan","great_horned_dragon"}));
+    set_property("sdc_bonus",120);
+}
+
+int set_worn(int on) {
+    object wearer = previous_object();
+    if (!wearer) return 0;
+    if (on) {
+        if (function_exists("query_property", wearer)) wearer->set_property("_orig_short", wearer->short());
+        wearer->set_short("Warrior is standing around.");
+    } else {
+        string orig = 0;
+        if (function_exists("query_property", wearer)) orig = wearer->query_property("_orig_short");
+        if (orig && orig != "") wearer->set_short(orig);
+        else wearer->set_short(wearer->query_name() + " the " + (wearer->query_privilege_title() || "Player"));
+    }
+    return 1;
+}

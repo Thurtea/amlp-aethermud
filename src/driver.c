@@ -4367,15 +4367,22 @@ more_room_source:
         }
         if (!args || !*args) {
             session->title[0] = '\0';
+            /* Persist change */
+            save_character(session);
             return vm_value_create_string("Title cleared.\r\n");
         }
 
         strncpy(session->title, args, sizeof(session->title) - 1);
         session->title[sizeof(session->title) - 1] = '\0';
 
-        char response[256];
-        snprintf(response, sizeof(response), "Title set to: %s\r\n", session->title);
-        return vm_value_create_string(response);
+        /* Persist change */
+        if (save_character(session)) {
+            char response[256];
+            snprintf(response, sizeof(response), "Title set to: %s\r\n", session->title);
+            return vm_value_create_string(response);
+        } else {
+            return vm_value_create_string("Failed to save title to disk.\r\n");
+        }
     }
 
     /* SETENTER - Custom room enter message (wizards+) */
@@ -4385,13 +4392,18 @@ more_room_source:
         }
         if (!args || !*args) {
             session->enter_msg[0] = '\0';
+            save_character(session);
             return vm_value_create_string("Enter message cleared.\r\n");
         }
         strncpy(session->enter_msg, args, sizeof(session->enter_msg) - 1);
         session->enter_msg[sizeof(session->enter_msg) - 1] = '\0';
-        char response[256];
-        snprintf(response, sizeof(response), "Enter message set to: %s\r\n", session->enter_msg);
-        return vm_value_create_string(response);
+        if (save_character(session)) {
+            char response[256];
+            snprintf(response, sizeof(response), "Enter message set to: %s\r\n", session->enter_msg);
+            return vm_value_create_string(response);
+        } else {
+            return vm_value_create_string("Failed to save enter message to disk.\r\n");
+        }
     }
 
     /* SETLEAVE - Custom room leave message (wizards+) */
@@ -4401,13 +4413,18 @@ more_room_source:
         }
         if (!args || !*args) {
             session->leave_msg[0] = '\0';
+            save_character(session);
             return vm_value_create_string("Leave message cleared.\r\n");
         }
         strncpy(session->leave_msg, args, sizeof(session->leave_msg) - 1);
         session->leave_msg[sizeof(session->leave_msg) - 1] = '\0';
-        char response[256];
-        snprintf(response, sizeof(response), "Leave message set to: %s\r\n", session->leave_msg);
-        return vm_value_create_string(response);
+        if (save_character(session)) {
+            char response[256];
+            snprintf(response, sizeof(response), "Leave message set to: %s\r\n", session->leave_msg);
+            return vm_value_create_string(response);
+        } else {
+            return vm_value_create_string("Failed to save leave message to disk.\r\n");
+        }
     }
 
     /* SETGOTO - Custom goto arrival message (wizards+) */
@@ -4417,13 +4434,18 @@ more_room_source:
         }
         if (!args || !*args) {
             session->goto_msg[0] = '\0';
+            save_character(session);
             return vm_value_create_string("Goto message cleared.\r\n");
         }
         strncpy(session->goto_msg, args, sizeof(session->goto_msg) - 1);
         session->goto_msg[sizeof(session->goto_msg) - 1] = '\0';
-        char response[256];
-        snprintf(response, sizeof(response), "Goto message set to: %s\r\n", session->goto_msg);
-        return vm_value_create_string(response);
+        if (save_character(session)) {
+            char response[256];
+            snprintf(response, sizeof(response), "Goto message set to: %s\r\n", session->goto_msg);
+            return vm_value_create_string(response);
+        } else {
+            return vm_value_create_string("Failed to save goto message to disk.\r\n");
+        }
     }
 
     if (strcmp(cmd, "shutdown") == 0) {
@@ -4621,7 +4643,7 @@ void process_login_state(PlayerSession *session, const char *input) {
                 /* Staff notification */
                 char staff_msg[256];
                 snprintf(staff_msg, sizeof(staff_msg),
-                        "\033[1;34m[Staff] %s has entered the game.\033[0m\r\n",
+                        "[Staff] %s has entered the game.\r\n",
                         session->username);
                 staff_message(staff_msg, session);
             } else {

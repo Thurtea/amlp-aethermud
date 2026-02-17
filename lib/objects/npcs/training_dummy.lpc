@@ -1,0 +1,37 @@
+// Training Dummy NPC
+inherit "/std/npc";
+
+private string spawn_room;
+
+void create() {
+    ::create();
+    set_name("training dummy");
+    set_id(({"training_dummy","dummy","target_dummy"}));
+    set_short("a training dummy");
+    set_long("A durable training construct. It does not grant XP and respawns instantly when destroyed.\n");
+    set_level(1);
+    set_hp(999999);
+    set_max_hp(999999);
+    set_value(0);
+    set_no_give(1);
+    set_no_corpse(1);
+    set_property("no_xp",1);
+    set_property("training_dummy",1);
+    spawn_room = file_name(environment(this_object()) || "/domains/start");
+}
+
+void die() {
+    // Prevent XP and instead respawn instantly
+    object env = environment(this_object());
+    if (env) tell_room(env, "The training dummy collapses and reforms instantly.\n");
+    // restore health
+    set_hp(query_max_hp());
+    // move back to spawn room if possible
+    if (spawn_room) {
+        object r = find_object(spawn_room);
+        if (r) move(r);
+    }
+    return;
+}
+
+void set_spawn_room(string r) { spawn_room = r; }

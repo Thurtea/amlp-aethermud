@@ -1,0 +1,33 @@
+// TX-500 Laser Rifle
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("tx-500");
+    set_id(({"tx-500","tx500","rifle","laser rifle","tx-500 rifle"}));
+    set_short("TX-500 Laser Rifle");
+    set_long("A compact high-energy laser rifle that fires from E-Clip cartridges. Holds up to 100 shots per E-Clip.\n");
+    set_weight(12);
+    set_value(12000);
+    set_property("weapon",1);
+    set_property("ammo_type","e_clip");
+    set_property("ammo_capacity",100);
+    set_property("damage", ({10,20}) );
+}
+
+int fire(object user, object target) {
+    // simplified firing logic for testing
+    if (!user) return 0;
+    object clip = 0;
+    object *inv = all_inventory(user);
+    foreach(object o in inv) {
+        if (o && function_exists("query_ammo_type", o) && o->query_ammo_type() == "e_clip") { clip = o; break; }
+    }
+    if (!clip) { tell_object(user, "No E-Clip installed.\n"); return 0; }
+    if (function_exists("consume_shot", clip)) {
+        if (!clip->consume_shot()) { tell_object(user, "E-Clip empty.\n"); return 0; }
+    }
+    tell_object(user, "You fire the TX-500 at " + (target? target->short() : "the target") + ".\n");
+    if (target && function_exists("receive_damage", target)) target->receive_damage(15);
+    return 1;
+}

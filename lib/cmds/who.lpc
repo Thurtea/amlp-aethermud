@@ -52,6 +52,20 @@ int main(string arg) {
     output = "\n";
     output += "=== AETHERMUD - ONLINE PLAYERS & STAFF ===\n\n";
 
+    // helper: remove color tokens like %^RED%^ for visible-width calculations
+    string strip_colours(string s) {
+        if (!s) return "";
+        return regreplace(s, "%\\^([A-Z_]+)%\\^", "", "g");
+    }
+
+    string pad_visible(string s, int width) {
+        string stripped = strip_colours(s);
+        int vis = strlen(stripped);
+        int pad = width - vis;
+        if (pad <= 0) return s;
+        return s + repeat_string(" ", pad);
+    }
+
     // Wizards section
     if (sizeof(wizards) > 0) {
         output += "Wizards Online:\n";
@@ -68,8 +82,11 @@ int main(string arg) {
             if (wizards[i]->query_privilege_level() >= 5) rank = "[ADMIN]";
             else if (wizards[i]->query_privilege_level() >= 3) rank = "[SENIOR WIZ]";
 
-            output += sprintf("  %-20s %-12s %s\n", capitalize(wiz_name), rank, wiz_title);
-            output += sprintf("    Idle: %4d sec  Loc: %s\n", idle_time, wiz_loc);
+            // Put role before name; align name by visible chars (strip colour tokens)
+            string display_name = capitalize(wiz_name) + ((idle_time > 120) ? " (idle)" : "");
+            display_name = pad_visible(display_name, 20);
+            output += "  " + rank + " " + display_name + " " + wiz_title + "\n";
+            output += sprintf("    (idle: %4d sec)  Loc: %s\n", idle_time, wiz_loc);
         }
 
         output += "\n";
@@ -89,8 +106,10 @@ int main(string arg) {
             object p_env = environment(players[i]);
             string p_loc = p_env && function_exists("query_short", p_env) ? p_env->query_short() : (p_env ? file_name(p_env) : "Unknown");
 
-            output += sprintf("  %-20s %s\n", capitalize(p_name), p_title);
-            output += sprintf("    Idle: %4d sec  Loc: %s\n", p_idle, p_loc);
+            string display_name = capitalize(p_name) + ((p_idle > 120) ? " (idle)" : "");
+            display_name = pad_visible(display_name, 20);
+            output += "  " + pad_visible("[PLAYER]", 12) + " " + display_name + " " + p_title + "\n";
+            output += sprintf("    (idle: %4d sec)  Loc: %s\n", p_idle, p_loc);
         }
 
         output += "\n";

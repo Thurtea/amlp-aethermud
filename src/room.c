@@ -1,6 +1,69 @@
 #include "room.h"
 #include "npc.h"
 #include "item.h"
+#include <string.h>
+#include <ctype.h>
+
+/* Helper: format item display name to lowercase while preserving
+ * acronyms (ALLCAPS) and obvious proper-nouns with apostrophes
+ * (e.g. Wilk's). Writes result into `out` (must be at least out_sz).
+ */
+static void format_item_name(const char *iname, char *out, size_t out_sz) {
+    if (!iname || !iname[0]) {
+        if (out_sz > 0) out[0] = '\0';
+        return;
+    }
+    char tmp[256];
+    strncpy(tmp, iname, sizeof(tmp)-1);
+    tmp[sizeof(tmp)-1] = '\0';
+
+    /* Split on spaces and process words */
+    char *words[64];
+    int wc = 0;
+    char *p = strtok(tmp, " ");
+    while (p && wc < 64) {
+        words[wc++] = p;
+        p = strtok(NULL, " ");
+    }
+
+    char buf[512] = "";
+    for (int i = 0; i < wc; i++) {
+        char *w = words[i];
+        int len = (int)strlen(w);
+        int all_upper = 1;
+        for (int j = 0; j < len; j++) {
+            if (!isupper((unsigned char)w[j])) { all_upper = 0; break; }
+        }
+
+        /* Preserve ALLCAPS acronyms */
+        if (all_upper && len > 1) {
+            if (buf[0]) strncat(buf, " ", sizeof(buf)-strlen(buf)-1);
+            strncat(buf, w, sizeof(buf)-strlen(buf)-1);
+            continue;
+        }
+
+        /* Preserve proper nouns like "Wilk's" (capital first letter and apostrophe)
+         */
+        if (len > 1 && isupper((unsigned char)w[0])) {
+            /* If contains apostrophe, keep as-is */
+            if (strchr(w, '\'') ) {
+                if (buf[0]) strncat(buf, " ", sizeof(buf)-strlen(buf)-1);
+                strncat(buf, w, sizeof(buf)-strlen(buf)-1);
+                continue;
+            }
+        }
+
+        /* Default: lowercase the word */
+        char lw[128];
+        for (int j = 0; j < len && j < (int)sizeof(lw)-1; j++) lw[j] = tolower((unsigned char)w[j]);
+        lw[len] = '\0';
+        if (buf[0]) strncat(buf, " ", sizeof(buf)-strlen(buf)-1);
+        strncat(buf, lw, sizeof(buf)-strlen(buf)-1);
+    }
+
+    strncpy(out, buf, out_sz-1);
+    out[out_sz-1] = '\0';
+}
 #include "session_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -1445,7 +1508,12 @@ show_room:
         while (curr) {
             char outbuf[256];
             const char *iname = curr->name && curr->name[0] ? curr->name : "something";
-            /* Check for existing article (a/an/the) */
+
+            /* Format item name to lowercase except acronyms/proper nouns */
+            char fmt_name[256];
+            format_item_name(iname, fmt_name, sizeof(fmt_name));
+
+            /* Check for existing article (a/an/the) on the original name */
             char first[32] = "";
             sscanf(iname, "%31s", first);
             int has_article = 0;
@@ -1456,12 +1524,12 @@ show_room:
             }
 
             if (!has_article) {
-                /* Choose A/An by vowel rule on first character */
-                char lc = tolower((unsigned char)iname[0]);
+                /* Choose lowercase a/an by vowel rule on formatted name */
+                char lc = tolower((unsigned char)fmt_name[0]);
                 int vowel = (lc == 'a' || lc == 'e' || lc == 'i' || lc == 'o' || lc == 'u');
-                snprintf(outbuf, sizeof(outbuf), "%s %s", vowel ? "An" : "A", iname);
+                snprintf(outbuf, sizeof(outbuf), "%s %s", vowel ? "an" : "a", fmt_name);
             } else {
-                /* Use the existing short but ensure capitalization */
+                /* Use original short but normalize capitalization of first char */
                 snprintf(outbuf, sizeof(outbuf), "%s", iname);
                 outbuf[0] = (char)toupper((unsigned char)outbuf[0]);
             }
@@ -1521,14 +1589,15 @@ show_room:
         }
     }
 
-    /* List NPCs in room */
+    /* List NPCs in room (use default position text) */
     for (int i = 0; i < room->num_npcs; i++) {
         NPC *n = room->npcs[i];
         if (n && n->is_alive) {
             char display[64];
             snprintf(display, sizeof(display), "%s", n->name);
             display[0] = (char)toupper((unsigned char)display[0]);
-            send_to_player(sess, "%s is here.\n", display);
+            /* Default NPC position */
+            send_to_player(sess, "%s is standing around.\n", display);
         }
     }
 }

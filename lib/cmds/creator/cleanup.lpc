@@ -1,0 +1,65 @@
+/*
+ * /lib/cmds/creator/cleanup.lpc
+ * Remove ground items from the current room and attempt a safe reload.
+ */
+
+int main(string args) {
+    object player = previous_object();
+    object room = environment(player);
+    object *inv;
+    int removed = 0;
+
+    if (!room) {
+        tell_object(player, "You are not in a room.\n");
+        return 1;
+    }
+
+    inv = all_inventory(room);
+    foreach(object o in inv) {
+        if (!o) continue;
+        // skip living objects (players, mobs)
+        if (living(o)) continue;
+        // skip persistent objects that opt-out
+        if (function_exists("query_property", o) && o->query_property("persistent")) continue;
+        // safe to destruct
+        catch { destruct(o); } : { }
+        removed++;
+    }
+
+    tell_object(player, "Cleanup: removed " + removed + " ground objects.\n");
+
+    // Attempt to reload the room if it's safe (no other players present)
+    object *players_here = filter(inv, (: living($1) && interactive($1) :));
+    if (sizeof(players_here) <= 1) {
+        string rn = file_name(room);
+        // notify and reload
+        tell_object(player, "Reloading room: " + rn + "...\n");
+        object old_room = room;
+        // move player out temporarily if necessary
+        if (sizeof(players_here) == 1) {
+            // attempt to destruct and reload while player is moved to /room/void if available
+            object voidroom = find_object("/lib/rooms/void.lpc");
+            if (voidroom) {
+                player->move(voidroom);
+            }
+        }
+
+        catch { destruct(old_room); } : { }
+        catch { load_object(rn); } : { tell_object(player, "Warning: reload failed.\n"); }
+        // move player back if void used
+        object new_room = find_object(rn);
+        if (new_room && environment(player) && environment(player) != new_room) {
+            player->move(new_room);
+        }
+
+        tell_object(player, "Cleanup: reload complete.\n");
+    } else {
+        tell_object(player, "Room contains other players — reload skipped.\n");
+    }
+
+    return 1;
+}
+
+void help() {
+    write("Usage: cleanup\nRemoves non-living ground objects from the current room and reloads the room if safe.\n");
+}

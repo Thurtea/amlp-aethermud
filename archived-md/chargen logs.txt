@@ -1,0 +1,1103 @@
+=========================================
+    AMLP Driver - Development Server
+             Version 0.1.0
+=========================================
+
+Welcome to the AMLP MUD!
+
+Enter your name: 
+
+Welcome, Splynncryth! You appear to be new here.
+Choose a password: 
+Confirm password: 
+
+=========================================
+      CHARACTER CREATION SYSTEM
+        Rifts Earth - 109 P.A.
+=========================================
+
+=== SELECT YOUR RACE (Page 1/9) ===
+
+   1. Human - Baseline race, adaptable and determined
+   2. Elf - Graceful and magical, attuned to nature
+   3. Dwarf - Stout and resilient, master craftsmen
+   4. Gnome - Small magical being, tech-savvy
+   5. Halfling - Small folk, lucky and brave
+   6. Orc - Savage warrior race
+   7. Goblin - Small cunning supernatural creature
+   8. Hobgoblin - Larger, fierce goblinoid
+   9. Ogre - Large brutish humanoid
+  10. Troll - Regenerating savage humanoid
+
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 2/9) ===
+
+  11. Minotaur - Bull-headed warrior of great strength
+  12. Atlantean - Dimensional traveler with tattoo magic
+  13. True Atlantean - Pure-blood Atlantean lineage
+  14. Algor Frost Giant - Ice-dwelling giant of the north
+  15. Nimro Fire Giant - Flame-wielding massive warrior
+  16. Jotan - Stone giant, master of earth
+  17. Titan - Divine giant of legendary power
+  18. Fire Dragon - Ancient wyrm of flame and destruction
+  19. Ice Dragon - Frost wyrm of the frozen wastes
+  20. Great Horned Dragon - Massive horned draconic lord
+
+  Type 'p' for previous page
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 3/9) ===
+
+  21. Thunder Lizard Dragon - Storm-calling dragon beast
+  22. Dragon Hatchling - Young but powerful dragon
+  23. Adult Dragon - Mature draconic being
+  24. Ancient Dragon - Millenia-old legendary wyrm
+  25. Thorny Dragon - Spiked dragon variant
+  26. Changeling - Shapeshifting fae creature
+  27. Common Faerie - Tiny winged fae being
+  28. Common Pixie - Mischievous tiny fae
+  29. Frost Pixie - Ice-aligned pixie variant
+  30. Green Wood Faerie - Forest-dwelling fae guardian
+
+  Type 'p' for previous page
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 4/9) ===
+
+  31. Night-Elves Faerie - Dark fae of the shadows
+  32. Silver Bells Faerie - Musical enchanting faerie
+  33. Tree Sprite - Nature spirit of the woods
+  34. Water Sprite - Aquatic elemental spirit
+  35. Brownie - Helpful household fae
+  36. Bogie - Mischievous shadow fae
+  37. Dog Boy - Canine mutant bred by Coalition
+  38. Bearman - Ursine humanoid warrior
+  39. Kankoran - Wolf-kin nomadic hunter
+  40. Rahu-man - Tiger-folk warrior race
+
+  Type 'p' for previous page
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 5/9) ===
+
+  41. Ratling - Cunning rat-like humanoid
+  42. Werewolf - Shapeshifting wolf-human
+  43. Werebear - Shapeshifting bear-human
+  44. Weretiger - Shapeshifting tiger-human
+  45. Wolfen - Noble lupine warrior race
+  46. Cat Girl - Feline humanoid, agile and curious
+  47. Mutant Animal - Uplifted animal with intelligence
+  48. Gargoyle - Stone-skinned supernatural guardian
+  49. Gurgoyle - Aquatic gargoyle variant
+  50. Hawrke Duhk - Hawk-folk aerial warrior
+
+  Type 'p' for previous page
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 6/9) ===
+
+  51. Hawrk-ka - Elite hawk-rider variant
+  52. Equinoid - Horse-kin centauroid race
+  53. Burster - Pyrokinetic psychic warrior
+  54. Mind Melter - Master psychic, multiple disciplines
+  55. Conservator - Psionic defender of nature
+  56. Psi-Stalker - Anti-magic psionic hunter (CS)
+  57. Wild Psi-Stalker - Feral psionic hunter
+  58. Psi-Ghost - Psychic entity, telekinetic mastery
+  59. Psi-Healer - Psychic healing specialist
+  60. Mind Bleeder - Psychic vampire, drains ISP
+
+  Type 'p' for previous page
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 7/9) ===
+
+  61. Vampire - Undead blood drinker
+  62. Secondary Vampire - Lesser vampire spawn
+  63. Wild Vampire - Feral uncontrolled vampire
+  64. Demon - Powerful supernatural evil entity
+  65. Deevil - Lesser demon from dark dimensions
+  66. Basilisk - Serpentine gaze-weapon creature
+  67. Nightbane - Shape-shifter between human/monster
+  68. Godling - Offspring of divine beings
+  69. D-Bee - Dimensional being from another reality
+  70. Coyle - Alien symbiote shapeshifter
+
+  Type 'p' for previous page
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 8/9) ===
+
+  71. Noli - Four-armed alien symbiote race
+  72. Eandroth - Insectoid alien warrior race
+  73. Quick-Flex - Incredibly fast alien species
+  74. Trimadore - Crystalline energy being
+  75. Uteni - Fur-covered peaceful alien
+  76. Promethean - Artificial life seeking humanity
+  77. Brodkill - Demon-cursed mutant super-soldier
+  78. Cosmo-Knight - Cosmic guardian with stellar powers
+  79. Dragon Juicer - Dragon blood-enhanced soldier
+  80. Mega-Juicer - Ultra-enhanced combat juicer
+
+  Type 'p' for previous page
+  Type 'n' for next page
+
+Enter choice (1-87): 
+
+=== SELECT YOUR RACE (Page 9/9) ===
+
+  81. Titan Juicer - Massive juicer, extended lifespan
+  82. Pogtal - Dragon Slayer - Anti-dragon specialist race
+  83. Splugorth - Ancient evil intelligence
+  84. Splugorth Minion - Enslaved warrior of Splugorth
+  85. Splynn Slave - Enslaved from dimensional market
+  86. Minion - Bio-wizard creation, enslaved
+  87. Simvan - Monster-riding nomadic warrior
+
+  Type 'p' for previous page
+
+Enter choice (1-87): 
+
+You selected: Splugorth
+
+Your starting O.C.C. is Vagabond (jack of all trades).
+A wizard can assign a specialized O.C.C. later.
+
+Rolling your attributes...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 15    ME: 14    MA: 16    PS: 12 
+  PP: 8     PE: 15    PB: 10    SPD: 11 
+-------------------------------------------------------
+  HP: 16 /16     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 12    ME: 13    MA: 11    PS: 8  
+  PP: 11    PE: 10    PB: 9     SPD: 11 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 7     ME: 12    MA: 8     PS: 9  
+  PP: 9     PE: 11    PB: 10    SPD: 10 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 10    ME: 16    MA: 11    PS: 8  
+  PP: 15    PE: 7     PB: 7     SPD: 5  
+-------------------------------------------------------
+  HP: 13 /13     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 10    ME: 6     MA: 10    PS: 9  
+  PP: 11    PE: 7     PB: 7     SPD: 6  
+-------------------------------------------------------
+  HP: 9  /9      S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 9     ME: 7     MA: 12    PS: 6  
+  PP: 13    PE: 11    PB: 12    SPD: 12 
+-------------------------------------------------------
+  HP: 12 /12     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 14    ME: 11    MA: 12    PS: 15 
+  PP: 9     PE: 11    PB: 7     SPD: 7  
+-------------------------------------------------------
+  HP: 14 /14     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 12    ME: 7     MA: 15    PS: 7  
+  PP: 14    PE: 11    PB: 17    SPD: 11 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 8     ME: 7     MA: 15    PS: 13 
+  PP: 9     PE: 13    PB: 7     SPD: 8  
+-------------------------------------------------------
+  HP: 19 /19     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 15    ME: 15    MA: 10    PS: 7  
+  PP: 7     PE: 14    PB: 9     SPD: 12 
+-------------------------------------------------------
+  HP: 17 /17     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 9     ME: 16    MA: 7     PS: 11 
+  PP: 10    PE: 10    PB: 9     SPD: 9  
+-------------------------------------------------------
+  HP: 16 /16     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 13    ME: 15    MA: 11    PS: 11 
+  PP: 8     PE: 12    PB: 10    SPD: 12 
+-------------------------------------------------------
+  HP: 16 /16     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 12    ME: 3     MA: 10    PS: 10 
+  PP: 12    PE: 12    PB: 11    SPD: 17 
+-------------------------------------------------------
+  HP: 13 /13     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 14    ME: 7     MA: 7     PS: 6  
+  PP: 14    PE: 7     PB: 11    SPD: 6  
+-------------------------------------------------------
+  HP: 13 /13     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 15    ME: 8     MA: 13    PS: 11 
+  PP: 8     PE: 12    PB: 9     SPD: 10 
+-------------------------------------------------------
+  HP: 18 /18     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 16    ME: 9     MA: 5     PS: 7  
+  PP: 7     PE: 8     PB: 6     SPD: 10 
+-------------------------------------------------------
+  HP: 12 /12     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 13    ME: 10    MA: 8     PS: 7  
+  PP: 6     PE: 12    PB: 16    SPD: 8  
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 15    ME: 8     MA: 8     PS: 3  
+  PP: 11    PE: 11    PB: 4     SPD: 16 
+-------------------------------------------------------
+  HP: 16 /16     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 11    ME: 13    MA: 13    PS: 6  
+  PP: 12    PE: 10    PB: 8     SPD: 12 
+-------------------------------------------------------
+  HP: 14 /14     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 12    ME: 11    MA: 10    PS: 8  
+  PP: 14    PE: 8     PB: 11    SPD: 5  
+-------------------------------------------------------
+  HP: 12 /12     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 5     ME: 9     MA: 13    PS: 9  
+  PP: 7     PE: 12    PB: 4     SPD: 17 
+-------------------------------------------------------
+  HP: 13 /13     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 7     ME: 10    MA: 9     PS: 15 
+  PP: 6     PE: 10    PB: 11    SPD: 10 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 9     ME: 10    MA: 4     PS: 10 
+  PP: 8     PE: 11    PB: 16    SPD: 7  
+-------------------------------------------------------
+  HP: 16 /16     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 4     ME: 11    MA: 13    PS: 12 
+  PP: 11    PE: 5     PB: 16    SPD: 6  
+-------------------------------------------------------
+  HP: 7  /7      S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 8     ME: 12    MA: 9     PS: 14 
+  PP: 9     PE: 8     PB: 13    SPD: 10 
+-------------------------------------------------------
+  HP: 9  /9      S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 6     ME: 7     MA: 13    PS: 12 
+  PP: 11    PE: 9     PB: 6     SPD: 14 
+-------------------------------------------------------
+  HP: 10 /10     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 11    ME: 13    MA: 13    PS: 10 
+  PP: 11    PE: 12    PB: 12    SPD: 8  
+-------------------------------------------------------
+  HP: 16 /16     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 8     ME: 9     MA: 9     PS: 10 
+  PP: 13    PE: 9     PB: 9     SPD: 10 
+-------------------------------------------------------
+  HP: 10 /10     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 6     ME: 5     MA: 7     PS: 9  
+  PP: 12    PE: 8     PB: 9     SPD: 5  
+-------------------------------------------------------
+  HP: 9  /9      S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 9     ME: 14    MA: 10    PS: 7  
+  PP: 9     PE: 9     PB: 10    SPD: 16 
+-------------------------------------------------------
+  HP: 13 /13     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 11    ME: 9     MA: 9     PS: 6  
+  PP: 9     PE: 13    PB: 12    SPD: 10 
+-------------------------------------------------------
+  HP: 14 /14     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 9     ME: 11    MA: 10    PS: 10 
+  PP: 13    PE: 14    PB: 9     SPD: 12 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 6     ME: 10    MA: 12    PS: 10 
+  PP: 11    PE: 10    PB: 12    SPD: 9  
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 10    ME: 6     MA: 13    PS: 10 
+  PP: 11    PE: 10    PB: 11    SPD: 10 
+-------------------------------------------------------
+  HP: 11 /11     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 10    ME: 11    MA: 10    PS: 16 
+  PP: 10    PE: 9     PB: 7     SPD: 4  
+-------------------------------------------------------
+  HP: 10 /10     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 7     ME: 8     MA: 15    PS: 13 
+  PP: 12    PE: 10    PB: 14    SPD: 11 
+-------------------------------------------------------
+  HP: 12 /12     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 13    ME: 12    MA: 14    PS: 11 
+  PP: 8     PE: 9     PB: 9     SPD: 14 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 6     ME: 17    MA: 14    PS: 15 
+  PP: 12    PE: 9     PB: 6     SPD: 9  
+-------------------------------------------------------
+  HP: 10 /10     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 6     ME: 5     MA: 11    PS: 10 
+  PP: 7     PE: 13    PB: 12    SPD: 14 
+-------------------------------------------------------
+  HP: 18 /18     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 8     ME: 14    MA: 15    PS: 14 
+  PP: 13    PE: 10    PB: 6     SPD: 12 
+-------------------------------------------------------
+  HP: 12 /12     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 7     ME: 10    MA: 12    PS: 8  
+  PP: 10    PE: 13    PB: 7     SPD: 15 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 8     ME: 11    MA: 9     PS: 14 
+  PP: 7     PE: 10    PB: 8     SPD: 8  
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 16    ME: 6     MA: 11    PS: 7  
+  PP: 10    PE: 11    PB: 12    SPD: 12 
+-------------------------------------------------------
+  HP: 12 /12     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 9     ME: 15    MA: 8     PS: 8  
+  PP: 10    PE: 5     PB: 10    SPD: 15 
+-------------------------------------------------------
+  HP: 9  /9      S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 12    ME: 16    MA: 7     PS: 11 
+  PP: 9     PE: 12    PB: 15    SPD: 17 
+-------------------------------------------------------
+  HP: 18 /18     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 11    ME: 10    MA: 10    PS: 11 
+  PP: 11    PE: 11    PB: 9     SPD: 9  
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 9     ME: 11    MA: 9     PS: 6  
+  PP: 11    PE: 14    PB: 9     SPD: 8  
+-------------------------------------------------------
+  HP: 17 /17     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 5     ME: 13    MA: 11    PS: 9  
+  PP: 13    PE: 15    PB: 9     SPD: 5  
+-------------------------------------------------------
+  HP: 17 /17     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 14    ME: 8     MA: 5     PS: 9  
+  PP: 11    PE: 15    PB: 7     SPD: 13 
+-------------------------------------------------------
+  HP: 21 /21     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Rerolling stats...
+
+=======================================================
+              YOUR CHARACTER SHEET
+-------------------------------------------------------
+  Name: Splynncryth
+  Race: Splugorth             O.C.C.: Vagabond
+-------------------------------------------------------
+  ATTRIBUTES
+  IQ: 11    ME: 11    MA: 11    PS: 12 
+  PP: 14    PE: 14    PB: 10    SPD: 10 
+-------------------------------------------------------
+  HP: 15 /15     S.D.C.: 40 /40 
+=======================================================
+
+Accept these stats? (yes/reroll): 
+
+Your primary skills have been assigned based on your O.C.C.
+
+=== YOUR SKILLS ===
+
+  Survival                        60%
+  Hand to Hand - Basic            50%
+  Tracking                        55%
+  Acrobatics                      55%
+  Literacy                        50%
+
+
+=== SELECT SECONDARY SKILLS (3 remaining) ===
+
+   1. Swimming                  (Physical) - Aquatic movement and survival
+   2. Computer Operations       (Technical) - Operating computers, hacking, data access
+   3. Mechanics                 (Technical) - Vehicle and robot repair/maintenance
+   4. Electronics               (Technical) - Device creation, repair, modification
+   5. WP Sword                  (Weapon) - Proficiency with swords and bladed melee weapons
+   6. WP Rifle                  (Weapon) - Proficiency with energy rifles and heavy guns
+   7. WP Pistol                 (Weapon) - Proficiency with energy pistols and sidearms
+   8. First Aid                 (Medical) - Basic healing and injury treatment
+   9. Paramedic                 (Medical) - Advanced healing and critical care
+  10. Magic - Novice            (Magical) - Foundation for magical spellcasting
+  11. Psionics - Novice         (Psionic) - Foundation for psionic powers
+
+Enter choice (1-11): 
+Learned: Psionics - Novice (50%)
+
+=== SELECT SECONDARY SKILLS (2 remaining) ===
+
+   1. Swimming                  (Physical) - Aquatic movement and survival
+   2. Computer Operations       (Technical) - Operating computers, hacking, data access
+   3. Mechanics                 (Technical) - Vehicle and robot repair/maintenance
+   4. Electronics               (Technical) - Device creation, repair, modification
+   5. WP Sword                  (Weapon) - Proficiency with swords and bladed melee weapons
+   6. WP Rifle                  (Weapon) - Proficiency with energy rifles and heavy guns
+   7. WP Pistol                 (Weapon) - Proficiency with energy pistols and sidearms
+   8. First Aid                 (Medical) - Basic healing and injury treatment
+   9. Paramedic                 (Medical) - Advanced healing and critical care
+  10. Magic - Novice            (Magical) - Foundation for magical spellcasting
+
+Enter choice (1-10): 
+Learned: Magic - Novice (50%)
+
+=== SELECT SECONDARY SKILLS (1 remaining) ===
+
+   1. Swimming                  (Physical) - Aquatic movement and survival
+   2. Computer Operations       (Technical) - Operating computers, hacking, data access
+   3. Mechanics                 (Technical) - Vehicle and robot repair/maintenance
+   4. Electronics               (Technical) - Device creation, repair, modification
+   5. WP Sword                  (Weapon) - Proficiency with swords and bladed melee weapons
+   6. WP Rifle                  (Weapon) - Proficiency with energy rifles and heavy guns
+   7. WP Pistol                 (Weapon) - Proficiency with energy pistols and sidearms
+   8. First Aid                 (Medical) - Basic healing and injury treatment
+   9. Paramedic                 (Medical) - Advanced healing and critical care
+
+Enter choice (1-9): 
+Learned: WP Rifle (50%)
+
+Secondary skills selection complete.
+
+Character creation complete!
+Welcome to Rifts Earth, Splynncryth!
+
+Saving your character...
+    Character saved!
+
+
+The Void
+You stand in an endless expanse of swirling energy and mist.
+This liminal space exists between worlds, a nexus of possibilities.
+To the north, you sense the pull of civilization.
+There is one exit: north

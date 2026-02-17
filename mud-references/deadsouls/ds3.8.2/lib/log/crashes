@@ -1,6 +1,0 @@
-Dead_Souls_thurtea crashed Tue Feb 10 02:26:34 2026 with error Process interrupted.
-
-0:OBJ(/secure/sefun/sefun), file: /secure/sefun/sefun.c, fun: get_stack, origin: simul
-1:OBJ(/secure/daemon/master), file: /secure/daemon/master.c, fun: crash, origin: driver
-({ })
----

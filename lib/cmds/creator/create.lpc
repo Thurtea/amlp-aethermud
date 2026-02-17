@@ -1,0 +1,271 @@
+// /lib/cmds/creator/create.lpc
+// QCS - Quick Creation System: Create objects in wizard workspace
+//
+// Usage:
+//   create npc <name>       - Create NPC template
+//   create weapon <name>    - Create weapon template
+//   create armor <name>     - Create armor template
+//   create room <name>      - Create room template
+//   create item <name>      - Create generic item template
+//
+// Files created in: /domains/wizard/USERNAME/area/<type>/<name>.lpc
+
+// Check if wizard has creator role (domain, coding, or admin)
+int check_creator_access(object player) {
+    if (!player) return 0;
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+    if (priv < 1) return 0;
+    if (priv >= 2) return 1;  // Admins always have access
+
+    string role = "";
+    if (function_exists("query_property", player))
+        role = player->query_property("wizard_role");
+    if (!role) role = "";
+
+    // Only domain, coding, and admin roles can use creator tools
+    if (role == "domain" || role == "coding" || role == "admin") return 1;
+
+    // Roleplay wizards cannot use QCS
+    return 0;
+}
+
+int main(string arg) {
+    object player = this_player();
+    if (!player) return 0;
+
+    // Creator role check (domain/coding/admin only)
+    if (!check_creator_access(player)) {
+        write("This command requires Domain or Coding wizard role.\n");
+        write("Your current role does not include building privileges.\n");
+        return 1;
+    }
+
+    if (!arg || arg == "") {
+        return show_help();
+    }
+
+    string type, name;
+    if (sscanf(arg, "%s %s", type, name) != 2) {
+        return show_help();
+    }
+
+    type = lower_case(type);
+    name = lower_case(name);
+
+    // Validate name: alphanumeric and underscores only
+    int i, len;
+    len = strlen(name);
+    if (len < 1 || len > 30) {
+        write("Name must be 1-30 characters.\n");
+        return 1;
+    }
+    for (i = 0; i < len; i++) {
+        int c = name[i];
+        if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')) {
+            write("Name may only contain lowercase letters, numbers, and underscores.\n");
+            return 1;
+        }
+    }
+
+    // Validate type
+    string *valid_types = ({ "npc", "weapon", "armor", "room", "item" });
+    int found = 0;
+    foreach (string vt in valid_types) {
+        if (vt == type) { found = 1; break; }
+    }
+    if (!found) {
+        write("Unknown type: " + type + "\n");
+        write("Valid types: npc, weapon, armor, room, item\n");
+        return 1;
+    }
+
+    // Get wizard name for workspace path
+    string wiz_name = "";
+    if (function_exists("query_name", player))
+        wiz_name = lower_case(player->query_name());
+    if (!wiz_name || wiz_name == "") {
+        write("Error: Could not determine your name.\n");
+        return 1;
+    }
+
+    // Build workspace path
+    string base_dir = "/domains/wizard/" + wiz_name + "/area";
+    string type_dir = base_dir + "/" + type;
+    string filepath = type_dir + "/" + name + ".lpc";
+
+    // Ensure directories exist
+    ensure_directory(base_dir);
+    ensure_directory(type_dir);
+
+    // Check if file already exists
+    if (file_size(filepath) > 0) {
+        write("File already exists: " + filepath + "\n");
+        write("Use 'modify " + name + " <property> <value>' to edit it.\n");
+        return 1;
+    }
+
+    // Generate template
+    string code;
+    switch (type) {
+        case "npc":     code = gen_npc(name); break;
+        case "weapon":  code = gen_weapon(name); break;
+        case "armor":   code = gen_armor(name); break;
+        case "room":    code = gen_room(name); break;
+        case "item":    code = gen_item(name); break;
+    }
+
+    // Write file
+    if (!write_file(filepath, code)) {
+        write("Error: Could not write file: " + filepath + "\n");
+        return 1;
+    }
+
+    write("\033[1;32mCreated:\033[0m " + filepath + "\n");
+    write("Type: " + type + "  Name: " + name + "\n");
+    write("\nNext steps:\n");
+    write("  modify " + name + " short \"a description\"\n");
+    write("  modify " + name + " long \"Detailed description.\"\n");
+    if (type == "npc")
+        write("  modify " + name + " race \"human\" level 5\n");
+    if (type == "weapon")
+        write("  modify " + name + " damage \"2d6\" type \"energy\"\n");
+    if (type == "room")
+        write("  modify " + name + " exit \"north\" \"/domains/new_camelot/tavern\"\n");
+    write("  deploy " + name + " /domains/new_camelot/tavern\n");
+
+    return 1;
+}
+
+// Ensure a directory exists (create if needed)
+void ensure_directory(string path) {
+    if (file_size(path) == -1) {
+        mkdir(path);
+    }
+}
+
+// --- Template Generators ---
+
+string gen_npc(string name) {
+    string display = replace_string(name, "_", " ");
+    return
+"// " + name + ".lpc - QCS Generated NPC\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/npc\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_name(\"" + display + "\");\n"
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"npc\" }));\n"
+"    set_short(\"a " + display + "\");\n"
+"    set_long(\"A " + display + " stands here.\\n\");\n\n"
+"    set_gender(\"neuter\");\n"
+"    set_race(\"human\");\n"
+"    set_level(1);\n\n"
+"    set_stat(\"intelligence quotient\", 10);\n"
+"    set_stat(\"mental endurance\", 10);\n"
+"    set_stat(\"mental affinity\", 10);\n"
+"    set_stat(\"physical strength\", 10);\n"
+"    set_stat(\"physical prowess\", 10);\n"
+"    set_stat(\"physical endurance\", 10);\n"
+"    set_stat(\"physical beauty\", 10);\n"
+"    set_stat(\"speed\", 10);\n"
+"}\n";
+}
+
+string gen_weapon(string name) {
+    string display = replace_string(name, "_", " ");
+    return
+"// " + name + ".lpc - QCS Generated Weapon\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/weapon\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"weapon\" }));\n"
+"    set_short(\"a " + display + "\");\n"
+"    set_long(\"A " + display + " of unremarkable craftsmanship.\\n\");\n\n"
+"    set_property(\"weapon_type\", \"sword\");\n"
+"    set_property(\"damage_type\", \"slashing\");\n"
+"    set_property(\"damage_dice\", \"1d6\");\n"
+"    set_property(\"mega_damage\", 0);\n"
+"    set_property(\"weight\", 3);\n"
+"    set_property(\"value\", 1000);\n"
+"}\n";
+}
+
+string gen_armor(string name) {
+    string display = replace_string(name, "_", " ");
+    return
+"// " + name + ".lpc - QCS Generated Armor\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/armor\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"armor\" }));\n"
+"    set_short(\"a suit of " + display + "\");\n"
+"    set_long(\"A suit of " + display + " armor.\\n\");\n\n"
+"    set_property(\"armor_type\", \"light\");\n"
+"    set_property(\"armor_class\", 5);\n"
+"    set_property(\"max_armor_mdc\", 50);\n"
+"    set_property(\"armor_mdc\", 50);\n"
+"    set_property(\"wear_slot\", \"body\");\n"
+"    set_property(\"weight\", 20);\n"
+"    set_property(\"value\", 5000);\n"
+"}\n";
+}
+
+string gen_room(string name) {
+    string display = replace_string(name, "_", " ");
+    return
+"// " + name + ".lpc - QCS Generated Room\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/room\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_short(\"" + capitalize(display) + "\");\n"
+"    set_long(\n"
+"        \"This is a newly created room. Edit the description.\\n\"\n"
+"    );\n\n"
+"    set_property(\"light\", 2);\n\n"
+"    // Add exits:\n"
+"    // add_exit(\"north\", \"/domains/somewhere\");\n"
+"}\n";
+}
+
+string gen_item(string name) {
+    string display = replace_string(name, "_", " ");
+    return
+"// " + name + ".lpc - QCS Generated Item\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/item\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"item\" }));\n"
+"    set_short(\"a " + display + "\");\n"
+"    set_long(\"A " + display + ".\\n\");\n\n"
+"    set_property(\"weight\", 1);\n"
+"    set_property(\"value\", 100);\n"
+"}\n";
+}
+
+int show_help() {
+    write("\033[1mQCS - Quick Creation System\033[0m\n");
+    write("===========================\n\n");
+    write("Usage: create <type> <name>\n\n");
+    write("Types:\n");
+    write("  npc       Create an NPC/monster\n");
+    write("  weapon    Create a weapon\n");
+    write("  armor     Create armor\n");
+    write("  room      Create a room\n");
+    write("  item      Create a generic item\n\n");
+    write("Examples:\n");
+    write("  create npc goblin\n");
+    write("  create weapon vibro_sword\n");
+    write("  create armor coalition_armor\n");
+    write("  create room dark_alley\n\n");
+    write("Files are created in: /domains/wizard/YOURNAME/area/<type>/\n\n");
+    write("After creating, use:\n");
+    write("  modify <name> <property> <value>  - Edit properties\n");
+    write("  deploy <name> <location>          - Place in the world\n");
+    return 1;
+}

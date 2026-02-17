@@ -1,58 +1,194 @@
 // /cmds/help.lpc
-// Display help information based on privilege level
+// Help system - topic-based lookups from lib/help/
+// Usage: help              - Show command overview
+//        help <topic>      - Show help on topic
+//        help topics       - List all available topics
 
 int main(string args) {
     object player = this_player();
     int priv_level;
-    
+
     if (!player) {
         write("Error: No player context.\n");
         return 1;
     }
-    
+
     priv_level = player->query_privilege_level();
-    
-    write("Available commands:\n");
-    write("  help                 - Show this help\n");
-    write("  look / l             - Look at your surroundings\n");
-    write("  inventory / i        - Check your inventory\n");
-    write("  say <message>        - Say something\n");
-    write("  emote <action>       - Perform an emote\n");
-    write("  who                  - List players online\n");
-    write("  stats                - Show your character stats\n");
-    write("  save                 - Save your character\n");
-    write("  quit / logout        - Save and disconnect\n");
-    write("\n");
-    write("Movement: north, south, east, west, up, down (or n, s, e, w, u, d)\n");
-    
-    // Show wizard commands for privilege level 1+
+
+    // No args: show command overview
+    if (!args || args == "") {
+        return show_overview(priv_level);
+    }
+
+    args = lower_case(args);
+
+    // Special: list topics
+    if (args == "topics" || args == "index" || args == "list") {
+        return show_topics(priv_level);
+    }
+
+    // Search for the topic in help directories
+    return show_topic(args, priv_level);
+}
+
+int show_topic(string topic, int priv_level) {
+    // Search directories in order
+    string *search_dirs = ({
+        "/help/",
+        "/help/basics/",
+        "/help/systems/",
+        "/help/occs/",
+        "/help/social/",
+        "/help/meta/",
+    });
+
+    // Add wizard help if privileged
     if (priv_level >= 1) {
-        write("\n");
-        write("WIZARD COMMANDS (Level 1+):\n");
-        write("  wiztool              - Load your wiztool\n");
-        write("  wiz <cmd> [args]     - Execute wiztool command\n");
-        write("  goto <room>          - Teleport to a room\n");
-        write("  clone <object>       - Clone an object\n");
-        write("\n");
-        write("Wiztool commands:\n");
-        write("  wiz help             - Show wiztool help\n");
-        write("  wiz ls [path]        - List directory contents\n");
-        write("  wiz cd <path>        - Change working directory\n");
-        write("  wiz pwd              - Print working directory\n");
-        write("  wiz cat <file>       - Display file contents\n");
-        write("  wiz eval <expr>      - Evaluate LPC expression\n");
-        write("  wiz clone <path>     - Clone an object (same as clone cmd)\n");
+        search_dirs += ({ "/help/wizard/" });
     }
-    
-    // Show admin commands for privilege level 2
+
+    // Try exact match first, then with common extensions
+    string *filenames = ({
+        topic + ".txt",
+        topic,
+    });
+
+    // Also try with dashes/underscores swapped
+    string alt = replace_string(topic, " ", "-");
+    if (alt != topic) filenames += ({ alt + ".txt", alt });
+    alt = replace_string(topic, " ", "_");
+    if (alt != topic) filenames += ({ alt + ".txt", alt });
+    alt = replace_string(topic, "_", "-");
+    if (alt != topic) filenames += ({ alt + ".txt", alt });
+    alt = replace_string(topic, "-", "_");
+    if (alt != topic) filenames += ({ alt + ".txt", alt });
+
+    foreach (string dir in search_dirs) {
+        foreach (string fn in filenames) {
+            string path = dir + fn;
+            string content = read_file(path);
+            if (content && content != "") {
+                write("\033[1m--- Help: " + topic + " ---\033[0m\n\n");
+                write(content);
+                write("\n");
+                return 1;
+            }
+        }
+    }
+
+    // Not found - suggest similar topics
+    write("No help found for: " + topic + "\n\n");
+    write("Try one of these topics:\n");
+    write("  Basics:    combat, commands, credits, death, equipment, experience,\n");
+    write("             look, movement, stats\n");
+    write("  Systems:   skills, psionics, magic, languages\n");
+    write("  Social:    clans, communication, interaction\n");
+    write("  Character: occs, description, sirname\n");
+    write("  OCCs:      cyber-knight, dragon-hatchling, ley-line-walker,\n");
+    write("             sunaj-assassin, vagabond\n");
+    write("  Meta:      rules, newbie, admin, wizard\n");
+    write("\nType 'help topics' for the full list.\n");
+    return 1;
+}
+
+int show_topics(int priv_level) {
+    write("\033[1m=== Available Help Topics ===\033[0m\n\n");
+
+    write("\033[1mBasics:\033[0m\n");
+    write("  combat       commands     credits      death\n");
+    write("  equipment    experience   look         movement     stats\n\n");
+
+    write("\033[1mSystems:\033[0m\n");
+    write("  skills       psionics     magic        languages\n\n");
+
+    write("\033[1mCharacter:\033[0m\n");
+    write("  occs         description  sirname\n\n");
+
+    write("\033[1mSocial:\033[0m\n");
+    write("  clans        communication  interaction\n\n");
+
+    write("\033[1mOCCs (detailed):\033[0m\n");
+    write("  cyber-knight      dragon-hatchling    ley-line-walker\n");
+    write("  sunaj-assassin    vagabond\n\n");
+
+    write("\033[1mMeta:\033[0m\n");
+    write("  rules        newbie       admin        wizard\n\n");
+
+    if (priv_level >= 1) {
+        write("\033[1mWizard:\033[0m\n");
+        write("  building     qcs         setocc\n\n");
+    }
+
+    write("Type 'help <topic>' to read about a specific topic.\n");
+    return 1;
+}
+
+int show_overview(int priv_level) {
+    write("\033[1m=== AetherMUD Help ===\033[0m\n\n");
+
+    write("Type 'help <topic>' for detailed information.\n");
+    write("Type 'help topics' for a list of all help topics.\n\n");
+
+    write("\033[1mBasic Commands:\033[0m\n");
+    write("  look / l             Look at surroundings\n");
+    write("  inventory / i        Check inventory\n");
+    write("  equipment / eq       View worn equipment\n");
+    write("  stats                Character stats\n");
+    write("  score                Full character sheet\n");
+    write("  who                  Players online\n");
+    write("  quit / logout        Save and disconnect\n\n");
+
+    write("\033[1mMovement:\033[0m north, south, east, west, up, down (n, s, e, w, u, d)\n\n");
+
+    write("\033[1mCommunication:\033[0m\n");
+    write("  say / '              Say something in the room\n");
+    write("  tell <player> <msg>  Private message\n");
+    write("  shout <msg>          Shout to entire MUD\n");
+    write("  chat <msg>           Global chat channel\n");
+    write("  emote / :            Emote an action\n\n");
+
+    write("\033[1mCombat:\033[0m\n");
+    write("  kill <target>        Attack a target\n");
+    write("  flee                 Flee from combat\n");
+    write("  wield <weapon>       Wield a weapon\n");
+    write("  wear <armor>         Wear armor\n\n");
+
+    write("\033[1mCharacter:\033[0m\n");
+    write("  skills               List all skills\n");
+    write("  pskills              Primary skills (from OCC)\n");
+    write("  sskills              Secondary skills (chosen)\n");
+    write("  description          Set your character description\n");
+    write("  sirname              Request an honorific title (lvl 10+)\n");
+    write("  languages            View known languages\n");
+    write("  credits / balance    Check your credits\n\n");
+
+    write("\033[1mSocial:\033[0m\n");
+    write("  introduce            Introduce yourself to others\n");
+    write("  clan                 View/join clans\n");
+    write("  position             Set RP position\n\n");
+
+    // Wizard commands
+    if (priv_level >= 1) {
+        write("\033[1mWizard Commands:\033[0m\n");
+        write("  goto <room>          Teleport to room\n");
+        write("  clone <object>       Clone an object\n");
+        write("  create <type> <name> QCS: Create object template\n");
+        write("  modify <name> ...    QCS: Edit object properties\n");
+        write("  deploy <name> <loc>  QCS: Deploy to world\n");
+        write("  setocc <plr> <occ>   Assign OCC to player\n");
+        write("  sirname <plr> <ttl>  Grant sirname to player\n");
+        write("  wiz help             Wiztool commands\n");
+        write("  cat / ed / ls / cd   File navigation\n\n");
+    }
+
+    // Admin commands
     if (priv_level >= 2) {
-        write("\n");
-        write("ADMIN COMMANDS (Level 2):\n");
-        write("  promote <player> <level> - Promote player (0=player, 1=wizard, 2=admin)\n");
-        write("  users                     - Show detailed user list\n");
-        write("  shutdown [delay]          - Shutdown server (optional delay in seconds)\n");
+        write("\033[1mAdmin Commands:\033[0m\n");
+        write("  promote <plr> <lvl>  Promote player (0/1/2)\n");
+        write("  setrole <plr> <role> Set wizard role\n");
+        write("  users                Detailed user list\n");
+        write("  shutdown [delay]     Shutdown server\n\n");
     }
-    
-    write("\n");
+
     return 1;
 }

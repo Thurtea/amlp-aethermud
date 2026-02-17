@@ -8,9 +8,17 @@ COMMANDS
   pskills             Show primary skills (from OCC)
   sskills             Show secondary skills (player-chosen)
 
+NOTE: If your O.C.C. shows "Pending", you have not yet been assigned
+an OCC. Request one from a wizard:
+  tell <wizard> I would like the O.C.C. <name>
+
+Once an OCC is assigned, your primary skills are auto-populated.
+
 SKILL TYPES
   Primary Skills    Auto-assigned from your OCC (5 skills)
-  Secondary Skills  Chosen during chargen (3 skills)
+                    These are set when a wizard assigns your OCC.
+                    Until then, pskills will show "No primary skills."
+  Secondary Skills  Chosen during character generation (3 skills)
 
 SKILL IMPROVEMENT
   Skills improve through use. Each successful use adds to the

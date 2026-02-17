@@ -1,0 +1,136 @@
+// /lib/domains/wizard/castle/monitor.lpc
+// Wizard Castle - Monitoring Station
+// Screens for watching mortal activity
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Monitoring Station");
+    set_long(
+        "A dimly lit room west of the main hall, filled with the soft\n"
+        "hum of arcane machinery. Crystal screens line the walls, each\n"
+        "one displaying a different scene from across AetherMUD.\n\n"
+        "One screen shows the starting village, where new players begin\n"
+        "their journey. Another displays the bustling streets of New\n"
+        "Camelot. A third shows the wilderness beyond the settlements.\n\n"
+        "A comfortable chair sits before the main console, with controls\n"
+        "for adjusting the viewing crystals. A logbook on the desk\n"
+        "records notable events and player activity."
+    );
+
+    add_exit("east", "/domains/wizard/castle/main_hall");
+
+    set_property("light", 1);
+    set_property("indoors", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_scan", "scan");
+    add_action("cmd_watch", "watch");
+    add_action("examine_screens", "examine");
+}
+
+int cmd_scan(string str) {
+    object player = this_player();
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+    if (priv < 1) {
+        write("The controls don't respond to your touch.\n");
+        return 1;
+    }
+
+    write("\033[1m=== Mortal Activity Scan ===\033[0m\n\n");
+
+    object *all_users = users();
+    int mortals = 0;
+    int wizards = 0;
+
+    foreach (object u in all_users) {
+        if (!u) continue;
+        int up = 0;
+        if (function_exists("query_privilege_level", u))
+            up = u->query_privilege_level();
+
+        string uname = "Unknown";
+        if (function_exists("query_cap_name", u))
+            uname = u->query_cap_name();
+
+        string loc = "Unknown";
+        object env = environment(u);
+        if (env && function_exists("query_short", env))
+            loc = env->query_short();
+
+        if (up >= 1) {
+            wizards++;
+        } else {
+            mortals++;
+            write("  " + uname + " - " + loc + "\n");
+        }
+    }
+
+    if (mortals == 0) {
+        write("  No mortal players currently online.\n");
+    }
+    write("\nMortals: " + mortals + "  Staff: " + wizards + "\n");
+    return 1;
+}
+
+int cmd_watch(string str) {
+    if (!str || str == "") {
+        write("Watch who? Usage: watch <player>\n");
+        return 1;
+    }
+
+    object target = find_player(lower_case(str));
+    if (!target) {
+        write("Player '" + str + "' not found.\n");
+        return 1;
+    }
+
+    string tname = "Someone";
+    if (function_exists("query_cap_name", target))
+        tname = target->query_cap_name();
+
+    string loc = "Unknown";
+    object env = environment(target);
+    if (env && function_exists("query_short", env))
+        loc = env->query_short();
+
+    int hp = 0, max_hp = 0;
+    if (function_exists("query_hp", target)) hp = target->query_hp();
+    if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+
+    write("\033[1m--- Monitoring: " + tname + " ---\033[0m\n");
+    write("Location: " + loc + "\n");
+    write("HP: " + hp + "/" + max_hp + "\n");
+
+    return 1;
+}
+
+int examine_screens(string str) {
+    if (!str) return 0;
+    if (str == "screens" || str == "crystals" || str == "screen") {
+        write(
+            "The crystal screens show real-time views of the world.\n"
+            "Use 'scan' to survey all mortal activity, or\n"
+            "'watch <player>' to focus on a specific player.\n"
+        );
+        return 1;
+    }
+    if (str == "console" || str == "controls") {
+        write("The console has controls for the monitoring crystals.\n"
+              "Commands: scan, watch <player>\n");
+        return 1;
+    }
+    if (str == "logbook" || str == "log") {
+        write("The logbook contains records of notable player events.\n"
+              "Recent entries mention new character creations and\n"
+              "several combat encounters in the wilderness.\n");
+        return 1;
+    }
+    return 0;
+}

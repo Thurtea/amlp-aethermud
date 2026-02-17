@@ -1,0 +1,47 @@
+PROMOTE - Grant Wizard/Admin Privileges
+========================================
+
+Usage: promote <player> <level>
+
+LEVELS:
+  0 = Player (normal user)
+  1 = Wizard (builder access, basic admin tools)
+  2 = Admin  (full system access)
+
+ON PROMOTION TO WIZARD/ADMIN:
+  1. Default wizard role assigned:
+     - Wizards default to "roleplay"
+     - Admins default to "admin"
+  2. Personal workroom created at /domains/wizard/<name>/
+  3. QCS workspace directories created (area/npc, area/room, etc.)
+  4. Standard wizkit cloned to inventory (role-specific tools)
+  5. Player teleported to their personal workroom
+  6. Staff announcement broadcast to all online staff
+
+WIZARD ROLES:
+  After promoting, assign a specific role with:
+    setrole <player> <role>
+
+  Available roles:
+    domain    - World building (gets wiz_build tool)
+    coding    - Systems programming (gets code_tool)
+    roleplay  - Events & storytelling (gets rp_tool)
+    admin     - Full administration (gets all tools)
+
+WIZKIT CONTENTS:
+  All wizards receive:
+    Wizard's Handbook, Storage Chest, Scrying Crystal,
+    Staff of Power, QCS Tool
+
+  Role-specific additions:
+    Domain:   Wiz Build tool
+    Coding:   Code Tool
+    Roleplay: RP Tool
+    Admin:    Admin Orb, Admin Wand, Staff of Demotion, all tools
+
+RESTRICTIONS:
+  - Wizards can only promote players to Wizard level (1)
+  - Admins can promote to any level
+  - Target player must be online
+
+See also: help setocc, help wizard_roles, help castle

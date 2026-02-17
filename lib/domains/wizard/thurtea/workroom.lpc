@@ -11,6 +11,7 @@ void create() {
         "with arcane symbols. A shimmering portal leads back to the world."
     );
     add_exit("out", "/domains/new_camelot/town_square");
+    add_exit("castle", "/domains/wizard/castle/main_hall");
     set_property("light", 2);
     set_property("indoors", 1);
 }

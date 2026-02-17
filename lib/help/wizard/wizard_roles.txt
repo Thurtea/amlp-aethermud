@@ -1,0 +1,47 @@
+WIZARD ROLES
+=============
+
+AetherMUD uses a role-based wizard system. Each wizard is assigned
+a primary role that determines their tools and responsibilities.
+
+ROLES:
+  Domain    (Blue)   - World builders and area creators
+  Coding    (Cyan)   - Systems programmers and debuggers
+  Roleplay  (Green)  - Event runners and storytellers
+  Admin     (Red)    - Full system administrators
+
+SETTING ROLES:
+  setrole <player> <role>     (Admin only)
+  Default on promotion: "roleplay" for wizards, "admin" for admins
+
+ROLE CAPABILITIES:
+  Domain:
+    - QCS creation tools (create, modify, deploy)
+    - Wiz Build area management tool
+    - Workspace access for building areas
+
+  Coding:
+    - QCS creation tools
+    - Code Tool for debugging and inspection
+    - Object compilation testing
+
+  Roleplay:
+    - RP Tool for events and costumes
+    - Announcement broadcasts
+    - Event calendar management
+    - NOTE: No QCS/building access
+
+  Admin:
+    - All tools from all roles
+    - Admin Orb for system monitoring
+    - Promote/demote commands
+    - Full system access
+
+WHO DISPLAY:
+  The WHO command shows wizard roles with color coding:
+    Admin    = Red
+    Domain   = Blue
+    Coding   = Cyan
+    Roleplay = Green
+
+See also: help promote, help castle, help workspace

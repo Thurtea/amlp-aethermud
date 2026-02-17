@@ -1,0 +1,43 @@
+RP_TOOL - Roleplay Wizard Event Tool
+======================================
+
+The RP Tool helps Roleplay wizards manage events, disguises, and
+in-game storytelling.
+
+USAGE:
+  rp <subcommand>
+
+SUBCOMMANDS:
+  rp events               List upcoming/recent RP events
+  rp addevent <desc>      Add an event to the calendar
+  rp costume <type>       Disguise yourself as an NPC type
+  rp announce <message>   Broadcast a purple RP announcement
+  rp emoteall <message>   Room-wide narrative emote
+  rp listskills           List all available skills
+
+COSTUME TYPES:
+  merchant    guard     noble     mystic    beggar
+  soldier     scholar   bard      thief     priest
+
+  Costumes change your short description to blend in with NPCs.
+  Useful for running events where you play a character role.
+
+ANNOUNCE:
+  Sends a purple-colored announcement to ALL connected players.
+  Use for event starts, world-changing moments, or RP hooks.
+  Example: rp announce The sky darkens as a rift tears open!
+
+EMOTEALL:
+  Sends a narrative line to everyone in your current room.
+  Unlike say/emote, it reads as third-person narrative.
+  Example: rp emoteall The ground trembles beneath your feet.
+
+EVENT CALENDAR:
+  Events are logged to /log/wizard/rp_events.log
+  Use 'rp events' to view recent entries.
+
+REQUIREMENTS:
+  - Roleplay or Admin wizard role
+  - Tool must be in your inventory (granted on promotion)
+
+See also: help wizard_roles, help castle

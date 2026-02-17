@@ -1,0 +1,69 @@
+// /lib/domains/wizard/courtyard.lpc
+// Public Wizard Courtyard - Entrance to the Wizard Castle
+// Accessible from staff castle, leads to wizard castle main hall
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Wizard Courtyard");
+    set_long(
+        "A tranquil courtyard surrounded by ivy-covered stone walls.\n"
+        "The air hums with latent magical energy. A grand archway to\n"
+        "the north leads into the Wizard Castle, where the builders\n"
+        "and administrators of AetherMUD conduct their work.\n\n"
+        "A marble notice board stands near the entrance, listing the\n"
+        "castle's facilities. A path to the south leads back to the\n"
+        "Staff Castle courtyard.\n\n"
+        "Personal workrooms for each wizard are accessed via the\n"
+        "'home' command from anywhere in the castle."
+    );
+
+    add_exit("north", "/domains/wizard/castle/main_hall");
+    add_exit("south", "/domains/staff_castle/room/courtyard");
+
+    set_property("light", 3);
+    set_property("indoors", 0);
+}
+
+void init() {
+    ::init();
+    add_action("examine_board", "examine");
+    add_action("cmd_read", "read");
+}
+
+int examine_board(string str) {
+    if (!str) return 0;
+    if (str == "board" || str == "notice" || str == "notice board") {
+        return show_board();
+    }
+    return 0;
+}
+
+int cmd_read(string str) {
+    if (!str) return 0;
+    if (str == "board" || str == "notice board") {
+        return show_board();
+    }
+    return 0;
+}
+
+int show_board() {
+    write("\n\033[1m+================================+\033[0m\n");
+    write("\033[1m|     WIZARD CASTLE DIRECTORY     |\033[0m\n");
+    write("\033[1m+================================+\033[0m\n\n");
+    write("  \033[1mMain Hall\033[0m    - Central meeting area\n");
+    write("  \033[1mDog Spike\033[0m    - Castle mascot's corner\n");
+    write("  \033[1mTraining\033[0m     - Combat testing grounds\n");
+    write("  \033[1mMonitor\033[0m      - Mortal observation station\n");
+    write("  \033[1mElevator\033[0m     - Access to wizard offices:\n");
+    write("    \033[1;34m[Domain]\033[0m   - World building office\n");
+    write("    \033[1;36m[Coding]\033[0m   - Systems & debugging office\n");
+    write("    \033[1;32m[Roleplay]\033[0m - Events & storytelling office\n");
+    write("    \033[1;31m[Admin]\033[0m    - Administration (restricted)\n\n");
+    write("  Type 'home' to return to your workroom.\n");
+    write("  Type 'castle' from your workroom to come here.\n");
+    write("\033[1m+================================+\033[0m\n\n");
+    return 1;
+}

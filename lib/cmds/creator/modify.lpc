@@ -1,0 +1,620 @@
+// /lib/cmds/creator/modify.lpc
+// QCS - Quick Creation System: Modify object properties
+//
+// Usage:
+//   modify <name> short "description"
+//   modify <name> long "detailed description"
+//   modify <name> race "orc" level 5
+//   modify <name> exit "north" "/domains/path"
+//   modify <name> damage "2d6" type "energy"
+//   modify <name> stat <statname> <value>
+//   modify <name> id "id1" "id2" "id3"
+//   modify <name> show                     - Show current properties
+
+// Check if wizard has creator role (domain, coding, or admin)
+int check_creator_access(object player) {
+    if (!player) return 0;
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+    if (priv < 1) return 0;
+    if (priv >= 2) return 1;
+    string role = "";
+    if (function_exists("query_property", player))
+        role = player->query_property("wizard_role");
+    if (!role) role = "";
+    if (role == "domain" || role == "coding" || role == "admin") return 1;
+    return 0;
+}
+
+// Check if wizard owns the workspace they're trying to modify
+int check_workspace_ownership(object player, string filepath) {
+    if (!player || !filepath) return 0;
+    // Admins can modify any workspace
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+    if (priv >= 2) return 1;
+
+    string wiz_name = "";
+    if (function_exists("query_name", player))
+        wiz_name = lower_case(player->query_name());
+    if (!wiz_name || wiz_name == "") return 0;
+
+    // Check that the filepath is within this wizard's workspace
+    string expected = "/domains/wizard/" + wiz_name + "/";
+    if (strsrch(filepath, expected) == 0) return 1;
+    return 0;
+}
+
+int main(string arg) {
+    object player = this_player();
+    if (!player) return 0;
+
+    // Creator role check (domain/coding/admin only)
+    if (!check_creator_access(player)) {
+        write("This command requires Domain or Coding wizard role.\n");
+        write("Your current role does not include building privileges.\n");
+        return 1;
+    }
+
+    if (!arg || arg == "") {
+        return show_help();
+    }
+
+    // Parse: modify <name> <property> [value...]
+    string name, rest;
+    if (sscanf(arg, "%s %s", name, rest) != 2) {
+        // Just a name with no property - show current
+        name = arg;
+        rest = "show";
+    }
+
+    name = lower_case(name);
+
+    // Find the file in wizard workspace
+    string wiz_name = "";
+    if (function_exists("query_name", player))
+        wiz_name = lower_case(player->query_name());
+    if (!wiz_name || wiz_name == "") {
+        write("Error: Could not determine your name.\n");
+        return 1;
+    }
+
+    string base_dir = "/domains/wizard/" + wiz_name + "/area";
+    string filepath = find_object_file(base_dir, name);
+
+    if (!filepath) {
+        write("Object '" + name + "' not found in your workspace.\n");
+        write("Searched: " + base_dir + "/*/\n");
+        write("Use 'create <type> " + name + "' to create it first.\n");
+        return 1;
+    }
+
+    // Ownership check: only modify your own workspace (admins exempt)
+    if (!check_workspace_ownership(player, filepath)) {
+        write("You can only modify objects in your own workspace.\n");
+        return 1;
+    }
+
+    // Parse property and value
+    string prop, value;
+    if (sscanf(rest, "%s %s", prop, value) != 2) {
+        prop = rest;
+        value = "";
+    }
+    prop = lower_case(prop);
+
+    // Handle different properties
+    switch (prop) {
+        case "show":
+            return show_object(filepath, name);
+        case "short":
+            return modify_short(filepath, value);
+        case "long":
+            return modify_long(filepath, value);
+        case "race":
+            return modify_race_level(filepath, value);
+        case "level":
+            return modify_level(filepath, value);
+        case "exit":
+            return modify_exit(filepath, value);
+        case "damage":
+            return modify_damage(filepath, value);
+        case "type":
+            return modify_type(filepath, value);
+        case "stat":
+            return modify_stat(filepath, value);
+        case "id":
+            return modify_id(filepath, value);
+        case "gender":
+            return modify_gender(filepath, value);
+        case "aggressive":
+            return modify_property(filepath, "aggressive", value);
+        case "light":
+            return modify_property(filepath, "light", value);
+        case "weight":
+            return modify_property(filepath, "weight", value);
+        case "value":
+            return modify_property(filepath, "value", value);
+        case "mega_damage":
+        case "megadamage":
+        case "md":
+            return modify_property(filepath, "mega_damage", value);
+        case "armor_class":
+        case "ac":
+            return modify_property(filepath, "armor_class", value);
+        case "max_armor_mdc":
+        case "mdc":
+            return modify_mdc(filepath, value);
+        default:
+            write("Unknown property: " + prop + "\n");
+            return show_help();
+    }
+}
+
+// Find an object file by name across all type subdirs
+string find_object_file(string base_dir, string name) {
+    string *subdirs = ({ "npc", "weapon", "armor", "room", "item" });
+    foreach (string sub in subdirs) {
+        string path = base_dir + "/" + sub + "/" + name + ".lpc";
+        if (file_size(path) > 0) return path;
+    }
+    return 0;
+}
+
+// Show current file contents
+int show_object(string filepath, string name) {
+    string content = read_file(filepath);
+    if (!content) {
+        write("Error: Could not read " + filepath + "\n");
+        return 1;
+    }
+    write("\033[1m=== " + name + " ===\033[0m\n");
+    write("File: " + filepath + "\n\n");
+    write(content);
+    return 1;
+}
+
+// Strip surrounding quotes from a value string
+string strip_quotes(string val) {
+    if (!val || val == "") return val;
+    int len = strlen(val);
+    if (len >= 2 && val[0] == '"' && val[len-1] == '"') {
+        return val[1..len-2];
+    }
+    return val;
+}
+
+// Replace a line matching a pattern in file content
+string replace_line(string content, string pattern, string new_line) {
+    string *lines = explode(content, "\n");
+    string *result = ({});
+    int replaced = 0;
+
+    foreach (string line in lines) {
+        if (!replaced && strsrch(line, pattern) != -1) {
+            result += ({ new_line });
+            replaced = 1;
+        } else {
+            result += ({ line });
+        }
+    }
+
+    if (!replaced) {
+        // Insert before closing brace
+        string *final = ({});
+        int inserted = 0;
+        int i;
+        for (i = sizeof(result) - 1; i >= 0; i--) {
+            if (!inserted && strsrch(result[i], "}") != -1) {
+                final = ({ new_line }) + ({ result[i] }) + final;
+                inserted = 1;
+            } else {
+                final = ({ result[i] }) + final;
+            }
+        }
+        if (inserted) result = final;
+        else result += ({ new_line });
+    }
+
+    return implode(result, "\n");
+}
+
+int modify_short(string filepath, string value) {
+    value = strip_quotes(value);
+    if (!value || value == "") {
+        write("Usage: modify <name> short \"description\"\n");
+        return 1;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    content = replace_line(content, "set_short(",
+        "    set_short(\"" + value + "\");");
+
+    rm(filepath);
+    write_file(filepath, content);
+    write("\033[1;32mUpdated:\033[0m short -> \"" + value + "\"\n");
+    return 1;
+}
+
+int modify_long(string filepath, string value) {
+    value = strip_quotes(value);
+    if (!value || value == "") {
+        write("Usage: modify <name> long \"description\"\n");
+        return 1;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    // Replace existing set_long - handle multiline
+    string *lines = explode(content, "\n");
+    string *result = ({});
+    int skipping = 0;
+
+    foreach (string line in lines) {
+        if (skipping) {
+            // Skip until we find the closing );
+            if (strsrch(line, ");") != -1) {
+                skipping = 0;
+            }
+            continue;
+        }
+        if (strsrch(line, "set_long(") != -1) {
+            result += ({ "    set_long(\n        \"" + value + "\\n\"\n    );" });
+            // Check if it's a single-line set_long
+            if (strsrch(line, ");") == -1) {
+                skipping = 1;
+            }
+        } else {
+            result += ({ line });
+        }
+    }
+
+    rm(filepath);
+    write_file(filepath, implode(result, "\n"));
+    write("\033[1;32mUpdated:\033[0m long description set.\n");
+    return 1;
+}
+
+int modify_race_level(string filepath, string value) {
+    // Parse: "orc" level 5  OR  just "orc"
+    string race_val, level_str;
+    int level;
+
+    if (sscanf(value, "%s level %s", race_val, level_str) == 2) {
+        race_val = strip_quotes(race_val);
+        level = to_int(level_str);
+    } else {
+        race_val = strip_quotes(value);
+        level = 0;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    if (race_val && race_val != "") {
+        // Try set_race first, fall back to set_monster_race
+        if (strsrch(content, "set_race(") != -1) {
+            content = replace_line(content, "set_race(",
+                "    set_race(\"" + race_val + "\");");
+        } else if (strsrch(content, "set_monster_race(") != -1) {
+            content = replace_line(content, "set_monster_race(",
+                "    set_monster_race(\"" + race_val + "\");");
+        } else {
+            content = replace_line(content, "}",
+                "    set_race(\"" + race_val + "\");\n}");
+        }
+        write("\033[1;32mUpdated:\033[0m race -> \"" + race_val + "\"\n");
+    }
+
+    if (level > 0) {
+        content = replace_line(content, "set_level(",
+            "    set_level(" + level + ");");
+        write("\033[1;32mUpdated:\033[0m level -> " + level + "\n");
+    }
+
+    rm(filepath);
+    write_file(filepath, content);
+    return 1;
+}
+
+int modify_level(string filepath, string value) {
+    int level = to_int(strip_quotes(value));
+    if (level < 1) {
+        write("Usage: modify <name> level <number>\n");
+        return 1;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    content = replace_line(content, "set_level(",
+        "    set_level(" + level + ");");
+
+    rm(filepath);
+    write_file(filepath, content);
+    write("\033[1;32mUpdated:\033[0m level -> " + level + "\n");
+    return 1;
+}
+
+int modify_exit(string filepath, string value) {
+    // Parse: "north" "/domains/path"
+    string dir, dest;
+    if (sscanf(value, "\"%s\" \"%s\"", dir, dest) != 2) {
+        if (sscanf(value, "%s %s", dir, dest) != 2) {
+            write("Usage: modify <name> exit \"direction\" \"/path/to/room\"\n");
+            write("Example: modify tavern exit \"north\" \"/domains/new_camelot/gate\"\n");
+            return 1;
+        }
+        dir = strip_quotes(dir);
+        dest = strip_quotes(dest);
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    // Add an add_exit line before closing brace
+    string exit_line = "    add_exit(\"" + dir + "\", \"" + dest + "\");";
+
+    // Check if this exit already exists
+    if (strsrch(content, "\"" + dir + "\"") != -1 &&
+        strsrch(content, "add_exit") != -1) {
+        content = replace_line(content, "\"" + dir + "\"",
+            exit_line);
+        write("\033[1;32mUpdated:\033[0m exit " + dir + " -> " + dest + "\n");
+    } else {
+        // Insert before closing brace
+        string *lines = explode(content, "\n");
+        string *result = ({});
+        int inserted = 0;
+        int i;
+        for (i = sizeof(lines) - 1; i >= 0; i--) {
+            if (!inserted && strsrch(lines[i], "}") != -1) {
+                result = ({ exit_line, lines[i] }) + result;
+                inserted = 1;
+            } else {
+                result = ({ lines[i] }) + result;
+            }
+        }
+        content = implode(result, "\n");
+        write("\033[1;32mAdded:\033[0m exit " + dir + " -> " + dest + "\n");
+    }
+
+    rm(filepath);
+    write_file(filepath, content);
+    return 1;
+}
+
+int modify_damage(string filepath, string value) {
+    // Parse: "2d6" type "energy"  OR  just "2d6"
+    string dice, dtype;
+
+    if (sscanf(value, "%s type %s", dice, dtype) == 2) {
+        dice = strip_quotes(dice);
+        dtype = strip_quotes(dtype);
+    } else {
+        dice = strip_quotes(value);
+        dtype = 0;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    if (dice && dice != "") {
+        content = replace_line(content, "damage_dice",
+            "    set_property(\"damage_dice\", \"" + dice + "\");");
+        write("\033[1;32mUpdated:\033[0m damage_dice -> \"" + dice + "\"\n");
+    }
+
+    if (dtype && dtype != "") {
+        content = replace_line(content, "damage_type",
+            "    set_property(\"damage_type\", \"" + dtype + "\");");
+        write("\033[1;32mUpdated:\033[0m damage_type -> \"" + dtype + "\"\n");
+    }
+
+    rm(filepath);
+    write_file(filepath, content);
+    return 1;
+}
+
+int modify_type(string filepath, string value) {
+    value = strip_quotes(value);
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    // Check what kind of type to set
+    if (strsrch(content, "weapon_type") != -1) {
+        content = replace_line(content, "weapon_type",
+            "    set_property(\"weapon_type\", \"" + value + "\");");
+        write("\033[1;32mUpdated:\033[0m weapon_type -> \"" + value + "\"\n");
+    } else if (strsrch(content, "armor_type") != -1) {
+        content = replace_line(content, "armor_type",
+            "    set_property(\"armor_type\", \"" + value + "\");");
+        write("\033[1;32mUpdated:\033[0m armor_type -> \"" + value + "\"\n");
+    } else {
+        write("No type property found in this object.\n");
+        return 1;
+    }
+
+    rm(filepath);
+    write_file(filepath, content);
+    return 1;
+}
+
+int modify_stat(string filepath, string value) {
+    // Parse: "physical strength" 20  OR  physical_strength 20
+    string stat_name, stat_val;
+
+    if (sscanf(value, "\"%s\" %s", stat_name, stat_val) != 2) {
+        if (sscanf(value, "%s %s", stat_name, stat_val) != 2) {
+            write("Usage: modify <name> stat \"stat name\" <value>\n");
+            write("Example: modify goblin stat \"physical strength\" 20\n");
+            return 1;
+        }
+        stat_name = replace_string(stat_name, "_", " ");
+    }
+
+    int sv = to_int(stat_val);
+    if (sv < 1 || sv > 100) {
+        write("Stat value must be 1-100.\n");
+        return 1;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    content = replace_line(content, "\"" + stat_name + "\"",
+        "    set_stat(\"" + stat_name + "\", " + sv + ");");
+
+    rm(filepath);
+    write_file(filepath, content);
+    write("\033[1;32mUpdated:\033[0m " + stat_name + " -> " + sv + "\n");
+    return 1;
+}
+
+int modify_id(string filepath, string value) {
+    // Parse quoted strings
+    string *ids = ({});
+    string remaining = value;
+
+    while (remaining && remaining != "") {
+        string id_val;
+        if (sscanf(remaining, "\"%s\" %s", id_val, remaining) == 2) {
+            ids += ({ id_val });
+        } else if (sscanf(remaining, "\"%s\"", id_val) == 1) {
+            ids += ({ id_val });
+            remaining = "";
+        } else {
+            // Unquoted single word
+            ids += ({ strip_quotes(remaining) });
+            remaining = "";
+        }
+    }
+
+    if (!sizeof(ids)) {
+        write("Usage: modify <name> id \"id1\" \"id2\" \"id3\"\n");
+        return 1;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    string id_str = "    set_id(({ ";
+    int i;
+    for (i = 0; i < sizeof(ids); i++) {
+        if (i > 0) id_str += ", ";
+        id_str += "\"" + ids[i] + "\"";
+    }
+    id_str += " }));";
+
+    content = replace_line(content, "set_id(", id_str);
+
+    rm(filepath);
+    write_file(filepath, content);
+    write("\033[1;32mUpdated:\033[0m ids -> " + implode(ids, ", ") + "\n");
+    return 1;
+}
+
+int modify_gender(string filepath, string value) {
+    value = strip_quotes(value);
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    content = replace_line(content, "set_gender(",
+        "    set_gender(\"" + value + "\");");
+
+    rm(filepath);
+    write_file(filepath, content);
+    write("\033[1;32mUpdated:\033[0m gender -> \"" + value + "\"\n");
+    return 1;
+}
+
+int modify_property(string filepath, string prop_name, string value) {
+    value = strip_quotes(value);
+    if (!value || value == "") {
+        write("Usage: modify <name> " + prop_name + " <value>\n");
+        return 1;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    // Determine if value is numeric or string
+    int is_num = 1;
+    int i;
+    for (i = 0; i < strlen(value); i++) {
+        int c = value[i];
+        if (!((c >= '0' && c <= '9') || c == '-')) { is_num = 0; break; }
+    }
+
+    string new_line;
+    if (is_num) {
+        new_line = "    set_property(\"" + prop_name + "\", " + value + ");";
+    } else {
+        new_line = "    set_property(\"" + prop_name + "\", \"" + value + "\");";
+    }
+
+    content = replace_line(content, prop_name, new_line);
+
+    rm(filepath);
+    write_file(filepath, content);
+    write("\033[1;32mUpdated:\033[0m " + prop_name + " -> " + value + "\n");
+    return 1;
+}
+
+int modify_mdc(string filepath, string value) {
+    int mdc = to_int(strip_quotes(value));
+    if (mdc < 1) {
+        write("Usage: modify <name> mdc <number>\n");
+        return 1;
+    }
+
+    string content = read_file(filepath);
+    if (!content) { write("Error reading file.\n"); return 1; }
+
+    content = replace_line(content, "max_armor_mdc",
+        "    set_property(\"max_armor_mdc\", " + mdc + ");");
+    content = replace_line(content, "\"armor_mdc\"",
+        "    set_property(\"armor_mdc\", " + mdc + ");");
+
+    rm(filepath);
+    write_file(filepath, content);
+    write("\033[1;32mUpdated:\033[0m MDC -> " + mdc + "\n");
+    return 1;
+}
+
+int show_help() {
+    write("\033[1mQCS - Modify Object Properties\033[0m\n");
+    write("==============================\n\n");
+    write("Usage: modify <name> <property> <value>\n\n");
+    write("Properties:\n");
+    write("  short <desc>           - Set short description\n");
+    write("  long <desc>            - Set long description\n");
+    write("  race <race> [level N]  - Set race and optionally level\n");
+    write("  level <N>              - Set level\n");
+    write("  gender <m/f/neuter>    - Set gender\n");
+    write("  stat <name> <value>    - Set a stat value\n");
+    write("  id \"id1\" \"id2\"        - Set identifiers\n");
+    write("  exit <dir> <path>      - Add/update room exit\n");
+    write("  damage <dice> [type X] - Set weapon damage\n");
+    write("  type <weapon/armor>    - Set weapon/armor type\n");
+    write("  mdc <N>                - Set armor MDC\n");
+    write("  ac <N>                 - Set armor class\n");
+    write("  weight <N>             - Set weight\n");
+    write("  value <N>              - Set credit value\n");
+    write("  aggressive <0/1>       - Set NPC aggression\n");
+    write("  light <N>              - Set room light level\n");
+    write("  show                   - Show current file\n\n");
+    write("Examples:\n");
+    write("  modify goblin short \"a nasty goblin\"\n");
+    write("  modify goblin long \"Green skin, sharp teeth.\"\n");
+    write("  modify goblin race \"orc\" level 5\n");
+    write("  modify goblin stat \"physical strength\" 20\n");
+    write("  modify dark_alley exit \"north\" \"/domains/new_camelot/tavern\"\n");
+    write("  modify vibro_sword damage \"2d6\" type \"energy\"\n");
+    return 1;
+}

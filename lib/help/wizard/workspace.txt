@@ -1,0 +1,38 @@
+WIZARD WORKSPACE
+=================
+
+Each wizard gets a personal workspace for building game content.
+
+LOCATION:
+  /domains/wizard/YOURNAME/
+
+STRUCTURE:
+  /domains/wizard/YOURNAME/
+    workroom.lpc          Your personal workroom
+    area/                 QCS workspace
+      npc/                NPC templates
+      room/               Room templates
+      weapon/             Weapon templates
+      armor/              Armor templates
+      item/               Item templates
+
+ACCESSING YOUR WORKSPACE:
+  - Your workroom: type 'home' from wizard castle
+  - Your workspace files are managed via QCS commands
+
+SECURITY:
+  - You can only modify files in YOUR workspace
+  - Admins can access and modify any wizard's workspace
+  - Roleplay wizards do not have QCS building access
+
+CREATING CONTENT:
+  1. create npc goblin           Creates area/npc/goblin.lpc
+  2. modify goblin short "..."   Edits the template
+  3. deploy goblin here          Clones into current room
+
+WORKSPACE SETUP:
+  Workspace directories are automatically created when you are
+  promoted to wizard. If directories are missing, create content
+  with QCS and they will be auto-created.
+
+See also: help qcs, help building, help wizard_roles

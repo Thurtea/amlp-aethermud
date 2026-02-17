@@ -1,0 +1,54 @@
+BUILDING - Wizard Building Guide
+
+As a wizard, you can create content for AetherMUD using the
+QCS (Quick Creation System) or manual LPC editing.
+
+QUICK START (QCS)
+  create npc guard
+  modify guard short "a castle guard"
+  modify guard long "A stern guard in chainmail armor."
+  modify guard race "human" level 3
+  deploy guard here
+
+FILE TOOLS
+  cat <file>         View file contents
+  ed <file>          Open line editor
+  ls [path]          List directory
+  cd <path>          Change directory
+  pwd                Print current directory
+  clone <path>       Clone an object
+  load <path>        Load/compile a file
+  update <path>      Reload a loaded object
+  destruct <obj>     Destroy an object
+
+YOUR WORKSPACE
+  /domains/wizard/YOURNAME/area/
+    npc/             NPCs and monsters
+    weapon/          Weapons
+    armor/           Armor and shields
+    room/            Rooms
+    item/            Misc items
+
+  /domains/wizard/YOURNAME/workroom.lpc
+    Your personal workroom (goto home)
+
+ROOM BUILDING
+  mkroom <name>               Create standalone room
+  mkroom <direction> <name>   Create room with exit link
+
+OBJECT TEMPLATES
+  mkobject weapon <name>      Weapon template
+  mkobject armor <name>       Armor template
+  mkobject npc <name>         NPC template
+  mkobject item <name>        Item template
+
+WIZARD CASTLE
+  The wizard castle at /domains/wizard/castle/ contains:
+  - Main hall with Dog Spike
+  - Training room with dummy
+  - Monitor room for mortal watching
+  - Role-specific offices (Domain, Coding, Roleplay, Admin)
+
+  Access from your workroom: type 'castle'
+
+See also: help qcs, help setocc

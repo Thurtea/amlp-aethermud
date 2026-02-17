@@ -8,15 +8,26 @@ COMMANDS
   powers              List your known powers
   isp                 Show current ISP pool
 
+NOTE: Psionic abilities are assigned when your OCC is set. If you
+have no powers listed, request an OCC from a wizard:
+  tell <wizard> I would like the O.C.C. <name>
+
 ISP POOL
   ISP regenerates passively over time. The rate depends on
   your OCC and Mental Endurance (ME) stat.
 
+  Starting ISP varies by OCC:
+    Mind Melter       60 ISP
+    Burster           50 ISP
+    Cyber-Knight      40 ISP
+    Psi-Healer        45 ISP
+    Psi-Stalker       35 ISP
+
 PSIONIC CATEGORIES
-  Healing       Psychic surgery, bio-regeneration
-  Physical      Telekinesis, ectoplasm
-  Sensitive     Telepathy, clairvoyance, sixth sense
-  Super         Mind bolt, pyrokinesis, hydrokinesis
+  Healing       Psychic surgery, bio-regeneration, healing touch
+  Physical      Telekinesis, ectoplasm, levitation
+  Sensitive     Telepathy, clairvoyance, sixth sense, empathy
+  Super         Mind bolt, pyrokinesis, hydrokinesis, electrokinesis
 
 PSIONIC OCCS
   Mind Melter       Master of all psionic disciplines
@@ -25,4 +36,8 @@ PSIONIC OCCS
   Psi-Stalker       Anti-magic psionic hunter
   Cyber-Knight      Psi-sword and cyber armor
 
-See also: help magic, help combat, help stats
+NON-PSIONIC OCCS
+  Some OCCs have minor psionic abilities (1-3 powers).
+  Dragon Hatchlings have innate psionic powers from their race.
+
+See also: help magic, help combat, help stats, help occs

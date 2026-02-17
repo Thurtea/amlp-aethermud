@@ -1,0 +1,47 @@
+// /lib/std/qcs/weapon.lpc - QCS Canonical Weapon Template
+// Inherit this for QCS-created weapons
+//
+// Provides:
+//   - Standard object base
+//   - Weapon properties (damage, type, range)
+//   - Mega-damage flag
+//   - Ammunition tracking
+
+inherit "/std/object";
+
+// QCS metadata
+private string qcs_creator;
+private string qcs_created;
+
+void create() {
+    ::create();
+
+    qcs_creator = "unknown";
+    qcs_created = ctime(time());
+
+    set_id(({ "weapon" }));
+    set_short("an unnamed weapon");
+    set_long("A newly created weapon. Use 'modify' to customize.\n");
+
+    set_property("weapon_type", "sword");
+    set_property("damage_type", "slashing");
+    set_property("damage_dice", "1d6");
+    set_property("mega_damage", 0);
+    set_property("range", 0);
+    set_property("weight", 3);
+    set_property("value", 1000);
+    set_property("gettable", 1);
+    set_property("wieldable", 1);
+}
+
+// QCS metadata
+void set_qcs_creator(string name) { qcs_creator = name; }
+string query_qcs_creator() { return qcs_creator; }
+string query_qcs_created() { return qcs_created; }
+
+// Convenience accessors
+string query_weapon_type() { return query_property("weapon_type"); }
+string query_damage_dice() { return query_property("damage_dice"); }
+string query_damage_type() { return query_property("damage_type"); }
+int query_mega_damage() { return (int)query_property("mega_damage"); }
+int query_range() { return (int)query_property("range"); }

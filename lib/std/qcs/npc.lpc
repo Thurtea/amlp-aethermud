@@ -1,0 +1,70 @@
+// /lib/std/qcs/npc.lpc - QCS Canonical NPC Template
+// Inherit this for QCS-created NPCs
+//
+// Provides:
+//   - Standard living base with stats
+//   - Configurable aggression, patrol, dialogue
+//   - Combat-ready with natural weapons support
+
+inherit "/std/living";
+
+// QCS metadata
+private string qcs_creator;
+private string qcs_created;
+private int aggressive;
+private string *patrol_path;
+private mapping dialogue;
+
+void create() {
+    ::create();
+
+    qcs_creator = "unknown";
+    qcs_created = ctime(time());
+    aggressive = 0;
+    patrol_path = ({});
+    dialogue = ([]);
+
+    set_name("unnamed npc");
+    set_id(({ "npc" }));
+    set_short("an unnamed NPC");
+    set_long("A newly created NPC. Use 'modify' to customize.\n");
+
+    set_gender("neuter");
+    set_race("human");
+    set_level(1);
+
+    // Default stats
+    set_stat("intelligence quotient", 10);
+    set_stat("mental endurance", 10);
+    set_stat("mental affinity", 10);
+    set_stat("physical strength", 10);
+    set_stat("physical prowess", 10);
+    set_stat("physical endurance", 10);
+    set_stat("physical beauty", 10);
+    set_stat("speed", 10);
+}
+
+// QCS metadata accessors
+void set_qcs_creator(string name) { qcs_creator = name; }
+string query_qcs_creator() { return qcs_creator; }
+string query_qcs_created() { return qcs_created; }
+
+// Aggression
+void set_aggressive(int flag) { aggressive = flag; }
+int query_aggressive() { return aggressive; }
+
+// Patrol system
+void set_patrol_path(string *path) { patrol_path = path; }
+string *query_patrol_path() { return patrol_path; }
+
+// Dialogue system
+void set_dialogue(string keyword, string response) {
+    dialogue[keyword] = response;
+}
+
+string query_dialogue(string keyword) {
+    if (dialogue[keyword]) return dialogue[keyword];
+    return 0;
+}
+
+mapping query_all_dialogue() { return copy(dialogue); }

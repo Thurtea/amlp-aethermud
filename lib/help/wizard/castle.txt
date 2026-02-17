@@ -1,0 +1,40 @@
+WIZARD CASTLE
+==============
+
+The Wizard Castle is the headquarters for all AetherMUD staff.
+
+GETTING THERE:
+  From Staff Castle Courtyard: go 'up' to Wizard Courtyard
+  From Wizard Courtyard: go 'north' to Main Hall
+  From your workroom: type 'castle'
+
+FACILITIES:
+  Courtyard     - Entrance with notice board directory
+  Main Hall     - Central meeting area with fireplace
+  Dog Spike     - Castle mascot's corner (pet/feed)
+  Training      - Combat testing grounds with training dummy
+  Monitor       - Mortal observation station (scan/watch)
+  Elevator      - Access to wizard role offices
+
+ROLE OFFICES (via elevator):
+  Domain Office   - World building workspace and references
+  Coding Office   - Systems and debugging workspace
+  Roleplay Office - Events and storytelling workspace
+  Admin Office    - Administration (Admin only, restricted)
+
+ELEVATOR USAGE:
+  In the elevator room, type:
+    press domain     - Go to Domain office
+    press coding     - Go to Coding office
+    press roleplay   - Go to Roleplay office
+    press admin      - Go to Admin office (Admin only)
+
+NOTICE BOARD:
+  In the courtyard, 'examine board' or 'read board' for the
+  full facility directory.
+
+PERSONAL WORKROOMS:
+  Type 'home' from anywhere in the castle to return to your
+  personal workroom. Your workroom has a 'castle' exit back.
+
+See also: help workspace, help wizard_roles, help promote

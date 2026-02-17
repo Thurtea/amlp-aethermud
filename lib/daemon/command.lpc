@@ -21,6 +21,7 @@ void create() {
         "/cmds/",
         "/cmds/admin/",
         "/cmds/wizard/",
+        "/cmds/creator/",
     });
     
     // Initialize command registry
@@ -86,6 +87,11 @@ void init_commands() {
     commands["languages"] = "/cmds/languages";
     commands["cast"] = "/cmds/cast";
     commands["surname"] = "/cmds/surname";  // Phase 5, Step 4
+    commands["sirname"] = "/cmds/sirname";
+    commands["pskills"] = "/cmds/pskills";
+    commands["sskills"] = "/cmds/sskills";
+    commands["description"] = "/cmds/description";
+    commands["selectocc"] = "/cmds/selectocc";
     
     // Social/introduction
     commands["introduce"] = "/cmds/introduce";
@@ -98,23 +104,28 @@ void init_commands() {
     commands["logout"] = "/cmds/quit";
     commands["test"] = "/cmds/test";
     
-    // Admin commands (will check privilege)
+    // Admin commands (will check privilege internally)
     commands["shutdown"] = "/cmds/admin/shutdown";
     commands["promote"] = "/cmds/admin/promote";
     commands["demote"] = "/cmds/admin/demote";
-    commands["setocc"] = "/cmds/admin/setocc";
     commands["grantskill"] = "/cmds/admin/grantskill";
     commands["users"] = "/cmds/admin/users";
-    
-    // Wizard tool commands
+    commands["tattoogun"] = "/cmds/admin/tattoogun";
+
+    // Wizard commands (check privilege internally)
+    commands["setocc"] = "/cmds/wizard/setocc";
     commands["wiztool"] = "/cmds/admin/wiztool";
     commands["wiz"] = "/cmds/admin/wiz";
     commands["goto"] = "/cmds/admin/goto";
-    commands["clone"] = "/cmds/admin/clone";
     commands["stat"] = "/cmds/admin/stat";
     commands["testskill"] = "/cmds/admin/testskill";
-    
-    // Wizard building tools
+
+    // QCS - Quick Creation System (domain/coding/admin roles)
+    commands["create"] = "/cmds/creator/create";
+    commands["modify"] = "/cmds/creator/modify";
+    commands["deploy"] = "/cmds/creator/deploy";
+
+    // Wizard building tools (check privilege internally)
     commands["pwd"] = "/cmds/wizard/pwd";
     commands["cd"] = "/cmds/wizard/cd";
     commands["eval"] = "/cmds/wizard/eval";
@@ -124,6 +135,7 @@ void init_commands() {
     commands["load"] = "/cmds/wizard/load";
     commands["update"] = "/cmds/wizard/update";
     commands["destruct"] = "/cmds/wizard/destruct";
+    commands["setrole"] = "/cmds/admin/setrole";
 }
 
 // Main command execution function

@@ -1,0 +1,56 @@
+SETOCC - Assign OCC to Player (Wizard)
+
+Wizards use this command to assign an Occupational Character Class
+to a player. Players request OCCs via tell:
+  Player: tell Thurtea I would like the O.C.C. Cyber-Knight
+
+USAGE
+  setocc <player> <occ>
+  setocc <player> <occ> confirm   (bypass safety check)
+  setocc reset <player>           (reset OCC to Pending)
+  setocc list                     (show all available OCCs)
+
+EXAMPLES
+  setocc Splynncryth cyber_knight
+  setocc Arismal ley_line_walker
+  setocc DragonPlayer necromancer
+
+WHAT HAPPENS
+  1. Validates the OCC exists in /occs/
+  2. Sets the player's OCC
+  3. Assigns primary skills from OCC package
+  4. Applies OCC bonuses (stat bonuses, abilities)
+  5. Saves the player
+  6. Logs the assignment
+
+AVAILABLE OCCs (use underscores, lowercase)
+  battle_magus         biomancer           body_fixer
+  burster              city_rat            cosmo_knight
+  crazy                cyber_knight        elemental_fusionist
+  full_conversion_borg glitter_boy_pilot   headhunter
+  juicer               ley_line_walker     mercenary
+  mind_melter          mystic              necromancer
+  operator             power_armor_pilot   psi_healer
+  psi_stalker          robot_pilot         rogue_scholar
+  rogue_scientist      sea_titan           shifter
+  special_forces       stone_master        sunaj_assassin
+  techno_wizard        temporal_wizard     vagabond
+  warlock              wilderness_scout
+
+SAFETY CHECKS
+  The 'confirm' flag is required when:
+  - Player already has an OCC (replacement)
+  - Assigning a major OCC: Cosmo-Knight, Full Conversion Borg,
+    Glitter Boy Pilot, Mind Melter, Necromancer, Sunaj Assassin
+
+RESET
+  setocc reset <player>  - Clears OCC to "Pending" and removes
+  primary skills. Player must request a new OCC.
+
+NOTES
+  - RCC races (Dragons) already have a racial class
+  - RCC characters can optionally take an OCC for extra abilities
+  - Sunaj Assassin requires Atlantean race + Clan Aerihman
+  - All OCC assignments are logged to /log/wizard/occ_assignments.log
+
+See also: help occs, help promote, help wizard_roles

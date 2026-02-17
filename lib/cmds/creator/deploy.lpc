@@ -1,0 +1,333 @@
+// /lib/cmds/creator/deploy.lpc
+// QCS - Quick Creation System: Deploy objects to the world
+//
+// Usage:
+//   deploy <name> <location>   - Clone object into target room
+//   deploy <name> here         - Clone object into current room
+//   deploy <name> list         - Show where copies are deployed
+//   deploy <name> remove       - Remove all deployed copies from current room
+
+// Check if wizard has creator role (domain, coding, or admin)
+int check_creator_access(object player) {
+    if (!player) return 0;
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+    if (priv < 1) return 0;
+    if (priv >= 2) return 1;
+    string role = "";
+    if (function_exists("query_property", player))
+        role = player->query_property("wizard_role");
+    if (!role) role = "";
+    if (role == "domain" || role == "coding" || role == "admin") return 1;
+    return 0;
+}
+
+// Check workspace ownership
+int check_workspace_ownership(object player, string filepath) {
+    if (!player || !filepath) return 0;
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+    if (priv >= 2) return 1;
+    string wiz_name = "";
+    if (function_exists("query_name", player))
+        wiz_name = lower_case(player->query_name());
+    if (!wiz_name || wiz_name == "") return 0;
+    string expected = "/domains/wizard/" + wiz_name + "/";
+    if (strsrch(filepath, expected) == 0) return 1;
+    return 0;
+}
+
+int main(string arg) {
+    object player = this_player();
+    if (!player) return 0;
+
+    // Creator role check (domain/coding/admin only)
+    if (!check_creator_access(player)) {
+        write("This command requires Domain or Coding wizard role.\n");
+        write("Your current role does not include building privileges.\n");
+        return 1;
+    }
+
+    if (!arg || arg == "") {
+        return show_help();
+    }
+
+    string name, location;
+    if (sscanf(arg, "%s %s", name, location) != 2) {
+        return show_help();
+    }
+
+    name = lower_case(name);
+    location = lower_case(location);
+
+    // Find the file in wizard workspace
+    string wiz_name = "";
+    if (function_exists("query_name", player))
+        wiz_name = lower_case(player->query_name());
+    if (!wiz_name || wiz_name == "") {
+        write("Error: Could not determine your name.\n");
+        return 1;
+    }
+
+    string base_dir = "/domains/wizard/" + wiz_name + "/area";
+    string filepath = find_object_file(base_dir, name);
+
+    if (!filepath) {
+        write("Object '" + name + "' not found in your workspace.\n");
+        write("Searched: " + base_dir + "/*/\n");
+        write("Use 'create <type> " + name + "' to create it first.\n");
+        return 1;
+    }
+
+    // Ownership check
+    if (!check_workspace_ownership(player, filepath)) {
+        write("You can only deploy objects from your own workspace.\n");
+        return 1;
+    }
+
+    // Determine what type this is based on path
+    string obj_type = detect_type(filepath);
+
+    // Handle special commands
+    if (location == "here") {
+        return deploy_here(player, filepath, name, obj_type);
+    }
+
+    if (location == "list") {
+        return list_deployed(filepath, name);
+    }
+
+    if (location == "remove") {
+        return remove_from_here(player, filepath, name);
+    }
+
+    // Deploy to specified location
+    return deploy_to(player, filepath, name, location, obj_type);
+}
+
+// Find an object file by name across all type subdirs
+string find_object_file(string base_dir, string name) {
+    string *subdirs = ({ "npc", "weapon", "armor", "room", "item" });
+    foreach (string sub in subdirs) {
+        string path = base_dir + "/" + sub + "/" + name + ".lpc";
+        if (file_size(path) > 0) return path;
+    }
+    return 0;
+}
+
+// Detect object type from filepath
+string detect_type(string filepath) {
+    if (strsrch(filepath, "/npc/") != -1) return "npc";
+    if (strsrch(filepath, "/weapon/") != -1) return "weapon";
+    if (strsrch(filepath, "/armor/") != -1) return "armor";
+    if (strsrch(filepath, "/room/") != -1) return "room";
+    if (strsrch(filepath, "/item/") != -1) return "item";
+    return "object";
+}
+
+// Deploy to current room
+int deploy_here(object player, string filepath, string name, string obj_type) {
+    object room = environment(player);
+    if (!room) {
+        write("Error: You are not in a room.\n");
+        return 1;
+    }
+
+    if (obj_type == "room") {
+        write("Rooms cannot be deployed to rooms. Use 'goto " + filepath + "' instead.\n");
+        write("Or add an exit: modify <room_name> exit \"direction\" \"" + filepath + "\"\n");
+        return 1;
+    }
+
+    return do_deploy(filepath, name, room, obj_type);
+}
+
+// Deploy to a specific path
+int deploy_to(object player, string filepath, string name, string location, string obj_type) {
+    if (obj_type == "room") {
+        // Rooms deploy differently - we load them, not clone into another room
+        write("Loading room: " + filepath + "\n");
+        object room;
+        catch {
+            room = load_object(filepath);
+        };
+        if (room) {
+            write("\033[1;32mRoom loaded:\033[0m " + filepath + "\n");
+            write("Use 'goto " + filepath + "' to visit it.\n");
+        } else {
+            write("Error: Failed to load room. Check for LPC errors.\n");
+        }
+        return 1;
+    }
+
+    // Load the target room
+    object target_room;
+    catch {
+        target_room = load_object(location);
+    };
+    if (!target_room) {
+        // Try with .lpc extension
+        catch {
+            target_room = load_object(location + ".lpc");
+        };
+    }
+    if (!target_room) {
+        write("Error: Could not find room: " + location + "\n");
+        return 1;
+    }
+
+    return do_deploy(filepath, name, target_room, obj_type);
+}
+
+// Perform the actual deployment (clone + move)
+int do_deploy(string filepath, string name, object target_room, string obj_type) {
+    // First, try to load/compile the object
+    object blueprint;
+    catch {
+        blueprint = load_object(filepath);
+    };
+    if (!blueprint) {
+        write("Error: Failed to compile " + filepath + "\n");
+        write("Check for LPC syntax errors in the file.\n");
+        return 1;
+    }
+
+    // Clone and move
+    object clone;
+    catch {
+        clone = clone_object(filepath);
+    };
+    if (!clone) {
+        write("Error: Failed to clone " + filepath + "\n");
+        return 1;
+    }
+
+    // Move clone to target room
+    if (function_exists("move", clone)) {
+        clone->move(target_room);
+    } else {
+        move_object(clone, target_room);
+    }
+
+    string room_desc = "the room";
+    if (function_exists("query_short", target_room))
+        room_desc = target_room->query_short();
+
+    string obj_desc = name;
+    if (function_exists("query_short", clone))
+        obj_desc = clone->query_short();
+
+    write("\033[1;32mDeployed:\033[0m " + obj_desc + " -> " + room_desc + "\n");
+    write("Source: " + filepath + "\n");
+
+    // Log deployment
+    string deployer = "unknown";
+    object dp = this_player();
+    if (dp && function_exists("query_name", dp))
+        deployer = dp->query_name();
+    write_file("/log/wizard/qcs_deploy.log",
+               ctime(time()) + " " + deployer + " deployed " + name +
+               " (" + filepath + ") to " + room_desc + "\n");
+
+    // Announce to room
+    string room_path = "";
+    if (function_exists("file_name", target_room))
+        room_path = file_name(target_room);
+    tell_room(target_room, capitalize(obj_desc) + " appears in the room.\n");
+
+    return 1;
+}
+
+// List rooms where this object has been deployed (via clones)
+int list_deployed(string filepath, string name) {
+    // Strip .lpc for matching
+    string base_path = filepath;
+    if (strsrch(base_path, ".lpc") != -1) {
+        sscanf(base_path, "%s.lpc", base_path);
+    }
+
+    object *all_clones = children(filepath);
+    if (!all_clones || !sizeof(all_clones)) {
+        write("No deployed copies of '" + name + "' found.\n");
+        return 1;
+    }
+
+    write("\033[1mDeployed copies of " + name + ":\033[0m\n");
+    int count = 0;
+    foreach (object clone in all_clones) {
+        if (!clone) continue;
+        object env = environment(clone);
+        string loc = "nowhere";
+        if (env) {
+            if (function_exists("query_short", env))
+                loc = env->query_short();
+            else
+                loc = file_name(env);
+        }
+        string desc = name;
+        if (function_exists("query_short", clone))
+            desc = clone->query_short();
+        write("  " + desc + " in " + loc + "\n");
+        count++;
+    }
+    write("Total: " + count + " deployed.\n");
+    return 1;
+}
+
+// Remove all copies from current room
+int remove_from_here(object player, string filepath, string name) {
+    object room = environment(player);
+    if (!room) {
+        write("Error: You are not in a room.\n");
+        return 1;
+    }
+
+    object *all_clones = children(filepath);
+    if (!all_clones || !sizeof(all_clones)) {
+        write("No deployed copies of '" + name + "' found anywhere.\n");
+        return 1;
+    }
+
+    int removed = 0;
+    foreach (object clone in all_clones) {
+        if (!clone) continue;
+        if (environment(clone) == room) {
+            string desc = name;
+            if (function_exists("query_short", clone))
+                desc = clone->query_short();
+            tell_room(room, capitalize(desc) + " vanishes.\n");
+            destruct(clone);
+            removed++;
+        }
+    }
+
+    if (removed > 0) {
+        write("\033[1;32mRemoved:\033[0m " + removed + " copy(s) of " + name + " from this room.\n");
+    } else {
+        write("No copies of '" + name + "' found in this room.\n");
+    }
+    return 1;
+}
+
+int show_help() {
+    write("\033[1mQCS - Deploy Objects\033[0m\n");
+    write("====================\n\n");
+    write("Usage: deploy <name> <location>\n\n");
+    write("Locations:\n");
+    write("  <path>    Deploy to a specific room path\n");
+    write("  here      Deploy to your current room\n");
+    write("  list      Show all deployed copies\n");
+    write("  remove    Remove copies from current room\n\n");
+    write("Examples:\n");
+    write("  deploy goblin here\n");
+    write("  deploy goblin /domains/new_camelot/tavern\n");
+    write("  deploy goblin list\n");
+    write("  deploy goblin remove\n\n");
+    write("For rooms, use 'deploy <room> load' to load it,\n");
+    write("then 'goto <filepath>' to visit.\n\n");
+    write("Objects are cloned from your workspace.\n");
+    write("Use 'modify <name> show' to review before deploying.\n");
+    return 1;
+}

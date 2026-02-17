@@ -1,0 +1,529 @@
+// /lib/obj/wiztools/admin_orb.lpc
+// Admin Orb - Full system stats, player search, system management
+// Admin-only tool (privilege level 2+)
+
+inherit "/lib/obj/wiztools/base_wiztool";
+
+void create() {
+    ::create();
+    set_name("admin orb");
+    set_id(({ "admin orb", "admin_orb", "orb", "crystal orb" }));
+    set_short("an Admin's crystal orb");
+    set_long(
+        "A polished crystal orb that swirls with dark energy. When\n"
+        "activated, it reveals the inner workings of the entire MUD -\n"
+        "player locations, system stats, and administrative controls.\n\n"
+        "Commands:\n"
+        "  orb status          System overview + zone counts\n"
+        "  orb players         Detailed player list with stats\n"
+        "  orb find <player>   Locate and inspect a player\n"
+        "  orb pending         Pending OCC/sirname requests\n"
+        "  orb goto <player>   Teleport to a player\n"
+        "  orb staff           Staff roster with roles\n"
+        "  orb logs            Recent admin log entries\n"
+        "  orb uptime          Server uptime and stats\n"
+        "  orb help            This help\n"
+    );
+    set_weight(2);
+    set_value(0);
+    set_property("no_drop", 1);
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+int check_wizard_level(object who) {
+    if (!who) return 0;
+    if (function_exists("query_privilege_level", who))
+        return (int)who->query_privilege_level() >= 2;
+    return 0;
+}
+
+void init() {
+    if (!environment() || !interactive(environment())) return;
+    if (!check_wizard_level(environment())) return;
+    add_action("cmd_orb", "orb");
+}
+
+int cmd_orb(string str) {
+    object player = this_player();
+    if (!check_wizard_level(player)) {
+        write("The orb remains dark and inert.\n");
+        return 1;
+    }
+
+    if (!str || str == "") return show_help();
+
+    string subcmd, rest;
+    if (sscanf(str, "%s %s", subcmd, rest) != 2) {
+        subcmd = str;
+        rest = "";
+    }
+    subcmd = lower_case(subcmd);
+
+    switch (subcmd) {
+        case "status":   return cmd_status();
+        case "players":  return cmd_players();
+        case "find":     return cmd_find(rest);
+        case "staff":    return cmd_staff();
+        case "logs":     return cmd_logs();
+        case "uptime":   return cmd_uptime();
+        case "pending":  return cmd_pending();
+        case "goto":
+        case "teleport": return cmd_teleport(rest);
+        case "help":     return show_help();
+        default:
+            write("Unknown orb command: " + subcmd + "\n");
+            return show_help();
+    }
+}
+
+int cmd_status() {
+    write("\n\033[1;31m=== Admin System Status ===\033[0m\n\n");
+
+    object *all_users = users();
+    int total = sizeof(all_users);
+    int admins = 0, wizards = 0, players = 0;
+
+    foreach (object u in all_users) {
+        if (!u) continue;
+        int up = 0;
+        if (function_exists("query_privilege_level", u))
+            up = u->query_privilege_level();
+        if (up >= 2) admins++;
+        else if (up >= 1) wizards++;
+        else players++;
+    }
+
+    write("  \033[1mPopulation:\033[0m " + total + " online\n");
+    write("    Admins: " + admins + "  Wizards: " + wizards + "  Players: " + players + "\n\n");
+
+    // Uptime
+    int up_secs = time();
+    int hours = up_secs / 3600;
+    int mins = (up_secs % 3600) / 60;
+    write("  \033[1mServer Time:\033[0m " + ctime(time()) + "\n\n");
+
+    // Key file counts
+    string *occ_files = get_dir("/occs/*.lpc");
+    string *cmd_files = get_dir("/cmds/*.lpc");
+    string *domain_dirs = get_dir("/domains/*");
+
+    write("  \033[1mContent:\033[0m\n");
+    write("    OCCs:     " + (occ_files ? sizeof(occ_files) : 0) + "\n");
+    write("    Commands: " + (cmd_files ? sizeof(cmd_files) : 0) + "\n");
+    write("    Domains:  " + (domain_dirs ? sizeof(domain_dirs) : 0) + "\n");
+
+    // Save file count
+    string *save_files = get_dir("/save/players/*.sav");
+    if (!save_files) save_files = get_dir("/save/players/*");
+    write("    Saves:    " + (save_files ? sizeof(save_files) : 0) + "\n");
+
+    // Zone breakdown (players by domain)
+    write("\n  \033[1mPlayers by Zone:\033[0m\n");
+    mapping zone_counts = ([]);
+    foreach (object u in all_users) {
+        if (!u) continue;
+        object env = environment(u);
+        string zone = "Unknown";
+        if (env) {
+            string fname = file_name(env);
+            // Extract domain from path like /domains/new_camelot/...
+            string domain_name;
+            if (sscanf(fname, "/domains/%s/", domain_name) == 1) {
+                zone = replace_string(domain_name, "_", " ");
+            } else {
+                zone = fname;
+            }
+        }
+        if (!zone_counts[zone]) zone_counts[zone] = 0;
+        zone_counts[zone] = zone_counts[zone] + 1;
+    }
+    string *zones = keys(zone_counts);
+    foreach (string z in zones) {
+        write("    " + capitalize(z) + ": " + zone_counts[z] + "\n");
+    }
+
+    // Pending requests summary
+    int pending_sirnames = 0, pending_occs = 0;
+    foreach (object u in all_users) {
+        if (!u) continue;
+        string occ = "";
+        if (function_exists("query_occ", u)) occ = u->query_occ();
+        if (!occ || occ == "" || occ == "Pending" || occ == "pending")
+            pending_occs++;
+    }
+    // Check sirname request log
+    string sir_log = read_file("/log/wizard/sirname_requests.log");
+    if (sir_log && sir_log != "") {
+        string *sir_lines = explode(sir_log, "\n");
+        foreach (string line in sir_lines) {
+            if (strsrch(line, "[PENDING]") != -1) pending_sirnames++;
+        }
+    }
+    if (pending_occs > 0 || pending_sirnames > 0) {
+        write("\n  \033[1;33mPending Requests:\033[0m\n");
+        if (pending_occs > 0)
+            write("    OCC assignments needed: " + pending_occs + "\n");
+        if (pending_sirnames > 0)
+            write("    Sirname requests: " + pending_sirnames + "\n");
+    }
+
+    write("\n");
+    return 1;
+}
+
+int cmd_players() {
+    write("\n\033[1;31m=== Online Players (Detailed) ===\033[0m\n\n");
+
+    object *all_users = users();
+    if (!sizeof(all_users)) {
+        write("  No players online.\n\n");
+        return 1;
+    }
+
+    foreach (object u in all_users) {
+        if (!u) continue;
+
+        string uname = "Unknown";
+        if (function_exists("query_cap_name", u))
+            uname = u->query_cap_name();
+
+        int up = 0;
+        if (function_exists("query_privilege_level", u))
+            up = u->query_privilege_level();
+        string role_str = ({ "\033[0mPlayer", "\033[1;33mWizard", "\033[1;31mAdmin" })[up];
+
+        string loc = "Unknown";
+        object env = environment(u);
+        if (env && function_exists("query_short", env))
+            loc = env->query_short();
+
+        int hp = 0, max_hp = 0, level = 0;
+        if (function_exists("query_hp", u)) hp = u->query_hp();
+        if (function_exists("query_max_hp", u)) max_hp = u->query_max_hp();
+        if (function_exists("query_level", u)) level = u->query_level();
+
+        string race = "?";
+        if (function_exists("query_race", u)) race = u->query_race();
+        string occ = "?";
+        if (function_exists("query_occ", u)) occ = u->query_occ();
+        if (!occ || occ == "") occ = "Pending";
+
+        write("  " + role_str + "\033[0m " + uname + "\n");
+        write("    Race: " + race + "  OCC: " + occ + "  Lvl: " + level + "\n");
+        write("    HP: " + hp + "/" + max_hp + "  Location: " + loc + "\n\n");
+    }
+    return 1;
+}
+
+int cmd_find(string name) {
+    if (!name || name == "") {
+        write("Usage: orb find <player_name>\n");
+        return 1;
+    }
+
+    object target = find_player(lower_case(name));
+    if (!target) {
+        write("Player '" + name + "' not found online.\n");
+        return 1;
+    }
+
+    string tname = "Unknown";
+    if (function_exists("query_cap_name", target))
+        tname = target->query_cap_name();
+
+    write("\n\033[1;31m=== Player Report: " + tname + " ===\033[0m\n\n");
+
+    // Basic info
+    int priv = 0;
+    if (function_exists("query_privilege_level", target))
+        priv = target->query_privilege_level();
+    write("  Privilege: " + ({ "Player", "Wizard", "Admin" })[priv] + "\n");
+
+    string race = "?", occ = "?";
+    if (function_exists("query_race", target)) race = target->query_race();
+    if (function_exists("query_occ", target)) occ = target->query_occ();
+    if (!occ || occ == "") occ = "Pending";
+    write("  Race: " + race + "\n");
+    write("  OCC: " + occ + "\n");
+
+    int level = 0;
+    if (function_exists("query_level", target)) level = target->query_level();
+    write("  Level: " + level + "\n");
+
+    // Pools
+    int hp = 0, max_hp = 0;
+    if (function_exists("query_hp", target)) hp = target->query_hp();
+    if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+    write("  HP: " + hp + "/" + max_hp + "\n");
+
+    // Location
+    string loc = "Unknown";
+    object env = environment(target);
+    if (env) {
+        if (function_exists("query_short", env))
+            loc = env->query_short();
+        write("  Location: " + loc + " (" + file_name(env) + ")\n");
+    }
+
+    // Wizard role
+    string wrole = "";
+    if (function_exists("query_property", target))
+        wrole = target->query_property("wizard_role");
+    if (wrole && wrole != "")
+        write("  Wizard Role: " + wrole + "\n");
+
+    // Sirname
+    string sirname = "";
+    if (function_exists("query_property", target))
+        sirname = target->query_property("sirname");
+    if (sirname && sirname != "")
+        write("  Sirname: " + sirname + "\n");
+
+    // Clan
+    string clan = "";
+    if (function_exists("query_property", target))
+        clan = target->query_property("clan");
+    if (clan && clan != "")
+        write("  Clan: " + clan + "\n");
+
+    // Inventory
+    object *inv = all_inventory(target);
+    if (inv && sizeof(inv)) {
+        write("\n  Inventory (" + sizeof(inv) + " items):\n");
+        foreach (object item in inv) {
+            if (!item) continue;
+            string iname = "something";
+            if (function_exists("query_short", item))
+                iname = item->query_short();
+            write("    " + iname + "\n");
+        }
+    }
+
+    write("\n");
+    return 1;
+}
+
+int cmd_staff() {
+    write("\n\033[1;31m=== Staff Roster ===\033[0m\n\n");
+
+    object *all_users = users();
+    int found = 0;
+
+    foreach (object u in all_users) {
+        if (!u) continue;
+        int up = 0;
+        if (function_exists("query_privilege_level", u))
+            up = u->query_privilege_level();
+        if (up < 1) continue;
+
+        found++;
+        string uname = "Unknown";
+        if (function_exists("query_cap_name", u))
+            uname = u->query_cap_name();
+
+        string role = "unassigned";
+        if (function_exists("query_property", u)) {
+            string r = u->query_property("wizard_role");
+            if (r && r != "") role = r;
+        }
+
+        string level = (up >= 2) ? "\033[1;31mAdmin\033[0m" : "\033[1;33mWizard\033[0m";
+        string role_color;
+        switch (role) {
+            case "admin":    role_color = "\033[1;31m"; break;
+            case "domain":   role_color = "\033[1;34m"; break;
+            case "coding":   role_color = "\033[1;36m"; break;
+            case "roleplay": role_color = "\033[1;32m"; break;
+            default:         role_color = "\033[0m"; break;
+        }
+
+        write("  " + level + " " + uname + " - " +
+              role_color + capitalize(role) + "\033[0m\n");
+    }
+
+    if (found == 0) {
+        write("  No staff online.\n");
+    }
+    write("\n");
+    return 1;
+}
+
+int cmd_logs() {
+    write("\n\033[1;31m=== Recent Admin Logs ===\033[0m\n\n");
+
+    // Show last entries from admin log
+    string content = read_file("/log/admin.log");
+    if (!content || content == "") {
+        write("  No admin log entries.\n\n");
+    } else {
+        // Show last 20 lines
+        string *lines = explode(content, "\n");
+        int start = sizeof(lines) - 20;
+        if (start < 0) start = 0;
+        int i;
+        for (i = start; i < sizeof(lines); i++) {
+            if (lines[i] != "") write("  " + lines[i] + "\n");
+        }
+        write("\n");
+    }
+
+    // Show promotion log
+    string promo_content = read_file("/log/promotions");
+    if (promo_content && promo_content != "") {
+        write("\033[1mRecent Promotions:\033[0m\n");
+        string *plines = explode(promo_content, "\n");
+        int pstart = sizeof(plines) - 10;
+        if (pstart < 0) pstart = 0;
+        int j;
+        for (j = pstart; j < sizeof(plines); j++) {
+            if (plines[j] != "") write("  " + plines[j] + "\n");
+        }
+        write("\n");
+    }
+
+    // Show OCC assignment log
+    string occ_content = read_file("/log/wizard/occ_assignments.log");
+    if (occ_content && occ_content != "") {
+        write("\033[1mRecent OCC Assignments:\033[0m\n");
+        string *olines = explode(occ_content, "\n");
+        int ostart = sizeof(olines) - 10;
+        if (ostart < 0) ostart = 0;
+        int k;
+        for (k = ostart; k < sizeof(olines); k++) {
+            if (olines[k] != "") write("  " + olines[k] + "\n");
+        }
+        write("\n");
+    }
+
+    // Show QCS deploy log
+    string qcs_content = read_file("/log/wizard/qcs_deploy.log");
+    if (qcs_content && qcs_content != "") {
+        write("\033[1mRecent QCS Deployments:\033[0m\n");
+        string *qlines = explode(qcs_content, "\n");
+        int qstart = sizeof(qlines) - 10;
+        if (qstart < 0) qstart = 0;
+        int m;
+        for (m = qstart; m < sizeof(qlines); m++) {
+            if (qlines[m] != "") write("  " + qlines[m] + "\n");
+        }
+        write("\n");
+    }
+
+    return 1;
+}
+
+int cmd_uptime() {
+    write("\n\033[1;31m=== Server Uptime ===\033[0m\n\n");
+    write("  Current time: " + ctime(time()) + "\n");
+    write("  Epoch: " + time() + "\n\n");
+
+    object *all_users = users();
+    write("  Connected users: " + sizeof(all_users) + "\n\n");
+    return 1;
+}
+
+int cmd_pending() {
+    write("\n\033[1;31m=== Pending Requests ===\033[0m\n\n");
+
+    // Players needing OCC assignment
+    object *all_users = users();
+    write("\033[1mPlayers Awaiting OCC:\033[0m\n");
+    int occ_count = 0;
+    foreach (object u in all_users) {
+        if (!u) continue;
+        string occ = "";
+        if (function_exists("query_occ", u)) occ = u->query_occ();
+        if (!occ || occ == "" || occ == "Pending" || occ == "pending") {
+            string uname = "Unknown";
+            if (function_exists("query_cap_name", u))
+                uname = u->query_cap_name();
+            string race = "?";
+            if (function_exists("query_race", u)) race = u->query_race();
+            write("  " + uname + " (" + race + ") - OCC: Pending\n");
+            occ_count++;
+        }
+    }
+    if (occ_count == 0) write("  None.\n");
+
+    // Sirname requests
+    write("\n\033[1mPending Sirname Requests:\033[0m\n");
+    string sir_log = read_file("/log/wizard/sirname_requests.log");
+    int sir_count = 0;
+    if (sir_log && sir_log != "") {
+        string *lines = explode(sir_log, "\n");
+        foreach (string line in lines) {
+            if (strsrch(line, "[PENDING]") != -1) {
+                write("  " + line + "\n");
+                sir_count++;
+            }
+        }
+    }
+    if (sir_count == 0) write("  None.\n");
+
+    write("\n\033[1mActions:\033[0m\n");
+    write("  setocc <player> <occ>           Assign an OCC\n");
+    write("  sirname <player> <title>        Grant a sirname\n\n");
+    return 1;
+}
+
+int cmd_teleport(string name) {
+    if (!name || name == "") {
+        write("Usage: orb goto <player_name>\n");
+        return 1;
+    }
+
+    object player = this_player();
+    object target = find_player(lower_case(name));
+    if (!target) {
+        write("Player '" + name + "' not found online.\n");
+        return 1;
+    }
+
+    object target_env = environment(target);
+    if (!target_env) {
+        write("Player has no location.\n");
+        return 1;
+    }
+
+    string tname = "Unknown";
+    if (function_exists("query_cap_name", target))
+        tname = target->query_cap_name();
+    string room_desc = "somewhere";
+    if (function_exists("query_short", target_env))
+        room_desc = target_env->query_short();
+
+    // Move admin to player's location
+    object old_env = environment(player);
+    if (old_env) {
+        tell_room(old_env, player->query_cap_name() +
+                  " vanishes in a flash of light.\n", ({ player }));
+    }
+
+    player->move(target_env);
+    write("Teleported to " + tname + " at " + room_desc + ".\n");
+    tell_room(target_env, player->query_cap_name() +
+              " appears in a flash of light.\n", ({ player }));
+
+    // Auto-look
+    if (function_exists("do_look", player)) {
+        player->do_look();
+    }
+
+    return 1;
+}
+
+int show_help() {
+    write("\n\033[1;31m=== Admin Orb ===\033[0m\n\n");
+    write("Commands:\n");
+    write("  orb status          Full system overview + zone counts\n");
+    write("  orb players         All players with stats\n");
+    write("  orb find <player>   Detailed player report\n");
+    write("  orb pending         Pending OCC/sirname requests\n");
+    write("  orb goto <player>   Teleport to a player\n");
+    write("  orb staff           Staff roster with roles\n");
+    write("  orb logs            Recent admin/promotion logs\n");
+    write("  orb uptime          Server time info\n");
+    write("  orb help            This help\n\n");
+    return 1;
+}

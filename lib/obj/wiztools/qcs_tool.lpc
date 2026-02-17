@@ -1,0 +1,258 @@
+// /lib/obj/wiztools/qcs_tool.lpc
+// QCS Creator Tool - Menu-driven object creation interface
+// Auto-loaded on wizard promotion, wraps create/modify/deploy commands
+
+inherit "/lib/obj/wiztools/base_wiztool";
+
+void create() {
+    ::create();
+    set_name("qcs tool");
+    set_id(({ "qcs tool", "qcs", "creator tool", "qcs_tool" }));
+    set_short("a QCS Creator Tool");
+    set_long(
+        "A crystalline tablet etched with arcane blueprints. Its surface\n"
+        "shimmers with potential, ready to manifest objects from pure will.\n\n"
+        "Type 'qcs' to open the creation menu.\n"
+    );
+    set_weight(1);
+    set_value(0);
+    set_property("no_drop", 1);
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+int check_wizard_level(object who) {
+    if (!who) return 0;
+    if (function_exists("query_privilege_level", who))
+        return (int)who->query_privilege_level() >= 1;
+    return 0;
+}
+
+void init() {
+    if (!environment() || !interactive(environment())) return;
+    if (!check_wizard_level(environment())) return;
+    add_action("cmd_qcs", "qcs");
+}
+
+int cmd_qcs(string str) {
+    object player = this_player();
+    if (!check_wizard_level(player)) {
+        write("The tool refuses to work for you.\n");
+        return 1;
+    }
+
+    if (!str || str == "") {
+        return show_menu();
+    }
+
+    // Direct subcommands
+    str = lower_case(str);
+
+    if (str == "1" || str == "room")    return do_create("room");
+    if (str == "2" || str == "npc")     return do_create("npc");
+    if (str == "3" || str == "weapon")  return do_create("weapon");
+    if (str == "4" || str == "armor")   return do_create("armor");
+    if (str == "5" || str == "item")    return do_create("item");
+    if (str == "6" || str == "list")    return do_list();
+    if (str == "7" || str == "deploy")  return do_deploy_menu();
+    if (str == "8" || str == "modify")  return do_modify_menu();
+    if (str == "9" || str == "help")    return do_help();
+    if (str == "0" || str == "exit" || str == "quit") {
+        write("QCS tool deactivated.\n");
+        return 1;
+    }
+
+    // Handle compound commands: qcs create npc goblin
+    string subcmd, rest;
+    if (sscanf(str, "%s %s", subcmd, rest) == 2) {
+        switch (subcmd) {
+            case "create":
+                return route_create(rest);
+            case "modify":
+                return route_modify(rest);
+            case "deploy":
+                return route_deploy(rest);
+            case "list":
+                return do_list();
+        }
+    }
+
+    write("Unknown option. Type 'qcs' for the menu.\n");
+    return 1;
+}
+
+int show_menu() {
+    string wiz_name = "";
+    object player = this_player();
+    if (function_exists("query_name", player))
+        wiz_name = lower_case(player->query_name());
+
+    write("\n");
+    write("\033[1;36m+===========================+\033[0m\n");
+    write("\033[1;36m|   QCS CREATOR TOOL        |\033[0m\n");
+    write("\033[1;36m+===========================+\033[0m\n");
+    write("\033[1m  1.\033[0m Create Room\n");
+    write("\033[1m  2.\033[0m Create NPC\n");
+    write("\033[1m  3.\033[0m Create Weapon\n");
+    write("\033[1m  4.\033[0m Create Armor\n");
+    write("\033[1m  5.\033[0m Create Item\n");
+    write("\033[1m  6.\033[0m List Area\n");
+    write("\033[1m  7.\033[0m Deploy Object\n");
+    write("\033[1m  8.\033[0m Modify Object\n");
+    write("\033[1m  9.\033[0m Help\n");
+    write("\033[1m  0.\033[0m Exit\n");
+    write("\033[1;36m+===========================+\033[0m\n");
+
+    if (wiz_name != "") {
+        write("  Workspace: /domains/wizard/" + wiz_name + "/area/\n");
+    }
+    write("\n  Usage: qcs <number>  OR  qcs create npc goblin\n\n");
+    return 1;
+}
+
+// Interactive create - prompt for name
+int do_create(string type) {
+    write("\n\033[1mCreate " + capitalize(type) + "\033[0m\n");
+    write("Enter name (lowercase, underscores ok): qcs create " + type + " <name>\n");
+    write("Example: qcs create " + type + " my_" + type + "\n");
+    return 1;
+}
+
+// Route create command: qcs create npc goblin
+int route_create(string rest) {
+    string type, name;
+    if (sscanf(rest, "%s %s", type, name) != 2) {
+        write("Usage: qcs create <type> <name>\n");
+        write("Types: room, npc, weapon, armor, item\n");
+        return 1;
+    }
+
+    // Delegate to the create command
+    object cmd;
+    catch { cmd = load_object("/cmds/creator/create"); };
+    if (cmd && function_exists("main", cmd)) {
+        return cmd->main(type + " " + name);
+    }
+    write("Error: Could not load create command.\n");
+    return 1;
+}
+
+// Route modify command: qcs modify goblin short "a goblin"
+int route_modify(string rest) {
+    if (!rest || rest == "") {
+        return do_modify_menu();
+    }
+
+    object cmd;
+    catch { cmd = load_object("/cmds/creator/modify"); };
+    if (cmd && function_exists("main", cmd)) {
+        return cmd->main(rest);
+    }
+    write("Error: Could not load modify command.\n");
+    return 1;
+}
+
+// Route deploy command: qcs deploy goblin here
+int route_deploy(string rest) {
+    if (!rest || rest == "") {
+        return do_deploy_menu();
+    }
+
+    object cmd;
+    catch { cmd = load_object("/cmds/creator/deploy"); };
+    if (cmd && function_exists("main", cmd)) {
+        return cmd->main(rest);
+    }
+    write("Error: Could not load deploy command.\n");
+    return 1;
+}
+
+// List all objects in workspace
+int do_list() {
+    object player = this_player();
+    string wiz_name = "";
+    if (function_exists("query_name", player))
+        wiz_name = lower_case(player->query_name());
+    if (!wiz_name || wiz_name == "") {
+        write("Error: Could not determine your name.\n");
+        return 1;
+    }
+
+    string base = "/domains/wizard/" + wiz_name + "/area";
+    string *types = ({ "room", "npc", "weapon", "armor", "item" });
+
+    write("\n\033[1m=== Your QCS Workspace ===\033[0m\n");
+    write("Base: " + base + "/\n\n");
+
+    int total = 0;
+    foreach (string type in types) {
+        string dir = base + "/" + type + "/";
+        string *files = get_dir(dir + "*.lpc");
+
+        if (files && sizeof(files)) {
+            write("\033[1m" + capitalize(type) + "s:\033[0m\n");
+            foreach (string f in files) {
+                string name = f;
+                // Strip .lpc
+                if (sscanf(f, "%s.lpc", name) != 1) name = f;
+                write("  " + name + "\n");
+                total++;
+            }
+            write("\n");
+        }
+    }
+
+    if (total == 0) {
+        write("  (empty workspace)\n");
+        write("  Use 'qcs create <type> <name>' to get started.\n\n");
+    } else {
+        write("Total: " + total + " object(s)\n\n");
+    }
+
+    return 1;
+}
+
+int do_deploy_menu() {
+    write("\n\033[1mDeploy Object\033[0m\n");
+    write("Usage: qcs deploy <name> <location>\n\n");
+    write("Options:\n");
+    write("  qcs deploy <name> here     Deploy to current room\n");
+    write("  qcs deploy <name> <path>   Deploy to specific room\n");
+    write("  qcs deploy <name> list     Show deployed copies\n");
+    write("  qcs deploy <name> remove   Remove from current room\n\n");
+    write("Example: qcs deploy goblin /domains/new_camelot/tavern\n");
+    return 1;
+}
+
+int do_modify_menu() {
+    write("\n\033[1mModify Object\033[0m\n");
+    write("Usage: qcs modify <name> <property> <value>\n\n");
+    write("Properties:\n");
+    write("  short <desc>           Set short description\n");
+    write("  long <desc>            Set long description\n");
+    write("  race <race> level <N>  Set NPC race and level\n");
+    write("  stat <name> <value>    Set a stat\n");
+    write("  exit <dir> <path>      Add room exit\n");
+    write("  damage <dice> type <X> Set weapon damage\n");
+    write("  show                   View current file\n\n");
+    write("Example: qcs modify goblin short \"a nasty goblin\"\n");
+    return 1;
+}
+
+int do_help() {
+    write("\n\033[1m=== QCS Creator Tool Help ===\033[0m\n\n");
+    write("The QCS (Quick Creation System) lets you build content\n");
+    write("without hand-editing LPC files.\n\n");
+    write("\033[1mQuick Start:\033[0m\n");
+    write("  qcs create npc goblin\n");
+    write("  qcs modify goblin short \"a nasty goblin\"\n");
+    write("  qcs modify goblin long \"Green skin, sharp teeth.\"\n");
+    write("  qcs modify goblin race \"orc\" level 5\n");
+    write("  qcs deploy goblin here\n\n");
+    write("\033[1mMenu:\033[0m Type 'qcs' to show the menu.\n");
+    write("\033[1mDirect:\033[0m Type 'qcs create/modify/deploy ...' for direct use.\n\n");
+    write("All files are saved in your workspace:\n");
+    write("  /domains/wizard/YOURNAME/area/<type>/<name>.lpc\n\n");
+    write("Type 'help qcs' for the full reference.\n");
+    return 1;
+}

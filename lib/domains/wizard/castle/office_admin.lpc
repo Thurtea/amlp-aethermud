@@ -1,0 +1,112 @@
+// /lib/domains/wizard/castle/office_admin.lpc
+// Wizard Castle - Admin Office
+// Restricted to admins (privilege level 2+)
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Admin Office");
+    set_long(
+        "The Admin Office is a secure chamber at the top of the castle.\n"
+        "Heavy wards shimmer around the doorway, restricting access to\n"
+        "those with the highest authority. The room is functional and\n"
+        "austere compared to the other offices.\n\n"
+        "A \033[1;31m[Admin]\033[0m banner marks the authority of this space.\n\n"
+        "A large desk dominates the room, covered with reports on player\n"
+        "activity, system performance, and staff assignments. A crystal\n"
+        "orb on the desk can be used to monitor the entire MUD at once.\n\n"
+        "Filing cabinets along one wall contain player records, ban\n"
+        "lists, and administrative logs. A secure vault in the corner\n"
+        "holds powerful artifacts and admin-only tools.\n\n"
+        "The elevator back to the main floor is to the south."
+    );
+
+    add_exit("south", "/domains/wizard/castle/elevator");
+
+    set_property("light", 2);
+    set_property("indoors", 1);
+}
+
+void init() {
+    ::init();
+    add_action("examine_office", "examine");
+    add_action("cmd_orb", "orb");
+}
+
+int cmd_orb(string str) {
+    object player = this_player();
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+
+    if (priv < 2) {
+        write("The orb remains dark. Admin access required.\n");
+        return 1;
+    }
+
+    write("\033[1m=== Admin Overview ===\033[0m\n\n");
+
+    object *all_users = users();
+    int total = sizeof(all_users);
+    int admins = 0, wizards = 0, players = 0;
+
+    foreach (object u in all_users) {
+        if (!u) continue;
+        int up = 0;
+        if (function_exists("query_privilege_level", u))
+            up = u->query_privilege_level();
+        if (up >= 2) admins++;
+        else if (up >= 1) wizards++;
+        else players++;
+    }
+
+    write("Online: " + total + " total (" + admins + " admin, " +
+          wizards + " wizard, " + players + " player)\n\n");
+
+    foreach (object u in all_users) {
+        if (!u) continue;
+        string uname = "Unknown";
+        if (function_exists("query_cap_name", u))
+            uname = u->query_cap_name();
+        int up = 0;
+        if (function_exists("query_privilege_level", u))
+            up = u->query_privilege_level();
+        string role = ({ "Player", "Wizard", "Admin" })[up];
+        string loc = "Unknown";
+        object env = environment(u);
+        if (env && function_exists("query_short", env))
+            loc = env->query_short();
+        write("  [" + role + "] " + uname + " - " + loc + "\n");
+    }
+
+    return 1;
+}
+
+int examine_office(string str) {
+    if (!str) return 0;
+    if (str == "orb" || str == "crystal") {
+        write("A crystal orb that provides an overview of the entire MUD.\n"
+              "Type 'orb' to activate it (Admin only).\n");
+        return 1;
+    }
+    if (str == "desk" || str == "reports") {
+        write("The desk is covered with administrative reports.\n"
+              "Player counts, uptime statistics, and bug reports.\n");
+        return 1;
+    }
+    if (str == "vault" || str == "artifacts") {
+        write("The vault is sealed with powerful wards. It contains\n"
+              "admin-only tools and artifacts too dangerous for general\n"
+              "wizard use.\n");
+        return 1;
+    }
+    if (str == "cabinets" || str == "files" || str == "records") {
+        write("Filing cabinets containing player records, ban lists,\n"
+              "and administrative action logs. Everything is neatly\n"
+              "organized and indexed.\n");
+        return 1;
+    }
+    return 0;
+}

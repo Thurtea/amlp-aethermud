@@ -1,0 +1,34 @@
+SIRNAME - Honorific Title System
+
+Sirnames are honorific titles displayed before your character name.
+Example: Lord Splynncryth, Lady Arismal, Baron Thurtea
+
+REQUIREMENTS:
+  - Level 10 or higher
+
+HOW TO REQUEST:
+  Players do not set their own sirname. Instead:
+  1. Reach level 10
+  2. Tell a wizard your desired sirname:
+     tell <wizard> I would like the sirname Lord
+  3. A wizard will grant it if approved
+
+  Your request is also broadcast to all online staff:
+     [Staff] PlayerName requests sirname: Lord
+
+WIZARD USAGE:
+  sirname <player> <title>    Grant a sirname
+  Example: sirname Splynncryth Lord
+
+DISPLAY:
+  Once granted, your sirname appears before your name:
+    Lord Splynncryth is standing around.
+    Lord Splynncryth says: Hello!
+
+RULES:
+  - Sirnames must be 2-20 characters
+  - Letters and spaces only
+  - Must be appropriate and non-offensive
+  - Wizards may deny inappropriate requests
+
+See also: help description, help stats

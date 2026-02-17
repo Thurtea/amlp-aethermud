@@ -1,0 +1,382 @@
+// /lib/cmds/wizard/setocc.lpc
+// Wizard command to assign an OCC to a player
+//
+// Usage: setocc <player> <occ>
+// Validates OCC against canonical list, sets OCC, updates stats/skills
+
+// Canonical OCC list (matches files in /occs/)
+string *VALID_OCCS = ({
+    "battle_magus",
+    "biomancer",
+    "body_fixer",
+    "burster",
+    "city_rat",
+    "cosmo_knight",
+    "crazy",
+    "cyber_knight",
+    "elemental_fusionist",
+    "full_conversion_borg",
+    "glitter_boy_pilot",
+    "headhunter",
+    "juicer",
+    "ley_line_walker",
+    "line_walker",
+    "mercenary",
+    "mind_melter",
+    "mystic",
+    "necromancer",
+    "operator",
+    "power_armor_pilot",
+    "psi_healer",
+    "psi_stalker",
+    "robot_pilot",
+    "rogue_scholar",
+    "rogue_scientist",
+    "sea_titan",
+    "shifter",
+    "special_forces",
+    "stone_master",
+    "sunaj_assassin",
+    "techno_wizard",
+    "temporal_wizard",
+    "vagabond",
+    "warlock",
+    "wilderness_scout",
+});
+
+// RCC-only (not assignable as OCC)
+string *RCC_ONLY = ({
+    "dragon_hatchling_rcc",
+    "fury_beetle",
+    "psi-stalker-r-c-c",
+    "xiticix_warrior",
+    "xiticix_worker",
+});
+
+int main(string arg) {
+    object wiz = this_player();
+    if (!wiz) return 0;
+
+    // Wizard privilege check
+    int priv = 0;
+    if (function_exists("query_privilege_level", wiz))
+        priv = wiz->query_privilege_level();
+    if (priv < 1) {
+        write("This command requires wizard privileges.\n");
+        return 1;
+    }
+
+    if (!arg || arg == "") {
+        return show_help();
+    }
+
+    // Special: list command
+    if (arg == "list" || arg == "occs") {
+        return list_occs();
+    }
+
+    // Parse: setocc <player> <occ> [confirm]
+    // Also: setocc reset <player>
+    string player_name, occ_name, extra;
+    int has_confirm = 0;
+
+    if (sscanf(arg, "reset %s", player_name) == 1) {
+        return do_reset(wiz, player_name);
+    }
+
+    if (sscanf(arg, "%s %s %s", player_name, occ_name, extra) == 3) {
+        if (lower_case(extra) == "confirm") has_confirm = 1;
+    } else if (sscanf(arg, "%s %s", player_name, occ_name) != 2) {
+        return show_help();
+    }
+
+    occ_name = lower_case(occ_name);
+
+    // Validate OCC against canonical list
+    int is_valid = 0;
+    foreach (string valid in VALID_OCCS) {
+        if (valid == occ_name) { is_valid = 1; break; }
+    }
+
+    if (!is_valid) {
+        // Check if it's an RCC
+        foreach (string rcc in RCC_ONLY) {
+            if (rcc == occ_name) {
+                write("'" + occ_name + "' is a Racial Character Class (RCC), not an OCC.\n");
+                write("RCCs are assigned automatically during character generation.\n");
+                return 1;
+            }
+        }
+        write("Unknown OCC: " + occ_name + "\n");
+        write("Type 'setocc list' to see available OCCs.\n");
+        return 1;
+    }
+
+    // Find target player (must be online)
+    object target = find_player(lower_case(player_name));
+    if (!target) {
+        target = find_living(lower_case(player_name));
+    }
+    if (!target) {
+        write("Player '" + player_name + "' not found. They must be online.\n");
+        return 1;
+    }
+
+    // Verify it's a player
+    if (!interactive(target)) {
+        write(capitalize(player_name) + " is not a player.\n");
+        return 1;
+    }
+
+    // Check Sunaj restriction
+    if (occ_name == "sunaj_assassin") {
+        string race = "";
+        if (function_exists("query_race", target))
+            race = lower_case(target->query_race());
+        string clan = "";
+        if (function_exists("query_property", target))
+            clan = target->query_property("clan");
+
+        if (strsrch(race, "atlantean") == -1) {
+            write("Sunaj Assassin requires Atlantean race.\n");
+            return 1;
+        }
+        if (!clan || strsrch(lower_case(clan), "aerihman") == -1) {
+            write("Sunaj Assassin requires Clan Aerihman membership.\n");
+            write("Player must first: clan aerihman\n");
+            return 1;
+        }
+    }
+
+    // Try to load the OCC object for bonuses
+    string occ_path = "/occs/" + occ_name;
+    object occ_obj;
+    catch {
+        occ_obj = load_object(occ_path);
+    };
+
+    if (!occ_obj) {
+        write("Warning: OCC file not loadable: " + occ_path + "\n");
+        write("Setting OCC name anyway, but bonuses may not apply.\n");
+    }
+
+    // Get OCC display name
+    string occ_display = replace_string(occ_name, "_", " ");
+    if (occ_obj && function_exists("query_occ_name", occ_obj)) {
+        occ_display = occ_obj->query_occ_name();
+    }
+
+    // Check if player already has an OCC
+    string current_occ = "";
+    if (function_exists("query_occ", target))
+        current_occ = target->query_occ();
+    if (!current_occ) current_occ = "";
+    if (function_exists("query_occ_id", target) && current_occ == "")
+        current_occ = target->query_occ_id();
+
+    // Major OCCs require confirm flag if player already has one
+    string *major_occs = ({
+        "cosmo_knight", "full_conversion_borg", "glitter_boy_pilot",
+        "mind_melter", "necromancer", "sunaj_assassin",
+    });
+    int is_major = 0;
+    foreach (string m in major_occs) {
+        if (m == occ_name) { is_major = 1; break; }
+    }
+
+    if (current_occ != "" && current_occ != "Pending" && current_occ != "pending") {
+        if (!has_confirm) {
+            write("\033[1;33mWARNING:\033[0m " + capitalize(player_name) +
+                  " already has OCC: " + current_occ + "\n");
+            write("This will REPLACE their current OCC.\n");
+            write("To confirm: setocc " + player_name + " " + occ_name + " confirm\n");
+            return 1;
+        }
+        write("Replacing OCC: " + current_occ + " -> " + occ_display + "\n");
+    }
+
+    if (is_major && !has_confirm) {
+        write("\033[1;33mNOTE:\033[0m " + occ_display + " is a major OCC with significant powers.\n");
+        write("To confirm: setocc " + player_name + " " + occ_name + " confirm\n");
+        return 1;
+    }
+
+    // Set the OCC on the target
+    if (function_exists("set_occ", target)) {
+        target->set_occ(occ_name);
+    }
+    if (function_exists("set_occ_id", target)) {
+        target->set_occ_id(occ_name);
+    }
+
+    // Apply OCC bonuses if available
+    if (occ_obj && function_exists("apply_to_player", occ_obj)) {
+        catch { occ_obj->apply_to_player(target); };
+    }
+    if (function_exists("apply_occ_bonuses", target)) {
+        catch { target->apply_occ_bonuses(); };
+    }
+
+    // Assign primary skills from OCC package
+    if (occ_obj && function_exists("query_occ_skills", occ_obj)) {
+        mixed skills = occ_obj->query_occ_skills();
+        if (skills && sizeof(skills)) {
+            if (function_exists("set_primary_skills", target)) {
+                target->set_primary_skills(skills);
+            }
+
+            object sd = find_object("/daemon/skills");
+            if (!sd) { catch { sd = load_object("/daemon/skills"); }; }
+
+            foreach (string sk in skills) {
+                int pct = 30;
+                if (sd && function_exists("calculate_skill_percentage", sd)) {
+                    pct = sd->calculate_skill_percentage(sk, target, 1);
+                }
+                if (function_exists("add_skill", target)) {
+                    target->add_skill(sk, pct);
+                }
+            }
+            write("Primary skills assigned: " + implode(skills, ", ") + "\n");
+        }
+    }
+
+    // Save the change
+    if (function_exists("save_player", target))
+        target->save_player();
+
+    // Feedback
+    string tname = capitalize(player_name);
+    string wname = "A wizard";
+    if (function_exists("query_cap_name", wiz))
+        wname = wiz->query_cap_name();
+
+    write("\033[1;32mOCC assigned:\033[0m " + occ_display + " -> " + tname + "\n");
+
+    tell_object(target, "\n\033[1;33m" + wname + " has assigned you the " +
+                occ_display + " O.C.C.!\033[0m\n");
+    tell_object(target, "Type 'score' to see your updated character sheet.\n");
+    tell_object(target, "Type 'pskills' to see your primary skills.\n\n");
+
+    // Log
+    write_file("/log/wizard/occ_assignments.log",
+               ctime(time()) + " " + wname + " assigned OCC '" + occ_display +
+               "' to " + tname + "\n");
+
+    return 1;
+}
+
+// Reset a player's OCC back to Pending
+int do_reset(object wiz, string player_name) {
+    if (!player_name || player_name == "") {
+        write("Usage: setocc reset <player>\n");
+        return 1;
+    }
+
+    object target = find_player(lower_case(player_name));
+    if (!target) {
+        target = find_living(lower_case(player_name));
+    }
+    if (!target) {
+        write("Player '" + player_name + "' not found. They must be online.\n");
+        return 1;
+    }
+
+    if (!interactive(target)) {
+        write(capitalize(player_name) + " is not a player.\n");
+        return 1;
+    }
+
+    string current_occ = "";
+    if (function_exists("query_occ", target))
+        current_occ = target->query_occ();
+
+    // Clear OCC
+    if (function_exists("set_occ", target))
+        target->set_occ("");
+    if (function_exists("set_occ_id", target))
+        target->set_occ_id("");
+
+    // Clear primary skills
+    if (function_exists("set_primary_skills", target))
+        target->set_primary_skills(({ }));
+
+    // Save
+    if (function_exists("save_player", target))
+        target->save_player();
+
+    string tname = capitalize(player_name);
+    string wname = "A wizard";
+    if (function_exists("query_cap_name", wiz))
+        wname = wiz->query_cap_name();
+
+    write("\033[1;33mOCC reset:\033[0m " + tname + " (was: " +
+          (current_occ != "" ? current_occ : "none") + ") -> Pending\n");
+    write("Primary skills cleared. Player must request a new OCC.\n");
+
+    tell_object(target, "\n\033[1;33m" + wname + " has reset your O.C.C.\033[0m\n");
+    tell_object(target, "Your OCC is now: Pending\n");
+    tell_object(target, "Request a new OCC: tell <wizard> I would like the O.C.C. <name>\n\n");
+
+    // Log
+    write_file("/log/wizard/occ_assignments.log",
+               ctime(time()) + " " + wname + " reset OCC for " + tname +
+               " (was: " + current_occ + ")\n");
+
+    return 1;
+}
+
+int list_occs() {
+    write("\033[1m=== Available OCCs ===\033[0m\n\n");
+
+    int col = 0;
+    string line = "";
+    foreach (string occ in VALID_OCCS) {
+        string display = replace_string(occ, "_", " ");
+        // Pad to 25 chars
+        while (strlen(display) < 25) display += " ";
+        line += "  " + display;
+        col++;
+        if (col >= 3) {
+            write(line + "\n");
+            line = "";
+            col = 0;
+        }
+    }
+    if (line != "") write(line + "\n");
+
+    write("\n\033[1mRCCs (auto-assigned, not selectable):\033[0m\n");
+    foreach (string rcc in RCC_ONLY) {
+        write("  " + replace_string(rcc, "_", " ") + "\n");
+    }
+
+    write("\nUsage: setocc <player> <occ_name>\n");
+    write("Use underscores in OCC name: setocc player cyber_knight\n");
+    return 1;
+}
+
+int show_help() {
+    write("\033[1mSETOCC - Assign OCC to Player\033[0m\n\n");
+    write("Usage:\n");
+    write("  setocc <player> <occ>           Assign an OCC\n");
+    write("  setocc <player> <occ> confirm   Assign (bypass safety check)\n");
+    write("  setocc reset <player>           Remove OCC, reset to Pending\n");
+    write("  setocc list                     Show all available OCCs\n\n");
+    write("Examples:\n");
+    write("  setocc Splynncryth cyber_knight\n");
+    write("  setocc Splynncryth cosmo_knight confirm\n");
+    write("  setocc reset Splynncryth\n\n");
+    write("When assigned, the player receives:\n");
+    write("  - OCC title and bonuses\n");
+    write("  - Primary skills from OCC package\n");
+    write("  - OCC-specific abilities\n\n");
+    write("Safety checks require 'confirm' for:\n");
+    write("  - Players who already have an OCC (replacement)\n");
+    write("  - Major OCCs: Cosmo-Knight, Full Conversion Borg,\n");
+    write("    Glitter Boy Pilot, Mind Melter, Necromancer, Sunaj Assassin\n\n");
+    write("Restrictions:\n");
+    write("  - Sunaj Assassin requires Atlantean + Clan Aerihman\n");
+    write("  - RCCs (Dragon Hatchling, etc.) cannot be assigned as OCCs\n\n");
+    write("See also: help occs\n");
+    return 1;
+}

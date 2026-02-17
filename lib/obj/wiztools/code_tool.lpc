@@ -1,0 +1,336 @@
+// /lib/obj/wiztools/code_tool.lpc
+// Coding Wizard Tool - File browser, syntax checker, system info
+// For Coding wizards (wizard_role == "coding")
+
+inherit "/lib/obj/wiztools/base_wiztool";
+
+void create() {
+    ::create();
+    set_name("code tool");
+    set_id(({ "code tool", "code_tool", "coding tool", "debugger" }));
+    set_short("a Coding Wizard's debugger");
+    set_long(
+        "A sleek obsidian tablet covered in scrolling green runes.\n"
+        "It hums softly, constantly analyzing the underlying code\n"
+        "that powers the world. Useful for debugging and inspection.\n\n"
+        "Commands:\n"
+        "  code check <file>      Attempt to load/compile a file\n"
+        "  code info <object>     Show object info (functions, vars)\n"
+        "  code search <pattern>  Search files in current directory\n"
+        "  code memory            Show system memory/object stats\n"
+        "  code children <file>   List clones of an object\n"
+        "  code trace <object>    Show inheritance chain\n"
+        "  code help              This help\n"
+    );
+    set_weight(1);
+    set_value(0);
+    set_property("no_drop", 1);
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+int check_wizard_level(object who) {
+    if (!who) return 0;
+    if (function_exists("query_privilege_level", who))
+        return (int)who->query_privilege_level() >= 1;
+    return 0;
+}
+
+void init() {
+    if (!environment() || !interactive(environment())) return;
+    if (!check_wizard_level(environment())) return;
+    add_action("cmd_code", "code");
+}
+
+int cmd_code(string str) {
+    object player = this_player();
+    if (!check_wizard_level(player)) {
+        write("The tool refuses to work for you.\n");
+        return 1;
+    }
+
+    if (!str || str == "") return show_help();
+
+    string subcmd, rest;
+    if (sscanf(str, "%s %s", subcmd, rest) != 2) {
+        subcmd = str;
+        rest = "";
+    }
+    subcmd = lower_case(subcmd);
+
+    switch (subcmd) {
+        case "check":    return cmd_check(rest);
+        case "info":     return cmd_info(rest);
+        case "search":   return cmd_search(player, rest);
+        case "memory":
+        case "mem":      return cmd_memory();
+        case "children": return cmd_children(rest);
+        case "trace":    return cmd_trace(rest);
+        case "help":     return show_help();
+        default:
+            write("Unknown code command: " + subcmd + "\n");
+            return show_help();
+    }
+}
+
+int cmd_check(string filepath) {
+    if (!filepath || filepath == "") {
+        write("Usage: code check <file_path>\n");
+        return 1;
+    }
+
+    write("\n\033[1;36m=== Syntax Check: " + filepath + " ===\033[0m\n\n");
+
+    // Check if file exists
+    if (file_size(filepath + ".lpc") <= 0 && file_size(filepath) <= 0) {
+        write("  \033[1;31m[ERROR]\033[0m File not found: " + filepath + "\n\n");
+        return 1;
+    }
+
+    // Attempt to load
+    object obj;
+    string err;
+    catch {
+        obj = load_object(filepath);
+    };
+
+    if (obj) {
+        write("  \033[1;32m[OK]\033[0m File compiles successfully.\n");
+        write("  Object: " + file_name(obj) + "\n");
+
+        // List functions
+        string *funcs = function_exists("query_function_list", obj) ?
+            ({}) : ({});
+        // Try to get function list through reflection
+        write("  Type: " + (living(obj) ? "living" : "object") + "\n");
+        if (function_exists("query_short", obj))
+            write("  Short: " + obj->query_short() + "\n");
+    } else {
+        write("  \033[1;31m[FAIL]\033[0m Compilation failed.\n");
+        write("  Check the file for LPC syntax errors.\n");
+    }
+    write("\n");
+    return 1;
+}
+
+int cmd_info(string target) {
+    if (!target || target == "") {
+        write("Usage: code info <object_path or 'here' or 'me'>\n");
+        return 1;
+    }
+
+    object obj;
+    if (target == "here") {
+        obj = environment(this_player());
+    } else if (target == "me") {
+        obj = this_player();
+    } else {
+        obj = find_object(target);
+        if (!obj) { catch { obj = load_object(target); }; }
+    }
+
+    if (!obj) {
+        write("Object not found: " + target + "\n");
+        return 1;
+    }
+
+    write("\n\033[1;36m=== Object Info ===\033[0m\n\n");
+    write("  File: " + file_name(obj) + "\n");
+    write("  Living: " + (living(obj) ? "yes" : "no") + "\n");
+    write("  Interactive: " + (interactive(obj) ? "yes" : "no") + "\n");
+
+    if (function_exists("query_short", obj))
+        write("  Short: " + obj->query_short() + "\n");
+    if (function_exists("query_name", obj))
+        write("  Name: " + obj->query_name() + "\n");
+
+    object env = environment(obj);
+    if (env) {
+        write("  Environment: " + file_name(env) + "\n");
+    }
+
+    // Inventory count
+    object *inv = all_inventory(obj);
+    if (inv && sizeof(inv)) {
+        write("  Inventory: " + sizeof(inv) + " object(s)\n");
+    }
+
+    // Check key functions
+    string *check_funcs = ({
+        "query_short", "query_long", "query_name", "query_exits",
+        "query_level", "query_hp", "query_privilege_level",
+        "query_property", "set_property", "move",
+    });
+
+    write("\n  Functions present:\n");
+    int col = 0;
+    string line = "    ";
+    foreach (string fn in check_funcs) {
+        if (function_exists(fn, obj)) {
+            line += fn + "  ";
+            col++;
+            if (col >= 3) {
+                write(line + "\n");
+                line = "    ";
+                col = 0;
+            }
+        }
+    }
+    if (col > 0) write(line + "\n");
+
+    write("\n");
+    return 1;
+}
+
+int cmd_search(object player, string pattern) {
+    if (!pattern || pattern == "") {
+        write("Usage: code search <filename_pattern>\n");
+        write("Example: code search *.lpc\n");
+        return 1;
+    }
+
+    string cwd = "/lib/";
+    if (function_exists("query_env", player)) {
+        string env_cwd = player->query_env("cwd");
+        if (env_cwd && env_cwd != "") cwd = env_cwd;
+    }
+
+    string *files = get_dir(cwd + pattern);
+    write("\n\033[1;36m=== Search: " + cwd + pattern + " ===\033[0m\n\n");
+
+    if (files && sizeof(files)) {
+        foreach (string f in files) {
+            int sz = file_size(cwd + f);
+            string size_str;
+            if (sz == -2) size_str = "<dir>";
+            else if (sz < 0) size_str = "???";
+            else if (sz < 1024) size_str = sz + "b";
+            else size_str = (sz / 1024) + "k";
+            write("  " + f + " (" + size_str + ")\n");
+        }
+        write("\n  " + sizeof(files) + " match(es)\n");
+    } else {
+        write("  No matches found.\n");
+    }
+    write("\n");
+    return 1;
+}
+
+int cmd_memory() {
+    write("\n\033[1;36m=== System Status ===\033[0m\n\n");
+
+    // Online users
+    object *all_users = users();
+    int total_users = sizeof(all_users);
+    write("  Online users: " + total_users + "\n");
+
+    // Uptime
+    write("  Uptime: " + (time() / 3600) + " hours\n");
+
+    // Count objects in key directories
+    string *dirs = ({
+        "/domains/", "/cmds/", "/std/", "/obj/",
+    });
+    foreach (string dir in dirs) {
+        string *files = get_dir(dir + "*.lpc");
+        int count = files ? sizeof(files) : 0;
+        write("  " + dir + ": " + count + " files\n");
+    }
+
+    write("\n");
+    return 1;
+}
+
+int cmd_children(string filepath) {
+    if (!filepath || filepath == "") {
+        write("Usage: code children <object_path>\n");
+        return 1;
+    }
+
+    object *clones = children(filepath);
+    write("\n\033[1;36m=== Clones of " + filepath + " ===\033[0m\n\n");
+
+    if (!clones || !sizeof(clones)) {
+        write("  No clones found.\n\n");
+        return 1;
+    }
+
+    foreach (object c in clones) {
+        if (!c) continue;
+        string loc = "nowhere";
+        object env = environment(c);
+        if (env) {
+            if (function_exists("query_short", env))
+                loc = env->query_short();
+            else
+                loc = file_name(env);
+        }
+        write("  " + file_name(c) + " in " + loc + "\n");
+    }
+    write("\n  Total: " + sizeof(clones) + " clone(s)\n\n");
+    return 1;
+}
+
+int cmd_trace(string filepath) {
+    if (!filepath || filepath == "") {
+        write("Usage: code trace <object_path or 'here'>\n");
+        return 1;
+    }
+
+    object obj;
+    if (filepath == "here") {
+        obj = environment(this_player());
+    } else {
+        obj = find_object(filepath);
+        if (!obj) { catch { obj = load_object(filepath); }; }
+    }
+
+    if (!obj) {
+        write("Object not found: " + filepath + "\n");
+        return 1;
+    }
+
+    write("\n\033[1;36m=== Inheritance Trace ===\033[0m\n\n");
+    write("  Object: " + file_name(obj) + "\n");
+
+    // Check common base classes
+    string *bases = ({
+        "/std/object", "/std/living", "/std/room",
+        "/lib/std/object", "/lib/std/living", "/lib/std/room",
+        "/std/daemon", "/lib/std/daemon",
+    });
+
+    write("  Inherits:\n");
+    foreach (string base in bases) {
+        // Check if object has functions from this base
+        object base_obj;
+        catch { base_obj = find_object(base); };
+        if (!base_obj) { catch { base_obj = load_object(base); }; }
+        // Simple check: does the object respond to base class functions?
+    }
+
+    // Show what the object can do
+    write("  Capabilities:\n");
+    if (function_exists("query_exits", obj)) write("    - Room (has exits)\n");
+    if (function_exists("query_hp", obj)) write("    - Living (has HP)\n");
+    if (function_exists("query_level", obj)) write("    - Leveled\n");
+    if (function_exists("query_privilege_level", obj)) write("    - Player (has privilege)\n");
+    if (function_exists("query_short", obj)) write("    - Describable\n");
+    if (function_exists("query_property", obj)) write("    - Has properties\n");
+
+    write("\n");
+    return 1;
+}
+
+int show_help() {
+    write("\n\033[1;36m=== Coding Tool ===\033[0m\n\n");
+    write("Commands:\n");
+    write("  code check <file>      Compile-check a file\n");
+    write("  code info <obj>        Object info ('here', 'me', or path)\n");
+    write("  code search <pattern>  Search files in cwd\n");
+    write("  code memory            System status\n");
+    write("  code children <file>   List clones of blueprint\n");
+    write("  code trace <obj>       Show object capabilities\n");
+    write("  code help              This help\n\n");
+    return 1;
+}

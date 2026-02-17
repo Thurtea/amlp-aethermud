@@ -1,0 +1,38 @@
+WIZ_BUILD - Domain Wizard Building Tool
+=======================================
+
+The Wiz Build tool is a Domain wizard's primary instrument for world
+building and area management.
+
+USAGE:
+  build <subcommand>
+
+SUBCOMMANDS:
+  build area              Show your workspace area summary
+  build rooms             List all rooms in your workspace
+  build exits             Show exit map for current area
+  build clone <src>       Copy a room template to your workspace
+  build link              Show link suggestions for unconnected rooms
+  build audit             Audit current room for missing properties
+
+AUDIT CHECKS:
+  The audit command checks for:
+  - Missing short description
+  - Missing long description
+  - No exits defined
+  - Light level not set
+  - Indoor/outdoor not specified
+
+WORKFLOW:
+  1. build area           - Review what you've built
+  2. create room tavern   - Make a new room via QCS
+  3. modify tavern short "The Rusty Tankard"
+  4. modify tavern exit "north" "/domains/my_area/street"
+  5. build audit          - Verify room is complete
+  6. deploy tavern load   - Load the room into the world
+
+REQUIREMENTS:
+  - Domain or Admin wizard role
+  - Tool must be in your inventory (granted on promotion)
+
+See also: help qcs, help workspace, help building

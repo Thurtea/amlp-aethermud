@@ -1,0 +1,72 @@
+// /lib/domains/wizard/castle/main_hall.lpc
+// Wizard Castle - Main Hall
+// Central hub for all wizard areas
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Wizard Castle - Main Hall");
+    set_long(
+        "The grand main hall of the Wizard Castle stretches before you,\n"
+        "its vaulted ceiling supported by pillars of shimmering crystal.\n"
+        "Arcane runes pulse softly along the walls, casting the room in\n"
+        "a warm amber glow. A massive fireplace dominates the northern\n"
+        "wall, its flames dancing with unnatural colors.\n\n"
+        "A large round table sits in the center, covered with maps and\n"
+        "scrolls. Comfortable chairs surround it, each engraved with a\n"
+        "different sigil. To the east, a doorway leads to the training\n"
+        "grounds. To the west, a monitoring station hums with energy.\n"
+        "An elevator to the south provides access to the offices above.\n"
+        "A loyal dog named Spike lounges by the fire."
+    );
+
+    add_exit("east", "/domains/wizard/castle/training");
+    add_exit("west", "/domains/wizard/castle/monitor");
+    add_exit("south", "/domains/wizard/castle/elevator");
+    add_exit("north", "/domains/wizard/castle/dog_spike");
+    add_exit("out", "/domains/staff_castle/room/courtyard");
+
+    set_property("light", 3);
+    set_property("indoors", 1);
+}
+
+void setup() {
+    ::setup();
+}
+
+void init() {
+    ::init();
+    add_action("examine_table", "examine");
+}
+
+int examine_table(string str) {
+    if (!str) return 0;
+    if (str == "table" || str == "maps" || str == "scrolls") {
+        write(
+            "The round table is covered with maps of AetherMUD's domains.\n"
+            "You see markers for New Camelot, the starting village, and\n"
+            "several frontier territories still being charted. Scrolls\n"
+            "contain notes on upcoming building projects and NPC designs.\n"
+        );
+        return 1;
+    }
+    if (str == "runes" || str == "walls") {
+        write(
+            "The runes along the walls are protective wards, maintaining\n"
+            "the castle's magical defenses. They pulse gently, each one\n"
+            "tied to a different aspect of the MUD's infrastructure.\n"
+        );
+        return 1;
+    }
+    if (str == "fireplace" || str == "fire" || str == "flames") {
+        write(
+            "The fireplace burns with unnatural flames of blue, green, and\n"
+            "purple. It provides warmth without smoke. A plaque above reads:\n"
+            "'Built by the founders, fueled by creativity.'\n"
+        );
+        return 1;
+    }
+    return 0;
+}

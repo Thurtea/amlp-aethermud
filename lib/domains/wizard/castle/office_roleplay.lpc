@@ -1,0 +1,65 @@
+// /lib/domains/wizard/castle/office_roleplay.lpc
+// Wizard Castle - Roleplay Wizard Office
+// For event runners and RP facilitators
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Roleplay Wizard Office");
+    set_long(
+        "The Roleplay Wizard Office is a warm, inviting space designed\n"
+        "to inspire storytelling. Bookshelves overflow with lore books,\n"
+        "quest outlines, and character backstories. A cozy reading nook\n"
+        "occupies one corner.\n\n"
+        "A \033[1;32m[Roleplay]\033[0m banner hangs proudly, marking this as the\n"
+        "headquarters for those who bring the world to life through\n"
+        "events, quests, and interactive storytelling.\n\n"
+        "A large corkboard displays upcoming event schedules, quest\n"
+        "hooks, and NPC interaction guidelines. Costume racks line\n"
+        "one wall, holding disguises for wizard-run NPCs.\n\n"
+        "The elevator back to the main floor is to the south."
+    );
+
+    add_exit("south", "/domains/wizard/castle/elevator");
+
+    set_property("light", 2);
+    set_property("indoors", 1);
+}
+
+void init() {
+    ::init();
+    add_action("examine_office", "examine");
+}
+
+int examine_office(string str) {
+    if (!str) return 0;
+    if (str == "events" || str == "corkboard" || str == "schedule") {
+        write(
+            "Upcoming Events:\n"
+            "  - New Player Welcome Tour (weekly)\n"
+            "  - Rift Storm RP Event (TBD)\n"
+            "  - Coalition vs. New Camelot skirmish (TBD)\n"
+            "  - Xiticix Hive exploration quest (TBD)\n"
+            "  - Dragon awakening ceremony (TBD)\n"
+        );
+        return 1;
+    }
+    if (str == "books" || str == "lore" || str == "bookshelves") {
+        write("The lore books contain background information on:\n"
+              "  - The Rifts and their origins\n"
+              "  - Major factions (Coalition, New Camelot, Atlanteans)\n"
+              "  - Monster ecology and NPC motivations\n"
+              "  - Quest design principles\n");
+        return 1;
+    }
+    if (str == "costumes" || str == "disguises" || str == "racks") {
+        write("The costume racks hold various disguises that roleplay\n"
+              "wizards use when running NPC characters during events.\n"
+              "There are merchant outfits, guard uniforms, mysterious\n"
+              "robes, and even a dragon costume (it doesn't fit well).\n");
+        return 1;
+    }
+    return 0;
+}

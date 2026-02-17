@@ -1,0 +1,63 @@
+QCS - QUICK CREATION SYSTEM (Wizard)
+
+The QCS lets wizards quickly create NPCs, weapons, armor, rooms,
+and items using simple commands instead of hand-editing LPC files.
+
+COMMANDS
+  create <type> <name>        Create a new object template
+  modify <name> <prop> <val>  Edit object properties
+  deploy <name> <location>    Clone object into the world
+
+WORKFLOW
+  1. create npc goblin
+     -> Creates /domains/wizard/YOURNAME/area/npc/goblin.lpc
+
+  2. modify goblin short "a nasty goblin"
+     modify goblin long "Green skin, sharp teeth, smells awful."
+     modify goblin race "orc" level 5
+     modify goblin stat "physical strength" 20
+
+  3. deploy goblin /domains/new_camelot/tavern
+     -> Clones goblin into the tavern
+
+CREATE TYPES
+  npc       NPC/monster with stats and combat
+  weapon    Melee or ranged weapon
+  armor     Body armor or MDC armor
+  room      A new room with exits
+  item      Generic pickup item
+
+MODIFY PROPERTIES
+  short <desc>            Short description
+  long <desc>             Long description
+  race <name> [level N]   Race and level (NPCs)
+  stat <name> <value>     Set a stat (NPCs)
+  gender <m/f/neuter>     Gender (NPCs)
+  aggressive <0/1>        Hostile NPC toggle
+  exit <dir> <path>       Add room exit
+  damage <dice> [type X]  Weapon damage
+  type <weapon/armor>     Weapon/armor subtype
+  mdc <N>                 Armor MDC rating
+  weight <N>              Object weight
+  value <N>               Credit value
+  id "id1" "id2"          Set identifiers
+  show                    View current file
+
+DEPLOY OPTIONS
+  deploy <name> <path>    Deploy to specific room
+  deploy <name> here      Deploy to current room
+  deploy <name> list      Show all deployed copies
+  deploy <name> remove    Remove copies from current room
+
+WORKSPACE
+  All files are created in: /domains/wizard/YOURNAME/area/
+  Subdirectories: npc/, weapon/, armor/, room/, item/
+  Templates inherit from /std/qcs/ canonical base classes.
+
+ROLE RESTRICTIONS
+  QCS requires Domain, Coding, or Admin wizard role.
+  Roleplay wizards do not have QCS access.
+  You can only modify objects in your own workspace.
+  Admins can modify any wizard's workspace.
+
+See also: help building, help setocc, help workspace, help wizard_roles

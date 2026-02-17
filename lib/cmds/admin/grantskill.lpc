@@ -74,7 +74,7 @@ int cmd(string args) {
         int spell_level = percentage > 0 ? percentage : 1;
         if (!catch(target->add_spell(skill_name, spell_level))) {
             write("Granted spell " + skill_name + " (level " + spell_level + ") to " + target->query_cap_name() + ".\n");
-            write_file("/log/rpwiz.log",
+            write_file("/log/wizard/rpwiz.log",
                        sprintf("[%s] %s granted SPELL '%s' (lvl %d) to %s\n",
                                ctime(time()), wiz->query_name(), skill_name, spell_level, target->query_name()));
         } else {
@@ -88,12 +88,12 @@ int cmd(string args) {
         // Try common psionic adders; use catch to avoid runtime errors if unavailable
         if (!catch(target->add_psionic(skill_name, psi_level))) {
             write("Granted psionic power " + skill_name + " (lvl " + psi_level + ") to " + target->query_cap_name() + ".\n");
-            write_file("/log/rpwiz.log",
+            write_file("/log/wizard/rpwiz.log",
                        sprintf("[%s] %s granted PSIONIC '%s' (lvl %d) to %s\n",
                                ctime(time()), wiz->query_name(), skill_name, psi_level, target->query_name()));
         } else if (!catch(target->add_power(skill_name, psi_level))) {
             write("Granted psionic power (alt) " + skill_name + " (lvl " + psi_level + ") to " + target->query_cap_name() + ".\n");
-            write_file("/log/rpwiz.log",
+            write_file("/log/wizard/rpwiz.log",
                        sprintf("[%s] %s granted PSIONIC (alt) '%s' (lvl %d) to %s\n",
                                ctime(time()), wiz->query_name(), skill_name, psi_level, target->query_name()));
         } else {
@@ -135,7 +135,7 @@ int cmd(string args) {
     }
     
     // Log it
-    write_file("/log/rpwiz.log", 
+    write_file("/log/wizard/rpwiz.log", 
                sprintf("[%s] %s granted skill '%s' at %d%% to %s\n",
                        ctime(time()), wiz->query_name(), skill_name, percentage, target->query_name()));
     

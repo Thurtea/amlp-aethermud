@@ -1,0 +1,62 @@
+// /lib/std/qcs/armor.lpc - QCS Canonical Armor Template
+// Inherit this for QCS-created armor
+//
+// Provides:
+//   - Standard object base
+//   - Armor properties (AC, MDC, type, slot)
+//   - Damage tracking and repair support
+
+inherit "/std/object";
+
+// QCS metadata
+private string qcs_creator;
+private string qcs_created;
+
+void create() {
+    ::create();
+
+    qcs_creator = "unknown";
+    qcs_created = ctime(time());
+
+    set_id(({ "armor" }));
+    set_short("a suit of unnamed armor");
+    set_long("A newly created suit of armor. Use 'modify' to customize.\n");
+
+    set_property("armor_type", "light");
+    set_property("armor_class", 5);
+    set_property("max_armor_mdc", 50);
+    set_property("armor_mdc", 50);
+    set_property("wear_slot", "body");
+    set_property("weight", 20);
+    set_property("value", 5000);
+    set_property("gettable", 1);
+    set_property("wearable", 1);
+}
+
+// QCS metadata
+void set_qcs_creator(string name) { qcs_creator = name; }
+string query_qcs_creator() { return qcs_creator; }
+string query_qcs_created() { return qcs_created; }
+
+// Convenience accessors
+string query_armor_type() { return query_property("armor_type"); }
+int query_armor_class() { return (int)query_property("armor_class"); }
+int query_max_armor_mdc() { return (int)query_property("max_armor_mdc"); }
+int query_armor_mdc() { return (int)query_property("armor_mdc"); }
+string query_wear_slot() { return query_property("wear_slot"); }
+
+// Damage and repair
+void take_damage(int amount) {
+    int current = query_armor_mdc();
+    current -= amount;
+    if (current < 0) current = 0;
+    set_property("armor_mdc", current);
+}
+
+void repair(int amount) {
+    int current = query_armor_mdc();
+    int max_mdc = query_max_armor_mdc();
+    current += amount;
+    if (current > max_mdc) current = max_mdc;
+    set_property("armor_mdc", current);
+}

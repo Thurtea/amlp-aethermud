@@ -1,0 +1,29 @@
+DESCRIPTION - Set Your Character Description
+
+The description command lets you write a custom description that
+other players see when they look at you.
+
+USAGE:
+  description            Open the ed editor to write your description
+
+USING THE ED EDITOR:
+  When you type 'description', the ed line editor opens.
+  Type your description, one line at a time.
+  When finished, type a single period (.) on a new line to save and exit.
+
+EXAMPLE:
+  > description
+  Enter your description (type . on a new line to finish):
+  A tall figure with dark eyes and weathered skin. Scars line
+  their forearms from countless battles. They carry themselves
+  with quiet confidence.
+  .
+  Description saved.
+
+TIPS:
+  - Keep it 2-5 lines for best readability
+  - Describe physical appearance, not actions
+  - Avoid referencing specific equipment (it changes)
+  - Write in third person ("A tall figure..." not "I am tall...")
+
+See also: help position, help stats

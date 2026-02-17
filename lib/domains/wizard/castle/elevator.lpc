@@ -1,0 +1,107 @@
+// /lib/domains/wizard/castle/elevator.lpc
+// Wizard Castle - Elevator Hub
+// Access to role-specific offices
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("The Elevator");
+    set_long(
+        "A circular chamber with a polished marble floor. In the center\n"
+        "stands an ornate brass elevator cage with crystal-paneled doors.\n"
+        "The elevator provides access to the various wizard offices on\n"
+        "the upper floors of the castle.\n\n"
+        "Four glowing buttons are set into the wall, each labeled:\n"
+        "  \033[1;34m[Domain]\033[0m  - Domain Wizard Office (world building)\n"
+        "  \033[1;36m[Coding]\033[0m  - Coding Wizard Office (systems & code)\n"
+        "  \033[1;32m[Roleplay]\033[0m - Roleplay Wizard Office (events & RP)\n"
+        "  \033[1;31m[Admin]\033[0m   - Admin Office (administration)\n\n"
+        "The main hall lies to the north."
+    );
+
+    add_exit("north", "/domains/wizard/castle/main_hall");
+    add_exit("domain", "/domains/wizard/castle/office_domain");
+    add_exit("coding", "/domains/wizard/castle/office_coding");
+    add_exit("roleplay", "/domains/wizard/castle/office_roleplay");
+    add_exit("admin", "/domains/wizard/castle/office_admin");
+
+    set_property("light", 2);
+    set_property("indoors", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_press", "press");
+    add_action("examine_elevator", "examine");
+}
+
+int cmd_press(string str) {
+    if (!str) {
+        write("Press which button? domain, coding, roleplay, or admin\n");
+        return 1;
+    }
+
+    str = lower_case(str);
+    object player = this_player();
+
+    switch (str) {
+        case "domain":
+            write("The elevator hums and rises. The doors open to the Domain Office.\n");
+            say(player->query_cap_name() + " takes the elevator to the Domain Office.\n");
+            player->move("/domains/wizard/castle/office_domain");
+            return 1;
+        case "coding":
+            write("The elevator hums and rises. The doors open to the Coding Office.\n");
+            say(player->query_cap_name() + " takes the elevator to the Coding Office.\n");
+            player->move("/domains/wizard/castle/office_coding");
+            return 1;
+        case "roleplay":
+            write("The elevator hums and rises. The doors open to the Roleplay Office.\n");
+            say(player->query_cap_name() + " takes the elevator to the Roleplay Office.\n");
+            player->move("/domains/wizard/castle/office_roleplay");
+            return 1;
+        case "admin":
+            // Admin office check
+            int priv = 0;
+            if (function_exists("query_privilege_level", player))
+                priv = player->query_privilege_level();
+            if (priv < 2) {
+                write("The Admin button glows red but doesn't respond. Admin access required.\n");
+                return 1;
+            }
+            write("The elevator hums and rises. The doors open to the Admin Office.\n");
+            say(player->query_cap_name() + " takes the elevator to the Admin Office.\n");
+            player->move("/domains/wizard/castle/office_admin");
+            return 1;
+        default:
+            write("Unknown floor. Options: domain, coding, roleplay, admin\n");
+            return 1;
+    }
+}
+
+int examine_elevator(string str) {
+    if (!str) return 0;
+    if (str == "elevator" || str == "cage" || str == "doors") {
+        write(
+            "An ornate brass elevator with crystal-paneled doors. The\n"
+            "mechanism is magical rather than mechanical - no cables or\n"
+            "pulleys, just pure arcane engineering. The buttons glow\n"
+            "softly, each in its role's color.\n"
+        );
+        return 1;
+    }
+    if (str == "buttons" || str == "button") {
+        write(
+            "Four buttons, each glowing a different color:\n"
+            "  Blue   - Domain Office\n"
+            "  Cyan   - Coding Office\n"
+            "  Green  - Roleplay Office\n"
+            "  Red    - Admin Office\n"
+            "Type 'press <name>' or just use the exit direction.\n"
+        );
+        return 1;
+    }
+    return 0;
+}

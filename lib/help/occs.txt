@@ -1,0 +1,44 @@
+O.C.C.s (OCCUPATIONAL CHARACTER CLASSES)
+
+IMPORTANT: Players do NOT select an OCC during character generation.
+Your character starts with O.C.C.: Pending after chargen completes.
+
+TO REQUEST AN OCC:
+  tell <wizard> I would like the O.C.C. <name>
+  Example: tell Thurtea I would like the O.C.C. Cyber-Knight
+
+Wizards assign OCCs via command. Once assigned, you receive:
+  - Primary skills (5 skills from your OCC package)
+  - OCC-specific abilities, psionics, or magic
+  - Stat bonuses where applicable
+
+RCC RACES (Race = Class):
+  Dragon races automatically receive "Dragon Hatchling RCC" during
+  chargen. RCC characters may optionally request an OCC as well.
+
+AVAILABLE OCCs:
+  Battle Magus           Biomancer              Body Fixer
+  Burster                City Rat               Cosmo-Knight
+  Crazy                  Cyber-Knight           Elemental Fusionist
+  Full Conversion Borg   Glitter Boy Pilot      Headhunter
+  Juicer                 Ley Line Walker        Mercenary
+  Mind Melter            Mystic                 Necromancer
+  Operator               Power Armor Pilot      Psi-Healer
+  Psi-Stalker            Robot Pilot            Rogue Scholar
+  Rogue Scientist        Sea Titan              Shifter
+  Special Forces         Stone Master           Sunaj Assassin
+  Techno-Wizard          Temporal Wizard        Vagabond
+  Warlock                Wilderness Scout
+
+AVAILABLE RCCs:
+  Dragon Hatchling RCC   Fury Beetle            Psi-Stalker RCC
+  Xiticix Warrior        Xiticix Worker
+
+RESTRICTED:
+  Sunaj Assassin - Requires Atlantean race + Clan Aerihman membership
+                   Join via: clan aerihman (after character creation)
+
+Type 'help <occ-name>' for detailed info on specific OCCs.
+  Example: help cyber-knight
+
+See also: help skills, help stats, help psionics

@@ -30,6 +30,7 @@ void create() {
     add_exit("east", "/domains/staff_castle/room/garden");
     add_exit("west", "/domains/staff_castle/room/stables");
     add_exit("out", "/domains/start/room/welcome");
+    add_exit("up", "/domains/wizard/courtyard");
 }
 
 void setup() {

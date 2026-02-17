@@ -1,0 +1,43 @@
+ADMIN_ORB - Administrator Crystal Orb
+======================================
+
+The Admin Orb provides full system monitoring and administrative
+oversight for Admin-level staff.
+
+USAGE:
+  orb <subcommand>
+
+SUBCOMMANDS:
+  orb status              System overview with zone counts
+  orb players             Detailed player list (race, OCC, HP, location)
+  orb find <player>       Full player report (inventory, clan, sirname)
+  orb pending             Show pending OCC/sirname requests
+  orb goto <player>       Teleport to a player's location
+  orb staff               Staff roster with colored roles
+  orb logs                Recent admin, OCC, promotion, QCS logs
+  orb uptime              Server time and connection count
+
+STATUS:
+  Shows population breakdown (admin/wizard/player), content counts,
+  players by zone, and any pending requests needing attention.
+
+PENDING:
+  Lists players still awaiting OCC assignment and any unresolved
+  sirname requests. Quick reference for daily admin tasks.
+
+GOTO:
+  Instantly teleports you to any online player's location.
+  Useful for responding to issues or monitoring gameplay.
+
+LOGS:
+  Consolidated view of:
+  - Admin actions log
+  - Promotion history
+  - OCC assignment history
+  - QCS deployment history
+
+REQUIREMENTS:
+  - Admin privilege level (2+)
+  - Orb must be in your inventory (granted on promotion)
+
+See also: help promote, help setocc, help wizard_roles

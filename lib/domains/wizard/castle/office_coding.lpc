@@ -1,0 +1,62 @@
+// /lib/domains/wizard/castle/office_coding.lpc
+// Wizard Castle - Coding Wizard Office
+// For systems programmers and LPC coders
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Coding Wizard Office");
+    set_long(
+        "The Coding Wizard Office is a technical workspace filled with\n"
+        "arcane terminals and crystalline data storage. Scrolling text\n"
+        "flows across crystal screens, showing system logs and code.\n\n"
+        "A \033[1;36m[Coding]\033[0m banner hangs above the main workstation, marking\n"
+        "this as the headquarters for those who maintain the systems\n"
+        "that power AetherMUD.\n\n"
+        "Whiteboards cover one wall, filled with diagrams of the\n"
+        "combat system, skill trees, and save/load format specs.\n"
+        "A bug tracker board lists known issues and feature requests.\n\n"
+        "The elevator back to the main floor is to the south."
+    );
+
+    add_exit("south", "/domains/wizard/castle/elevator");
+
+    set_property("light", 2);
+    set_property("indoors", 1);
+}
+
+void init() {
+    ::init();
+    add_action("examine_office", "examine");
+}
+
+int examine_office(string str) {
+    if (!str) return 0;
+    if (str == "bugs" || str == "tracker" || str == "board") {
+        write(
+            "Bug Tracker:\n"
+            "  [OPEN]  Some efuns fail to register on startup (non-fatal)\n"
+            "  [OPEN]  LPC domain rooms not yet connected to C driver\n"
+            "  [FIXED] Inventory not persisting on save/load\n"
+            "  [FIXED] Dragon secondary skills index alignment\n"
+        );
+        return 1;
+    }
+    if (str == "whiteboard" || str == "whiteboards" || str == "diagrams") {
+        write("The whiteboards show:\n"
+              "  - Combat system: 2s heartbeat tick, real-time\n"
+              "  - Save format: v5 with wizard_role field\n"
+              "  - Skill system: primary (OCC) + secondary (player)\n"
+              "  - Chargen flow: race -> stats -> alignment -> skills\n");
+        return 1;
+    }
+    if (str == "terminals" || str == "screens" || str == "logs") {
+        write("The terminals display scrolling system logs. You can\n"
+              "see player logins, command usage, and occasional error\n"
+              "messages. Everything looks nominal.\n");
+        return 1;
+    }
+    return 0;
+}

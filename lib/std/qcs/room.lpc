@@ -1,0 +1,66 @@
+// /lib/std/qcs/room.lpc - QCS Canonical Room Template
+// Inherit this for QCS-created rooms
+//
+// Provides:
+//   - Standard room base with exits
+//   - Light level management
+//   - Indoor/outdoor flag
+//   - NPC spawn points
+
+inherit "/lib/std/room";
+
+// QCS metadata
+private string qcs_creator;
+private string qcs_created;
+private string *spawn_npcs;
+
+void create() {
+    ::create();
+
+    qcs_creator = "unknown";
+    qcs_created = ctime(time());
+    spawn_npcs = ({});
+
+    set_short("An Unnamed Room");
+    set_long("A newly created room. Use 'modify' to customize.\n");
+
+    set_property("light", 2);
+    set_property("indoors", 0);
+}
+
+// QCS metadata
+void set_qcs_creator(string name) { qcs_creator = name; }
+string query_qcs_creator() { return qcs_creator; }
+string query_qcs_created() { return qcs_created; }
+
+// NPC spawn management
+void add_spawn(string npc_path) {
+    spawn_npcs += ({ npc_path });
+}
+
+void remove_spawn(string npc_path) {
+    spawn_npcs -= ({ npc_path });
+}
+
+string *query_spawns() { return spawn_npcs; }
+
+// Spawn all configured NPCs
+void do_spawns() {
+    foreach (string npc_path in spawn_npcs) {
+        if (!present_clone(npc_path, this_object())) {
+            object npc;
+            catch { npc = clone_object(npc_path); };
+            if (npc) {
+                if (function_exists("move", npc))
+                    npc->move(this_object());
+                else
+                    move_object(npc, this_object());
+            }
+        }
+    }
+}
+
+void setup() {
+    ::setup();
+    do_spawns();
+}

@@ -1,0 +1,80 @@
+// /lib/domains/wizard/castle/training.lpc
+// Wizard Castle - Training Room
+// Practice area with training dummy
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Training Grounds");
+    set_long(
+        "A spacious training room east of the main hall. The stone floor\n"
+        "is scuffed from countless practice sessions. Weapon racks line\n"
+        "the walls, holding practice swords, staves, and blasters.\n\n"
+        "A sturdy training dummy stands in the center of the room, its\n"
+        "wooden frame reinforced with metal bands. It's been patched and\n"
+        "repaired many times. A scoreboard on the wall tracks damage\n"
+        "dealt during practice sessions.\n\n"
+        "A sign reads: 'Hit the dummy to test combat mechanics.\n"
+        "All damage is practice-only. No XP or loot.'"
+    );
+
+    add_exit("west", "/domains/wizard/castle/main_hall");
+
+    set_property("light", 3);
+    set_property("indoors", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_hit", "hit");
+    add_action("cmd_hit", "attack");
+    add_action("cmd_hit", "punch");
+    add_action("examine_items", "examine");
+}
+
+int cmd_hit(string str) {
+    if (!str || (str != "dummy" && str != "training dummy")) return 0;
+
+    object player = this_player();
+    int ps = 10;
+    if (function_exists("query_stat", player))
+        ps = player->query_stat("physical strength");
+
+    int damage = (ps / 3) + random(6) + 1;
+
+    write("You strike the training dummy! It rocks back from the impact.\n");
+    write("Damage dealt: \033[1;33m" + damage + "\033[0m\n");
+    say(player->query_cap_name() + " strikes the training dummy.\n");
+
+    return 1;
+}
+
+int examine_items(string str) {
+    if (!str) return 0;
+    if (str == "dummy" || str == "training dummy") {
+        write(
+            "The training dummy is a wooden mannequin reinforced with iron\n"
+            "bands. It's been battered and repaired countless times. Despite\n"
+            "the abuse, it stands firm. It doesn't fight back.\n"
+        );
+        return 1;
+    }
+    if (str == "weapons" || str == "rack" || str == "racks") {
+        write(
+            "The weapon racks hold a variety of practice weapons: wooden\n"
+            "swords, padded staves, and deactivated blaster replicas.\n"
+            "None of them are real weapons - they're for form practice.\n"
+        );
+        return 1;
+    }
+    if (str == "scoreboard" || str == "score" || str == "board") {
+        write(
+            "The scoreboard shows recent practice results. Most entries\n"
+            "are from wizards testing combat formulas and balancing damage.\n"
+        );
+        return 1;
+    }
+    return 0;
+}

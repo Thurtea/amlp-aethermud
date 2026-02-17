@@ -1,0 +1,33 @@
+// /lib/std/qcs/item.lpc - QCS Canonical Item Template
+// Inherit this for QCS-created generic items
+//
+// Provides:
+//   - Standard object base
+//   - Configurable properties (weight, value)
+//   - Usable flag for consumables/tools
+
+inherit "/std/object";
+
+// QCS metadata
+private string qcs_creator;
+private string qcs_created;
+
+void create() {
+    ::create();
+
+    qcs_creator = "unknown";
+    qcs_created = ctime(time());
+
+    set_id(({ "item" }));
+    set_short("an unnamed item");
+    set_long("A newly created item. Use 'modify' to customize.\n");
+
+    set_property("weight", 1);
+    set_property("value", 100);
+    set_property("gettable", 1);
+}
+
+// QCS metadata
+void set_qcs_creator(string name) { qcs_creator = name; }
+string query_qcs_creator() { return qcs_creator; }
+string query_qcs_created() { return qcs_created; }

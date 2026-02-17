@@ -1,5 +1,5 @@
 // /lib/obj/wiztools/rp_tool.lpc
-// Roleplay Wizard Skill Tool - Give skills to players
+// Roleplay Wizard Tool - Event calendar, costume generator, skill granting
 // For Roleplay wizards (wizard_role == "roleplay")
 
 inherit "/lib/obj/wiztools/base_wiztool";
@@ -7,23 +7,20 @@ inherit "/lib/obj/wiztools/base_wiztool";
 void create() {
     ::create();
     set_name("rp tool");
-    set_id(({ "rp tool", "skill tool", "roleplay tool", "rp_tool" }));
-    set_short("a Roleplay Wizard's skill tool");
+    set_id(({ "rp tool", "rp_tool", "roleplay tool", "event tool" }));
+    set_short("a Roleplay Wizard's event tome");
     set_long(
-        "A leather-bound tome radiating faint magical energy. Its pages "
-        "shimmer with lists of skills and abilities that can be bestowed "
-        "upon worthy adventurers.\n\n"
-        "This is a Roleplay Wizard tool for granting skills to players.\n\n"
+        "A leather-bound tome radiating faint magical energy. Its pages\n"
+        "shimmer with lists of skills, event schedules, and NPC disguises.\n"
+        "A true storyteller's companion.\n\n"
         "Commands:\n"
-        "  giveskill <player> <skillname> <percentage>\n"
-        "  listskills\n\n"
-        "Available Skills:\n"
-        "  Physical: Hand to Hand - Basic, Acrobatics, Swimming\n"
-        "  Technical: Computer Operations, Mechanics, Electronics, Literacy\n"
-        "  Weapon: WP Sword, WP Rifle, WP Pistol\n"
-        "  Medical: First Aid, Paramedic\n"
-        "  Wilderness: Survival, Tracking\n"
-        "  Magical: Magic - Novice, Psionics - Novice\n"
+        "  rp events          View/manage event calendar\n"
+        "  rp addevent <desc> Add an event to the calendar\n"
+        "  rp costume <type>  Generate NPC costume description\n"
+        "  rp announce <msg>  Broadcast RP announcement\n"
+        "  rp emoteall <msg>  Room-wide narrative emote\n"
+        "  rp listskills      List available skills for granting\n"
+        "  rp help            This help\n"
     );
     set_weight(2);
     set_value(0);
@@ -34,20 +31,206 @@ void create() {
 
 int check_wizard_level(object who) {
     if (!who) return 0;
-    if (function_exists("query_privilege_level", who)) {
-        return (int)who->query_privilege_level() >= 1;  // Any wizard
-    }
+    if (function_exists("query_privilege_level", who))
+        return (int)who->query_privilege_level() >= 1;
     return 0;
 }
 
 void init() {
     if (!environment() || !interactive(environment())) return;
     if (!check_wizard_level(environment())) return;
-    add_action("cmd_listskills", "listskills");
+    add_action("cmd_rp", "rp");
 }
 
-int cmd_listskills(string str) {
-    write("\n=== AVAILABLE SKILLS ===\n");
+int cmd_rp(string str) {
+    object player = this_player();
+    if (!check_wizard_level(player)) {
+        write("The tool refuses to work for you.\n");
+        return 1;
+    }
+
+    if (!str || str == "") return show_help();
+
+    string subcmd, rest;
+    if (sscanf(str, "%s %s", subcmd, rest) != 2) {
+        subcmd = str;
+        rest = "";
+    }
+    subcmd = lower_case(subcmd);
+
+    switch (subcmd) {
+        case "events":     return cmd_events();
+        case "addevent":   return cmd_addevent(player, rest);
+        case "costume":    return cmd_costume(rest);
+        case "announce":   return cmd_announce(player, rest);
+        case "emoteall":   return cmd_emoteall(player, rest);
+        case "listskills": return cmd_listskills();
+        case "help":       return show_help();
+        default:
+            write("Unknown rp command: " + subcmd + "\n");
+            return show_help();
+    }
+}
+
+int cmd_events() {
+    string content = read_file("/log/rp_events.log");
+
+    write("\n\033[1;32m=== RP Event Calendar ===\033[0m\n\n");
+
+    if (!content || content == "") {
+        write("  No events scheduled.\n");
+        write("  Use 'rp addevent <description>' to add one.\n\n");
+        return 1;
+    }
+
+    write(content);
+    write("\nUse 'rp addevent <description>' to add a new event.\n\n");
+    return 1;
+}
+
+int cmd_addevent(object player, string desc) {
+    if (!desc || desc == "") {
+        write("Usage: rp addevent <event description>\n");
+        write("Example: rp addevent Rift Storm RP Event - Saturday 8PM\n");
+        return 1;
+    }
+
+    string wname = "Unknown";
+    if (function_exists("query_cap_name", player))
+        wname = player->query_cap_name();
+
+    string entry = ctime(time()) + " [" + wname + "] " + desc + "\n";
+    write_file("/log/wizard/rp_events.log", entry);
+
+    write("\033[1;32mEvent added:\033[0m " + desc + "\n");
+    return 1;
+}
+
+int cmd_costume(string type) {
+    if (!type || type == "") {
+        write("Costume types: merchant, guard, noble, mystic, beggar,\n");
+        write("               soldier, scholar, bard, thief, priest\n");
+        write("Usage: rp costume <type>\n");
+        return 1;
+    }
+
+    type = lower_case(type);
+    string desc;
+
+    switch (type) {
+        case "merchant":
+            desc = "A portly figure in fine silk robes with jingling coin pouches\n"
+                   "at their belt. Gold rings adorn every finger and a shrewd\n"
+                   "gleam lights their eyes.";
+            break;
+        case "guard":
+            desc = "A stern guard in polished chainmail, a halberd resting on\n"
+                   "one shoulder. Their eyes constantly scan the surroundings\n"
+                   "with professional vigilance.";
+            break;
+        case "noble":
+            desc = "An aristocratic figure in velvet and ermine, carrying\n"
+                   "themselves with practiced dignity. A signet ring gleams\n"
+                   "on their left hand.";
+            break;
+        case "mystic":
+            desc = "A mysterious figure in flowing robes covered in arcane\n"
+                   "symbols. Their eyes glow with faint eldritch light and\n"
+                   "the air crackles around them.";
+            break;
+        case "beggar":
+            desc = "A ragged figure in torn clothing, hunched and dirty.\n"
+                   "They clutch a dented tin cup and peer up with watery\n"
+                   "but surprisingly alert eyes.";
+            break;
+        case "soldier":
+            desc = "A battle-hardened soldier in Coalition Dead Boy armor,\n"
+                   "energy rifle slung across their back. Scars crisscross\n"
+                   "their face and hands.";
+            break;
+        case "scholar":
+            desc = "A bookish figure with ink-stained fingers and spectacles\n"
+                   "perched on their nose. Scrolls and books overflow from\n"
+                   "a battered leather satchel.";
+            break;
+        case "bard":
+            desc = "A charismatic performer in colorful motley, carrying\n"
+                   "a lute and wearing a jaunty feathered cap. Their smile\n"
+                   "is infectious.";
+            break;
+        case "thief":
+            desc = "A nondescript figure in dark, practical clothing. They\n"
+                   "move with catlike grace and their eyes dart constantly,\n"
+                   "cataloguing exits and valuables.";
+            break;
+        case "priest":
+            desc = "A solemn figure in ecclesiastical robes bearing a holy\n"
+                   "symbol. An aura of calm surrounds them, and their voice\n"
+                   "carries quiet authority.";
+            break;
+        default:
+            write("Unknown costume type: " + type + "\n");
+            write("Try: merchant, guard, noble, mystic, beggar,\n");
+            write("     soldier, scholar, bard, thief, priest\n");
+            return 1;
+    }
+
+    write("\n\033[1;32m=== " + capitalize(type) + " Costume ===\033[0m\n\n");
+    write(desc + "\n\n");
+    write("Copy this description for your NPC:\n");
+    write("  modify <npc> long \"" + desc + "\"\n\n");
+    return 1;
+}
+
+int cmd_announce(object player, string msg) {
+    if (!msg || msg == "") {
+        write("Usage: rp announce <message>\n");
+        write("Broadcasts an RP announcement to all players.\n");
+        return 1;
+    }
+
+    string wname = "The Storyteller";
+    if (function_exists("query_cap_name", player))
+        wname = player->query_cap_name();
+
+    string announcement = "\n\033[1;35m=== RP Announcement ===\033[0m\n";
+    announcement += "\033[0;35m" + msg + "\033[0m\n";
+    announcement += "\033[1;35m======================\033[0m\n\n";
+
+    object *all_users = users();
+    foreach (object u in all_users) {
+        if (u) tell_object(u, announcement);
+    }
+
+    write("Announcement sent to " + sizeof(all_users) + " player(s).\n");
+
+    // Log it
+    write_file("/log/wizard/rp_events.log",
+               ctime(time()) + " [ANNOUNCE by " + wname + "] " + msg + "\n");
+    return 1;
+}
+
+int cmd_emoteall(object player, string msg) {
+    if (!msg || msg == "") {
+        write("Usage: rp emoteall <narrative text>\n");
+        write("Example: rp emoteall The ground shakes as a rift tears open!\n");
+        return 1;
+    }
+
+    object room = environment(player);
+    if (!room) {
+        write("You are not in a room.\n");
+        return 1;
+    }
+
+    string narrative = "\n\033[1;35m" + msg + "\033[0m\n\n";
+    tell_room(room, narrative);
+    write("Narrative emoted to room.\n");
+    return 1;
+}
+
+int cmd_listskills() {
+    write("\n\033[1;32m=== Available Skills ===\033[0m\n\n");
     write("Physical:\n");
     write("  Hand to Hand - Basic (ID 0) - Basic martial arts\n");
     write("  Acrobatics (ID 1) - Dodge, tumble, balance\n");
@@ -71,7 +254,22 @@ int cmd_listskills(string str) {
     write("  Magic - Novice (ID 14) - Spellcasting foundation\n");
     write("  Psionics - Novice (ID 15) - Psionic foundation\n");
     write("\nUsage: giveskill <player> <skillname> <percentage>\n");
-    write("  Example: giveskill thurtest Swimming 60\n");
-    write("========================\n\n");
+    write("  Example: giveskill thurtest Swimming 60\n\n");
+    return 1;
+}
+
+int show_help() {
+    write("\n\033[1;32m=== Roleplay Tool ===\033[0m\n\n");
+    write("Commands:\n");
+    write("  rp events          View event calendar\n");
+    write("  rp addevent <desc> Schedule a new event\n");
+    write("  rp costume <type>  Generate NPC costume description\n");
+    write("  rp announce <msg>  Global RP announcement (purple)\n");
+    write("  rp emoteall <msg>  Narrative emote to current room\n");
+    write("  rp listskills      List skills for granting\n");
+    write("  rp help            This help\n\n");
+    write("Costume types:\n");
+    write("  merchant, guard, noble, mystic, beggar,\n");
+    write("  soldier, scholar, bard, thief, priest\n\n");
     return 1;
 }

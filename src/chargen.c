@@ -2055,6 +2055,50 @@ void cmd_get(PlayerSession *sess, const char *args) {
         return;
     }
 
+    /* Handle "get all" */
+    if (strcasecmp(args, "all") == 0) {
+        if (!sess->current_room || !sess->current_room->items) {
+            send_to_player(sess, "There is nothing here to pick up.\n");
+            return;
+        }
+
+        int picked = 0;
+        int skipped = 0;
+        /* Iterate over room items; move items until weight limit reached */
+        Item *iter = sess->current_room->items;
+        /* We collect items to move in an array because moving alters the room list */
+        Item *to_move[256];
+        int tm_count = 0;
+        while (iter && tm_count < 256) {
+            to_move[tm_count++] = iter;
+            iter = iter->next;
+        }
+
+        for (int i = 0; i < tm_count; i++) {
+            Item *it = to_move[i];
+            if (!inventory_can_carry(&sess->character.inventory, it->weight)) {
+                skipped++;
+                continue;
+            }
+            /* Remove from room and add to inventory */
+            room_remove_item(sess->current_room, it);
+            if (inventory_add(&sess->character.inventory, it)) {
+                picked++;
+                char msg[256];
+                snprintf(msg, sizeof(msg), "%s picks up %s.\n", sess->username, it->name);
+                room_broadcast(sess->current_room, msg, sess);
+            } else {
+                /* Should not usually happen, but restore to room */
+                room_add_item(sess->current_room, it);
+                skipped++;
+            }
+        }
+
+        send_to_player(sess, "You pick up %d item(s). %d skipped (weight limit).\n", picked, skipped);
+        return;
+    }
+
+    /* Default: pick a single named item */
     Item *item = room_find_item(sess->current_room, args);
     if (!item) {
         send_to_player(sess, "There is no '%s' here to pick up.\n", args);
@@ -2084,6 +2128,45 @@ void cmd_drop(PlayerSession *sess, const char *args) {
 
     if (!sess->current_room) {
         send_to_player(sess, "You are nowhere.\n");
+        return;
+    }
+
+    /* Handle "drop all" */
+    if (strcasecmp(args, "all") == 0) {
+        Character *ch = &sess->character;
+        if (!ch->inventory.items) {
+            send_to_player(sess, "You have nothing to drop.\n");
+            return;
+        }
+
+        int dropped = 0;
+        int skipped = 0;
+        /* We need to iterate and remove non-equipped items */
+        Item *curr = ch->inventory.items;
+        Item *next;
+        /* Use a temp array to avoid concurrent modification issues */
+        Item *to_drop[256];
+        int td = 0;
+        while (curr && td < 256) {
+            if (!curr->is_equipped) to_drop[td++] = curr;
+            curr = curr->next;
+        }
+
+        for (int i = 0; i < td; i++) {
+            Item *it = to_drop[i];
+            Item *removed = inventory_remove(&ch->inventory, it->name);
+            if (removed) {
+                room_add_item(sess->current_room, removed);
+                dropped++;
+                char msg[256];
+                snprintf(msg, sizeof(msg), "%s drops %s.\n", sess->username, removed->name);
+                room_broadcast(sess->current_room, msg, sess);
+            } else {
+                skipped++;
+            }
+        }
+
+        send_to_player(sess, "You drop %d item(s). %d skipped (equipped or protected).\n", dropped, skipped);
         return;
     }
 

@@ -682,18 +682,32 @@ void inventory_display(struct PlayerSession *sess) {
         while (curr) {
             const char *dmg_type = curr->stats.is_mega_damage ? "MD" : "SDC";
             
+            /* Add indefinite article (A/An) for inventory readability */
+            const char *name = curr->name;
+            char name_buf[256];
+            if (name && name[0]) {
+                char first = tolower((unsigned char)name[0]);
+                if (first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u') {
+                    snprintf(name_buf, sizeof(name_buf), "An %s", name);
+                } else {
+                    snprintf(name_buf, sizeof(name_buf), "A %s", name);
+                }
+            } else {
+                snprintf(name_buf, sizeof(name_buf), "%s", name ? name : "item");
+            }
+
             if (curr->type == ITEM_WEAPON_MELEE || curr->type == ITEM_WEAPON_RANGED) {
                 snprintf(buf, sizeof(buf), "%d. %s - %dd%d %s (%d lbs, %d cr)\n",
-                    count++, curr->name,
+                    count++, name_buf,
                     curr->stats.damage_dice, curr->stats.damage_sides, dmg_type,
                     curr->weight, curr->value);
             } else if (curr->type == ITEM_ARMOR) {
                 snprintf(buf, sizeof(buf), "%d. %s - AR %d, %d %s (%d lbs, %d cr)\n",
-                    count++, curr->name, curr->stats.ar, curr->current_durability, dmg_type,
+                    count++, name_buf, curr->stats.ar, curr->current_durability, dmg_type,
                     curr->weight, curr->value);
             } else {
                 snprintf(buf, sizeof(buf), "%d. %s (%d lbs, %d cr)\n",
-                    count++, curr->name, curr->weight, curr->value);
+                    count++, name_buf, curr->weight, curr->value);
             }
             send_to_player(sess, buf);
             curr = curr->next;

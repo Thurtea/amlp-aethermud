@@ -1,0 +1,263 @@
+// /lib/obj/wiztools/admin_wand.lpc
+// Admin Magic Wand - Cast any spell or psionic without resource cost
+// Admin-only tool
+
+inherit "/lib/obj/wiztools/base_wiztool";
+
+void create() {
+    ::create();
+    set_name("wand");
+    set_id(({ "wand", "magic wand", "admin wand", "crystal wand" }));
+    set_short("a shimmering crystal wand");
+    set_long(
+        "A shimmering crystal wand crackling with raw magical energy. "
+        "Arcs of blue-white lightning dance along its surface, and the "
+        "crystal tip pulses with an inner light that shifts between all "
+        "colors of the spectrum.\n\n"
+        "This is an Admin tool. It can cast any spell or use any psionic "
+        "power without consuming P.P.E. or I.S.P.\n\n"
+        "Commands:\n"
+        "  wand cast <spell> [at <target>]\n"
+        "  wand psi <power> [on <target>]\n"
+        "  wand list spells\n"
+        "  wand list psionics\n"
+        "  wand heal <target>\n"
+    );
+    set_weight(1);
+    set_value(0);
+    set_property("no_drop", 1);
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+    set_property("magic", 1);
+}
+
+int check_wizard_level(object who) {
+    if (!who) return 0;
+    if (function_exists("query_privilege_level", who)) {
+        return (int)who->query_privilege_level() >= 2;  // Admin only
+    }
+    return 0;
+}
+
+void init() {
+    if (!environment() || !interactive(environment())) return;
+    if (!check_wizard_level(environment())) return;
+    add_action("cmd_wand", "wand");
+}
+
+int cmd_wand(string str) {
+    object player;
+    string subcmd, rest;
+
+    player = this_player();
+    if (!check_wizard_level(player)) {
+        write("The wand refuses to respond to you.\n");
+        return 1;
+    }
+
+    if (!str || str == "") {
+        write("The wand crackles with energy, awaiting your command.\n");
+        write("Try: wand cast <spell>, wand psi <power>, wand list spells, wand heal <target>\n");
+        return 1;
+    }
+
+    if (sscanf(str, "%s %s", subcmd, rest) != 2) {
+        subcmd = str;
+        rest = "";
+    }
+
+    subcmd = lower_case(subcmd);
+
+    if (subcmd == "list") {
+        return wand_list(rest);
+    }
+    if (subcmd == "cast") {
+        return wand_cast(rest);
+    }
+    if (subcmd == "psi") {
+        return wand_psi(rest);
+    }
+    if (subcmd == "heal") {
+        return wand_heal(rest);
+    }
+
+    write("Unknown wand command. Try: cast, psi, list, heal\n");
+    return 1;
+}
+
+int wand_list(string what) {
+    if (!what || what == "" || what == "spells") {
+        write("\n=== AVAILABLE SPELLS ===\n");
+        write("  Magic Armor        Detect Magic       Light\n");
+        write("  Mend               Magic Shield       Identify\n");
+        write("  Alarm              Dispel Magic       Fireball\n");
+        write("  Lightning Bolt     Teleport           Ice Shards\n");
+        write("  Web of Protection  Summon Lesser      Frenzy\n");
+        write("  Mirror Image       Rift Teleportation Magic Missile\n");
+        write("  Plague             Summon Greater\n");
+        write("========================\n");
+        write("Usage: wand cast <spell name> [at <target>]\n\n");
+        return 1;
+    }
+    if (what == "psionics" || what == "psi") {
+        write("\n=== AVAILABLE PSIONICS ===\n");
+        write("  Mind Block         Meditation         Mental Acceleration\n");
+        write("  Telemechanics      Telepathy          Psychometry\n");
+        write("  Bio-Regeneration   Psychic Healing    Disease Immunity\n");
+        write("  Poison Immunity    Mental Surge       Restoration\n");
+        write("  Telekinesis        Electrokinesis     Pyrokinesis\n");
+        write("  Hydrokinesis       Levitation         Sixth Sense\n");
+        write("  Object Read        Presence Sense\n");
+        write("==========================\n");
+        write("Usage: wand psi <power name> [on <target>]\n\n");
+        return 1;
+    }
+    write("List what? Try: wand list spells, wand list psionics\n");
+    return 1;
+}
+
+int wand_cast(string str) {
+    string spell_name, target_name;
+    object player, target;
+
+    player = this_player();
+
+    if (!str || str == "") {
+        write("Cast what? Try: wand cast fireball [at <target>]\n");
+        return 1;
+    }
+
+    // Parse "spell at target" or just "spell"
+    if (sscanf(str, "%s at %s", spell_name, target_name) != 2) {
+        spell_name = str;
+        target_name = "";
+    }
+
+    write("\nThe crystal wand flares with brilliant light!\n");
+
+    if (target_name && target_name != "") {
+        // Find target in room
+        object env = environment(player);
+        if (env) {
+            target = present(lower_case(target_name), env);
+        }
+        if (target) {
+            write("You point the wand at " + capitalize(target_name) +
+                  " and cast " + capitalize(spell_name) + "!\n");
+            tell_room(environment(player),
+                      player->query_cap_name() + " points a crystal wand at " +
+                      capitalize(target_name) + " and unleashes " +
+                      capitalize(spell_name) + "!",
+                      ({ player }));
+        } else {
+            write("You cast " + capitalize(spell_name) +
+                  " toward " + capitalize(target_name) + "!\n");
+            tell_room(environment(player),
+                      player->query_cap_name() +
+                      " waves a crystal wand and casts " +
+                      capitalize(spell_name) + "!",
+                      ({ player }));
+        }
+    } else {
+        write("You channel " + capitalize(spell_name) + " through the wand!\n");
+        tell_room(environment(player),
+                  player->query_cap_name() +
+                  " waves a crystal wand and casts " +
+                  capitalize(spell_name) + "!",
+                  ({ player }));
+    }
+
+    write("(No P.P.E. consumed - Admin wand)\n");
+    return 1;
+}
+
+int wand_psi(string str) {
+    string power_name, target_name;
+    object player;
+
+    player = this_player();
+
+    if (!str || str == "") {
+        write("Use what psionic? Try: wand psi telepathy [on <target>]\n");
+        return 1;
+    }
+
+    // Parse "power on target" or just "power"
+    if (sscanf(str, "%s on %s", power_name, target_name) != 2) {
+        power_name = str;
+        target_name = "";
+    }
+
+    write("\nThe wand hums with psychic resonance!\n");
+
+    if (target_name && target_name != "") {
+        write("You focus " + capitalize(power_name) +
+              " on " + capitalize(target_name) + " through the wand!\n");
+        tell_room(environment(player),
+                  player->query_cap_name() +
+                  "'s crystal wand pulses as " +
+                  player->query_subjective() + " uses " +
+                  capitalize(power_name) + " on " +
+                  capitalize(target_name) + ".",
+                  ({ player }));
+    } else {
+        write("You activate " + capitalize(power_name) + " through the wand!\n");
+        tell_room(environment(player),
+                  player->query_cap_name() +
+                  "'s crystal wand pulses with psionic energy.",
+                  ({ player }));
+    }
+
+    write("(No I.S.P. consumed - Admin wand)\n");
+    return 1;
+}
+
+int wand_heal(string str) {
+    object player, target;
+
+    player = this_player();
+
+    if (!str || str == "") {
+        write("Heal whom? Try: wand heal <player>\n");
+        return 1;
+    }
+
+    // Find target
+    object env = environment(player);
+    if (env) {
+        target = present(lower_case(str), env);
+    }
+
+    if (!target || !living(target)) {
+        write("Cannot find " + str + " here.\n");
+        return 1;
+    }
+
+    // Full heal
+    if (function_exists("set_hp", target)) {
+        target->set_hp(target->query_max_hp());
+    }
+    if (function_exists("set_sdc", target)) {
+        target->set_sdc(target->query_max_sdc());
+    }
+    if (function_exists("set_mdc", target)) {
+        target->set_mdc(target->query_max_mdc());
+    }
+    if (function_exists("set_ppe", target)) {
+        target->set_ppe(target->query_max_ppe());
+    }
+    if (function_exists("set_isp", target)) {
+        target->set_isp(target->query_max_isp());
+    }
+
+    write("The wand glows with healing light!\n");
+    write("You fully heal " + capitalize(str) + "!\n");
+    tell_object(target, player->query_cap_name() +
+                " points a crystal wand at you. Healing energy washes over you!\n");
+    tell_room(environment(player),
+              player->query_cap_name() +
+              " points a crystal wand at " + capitalize(str) +
+              ", releasing a wave of healing energy.",
+              ({ player, target }));
+    return 1;
+}

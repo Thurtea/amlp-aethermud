@@ -1,0 +1,77 @@
+// /lib/obj/wiztools/rp_tool.lpc
+// Roleplay Wizard Skill Tool - Give skills to players
+// For Roleplay wizards (wizard_role == "roleplay")
+
+inherit "/lib/obj/wiztools/base_wiztool";
+
+void create() {
+    ::create();
+    set_name("rp tool");
+    set_id(({ "rp tool", "skill tool", "roleplay tool", "rp_tool" }));
+    set_short("a Roleplay Wizard's skill tool");
+    set_long(
+        "A leather-bound tome radiating faint magical energy. Its pages "
+        "shimmer with lists of skills and abilities that can be bestowed "
+        "upon worthy adventurers.\n\n"
+        "This is a Roleplay Wizard tool for granting skills to players.\n\n"
+        "Commands:\n"
+        "  giveskill <player> <skillname> <percentage>\n"
+        "  listskills\n\n"
+        "Available Skills:\n"
+        "  Physical: Hand to Hand - Basic, Acrobatics, Swimming\n"
+        "  Technical: Computer Operations, Mechanics, Electronics, Literacy\n"
+        "  Weapon: WP Sword, WP Rifle, WP Pistol\n"
+        "  Medical: First Aid, Paramedic\n"
+        "  Wilderness: Survival, Tracking\n"
+        "  Magical: Magic - Novice, Psionics - Novice\n"
+    );
+    set_weight(2);
+    set_value(0);
+    set_property("no_drop", 1);
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+int check_wizard_level(object who) {
+    if (!who) return 0;
+    if (function_exists("query_privilege_level", who)) {
+        return (int)who->query_privilege_level() >= 1;  // Any wizard
+    }
+    return 0;
+}
+
+void init() {
+    if (!environment() || !interactive(environment())) return;
+    if (!check_wizard_level(environment())) return;
+    add_action("cmd_listskills", "listskills");
+}
+
+int cmd_listskills(string str) {
+    write("\n=== AVAILABLE SKILLS ===\n");
+    write("Physical:\n");
+    write("  Hand to Hand - Basic (ID 0) - Basic martial arts\n");
+    write("  Acrobatics (ID 1) - Dodge, tumble, balance\n");
+    write("  Swimming (ID 2) - Aquatic movement\n");
+    write("\nTechnical:\n");
+    write("  Computer Operations (ID 3) - Hacking, data access\n");
+    write("  Mechanics (ID 4) - Vehicle/robot repair\n");
+    write("  Electronics (ID 5) - Device creation/repair\n");
+    write("  Literacy (ID 6) - Reading and writing\n");
+    write("\nWeapon Proficiencies:\n");
+    write("  WP Sword (ID 7) - Bladed melee weapons\n");
+    write("  WP Rifle (ID 8) - Energy rifles\n");
+    write("  WP Pistol (ID 9) - Energy pistols\n");
+    write("\nMedical:\n");
+    write("  First Aid (ID 10) - Basic healing\n");
+    write("  Paramedic (ID 11) - Advanced healing\n");
+    write("\nWilderness:\n");
+    write("  Survival (ID 12) - Wilderness survival\n");
+    write("  Tracking (ID 13) - Tracking targets\n");
+    write("\nMagical/Psionic:\n");
+    write("  Magic - Novice (ID 14) - Spellcasting foundation\n");
+    write("  Psionics - Novice (ID 15) - Psionic foundation\n");
+    write("\nUsage: giveskill <player> <skillname> <percentage>\n");
+    write("  Example: giveskill thurtest Swimming 60\n");
+    write("========================\n\n");
+    return 1;
+}

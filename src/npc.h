@@ -21,6 +21,7 @@ typedef enum {
     NPC_DEAD_BOY,
     NPC_BRODKIL,
     NPC_DRAGON_HATCHLING,
+    NPC_MOXIM,
     NPC_TEMPLATE_COUNT
 } NpcTemplateId;
 

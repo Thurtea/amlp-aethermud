@@ -1199,18 +1199,22 @@ static void look_at_player(PlayerSession *sess, PlayerSession *target) {
         return;
     }
 
-    /* Check if introduced */
+    /* Check if should show name: wizard targets/viewers always, or if introduced */
     Character *lch = &sess->character;
-    int introduced = 0;
-    for (int j = 0; j < lch->introduced_count; j++) {
-        if (lch->introduced_to[j] &&
-            strcasecmp(lch->introduced_to[j], target->username) == 0) {
-            introduced = 1;
-            break;
+    int show_name = 0;
+    if (target->privilege_level >= 1) show_name = 1;  /* Target is wizard */
+    if (sess->privilege_level >= 1) show_name = 1;    /* Viewer is wizard */
+    if (!show_name) {
+        for (int j = 0; j < lch->introduced_count; j++) {
+            if (lch->introduced_to[j] &&
+                strcasecmp(lch->introduced_to[j], target->username) == 0) {
+                show_name = 1;
+                break;
+            }
         }
     }
 
-    if (introduced) {
+    if (show_name) {
         send_to_player(sess, "You look at %s.\n", target->username);
         if (target->character.description) {
             send_to_player(sess, "%s\n", target->character.description);
@@ -1386,9 +1390,12 @@ void cmd_look(PlayerSession *sess, const char *args) {
     /* ---- LOOK AT ROOM (no args) ---- */
 show_room:
 
-    send_to_player(sess, "\n%s\n", room->name);
-    if (!sess->is_brief) {
-        send_to_player(sess, "%s\n", room->description);
+    if (sess->is_brief) {
+        /* Brief mode: room name only */
+        send_to_player(sess, "\n%s\n", room->name);
+    } else {
+        /* Verbose mode: full description only (no room name) */
+        send_to_player(sess, "\n%s\n", room->description);
     }
     /* Show light level hints */
     if (room->light_level == 0) {
@@ -1476,20 +1483,24 @@ show_room:
             PlayerSession *other = room->players[i];
             if (!other || other == sess) continue;
 
-            /* Check if introduced */
-            int introduced = 0;
-            for (int j = 0; j < sess->character.introduced_count; j++) {
-                if (sess->character.introduced_to[j] &&
-                    strcasecmp(sess->character.introduced_to[j], other->username) == 0) {
-                    introduced = 1;
-                    break;
+            /* Wizards/admins always show name; also if viewer is wiz or if introduced */
+            int show_name = 0;
+            if (other->privilege_level >= 1) show_name = 1;  /* Target is wizard */
+            if (sess->privilege_level >= 1) show_name = 1;   /* Viewer is wizard */
+            if (!show_name) {
+                for (int j = 0; j < sess->character.introduced_count; j++) {
+                    if (sess->character.introduced_to[j] &&
+                        strcasecmp(sess->character.introduced_to[j], other->username) == 0) {
+                        show_name = 1;
+                        break;
+                    }
                 }
             }
 
             const char *position = other->character.position ?
                 other->character.position : "is standing around";
 
-            if (introduced) {
+            if (show_name) {
                 send_to_player(sess, "%s %s.\n", other->username, position);
             } else {
                 const char *race = other->character.race;
@@ -1574,8 +1585,12 @@ void cmd_move(PlayerSession *sess, const char *direction) {
     /* Notify room of departure */
     for (int i = 0; i < current->num_players; i++) {
         if (current->players[i] != sess) {
-            send_to_player(current->players[i], "%s leaves %s.\n",
-                          sess->username, direction);
+            if (sess->leave_msg[0]) {
+                send_to_player(current->players[i], "%s\n", sess->leave_msg);
+            } else {
+                send_to_player(current->players[i], "%s leaves %s.\n",
+                              sess->username, direction);
+            }
         }
     }
 
@@ -1587,7 +1602,11 @@ void cmd_move(PlayerSession *sess, const char *direction) {
     /* Notify new room of arrival */
     for (int i = 0; i < next_room->num_players; i++) {
         if (next_room->players[i] != sess) {
-            send_to_player(next_room->players[i], "%s arrives.\n", sess->username);
+            if (sess->enter_msg[0]) {
+                send_to_player(next_room->players[i], "%s\n", sess->enter_msg);
+            } else {
+                send_to_player(next_room->players[i], "%s arrives.\n", sess->username);
+            }
         }
     }
 
@@ -1610,12 +1629,12 @@ static struct {
     { 23, "Chi-Town Transit", "chitown" },
 };
 
-/* Check if a room has a Moxim NPC */
+/* Check if a room has a living Moxim NPC */
 static int room_has_moxim(int room_id) {
-    for (int i = 0; i < NUM_RIFT_DESTINATIONS; i++) {
-        if (rift_destinations[i].room_id == room_id) return 1;
-    }
-    return 0;
+    Room *room = room_get_by_id(room_id);
+    if (!room) return 0;
+    NPC *moxim = npc_find_in_room(room, "moxim");
+    return (moxim != NULL);
 }
 
 /* Rift travel command */

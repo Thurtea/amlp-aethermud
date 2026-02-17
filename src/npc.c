@@ -77,6 +77,18 @@ const NpcTemplate NPC_TEMPLATES[NPC_TEMPLATE_COUNT] = {
         .iq = 14, .me = 18, .ma = 12, .ps = 28, .pp = 20, .pe = 22, .pb = 14, .spd = 30,
         .weapon_dice = 5, .weapon_sides = 6, .weapon_name = "claws and bite",
         .xp_reward = 1000, .aggro = 1
+    },
+    /* Moxim: L15, MDC creature, rift travel NPC — non-aggro, very tough */
+    {
+        .template_id = NPC_MOXIM,
+        .name = "a shimmering Moxim", .keyword = "moxim",
+        .level = 15, .health_type = MDC_ONLY,
+        .hp = 800, .max_hp = 800, .sdc = 0, .max_sdc = 0, .mdc = 800, .max_mdc = 800,
+        .attacks_per_round = 8, .parries_per_round = 6,
+        .auto_parry = 1, .auto_dodge = 1,
+        .iq = 22, .me = 24, .ma = 20, .ps = 30, .pp = 24, .pe = 26, .pb = 18, .spd = 40,
+        .weapon_dice = 6, .weapon_sides = 6, .weapon_name = "rift energy blast",
+        .xp_reward = 2000, .aggro = 0
     }
 };
 
@@ -269,8 +281,8 @@ void npc_handle_death(NPC *npc, PlayerSession *killer) {
     npc->in_combat = 0;
     npc->combat_target_player = NULL;
 
-    /* Set respawn timer (30 ticks = 60 seconds at 2s/tick) */
-    npc->respawn_timer = 30;
+    /* Set respawn timer: Moxim respawns fast (10 ticks = 20s), others 30 ticks = 60s */
+    npc->respawn_timer = (npc->template_id == NPC_MOXIM) ? 10 : 30;
 
     /* Remove from room */
     if (npc->current_room) {

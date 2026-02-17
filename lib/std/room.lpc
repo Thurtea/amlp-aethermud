@@ -56,10 +56,10 @@ string look() {
 
     // Render header based on brief/verbose preference
     if (brief_mode) {
-        // Brief mode: show the short only
-        desc += "\033[1;36m" + query_short() + "\033[0m\n";
+        // Brief mode: room name only
+        desc += query_short() + "\n";
     } else {
-        // Verbose: show the long description only (avoid duplicating short)
+        // Verbose mode: full description only (no room name)
         desc += query_long() + "\n";
     }
     

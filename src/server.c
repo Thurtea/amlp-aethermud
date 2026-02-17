@@ -446,6 +446,46 @@ int cmd_ed_filesystem(PlayerSession *session, const char *args) {
 
     /* No subcommand: list file */
     if (subcmd[0] == '\0' || subcmd[0] == 'l') {
+        /* Start an interactive ed session if the caller is a wizard and asked to edit */
+        if (session && session->privilege_level >= 1 && subcmd[0] == '\0') {
+            /* Initialize interactive editor state on the session */
+            /* Free any existing editor state first */
+            if (session->ed_active) {
+                /* Drop existing editor session */
+                session->ed_active = 0;
+            }
+
+            /* Copy virtual and filesystem path into session */
+            strncpy(session->ed_vpath, vpath, sizeof(session->ed_vpath) - 1);
+            strncpy(session->ed_fspath, actual_path, sizeof(session->ed_fspath) - 1);
+            /* Load lines into session->ed_lines */
+            /* Free prior buffer if any */
+            if (session->ed_lines) {
+                for (int i = 0; i < session->ed_lines_count; i++) free(session->ed_lines[i]);
+                free(session->ed_lines);
+                session->ed_lines = NULL;
+                session->ed_lines_count = 0;
+                session->ed_lines_capacity = 0;
+            }
+
+            session->ed_lines_capacity = total > 64 ? total + 64 : 256;
+            session->ed_lines = calloc(session->ed_lines_capacity, sizeof(char*));
+            for (int i = 0; i < total; i++) {
+                session->ed_lines[i] = strdup(lines[i]);
+            }
+            session->ed_lines_count = total;
+            session->ed_show_numbers = 0;
+            session->ed_cursor = 0;
+            session->ed_input_mode = 0;
+            session->ed_target_line = 0;
+            session->ed_active = 1;
+
+            /* Show brief header and colon prompt */
+            send_to_player(session, "Editing %s (%d lines)\r\n", session->ed_vpath, session->ed_lines_count);
+            send_to_player(session, ": ");
+            return 1;
+        }
+
         send_to_player(session, "File: %s (%d lines)\r\n", vpath, total);
         for (int i = 0; i < total; i++) {
             send_to_player(session, "%3d: %s\r\n", i + 1, lines[i]);
@@ -549,4 +589,186 @@ int cmd_ed_filesystem(PlayerSession *session, const char *args) {
     send_to_player(session, "Unknown ed command: %c\r\n", subcmd[0]);
     send_to_player(session, "Commands: l (list), a (append), i (insert), d (delete), r (replace)\r\n");
     return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Interactive in-session ed handler called from process_playing_state */
+/* Returns 1 if input was handled as ed input */
+int ed_handle_input(PlayerSession *session, const char *input) {
+    if (!session || !session->ed_active) return 0;
+
+    /* If we are in append/insert/change multi-line mode, collect until '.' */
+    if (session->ed_input_mode == 1 || session->ed_input_mode == 2 || session->ed_input_mode == 3) {
+        if (strcmp(input, ".") == 0) {
+            /* End of multi-line input */
+            session->ed_input_mode = 0;
+            send_to_player(session, ": ");
+            return 1;
+        }
+
+        /* Append the line to buffer appropriately */
+        if (session->ed_input_mode == 1) {
+            /* append to end */
+            if (session->ed_lines_count + 1 >= session->ed_lines_capacity) {
+                session->ed_lines_capacity = session->ed_lines_capacity * 2 + 16;
+                session->ed_lines = realloc(session->ed_lines, session->ed_lines_capacity * sizeof(char*));
+            }
+            session->ed_lines[session->ed_lines_count++] = strdup(input);
+        } else if (session->ed_input_mode == 2) {
+            /* insert before target line */
+            int idx = session->ed_target_line - 1;
+            if (idx < 0) idx = 0;
+            if (idx > session->ed_lines_count) idx = session->ed_lines_count;
+            if (session->ed_lines_count + 1 >= session->ed_lines_capacity) {
+                session->ed_lines_capacity = session->ed_lines_capacity * 2 + 16;
+                session->ed_lines = realloc(session->ed_lines, session->ed_lines_capacity * sizeof(char*));
+            }
+            for (int i = session->ed_lines_count; i > idx; i--) session->ed_lines[i] = session->ed_lines[i-1];
+            session->ed_lines[idx] = strdup(input);
+            session->ed_lines_count++;
+        } else if (session->ed_input_mode == 3) {
+            /* change: replace target line with this single line */
+            int idx = session->ed_target_line - 1;
+            if (idx >= 0 && idx < session->ed_lines_count) {
+                free(session->ed_lines[idx]);
+                session->ed_lines[idx] = strdup(input);
+            }
+        }
+
+        /* Continue collecting */
+        send_to_player(session, "* ");
+        return 1;
+    }
+
+    /* Interpret simple colon-style commands (user types command without leading colon) */
+    /* Trim leading/trailing whitespace */
+    const char *s = input;
+    while (*s == ' ' || *s == '\t') s++;
+    if (*s == '\0') { send_to_player(session, ": "); return 1; }
+
+    /* Numeric prefix (for e.g. '1z') */
+    int num = 0;
+    const char *p = s;
+    while (*p >= '0' && *p <= '9') { num = num * 10 + (*p - '0'); p++; }
+    char cmd = *p;
+
+    switch (cmd) {
+        case 'n':
+            session->ed_show_numbers = !session->ed_show_numbers;
+            send_to_player(session, "number %s\r\n", session->ed_show_numbers ? "on" : "off");
+            break;
+
+        case 'z': {
+            int start = (num > 0) ? num - 1 : session->ed_cursor;
+            if (start < 0) start = 0;
+            int show = 20;
+            for (int i = 0; i < show && start + i < session->ed_lines_count; i++) {
+                int ln = start + i + 1;
+                if (session->ed_show_numbers)
+                    send_to_player(session, "%4d: %s\r\n", ln, session->ed_lines[start + i]);
+                else
+                    send_to_player(session, "%s\r\n", session->ed_lines[start + i]);
+            }
+            session->ed_cursor = start + show;
+            if (session->ed_cursor >= session->ed_lines_count) session->ed_cursor = session->ed_lines_count - 1;
+            if (session->ed_cursor < 0) session->ed_cursor = 0;
+            break; }
+
+        case 'a':
+            /* Enter append mode; lines until a single '.' are appended */
+            session->ed_input_mode = 1;
+            send_to_player(session, "* ");
+            return 1;
+
+        case 'd': {
+            /* delete: d <n> */
+            int target = num;
+            if (target < 1 || target > session->ed_lines_count) {
+                send_to_player(session, "Line %d out of range (1-%d)\r\n", target, session->ed_lines_count);
+            } else {
+                int idx = target - 1;
+                free(session->ed_lines[idx]);
+                for (int i = idx; i < session->ed_lines_count - 1; i++) session->ed_lines[i] = session->ed_lines[i+1];
+                session->ed_lines_count--;
+                send_to_player(session, "Deleted line %d\r\n", target);
+            }
+            break; }
+
+        case 'g': {
+            /* go to line and show a page: g <n> or just g */
+            int start = (num > 0) ? num - 1 : 0;
+            if (start < 0) start = 0;
+            int show = 20;
+            for (int i = 0; i < show && start + i < session->ed_lines_count; i++) {
+                int ln = start + i + 1;
+                if (session->ed_show_numbers)
+                    send_to_player(session, "%4d: %s\r\n", ln, session->ed_lines[start + i]);
+                else
+                    send_to_player(session, "%s\r\n", session->ed_lines[start + i]);
+            }
+            session->ed_cursor = start + show;
+            break; }
+
+        case 'I': {
+            /* Insert before line: I <n> */
+            int target = num;
+            if (target < 1) target = 1;
+            if (target > session->ed_lines_count + 1) target = session->ed_lines_count + 1;
+            session->ed_target_line = target;
+            session->ed_input_mode = 2; /* insert mode */
+            send_to_player(session, "* ");
+            return 1; }
+
+        case 'c': {
+            /* change/replace line: c <n> */
+            int target = num;
+            if (target < 1 || target > session->ed_lines_count) {
+                send_to_player(session, "Line %d out of range\r\n", target);
+            } else {
+                session->ed_target_line = target;
+                session->ed_input_mode = 3; /* change mode */
+                send_to_player(session, "* ");
+                return 1;
+            }
+            break; }
+
+        case 'x': {
+            /* write file and exit editor */
+            FILE *wf = fopen(session->ed_fspath, "w");
+            if (!wf) {
+                send_to_player(session, "Cannot write to: %s\r\n", session->ed_vpath);
+                break;
+            }
+            for (int i = 0; i < session->ed_lines_count; i++) {
+                fprintf(wf, "%s\n", session->ed_lines[i]);
+            }
+            fclose(wf);
+            send_to_player(session, "Wrote %d lines to: %s\r\n", session->ed_lines_count, session->ed_vpath);
+            /* Exit editor and free memory */
+            for (int i = 0; i < session->ed_lines_count; i++) free(session->ed_lines[i]);
+            free(session->ed_lines);
+            session->ed_lines = NULL;
+            session->ed_lines_count = 0;
+            session->ed_lines_capacity = 0;
+            session->ed_active = 0;
+            send_to_player(session, "Exited editor.\r\n");
+            break; }
+
+        case 'q':
+            /* Quit without saving */
+            for (int i = 0; i < session->ed_lines_count; i++) free(session->ed_lines[i]);
+            free(session->ed_lines);
+            session->ed_lines = NULL;
+            session->ed_lines_count = 0;
+            session->ed_lines_capacity = 0;
+            session->ed_active = 0;
+            send_to_player(session, "Exited editor (no save).\r\n");
+            break;
+
+        default:
+            send_to_player(session, "Unknown ed command: %s\r\n", s);
+    }
+
+    if (session->ed_active) send_to_player(session, ": ");
+    return 1;
 }

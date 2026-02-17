@@ -1,0 +1,1 @@
+This will be the directory for wizards in the game. When the Admin promotes them it will make a directory here, make them a workroom.lpc /domains/<wizardname>/workroom.lpc then there will be a chest in there. and the exit will lead to the wizard's castle. which is lounge area we are working on.

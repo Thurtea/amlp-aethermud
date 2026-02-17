@@ -1920,8 +1920,13 @@ int query_skill(string skill_id) {
     
     // Cap at 98%
     if (total > 98) total = 98;
-    
+
     return total;
+}
+
+// Alias for query_skill - used by lake rooms and companions
+int query_skill_percentage(string skill_id) {
+    return query_skill(skill_id);
 }
 
 // Get all skills

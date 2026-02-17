@@ -1,6 +1,6 @@
-// Who command - Show online wizards and population indicator
-// Players see wizards only (to foster player-wizard interaction)
-// Population shown as: Low/Medium/High instead of exact count
+// Who command
+// Wizards/admins: full player list with details
+// Regular players: population indicator only (Low/Medium/High)
 
 #include <globals.h>
 
@@ -9,42 +9,52 @@ int main(string arg) {
     object user;
     int i, total_players;
     string output, population;
-    
+
     user = previous_object();
     all_users = users();
     wizards = ({});
     players = ({});
-    
+
     // Separate wizards from players
     for (i = 0; i < sizeof(all_users); i++) {
         if (!all_users[i]) continue;
         if (!all_users[i]->query_name()) continue;
-        
+
         if (all_users[i]->query_privilege_level() >= 1) {
             wizards += ({ all_users[i] });
         } else {
             players += ({ all_users[i] });
         }
     }
-    
+
     total_players = sizeof(players) + sizeof(wizards);
-    
+
     // Determine population indicator
-    if (total_players <= 3) {
-        population = "LOW";
-    } else if (total_players <= 10) {
-        population = "MEDIUM";
+    if (total_players <= 5) {
+        population = "Low";
+    } else if (total_players <= 15) {
+        population = "Medium";
     } else {
-        population = "HIGH";
+        population = "High";
     }
-    
+
+    // Regular players: population indicator only
+    if (user->query_privilege_level() < 1) {
+        output = "\n";
+        output += "=== AETHERMUD ===\n\n";
+        output += "Population: " + population + "\n\n";
+        output += "=================\n\n";
+        tell_object(user, output);
+        return 1;
+    }
+
+    // Wizard/admin view: full player list
     output = "\n";
     output += "=== AETHERMUD - ONLINE PLAYERS & STAFF ===\n\n";
 
-    /* Wizards section: show names and titles to everyone;
-       show extra idle/location details only to wizards (privileged users). */
+    // Wizards section
     if (sizeof(wizards) > 0) {
-        output += "Wizards Online (available to help):\n";
+        output += "Wizards Online:\n";
         output += "------------------------------------\n";
 
         for (i = 0; i < sizeof(wizards); i++) {
@@ -54,28 +64,20 @@ int main(string arg) {
             object wiz_env = environment(wizards[i]);
             string wiz_loc = wiz_env && function_exists("query_short", wiz_env) ? wiz_env->query_short() : (wiz_env ? file_name(wiz_env) : "Unknown");
 
-            /* Always show name + title */
-            output += sprintf("  %-20s %s", capitalize(wiz_name), wiz_title);
-            output += "\n";
+            string rank = "[WIZARD]";
+            if (wizards[i]->query_privilege_level() >= 5) rank = "[ADMIN]";
+            else if (wizards[i]->query_privilege_level() >= 3) rank = "[SENIOR WIZ]";
 
-            /* Wizard-only extra details */
-            if (user->query_privilege_level() >= 1) {
-                string rank = "[WIZARD]";
-                if (wizards[i]->query_privilege_level() >= 5) rank = "[ADMIN]";
-                else if (wizards[i]->query_privilege_level() >= 3) rank = "[SENIOR WIZ]";
-
-                output += sprintf("    %-8s Idle: %4d sec  Loc: %s\n", rank, idle_time, wiz_loc);
-            }
+            output += sprintf("  %-20s %-12s %s\n", capitalize(wiz_name), rank, wiz_title);
+            output += sprintf("    Idle: %4d sec  Loc: %s\n", idle_time, wiz_loc);
         }
 
-        output += "\nTo contact a wizard for help, skills, tattoos, or OCC changes:\n";
-        output += "  tell <wizard_name> <your message>\n\n";
+        output += "\n";
     } else {
         output += "No wizards currently online.\n\n";
     }
 
-    /* Players section: always visible to everyone (name + title).
-       Wizards (privileged users) see extra idle/location details for players too. */
+    // Players section
     if (sizeof(players) > 0) {
         output += "Players Online:\n";
         output += "----------------\n";
@@ -87,13 +89,8 @@ int main(string arg) {
             object p_env = environment(players[i]);
             string p_loc = p_env && function_exists("query_short", p_env) ? p_env->query_short() : (p_env ? file_name(p_env) : "Unknown");
 
-            /* Always show concise name + title */
             output += sprintf("  %-20s %s\n", capitalize(p_name), p_title);
-
-            /* Extra details only for wizard viewers */
-            if (user->query_privilege_level() >= 1) {
-                output += sprintf("    Idle: %4d sec  Loc: %s\n", p_idle, p_loc);
-            }
+            output += sprintf("    Idle: %4d sec  Loc: %s\n", p_idle, p_loc);
         }
 
         output += "\n";
@@ -102,18 +99,13 @@ int main(string arg) {
     }
 
     output += "------------------------------------\n";
-    output += "Server Population: " + population + "\n";
-    output += "====================================\n\n";
+    output += "Population: " + population + "\n";
+    output += "====================================\n";
+    output += "\n[STAFF VIEW]\n";
+    output += "  Wizards: " + sizeof(wizards) + "\n";
+    output += "  Players: " + sizeof(players) + "\n";
+    output += "  Total: " + total_players + "\n\n";
 
-    /* Wizard staff-only summary (keeps the extra counts and staff view) */
-    if (user->query_privilege_level() >= 1) {
-        output += "\n[STAFF VIEW]\n";
-        output += "Actual counts:\n";
-        output += "  Wizards: " + sizeof(wizards) + "\n";
-        output += "  Players: " + sizeof(players) + "\n";
-        output += "  Total: " + total_players + "\n\n";
-    }
-    
     tell_object(user, output);
     return 1;
 }

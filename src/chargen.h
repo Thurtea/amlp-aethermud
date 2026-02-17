@@ -8,6 +8,7 @@
 
 /* Forward declare from session_internal.h */
 typedef struct PlayerSession PlayerSession;
+typedef struct Room Room;
 
 /* Forward declare skill structures */
 typedef struct {
@@ -203,6 +204,8 @@ int save_character(PlayerSession *sess);
 int load_character(PlayerSession *sess, const char *username);
 int character_exists(const char *username, char *found_name, size_t found_size);
 int any_saved_players(void);
+int create_wizard_workroom(const char *username);
+Room* setup_wizard_workroom(const char *username, const char *wizard_role);
 
 #endif /* CHARGEN_H */
 

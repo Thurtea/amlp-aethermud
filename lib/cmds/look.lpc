@@ -114,10 +114,12 @@ int main(string arg) {
 
     // Header: respect brief/verbose preferences
     if (brief_mode) {
+        // Brief mode: room name only
         if (function_exists("query_short", room)) {
             desc += room->query_short() + "\n";
         }
     } else {
+        // Verbose mode: full description only (no room name)
         if (function_exists("query_long", room)) {
             desc += room->query_long() + "\n";
         }

@@ -24,6 +24,8 @@ extern void send_to_player(PlayerSession *session, const char *format, ...);
 
 /* External from driver.c - find a player session by name */
 extern PlayerSession* find_player_by_name(const char *name);
+extern void staff_message(const char *message, PlayerSession *exclude);
+extern void broadcast_message(const char *message, PlayerSession *exclude);
 
 /* External from room.c - movement command */
 extern void cmd_move(PlayerSession *sess, const char *direction);
@@ -127,7 +129,7 @@ static void assign_starting_languages(Character *ch) {
 
 /* Create the wizard workroom LPC file on disk if it doesn't exist.
  * Returns 1 on success (or already exists), 0 on failure. */
-static int create_wizard_workroom(const char *username) {
+int create_wizard_workroom(const char *username) {
     if (!username || !username[0]) return 0;
 
     /* Build lowercase username for path */
@@ -190,6 +192,146 @@ static int create_wizard_workroom(const char *username) {
     fclose(f);
     fprintf(stderr, "[Chargen] Created wizard workroom: %s\n", file_path);
     return 1;
+}
+
+/* Populate a wizard's workroom with tools and items based on role.
+ * Creates the workroom LPC file + directory if needed, loads it,
+ * and adds wiz-tools + sample items.
+ * Returns the Room pointer on success, NULL on failure. */
+Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
+    if (!username || !username[0]) return NULL;
+
+    /* Build lowercase username for path */
+    char lower_name[64];
+    for (int i = 0; username[i] && i < 63; i++)
+        lower_name[i] = tolower((unsigned char)username[i]);
+    lower_name[strlen(username) < 63 ? strlen(username) : 63] = '\0';
+
+    /* Create the LPC file on disk */
+    if (!create_wizard_workroom(username)) return NULL;
+
+    char workroom_path[256];
+    snprintf(workroom_path, sizeof(workroom_path),
+             "/domains/wizard/%s/workroom", lower_name);
+
+    Room *workroom = room_get_by_path(workroom_path);
+    if (!workroom) return NULL;
+
+    /* Staff (all wizards) */
+    Item *staff = (Item*)calloc(1, sizeof(Item));
+    staff->id = -2;
+    staff->name = strdup("wizard's staff");
+    staff->description = strdup(
+        "A gnarled wooden staff crackling with arcane power.\n"
+        "Runes etched along its length glow faintly.\n"
+        "\n"
+        "+---------- WIZARD COMMANDS ----------+\n"
+        "| goto <player|room>  Teleport        |\n"
+        "| set <player> <stat> Set player stat  |\n"
+        "| heal <player>       Restore HP/pools |\n"
+        "| clone <object>      Clone an object  |\n"
+        "| eval <expr>         Evaluate LPC     |\n"
+        "| update <file>       Reload LPC file  |\n"
+        "+--------------------------------------+");
+    staff->type = ITEM_TOOL;
+    staff->weight = 5;
+    staff->value = 0;
+    room_add_item(workroom, staff);
+
+    /* Handbook (all wizards) */
+    Item *handbook = (Item*)calloc(1, sizeof(Item));
+    handbook->id = -3;
+    handbook->name = strdup("wizard's handbook");
+    handbook->description = strdup(
+        "A leather-bound book with gold-leaf lettering:\n"
+        "'The AetherMUD Wizard's Handbook'\n"
+        "Type 'read handbook' for the wizard guide.");
+    handbook->type = ITEM_MISC;
+    handbook->weight = 2;
+    handbook->value = 0;
+    room_add_item(workroom, handbook);
+
+    /* Viewing crystal (all wizards) */
+    Item *crystal = (Item*)calloc(1, sizeof(Item));
+    crystal->id = -4;
+    crystal->name = strdup("viewing crystal");
+    crystal->description = strdup(
+        "A swirling crystal orb resting on a silver stand.\n"
+        "Shadows of distant places shift within its depths.\n"
+        "\n"
+        "+-------- MONITORING COMMANDS --------+\n"
+        "| who                List all online  |\n"
+        "| finger <player>    Player details   |\n"
+        "| snoop <player>     Watch a session  |\n"
+        "| users              Connection info  |\n"
+        "+-------------------------------------+");
+    crystal->type = ITEM_TOOL;
+    crystal->weight = 1;
+    crystal->value = 0;
+    room_add_item(workroom, crystal);
+
+    /* Role-specific tool */
+    if (wizard_role && strcmp(wizard_role, "admin") == 0) {
+        Item *wand = (Item*)calloc(1, sizeof(Item));
+        wand->id = -5;
+        wand->name = strdup("crystal wand");
+        wand->description = strdup(
+            "A shimmering crystal wand crackling with raw magical energy.\n"
+            "\n"
+            "+---------- ADMIN WAND COMMANDS --------+\n"
+            "| wand cast <spell> [at <target>]       |\n"
+            "| wand psi <power> [on <target>]        |\n"
+            "| wand heal <target>                    |\n"
+            "| wand list spells                      |\n"
+            "| wand list psionics                    |\n"
+            "+---------------------------------------+");
+        wand->type = ITEM_TOOL;
+        wand->weight = 1;
+        wand->value = 0;
+        room_add_item(workroom, wand);
+    } else if (wizard_role && strcmp(wizard_role, "roleplay") == 0) {
+        Item *rptool = (Item*)calloc(1, sizeof(Item));
+        rptool->id = -6;
+        rptool->name = strdup("roleplay tome");
+        rptool->description = strdup(
+            "A leather-bound tome radiating faint magical energy.\n"
+            "\n"
+            "+-------- ROLEPLAY TOOL COMMANDS -------+\n"
+            "| giveskill <player> <skill> <%>        |\n"
+            "| listskills                            |\n"
+            "+---------------------------------------+");
+        rptool->type = ITEM_TOOL;
+        rptool->weight = 2;
+        rptool->value = 0;
+        room_add_item(workroom, rptool);
+    }
+
+    /* Sample items: one of each major category */
+    /* Weapon samples */
+    Item *w1 = item_create(1);  /* Vibro-Blade */
+    Item *w2 = item_create(9);  /* C-18 Laser Pistol */
+    Item *w3 = item_create(12); /* C-12 Laser Rifle */
+    if (w1) room_add_item(workroom, w1);
+    if (w2) room_add_item(workroom, w2);
+    if (w3) room_add_item(workroom, w3);
+
+    /* Armor samples */
+    Item *a1 = item_create(25); /* Huntsman Light Armor */
+    Item *a2 = item_create(27); /* Light EBA */
+    if (a1) room_add_item(workroom, a1);
+    if (a2) room_add_item(workroom, a2);
+
+    /* Supplies */
+    Item *s1 = item_create(40); /* First Aid Kit */
+    Item *s2 = item_create(48); /* Trail Ration */
+    Item *s3 = item_create(49); /* Water Canteen */
+    if (s1) room_add_item(workroom, s1);
+    if (s2) room_add_item(workroom, s2);
+    if (s3) room_add_item(workroom, s3);
+
+    fprintf(stderr, "[Chargen] Populated workroom for %s (role: %s)\n",
+            username, wizard_role ? wizard_role : "none");
+    return workroom;
 }
 
 /* Create admin character, skipping chargen entirely */
@@ -272,83 +414,10 @@ void chargen_create_admin(PlayerSession *sess) {
     /* No starting gear for admin */
 
     /* Create wizard workroom and place admin there */
-    char lower_name[64];
-    for (int i = 0; sess->username[i] && i < 63; i++)
-        lower_name[i] = tolower((unsigned char)sess->username[i]);
-    lower_name[strlen(sess->username) < 63 ? strlen(sess->username) : 63] = '\0';
-
-    char workroom_path[256];
-    snprintf(workroom_path, sizeof(workroom_path),
-             "/domains/wizard/%s/workroom", lower_name);
-
-    if (create_wizard_workroom(sess->username)) {
-        Room *workroom = room_get_by_path(workroom_path);
-        if (workroom) {
-            sess->current_room = workroom;
-            room_add_player(workroom, sess);
-
-            /* Place wiz-tool items in workroom */
-            /* Staff */
-            Item *staff = (Item*)calloc(1, sizeof(Item));
-            staff->id = -2;
-            staff->name = strdup("wizard's staff");
-            staff->description = strdup(
-                "A gnarled wooden staff crackling with arcane power.\n"
-                "Runes etched along its length glow faintly.\n"
-                "\n"
-                "+---------- WIZARD COMMANDS ----------+\n"
-                "| goto <player|room>  Teleport        |\n"
-                "| set <player> <stat> Set player stat  |\n"
-                "| heal <player>       Restore HP/pools |\n"
-                "| clone <object>      Clone an object  |\n"
-                "| eval <expr>         Evaluate LPC     |\n"
-                "| update <file>       Reload LPC file  |\n"
-                "+--------------------------------------+");
-            staff->type = ITEM_TOOL;
-            staff->weight = 5;
-            staff->value = 0;
-            room_add_item(workroom, staff);
-
-            /* Handbook */
-            Item *handbook = (Item*)calloc(1, sizeof(Item));
-            handbook->id = -3;
-            handbook->name = strdup("wizard's handbook");
-            handbook->description = strdup(
-                "A leather-bound book with gold-leaf lettering:\n"
-                "'The AetherMUD Wizard's Handbook'\n"
-                "Type 'read handbook' for the wizard guide.");
-            handbook->type = ITEM_MISC;
-            handbook->weight = 2;
-            handbook->value = 0;
-            room_add_item(workroom, handbook);
-
-            /* Crystal */
-            Item *crystal = (Item*)calloc(1, sizeof(Item));
-            crystal->id = -4;
-            crystal->name = strdup("viewing crystal");
-            crystal->description = strdup(
-                "A swirling crystal orb resting on a silver stand.\n"
-                "Shadows of distant places shift within its depths.\n"
-                "\n"
-                "+-------- MONITORING COMMANDS --------+\n"
-                "| who                List all online  |\n"
-                "| finger <player>    Player details   |\n"
-                "| snoop <player>     Watch a session  |\n"
-                "| users              Connection info  |\n"
-                "+-------------------------------------+");
-            crystal->type = ITEM_TOOL;
-            crystal->weight = 1;
-            crystal->value = 0;
-            room_add_item(workroom, crystal);
-        } else {
-            /* Fallback to start room if LPC load fails */
-            fprintf(stderr, "[Chargen] Workroom LPC load failed, using start room\n");
-            Room *start = room_get_start();
-            if (start) {
-                sess->current_room = start;
-                room_add_player(start, sess);
-            }
-        }
+    Room *workroom = setup_wizard_workroom(sess->username, "admin");
+    if (workroom) {
+        sess->current_room = workroom;
+        room_add_player(workroom, sess);
     } else {
         Room *start = room_get_start();
         if (start) {
@@ -370,10 +439,10 @@ void chargen_create_admin(PlayerSession *sess) {
     send_to_player(sess, "Your admin character has been auto-created.\n");
     send_to_player(sess, "You are standing in your private workroom.\n");
     send_to_player(sess, "\n");
-    send_to_player(sess, "Your workroom contains a chest with wiz-tools for your role.\n");
+    send_to_player(sess, "Your workroom contains wiz-tools: staff, handbook, crystal, wand.\n");
     send_to_player(sess, "Use 'home' command to return to your workroom anytime.\n");
     send_to_player(sess, "\n");
-    send_to_player(sess, "Admin commands: promote, goto, set, users, force, eval\n");
+    send_to_player(sess, "Admin commands: promote, setrole, goto, set, giveskill, users, eval\n");
     send_to_player(sess, "Type 'help' for the full command reference.\n");
     send_to_player(sess, "\n");
 
@@ -800,6 +869,20 @@ void chargen_complete(PlayerSession *sess) {
     /* Auto-look at starting room */
     cmd_look(sess, "");
     send_to_player(sess, "\n> ");
+
+    /* Announce new character to all + staff notification */
+    char new_msg[256];
+    snprintf(new_msg, sizeof(new_msg),
+            "%s has entered the game.\r\n", sess->username);
+    broadcast_message(new_msg, sess);
+
+    char staff_msg[256];
+    snprintf(staff_msg, sizeof(staff_msg),
+            "\033[1;34m[Staff] %s created a new character (%s %s).\033[0m\r\n",
+            sess->username,
+            sess->character.race ? sess->character.race : "unknown",
+            sess->character.occ ? sess->character.occ : "Vagabond");
+    staff_message(staff_msg, sess);
 }
 
 /* Process chargen input */
@@ -901,12 +984,10 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     send_to_player(sess, "\n");
                     send_to_player(sess, "Accept these stats? (yes/reroll): ");
                 } else {
-                    /* Non-RCC: DO NOT force O.C.C. selection during chargen.
-                     * Players may choose an O.C.C. in-game via the 'selectocc'
-                     * command. Proceed directly to rolling attributes. */
+                    /* Non-RCC: O.C.C. will be assigned by a wizard later.
+                     * Proceed directly to rolling attributes. */
                     ch->occ = NULL;
 
-                    send_to_player(sess, "You may select an O.C.C. later in-game using 'selectocc'.\n\n");
                     send_to_player(sess, "Rolling your attributes...\n");
                     chargen_roll_stats(sess);
                     chargen_display_stats(sess);
@@ -920,7 +1001,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             }
             break;
 
-        /* O.C.C. selection step removed: players choose O.C.C. in-game via 'selectocc'. */
+        /* O.C.C. selection step removed: wizards assign O.C.C. via 'set' command. */
             
         case CHARGEN_STATS_CONFIRM:
             if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
@@ -1248,8 +1329,10 @@ int save_character(PlayerSession *sess) {
      * Version history:
      *  1 - original format
      *  3 - added LPC room path persistence (char *room_path) after room_id
+     *  5 - added wizard_role (32 bytes) after privilege_level
+     *  6 - added title, enter_msg, leave_msg, goto_msg (128 bytes each) after wizard_role
      */
-    uint16_t version = 4;
+    uint16_t version = 6;
     fwrite(&version, sizeof(uint16_t), 1, f);
     
     /* Write username */
@@ -1259,7 +1342,10 @@ int save_character(PlayerSession *sess) {
     
     /* Write privilege level */
     fwrite(&sess->privilege_level, sizeof(int), 1, f);
-    
+
+    /* Write wizard role (fixed 32 bytes) */
+    fwrite(sess->wizard_role, 1, 32, f);
+
     /* Write password hash (for security) */
     size_t hash_len = strlen(sess->password_hash);
     fwrite(&hash_len, sizeof(size_t), 1, f);
@@ -1572,7 +1658,22 @@ int load_character(PlayerSession *sess, const char *username) {
     
     /* Read privilege level */
     fread(&sess->privilege_level, sizeof(int), 1, f);
-    
+
+    /* Read wizard role (version >= 5) */
+    if (version >= 5) {
+        fread(sess->wizard_role, 1, 32, f);
+        sess->wizard_role[31] = '\0';  /* Ensure null termination */
+    } else {
+        /* Default role based on privilege level */
+        if (sess->privilege_level >= 2) {
+            strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role));
+        } else if (sess->privilege_level >= 1) {
+            strncpy(sess->wizard_role, "roleplay", sizeof(sess->wizard_role));
+        } else {
+            sess->wizard_role[0] = '\0';
+        }
+    }
+
     /* Read password hash (for authentication) */
     size_t hash_len = 0;
     fread(&hash_len, sizeof(size_t), 1, f);

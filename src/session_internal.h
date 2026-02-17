@@ -48,6 +48,7 @@ typedef struct PlayerSession {
     void *player_object;
     char ip_address[INET_ADDRSTRLEN];
     int privilege_level;
+    char wizard_role[32];    /* Wizard role: "admin", "domain", "code", "roleplay" */
     char *current_dir;       /* Wizard/admin filesystem navigation directory */
     
     /* Character generation and game state */
@@ -66,6 +67,9 @@ typedef struct PlayerSession {
     int is_invisible;                    /* Wizard invisibility flag */
     int is_godmode;                      /* God mode - immune to damage */
     char title[128];                     /* Custom title for who list */
+    char enter_msg[128];                 /* Custom room enter message */
+    char leave_msg[128];                 /* Custom room leave message */
+    char goto_msg[128];                  /* Custom goto arrival message */
 
     /* Real-time combat state */
     struct PlayerSession *combat_target;  /* Current combat target */
@@ -80,10 +84,23 @@ typedef struct PlayerSession {
     int is_brief;                         /* Brief mode: skip long room descriptions */
     int is_color;                         /* ANSI color enabled (default 1) */
     int is_resting;                       /* Resting state (regen bonus) */
+    char custom_prompt[128];              /* Custom prompt format string */
     int converse_mode;                    /* 1 = every input becomes "say" */
     /* Terminal geometry (can be overridden by client/efun) */
     int terminal_width;                    /* columns, default set on init */
     int terminal_height;                   /* rows, default set on init */
+
+    /* In-game editor (ed) state */
+    int ed_active;                 /* 1 when in interactive ed mode */
+    char ed_vpath[512];            /* virtual path seen by player (/domains/...) */
+    char ed_fspath[1024];          /* actual filesystem path (lib/...) */
+    char **ed_lines;               /* dynamically allocated array of lines */
+    int ed_lines_count;            /* number of lines loaded */
+    int ed_lines_capacity;         /* allocated capacity for ed_lines */
+    int ed_show_numbers;           /* 1 = show numbers when listing */
+    int ed_cursor;                 /* current line index for paging (0-based) */
+    int ed_input_mode;             /* 0=command, 1=append, 2=insert, 3=change */
+    int ed_target_line;            /* target line number for insert/change/delete (1-based) */
 } PlayerSession;
 
 #endif /* SESSION_INTERNAL_H */

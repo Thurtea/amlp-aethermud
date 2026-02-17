@@ -12,6 +12,15 @@ void create() {
     );
 
     add_exit("west", "/domains/new_camelot/training_grounds");
+    add_exit("in", "/domains/new_camelot/shops/falconer");
+
+    set_long(
+        "A large barn housing horses and other riding animals. Hay bales\n"
+        "are stacked against the walls and the smell of leather and feed\n"
+        "fills the air. A stable hand tends to a warhorse in the far stall.\n"
+        "The training grounds are to the west. A narrow doorway leads in\n"
+        "to Aldric's Falconry."
+    );
 
     set_property("light", 2);
 }

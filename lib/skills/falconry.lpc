@@ -1,0 +1,38 @@
+/*
+ * /lib/skills/falconry.lpc - Falconry skill
+ *
+ * The art of training and handling birds of prey for hunting and scouting.
+ * Trainable by Wilderness Scouts and Nomads.
+ *
+ * Passive: +2 Perception outdoors when skill >= 50%
+ * Active: Controls hawk obedience for SAY commands
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("falconry");
+    set_skill_name("Falconry");
+    set_skill_desc(
+        "The ancient art of training birds of prey. A skilled falconer can "
+        "direct a hawk to scout ahead, attack enemies, retrieve game, and "
+        "return on command. Passive bonus: +2 Perception outdoors when "
+        "skill is 50% or higher. Primary OCCs: Wilderness Scout, Nomad."
+    );
+    set_skill_category("wilderness");
+
+    set_base_percentage(35);
+    set_level_bonus(5);
+    set_max_percentage(98);
+
+    /* Land navigation and wilderness survival give synergy bonuses */
+    set_related_skills(({ "land_navigation", "wilderness_survival" }));
+    set_related_bonuses(({ 5, 5 }));
+
+    set_stat_requirements(([ ]));
+
+    set_training_time(3);
+    set_is_primary_only(0);
+}

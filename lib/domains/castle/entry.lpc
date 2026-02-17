@@ -44,7 +44,7 @@ void reset() {
     // Spawn hawk if not present
     if (!present("hawk")) {
         object hawk;
-        hawk = load_object("/domains/castle/hawk");
+        hawk = load_object("/obj/pets/hawk");
         if (hawk) {
             hawk->move(this_object());
         }

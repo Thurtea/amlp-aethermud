@@ -1,0 +1,79 @@
+// /lib/obj/pets/hawk_egg.lpc
+// Hawk/Falcon egg obtained from the New Camelot falconer shop
+// Three tiers: hawk (3), master hawk (5), falcon (7)
+// Hatch with: hatch egg
+
+inherit "/std/object";
+
+private int egg_level;    // Hatchling starting level: 3, 5, or 7
+private string egg_type;  // "hawk", "master_hawk", "falcon"
+
+void create() {
+    ::create();
+
+    // Default to basic hawk egg
+    egg_level = 3;
+    egg_type = "hawk";
+
+    _update_desc();
+
+    set_weight(1);
+    set_value(500);
+
+    set_property("is_egg", 1);
+}
+
+void _update_desc() {
+    if (egg_type == "falcon") {
+        set_name("falcon egg");
+        set_id(({ "falcon egg", "egg", "large egg" }));
+        set_short("a mottled peregrine falcon egg");
+        set_long(
+            "A large, pale cream egg mottled with reddish-brown splotches. "
+            "It is noticeably warm to the touch and vibrates faintly with "
+            "life. A falcon of exceptional speed and intelligence waits "
+            "within. The egg is wrapped in soft leather to protect it.\n"
+            "  [Level 7 Falcon -- use 'hatch egg' to hatch it]\n"
+        );
+    } else if (egg_type == "master_hawk") {
+        set_name("master hawk egg");
+        set_id(({ "master hawk egg", "master egg", "egg" }));
+        set_short("a speckled master hawk egg");
+        set_long(
+            "A handsome speckled egg slightly larger than a chicken's. Its "
+            "shell has an unusual blue-grey sheen and is warm against your "
+            "palm. A master hunting hawk gestates inside -- stronger and "
+            "more obedient than a common bird. The egg is nestled in straw.\n"
+            "  [Level 5 Master Hawk -- use 'hatch egg' to hatch it]\n"
+        );
+    } else {
+        set_name("hawk egg");
+        set_id(({ "hawk egg", "egg" }));
+        set_short("a speckled hawk egg");
+        set_long(
+            "A brown-speckled egg slightly smaller than your fist. It feels "
+            "warm and solid in your hand. A hunting hawk grows inside, "
+            "waiting to be hatched and trained. The shell is surprisingly "
+            "tough.\n"
+            "  [Level 3 Hawk -- use 'hatch egg' to hatch it]\n"
+        );
+    }
+}
+
+// Setters used by the falconer shop when creating the egg
+void set_egg_level(int lvl) {
+    egg_level = lvl;
+}
+
+void set_egg_type(string t) {
+    egg_type = t;
+    _update_desc();
+}
+
+int query_egg_level() {
+    return egg_level;
+}
+
+string query_egg_type() {
+    return egg_type;
+}

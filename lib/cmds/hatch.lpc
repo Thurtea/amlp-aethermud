@@ -1,0 +1,147 @@
+// /lib/cmds/hatch.lpc
+// Hatch a hawk/falcon egg from the falconer
+//
+// Usage: hatch [egg | hawk egg | master hawk egg | falcon egg]
+//
+// Requires the falconry skill for better hatch success odds.
+// Base success: 60%. +1% per 1% of falconry skill above 40%.
+
+#define HAWK_PATH "/lib/obj/pets/hawk"
+#define EGG_PATH  "/lib/obj/pets/hawk_egg"
+
+int cmd(string arg) {
+    object player, egg, hawk;
+    object *inv;
+    string egg_type, tier_name;
+    int egg_level, falconry_pct, roll, success_threshold;
+
+    player = this_player();
+    if (!player) return 0;
+
+    // Find the egg in inventory
+    inv = all_inventory(player);
+    egg = 0;
+
+    foreach (object ob : inv) {
+        if (!ob) continue;
+        if (!function_exists("query_property", ob)) continue;
+        if (ob->query_property("is_egg")) {
+            // If arg specified, match it
+            if (arg && arg != "") {
+                if (ob->id(arg)) {
+                    egg = ob;
+                    break;
+                }
+            } else {
+                egg = ob;
+                break;
+            }
+        }
+    }
+
+    if (!egg) {
+        if (arg && arg != "") {
+            write("You don't have " + arg + " to hatch.\n");
+        } else {
+            write("You don't have an egg to hatch.\n");
+        }
+        return 1;
+    }
+
+    egg_type  = egg->query_egg_type();
+    egg_level = egg->query_egg_level();
+
+    // Determine display name
+    if (egg_type == "falcon") {
+        tier_name = "peregrine falcon";
+    } else if (egg_type == "master_hawk") {
+        tier_name = "master hawk";
+    } else {
+        tier_name = "hawk";
+    }
+
+    // Falconry skill check
+    falconry_pct = 0;
+    if (function_exists("query_skill_percentage", player)) {
+        falconry_pct = player->query_skill_percentage("falconry");
+    }
+
+    // Base 60%, +1% per skill% above 40
+    success_threshold = 60;
+    if (falconry_pct > 40) {
+        success_threshold += (falconry_pct - 40);
+    }
+    if (success_threshold > 98) success_threshold = 98;
+
+    roll = random(100) + 1;
+
+    write("You cup " + egg->query_short() + " in both hands and hold it\n"
+          "gently against your chest, warming it carefully...\n");
+
+    tell_room(environment(player),
+              player->query_cap_name() + " holds a large egg carefully "
+              "against their chest.",
+              ({ player }));
+
+    if (roll > success_threshold) {
+        // Failed hatch
+        write("\nA soft crack sounds -- but then silence. The egg grows\n"
+              "cold. The hatchling did not survive.\n");
+        tell_room(environment(player),
+                  player->query_cap_name() + "'s egg fails to hatch.",
+                  ({ player }));
+        destruct(egg);
+        return 1;
+    }
+
+    // Success!
+    write("\nThe egg trembles in your hands. A hairline crack races across\n"
+          "the shell -- then another -- and with a sharp creak the egg\n"
+          "splits open. A damp, wide-eyed " + tier_name + " hatchling\n"
+          "tumbles into your hands and fixes you with an intense stare.\n"
+          "It has imprinted on you.\n\n");
+
+    tell_room(environment(player),
+              player->query_cap_name() + "'s egg cracks open and a " +
+              tier_name + " hatchling emerges!",
+              ({ player }));
+
+    // Create hawk and configure it
+    hawk = clone_object(HAWK_PATH);
+    if (!hawk) {
+        write("Error: could not create hatchling. Contact an administrator.\n");
+        destruct(egg);
+        return 1;
+    }
+
+    hawk->set_hawk_tier(egg_type, egg_level);
+    hawk->set_owner(player);
+
+    // Start following by default
+    hawk->set_property("following", player);
+
+    hawk->move(environment(player));
+
+    write(hawk->query_cap_name() + " has bonded with you. It will follow\n"
+          "you and obey SAY commands.\n\n"
+          "Try: say " + hawk->query_name() + " follow\n"
+          "     say " + hawk->query_name() + " scout north\n"
+          "     say " + hawk->query_name() + " attack <target>\n"
+          "Type 'help falconry' for full command list.\n\n");
+
+    destruct(egg);
+    return 1;
+}
+
+string query_help() {
+    return
+"HATCH - Hatch a hawk or falcon egg\n\n"
+"Usage:\n"
+"  hatch            Hatch the first egg in your inventory\n"
+"  hatch egg        Same as above\n"
+"  hatch hawk egg   Hatch a specific egg by name\n\n"
+"Hold the egg against your body to warm it. Success depends on\n"
+"your Falconry skill percentage. A failed hatch destroys the egg.\n\n"
+"Eggs are obtained by trading with Aldric at the New Camelot falconer.\n"
+"See also: help falconry, help falconer, help pets\n";
+}

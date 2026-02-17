@@ -1,0 +1,27 @@
+// /lib/objects/clothing/coalition_uniform.lpc
+// Coalition States military dress uniform
+// Used as trade currency at the New Camelot falconer shop
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+
+    set_name("coalition uniform");
+    set_id(({ "coalition uniform", "uniform", "military uniform",
+              "cs uniform", "dead boy uniform" }));
+    set_short("a Coalition States military uniform");
+    set_long(
+        "A crisp Coalition States military dress uniform -- the iconic black "
+        "and bone-white ensemble worn by CS soldiers, complete with skull "
+        "emblem and rank insignia. Though loathed by freedom fighters across "
+        "Rifts Earth, some merchants prize them as exotic trade goods or for "
+        "their durable synthetic fabric. The uniform is in good condition.\n"
+    );
+
+    set_weight(3);
+    set_value(2500);
+
+    set_property("clothing", 1);
+    set_property("clothing_type", "uniform");
+}

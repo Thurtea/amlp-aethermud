@@ -1,0 +1,249 @@
+// /lib/domains/new_camelot/shops/falconer.lpc
+// Aldric's Falconry -- barter shop in New Camelot
+//
+// Trades:
+//   10 E-Clips           -> Hawk Egg       (level 3)
+//   TX-500 Laser Rifle   -> Master Hawk Egg (level 5)
+//   Coalition Uniform    -> Falcon Egg      (level 7)
+//
+// Commands: trade, list (browse), help falconer
+
+inherit "/std/room";
+
+#define EGG_PATH       "/lib/obj/pets/hawk_egg"
+#define ECLIP_PATH     "/lib/objects/ammo/e_clip"
+#define TX500_PATH     "/lib/objects/weapons/tx500"
+#define UNIFORM_PATH   "/lib/objects/clothing/coalition_uniform"
+
+void create() {
+    ::create();
+
+    set_short("Aldric's Falconry");
+    set_long(
+        "A narrow shop built against New Camelot's inner wall, smelling "
+        "of leather, pine straw, and wind. Perch-rods line the walls, most "
+        "empty now. Aldric -- a lean, sun-darkened man with a hawk's "
+        "patience in his eyes -- sits behind a low counter. Pelts, jesses, "
+        "and hoods hang from wooden pegs. A hand-lettered sign reads:\n\n"
+        "  'I TRADE, NOT SELL. Bring me things worth having.'\n\n"
+        "Type 'list' or 'browse' to see what Aldric will accept.\n"
+        "Type 'trade <item>' to offer an item in exchange for an egg.\n"
+    );
+
+    add_exit("out", "/domains/new_camelot/stables");
+
+    set_property("indoors", 1);
+    set_property("light", 2);
+    set_property("shop", 1);     // Suppresses combat
+    set_property("no_combat", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_list", "list");
+    add_action("cmd_list", "browse");
+    add_action("cmd_trade", "trade");
+}
+
+// ---- List command ----
+
+int cmd_list(string arg) {
+    write(
+        "\n"
+        "==========[ ALDRIC'S FALCONRY -- TRADE LIST ]=========\n"
+        "Aldric says: \"I barter in rare goods for rare birds.\"\n\n"
+        "  10 x E-Clips (energy ammo)    ->  Hawk Egg       [Level 3]\n"
+        "  TX-500 Laser Rifle            ->  Master Hawk Egg [Level 5]\n"
+        "  Coalition States Uniform      ->  Falcon Egg      [Level 7]\n\n"
+        "Use: trade <item>   (e.g., 'trade rifle', 'trade uniform')\n"
+        "     hatch egg      (once you have an egg, hatch it!)\n\n"
+        "See also: help falconry, help falconer, help pets\n"
+        "======================================================\n\n"
+    );
+    return 1;
+}
+
+// ---- Trade command ----
+
+int cmd_trade(string arg) {
+    object player;
+    object *inv, found;
+    int eclip_count;
+
+    player = this_player();
+    if (!player) return 0;
+
+    if (!arg || arg == "") {
+        write("Trade what? Type 'list' to see what Aldric accepts.\n");
+        return 1;
+    }
+
+    inv = all_inventory(player);
+    if (!inv) inv = ({});
+
+    arg = lower_case(arg);
+
+    // --- Check for Coalition Uniform (falcon egg, lvl 7) ---
+    if (arg == "uniform" || arg == "coalition uniform" ||
+        arg == "military uniform" || arg == "cs uniform") {
+        return _try_trade_uniform(player, inv);
+    }
+
+    // --- Check for TX-500 Rifle (master hawk egg, lvl 5) ---
+    if (arg == "rifle" || arg == "tx-500" || arg == "tx500" ||
+        arg == "laser rifle" || arg == "tx-500 rifle") {
+        return _try_trade_rifle(player, inv);
+    }
+
+    // --- Check for E-Clips (hawk egg, lvl 3) ---
+    if (arg == "e-clips" || arg == "eclips" || arg == "clips" ||
+        arg == "e-clip" || arg == "clip" || arg == "ammo") {
+        return _try_trade_eclips(player, inv);
+    }
+
+    // Generic: try to match any known trade item
+    foreach (object ob : inv) {
+        if (!ob) continue;
+        if (ob->id(arg)) {
+            // Rifle?
+            if (ob->id("tx-500") || ob->id("rifle")) {
+                return _try_trade_rifle(player, inv);
+            }
+            // Uniform?
+            if (ob->id("coalition uniform") || ob->id("uniform")) {
+                return _try_trade_uniform(player, inv);
+            }
+            // E-clip?
+            if (ob->id("e-clip") || ob->id("clip")) {
+                return _try_trade_eclips(player, inv);
+            }
+        }
+    }
+
+    write("Aldric shakes his head. \"I have no use for that.\"\n");
+    return 1;
+}
+
+// --- Trade helpers ---
+
+int _try_trade_rifle(object player, object *inv) {
+    object rifle;
+
+    foreach (object ob : inv) {
+        if (ob && (ob->id("tx-500") || ob->id("rifle"))) {
+            rifle = ob;
+            break;
+        }
+    }
+
+    if (!rifle) {
+        write("You don't have a TX-500 Laser Rifle to trade.\n");
+        return 1;
+    }
+
+    write(
+        "Aldric takes the TX-500, turns it over in his hands, and sets it\n"
+        "under the counter with a satisfied nod.\n"
+        "He produces a cloth-wrapped bundle and sets it on the counter:\n"
+        "a speckled Master Hawk Egg.\n\n"
+        "Aldric says: \"Treat it well. A master hawk is worth ten rifles.\"\n\n"
+    );
+
+    tell_room(environment(player),
+              player->query_cap_name() + " trades a rifle to the falconer "
+              "and receives a Master Hawk Egg.",
+              ({ player }));
+
+    destruct(rifle);
+    _give_egg(player, "master_hawk", 5);
+    return 1;
+}
+
+int _try_trade_uniform(object player, object *inv) {
+    object uniform;
+
+    foreach (object ob : inv) {
+        if (ob && (ob->id("coalition uniform") || ob->id("uniform"))) {
+            uniform = ob;
+            break;
+        }
+    }
+
+    if (!uniform) {
+        write("You don't have a Coalition States uniform to trade.\n");
+        return 1;
+    }
+
+    write(
+        "Aldric's eyes narrow as you produce the Coalition uniform. He\n"
+        "examines it carefully, then folds it neatly beneath the counter.\n"
+        "From a locked strongbox he lifts a large mottled egg cradled\n"
+        "in soft leather.\n\n"
+        "Aldric says: \"A Falcon. The fastest raptor on Rifts Earth. "
+        "Don't waste her.\"\n\n"
+    );
+
+    tell_room(environment(player),
+              player->query_cap_name() + " trades a Coalition uniform to "
+              "the falconer and receives a Falcon Egg.",
+              ({ player }));
+
+    destruct(uniform);
+    _give_egg(player, "falcon", 7);
+    return 1;
+}
+
+int _try_trade_eclips(object player, object *inv) {
+    object *clips;
+    int i;
+
+    clips = ({});
+    foreach (object ob : inv) {
+        if (ob && (ob->id("e-clip") || ob->id("clip"))) {
+            clips += ({ ob });
+        }
+    }
+
+    if (sizeof(clips) < 10) {
+        write("Aldric says: \"I need ten E-Clips. You only have " +
+              sizeof(clips) + ".\"\n");
+        return 1;
+    }
+
+    write(
+        "Aldric counts out ten E-Clips on the counter, then sweeps them\n"
+        "into a wooden box beneath his bench.\n"
+        "He reaches up to a shelf and sets a speckled brown egg before you.\n\n"
+        "Aldric says: \"Feed it well and train it harder. Good luck.\"\n\n"
+    );
+
+    tell_room(environment(player),
+              player->query_cap_name() + " trades ten E-Clips to the "
+              "falconer and receives a Hawk Egg.",
+              ({ player }));
+
+    // Remove 10 E-Clips
+    for (i = 0; i < 10; i++) {
+        destruct(clips[i]);
+    }
+
+    _give_egg(player, "hawk", 3);
+    return 1;
+}
+
+void _give_egg(object player, string egg_type, int egg_level) {
+    object egg;
+
+    egg = clone_object(EGG_PATH);
+    if (!egg) {
+        write("Error: could not create egg. Contact an administrator.\n");
+        return;
+    }
+
+    egg->set_egg_type(egg_type);
+    egg->set_egg_level(egg_level);
+    egg->move(player);
+
+    write("You receive " + egg->query_short() + ".\n");
+    write("Use 'hatch egg' when you are ready to hatch it.\n");
+}

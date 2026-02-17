@@ -1,0 +1,60 @@
+FALCONRY - Training and Commanding Birds of Prey
+=================================================
+
+Falconry is a wilderness skill available to Wilderness Scouts and
+Nomads. It governs how well your hawk or falcon obeys voice commands.
+
+SKILL PERCENTAGES:
+  Base: 35% (+5% per level)
+  Synergy bonuses: Land Navigation (+5%), Wilderness Survival (+5%)
+  Maximum: 98%
+
+PASSIVE BONUS:
+  When Falconry >= 50%, you gain +2 Perception in outdoor environments.
+
+OBEDIENCE:
+  When you issue a voice command (see below), your hawk rolls against
+  your Falconry percentage. If the roll fails, the hawk ignores you.
+  Higher skill = more reliable hawk.
+
+VOICE COMMANDS:
+  Commands are issued using the SAY command:
+    say <birdname> <command> [arguments]
+
+  Available commands:
+    follow          -- Hawk follows you between rooms
+    stay            -- Hawk stays in its current room
+    come            -- Hawk returns to your room
+    return          -- Alias for come
+    perch           -- Hawk lands on your arm/shoulder
+    fly             -- Hawk takes flight (required for hunt/scout)
+    scout <dir>     -- Hawk flies to adjacent room and reports back
+    attack <target> -- Hawk attacks a target in your room
+    hunt            -- Hawk searches for prey (must be flying)
+    eat [corpse]    -- Hawk feeds on a corpse (restores its HP)
+
+SCOUT REPORT:
+  When you order your hawk to scout a direction, it flies ahead and
+  returns with a report showing:
+    - Room name in that direction
+    - Number of hostile creatures spotted
+    - Number of non-hostile presences
+
+HAWK TIERS:
+  Level 3 -- Hawk        (obtained: 10 E-Clips)
+  Level 5 -- Master Hawk (obtained: TX-500 Laser Rifle)
+  Level 7 -- Falcon      (obtained: Coalition States Uniform)
+
+  Higher-tier birds have better stats, more attacks, and improved
+  hunting success.
+
+HATCHING:
+  Eggs must be hatched before use. Type 'hatch egg' while holding
+  a hawk egg. Success chance is based on your Falconry skill.
+  A failed hatch destroys the egg.
+
+OBTAINING HAWKS:
+  Trade items with Aldric at the New Camelot Falconer shop.
+  Type 'list' inside the shop to see current trade offers.
+
+See also: help falconer, help pets, help skills

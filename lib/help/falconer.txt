@@ -1,0 +1,35 @@
+FALCONER - Aldric's Falconry Shop (New Camelot)
+================================================
+
+Aldric's Falconry is a barter shop in New Camelot, accessible from
+the stables. Aldric does not accept credits -- he trades rare birds
+for rare goods.
+
+LOCATION:
+  New Camelot -> Stables -> Falconer (out from stables)
+
+TRADE TABLE:
+  10 x E-Clips (energy ammo)   ->  Hawk Egg       [Level 3 Hawk]
+  TX-500 Laser Rifle            ->  Master Hawk Egg [Level 5 Master Hawk]
+  Coalition States Uniform      ->  Falcon Egg      [Level 7 Falcon]
+
+HOW TO TRADE:
+  1. Obtain the required items (from combat loot, shops, etc.)
+  2. Go to Aldric's Falconry in New Camelot
+  3. Type: trade <item>
+     Examples:
+       trade e-clips
+       trade rifle
+       trade uniform
+
+  4. You receive a hawk egg
+  5. Leave the shop and type: hatch egg
+  6. Your hawk hatches and bonds with you
+
+NOTES:
+  - You must have ALL required items (10 clips for basic hawk)
+  - The TX-500 and Coalition Uniform are consumed on trade
+  - Falconry skill improves hatch success and hawk obedience
+  - Multiple hawks can be owned but only one bonds as primary
+
+See also: help falconry, help pets, help skills

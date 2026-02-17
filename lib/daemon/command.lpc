@@ -92,6 +92,7 @@ void init_commands() {
     commands["sskills"] = "/cmds/sskills";
     commands["description"] = "/cmds/description";
     commands["selectocc"] = "/cmds/selectocc";
+    commands["hatch"] = "/cmds/hatch";       // Falconry: hatch a hawk egg
     
     // Social/introduction
     commands["introduce"] = "/cmds/introduce";

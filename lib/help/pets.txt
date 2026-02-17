@@ -1,0 +1,43 @@
+PETS - Companion Animals
+========================
+
+Pets are companion animals that follow and obey their owner.
+They use voice commands (the SAY command) to receive orders.
+
+CURRENT PETS:
+  Hawk / Master Hawk / Falcon
+    Obtained from the New Camelot falconer shop via barter.
+    Requires: Falconry skill (Wilderness Scout, Nomad OCCs)
+
+VOICE COMMANDS:
+  Issue commands by saying your pet's name followed by the command:
+    say <petname> <command> [arguments]
+
+  Universal commands:
+    follow   -- Pet follows you between rooms
+    stay     -- Pet stays put
+    come     -- Pet returns to your room
+    return   -- Same as come
+
+  Hawk/Falcon commands:
+    perch           -- Bird perches on your arm
+    fly             -- Bird takes flight
+    scout <dir>     -- Bird scouts an adjacent room and reports
+    attack <target> -- Bird attacks a target
+    hunt            -- Bird hunts for prey (must be flying)
+    eat [corpse]    -- Bird feeds (restores HP)
+
+OBEDIENCE:
+  Each command triggers an obedience check against your relevant
+  companion skill (Falconry for hawks). If the check fails, the
+  pet ignores the command. Higher skill = more reliable pet.
+
+OBTAINING PETS:
+  Hawks:   Trade with Aldric at the New Camelot Falconer
+           Type 'help falconer' for trade details
+
+HATCHING:
+  Some pets start as eggs. Use 'hatch egg' to hatch them.
+  Success depends on your skill. Failed hatches destroy the egg.
+
+See also: help falconry, help falconer, help skills

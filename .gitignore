@@ -41,13 +41,12 @@ Thumbs.db
 
 # AI context files (local only, do not commit)
 **/llm_breadcrumb.md
-archived-md/
 lib/llm_entries/
 mud-references-deadsouls/
 mud-references/
 scripts/
 /scripts/
 
-# Allow archived-md to be committed when needed
-!archived-md/
-!archived-md/*.mdarchived-md/
+# Archived docs: ignore everything except the single summary file
+archived-md/
+!archived-md/summary-02-17.md

@@ -50,4 +50,4 @@ scripts/
 
 # Allow archived-md to be committed when needed
 !archived-md/
-!archived-md/*.md
+!archived-md/*.mdarchived-md/

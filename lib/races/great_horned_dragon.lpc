@@ -1,135 +1,102 @@
 // /lib/races/great_horned_dragon.lpc
+// Great Horned Dragon - Powerful RCC with metamorph ability
+// Phase 2 - Dragon shapeshifting ability
+//
+// Hatchling stats: 22+ tons, massive MDC creature. Adults grow to 1000+ MDC.
+// Base MDC 350 at hatchling, +25 per level (level 10 = 600, level 15 = 725).
+
 inherit "/std/race";
 
 void create() {
     ::create();
+
     set_race_name("Great Horned Dragon");
     set_race_id("great_horned_dragon");
     set_race_plural("Great Horned Dragons");
     set_race_category(RACE_CAT_DRAGON);
 
     set_race_description(
-        "A powerful draconic lineage with great horns and massive wings. "
-        "Suited for metamorph testing and large-form playtesting."
-    );
-
-    set_size_category(SIZE_LARGE);
-    set_height_range(240,480);
-    set_weight_range(2000,8000);
-
-    set_stat_modifiers(([
-        "ps": 20,
-        "pe": 12,
-        "spd": 2
-    ]));
-
-    set_natural_mdc(800);
-    set_mdc_creature(1);
-    set_natural_armor(40);
-
-    add_natural_weapon("bite", 6, 10, 12);
-    add_natural_weapon("claw", 4, 8, 8);
-
-    set_is_rcc(1);
-    set_can_have_occ(1);
-}
-// /lib/races/great_horned_dragon.lpc
-// Great Horned Dragon - Powerful RCC with metamorph ability
-// Phase 2 - Dragon shapeshifting ability
-
-inherit "/std/race";
-
-void create() {
-    ::create();
-    
-    set_name("great_horned_dragon");
-    set_short("Great Horned Dragon");
-    set_long(
         "Great Horned Dragons are ancient and powerful beings, among the most "
         "intelligent and formidable of all dragon species. They possess massive "
         "horns, razor-sharp claws, and can breathe fire. Their most unique ability "
-        "is metamorphosis - the power to take the form of any humanoid race.\n"
+        "is metamorphosis - the power to take the form of any humanoid race."
     );
-    
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(180, 240);    // 15-20 feet tall at hatchling
+    set_weight_range(4000, 6000);  // 22+ tons
+
     // Great Horned Dragons are VERY powerful
-    set_stat_bonus("IQ", 8);   // Highly intelligent
-    set_stat_bonus("ME", 6);
-    set_stat_bonus("MA", 4);
-    set_stat_bonus("PS", 12);  // Incredibly strong
-    set_stat_bonus("PP", 6);
-    set_stat_bonus("PE", 10);
-    set_stat_bonus("PB", 8);
-    set_stat_bonus("SPD", 8);
-    
-    // M.D.C. creature!
-    set_base_mdc(200);  // 200 base MDC
-    set_mdc_bonus_per_level(20);  // +20 MDC per level
-    
+    set_stat_modifiers(([
+        "iq":  8,   // Highly intelligent
+        "me":  6,
+        "ma":  4,
+        "ps":  20,  // Incredibly strong
+        "pp":  6,
+        "pe":  12,
+        "pb":  8,
+        "spd": 10,
+    ]));
+
+    // M.D.C. creature — 350 base at hatchling, +25 per level
+    set_base_mdc(350);
+    set_mdc_bonus_per_level(25);
+    set_mdc_creature(1);
+    set_natural_armor(40);
+
     // Natural weapons
-    set_attacks_per_round(3);  // 3 attacks per round!
+    set_attacks_per_round(3);
     set_parries_per_round(4);
     set_auto_parry(1);
     set_auto_dodge(1);
     set_combat_archetype("dragon");
     set_mdc_natural_attacks(1);  // Natural attacks do M.D.!
-    
-    add_natural_weapon("bite", 2, 8, 4);      // 2d8+4 MD
-    add_natural_weapon("claw", 2, 6, 2);      // 2d6+2 MD
-    add_natural_weapon("tail", 1, 10, 3);     // 1d10+3 MD
-    add_natural_weapon("horn_gore", 3, 6, 4); // 3d6+4 MD
-    
+
+    add_natural_weapon("bite",     2, 8, 4);   // 2d8+4 MD
+    add_natural_weapon("claw",     2, 6, 2);   // 2d6+2 MD
+    add_natural_weapon("tail",     1, 10, 3);  // 1d10+3 MD
+    add_natural_weapon("horn_gore",3, 6, 4);   // 3d6+4 MD
+
+    set_is_rcc(1);
+    set_can_have_occ(1);
+
     // Flight
     set_property("can_fly", 1);
     set_property("flight_speed", 200);  // 200 mph flying
-    
+
     // Supernatural
     set_property("is_supernatural", 1);
     set_property("see_invisible", 1);
     set_property("nightvision", 1);
-    
+
     // Metamorph ability
     set_property("has_metamorph", 1);
-    set_property("metamorph_races", ({ 
-        "human", "elf", "dwarf", "dog_boy", "psi_stalker", 
+    set_property("can_metamorph", 1);
+    set_property("metamorph_races", ({
+        "human", "elf", "dwarf", "dog_boy", "psi_stalker",
         "dragon_hatchling", "juicer", "crazy"
     }));
-    // Structured metamorph/armor compatibility fields for runtime checks
-    set_property("can_metamorph", 1);
-    // If true, metamorphed form may be allowed to wear armor conforming to
-    // the target race's form (runtime must check/obey this flag).
     set_property("metamorph_armor_fit_override", 1);
-    // Explicit list of races/forms that this dragon can validly assume
-    // and for which armor-fitting should be permitted when metamorphed.
-    set_property("metamorph_armor_compat", ([ 
+    set_property("metamorph_armor_compat", ([
         "human": 1, "elf": 1, "dwarf": 1, "psi_stalker": 1
     ]));
-    // A convenience array listing the same targets for simpler checks.
     set_property("metamorph_armor_list", ({ "human", "elf", "dwarf", "psi_stalker" }));
-    
+
     // Magic and psionics
     set_base_ppe(100);  // Natural magic
     set_base_isp(50);   // Natural psionics
-    
-    set_size("huge");
-    set_weight_range(4000, 6000);  // Several tons!
-    set_height_range(180, 240);    // 15-20 feet tall
 }
 
 // Great Horned Dragons start with special abilities
 void setup_player(object player) {
     ::setup_player(player);
-    
-    // Grant metamorph command
+
     if (player && living(player)) {
         player->set_property("has_metamorph", 1);
         player->set_property("true_race", "great_horned_dragon");
-        // Mirror race-level metamorph settings onto the player object for
-        // command/runtime checks.
         player->set_property("can_metamorph", 1);
         player->set_property("metamorph_armor_fit_override", 1);
         player->set_property("metamorph_armor_list", ({ "human", "elf", "dwarf", "psi_stalker" }));
-        
-        // Dragons can breathe fire (future implementation)
         player->set_property("can_breathe_fire", 1);
     }
 }

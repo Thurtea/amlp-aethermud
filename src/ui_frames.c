@@ -61,15 +61,26 @@ void frame_title(PlayerSession *sess, const char *title, int width) {
 }
 
 /* │ left-aligned text          │ */
-void frame_line(PlayerSession *sess, const char *text, int width) {
-    int tlen = (int)strlen(text);
-    int pad = width - tlen;
-    if (pad < 0) pad = 0;
+/* Count visible characters in a string, skipping ANSI escape sequences */
+static int ansi_visible_len(const char *s) {
+    int len = 0;
+    while (*s) {
+        if (*s == '\033' && *(s+1) == '[') {
+            s += 2;
+            while (*s && *s != 'm') s++;
+            if (*s) s++;
+        } else {
+            len++;
+            s++;
+        }
+    }
+    return len;
+}
 
+void frame_line(PlayerSession *sess, const char *text, int width) {
+    int tlen = ansi_visible_len(text);
     send_to_player(sess, BOX_V " ");
     send_to_player(sess, "%s", text);
-    /* pad = width - tlen, but we used 1 char for leading space */
-    /* total inner = width, leading space = 1, text = tlen, trailing pad + trailing space = width - 1 - tlen */
     int remaining = width - 1 - tlen;
     if (remaining < 0) remaining = 0;
     for (int i = 0; i < remaining; i++) send_to_player(sess, " ");

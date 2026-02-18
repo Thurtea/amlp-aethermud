@@ -1,0 +1,48 @@
+/* dchat command - forwards messages to the intermud daemon
+ * Supports `dchat hello` and simple emote syntax `dchat *waves*`.
+ */
+
+#include <lib.h>
+
+inherit LIB_DAEMON;
+
+private string INTERMUD_D = "/lib/daemon/intermud";
+
+mixed cmd(string args) {
+    object id = find_object(INTERMUD_D) || load_object(INTERMUD_D);
+    if (!id) {
+        write("Intermud daemon is not available.");
+        return 0;
+    }
+
+    if (!args || args == "") {
+        write("Usage: dchat <message>\nUse: dchat *waves* to emote.");
+        return 1;
+    }
+
+    int is_emote = 0;
+    string text = args;
+    if (strlen(text) >= 2 && text[0] == '*') {
+        /* simple emote: strip leading/trailing * */
+        is_emote = 1;
+        if (text[<1] == '*') text = text[1..<2];
+        else text = text[1..];
+        text = sprintf("%s %s", this_player()->GetKeyName(), text);
+    }
+
+    /* Store/send via daemon */
+    id->send_channel("dchat", text, this_player());
+
+    /* Local echo */
+    if (is_emote) {
+        write("You dchat (emote): " + text + "\n");
+    } else {
+        write("You dchat: " + text + "\n");
+    }
+
+    return 1;
+}
+
+string GetHelp() {
+    return "Syntax: dchat <message>\n\nSend a message to the Intermud 'dchat' channel. Use leading and trailing asterisks for emotes (e.g. dchat *waves*).";
+}

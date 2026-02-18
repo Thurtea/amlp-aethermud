@@ -5,7 +5,6 @@
 // travel millennia ago. They are taller and longer-lived than standard
 // humans and carry magical heritage tattoos. Their connection to
 // tattoo magic makes them uniquely suited to mystical combat roles.
-// Some Atlanteans serve the secretive Aerihman clan as Sunaj Assassins.
 
 inherit "/std/race";
 
@@ -25,8 +24,7 @@ void create() {
         "and grant supernatural abilities. Driven from their homeland by the "
         "Splugorth, Atlanteans have become wanderers of the Megaverse. Their "
         "mastery of tattoo magic is unrivaled, and their hatred of the Splugorth "
-        "is legendary. Some clans harbor dark secrets - the Aerihman clan is "
-        "rumored to train shadow assassins known only as the Sunaj."
+        "is legendary."
     );
 
     set_size_category(SIZE_MEDIUM);

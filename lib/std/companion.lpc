@@ -93,7 +93,8 @@ int listen_for_command(string str) {
     command = words[1];
     
     // Check if they're addressing us
-    string *our_ids = query_id();
+    // query_id() returns a string; query_ids() returns the full string array.
+    string *our_ids = query_ids();
     if (!our_ids || member_array(pet_name, our_ids) == -1) {
         return 0;  // Not talking to us
     }

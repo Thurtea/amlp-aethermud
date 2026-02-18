@@ -79,6 +79,10 @@ typedef struct PlayerSession {
     struct PlayerSession *spell_target;   /* Resolved target for current spell */
     struct NPC *spell_target_npc;         /* Resolved NPC target for current spell */
 
+    /* Rift travel pending state */
+    int rift_pending;              /* 1 if a rift has been opened awaiting entry */
+    int rift_dest_id;              /* Destination rift_destinations[] index */
+
     /* Social/RP state */
     char last_tell_from[64];              /* Username of last tell sender (for reply) */
     int is_brief;                         /* Brief mode: skip long room descriptions */

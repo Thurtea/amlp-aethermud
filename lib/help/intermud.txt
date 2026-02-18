@@ -1,0 +1,8 @@
+Name: intermud
+Syntax: (daemon)
+
+Intermud daemon - provides a simple Intermud-3-like channel history and API.
+
+At present this daemon stores channel history and exposes `send_channel(chan, text, who)` and `query_history(chan, lines)` for local use. Network transport (UDP sockets) is not enabled by default.
+
+Channels: dchat, cre, ds, interwiz (libraries may create/use additional channels)

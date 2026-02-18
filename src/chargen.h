@@ -108,6 +108,7 @@ typedef struct Character {
     int auto_dodge_enabled;    /* Player toggle: 1=on, 0=off (default on) */
     int wimpy_threshold;       /* Auto-flee at this % of max HP (0=disabled) */
     int credits;               /* Universal credits (currency) */
+    int bm_credits;            /* Black market credits (untraceable) */
     char *clan;                /* Clan membership (e.g., "aerihman" for Sunaj) */
     char *alignment;           /* Character alignment (e.g., "Principled") */
 

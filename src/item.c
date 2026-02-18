@@ -418,9 +418,57 @@ Item* item_create(int template_id) {
 /* Free an item and its allocated memory */
 void item_free(Item *item) {
     if (!item) return;
+    /* Recursively free contained items first */
+    Item *c = item->contents;
+    while (c) {
+        Item *cn = c->next;
+        item_free(c);
+        c = cn;
+    }
     if (item->name) free(item->name);
     if (item->description) free(item->description);
     free(item);
+}
+
+/* Prepend item to container's contents list. */
+void container_add_item(Item *container, Item *item) {
+    if (!container || !item || !container->is_container) return;
+    item->next = container->contents;
+    container->contents = item;
+}
+
+/* Find an item in a container by name (exact then substring). */
+Item* container_find_item(Item *container, const char *name) {
+    if (!container || !name) return NULL;
+    Item *curr = container->contents;
+    while (curr) {
+        if (curr->name && strcasecmp(curr->name, name) == 0) return curr;
+        curr = curr->next;
+    }
+    curr = container->contents;
+    while (curr) {
+        if (curr->name && strcasestr(curr->name, name)) return curr;
+        curr = curr->next;
+    }
+    return NULL;
+}
+
+/* Remove a named item from a container (returns it unlinked, caller owns it). */
+Item* container_remove_item(Item *container, const char *name) {
+    if (!container || !name) return NULL;
+    Item *prev = NULL, *curr = container->contents;
+    while (curr) {
+        if (curr->name && (strcasecmp(curr->name, name) == 0 ||
+                           strcasestr(curr->name, name) != NULL)) {
+            if (prev) prev->next = curr->next;
+            else container->contents = curr->next;
+            curr->next = NULL;
+            return curr;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    return NULL;
 }
 
 /* Clone an item */
@@ -688,29 +736,30 @@ void inventory_display(struct PlayerSession *sess) {
             if (name && name[0]) {
                 char fmt[256];
                 format_item_name(name, fmt, sizeof(fmt));
-                char first = fmt[0];
-                if (first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u') {
-                    snprintf(name_buf, sizeof(name_buf), "An %s", fmt);
+                /* Avoid double article if name already begins with a/an/the */
+                int has_art = (strncasecmp(fmt, "a ", 2) == 0 ||
+                               strncasecmp(fmt, "an ", 3) == 0 ||
+                               strncasecmp(fmt, "the ", 4) == 0);
+                if (has_art) {
+                    /* Capitalize first char only */
+                    snprintf(name_buf, sizeof(name_buf), "%s", fmt);
+                    name_buf[0] = (char)toupper((unsigned char)name_buf[0]);
                 } else {
-                    snprintf(name_buf, sizeof(name_buf), "A %s", fmt);
+                    char first = fmt[0];
+                    if (first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u') {
+                        snprintf(name_buf, sizeof(name_buf), "An %s", fmt);
+                    } else {
+                        snprintf(name_buf, sizeof(name_buf), "A %s", fmt);
+                    }
                 }
             } else {
                 snprintf(name_buf, sizeof(name_buf), "%s", name ? name : "item");
             }
 
-            if (curr->type == ITEM_WEAPON_MELEE || curr->type == ITEM_WEAPON_RANGED) {
-                snprintf(buf, sizeof(buf), "%d. %s - %dd%d %s (%d lbs, %d cr)\n",
-                    count++, name_buf,
-                    curr->stats.damage_dice, curr->stats.damage_sides, dmg_type,
-                    curr->weight, curr->value);
-            } else if (curr->type == ITEM_ARMOR) {
-                snprintf(buf, sizeof(buf), "%d. %s - AR %d, %d %s (%d lbs, %d cr)\n",
-                    count++, name_buf, curr->stats.ar, curr->current_durability, dmg_type,
-                    curr->weight, curr->value);
-            } else {
-                snprintf(buf, sizeof(buf), "%d. %s (%d lbs, %d cr)\n",
-                    count++, name_buf, curr->weight, curr->value);
-            }
+            /* Show name and weight only — damage/AR/credits omitted from listing.
+             * Use examine <item> for full stats. */
+            snprintf(buf, sizeof(buf), "%d. %s. (%.1f lbs)\n",
+                count++, name_buf, (float)curr->weight);
             send_to_player(sess, buf);
             curr = curr->next;
         }

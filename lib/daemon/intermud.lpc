@@ -1,0 +1,56 @@
+/* Simple Intermud-3 style daemon (minimal, local-only adapter)
+ * Provides history storage and a send_channel() API used by
+ * communication commands like dchat.
+ *
+ * This is a light-weight adaptation for AMLP using patterns
+ * from Dead Souls intermud daemons. Network transport (UDP)
+ * is intentionally omitted here — add a driver-level socket
+ * integration later when ready.
+ */
+
+inherit "/lib/daemon";
+
+private mapping channel_history;
+private int max_history = 50;
+
+void create() {
+    ::create();
+    channel_history = ([ ]);
+}
+
+void set_max_history(int n) { if (n > 0) max_history = n; }
+
+/* Store a message in the history for a channel. */
+void store_message(string chan, string formatted) {
+    if (!chan) chan = "dchat";
+    if (!channel_history[chan]) channel_history[chan] = ({ });
+    channel_history[chan] += ({ formatted });
+    if (sizeof(channel_history[chan]) > max_history) {
+        channel_history[chan] = channel_history[chan][<max_history..];
+    }
+    log_file("intermud", sprintf("[%s] %s\n", chan, formatted));
+}
+
+/* Public API used by commands: send a message to a channel.
+ * For now this only stores history and logs; commands should
+ * handle local user-visible delivery. */
+int send_channel(string chan, string text, object who) {
+    string whoname = who ? (string)who->GetKeyName() : "System";
+    string ts = ctime(time());
+    string formatted = sprintf("%s <%s> %s", whoname, ts, text);
+    store_message(chan, formatted);
+    return 1;
+}
+
+/* Return recent history lines for a channel. */
+string *query_history(string chan, int lines) {
+    if (!chan) chan = "dchat";
+    if (!channel_history[chan]) return ({ });
+    if (lines <= 0) return channel_history[chan];
+    return channel_history[chan][<lines..];
+}
+
+/* List known channels (keys of history map) */
+string *query_channels() {
+    return keys(channel_history);
+}

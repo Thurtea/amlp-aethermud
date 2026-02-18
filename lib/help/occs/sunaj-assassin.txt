@@ -1,37 +1,10 @@
 SUNAJ ASSASSIN (O.C.C.)
 
-Description:
-  The Sunaj are elite Atlantean assassins who serve the
-  mysterious Aerihman clan. They are masters of stealth,
-  shadow magic, and silent killing. Access is restricted
-  to Atlantean characters who join Clan Aerihman.
+Little is known about the Sunaj. They are spoken of only in hushed tones
+in the darkest corners of Splynn and the outlying territories. Atlantean
+scholars deny their existence. Coalition spies have never confirmed a
+sighting.
 
-Requirements:
-  - Race: Must be Atlantean
-  - Clan: Must join Clan Aerihman (use 'clan aerihman')
-  - Note: Cannot be selected during chargen
+If such an order exists, they leave no traces.
 
-Abilities:
-  - PPE Pool: 30 starting PPE
-  - ISP Pool: 20 starting ISP
-  - Shadow Skills: Stealth and infiltration
-  - Assassin Training: Enhanced combat techniques
-
-Starting Skills:
-  Primary (auto-assigned on clan join):
-    Prowl, Detect Ambush, Intelligence,
-    Weapon Proficiency (Knife), Tracking
-
-Starting Equipment:
-  Vibro-Blade (shadow weapon), Light EBA (shadow suit),
-  Food Ration, Water Canteen
-
-Starting Credits: 800
-
-How to Unlock:
-  1. Create an Atlantean character
-  2. Complete chargen normally (default: Vagabond)
-  3. Type: clan aerihman
-  4. Your OCC changes to Sunaj Assassin
-
-See also: help occs, help clan, help magic
+See also: help occs

@@ -50,6 +50,8 @@ void init_commands() {
     commands["shout"] = "/cmds/shout";
     commands["chat"] = "/cmds/chat";
     commands["whisper"] = "/cmds/whisper";
+    // Intermud / external chat channel (local dchat daemon)
+    commands["dchat"] = "/cmds/communication/dchat";
     commands["emote"] = "/cmds/emote";
     commands[":"] = "/cmds/emote";
     

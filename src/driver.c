@@ -660,11 +660,11 @@ static int cmd_tell(PlayerSession *session, const char *arg) {
     
     /* Send messages - blue text when wizard is involved */
     if (session->privilege_level >= 1 || target->privilege_level >= 1) {
-        send_to_player(target, "\n\033[1;34m<%s tells you> %s\033[0m\n", session->username, message);
-        send_to_player(session, "\033[1;34m<You tell %s> %s\033[0m\n", target->username, message);
+        send_to_player(target, "\n\033[1;34m%s tells you: %s\033[0m\n", session->username, message);
+        send_to_player(session, "\033[1;34mYou tell %s: %s\033[0m\n", target->username, message);
     } else {
-        send_to_player(target, "\n<%s tells you> %s\n", session->username, message);
-        send_to_player(session, "<You tell %s> %s\n", target->username, message);
+        send_to_player(target, "\n%s tells you: %s\n", session->username, message);
+        send_to_player(session, "You tell %s: %s\n", target->username, message);
     }
 
     /* Track for reply command */
@@ -839,6 +839,26 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
         cmd_look(session, "");
         return 1;
     }
+
+    /* "examine id" / "examine id card" / "examine card" — show Universal ID balance */
+    if (strcasecmp(arg, "id") == 0 || strcasecmp(arg, "id card") == 0 ||
+        strcasecmp(arg, "card") == 0 || strcasecmp(arg, "universal id") == 0 ||
+        strcasecmp(arg, "universal id card") == 0 || strcasecmp(arg, "atm card") == 0) {
+        /* Confirm player has the card */
+        Item *card = inventory_find(&session->character.inventory, "atm card");
+        if (!card) card = inventory_find(&session->character.inventory, "universal id card");
+        if (!card) {
+            send_to_player(session, "You don't have a Universal ID card.\n");
+            return 1;
+        }
+        send_to_player(session, "Universal ID Card — %s\n", session->username);
+        send_to_player(session, "AMLP Federal Credit Union\n");
+        send_to_player(session, "  Universal credits:    %d cr\n", session->character.credits);
+        if (session->character.bm_credits > 0) {
+            send_to_player(session, "  Black market credits: %d cr\n", session->character.bm_credits);
+        }
+        return 1;
+    }
     
     /* Look for player in room */
     Room *room = session->current_room;
@@ -863,6 +883,17 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
     /* Check inventory */
     Item *inv_item = inventory_find(&session->character.inventory, arg);
     if (inv_item) {
+        /* ATM card: show live credit balance (both pools) */
+        if (strcasecmp(inv_item->name, "Universal ID card") == 0 ||
+            strcasecmp(inv_item->name, "atm card") == 0) {
+            send_to_player(session, "Universal ID Card — %s\n", session->username);
+            send_to_player(session, "AMLP Federal Credit Union\n");
+            send_to_player(session, "  Universal credits:    %d cr\n", session->character.credits);
+            if (session->character.bm_credits > 0) {
+                send_to_player(session, "  Black market credits: %d cr\n", session->character.bm_credits);
+            }
+            return 1;
+        }
         send_to_player(session, "%s (%s)\n", inv_item->name, item_type_to_string(inv_item->type));
         send_to_player(session, "%s\n", inv_item->description);
         if (inv_item->type == ITEM_WEAPON_MELEE || inv_item->type == ITEM_WEAPON_RANGED) {
@@ -888,19 +919,26 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
         if (nt->long_desc) {
             send_to_player(session, "%s\n", nt->long_desc);
         } else {
-            /* Generic stat block for combat NPCs */
+            /* Show name + descriptive health state — no numbers */
             char display[64];
             snprintf(display, sizeof(display), "%s", room_npc->name);
             display[0] = (char)toupper((unsigned char)display[0]);
-            send_to_player(session, "%s\n", display);
             Character *nch = &room_npc->character;
+            int pct;
             if (nch->health_type == MDC_ONLY) {
-                send_to_player(session, "Level %d  MDC: %d/%d\n",
-                               nch->level, nch->mdc, nch->max_mdc);
+                pct = nch->max_mdc > 0 ? (nch->mdc * 100 / nch->max_mdc) : 0;
             } else {
-                send_to_player(session, "Level %d  HP: %d/%d  SDC: %d/%d\n",
-                               nch->level, nch->hp, nch->max_hp, nch->sdc, nch->max_sdc);
+                int total = nch->max_hp + nch->max_sdc;
+                int cur   = nch->hp + nch->sdc;
+                pct = total > 0 ? (cur * 100 / total) : 0;
             }
+            const char *health;
+            if      (pct >= 90) health = "appears in perfect health.";
+            else if (pct >= 70) health = "appears in good health.";
+            else if (pct >= 50) health = "appears slightly injured.";
+            else if (pct >= 25) health = "appears badly injured.";
+            else                health = "appears near death.";
+            send_to_player(session, "%s. It %s\n", display, health);
         }
         return 1;
     }
@@ -1385,27 +1423,104 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         }
 
         if (strcmp(cmd, "update") == 0) {
-            if (!args || *args == '\0') {
-                send_to_player(session, "Usage: update <lpc_path>\r\n");
-                send_to_player(session, "Example: update /domains/wizard/thurtea/workroom\r\n");
-                result.type = VALUE_NULL;
-                return result;
+            const char *update_path = args;
+            /* "update" or "update here" → reload current room */
+            if (!update_path || *update_path == '\0' ||
+                strcasecmp(update_path, "here") == 0) {
+                if (session->current_room && session->current_room->lpc_path) {
+                    update_path = session->current_room->lpc_path;
+                } else {
+                    send_to_player(session, "No LPC room to update here.\r\n");
+                    result.type = VALUE_NULL;
+                    return result;
+                }
             }
-            Room *reloaded = room_reload_lpc(args);
+            Room *reloaded = room_reload_lpc(update_path);
             if (reloaded) {
-                send_to_player(session, "Reloaded: %s (%s)\r\n", args, reloaded->name);
+                send_to_player(session, "Reloaded: %s (%s)\r\n", update_path, reloaded->name);
                 /* If we're standing in it, re-look */
                 if (session->current_room == reloaded) {
                     cmd_look(session, "");
                 }
             } else {
-                send_to_player(session, "Failed to reload '%s'.\r\n", args);
+                send_to_player(session, "Failed to reload '%s'.\r\n", update_path);
             }
             result.type = VALUE_NULL;
             return result;
         }
+
+        /* findobj <query> — scan lib/ for .lpc files matching name */
+        if (strcmp(cmd, "findobj") == 0) {
+            if (!args || *args == '\0') {
+                send_to_player(session, "Usage: findobj <name>\r\n");
+                send_to_player(session, "Example: findobj falcon\r\n");
+                result.type = VALUE_NULL;
+                return result;
+            }
+            /* Recursive scan helper using a stack of dirs */
+            char query[128];
+            strncpy(query, args, sizeof(query) - 1);
+            query[sizeof(query) - 1] = '\0';
+            /* Lowercase query for case-insensitive match */
+            for (int qi = 0; query[qi]; qi++) query[qi] = tolower((unsigned char)query[qi]);
+
+            int found = 0;
+            /* BFS/DFS with a fixed-size dir stack */
+            #define FINDOBJ_MAX_DIRS 512
+            char *dir_stack[FINDOBJ_MAX_DIRS];
+            int dir_top = 0;
+            dir_stack[dir_top++] = strdup("lib");
+
+            while (dir_top > 0) {
+                char *cur_dir = dir_stack[--dir_top];
+                DIR *dh = opendir(cur_dir);
+                if (!dh) { free(cur_dir); continue; }
+                struct dirent *de;
+                while ((de = readdir(dh)) != NULL) {
+                    if (de->d_name[0] == '.') continue;
+                    char full[1024];
+                    snprintf(full, sizeof(full), "%s/%s", cur_dir, de->d_name);
+                    struct stat st2;
+                    if (stat(full, &st2) != 0) continue;
+                    if (S_ISDIR(st2.st_mode)) {
+                        if (dir_top < FINDOBJ_MAX_DIRS - 1)
+                            dir_stack[dir_top++] = strdup(full);
+                    } else {
+                        /* Check .lpc extension */
+                        size_t nlen = strlen(de->d_name);
+                        if (nlen < 5 || strcmp(de->d_name + nlen - 4, ".lpc") != 0) continue;
+                        /* Case-insensitive basename match */
+                        char lc_name[256];
+                        strncpy(lc_name, de->d_name, sizeof(lc_name) - 1);
+                        lc_name[sizeof(lc_name)-1] = '\0';
+                        for (int li = 0; lc_name[li]; li++) lc_name[li] = tolower((unsigned char)lc_name[li]);
+                        if (strstr(lc_name, query)) {
+                            /* Convert filesystem path to virtual LPC path */
+                            const char *vpath = full + 3; /* skip "lib" → "/" */
+                            /* Strip .lpc extension */
+                            char vpath_noext[1024];
+                            strncpy(vpath_noext, vpath, sizeof(vpath_noext) - 1);
+                            vpath_noext[sizeof(vpath_noext)-1] = '\0';
+                            size_t vlen = strlen(vpath_noext);
+                            if (vlen >= 4) vpath_noext[vlen - 4] = '\0';
+                            send_to_player(session, "%s.lpc\r\n", vpath_noext);
+                            found++;
+                        }
+                    }
+                }
+                closedir(dh);
+                free(cur_dir);
+            }
+            #undef FINDOBJ_MAX_DIRS
+            if (found == 0)
+                send_to_player(session, "No .lpc files found matching '%s'.\r\n", args);
+            else
+                send_to_player(session, "--- %d match%s ---\r\n", found, found == 1 ? "" : "es");
+            result.type = VALUE_NULL;
+            return result;
+        }
     }
-    
+
     /* If player object exists, route command through it. Set the
      * current VM session so efuns like this_player() can access it. */
     /* Prefer LPC room rendering when available: if the current room
@@ -1713,8 +1828,9 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
 
+    /* 'credits' and 'balance' commands removed — use 'examine id' */
     if (strcmp(cmd, "credits") == 0 || strcmp(cmd, "balance") == 0) {
-        send_to_player(session, "You have %d credits.\r\n", session->character.credits);
+        send_to_player(session, "Type 'examine id' to check your Universal ID card balance.\r\n");
         result.type = VALUE_NULL;
         return result;
     }
@@ -2018,7 +2134,39 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
     /* Psionics commands (Phase 5) */
     if (strcmp(cmd, "use") == 0 || strcmp(cmd, "manifest") == 0) {
+        /* "use atm" / "use terminal" — check balance at ATM terminal in room */
+        if (args && (strcasecmp(args, "atm") == 0 || strcasecmp(args, "terminal") == 0 ||
+                     strcasecmp(args, "atm terminal") == 0)) {
+            Room *cur = session->current_room;
+            Item *atm_term = cur ? room_find_item(cur, "atm terminal") : NULL;
+            if (!atm_term) {
+                send_to_player(session, "There is no ATM terminal here.\r\n");
+            } else {
+                Item *card = inventory_find(&session->character.inventory, "atm card");
+                if (!card) card = inventory_find(&session->character.inventory, "universal id card");
+                if (!card) {
+                    send_to_player(session, "You need a Universal ID card to use the ATM.\r\n");
+                } else {
+                    send_to_player(session, "AMLP Federal Credit Union\n");
+                    send_to_player(session, "Account holder: %s\n", session->username);
+                    send_to_player(session, "Current balance: %d credits\n\n", session->character.credits);
+                }
+            }
+            result.type = VALUE_NULL;
+            return result;
+        }
         cmd_use_power(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* "enter rift" — travel through a pending rift */
+    if (strcmp(cmd, "enter") == 0 && args && strcasecmp(args, "rift") == 0) {
+        if (!session->rift_pending) {
+            send_to_player(session, "There is no open rift here.\r\n");
+        } else {
+            cmd_enter_rift(session);  /* defined in room.c, declared in room.h */
+        }
         result.type = VALUE_NULL;
         return result;
     }
@@ -2167,33 +2315,17 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             char self_msg[BUFFER_SIZE];
             snprintf(self_msg, sizeof(self_msg), "You [OOC]: %s\r\n", args);
 
-            /* Broadcast to room - no language check */
+            /* Broadcast to room - OOC always uses player username, no intro check */
             if (session->current_room) {
                 Room *room = session->current_room;
+                const char *speaker_name = session->username ? session->username : "Someone";
                 for (int i = 0; i < room->num_players; i++) {
                     PlayerSession *listener = room->players[i];
                     if (!listener || listener == session) continue;
 
-                    /* Determine display name: username if introduced, else "A <race>" */
-                    Character *lch = &listener->character;
-                    const char *speaker_name = NULL;
-                    for (int j = 0; j < lch->introduced_count; j++) {
-                        if (lch->introduced_to[j] &&
-                            strcasecmp(lch->introduced_to[j], session->username) == 0) {
-                            speaker_name = session->username;
-                            break;
-                        }
-                    }
-
                     char listener_msg[BUFFER_SIZE];
-                    if (speaker_name) {
-                        snprintf(listener_msg, sizeof(listener_msg),
-                            "%s [OOC]: %s\r\n", speaker_name, args);
-                    } else {
-                        const char *race = speaker_ch->race ? speaker_ch->race : "Someone";
-                        snprintf(listener_msg, sizeof(listener_msg),
-                            "A %s [OOC]: %s\r\n", race, args);
-                    }
+                    snprintf(listener_msg, sizeof(listener_msg),
+                        "%s [OOC]: %s\r\n", speaker_name, args);
                     send_to_player(listener, "%s", listener_msg);
                 }
             }
@@ -2350,52 +2482,52 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             return result;
         }
 
-        /* Wizard/admin view: full list with colored roles */
+        /* Wizard/admin view: full list with colored roles.
+           Shows STATE_PLAYING and STATE_CHARGEN so wizards see everyone,
+           including players still in character creation. Invisible players
+           are always shown to wizards (tagged with "(invis)"). */
         send_to_player(session, "\r\n");
         frame_top(session, w);
         frame_title(session, "PLAYERS ONLINE", w);
         frame_sep(session, w);
 
         for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
-                if (sessions[i]->is_invisible && session->privilege_level < 1)
-                    continue;
-                time_t idle = time(NULL) - sessions[i]->last_activity;
-                const char *invis_tag = sessions[i]->is_invisible ? " (invis)" : "";
-                const char *title_str = sessions[i]->title[0] ? sessions[i]->title : "";
+            if (!sessions[i]) continue;
+            SessionState st = sessions[i]->state;
+            if (st != STATE_PLAYING && st != STATE_CHARGEN) continue;
+            if (!sessions[i]->username || !sessions[i]->username[0]) continue;
 
-                /* Build colored role tag (prefix before name, trailing space) */
-                char role_tag[64] = "";
-                if (sessions[i]->privilege_level >= 1) {
-                    const char *role = sessions[i]->wizard_role;
-                    if (strcmp(role, "admin") == 0)
-                        snprintf(role_tag, sizeof(role_tag), "\033[1;31m[Admin]\033[0m ");
-                    else if (strcmp(role, "domain") == 0)
-                        snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
-                    else if (strcmp(role, "code") == 0)
-                        snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
-                    else
-                        snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
-                }
+            time_t idle = time(NULL) - sessions[i]->last_activity;
+            const char *invis_tag  = sessions[i]->is_invisible ? " \033[2m(invis)\033[0m" : "";
+            const char *state_tag  = (st == STATE_CHARGEN)     ? " \033[2m(chargen)\033[0m" : "";
+            const char *title_str  = sessions[i]->title[0]     ? sessions[i]->title : "";
 
-                if (title_str[0]) {
-                    snprintf(buf, sizeof(buf), "%s%-16s%s %s  (%lds idle)",
-                            role_tag, sessions[i]->username, invis_tag, title_str, idle);
-                } else {
-                    snprintf(buf, sizeof(buf), "%s%-16s%s  (%lds idle)",
-                            role_tag, sessions[i]->username, invis_tag, idle);
-                }
-
-                /* If role_tag contains ANSI color codes the visible length
-                 * will be shorter than the raw string length. Add 11 spaces
-                 * padding so the frame border lines up visually. */
-                if (sessions[i] && sessions[i]->privilege_level >= 1) {
-                    strncat(buf, "           ", sizeof(buf) - strlen(buf) - 1);
-                }
-
-                frame_line(session, buf, w);
-                count++;
+            /* Colored role tag for wizards */
+            char role_tag[64] = "";
+            if (sessions[i]->privilege_level >= 1) {
+                const char *role = sessions[i]->wizard_role;
+                if (strcmp(role, "admin") == 0)
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;31m[Admin]\033[0m ");
+                else if (strcmp(role, "domain") == 0)
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
+                else if (strcmp(role, "code") == 0)
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
+                else
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
             }
+
+            if (title_str[0]) {
+                snprintf(buf, sizeof(buf), "%s%-16s%s%s %s  (%lds idle)",
+                        role_tag, sessions[i]->username, invis_tag, state_tag,
+                        title_str, idle);
+            } else {
+                snprintf(buf, sizeof(buf), "%s%-16s%s%s  (%lds idle)",
+                        role_tag, sessions[i]->username, invis_tag, state_tag, idle);
+            }
+
+            /* frame_line is ANSI-aware; no manual padding needed */
+            frame_line(session, buf, w);
+            count++;
         }
 
         frame_sep(session, w);
@@ -4086,11 +4218,11 @@ more_room_source:
             return vm_value_create_string(response);
         }
 
-        send_to_player(target, "\n<%s tells you> %s\n", session->username, args);
+        send_to_player(target, "\n%s tells you: %s\n", session->username, args);
         strncpy(target->last_tell_from, session->username, sizeof(target->last_tell_from) - 1);
 
         char response[1024];
-        snprintf(response, sizeof(response), "<You tell %s> %s\r\n", target->username, args);
+        snprintf(response, sizeof(response), "You tell %s: %s\r\n", target->username, args);
         return vm_value_create_string(response);
     }
 

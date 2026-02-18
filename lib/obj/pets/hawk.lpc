@@ -142,6 +142,38 @@ void set_hawk_tier(string tier, int level) {
 string query_hawk_tier() { return hawk_tier; }
 int query_hawk_level() { return hawk_level; }
 
+// ---- Display helpers ----
+
+// Human-readable tier label for short descs
+private string _tier_label() {
+    if (hawk_tier == "falcon")      return "peregrine falcon";
+    if (hawk_tier == "master_hawk") return "master hawk";
+    return "hunting hawk";
+}
+
+// Override query_short() so room-look shows the perched state dynamically.
+// When perched on an owner the short desc becomes e.g.:
+//   "a hunting hawk perched on Cabe's arm"
+// When in flight or just present in a room it falls back to the tier default.
+string query_short() {
+    object owner;
+
+    if (query_property("is_perched")) {
+        owner = query_owner();
+        if (owner) {
+            return "a " + _tier_label() + " perched on " +
+                   owner->query_cap_name() + "'s arm";
+        }
+    }
+
+    // Airborne - make it obvious
+    if (query_property("is_flying")) {
+        return "a " + _tier_label() + " circling overhead";
+    }
+
+    return ::query_short();
+}
+
 // ---- Hawk-specific emotes ----
 
 void emote_confused() {

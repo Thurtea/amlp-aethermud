@@ -1,0 +1,24 @@
+// Universal ATM Card — credits access object
+// Every player receives one at character creation.
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_id("atm card");
+    add_id("card");
+    add_id("universal id");
+    add_id("id card");
+    add_id("universal id card");
+    set_short("a Universal ID card");
+    set_long(
+        "A slim duraplastic card embossed with the AMLP Federal Credit Union logo.\n"
+        "Your name and citizen ID are etched in micro-print along the edge.\n"
+        "It stores your credit balance and serves as your universal identification.\n"
+        "Type 'examine atm card' to check your current balance."
+    );
+    set_weight(0);
+    set_value(0);
+    set_property("type", "id");
+    set_property("no_drop", 1);
+}

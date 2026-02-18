@@ -83,5 +83,6 @@ void format_item_name(const char *iname, char *out, size_t out_sz);
 void cmd_look(PlayerSession *sess, const char *args);
 void cmd_move(PlayerSession *sess, const char *direction);
 void cmd_rift(PlayerSession *sess, const char *args);
+void cmd_enter_rift(PlayerSession *sess);
 
 #endif /* ROOM_H */

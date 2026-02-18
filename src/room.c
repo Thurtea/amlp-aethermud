@@ -1318,6 +1318,38 @@ static void look_at_player(PlayerSession *sess, PlayerSession *target) {
 }
 
 /* Helper: display item details to looker. */
+/* Display the contents of a container item. */
+static void look_at_container(PlayerSession *sess, Item *box) {
+    /* Header: capitalise name */
+    char header[256];
+    snprintf(header, sizeof(header), "%s", box->name ? box->name : "container");
+    header[0] = (char)toupper((unsigned char)header[0]);
+    send_to_player(sess, "%s\n", header);
+    if (box->description && box->description[0])
+        send_to_player(sess, "%s\n", box->description);
+
+    if (!box->contents) {
+        send_to_player(sess, "It is empty.\n");
+        return;
+    }
+
+    send_to_player(sess, "It contains:\n");
+    Item *curr = box->contents;
+    int n = 1;
+    while (curr) {
+        const char *iname = curr->name && curr->name[0] ? curr->name : "something";
+        char fmt[256];
+        format_item_name(iname, fmt, sizeof(fmt));
+        char lc = tolower((unsigned char)fmt[0]);
+        int vowel = (lc == 'a' || lc == 'e' || lc == 'i' || lc == 'o' || lc == 'u');
+        send_to_player(sess, "  %d. %s %s. (%.1f lbs)\n",
+                       n++, vowel ? "An" : "A", fmt, (float)curr->weight);
+        curr = curr->next;
+    }
+    send_to_player(sess, "Type 'get <item> from %s' to retrieve an item.\n",
+                   box->name ? box->name : "it");
+}
+
 static void look_at_item(PlayerSession *sess, Item *item) {
     send_to_player(sess, "%s (%s)\n", item->name, item_type_to_string(item->type));
     send_to_player(sess, "%s\n", item->description);
@@ -1431,7 +1463,10 @@ void cmd_look(PlayerSession *sess, const char *args) {
         /* 6. Room items */
         Item *ritem = room_find_item(room, target);
         if (ritem) {
-            look_at_item(sess, ritem);
+            if (ritem->is_container)
+                look_at_container(sess, ritem);
+            else
+                look_at_item(sess, ritem);
             return;
         }
 
@@ -1527,10 +1562,11 @@ show_room:
             }
 
             if (!has_article) {
-                /* Choose lowercase a/an by vowel rule on formatted name */
+                /* Choose a/an by vowel rule on formatted name, then capitalize */
                 char lc = tolower((unsigned char)fmt_name[0]);
                 int vowel = (lc == 'a' || lc == 'e' || lc == 'i' || lc == 'o' || lc == 'u');
                 snprintf(outbuf, sizeof(outbuf), "%s %s", vowel ? "an" : "a", fmt_name);
+                outbuf[0] = (char)toupper((unsigned char)outbuf[0]);
             } else {
                 /* Use original short but normalize capitalization of first char */
                 snprintf(outbuf, sizeof(outbuf), "%s", iname);
@@ -1764,8 +1800,37 @@ void cmd_rift(PlayerSession *sess, const char *args) {
         return;
     }
 
-    /* Deduct credits */
+    /* Deduct credits and open the rift — player must "enter rift" to travel */
     sess->character.credits -= RIFT_COST;
+    sess->rift_pending = 1;
+    sess->rift_dest_id = dest_idx;
+
+    send_to_player(sess, "\nThe Moxim begins weaving dimensional energy...\n");
+    send_to_player(sess, "A shimmering rift tears open before you, swirling with light.\n");
+    send_to_player(sess, "Destination: %s  (%d credits deducted)\n",
+        rift_destinations[dest_idx].name, RIFT_COST);
+    send_to_player(sess, "Type 'enter rift' to step through.\n");
+
+    /* Notify others in the departure room */
+    Room *current = sess->current_room;
+    for (int i = 0; i < current->num_players; i++) {
+        if (current->players[i] != sess) {
+            send_to_player(current->players[i],
+                "The Moxim tears open a shimmering rift. A destination glows within.\n");
+        }
+    }
+}
+
+/* Complete rift travel — called by "enter rift" command */
+void cmd_enter_rift(PlayerSession *sess) {
+    if (!sess || !sess->rift_pending) {
+        send_to_player(sess, "There is no open rift here.\n");
+        return;
+    }
+
+    int dest_idx = sess->rift_dest_id;
+    sess->rift_pending = 0;
+    sess->rift_dest_id = -1;
 
     Room *dest = room_get_by_id(rift_destinations[dest_idx].room_id);
     if (!dest) {
@@ -1774,35 +1839,27 @@ void cmd_rift(PlayerSession *sess, const char *args) {
         return;
     }
 
-    /* Notify departure room */
     Room *current = sess->current_room;
     for (int i = 0; i < current->num_players; i++) {
         if (current->players[i] != sess) {
             send_to_player(current->players[i],
-                "The Moxim opens a shimmering rift. %s steps through and vanishes.\n",
-                sess->username);
+                "%s steps into the shimmering rift and vanishes.\n", sess->username);
         }
     }
 
-    /* Move player */
     room_remove_player(current, sess);
     room_add_player(dest, sess);
     sess->current_room = dest;
 
-    send_to_player(sess, "\nThe Moxim opens a shimmering rift before you.\n");
-    send_to_player(sess, "You step through into blinding light...\n\n");
-    send_to_player(sess, "%d credits deducted. You have %d credits remaining.\n\n",
-        RIFT_COST, sess->character.credits);
+    send_to_player(sess, "\nYou step through the rift into blinding light...\n\n");
+    send_to_player(sess, "You have %d credits remaining.\n\n", sess->character.credits);
 
-    /* Notify arrival room */
     for (int i = 0; i < dest->num_players; i++) {
         if (dest->players[i] != sess) {
             send_to_player(dest->players[i],
-                "A shimmering rift opens and %s steps through.\n",
-                sess->username);
+                "A shimmering rift tears open and %s steps through.\n", sess->username);
         }
     }
 
-    /* Auto-look */
     cmd_look(sess, "");
 }

@@ -1,0 +1,29 @@
+// findobj.lpc — Admin command: search lib/ for .lpc files matching pattern
+// Usage: findobj <pattern>
+// The actual implementation is in the C driver (src/driver.c).
+// This file serves as the canonical command definition and can be loaded
+// by LPC environments that support admin command routing.
+
+#include <globals.h>
+
+int main(string arg) {
+    object user;
+    user = previous_object();
+
+    if (!user || user->query_privilege_level() < PRIV_ADMIN) {
+        tell_object(user, "You don't have permission to use that command.\n");
+        return 1;
+    }
+
+    if (!arg || arg == "") {
+        tell_object(user, "Usage: findobj <pattern>\n");
+        tell_object(user, "Example: findobj falcon\n");
+        return 1;
+    }
+
+    // The C driver handles actual filesystem scanning via the findobj builtin.
+    // If this LPC path is reached in a pure-LPC environment, show a note.
+    tell_object(user, "[findobj] Handled by C driver builtin.\n");
+    tell_object(user, "Pattern: " + arg + "\n");
+    return 1;
+}

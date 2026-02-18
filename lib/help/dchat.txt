@@ -1,0 +1,9 @@
+Name: dchat
+Syntax: dchat <message>
+
+Send a message to the Intermud dchat channel. Emotes are supported using leading/trailing asterisks:
+
+  dchat Hello everyone
+  dchat *waves*
+
+This implementation stores a local history and logs messages; network transport may be enabled later.

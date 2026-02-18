@@ -68,6 +68,10 @@ typedef struct Item {
     int ppe_max_storage;        /* Max PPE storage capacity */
     int charged;                /* Activated state (TW hilt blade) */
     struct Item *next;          /* Linked list */
+
+    /* Container support: items stored inside this object (e.g., a chest) */
+    bool is_container;          /* True if this item holds other items */
+    struct Item *contents;      /* Linked list of contained items (NULL if empty) */
 } Item;
 
 /* Inventory Structure */
@@ -122,6 +126,11 @@ void equipment_display(PlayerSession *sess);
 Item* item_create_from_lpc(const char *fs_path);
 /* Resolve LPC path helper (used by clone/wizard helpers) */
 int resolve_lpc_path(const char *args, char *out_path, size_t out_size);
+
+/* Container functions */
+void container_add_item(Item *container, Item *item);
+Item* container_find_item(Item *container, const char *name);
+Item* container_remove_item(Item *container, const char *name);
 
 /* Techno-Wizard Hilt commands */
 void cmd_charge(PlayerSession *sess, const char *args);

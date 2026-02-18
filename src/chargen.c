@@ -217,6 +217,20 @@ Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
     Room *workroom = room_get_by_path(workroom_path);
     if (!workroom) return NULL;
 
+    /* ---- Wooden chest: all items spawn inside, not on the floor ---- */
+    Item *chest = (Item*)calloc(1, sizeof(Item));
+    chest->id = -1;
+    chest->name = strdup("wooden chest");
+    chest->description = strdup(
+        "A sturdy wooden chest bound with iron straps and marked with\n"
+        "arcane symbols. It contains sample equipment and wizard tools.");
+    chest->type = ITEM_MISC;
+    chest->weight = 20;
+    chest->value = 0;
+    chest->is_container = true;
+    chest->contents = NULL;
+    room_add_item(workroom, chest);
+
     /* Staff (all wizards) */
     Item *staff = (Item*)calloc(1, sizeof(Item));
     staff->id = -2;
@@ -236,7 +250,7 @@ Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
     staff->type = ITEM_TOOL;
     staff->weight = 5;
     staff->value = 0;
-    room_add_item(workroom, staff);
+    container_add_item(chest, staff);
 
     /* Handbook (all wizards) */
     Item *handbook = (Item*)calloc(1, sizeof(Item));
@@ -249,7 +263,7 @@ Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
     handbook->type = ITEM_MISC;
     handbook->weight = 2;
     handbook->value = 0;
-    room_add_item(workroom, handbook);
+    container_add_item(chest, handbook);
 
     /* Viewing crystal (all wizards) */
     Item *crystal = (Item*)calloc(1, sizeof(Item));
@@ -268,7 +282,7 @@ Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
     crystal->type = ITEM_TOOL;
     crystal->weight = 1;
     crystal->value = 0;
-    room_add_item(workroom, crystal);
+    container_add_item(chest, crystal);
 
     /* Role-specific tool */
     if (wizard_role && strcmp(wizard_role, "admin") == 0) {
@@ -288,7 +302,7 @@ Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
         wand->type = ITEM_TOOL;
         wand->weight = 1;
         wand->value = 0;
-        room_add_item(workroom, wand);
+        container_add_item(chest, wand);
     } else if (wizard_role && strcmp(wizard_role, "roleplay") == 0) {
         Item *rptool = (Item*)calloc(1, sizeof(Item));
         rptool->id = -6;
@@ -303,31 +317,69 @@ Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
         rptool->type = ITEM_TOOL;
         rptool->weight = 2;
         rptool->value = 0;
-        room_add_item(workroom, rptool);
+        container_add_item(chest, rptool);
     }
 
-    /* Sample items: one of each major category */
-    /* Weapon samples */
+    /* Sample items: one of each major category — all inside the chest */
     Item *w1 = item_create(1);  /* Vibro-Blade */
     Item *w2 = item_create(9);  /* C-18 Laser Pistol */
     Item *w3 = item_create(12); /* C-12 Laser Rifle */
-    if (w1) room_add_item(workroom, w1);
-    if (w2) room_add_item(workroom, w2);
-    if (w3) room_add_item(workroom, w3);
+    if (w1) container_add_item(chest, w1);
+    if (w2) container_add_item(chest, w2);
+    if (w3) container_add_item(chest, w3);
 
-    /* Armor samples */
     Item *a1 = item_create(25); /* Huntsman Light Armor */
     Item *a2 = item_create(27); /* Light EBA */
-    if (a1) room_add_item(workroom, a1);
-    if (a2) room_add_item(workroom, a2);
+    if (a1) container_add_item(chest, a1);
+    if (a2) container_add_item(chest, a2);
 
-    /* Supplies */
     Item *s1 = item_create(40); /* First Aid Kit */
     Item *s2 = item_create(48); /* Trail Ration */
     Item *s3 = item_create(49); /* Water Canteen */
-    if (s1) room_add_item(workroom, s1);
-    if (s2) room_add_item(workroom, s2);
-    if (s3) room_add_item(workroom, s3);
+    if (s1) container_add_item(chest, s1);
+    if (s2) container_add_item(chest, s2);
+    if (s3) container_add_item(chest, s3);
+
+    /* Moxim rift terminal — enables 'rift' travel from workroom */
+    Item *moxim_term = (Item*)calloc(1, sizeof(Item));
+    moxim_term->id = -10;
+    moxim_term->name = strdup("moxim terminal");
+    moxim_term->description = strdup(
+        "A shimmering crystalline terminal, humming with dimensional energy.\n"
+        "Moxim rift technology allows rapid travel between major cities.\n"
+        "\n"
+        "+-------- RIFT DESTINATIONS --------+\n"
+        "| rift camelot  - New Camelot       |\n"
+        "| rift splynn   - Splynn            |\n"
+        "| rift chitown  - Chi-Town Transit  |\n"
+        "+-----------------------------------+\n"
+        "Cost: 500 credits per jump.\n"
+        "Type 'rift' to see destinations and current balance.");
+    moxim_term->type = ITEM_TOOL;
+    moxim_term->weight = 50;
+    moxim_term->value = 0;
+    container_add_item(chest, moxim_term);
+
+    /* ATM terminal — credits management */
+    Item *atm = (Item*)calloc(1, sizeof(Item));
+    atm->id = -11;
+    atm->name = strdup("ATM terminal");
+    atm->description = strdup(
+        "A sturdy steel terminal with a glowing display screen.\n"
+        "AMLP Federal Credit Union — Automated Teller Machine\n"
+        "\n"
+        "+-------- ATM COMMANDS --------+\n"
+        "| credits     Check balance    |\n"
+        "| balance     Check balance    |\n"
+        "+------------------------------+\n"
+        "Type 'credits' or 'balance' to view your current credit balance.");
+    atm->type = ITEM_TOOL;
+    atm->weight = 100;
+    atm->value = 0;
+    container_add_item(chest, atm);
+
+    /* Spawn a Moxim NPC in the workroom so 'rift' command works here */
+    npc_spawn(NPC_MOXIM, workroom->id);
 
     fprintf(stderr, "[Chargen] Populated workroom for %s (role: %s)\n",
             username, wizard_role ? wizard_role : "none");
@@ -411,7 +463,20 @@ void chargen_create_admin(PlayerSession *sess) {
     /* Starting language */
     assign_starting_languages(ch);
 
-    /* No starting gear for admin */
+    /* Give admin a Universal ID card */
+    {
+        Item *atm_card = (Item*)calloc(1, sizeof(Item));
+        atm_card->id = -20;
+        atm_card->name = strdup("Universal ID card");
+        atm_card->description = strdup(
+            "A slim duraplastic card embossed with the AMLP Federal Credit Union logo.\n"
+            "Your name and citizen ID are etched in micro-print along the edge.\n"
+            "Type 'examine atm card' to check your current credit balance.");
+        atm_card->type = ITEM_MISC;
+        atm_card->weight = 0;
+        atm_card->value = 0;
+        inventory_add(&ch->inventory, atm_card);
+    }
 
     /* Create wizard workroom and place admin there */
     Room *workroom = setup_wizard_workroom(sess->username, "admin");
@@ -456,6 +521,12 @@ void chargen_create_admin(PlayerSession *sess) {
     /* Show starting room */
     cmd_look(sess, "");
     send_to_player(sess, "\n> ");
+
+    /* Staff announcement for admin creation */
+    char staff_msg[256];
+    snprintf(staff_msg, sizeof(staff_msg),
+             "[Staff] %s created a new Admin character.\r\n", sess->username);
+    staff_message(staff_msg, sess);
 }
 
 /* Init car generation */
@@ -587,7 +658,7 @@ void chargen_display_stats(PlayerSession *sess) {
     snprintf(buf, sizeof(buf), "Name: %s", sess->username);
     frame_line(sess, buf, w);
     snprintf(buf, sizeof(buf), "Race: %-20s O.C.C.: %s",
-             ch->race ? ch->race : "None", ch->occ ? ch->occ : "Pending");
+             ch->race ? ch->race : "N/A", ch->occ ? ch->occ : "N/A");
     frame_line(sess, buf, w);
     if (ch->alignment) {
         snprintf(buf, sizeof(buf), "Alignment: %s", ch->alignment);
@@ -679,9 +750,7 @@ static void chargen_show_zones(PlayerSession *sess) {
     send_to_player(sess, "                    Atlantis. Market Center.\n");
     send_to_player(sess, "  3. Chi-Town     - The Coalition States' fortress city.\n");
     send_to_player(sess, "                    Transit Hub.\n");
-    send_to_player(sess, "  4. Welcome Area (LPC) - Beginner tutorial and help rooms.\n");
-    send_to_player(sess, "  5. Castle Entry (LPC) - A noble castle's entry courtyard.\n");
-    send_to_player(sess, "\nEnter choice (1-5): ");
+    send_to_player(sess, "\nEnter choice (1-3): ");
 }
 
 /* Display available secondary skills for selection */
@@ -744,6 +813,21 @@ void chargen_complete(PlayerSession *sess) {
     /* Assign starting languages based on race */
     assign_starting_languages(&sess->character);
     
+    /* Give every new character a Universal ID card (ATM card) */
+    {
+        Item *atm_card = (Item*)calloc(1, sizeof(Item));
+        atm_card->id = -20;
+        atm_card->name = strdup("Universal ID card");
+        atm_card->description = strdup(
+            "A slim duraplastic card embossed with the AMLP Federal Credit Union logo.\n"
+            "Your name and citizen ID are etched in micro-print along the edge.\n"
+            "Type 'examine atm card' to check your current credit balance.");
+        atm_card->type = ITEM_MISC;
+        atm_card->weight = 0;
+        atm_card->value = 0;
+        inventory_add(&sess->character.inventory, atm_card);
+    }
+
     /* Add starting equipment based on OCC */
     if (!sess->character.occ) {
         /* No OCC assigned yet - give basic starter gear */
@@ -982,7 +1066,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
 
                     sess->chargen_state = CHARGEN_STATS_CONFIRM;
                     send_to_player(sess, "\n");
-                    send_to_player(sess, "Accept these stats? (yes/reroll): ");
+                    send_to_player(sess, "Accept these stats? (yes/reroll/back): ");
                 } else {
                     /* Non-RCC: O.C.C. will be assigned by a wizard later.
                      * Proceed directly to rolling attributes. */
@@ -994,7 +1078,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
 
                     sess->chargen_state = CHARGEN_STATS_CONFIRM;
                     send_to_player(sess, "\n");
-                    send_to_player(sess, "Accept these stats? (yes/reroll): ");
+                    send_to_player(sess, "Accept these stats? (yes/reroll/back): ");
                 }
             } else {
                 send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
@@ -1004,6 +1088,23 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
         /* O.C.C. selection step removed: wizards assign O.C.C. via 'set' command. */
             
         case CHARGEN_STATS_CONFIRM:
+            if (strncasecmp(input, "back", 4) == 0 || strncasecmp(input, "b", 1) == 0) {
+                /* Go back to race selection */
+                if (ch->race) { free(ch->race); ch->race = NULL; }
+                if (ch->occ)  { free(ch->occ);  ch->occ  = NULL; }
+                sess->chargen_state = CHARGEN_RACE_SELECT;
+                sess->chargen_page = 0;
+                int total_pages2 = (num_loaded_races + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+                send_to_player(sess, "\n=== SELECT YOUR RACE (Page 1/%d) ===\n\n", total_pages2);
+                for (int i = 0; i < (num_loaded_races < ITEMS_PER_PAGE ? num_loaded_races : ITEMS_PER_PAGE); i++) {
+                    send_to_player(sess, "  %2d. %s - %s\n",
+                                  i + 1, loaded_races[i].name, loaded_races[i].desc);
+                }
+                send_to_player(sess, "\n");
+                if (num_loaded_races > ITEMS_PER_PAGE) send_to_player(sess, "  Type 'n' for next page\n");
+                send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_races);
+                break;
+            }
             if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
                 /* Auto-assign OCC primary skills, except for dragon RCCs which use racial skills */
                 if (ch->occ && strcasestr(ch->occ, "Dragon Hatchling") != NULL) {
@@ -1026,7 +1127,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                 send_to_player(sess, "\n");
                 send_to_player(sess, "Accept these stats? (yes/reroll): ");
             } else {
-                send_to_player(sess, "Please answer 'yes' or 'reroll': ");
+                send_to_player(sess, "Please answer 'yes', 'reroll', or 'back': ");
             }
             break;
 
@@ -1072,29 +1173,8 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     /* Secondary skills can be learned through in-game training */
                     send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
                     chargen_complete(sess);
-                } else if (choice == 4 || choice == 5) {
-                    /* LPC starting rooms */
-                    const char *path = (choice == 4) ? "/domains/start/room/welcome" : "/domains/castle/room/entry";
-                    send_to_player(sess, "\nStarting zone: %s (LPC)\n", path);
-
-                    /* Free previous path if any */
-                    if (sess->current_room_path) { free(sess->current_room_path); sess->current_room_path = NULL; }
-                    sess->current_room_path = strdup(path);
-
-                    /* Load LPC room on-demand */
-                    Room *zone_room = room_get_by_path(path);
-                    if (zone_room) {
-                        sess->current_room = zone_room;
-                    } else {
-                        send_to_player(sess, "Warning: LPC start room '%s' could not be loaded now; defaulting to starter zone.\n", path);
-                        sess->current_room = room_get_start();
-                    }
-
-                    /* Secondary skills can be learned through in-game training */
-                    send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
-                    chargen_complete(sess);
                 } else {
-                    send_to_player(sess, "Invalid choice. Enter 1-5: ");
+                    send_to_player(sess, "Invalid choice. Enter 1-3: ");
                 }
             }
             break;
@@ -1331,8 +1411,9 @@ int save_character(PlayerSession *sess) {
      *  3 - added LPC room path persistence (char *room_path) after room_id
      *  5 - added wizard_role (32 bytes) after privilege_level
      *  6 - added title, enter_msg, leave_msg, goto_msg (128 bytes each) after wizard_role
+     *  7 - added bm_credits (int) appended after original_mdc_max
      */
-    uint16_t version = 6;
+    uint16_t version = 7;
     fwrite(&version, sizeof(uint16_t), 1, f);
     
     /* Write username */
@@ -1618,6 +1699,9 @@ int save_character(PlayerSession *sess) {
     fwrite(&ch->original_hp_max, sizeof(int), 1, f);
     fwrite(&ch->original_mdc_max, sizeof(int), 1, f);
 
+    /* Version 7: bm_credits */
+    fwrite(&ch->bm_credits, sizeof(int), 1, f);
+
     fclose(f);
 
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
@@ -1659,8 +1743,8 @@ int load_character(PlayerSession *sess, const char *username) {
         return 0;
     }
     
-    /* Accept save versions between 1 and current supported version (6). */
-    if (version < 1 || version > 6) {
+    /* Accept save versions between 1 and current supported version (7). */
+    if (version < 1 || version > 7) {
         ERROR_LOG("Unsupported save file version %d for '%s'", 
                 version, username);
         fclose(f);
@@ -2116,6 +2200,12 @@ int load_character(PlayerSession *sess, const char *username) {
         if (fread(&ch->original_mdc_max, sizeof(int), 1, f) != 1) ch->original_mdc_max = 0;
     }
 
+    /* Version 7: bm_credits */
+    ch->bm_credits = 0;
+    if (version >= 7) {
+        if (fread(&ch->bm_credits, sizeof(int), 1, f) != 1) ch->bm_credits = 0;
+    }
+
     fclose(f);
 
     INFO_LOG("Character '%s' loaded from %s (saved %ld seconds ago)",
@@ -2272,7 +2362,71 @@ void cmd_get(PlayerSession *sess, const char *args) {
         return;
     }
 
-    /* Default: pick a single named item */
+    /* Handle "get <item> from <container>" */
+    {
+        const char *from_ptr = strcasestr(args, " from ");
+        if (from_ptr) {
+            /* Split into item-part and container-part */
+            char item_part[256], cont_part[256];
+            size_t item_len = (size_t)(from_ptr - args);
+            if (item_len > 0 && item_len < sizeof(item_part)) {
+                strncpy(item_part, args, item_len);
+                item_part[item_len] = '\0';
+                /* Trim trailing spaces */
+                for (int k = (int)item_len - 1; k >= 0 && item_part[k] == ' '; k--)
+                    item_part[k] = '\0';
+
+                /* Container name: skip " from " (6 chars) then leading spaces */
+                const char *cp = from_ptr + 6;
+                while (*cp == ' ') cp++;
+                strncpy(cont_part, cp, sizeof(cont_part) - 1);
+                cont_part[sizeof(cont_part) - 1] = '\0';
+
+                /* Find container in room */
+                Item *container = room_find_item(sess->current_room, cont_part);
+                if (!container) {
+                    send_to_player(sess, "There is no '%s' here.\n", cont_part);
+                    return;
+                }
+                if (!container->is_container) {
+                    send_to_player(sess, "You can't take things from %s.\n",
+                                   container->name ? container->name : "that");
+                    return;
+                }
+
+                /* Find and remove item from container */
+                Item *citem = container_remove_item(container, item_part);
+                if (!citem) {
+                    send_to_player(sess, "There is no '%s' in the %s.\n",
+                                   item_part, container->name ? container->name : "container");
+                    return;
+                }
+
+                if (!inventory_can_carry(&sess->character.inventory, citem->weight)) {
+                    /* Put it back */
+                    container_add_item(container, citem);
+                    send_to_player(sess, "You can't carry that much weight.\n");
+                    return;
+                }
+
+                if (inventory_add(&sess->character.inventory, citem)) {
+                    send_to_player(sess, "You get %s from the %s.\n",
+                                   citem->name, container->name ? container->name : "container");
+                    char msg[256];
+                    snprintf(msg, sizeof(msg), "%s takes %s from the %s.\n",
+                             sess->username, citem->name,
+                             container->name ? container->name : "container");
+                    room_broadcast(sess->current_room, msg, sess);
+                } else {
+                    container_add_item(container, citem);
+                    send_to_player(sess, "Your inventory is full.\n");
+                }
+                return;
+            }
+        }
+    }
+
+    /* Default: pick a single named item from the room floor */
     Item *item = room_find_item(sess->current_room, args);
     if (!item) {
         send_to_player(sess, "There is no '%s' here to pick up.\n", args);
@@ -2546,41 +2700,28 @@ void cmd_clan(PlayerSession *sess, const char *args) {
         return;
     }
 
-    /* Hide clan system from player discovery - unlocked through quests */
-    send_to_player(sess, "Clans are unlocked through in-game quests and roleplay.\n");
-    send_to_player(sess, "Explore the world to discover hidden factions.\n");
-    return;
-
-    /* Internal quest trigger code below (kept for future quest system) */
     Character *ch = &sess->character;
 
-    /* No argument: show current clan or list available */
+    /* No argument: show current clan status only */
     if (!args || !(*args)) {
         if (ch->clan && ch->clan[0]) {
-            send_to_player(sess, "You are a member of Clan %s.\n", ch->clan);
+            send_to_player(sess, "You are bound to Clan %s.\n", ch->clan);
         } else {
-            send_to_player(sess, "You do not belong to any clan.\n");
+            send_to_player(sess, "You belong to no clan.\n");
         }
-        send_to_player(sess, "\nAvailable Clans:\n");
-        send_to_player(sess, "  aerihman  - The Aerihman Clan (Atlantean only)\n");
-        send_to_player(sess, "              Unlocks: Sunaj Assassin O.C.C.\n");
-        send_to_player(sess, "\nUsage: clan <name>\n");
         return;
     }
 
     /* Already in a clan */
     if (ch->clan && ch->clan[0]) {
-        send_to_player(sess, "You are already a member of Clan %s.\n", ch->clan);
-        send_to_player(sess, "You cannot change clans.\n");
+        send_to_player(sess, "You are already bound to Clan %s.\n", ch->clan);
         return;
     }
 
-    /* Handle "clan aerihman" */
+    /* Handle "clan aerihman" — True Atlantean gate only */
     if (strcasecmp(args, "aerihman") == 0) {
-        /* Must be Atlantean */
-        if (!ch->race || (strcasecmp(ch->race, "Atlantean") != 0 &&
-                          strcasecmp(ch->race, "True Atlantean") != 0)) {
-            send_to_player(sess, "Only Atlanteans may join Clan Aerihman.\n");
+        if (!ch->race || strcasecmp(ch->race, "True Atlantean") != 0) {
+            send_to_player(sess, "That name holds no significance for you.\n");
             return;
         }
 
@@ -2641,7 +2782,7 @@ void cmd_clan(PlayerSession *sess, const char *args) {
             send_to_player(sess, "Character saved.\n");
         }
     } else {
-        send_to_player(sess, "Unknown clan '%s'. Type 'clan' to see available clans.\n", args);
+        send_to_player(sess, "That name holds no significance for you.\n");
     }
 }
 

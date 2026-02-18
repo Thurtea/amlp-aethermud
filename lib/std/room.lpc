@@ -240,6 +240,10 @@ string render_item_description(object item, object viewer) {
     } else {
         out = formatted;
     }
+    // Capitalise the first character of the fully assembled line so that
+    // both "a wizard's staff" (article stripped) and "a" + "wizard's staff"
+    // (article prepended then lowercased) become "A wizard's staff."
+    out = capitalize(out);
     if (out[<1] != '.' && out[<1] != '!') out += ".";
     return out;
 }

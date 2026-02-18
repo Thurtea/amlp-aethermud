@@ -1,0 +1,34 @@
+// /lib/single/scimitar.lpc
+// Pre-Rifts curved scimitar -- rare enough that a falconer will trade for it.
+// Aldric's shop accepts this in exchange for a Master Hawk Egg (level 5).
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+
+    set_id("scimitar");
+    add_id("blade");
+    add_id("curved blade");
+    add_id("curved sword");
+    add_id("old scimitar");
+
+    set_short("a curved scimitar");
+    set_long(
+        "A gracefully curved single-edged blade from the pre-Rifts era, "
+        "its steel still bright and keen despite its age. The bone handle "
+        "is wrapped in cracked leather, and a stylized bird of prey is "
+        "etched near the guard -- faded but unmistakable. A blade this "
+        "well-preserved is rare; a falconer might part with something "
+        "extraordinary for it.\n"
+    );
+
+    set_weight(2500);    // ~5.5 lbs
+    set_value(1200);
+
+    set_property("type", "weapon");
+    set_property("weapon_type", "sword");
+    set_property("damage", "2d6+2");
+    set_property("strike_bonus", 2);
+    set_property("rare", 1);
+}

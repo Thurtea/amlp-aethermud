@@ -52,10 +52,11 @@ int cmd_list(string arg) {
         "\n"
         "==========[ ALDRIC'S FALCONRY -- TRADE LIST ]=========\n"
         "Aldric says: \"I barter in rare goods for rare birds.\"\n\n"
-        "  10 x E-Clips (energy ammo)    ->  Hawk Egg       [Level 3]\n"
+        "  10 x E-Clips (energy ammo)    ->  Hawk Egg        [Level 3]\n"
         "  TX-500 Laser Rifle            ->  Master Hawk Egg [Level 5]\n"
+        "  Pre-Rifts Scimitar            ->  Master Hawk Egg [Level 5]\n"
         "  Coalition States Uniform      ->  Falcon Egg      [Level 7]\n\n"
-        "Use: trade <item>   (e.g., 'trade rifle', 'trade uniform')\n"
+        "Use: trade <item>   (e.g., 'trade scimitar', 'trade rifle')\n"
         "     hatch egg      (once you have an egg, hatch it!)\n\n"
         "See also: help falconry, help falconer, help pets\n"
         "======================================================\n\n"
@@ -101,6 +102,12 @@ int cmd_trade(string arg) {
         return _try_trade_eclips(player, inv);
     }
 
+    // --- Check for Scimitar (master hawk egg, lvl 5) ---
+    if (arg == "scimitar" || arg == "blade" || arg == "curved blade" ||
+        arg == "curved sword" || arg == "old scimitar") {
+        return _try_trade_scimitar(player, inv);
+    }
+
     // Generic: try to match any known trade item
     foreach (object ob : inv) {
         if (!ob) continue;
@@ -116,6 +123,10 @@ int cmd_trade(string arg) {
             // E-clip?
             if (ob->id("e-clip") || ob->id("clip")) {
                 return _try_trade_eclips(player, inv);
+            }
+            // Scimitar?
+            if (ob->id("scimitar") || ob->id("curved blade")) {
+                return _try_trade_scimitar(player, inv);
             }
         }
     }
@@ -228,6 +239,43 @@ int _try_trade_eclips(object player, object *inv) {
     }
 
     _give_egg(player, "hawk", 3);
+    return 1;
+}
+
+int _try_trade_scimitar(object player, object *inv) {
+    object scimitar;
+
+    foreach (object ob : inv) {
+        if (ob && (ob->id("scimitar") || ob->id("curved blade") ||
+                   ob->id("old scimitar"))) {
+            scimitar = ob;
+            break;
+        }
+    }
+
+    if (!scimitar) {
+        write("You don't have a scimitar to trade.\n");
+        return 1;
+    }
+
+    write(
+        "Aldric's eyes fix on the blade the moment you lay it on the counter.\n"
+        "He turns it over slowly, runs a thumb down the flat, and exhales\n"
+        "through his nose -- quiet satisfaction from a man who doesn't waste\n"
+        "words on things he wants. He tucks it under the bench and produces\n"
+        "a straw-padded wooden box from the shelf behind him.\n\n"
+        "Inside, cradled in soft wool, rests a speckled Master Hawk Egg.\n\n"
+        "Aldric says: \"A blade that old earns a bird worth keeping.\n"
+        "Train her right.\"\n\n"
+    );
+
+    tell_room(environment(player),
+              player->query_cap_name() + " trades an old scimitar to Aldric "
+              "and receives a Master Hawk Egg.",
+              ({ player }));
+
+    destruct(scimitar);
+    _give_egg(player, "master_hawk", 5);
     return 1;
 }
 

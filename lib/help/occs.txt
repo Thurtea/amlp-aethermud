@@ -34,10 +34,6 @@ AVAILABLE RCCs:
   Dragon Hatchling RCC   Fury Beetle            Psi-Stalker RCC
   Xiticix Warrior        Xiticix Worker
 
-RESTRICTED:
-  Sunaj Assassin - Requires Atlantean race + Clan Aerihman membership
-                   Join via: clan aerihman (after character creation)
-
 Type 'help <occ-name>' for detailed info on specific OCCs.
   Example: help cyber-knight
 

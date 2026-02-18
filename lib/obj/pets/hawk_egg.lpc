@@ -25,8 +25,10 @@ void create() {
 
 void _update_desc() {
     if (egg_type == "falcon") {
-        set_name("falcon egg");
-        set_id(({ "falcon egg", "egg", "large egg" }));
+        // set_id() sets the primary id; additional aliases via add_id()
+        set_id("falcon egg");
+        add_id("egg");
+        add_id("large egg");
         set_short("a mottled peregrine falcon egg");
         set_long(
             "A large, pale cream egg mottled with reddish-brown splotches. "
@@ -36,8 +38,9 @@ void _update_desc() {
             "  [Level 7 Falcon -- use 'hatch egg' to hatch it]\n"
         );
     } else if (egg_type == "master_hawk") {
-        set_name("master hawk egg");
-        set_id(({ "master hawk egg", "master egg", "egg" }));
+        set_id("master hawk egg");
+        add_id("master egg");
+        add_id("egg");
         set_short("a speckled master hawk egg");
         set_long(
             "A handsome speckled egg slightly larger than a chicken's. Its "
@@ -47,8 +50,8 @@ void _update_desc() {
             "  [Level 5 Master Hawk -- use 'hatch egg' to hatch it]\n"
         );
     } else {
-        set_name("hawk egg");
-        set_id(({ "hawk egg", "egg" }));
+        set_id("hawk egg");
+        add_id("egg");
         set_short("a speckled hawk egg");
         set_long(
             "A brown-speckled egg slightly smaller than your fist. It feels "
@@ -58,6 +61,90 @@ void _update_desc() {
             "  [Level 3 Hawk -- use 'hatch egg' to hatch it]\n"
         );
     }
+}
+
+void init() {
+    ::init();
+    add_action("cmd_hatch", "hatch");
+}
+
+// Required falconry % by egg tier
+int _required_skill() {
+    if (egg_type == "falcon")      return 50;
+    if (egg_type == "master_hawk") return 30;
+    return 15;  // basic hawk
+}
+
+int cmd_hatch(string arg) {
+    object player, hawk;
+    int skill_pct, req_pct;
+
+    player = this_player();
+    if (!player) return 0;
+
+    // Only respond when this specific egg is in the player's inventory
+    if (environment(this_object()) != player) return 0;
+
+    // If an argument was given it must match one of our ids
+    if (arg && arg != "" && !id(arg)) return 0;
+
+    req_pct = _required_skill();
+
+    // Check falconry skill (query_skill_percentage is the canonical alias)
+    skill_pct = 0;
+    if (function_exists("query_skill_percentage", player)) {
+        skill_pct = player->query_skill_percentage("falconry");
+    } else if (function_exists("query_skill", player)) {
+        skill_pct = player->query_skill("falconry");
+    }
+
+    if (skill_pct < req_pct) {
+        write(
+            "You cradle the " + query_short() + " in your hands, but you "
+            "lack the falconry training to coax it open.\n"
+            "  [Requires Falconry " + req_pct + "% -- you have " +
+            skill_pct + "%]\n"
+        );
+        return 1;
+    }
+
+    hawk = clone_object("/lib/obj/pets/hawk");
+    if (!hawk) {
+        write("[Error] Could not hatch egg. Contact an administrator.\n");
+        return 1;
+    }
+
+    hawk->set_hawk_tier(egg_type, egg_level);
+    hawk->set_owner(player);
+    hawk->set_property("is_perched", 1);
+    hawk->set_property("is_flying", 0);
+    hawk->set_property("following", player);
+
+    // Move hawk into the room so other players see it
+    hawk->move(environment(player));
+
+    write(
+        "\nYou cradle the " + query_short() + " in both hands and breathe\n"
+        "warm air along the shell. A hairline crack appears... then another.\n"
+        "A tiny beak forces through, chips away a wedge of shell, and then --\n"
+        "in a burst of fragments -- a " + hawk->query_short() + " tumbles\n"
+        "free. It fixes one bright amber eye on you, lets out a small sharp\n"
+        "cry, and hops up to perch on your arm.\n\n"
+        "  Commands: say " + hawk->query_name() + " follow/stay/come/perch/fly\n"
+        "            say " + hawk->query_name() + " scout <dir>  |  say " +
+        hawk->query_name() + " attack <target>\n"
+    );
+
+    tell_room(
+        environment(player),
+        player->query_cap_name() + " hatches " + query_short() + "! A " +
+        hawk->query_short() + " emerges and perches on " +
+        player->query_cap_name() + "'s arm.",
+        ({ player })
+    );
+
+    destruct(this_object());
+    return 1;
 }
 
 // Setters used by the falconer shop when creating the egg

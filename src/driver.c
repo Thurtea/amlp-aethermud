@@ -881,6 +881,30 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
         return 1;
     }
 
+    /* Check room NPCs */
+    NPC *room_npc = npc_find_in_room(room, arg);
+    if (room_npc && room_npc->is_alive) {
+        const NpcTemplate *nt = &NPC_TEMPLATES[room_npc->template_id];
+        if (nt->long_desc) {
+            send_to_player(session, "%s\n", nt->long_desc);
+        } else {
+            /* Generic stat block for combat NPCs */
+            char display[64];
+            snprintf(display, sizeof(display), "%s", room_npc->name);
+            display[0] = (char)toupper((unsigned char)display[0]);
+            send_to_player(session, "%s\n", display);
+            Character *nch = &room_npc->character;
+            if (nch->health_type == MDC_ONLY) {
+                send_to_player(session, "Level %d  MDC: %d/%d\n",
+                               nch->level, nch->mdc, nch->max_mdc);
+            } else {
+                send_to_player(session, "Level %d  HP: %d/%d  SDC: %d/%d\n",
+                               nch->level, nch->hp, nch->max_hp, nch->sdc, nch->max_sdc);
+            }
+        }
+        return 1;
+    }
+
     /* Check room items */
     Item *room_item2 = room_find_item(room, arg);
     if (room_item2) {
@@ -1507,17 +1531,19 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         /* Help subdirectories to search (in order) */
         static const char *help_dirs[] = {
             "lib/help/basics", "lib/help/occs", "lib/help/systems",
-            "lib/help/social", "lib/help/meta", NULL
+            "lib/help/social", "lib/help/meta", "lib/help/wizard", "lib/help", NULL
         };
+        /* Named categories (shown in 'help' index and listable via 'help <cat>') */
         static const char *help_dir_names[] = {
-            "basics", "occs", "systems", "social", "meta"
+            "basics", "occs", "systems", "social", "meta", "wizard", NULL
         };
         static const char *help_dir_descs[] = {
             "Core commands, movement, combat, equipment",
             "Character classes (O.C.C.s and R.C.C.s)",
             "Psionics, magic, skills, languages",
             "Communication, clans, social interaction",
-            "Rules, tips, wizard/admin commands"
+            "Rules, tips, wizard/admin commands",
+            "Wizard/admin tools and commands"
         };
 
         if (args && *args) {
@@ -1533,10 +1559,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 return result;
             }
 
-            /* Check if arg matches a subdirectory name -> list its contents */
-            for (int di = 0; help_dirs[di]; di++) {
+            /* Check if arg matches a named category -> list its contents */
+            for (int di = 0; help_dir_names[di]; di++) {
                 if (strcasecmp(args, help_dir_names[di]) == 0) {
-                    DIR *hdir = opendir(help_dirs[di]);
+                    char cat_path[256];
+                    snprintf(cat_path, sizeof(cat_path), "lib/help/%s", help_dir_names[di]);
+                    DIR *hdir = opendir(cat_path);
                     if (!hdir) {
                         send_to_player(session, "Help category '%s' not available.\r\n", args);
                         result.type = VALUE_NULL;
@@ -1615,8 +1643,13 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             send_to_player(session, "\r\n");
             send_to_player(session, "AetherMUD Help System\r\n");
             send_to_player(session, "================================================\r\n");
-            for (int di = 0; help_dirs[di]; di++) {
-                /* Hide wizard/admin topics from regular players */
+            for (int di = 0; help_dir_names[di]; di++) {
+                /* Hide wizard category from regular players */
+                if (strcmp(help_dir_names[di], "wizard") == 0 &&
+                    session->privilege_level < 1) {
+                    continue;
+                }
+                /* Abbreviated meta description for regular players */
                 if (strcmp(help_dir_names[di], "meta") == 0 &&
                     session->privilege_level < 1) {
                     send_to_player(session, "  %-12s %s\r\n", "meta",
@@ -2352,6 +2385,14 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                     snprintf(buf, sizeof(buf), "%s%-16s%s  (%lds idle)",
                             role_tag, sessions[i]->username, invis_tag, idle);
                 }
+
+                /* If role_tag contains ANSI color codes the visible length
+                 * will be shorter than the raw string length. Add 11 spaces
+                 * padding so the frame border lines up visually. */
+                if (sessions[i] && sessions[i]->privilege_level >= 1) {
+                    strncat(buf, "           ", sizeof(buf) - strlen(buf) - 1);
+                }
+
                 frame_line(session, buf, w);
                 count++;
             }
@@ -4318,6 +4359,75 @@ more_room_source:
         return result;
     }
 
+    /* PET - Pet a friendly NPC in the room */
+    if (strcmp(cmd, "pet") == 0) {
+        const char *target_kw = (args && *args) ? args : "";
+        if (!*target_kw) {
+            return vm_value_create_string("Pet what?\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+        NPC *n = npc_find_in_room(session->current_room, target_kw);
+        if (n && n->is_alive) {
+            const NpcTemplate *t = &NPC_TEMPLATES[n->template_id];
+            if (t->can_pet) {
+                char pet_msg[256];
+                snprintf(pet_msg, sizeof(pet_msg),
+                    "You pet %s. %s's tail wags furiously!\r\n",
+                    n->name, n->name);
+                /* Broadcast to others */
+                char pet_room[256];
+                snprintf(pet_room, sizeof(pet_room),
+                    "%s pets %s.\r\n", session->username, n->name);
+                for (int ri = 0; ri < session->current_room->num_players; ri++) {
+                    PlayerSession *other = session->current_room->players[ri];
+                    if (other && other != session) {
+                        send_to_player(other, "%s", pet_room);
+                    }
+                }
+                return vm_value_create_string(pet_msg);
+            }
+        }
+        char nomatch[128];
+        snprintf(nomatch, sizeof(nomatch), "You don't see '%s' here.\r\n", target_kw);
+        return vm_value_create_string(nomatch);
+    }
+
+    /* FEED - Feed a friendly NPC a treat */
+    if (strcmp(cmd, "feed") == 0) {
+        const char *target_kw = (args && *args) ? args : "";
+        if (!*target_kw) {
+            return vm_value_create_string("Feed what?\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+        NPC *n = npc_find_in_room(session->current_room, target_kw);
+        if (n && n->is_alive) {
+            const NpcTemplate *t = &NPC_TEMPLATES[n->template_id];
+            if (t->can_pet) {
+                char feed_msg[256];
+                snprintf(feed_msg, sizeof(feed_msg),
+                    "You give %s a treat. %s gobbles it up happily!\r\n",
+                    n->name, n->name);
+                char feed_room[256];
+                snprintf(feed_room, sizeof(feed_room),
+                    "%s feeds %s a treat.\r\n", session->username, n->name);
+                for (int ri = 0; ri < session->current_room->num_players; ri++) {
+                    PlayerSession *other = session->current_room->players[ri];
+                    if (other && other != session) {
+                        send_to_player(other, "%s", feed_room);
+                    }
+                }
+                return vm_value_create_string(feed_msg);
+            }
+        }
+        char nomatch[128];
+        snprintf(nomatch, sizeof(nomatch), "You don't see '%s' here.\r\n", target_kw);
+        return vm_value_create_string(nomatch);
+    }
+
     /* POSITION - Set position description */
     if (strcmp(cmd, "position") == 0) {
         if (!args || !*args) {
@@ -4360,8 +4470,9 @@ more_room_source:
         return vm_value_create_string(map_buf);
     }
 
-    /* TITLE / SETTITLE - Set custom title (wizards+) */
-    if (strcmp(cmd, "title") == 0 || strcmp(cmd, "settitle") == 0) {
+    /* TITLE / SETTITLE / SETWHOTITLE - Set custom WHO title (wizards+) */
+    if (strcmp(cmd, "title") == 0 || strcmp(cmd, "settitle") == 0 ||
+        strcmp(cmd, "setwhotitle") == 0) {
         if (session->privilege_level < 1) {
             return vm_value_create_string("Only wizards can set titles.\r\n");
         }
@@ -5147,6 +5258,7 @@ int main(int argc, char **argv) {
     npc_spawn(NPC_MOXIM, 4);    /* New Camelot: Moxim rift NPC */
     npc_spawn(NPC_MOXIM, 11);   /* Splynn: Moxim rift NPC */
     npc_spawn(NPC_MOXIM, 23);   /* Chi-Town Transit: Moxim rift NPC */
+    npc_spawn_by_path(NPC_SPIKE, "/domains/wizard/castle/dog_spike"); /* Wizard Castle dog */
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
         sessions[i] = NULL;

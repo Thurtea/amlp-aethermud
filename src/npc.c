@@ -88,7 +88,28 @@ const NpcTemplate NPC_TEMPLATES[NPC_TEMPLATE_COUNT] = {
         .auto_parry = 1, .auto_dodge = 1,
         .iq = 22, .me = 24, .ma = 20, .ps = 30, .pp = 24, .pe = 26, .pb = 18, .spd = 40,
         .weapon_dice = 6, .weapon_sides = 6, .weapon_name = "rift energy blast",
-        .xp_reward = 2000, .aggro = 0
+        .xp_reward = 2000, .aggro = 0,
+        .can_pet = 0, .long_desc = NULL, .position_text = NULL
+    },
+    /* Spike: wizard castle dog — friendly, pettable, no combat */
+    {
+        .template_id = NPC_SPIKE,
+        .name = "Spike", .keyword = "spike",
+        .level = 1, .health_type = HP_SDC,
+        .hp = 30, .max_hp = 30, .sdc = 0, .max_sdc = 0, .mdc = 0, .max_mdc = 0,
+        .attacks_per_round = 0, .parries_per_round = 0,
+        .auto_parry = 0, .auto_dodge = 1,
+        .iq = 6, .me = 8, .ma = 14, .ps = 8, .pp = 12, .pe = 12, .pb = 16, .spd = 14,
+        .weapon_dice = 0, .weapon_sides = 0, .weapon_name = "none",
+        .xp_reward = 0, .aggro = 0,
+        .can_pet = 1,
+        .long_desc =
+            "Spike is a large, friendly dog of indeterminate breed. He has\n"
+            "shaggy brown fur, floppy ears, and warm brown eyes. Despite\n"
+            "his title as Head of Castle Security, he seems more interested\n"
+            "in belly rubs than guarding anything. A small collar around\n"
+            "his neck reads 'Spike - Good Boy Since Day One.'\n",
+        .position_text = "lounges by the fire."
     }
 };
 
@@ -185,6 +206,16 @@ NPC* npc_spawn(NpcTemplateId template_id, int room_id) {
     fprintf(stderr, "[NPC] Spawned '%s' (id=%d) in room %d\n",
             npc->name, npc->id, room_id);
     return npc;
+}
+
+/* Spawn an NPC by LPC room path (loads room lazily if not yet loaded) */
+NPC* npc_spawn_by_path(NpcTemplateId template_id, const char *lpc_path) {
+    Room *room = room_get_by_path(lpc_path);
+    if (!room) {
+        fprintf(stderr, "[NPC] npc_spawn_by_path: failed to load room '%s'\n", lpc_path);
+        return NULL;
+    }
+    return npc_spawn(template_id, room->id);
 }
 
 void npc_despawn(NPC *npc) {

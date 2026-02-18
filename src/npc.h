@@ -22,6 +22,7 @@ typedef enum {
     NPC_BRODKIL,
     NPC_DRAGON_HATCHLING,
     NPC_MOXIM,
+    NPC_SPIKE,              /* Wizard Castle dog — friendly, pettable */
     NPC_TEMPLATE_COUNT
 } NpcTemplateId;
 
@@ -43,6 +44,9 @@ typedef struct {
     const char *weapon_name;    /* "claws", "vibro-blade", etc. */
     int xp_reward;
     int aggro;                  /* 1 = attacks players on sight */
+    int can_pet;                /* 1 = responds to "pet <keyword>" */
+    const char *long_desc;      /* Shown when examined (NULL = generic stat block) */
+    const char *position_text;  /* Shown in room: "lounges by the fire" etc. */
 } NpcTemplate;
 
 /* NPC instance (runtime) */
@@ -69,6 +73,7 @@ void npc_cleanup(void);
 
 /* Spawning */
 NPC* npc_spawn(NpcTemplateId template_id, int room_id);
+NPC* npc_spawn_by_path(NpcTemplateId template_id, const char *lpc_path);
 void npc_despawn(NPC *npc);
 
 /* Tick — AI and respawn (called every 2s from heartbeat) */

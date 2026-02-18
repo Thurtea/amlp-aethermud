@@ -1234,6 +1234,9 @@ static void look_at_player(PlayerSession *sess, PlayerSession *target) {
         /* Look at self -> show a brief self-description instead of full sheet */
         send_to_player(sess, "You look at yourself.\n");
         send_to_player(sess, "Name: %s\n", sess->username);
+        if (sess->character.description) {
+            send_to_player(sess, "%s\n", sess->character.description);
+        }
         send_to_player(sess, "Race: %s  O.C.C.: %s\n",
                    sess->character.race ? sess->character.race : "Unknown",
                    sess->character.occ ? sess->character.occ : "Pending");
@@ -1589,15 +1592,17 @@ show_room:
         }
     }
 
-    /* List NPCs in room (use default position text) */
+    /* List NPCs in room */
     for (int i = 0; i < room->num_npcs; i++) {
         NPC *n = room->npcs[i];
         if (n && n->is_alive) {
             char display[64];
             snprintf(display, sizeof(display), "%s", n->name);
             display[0] = (char)toupper((unsigned char)display[0]);
-            /* Default NPC position */
-            send_to_player(sess, "%s is standing around.\n", display);
+            const NpcTemplate *nt = &NPC_TEMPLATES[n->template_id];
+            const char *pos = (nt->position_text && nt->position_text[0])
+                              ? nt->position_text : "is standing around.";
+            send_to_player(sess, "%s %s\n", display, pos);
         }
     }
 }

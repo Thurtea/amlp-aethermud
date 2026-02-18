@@ -15,58 +15,20 @@ void create() {
         "A water bowl and food dish sit near the wall.\n\n"
         "This is Spike's domain. The castle's loyal guard dog has claimed\n"
         "this spot as his own. A sign on the wall reads:\n"
-        "'Spike - Head of Castle Security. Please pet.'\n\n"
-        "Spike looks up at you with big brown eyes, tail wagging."
+        "'Spike - Head of Castle Security. Please pet.'"
     );
 
     add_exit("south", "/domains/wizard/castle/main_hall");
 
     set_property("light", 2);
     set_property("indoors", 1);
-}
 
-void init() {
-    ::init();
-    add_action("cmd_pet", "pet");
-    add_action("cmd_feed", "feed");
-    add_action("examine_spike", "examine");
-}
-
-int cmd_pet(string str) {
-    if (!str || str != "spike") return 0;
-    write("You pet Spike. His tail wags furiously and he licks your hand.\n");
-    say(this_player()->query_cap_name() + " pets Spike the dog.\n");
-    return 1;
-}
-
-int cmd_feed(string str) {
-    if (!str || str != "spike") return 0;
-    write("You give Spike a treat. He gobbles it up happily and barks!\n");
-    say(this_player()->query_cap_name() + " feeds Spike a treat.\n");
-    return 1;
-}
-
-int examine_spike(string str) {
-    if (!str) return 0;
-    if (str == "spike" || str == "dog") {
-        write(
-            "Spike is a large, friendly dog of indeterminate breed. He has\n"
-            "shaggy brown fur, floppy ears, and warm brown eyes. Despite\n"
-            "his title as Head of Castle Security, he seems more interested\n"
-            "in belly rubs than guarding anything. A small collar around\n"
-            "his neck reads 'Spike - Good Boy Since Day One.'\n"
-        );
-        return 1;
-    }
-    if (str == "bed" || str == "dog bed") {
-        write("A large, overstuffed dog bed. It's seen better days but\n"
-              "Spike clearly loves it.\n");
-        return 1;
-    }
-    if (str == "toys" || str == "bones") {
-        write("An assortment of well-chewed toys and bones. Spike guards\n"
-              "them jealously.\n");
-        return 1;
-    }
-    return 0;
+    set_items(([
+        "bed"     : "A large, overstuffed dog bed. It's seen better days but Spike\nclearly loves it.",
+        "dog bed" : "A large, overstuffed dog bed. It's seen better days but Spike\nclearly loves it.",
+        "toys"    : "An assortment of well-chewed toys and bones. Spike guards them jealously.",
+        "bones"   : "An assortment of well-chewed toys and bones. Spike guards them jealously.",
+        "bowl"    : "A large water bowl and food dish sit near the wall, both well-used.",
+        "sign"    : "The sign reads: 'Spike - Head of Castle Security. Please pet.'"
+    ]));
 }

@@ -19,7 +19,7 @@ void create() {
         "different sigil. To the east, a doorway leads to the training\n"
         "grounds. To the west, a monitoring station hums with energy.\n"
         "An elevator to the south provides access to the offices above.\n"
-        "A loyal dog named Spike lounges by the fire."
+        "To the north, a cozy alcove serves as home to Spike, the castle dog."
     );
 
     add_exit("east", "/domains/wizard/castle/training");
@@ -30,43 +30,15 @@ void create() {
 
     set_property("light", 3);
     set_property("indoors", 1);
-}
 
-void setup() {
-    ::setup();
-}
-
-void init() {
-    ::init();
-    add_action("examine_table", "examine");
-}
-
-int examine_table(string str) {
-    if (!str) return 0;
-    if (str == "table" || str == "maps" || str == "scrolls") {
-        write(
-            "The round table is covered with maps of AetherMUD's domains.\n"
-            "You see markers for New Camelot, the starting village, and\n"
-            "several frontier territories still being charted. Scrolls\n"
-            "contain notes on upcoming building projects and NPC designs.\n"
-        );
-        return 1;
-    }
-    if (str == "runes" || str == "walls") {
-        write(
-            "The runes along the walls are protective wards, maintaining\n"
-            "the castle's magical defenses. They pulse gently, each one\n"
-            "tied to a different aspect of the MUD's infrastructure.\n"
-        );
-        return 1;
-    }
-    if (str == "fireplace" || str == "fire" || str == "flames") {
-        write(
-            "The fireplace burns with unnatural flames of blue, green, and\n"
-            "purple. It provides warmth without smoke. A plaque above reads:\n"
-            "'Built by the founders, fueled by creativity.'\n"
-        );
-        return 1;
-    }
-    return 0;
+    set_items(([
+        "table"     : "The round table is covered with maps of AetherMUD's domains.\nYou see markers for New Camelot, the starting village, and\nseveral frontier territories still being charted. Scrolls\ncontain notes on upcoming building projects and NPC designs.",
+        "maps"      : "The round table is covered with maps of AetherMUD's domains.\nYou see markers for New Camelot, the starting village, and\nseveral frontier territories still being charted.",
+        "scrolls"   : "The scrolls on the table contain notes on upcoming building\nprojects, NPC designs, and quest outlines.",
+        "runes"     : "The runes along the walls are protective wards, maintaining\nthe castle's magical defenses. They pulse gently, each one\ntied to a different aspect of the MUD's infrastructure.",
+        "walls"     : "The walls glow with protective arcane runes. Each one pulses\nwith the heartbeat of the MUD's infrastructure.",
+        "fireplace" : "The fireplace burns with unnatural flames of blue, green, and\npurple. It provides warmth without smoke. A plaque above reads:\n'Built by the founders, fueled by creativity.'",
+        "fire"      : "The fireplace burns with unnatural flames of blue, green, and\npurple. It provides warmth without smoke.",
+        "flames"    : "The flames dance in shades of blue, green, and purple — clearly\nnot ordinary fire."
+    ]));
 }

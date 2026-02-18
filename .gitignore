@@ -47,6 +47,5 @@ mud-references/
 scripts/
 /scripts/
 
-# Archived docs: ignore everything except the single summary file
+# Archived docs (local only, do not commit)
 archived-md/
-!archived-md/summary-02-17.md

@@ -1,0 +1,10 @@
+// /cmds/shutdown.lpc
+// Shutdown server
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+    // Stub: shutdown logic not implemented
+    write("Stub: shutdown command. Shutdown not implemented.\n");
+    return 1;
+}

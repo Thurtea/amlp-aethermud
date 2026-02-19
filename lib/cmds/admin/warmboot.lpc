@@ -1,0 +1,15 @@
+// warmboot.lpc — Admin command: reload all .lpc files in core lib dirs
+// Usage: warmboot
+
+inherit "/std/cmd";
+
+int main(string arg) {
+    object user = previous_object();
+    if (!user || user->query_privilege_level() < 2) {
+        tell_object(user, "You don't have permission to use that command.\n");
+        return 1;
+    }
+    // The actual implementation is in the C driver (src/driver.c)
+    tell_object(user, "[warmboot] Handled by C driver builtin.\n");
+    return 1;
+}

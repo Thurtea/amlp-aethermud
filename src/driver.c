@@ -4109,6 +4109,61 @@ more_room_source:
      * ADMIN COMMANDS (Phase 6)
      * ==================================================================== */
 
+        /* WARMBOOT - Reload all .lpc files in core lib dirs */
+        if (strcmp(cmd, "warmboot") == 0) {
+            if (session->privilege_level < 2) {
+                return vm_value_create_string("You don't have permission to use that command.\r\n");
+            }
+
+            const char *dirs[] = {
+                "lib/cmds/", "lib/std/", "lib/daemon/", "lib/domains/", NULL
+            };
+            int total = 0, success = 0, fail = 0;
+            char report[4096] = "[warmboot] Reloading .lpc files...\r\n";
+
+            // Helper: recursively scan for .lpc files and call update
+            void scan_dir(const char *dir) {
+                DIR *d = opendir(dir);
+                if (!d) return;
+                struct dirent *ent;
+                char path[1024];
+                while ((ent = readdir(d))) {
+                    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+                    snprintf(path, sizeof(path), "%s%s", dir, ent->d_name);
+                    struct stat st;
+                    if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) {
+                        size_t len = strlen(path);
+                        if (len < sizeof(path) - 2) { strcat(path, "/"); }
+                        scan_dir(path);
+                    } else if (strstr(ent->d_name, ".lpc")) {
+                        total++;
+                        // Use update logic for each .lpc file
+                        Room *reloaded = room_reload_lpc(path);
+                        if (reloaded) {
+                            success++;
+                            strncat(report, "[OK]  ", sizeof(report)-strlen(report)-1);
+                            strncat(report, path, sizeof(report)-strlen(report)-1);
+                            strncat(report, "\r\n", sizeof(report)-strlen(report)-1);
+                        } else {
+                            fail++;
+                            strncat(report, "[FAIL] ", sizeof(report)-strlen(report)-1);
+                            strncat(report, path, sizeof(report)-strlen(report)-1);
+                            strncat(report, "\r\n", sizeof(report)-strlen(report)-1);
+                        }
+                    }
+                }
+                closedir(d);
+            }
+
+            for (int i = 0; dirs[i]; i++) scan_dir(dirs[i]);
+
+            char summary[256];
+            snprintf(summary, sizeof(summary), "\r\nDone. %d files: %d OK, %d failed.\r\n", total, success, fail);
+            strncat(report, summary, sizeof(report)-strlen(report)-1);
+            send_to_player(session, "%s", report);
+            return vm_value_create_string("Warmboot complete.\r\n");
+        }
+
     /* REBOOT - Graceful server restart */
     if (strcmp(cmd, "reboot") == 0) {
         if (session->privilege_level < 2) {

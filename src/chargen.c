@@ -4,6 +4,7 @@
 #include "npc.h"
 #include "skills.h"
 #include "combat.h"
+#include "object.h"
 #include "race_loader.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,28 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <errno.h>
+#include "vm.h"
+#include "efun.h"
+
+// List of all supported language IDs for wizard/admin bonus
+static const char *all_language_ids[] = {
+    "american", "atlantean", "demonic", "dragonese", "dwarven", "elven",
+    "euro", "faerie", "goblin", "japanese", "spanish", "techno_can"
+};
+#define NUM_ALL_LANGUAGES (sizeof(all_language_ids)/sizeof(all_language_ids[0]))
+
+/* Prototype: add a language to a character (defined later) */
+static int character_add_language(Character *ch, const char *lang);
+
+// Grant all languages at 98% proficiency (if supported) to a character
+static void grant_all_languages(Character *ch) {
+    if (!ch) return;
+    for (int i = 0; i < NUM_ALL_LANGUAGES; i++) {
+        character_add_language(ch, all_language_ids[i]);
+        // If language proficiency is tracked, set to 98 here
+        // Example: ch->language_proficiency[i] = 98;
+    }
+}
 
 /* External function from session.c */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
@@ -57,19 +80,29 @@ int roll_1d6(void) {
 }
 
 /* Add a language to character (returns 1 if added, 0 if already known or full) */
+
 static int character_add_language(Character *ch, const char *lang) {
-    if (!ch || !lang) return 0;
-    /* Check if already known */
+    if (!ch || !lang || !lang[0]) return 0;
+
+    /* Already known? */
     for (int i = 0; i < ch->num_languages; i++) {
         if (ch->languages[i] && strcasecmp(ch->languages[i], lang) == 0)
             return 0;
     }
+
+    /* Capacity check (max 16 languages) */
     if (ch->num_languages >= 16) return 0;
+
     ch->languages[ch->num_languages] = strdup(lang);
+    if (!ch->languages[ch->num_languages]) return 0;
     ch->num_languages++;
-    if (!ch->current_language) {
+
+    /* If no current language set, make this the default */
+    if (!ch->current_language || !ch->current_language[0]) {
+        if (ch->current_language) free(ch->current_language);
         ch->current_language = strdup(lang);
     }
+
     return 1;
 }
 
@@ -463,6 +496,9 @@ void chargen_create_admin(PlayerSession *sess) {
     /* Starting language */
     assign_starting_languages(ch);
 
+    // Wizards/admins know all languages at 98% (see help admin.txt)
+    grant_all_languages(ch);
+
     /* Give admin a Universal ID card */
     {
         Item *atm_card = (Item*)calloc(1, sizeof(Item));
@@ -491,6 +527,47 @@ void chargen_create_admin(PlayerSession *sess) {
         }
     }
 
+    /* Auto-equip common admin wiztools by cloning LPC objects into the
+     * player's inventory/room. This uses the VM efun clone_object and
+     * calls the cloned object's move_to(player) to place it with the player.
+     */
+    {
+        const char *tools[] = {
+            "/lib/obj/wiztools/admin_orb.lpc",
+            "/lib/obj/wiztools/admin_wand.lpc",
+            "/lib/obj/wiztools/chest.lpc",
+            "/lib/obj/wiztools/staff.lpc",
+            "/lib/obj/wiztools/admin_map.lpc",
+            "/lib/obj/wiztools/admin_badge.lpc",
+            "/lib/obj/wiztools/admin_key.lpc",
+            "/lib/obj/wiztools/admin_scroll.lpc",
+            "/lib/obj/wiztools/admin_ring.lpc",
+            "/lib/obj/wiztools/admin_cloak.lpc",
+            "/lib/obj/wiztools/admin_chest.lpc"
+        };
+        int num_tools = sizeof(tools) / sizeof(tools[0]);
+
+        for (int ti = 0; ti < num_tools; ti++) {
+            const char *lpc_path = tools[ti];
+            VMValue path_val = vm_value_create_string(lpc_path);
+            VMValue res = efun_clone_object(global_vm, &path_val, 1);
+            vm_value_release(&path_val);
+
+            if (res.type == VALUE_OBJECT && res.data.object_value) {
+                /* If session has a player_object (LPC Player), call move_to on cloned object */
+                if (sess->player_object) {
+                    VMValue arg;
+                    arg.type = VALUE_OBJECT;
+                    arg.data.object_value = sess->player_object;
+                    obj_call_method(global_vm, (obj_t *)res.data.object_value, "move_to", &arg, 1);
+                }
+                vm_value_release(&res);
+            } else {
+                if (res.type != VALUE_NULL) vm_value_release(&res);
+                /* Non-fatal: cloning may fail if LPC file missing; continue */
+            }
+        }
+    }
     /* Mark chargen as complete */
     sess->chargen_state = CHARGEN_COMPLETE;
     sess->state = STATE_PLAYING;

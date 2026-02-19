@@ -9,13 +9,11 @@ void create() {
 
     set_short("Dog Spike's Corner");
     set_long(
-        "A cozy alcove just north of the main hall, warmed by the\n"
-        "nearby fireplace. A large dog bed sits in the corner, well-worn\n"
-        "and clearly loved. Chew toys and bones are scattered about.\n"
-        "A water bowl and food dish sit near the wall.\n\n"
-        "This is Spike's domain. The castle's loyal guard dog has claimed\n"
-        "this spot as his own. A sign on the wall reads:\n"
-        "'Spike - Head of Castle Security. Please pet.'"
+        "A cozy alcove just north of the main hall, warmed by the nearby fireplace.\n"
+        "A large dog bed sits in the corner, well-worn and clearly loved.\n"
+        "Chew toys and bones are scattered about. A water bowl and food dish sit near the wall.\n\n"
+        "This is Spike's domain. The castle's loyal guard dog has claimed this spot as his own.\n"
+        "A sign on the wall reads: 'Spike - Head of Castle Security. Please pet.'"
     );
 
     add_exit("south", "/domains/wizard/castle/main_hall");
@@ -24,8 +22,8 @@ void create() {
     set_property("indoors", 1);
 
     set_items(([
-        "bed"     : "A large, overstuffed dog bed. It's seen better days but Spike\nclearly loves it.",
-        "dog bed" : "A large, overstuffed dog bed. It's seen better days but Spike\nclearly loves it.",
+        "bed"     : "A large, overstuffed dog bed. It's seen better days but Spike clearly loves it.",
+        "dog bed" : "A large, overstuffed dog bed. It's seen better days but Spike clearly loves it.",
         "toys"    : "An assortment of well-chewed toys and bones. Spike guards them jealously.",
         "bones"   : "An assortment of well-chewed toys and bones. Spike guards them jealously.",
         "bowl"    : "A large water bowl and food dish sit near the wall, both well-used.",

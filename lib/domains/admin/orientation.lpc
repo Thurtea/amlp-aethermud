@@ -1,0 +1,18 @@
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Admin Orientation Room");
+    set_long(
+        "Welcome Admin Thurtea!\n\n"
+        "This is the Admin Orientation Room. Use the following helper commands:\n"
+        " - call <player>       -> summon a player to your location\n"
+        " - ed <file>           -> edit an LPC file (wizard editor)\n"
+        " - warmboot            -> reload lib/ and LPC files\n"
+        " - promote <player> 2  -> promote a player to admin (level 2)\n"
+        "\nBe mindful: these commands are powerful. Use with responsibility."
+    );
+    add_exit("castle", "/domains/wizard/castle/main_hall");
+    set_property("light", 2);
+    set_property("indoors", 1);
+}

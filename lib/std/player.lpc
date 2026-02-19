@@ -417,7 +417,48 @@ void set_secondary_skills(mapping m) {
 // Command processing - CRITICAL FUNCTION
 // Simple command processor - returns 0 to let C handle commands for now
 mixed process_command(string cmd) {
-    // Return 0 = command not handled in LPC, let C driver process it
+    int res;
+    if (!cmd || cmd == "") return 0;
+
+    /* Route commands to the central command daemon if available */
+    if (objectp(COMMAND_D)) {
+        res = 0;
+        catch(res = (int)COMMAND_D->execute_command(this_object(), cmd));
+        return res;
+    }
+
+    return 0;
+}
+
+/* Ensure player registers a catch-all action with the driver-level parser
+ * so legacy add_action flows also reach the command daemon. */
+void init() {
+    ::init();
+    add_action("do_cmd", "", 1);
+}
+
+int do_cmd(string arg) {
+    string verb = query_verb();
+    string full = verb;
+    if (arg && arg != "") full += " " + arg;
+
+    if (objectp(COMMAND_D)) {
+        int res = 0;
+        catch(res = (int)COMMAND_D->execute_command(this_object(), full));
+        if (res) return 1;
+    }
+    return 0;
+}
+
+/* Allow daemon to probe for action handlers */
+int try_action(string verb, string args) {
+    string full = verb;
+    if (args && args != "") full += " " + args;
+    if (objectp(COMMAND_D)) {
+        int res = 0;
+        catch(res = (int)COMMAND_D->execute_command(this_object(), full));
+        return res;
+    }
     return 0;
 }
 

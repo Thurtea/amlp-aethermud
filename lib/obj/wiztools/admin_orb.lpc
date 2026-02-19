@@ -42,6 +42,41 @@ void init() {
     if (!environment() || !interactive(environment())) return;
     if (!check_wizard_level(environment())) return;
     add_action("cmd_orb", "orb");
+    /* Allow admins to summon players using 'call <player>' */
+    add_action("do_call", "call");
+}
+
+int do_call(string name) {
+    if (!name || name == "") return 0;
+
+    object caller = this_player();
+    if (!check_wizard_level(caller)) {
+        write("You lack permission to call players.
+");
+        return 1;
+    }
+
+    object target = find_player(lower_case(name));
+    if (!target) {
+        write("Player '" + name + "' not found online.\n");
+        return 1;
+    }
+
+    object tenv = environment(target);
+    object cenv = environment(caller);
+    if (!cenv) {
+        write("You have no location to receive the player.\n");
+        return 1;
+    }
+
+    if (tenv) {
+        tell_room(tenv, target->query_cap_name() + " is summoned away by an admin.\n", ({ target }));
+    }
+
+    target->move(cenv);
+    tell_room(cenv, target->query_cap_name() + " appears in a flash of light.\n", ({ target }));
+    write("You call " + target->query_cap_name() + " to your location.\n");
+    return 1;
 }
 
 int cmd_orb(string str) {

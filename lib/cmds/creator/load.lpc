@@ -43,3 +43,12 @@ void help() {
     write("Syntax: load <object_path>\n");
     write("Load an object into memory without cloning.\n");
 }
+
+string query_help() {
+    return
+"LOAD - Load an object into memory\n\n"
+"Usage:\n"
+"  load <object_path>   Load a file into memory for inspection\n\n"
+"Loads the specified LPC file into the driver without cloning. Useful\n"
+"for testing and debugging builder-created files.\n";
+}

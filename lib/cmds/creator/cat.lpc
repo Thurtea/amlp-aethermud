@@ -57,3 +57,12 @@ void help() {
     write("Syntax: cat <file_path>\n");
     write("Display file contents with line numbers.\n");
 }
+
+string query_help() {
+    return
+"CAT - Show file contents\n\n"
+"Usage:\n"
+"  cat <file>           Display the contents of a file in your workspace\n\n"
+"Useful for quickly viewing source files while editing or reviewing\n"
+"templates created by the QCS.\n";
+}

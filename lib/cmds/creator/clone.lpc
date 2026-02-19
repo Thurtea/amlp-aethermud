@@ -50,3 +50,12 @@ int main(string args) {
     
     return 1;
 }
+
+string query_help() {
+    return
+"CLONE - Clone an object for editing\n\n"
+"Usage:\n"
+"  clone <file>         Clone a file into your workspace for editing\n\n"
+"Creates a writable clone of a library object in your workspace so you\n"
+"can edit it. Intended for builders and creators.\n";
+}

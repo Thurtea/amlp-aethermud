@@ -118,6 +118,14 @@ int main(string args) {
     return 1;
 }
 
+string query_help() {
+    return
+"TAIL - Show end of file\n\n"
+"Usage:\n"
+"  tail <file>           Show the last lines of a file (like Unix tail)\n\n"
+"Useful for monitoring logs or recently edited files in your workspace.\n";
+}
+
 void help() {
     write("Syntax: tail [-n <lines>] [-f] <file>\n");
     write("Display the last lines of a file.\n");

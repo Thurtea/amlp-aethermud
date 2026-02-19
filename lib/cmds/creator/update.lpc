@@ -62,6 +62,15 @@ int main(string args) {
     return 1;
 }
 
+string query_help() {
+    return
+"UPDATE - Update a deployed object with workspace changes\n\n"
+"Usage:\n"
+"  update <name>         Update an existing deployed object from workspace\n\n"
+"Replace or refresh a deployed file with the version from your creator\n"
+"workspace. Requires appropriate permissions.\n";
+}
+
 void help() {
     write("Syntax: update <object_path>\n");
     write("Reload/recompile an object.\n");

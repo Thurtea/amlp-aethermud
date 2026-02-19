@@ -260,3 +260,11 @@ void init() {
     add_action("cmd_mkobject", "mkobject");
     add_action("cmd_mkobject", "makeobject");
 }
+
+string query_help() {
+    return
+"MKOBJECT - Create weapon/armor/item/NPC templates\n\n"
+"Usage:\n"
+"  mkobject <type> <filename>   Create an object template in your workspace\n\n"
+"Quickly scaffold common object types for editing and deployment.\n";
+}

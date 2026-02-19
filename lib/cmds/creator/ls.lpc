@@ -144,3 +144,12 @@ void help() {
     write("Syntax: ls [-l1atxr] [path]\n");
     write("List directory contents. Creator-friendly; resolves creator cwd.\n");
 }
+
+string query_help() {
+    return
+"LS - List directory contents\n\n"
+"Usage:\n"
+"  ls <path>            List files in a directory (workspace)\n\n"
+"Shows files and directories in the given path. Useful for browsing\n"
+"your building workspace.\n";
+}

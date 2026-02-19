@@ -192,3 +192,12 @@ void help() {
     write("\n");
     write("See also: grep, ls\n");
 }
+
+string query_help() {
+    return
+"FIND - Find files by pattern\n\n"
+"Usage:\n"
+"  find <directory> [-name <pattern>] [-type f|d]\n\n"
+"Locate files or directories recursively in your workspace. Supports\n"
+"simple wildcard patterns and basic type filtering.\n";
+}

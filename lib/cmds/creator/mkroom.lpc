@@ -297,3 +297,13 @@ void init() {
     add_action("cmd_mkroom", "mkroom");
     add_action("cmd_mkroom", "makeroom");
 }
+
+string query_help() {
+    return
+"MKROOM - Create a new room quickly\n\n"
+"Usage:\n"
+"  mkroom <filename>                 Create a new room file in your domain\n"
+"  mkroom <direction> <filename>     Create room and link an exit\n\n"
+"Quick tool to scaffold room files and optionally create exits between\n"
+"rooms. Intended for builders and creators.\n";
+}

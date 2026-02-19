@@ -66,3 +66,12 @@ int cmd_eval(string arg) {
 void create() {
     // Command registration
 }
+
+string query_help() {
+    return
+"EVAL - Evaluate LPC code (wizard-only)\n\n"
+"Usage:\n"
+"  eval <lpc_code>      Execute LPC code as the wizard (use with caution)\n\n"
+"Runs arbitrary LPC code in the server context. Intended for wizards and\n"
+"admins for debugging; use carefully to avoid instability.\n";
+}

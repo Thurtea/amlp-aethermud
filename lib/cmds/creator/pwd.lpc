@@ -16,3 +16,12 @@ void help() {
     write("Syntax: pwd\n");
     write("Shows your current working directory.\n");
 }
+
+string query_help() {
+    return
+"PWD - Show current working directory\n\n"
+"Usage:\n"
+"  pwd                  Display your current creator workspace directory\n\n"
+"Useful for builders to confirm their current working directory when\n"
+"creating or modifying files.\n";
+}

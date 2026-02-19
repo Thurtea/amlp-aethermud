@@ -63,3 +63,12 @@ int main(string args) {
 void help() {
     write("Usage: cleanup\nRemoves non-living ground objects from the current room and reloads the room if safe.\n");
 }
+
+string query_help() {
+    return
+"CLEANUP - Remove ground objects and attempt reload\n\n"
+"Usage:\n"
+"  cleanup              Remove non-living objects from current room\n\n"
+"Safely destructs non-persistent items and attempts to reload the room if\n"
+"no other players are present. Intended for builders.\n";
+}

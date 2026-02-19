@@ -55,7 +55,7 @@ void open_rift(string dest, object who, object room) {
 
     rift = clone_object("/lib/obj/rift.lpc");
     if (!rift) {
-        tell_room(room, "Moxim looks embarrassed — the weave resists him.\n");
+        tell_room(room, "Moxim looks embarrassed - the weave resists him.\n");
         return;
     }
 

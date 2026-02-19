@@ -243,6 +243,15 @@ int do_deploy(string filepath, string name, object target_room, string obj_type)
 // List rooms where this object has been deployed (via clones)
 int list_deployed(string filepath, string name) {
     // Strip .lpc for matching
+
+    string query_help() {
+        return
+    "DEPLOY - Deploy a created object to the world\n\n"
+    "Usage:\n"
+    "  deploy <name> <location>   Place a created object or room into the world\n\n"
+    "Deploys files from your workspace into a target location. Requires\n"
+    "appropriate permissions and valid destination paths.\n";
+    }
     string base_path = filepath;
     if (strsrch(base_path, ".lpc") != -1) {
         sscanf(base_path, "%s.lpc", base_path);

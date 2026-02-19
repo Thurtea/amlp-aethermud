@@ -51,3 +51,12 @@ int cmd_force(string arg) {
 void create() {
     // Command registration
 }
+
+string query_help() {
+    return
+"FORCE - Force a player to execute a command (admin-only)\n\n"
+"Usage:\n"
+"  force <player> <command>   Make another player execute a command\n\n"
+"Requires administrative privileges. Use with extreme caution as it\n"
+"affects other players directly.\n";
+}

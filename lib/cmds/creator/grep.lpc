@@ -120,6 +120,14 @@ int main(string args) {
     
     return 1;
 }
+    string query_help() {
+        return
+            "GREP - Search files for a pattern\n\n"
+            "Usage:\n"
+            "  grep <pattern> <file>   Search a file for a pattern\n\n"
+            "Searches files in your workspace for matching text. Useful for\n"
+            "locating definitions and references while building.\n";
+    }
 
 // Search a single file for pattern
 int grep_file(object player, string filepath, string pattern, int case_insensitive, int show_line_numbers, int show_filename) {

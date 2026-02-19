@@ -195,3 +195,12 @@ void help() {
     write("Simple line text editor for creating/editing LPC files.\n");
     write("Use 'ed file help' for detailed command help.\n");
 }
+
+string query_help() {
+    return
+"ED - Simple line editor for LPC files\n\n"
+"Usage:\n"
+"  ed <file> [command]   Edit a file with simple line commands (show, a, d, w)\n\n"
+"Provides lightweight editing operations for creator workspace files.\n"
+"Useful when making quick changes without leaving the game.\n";
+}

@@ -99,6 +99,15 @@ int main(string args) {
     return 1;
 }
 
+string query_help() {
+    return
+"HEAD - Show start of file\n\n"
+"Usage:\n"
+"  head <file>           Show the first lines of a file\n\n"
+"Useful for quickly previewing file headers and metadata in workspace\n"
+"files.\n";
+}
+
 void help() {
     write("Syntax: head [-n <lines>] <file>\n");
     write("Display the first lines of a file.\n");

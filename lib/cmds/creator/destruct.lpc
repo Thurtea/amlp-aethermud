@@ -53,3 +53,11 @@ void help() {
     write("First tries to find object in your inventory by name,\n");
     write("then looks up by file path.\n");
 }
+
+string query_help() {
+    return
+"DESTRUCT - Destruct an object\n\n"
+"Usage:\n"
+"  destruct <object>    Remove an object from memory (wizard-only)\n\n"
+"Use with caution: destructing objects can destabilize running systems.\n";
+}

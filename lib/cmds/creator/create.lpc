@@ -269,3 +269,12 @@ int show_help() {
     write("  deploy <name> <location>          - Place in the world\n");
     return 1;
 }
+
+string query_help() {
+    return
+"CREATE - Quick create templates for NPCs, items, rooms, etc.\n\n"
+"Usage:\n"
+"  create <type> <name>    Create template (npc, weapon, armor, room, item)\n\n"
+"Generates starter LPC files in your wizard workspace for common object\n"
+"types. Use 'modify' and 'deploy' to edit and place them.\n";
+}

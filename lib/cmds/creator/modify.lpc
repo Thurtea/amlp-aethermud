@@ -618,3 +618,12 @@ int show_help() {
     write("  modify vibro_sword damage \"2d6\" type \"energy\"\n");
     return 1;
 }
+
+string query_help() {
+    return
+"MODIFY - Edit properties of created objects\n\n"
+"Usage:\n"
+"  modify <name> <property> <value>   Modify properties of an object in workspace\n\n"
+"Used to change descriptions, stats, exits, and other properties of\n"
+"objects you have created with the QCS.\n";
+}

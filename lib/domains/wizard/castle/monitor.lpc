@@ -104,7 +104,7 @@ int cmd_watch(string str) {
     if (function_exists("query_hp", target)) hp = target->query_hp();
     if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
 
-    write("\033[1m--- Monitoring: " + tname + " ---\033[0m\n");
+    write("--- Monitoring: " + tname + " ---\n");
     write("Location: " + loc + "\n");
     write("HP: " + hp + "/" + max_hp + "\n");
 

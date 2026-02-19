@@ -39,6 +39,6 @@ void create() {
         "walls"     : "The walls glow with protective arcane runes. Each one pulses\nwith the heartbeat of the MUD's infrastructure.",
         "fireplace" : "The fireplace burns with unnatural flames of blue, green, and\npurple. It provides warmth without smoke. A plaque above reads:\n'Built by the founders, fueled by creativity.'",
         "fire"      : "The fireplace burns with unnatural flames of blue, green, and\npurple. It provides warmth without smoke.",
-        "flames"    : "The flames dance in shades of blue, green, and purple — clearly\nnot ordinary fire."
+        "flames"    : "The flames dance in shades of blue, green, and purple - clearly\nnot ordinary fire."
     ]));
 }

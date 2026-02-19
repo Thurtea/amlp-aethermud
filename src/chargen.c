@@ -1137,25 +1137,16 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     send_to_player(sess, "As a %s, your class is %s.\n", ch->race, ch->occ);
                     send_to_player(sess, "Racial Character Classes have innate abilities.\n\n");
 
-                    send_to_player(sess, "Rolling your attributes...\n");
-                    chargen_roll_stats(sess);
-                    chargen_display_stats(sess);
-
-                    sess->chargen_state = CHARGEN_STATS_CONFIRM;
-                    send_to_player(sess, "\n");
-                    send_to_player(sess, "Accept these stats? (yes/reroll/back): ");
+                    /* Do not roll here - roll will occur after starting zone selection */
+                    sess->chargen_state = CHARGEN_ZONE_SELECT;
+                    chargen_show_zones(sess);
                 } else {
-                    /* Non-RCC: O.C.C. will be assigned by a wizard later.
-                     * Proceed directly to rolling attributes. */
+                    /* Non-RCC: O.C.C. will be assigned by a wizard later. */
                     ch->occ = NULL;
 
-                    send_to_player(sess, "Rolling your attributes...\n");
-                    chargen_roll_stats(sess);
-                    chargen_display_stats(sess);
-
-                    sess->chargen_state = CHARGEN_STATS_CONFIRM;
-                    send_to_player(sess, "\n");
-                    send_to_player(sess, "Accept these stats? (yes/reroll/back): ");
+                    /* Do not roll yet - proceed to starting zone selection */
+                    sess->chargen_state = CHARGEN_ZONE_SELECT;
+                    chargen_show_zones(sess);
                 }
             } else {
                 send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
@@ -1247,9 +1238,17 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         sess->current_room = zone_room;
                     }
 
-                    /* Secondary skills can be learned through in-game training */
-                    send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
-                    chargen_complete(sess);
+                        /* Secondary skills can be learned through in-game training */
+                        send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
+
+                        /* Now roll attributes (after starting zone selection) */
+                        send_to_player(sess, "\nRolling your attributes...\n");
+                        chargen_roll_stats(sess);
+                        chargen_display_stats(sess);
+
+                        sess->chargen_state = CHARGEN_STATS_CONFIRM;
+                        send_to_player(sess, "\n");
+                        send_to_player(sess, "Accept these stats? (yes/reroll/back): ");
                 } else {
                     send_to_player(sess, "Invalid choice. Enter 1-3: ");
                 }

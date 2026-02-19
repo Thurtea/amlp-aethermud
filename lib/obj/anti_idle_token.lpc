@@ -1,0 +1,44 @@
+// /lib/obj/anti_idle_token.lpc
+// Item that grants the holder a no-idle token (prevents idle disconnects)
+
+#include <lib.h>
+
+inherit LIB_ITEM;
+
+static void create() {
+    item::create();
+    SetKeyName("anti-idle token");
+    SetId(({ "noidle", "antiidle", "token", "no-idle-token" }));
+    SetShort("an anti-idle token");
+    SetLong("A small brass token embossed with the words 'NO-IDLE'.\n"
+            "When carried, it prevents the server from disconnecting you for idling.");
+    SetMass(1);
+    SetValue(0);
+}
+
+void init() {
+    ::init();
+    object env = environment(this_object());
+    if (!env) return;
+    if (function_exists("query_name", env) && env->query_name()) {
+        string name = env->query_name();
+        string lower = lower_case(name);
+        string dir = "lib/save/noidle";
+        if (file_size(dir) != -2) mkdir(dir);
+        string path = dir + "/" + lower + ".token";
+        write_file(path, "Anti-idle token created for: " + name + "\n");
+    }
+}
+
+void remove() {
+    object env = environment(this_object());
+    if (env && function_exists("query_name", env) && env->query_name()) {
+        string name = env->query_name();
+        string lower = lower_case(name);
+        string path = "lib/save/noidle/" + lower + ".token";
+        if (file_size(path) >= 0) rm(path);
+    }
+    ::remove();
+}
+
+int CanSell() { return 0; }

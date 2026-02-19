@@ -5166,8 +5166,25 @@ void check_session_timeouts(void) {
             time_t idle = now - sessions[i]->last_activity;
             
             if (idle > SESSION_TIMEOUT) {
-                // Exempt wizards/admins from idle timeout
+                /* Exempt wizards/admins from idle timeout */
                 if (sessions[i]->privilege_level == 0) {
+                    /* Check for per-player no-idle token file: lib/save/noidle/<name>.token */
+                    char noidle_path[512];
+                    if (sessions[i]->username && sessions[i]->username[0]) {
+                        /* lower-case username for path */
+                        char lower[64];
+                        size_t j;
+                        for (j = 0; j < sizeof(lower) - 1 && sessions[i]->username[j]; j++) {
+                            lower[j] = tolower((unsigned char)sessions[i]->username[j]);
+                        }
+                        lower[j] = '\0';
+                        snprintf(noidle_path, sizeof(noidle_path), "lib/save/noidle/%s.token", lower);
+                        struct stat st; 
+                        if (stat(noidle_path, &st) == 0) {
+                            /* Token present - skip disconnect */
+                            continue;
+                        }
+                    }
                     send_to_player(sessions[i], "You have been idle too long. Disconnecting...");
                     fprintf(stderr, "[Server] Timeout disconnect: %s (slot %d)\n",
                            sessions[i]->username[0] ? sessions[i]->username : "guest",

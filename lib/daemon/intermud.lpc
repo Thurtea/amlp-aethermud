@@ -4,7 +4,7 @@
  *
  * This is a light-weight adaptation for AMLP using patterns
  * from Dead Souls intermud daemons. Network transport (UDP)
- * is intentionally omitted here — add a driver-level socket
+ * is intentionally omitted here - add a driver-level socket
  * integration later when ready.
  */
 

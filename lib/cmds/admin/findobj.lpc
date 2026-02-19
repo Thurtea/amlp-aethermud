@@ -1,4 +1,4 @@
-// findobj.lpc — Admin command: search lib/ for .lpc files matching pattern
+// findobj.lpc - Admin command: search lib/ for .lpc files matching pattern
 // Usage: findobj <pattern>
 // The actual implementation is in the C driver (src/driver.c).
 // This file serves as the canonical command definition and can be loaded

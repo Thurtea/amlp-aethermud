@@ -54,7 +54,7 @@ int main(string args) {
 
         tell_object(player, "Cleanup: reload complete.\n");
     } else {
-        tell_object(player, "Room contains other players — reload skipped.\n");
+        tell_object(player, "Room contains other players - reload skipped.\n");
     }
 
     return 1;

@@ -5,9 +5,9 @@
 
 inherit LIB_DAEMON;
 
-mixed cmd(string arg) {
+int main(string arg) {
     object player = this_player();
-    if (!archp(player)) {
+    if (!player->is_admin()) {
         write("You do not have permission to use warmboot.");
         return 1;
     }
@@ -53,6 +53,6 @@ string *deep_lpc_files(string dir) {
     return out;
 }
 
-string GetHelp() {
+string query_help() {
     return "Syntax: warmboot\n\nReloads all .lpc files in lib/ and domains/. Prompts for confirmation. Logs to /log/warmboot.log.";
 }

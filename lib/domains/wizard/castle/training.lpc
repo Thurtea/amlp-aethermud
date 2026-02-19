@@ -45,7 +45,7 @@ int cmd_hit(string str) {
     int damage = (ps / 3) + random(6) + 1;
 
     write("You strike the training dummy! It rocks back from the impact.\n");
-    write("Damage dealt: \033[1;33m" + damage + "\033[0m\n");
+    write("Damage dealt: " + damage + "\n");
     say(player->query_cap_name() + " strikes the training dummy.\n");
 
     return 1;

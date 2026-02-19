@@ -12,13 +12,7 @@ void create() {
         "A circular chamber with a polished marble floor. In the center\n"
         "stands an ornate brass elevator cage with crystal-paneled doors.\n"
         "The elevator provides access to the various wizard offices on\n"
-        "the upper floors of the castle.\n\n"
-        "Four glowing buttons are set into the wall, each labeled:\n"
-        "  \033[1;34m[Domain]\033[0m  - Domain Wizard Office (world building)\n"
-        "  \033[1;36m[Coding]\033[0m  - Coding Wizard Office (systems & code)\n"
-        "  \033[1;32m[Roleplay]\033[0m - Roleplay Wizard Office (events & RP)\n"
-        "  \033[1;31m[Admin]\033[0m   - Admin Office (administration)\n\n"
-        "The main hall lies to the north."
+        "the upper floors of the castle."
     );
 
     add_exit("north", "/domains/wizard/castle/main_hall");

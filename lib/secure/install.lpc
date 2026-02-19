@@ -21,13 +21,109 @@ void logon() {
     write("+----------------------------------------------------------------+\n");
     write("\n");
     write("Welcome to the AMLP MUD Installation Process!\n\n");
-    write("You will be asked a series of questions to create the first\n");
-    write("administrator account for this MUD.\n\n");
     write("This wizard will only run ONCE - on the first connection.\n");
     write("After setup, normal login will be activated.\n\n");
     write("-----------------------------------------------------------------\n\n");
-    
+
+    // Check for existing admin saves (driver-created or previous install)
+    string *player_files = get_dir("/lib/save/players/*.dat");
+    if (player_files && sizeof(player_files) > 0) {
+        write("Detected existing admin or player save files.\n");
+        write("Would you like to run post-install setup (attach wiztools, create workroom, mark setup complete)?\n");
+        write("Type 'y' to continue with post-install, or 'n' to abort.\n");
+        input_to("post_install_prompt");
+        return;
+    }
     input_name();
+}
+
+void post_install_prompt(string resp) {
+    resp = lower_case(resp || "");
+    if (resp == "y" || resp == "yes") {
+        run_post_install();
+    } else {
+        write("\nAborting installation. You may restart the MUD to try again.\n");
+        shutdown();
+        destruct(this_object());
+    }
+}
+
+void run_post_install() {
+    write("\n--- POST-INSTALLATION SETUP ---\n");
+    // Try to find an admin player file
+    string *player_files = get_dir("/lib/save/players/*.dat");
+    string admin_file = sizeof(player_files) > 0 ? player_files[0] : 0;
+    string admin_name = admin_file ? admin_file[0..strlen(admin_file)-5] : 0; // strip .dat
+    object admin;
+    mixed err;
+    string workroom_path;
+
+    if (!admin_name) {
+        write("No admin player file found. Cannot continue post-install.\n");
+        shutdown();
+        destruct(this_object());
+        return;
+    }
+
+    write("Loading admin user: " + admin_name + "\n");
+    err = catch(admin = new(USER_OB));
+    if (err || !admin) {
+        write("\nERROR: Failed to create user object!\n");
+        write("Error: " + err + "\n");
+        shutdown();
+        destruct(this_object());
+        return;
+    }
+    // Attempt to load player data
+    if (function_exists("restore_player", admin)) {
+        admin->restore_player(admin_name);
+    } else if (function_exists("restore_me", admin)) {
+        admin->restore_me(admin_name);
+    }
+
+    // Attach wiztool
+    write("Attaching wizard tools...\n");
+    catch {
+        object wt = clone_object(WIZTOOL);
+        if (wt) {
+            if (function_exists("attach_wiztool", admin)) {
+                admin->attach_wiztool(wt);
+            } else if (function_exists("attach", wt)) {
+                wt->attach(admin);
+            }
+        }
+    };
+
+    // Create admin workroom if not present
+    write("Creating admin workroom...\n");
+    workroom_path = create_workroom(admin_name);
+    if (workroom_path) {
+        write("  Workroom created at: " + workroom_path + "\n");
+        if (function_exists("set_home", admin)) {
+            admin->set_home(workroom_path);
+        }
+    }
+
+    // Save admin
+    if (function_exists("save_player", admin)) {
+        admin->save_player();
+    } else if (function_exists("save_me", admin)) {
+        admin->save_me();
+    }
+
+    // Mark installation as complete
+    write_file("/data/setup_complete", "Installation completed on: " + ctime(time()) + "\n");
+    write_file("/data/setup_complete", "First admin: " + admin_name + "\n");
+
+    // Back up install wizard
+    string install_dir = "/lib/secure";
+    catch(cp(install_dir + "/install.lpc", install_dir + "/install.first.lpc"));
+    write("  Backed up: install.first.lpc\n");
+
+    write("\nPost-installation complete!\n");
+    write("The MUD will now shut down. Please restart to login as " + capitalize(admin_name) + ".\n");
+    shutdown();
+    destruct(this_object());
 }
 
 void input_name() {

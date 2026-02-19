@@ -12,7 +12,7 @@ void create() {
         "The Coding Wizard Office is a technical workspace filled with\n"
         "arcane terminals and crystalline data storage. Scrolling text\n"
         "flows across crystal screens, showing system logs and code.\n\n"
-        "A \033[1;36m[Coding]\033[0m banner hangs above the main workstation, marking\n"
+        "A [Coding] banner hangs above the main workstation, marking\n"
         "this as the headquarters for those who maintain the systems\n"
         "that power AetherMUD.\n\n"
         "Whiteboards cover one wall, filled with diagrams of the\n"

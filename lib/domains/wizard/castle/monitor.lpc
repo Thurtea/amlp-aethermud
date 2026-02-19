@@ -43,7 +43,7 @@ int cmd_scan(string str) {
         return 1;
     }
 
-    write("\033[1m=== Mortal Activity Scan ===\033[0m\n\n");
+    write("=== Mortal Activity Scan ===\n\n");
 
     object *all_users = users();
     int mortals = 0;

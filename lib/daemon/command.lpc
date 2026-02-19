@@ -29,104 +29,103 @@ void create() {
 }
 
 void init_commands() {
-    // Movement commands
-    commands["north"] = "/cmds/go";
-    commands["south"] = "/cmds/go";
-    commands["east"] = "/cmds/go";
-    commands["west"] = "/cmds/go";
-    commands["up"] = "/cmds/go";
-    commands["down"] = "/cmds/go";
-    commands["n"] = "/cmds/go";
-    commands["s"] = "/cmds/go";
-    commands["e"] = "/cmds/go";
-    commands["w"] = "/cmds/go";
-    commands["u"] = "/cmds/go";
-    commands["d"] = "/cmds/go";
-    
+    commands["north"] = "cmds/go";
+    commands["south"] = "cmds/go";
+    commands["east"] = "cmds/go";
+    commands["west"] = "cmds/go";
+    commands["up"] = "cmds/go";
+    commands["down"] = "cmds/go";
+    commands["n"] = "cmds/go";
+    commands["s"] = "cmds/go";
+    commands["e"] = "cmds/go";
+    commands["w"] = "cmds/go";
+    commands["u"] = "cmds/go";
+    commands["d"] = "cmds/go";
     // Communication
-    commands["say"] = "/cmds/say";
-    commands["'"] = "/cmds/say";
-    commands["tell"] = "/cmds/tell";
-    commands["shout"] = "/cmds/shout";
-    commands["chat"] = "/cmds/chat";
-    commands["whisper"] = "/cmds/whisper";
-    // Intermud / external chat channel (local dchat daemon)
-    commands["dchat"] = "/cmds/communication/dchat";
-    commands["emote"] = "/cmds/emote";
-    commands[":"] = "/cmds/emote";
-    
+    commands["say"] = "cmds/say";
+    commands["'"] = "cmds/say";
+    commands["tell"] = "cmds/tell";
+    commands["shout"] = "cmds/shout";
+    commands["chat"] = "cmds/chat";
+    commands["whisper"] = "cmds/whisper";
+    // Intermud / external chat channel (stub removed; true Intermud needs I3 daemon)
+    commands["emote"] = "cmds/emote";
+    commands[":"] = "cmds/emote";
     // Information
-    commands["look"] = "/cmds/look";
-    commands["l"] = "/cmds/look";
-    commands["examine"] = "/cmds/examine";
-    commands["exits"] = "/cmds/exits";
-    commands["inventory"] = "/cmds/inventory";
-    commands["i"] = "/cmds/inventory";
-    commands["equipment"] = "/cmds/equipment";
-    commands["eq"] = "/cmds/equipment";
-    commands["stats"] = "/cmds/stats";
-    commands["score"] = "/cmds/score";
-    commands["who"] = "/cmds/who";
-    commands["help"] = "/cmds/help";
-    commands["ls"] = "/cmds/ls";
-    
+    commands["look"] = "cmds/look";
+    commands["l"] = "cmds/look";
+    commands["examine"] = "cmds/examine";
+    commands["exits"] = "cmds/exits";
+    commands["inventory"] = "cmds/inventory";
+    commands["i"] = "cmds/inventory";
+    commands["equipment"] = "cmds/equipment";
+    commands["eq"] = "cmds/equipment";
+    commands["stats"] = "cmds/stats";
+    commands["score"] = "cmds/score";
+    commands["who"] = "cmds/who";
+    commands["help"] = "cmds/help";
+    commands["ls"] = "cmds/ls";
     // Actions
-    commands["take"] = "/cmds/take";
-    commands["put"] = "/cmds/put";
-    commands["get"] = "/cmds/take";  // Alias for take
-    commands["drop"] = "/cmds/put";  // Alias for put
-    commands["give"] = "/cmds/give";
-    
+    commands["take"] = "cmds/take";
+    commands["put"] = "cmds/put";
+    commands["get"] = "cmds/take";  // Alias for take
+    commands["drop"] = "cmds/put";  // Alias for put
+    commands["give"] = "cmds/give";
     // Equipment
-    commands["wear"] = "/cmds/wear";
-    commands["wield"] = "/cmds/wield";
-    commands["remove"] = "/cmds/remove";
-    commands["unwield"] = "/cmds/unwield";
-    commands["repair"] = "/cmds/repair";  // Phase 3, Step 4
-    
+    commands["wear"] = "cmds/wear";
+    commands["wield"] = "cmds/wield";
+    commands["remove"] = "cmds/remove";
+    commands["unwield"] = "cmds/unwield";
+    commands["repair"] = "cmds/repair";  // Phase 3, Step 4
     // Character development
-    commands["skills"] = "/cmds/skills";
-    commands["languages"] = "/cmds/languages";
-    commands["cast"] = "/cmds/cast";
-    commands["surname"] = "/cmds/surname";  // Phase 5, Step 4
-    commands["sirname"] = "/cmds/sirname";
-    commands["pskills"] = "/cmds/pskills";
-    commands["sskills"] = "/cmds/sskills";
-    commands["description"] = "/cmds/description";
-    commands["selectocc"] = "/cmds/selectocc";
-    commands["hatch"] = "/cmds/hatch";       // Falconry: hatch a hawk egg
-    
+    commands["skills"] = "cmds/skills";
+    commands["languages"] = "cmds/languages";
+    commands["cast"] = "cmds/cast";
+    commands["surname"] = "cmds/surname";  // Phase 5, Step 4
+    commands["sirname"] = "cmds/sirname";
+    commands["pskills"] = "cmds/pskills";
+    commands["sskills"] = "cmds/sskills";
+    commands["description"] = "cmds/description";
+    commands["selectocc"] = "cmds/selectocc";
+    commands["hatch"] = "cmds/hatch";       // Falconry: hatch a hawk egg
     // Social/introduction
-    commands["introduce"] = "/cmds/introduce";
-    commands["greet"] = "/cmds/introduce";  // Alias for introduce
-    commands["remember"] = "/cmds/remember";
-    commands["position"] = "/cmds/position";  // RP position
-    
+    commands["introduce"] = "cmds/introduce";
+    commands["greet"] = "cmds/introduce";  // Alias for introduce
+    commands["remember"] = "cmds/remember";
+    commands["position"] = "cmds/position";  // RP position
     // System
-    commands["quit"] = "/cmds/quit";
-    commands["logout"] = "/cmds/quit";
-    commands["test"] = "/cmds/test";
-    
+    commands["quit"] = "cmds/quit";
+    commands["logout"] = "cmds/quit";
+    commands["test"] = "cmds/test";
     // Admin commands (will check privilege internally)
-    commands["shutdown"] = "/cmds/admin/shutdown";
-    commands["promote"] = "/cmds/admin/promote";
-    commands["demote"] = "/cmds/admin/demote";
-    commands["grantskill"] = "/cmds/admin/grantskill";
-    commands["users"] = "/cmds/admin/users";
-    commands["tattoogun"] = "/cmds/admin/tattoogun";
-
+    commands["shutdown"] = "cmds/admin/shutdown";
+    commands["promote"] = "cmds/admin/promote";
+    commands["demote"] = "cmds/admin/demote";
+    commands["grantskill"] = "cmds/admin/grantskill";
+    commands["users"] = "cmds/admin/users";
+    commands["tattoogun"] = "cmds/admin/tattoogun";
     // Wizard commands (check privilege internally)
-    commands["setocc"] = "/cmds/wizard/setocc";
-    commands["wiztool"] = "/cmds/admin/wiztool";
-    commands["wiz"] = "/cmds/admin/wiz";
-    commands["goto"] = "/cmds/admin/goto";
-    commands["stat"] = "/cmds/admin/stat";
-    commands["testskill"] = "/cmds/admin/testskill";
-
+    commands["setocc"] = "cmds/wizard/setocc";
+    commands["wiztool"] = "cmds/admin/wiztool";
+    commands["wiz"] = "cmds/admin/wiz";
+    commands["goto"] = "cmds/admin/goto";
+    commands["stat"] = "cmds/admin/stat";
+    commands["testskill"] = "cmds/admin/testskill";
     // QCS - Quick Creation System (domain/coding/admin roles)
-    commands["create"] = "/cmds/creator/create";
-    commands["modify"] = "/cmds/creator/modify";
-    commands["deploy"] = "/cmds/creator/deploy";
+    commands["create"] = "cmds/creator/create";
+    commands["modify"] = "cmds/creator/modify";
+    commands["deploy"] = "cmds/creator/deploy";
+    // Wizard building tools (check privilege internally)
+    commands["pwd"] = "cmds/wizard/pwd";
+    commands["cd"] = "cmds/wizard/cd";
+    commands["eval"] = "cmds/wizard/eval";
+    commands["cat"] = "cmds/wizard/cat";
+    commands["ed"] = "cmds/wizard/ed";
+    commands["clone"] = "cmds/wizard/clone";
+    commands["load"] = "cmds/wizard/load";
+    commands["update"] = "cmds/wizard/update";
+    commands["destruct"] = "cmds/wizard/destruct";
+    commands["setrole"] = "cmds/admin/setrole";
 
     // Wizard building tools (check privilege internally)
     commands["pwd"] = "/cmds/wizard/pwd";

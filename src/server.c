@@ -20,6 +20,30 @@
 /* External function to send text to player */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
 
+// Utility: convert "\033" to binary ESC (27) in LPC strings for ANSI color support
+void send_ansi(PlayerSession *session, const char *text) {
+    char buf[4096];
+    int bi = 0;
+    for (int i = 0; text[i] && bi < sizeof(buf)-1; ) {
+        // Look for "\\033["
+        if (text[i] == '\\' && text[i+1] == '0' && text[i+2] == '3' && text[i+3] == '3' && text[i+4] == '[') {
+            buf[bi++] = 27; // ESC
+            buf[bi++] = '[';
+            i += 5;
+            // Copy the rest of the ANSI sequence (e.g., '1;34m')
+            while (text[i] && bi < sizeof(buf)-1) {
+                buf[bi++] = text[i];
+                if (text[i] == 'm') { i++; break; }
+                i++;
+            }
+        } else {
+            buf[bi++] = text[i++];
+        }
+    }
+    buf[bi] = '\0';
+    send_to_player(session, "%s", buf);
+}
+
 /* ==========================================================================
  * Filesystem Commands for Wizards/Admins
  * ========================================================================== */

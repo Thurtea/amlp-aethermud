@@ -1,3 +1,25 @@
+// Send ANSI string to user (calls server efun)
+void send_ansi(string s) {
+    efun::send_ansi(this_object(), s);
+}
+
+// Override write to use send_ansi if available
+void write(string s) {
+    if (function_exists("send_ansi", this_object())) {
+        this_object()->send_ansi(s);
+    } else {
+        efun::write(s);
+    }
+}
+
+// Override mtell_from_room to use send_ansi
+void mtell_from_room(string s) {
+    if (function_exists("send_ansi", this_object())) {
+        this_object()->send_ansi(s);
+    } else {
+        efun::write(s);
+    }
+}
 // User object - Enhanced with race, language, wizard system
 
 #include <globals.h>

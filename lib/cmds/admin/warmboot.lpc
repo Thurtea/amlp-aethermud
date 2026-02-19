@@ -1,15 +1,58 @@
-// warmboot.lpc — Admin command: reload all .lpc files in core lib dirs
-// Usage: warmboot
+// /cmds/admin/warmboot.lpc
+// True warmboot: reloads all .lpc files in lib/ and lib/domains/
 
-inherit "/std/cmd";
+#include <lib.h>
 
-int main(string arg) {
-    object user = previous_object();
-    if (!user || user->query_privilege_level() < 2) {
-        tell_object(user, "You don't have permission to use that command.\n");
+inherit LIB_DAEMON;
+
+mixed cmd(string arg) {
+    object player = this_player();
+    if (!archp(player)) {
+        write("You do not have permission to use warmboot.");
         return 1;
     }
-    // The actual implementation is in the C driver (src/driver.c)
-    tell_object(user, "[warmboot] Handled by C driver builtin.\n");
+    string *files = get_lpc_files();
+    int count = sizeof(files);
+    write("This will reload " + count + " .lpc files. Continue? (y/n)");
+    input_to("confirm_warmboot", files);
     return 1;
+}
+
+void confirm_warmboot(string resp, string *files) {
+    resp = lower_case(resp || "");
+    if (resp != "y" && resp != "yes") {
+        write("Warmboot cancelled.");
+        return;
+    }
+    int reloaded = 0;
+    foreach (string file in files) {
+        object ob = find_object(file);
+        if (ob) destruct(ob);
+        catch { load_object(file); };
+        reloaded++;
+        write_file("/log/warmboot.log", ctime(time())+": reloaded "+file+"\n");
+    }
+    write("Warmboot complete. Reloaded " + reloaded + " files.\n");
+}
+
+string *get_lpc_files() {
+    return deep_lpc_files("/lib");
+}
+
+string *deep_lpc_files(string dir) {
+    string *out = ({});
+    string *entries = get_dir(dir+"/*");
+    foreach (string entry in entries) {
+        string path = dir+"/"+entry;
+        if (file_size(path) == -2) {
+            out += deep_lpc_files(path);
+        } else if (strlen(path) > 4 && path[<4..] == ".lpc") {
+            out += ({ path });
+        }
+    }
+    return out;
+}
+
+string GetHelp() {
+    return "Syntax: warmboot\n\nReloads all .lpc files in lib/ and domains/. Prompts for confirmation. Logs to /log/warmboot.log.";
 }

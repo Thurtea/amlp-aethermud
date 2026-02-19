@@ -13,7 +13,7 @@ void create() {
         "world building. Large drafting tables display maps of existing\n"
         "domains, with blank parchment ready for new designs. Shelves\n"
         "hold miniature models of buildings, terrain features, and NPCs.\n\n"
-        "A \033[1;34m[Domain]\033[0m banner hangs on the wall, marking this as the\n"
+        "A [Domain] banner hangs on the wall, marking this as the\n"
         "headquarters for those who shape the physical world of AetherMUD.\n\n"
         "A bulletin board lists current building projects and area\n"
         "assignments. Reference books on room design and NPC creation\n"

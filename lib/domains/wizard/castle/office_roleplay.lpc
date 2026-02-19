@@ -13,7 +13,7 @@ void create() {
         "to inspire storytelling. Bookshelves overflow with lore books,\n"
         "quest outlines, and character backstories. A cozy reading nook\n"
         "occupies one corner.\n\n"
-        "A \033[1;32m[Roleplay]\033[0m banner hangs proudly, marking this as the\n"
+        "A [Roleplay] banner hangs proudly, marking this as the\n"
         "headquarters for those who bring the world to life through\n"
         "events, quests, and interactive storytelling.\n\n"
         "A large corkboard displays upcoming event schedules, quest\n"

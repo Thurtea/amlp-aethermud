@@ -14,6 +14,24 @@ void create() {
         "the shopkeeper conducts business. A sign on the wall reads: 'BUY and SELL - "
         "Type LIST to see inventory'.\n"
     );
+
+    set_items(([
+        "sign": "A wooden sign is posted on the wall. You can 'read sign'."
+    ]));
+}
+
+void init() {
+    ::init();
+    add_action("read_sign", "read");
+}
+
+int read_sign(string str) {
+    if (!str || lower_case(str) != "sign") return 0;
+    write("\nThe sign reads:\n");
+    write("  Welcome to the shop!\n");
+    write("  Type LIST to see inventory.\n");
+    write("  Use BUY <item> or SELL <item>.\n");
+    return 1;
     
     set_exits(([
         "out": "/domains/start/village_center"

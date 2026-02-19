@@ -56,11 +56,10 @@ string look() {
 
     // Render header based on brief/verbose preference
     if (brief_mode) {
-        // Brief mode: room name only
         desc += query_short() + "\n";
     } else {
-        // Verbose mode: full description only (no room name)
-        desc += query_long() + "\n";
+        write(query_long() + "\033[0m");
+        return "";
     }
     
     // Get room contents
@@ -142,7 +141,6 @@ string look() {
     if (exits && sizeof(exits) > 0) {
         string *dirs = keys(exits);
         desc += "\n\033[1;32mExits:\033[0m ";
-        
         for (int i = 0; i < sizeof(dirs); i++) {
             desc += dirs[i];
             if (i < sizeof(dirs) - 1) {
@@ -151,9 +149,9 @@ string look() {
         }
         desc += "\n";
     }
-    
     return desc;
 }
+
 
 // Helper: return a nicely-phrased single-line description for an item
 // Format item short description to lowercase while preserving acronyms

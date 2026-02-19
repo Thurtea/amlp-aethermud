@@ -13,7 +13,7 @@ void create() {
         "Heavy wards shimmer around the doorway, restricting access to\n"
         "those with the highest authority. The room is functional and\n"
         "austere compared to the other offices.\n\n"
-        "A \033[1;31m[Admin]\033[0m banner marks the authority of this space.\n\n"
+        "A [Admin] banner marks the authority of this space.\n\n"
         "A large desk dominates the room, covered with reports on player\n"
         "activity, system performance, and staff assignments. A crystal\n"
         "orb on the desk can be used to monitor the entire MUD at once.\n\n"
@@ -46,7 +46,7 @@ int cmd_orb(string str) {
         return 1;
     }
 
-    write("\033[1m=== Admin Overview ===\033[0m\n\n");
+    write("=== Admin Overview ===\n\n");
 
     object *all_users = users();
     int total = sizeof(all_users);

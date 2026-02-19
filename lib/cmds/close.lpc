@@ -1,0 +1,22 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    object ob;
+    if(!str || str == "") { notify_fail("Close what?\n"); return 0; }
+    ob = find_ob(str, player);
+    if(!ob) ob = find_ob(str, environment(player));
+    if(!ob) { notify_fail("You do not see " + add_article(str) + " here.\n"); return 0; }
+    if(!function_exists("do_close", ob)) {
+        notify_fail(capitalize(obj_short(ob)) + " cannot be closed.\n"); return 0; }
+    return ob->do_close(player);
+}
+
+string query_help() {
+    return
+"CLOSE - Close a door or container\n\n"
+"Usage:\n"
+"  close <object>     Close an open container or door\n\n"
+"Closing a container does not lock it. Use 'lock' to lock it.\n";
+}

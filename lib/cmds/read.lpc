@@ -1,0 +1,27 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    object ob;
+    if(!str || str == "") { notify_fail("Read what?\n"); return 0; }
+    ob = find_ob(str, player);
+    if(!ob) ob = find_ob(str, environment(player));
+    if(!ob) { notify_fail("You do not see " + add_article(str) + " here.\n"); return 0; }
+    if(function_exists("do_read", ob)) return ob->do_read(player);
+    if(function_exists("query_read_msg", ob)) {
+        string msg = (string)ob->query_read_msg();
+        if(msg && msg != "") { tell_object(player, msg + "\n"); return 1; }
+    }
+    notify_fail("There is nothing written on " + obj_short(ob) + ".\n");
+    return 0;
+}
+
+string query_help() {
+    return
+"READ - Read text from an object\n\n"
+"Usage:\n"
+"  read <object>      Read text written on or in an object\n\n"
+"Some objects such as books, signs, and notes can be read.\n"
+"Not all objects have readable text.\n";
+}

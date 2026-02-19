@@ -4950,11 +4950,12 @@ void process_login_state(PlayerSession *session, const char *input) {
                 cmd_look(session, "");
                 send_prompt(session);
                 
-                /* Announce login */
-                char login_msg[256];
-                snprintf(login_msg, sizeof(login_msg),
-                        "%s has entered the game.\r\n", session->username);
-                broadcast_message(login_msg, session);
+                /* Announce login --- global broadcast suppressed. Only staff are notified. */
+                /* If you want a local room message, implement room_broadcast or similar. */
+                /* char login_msg[256];
+                 * snprintf(login_msg, sizeof(login_msg), "%s has entered the game.\r\n", session->username);
+                 * broadcast_message(login_msg, session);
+                 */
 
                 /* Staff notification */
                 char staff_msg[256];
@@ -5657,6 +5658,9 @@ int main(int argc, char **argv) {
 
             last_combat_tick = now;
         }
+
+        /* Process scheduled callouts once per tick */
+        process_callouts();
     }
     
     fprintf(stderr, "\n[Server] Shutting down...\n");

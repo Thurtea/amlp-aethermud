@@ -1,0 +1,36 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    object target = player;
+    if(str && str != "") {
+        target = find_living_here(str, environment(player));
+        if(!target) { notify_fail("You do not see " + str + " here.\n"); return 0; }
+    }
+    string pos = "standing";
+    if(function_exists("query_position", target)) pos = (string)target->query_position();
+    if(pos != "sleeping") {
+        tell_object(player, (target==player ? "You are" : capitalize(obj_name(target)) + " is") + " already awake.\n");
+        return 1;
+    }
+    if(function_exists("set_position", target)) target->set_position("standing");
+    if(target == player) {
+        tell_object(player, "You wake up.\n");
+        tell_room(environment(player), capitalize(obj_name(player)) + " wakes up.\n", ({ player }));
+    } else {
+        tell_object(player, "You wake " + obj_name(target) + ".\n");
+        tell_object(target, capitalize(obj_name(player)) + " wakes you up.\n");
+        tell_room(environment(player), capitalize(obj_name(player)) + " wakes " + obj_name(target) + ".\n", ({ player, target }));
+    }
+    return 1;
+}
+
+string query_help() {
+    return
+"WAKE - Wake up yourself or another player\n\n"
+"Usage:\n"
+"  wake                   Wake yourself up\n"
+"  wake <name>            Wake a sleeping person nearby\n\n"
+"You can wake others who are sleeping in the same location.\n";
+}

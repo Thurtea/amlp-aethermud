@@ -1,0 +1,37 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    if(!str || str == "") {
+        object f = 0;
+        if(function_exists("query_following", player)) f = (object)player->query_following();
+        if(f) tell_object(player, "You are following " + capitalize(obj_name(f)) + ".\n");
+        else  tell_object(player, "You are not following anyone.\n");
+        return 1;
+    }
+    if(str == "stop" || str == "none") {
+        if(function_exists("set_following", player)) player->set_following(0);
+        tell_object(player, "You stop following.\n");
+        return 1;
+    }
+    object target = find_living_here(str, environment(player));
+    if(!target) { notify_fail("You do not see " + str + " here.\n"); return 0; }
+    if(target == player) { notify_fail("You cannot follow yourself.\n"); return 0; }
+    if(function_exists("set_following", player)) player->set_following(target);
+    tell_object(player, "You begin following " + capitalize(obj_name(target)) + ".\n");
+    tell_object(target, capitalize(obj_name(player)) + " begins following you.\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"FOLLOW - Follow another player or NPC\n\n"
+"Usage:\n"
+"  follow                 Show who you are currently following\n"
+"  follow <name>          Begin following someone in your location\n"
+"  follow stop            Stop following\n"
+"  follow none            Stop following\n\n"
+"When following, you will automatically move with the person you\n"
+"are following when they leave the room.\n";
+}

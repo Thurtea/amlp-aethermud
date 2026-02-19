@@ -178,6 +178,20 @@ string creator_file(string file) {
 
 // Validate read access
 int valid_read(string file, object caller, string func) {
+    if(!file) return 0;
+    if(strsrch(file, "/save/players/") != -1) {
+        if(objectp(caller) && function_exists("query_name", caller)) {
+            string pname = lower_case((string)caller->query_name() || "");
+            if(pname != "" && strsrch(lower_case(file), "/" + pname + ".o") != -1)
+                return 1;
+        }
+        if(creator_file(file_name(caller || this_object())) == "Root") return 1;
+        return 0;
+    }
+    if(strsrch(file, "/secure/") != -1) {
+        if(creator_file(file_name(caller || this_object())) == "Root") return 1;
+        return 0;
+    }
     return 1;
 }
 
@@ -203,4 +217,55 @@ int valid_write(string file, object caller, string func) {
     if (sscanf(file, "lib/log/%s", fname) == 1) return 1;
 
     return 0;
+}
+
+// === MISSING MASTER APPLIES -- appended ===
+
+object get_master() { return this_object(); }
+
+int valid_seteuid(object ob, string uid) {
+    if(!ob || !uid) return 0;
+    if(creator_file(file_name(ob)) == "Root") return 1;
+    if(uid == creator_file(file_name(ob))) return 1;
+    if(uid == get_bb_uid()) return 1;
+    return 0;
+}
+
+string author_file(string file) { return creator_file(file); }
+
+int valid_override(object ob, string func) {
+    if(creator_file(file_name(ob)) == "Root") return 1;
+    return 0;
+}
+
+int valid_exec(object ob, string prog) {
+    if(creator_file(file_name(ob)) == "Root") return 1;
+    return 0;
+}
+
+int valid_bind(int port, string name) {
+    if(port > 1024) return 1;
+    return 0;
+}
+
+int valid_apply(string func, object ob) { return 1; }
+
+void runtime_error(string err, string prg, string curobj, int line) {
+    string msg = sprintf("[RUNTIME] %s\n  in %s line %d\n  current: %s\n\n",
+        err, prg || "?", line, curobj || "?");
+    write(msg);
+    write_file("/log/runtime_errors.log", ctime(time()) + "\n" + msg);
+}
+
+void log_error(string file, string err) {
+    string msg = sprintf("[COMPILE] %s\n  in %s\n\n", err, file || "?");
+    write(msg);
+    write_file("/log/compile_errors.log", ctime(time()) + "\n" + msg);
+}
+
+void destruct_ob(object ob) {
+    if(!mappingp(loaded_daemons) || !ob) return;
+    string *ks = keys(loaded_daemons); int i;
+    for(i = 0; i < sizeof(ks); i++)
+        if(loaded_daemons[ks[i]] == ob) map_delete(loaded_daemons, ks[i]);
 }

@@ -1,0 +1,21 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    string pos = "standing";
+    if(function_exists("query_position", player)) pos = (string)player->query_position();
+    if(pos == "standing") { tell_object(player, "You are already standing.\n"); return 1; }
+    if(function_exists("set_position", player)) player->set_position("standing");
+    tell_object(player, "You stand up.\n");
+    tell_room(environment(player), capitalize(obj_name(player)) + " stands up.\n", ({ player }));
+    return 1;
+}
+
+string query_help() {
+    return
+"STAND - Stand up\n\n"
+"Usage:\n"
+"  stand                  Stand up from a sitting or resting position\n\n"
+"You must be standing to move or fight effectively.\n";
+}

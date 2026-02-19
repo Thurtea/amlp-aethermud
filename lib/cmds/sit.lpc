@@ -1,0 +1,22 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    string pos = "standing";
+    if(function_exists("query_position", player)) pos = (string)player->query_position();
+    if(pos == "sitting") { tell_object(player, "You are already sitting.\n"); return 1; }
+    if(function_exists("set_position", player)) player->set_position("sitting");
+    tell_object(player, "You sit down.\n");
+    tell_room(environment(player), capitalize(obj_name(player)) + " sits down.\n", ({ player }));
+    return 1;
+}
+
+string query_help() {
+    return
+"SIT - Sit down\n\n"
+"Usage:\n"
+"  sit                    Sit down in your current location\n\n"
+"Sitting reduces stamina drain while resting. Use 'stand' to\n"
+"get back up.\n";
+}

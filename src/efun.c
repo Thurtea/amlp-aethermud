@@ -1801,6 +1801,35 @@ VMValue efun_query_verb(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_string("");
 }
 
+/* ========== Callout Efuns (bridge to C scheduler) ========== */
+
+VMValue efun_call_out(VirtualMachine *vm, VMValue *args, int arg_count) {
+    /* Callout scheduler not implemented yet on this driver. Return -1 as failure. */
+    (void)vm; (void)args; (void)arg_count;
+    return vm_value_create_int(-1);
+}
+
+VMValue efun_remove_call_out(VirtualMachine *vm, VMValue *args, int arg_count) {
+    /* Scheduler removal not implemented; return -1.0 to indicate failure */
+    (void)vm; (void)args; (void)arg_count;
+    return vm_value_create_float(-1.0);
+}
+
+VMValue efun_find_call_out(VirtualMachine *vm, VMValue *args, int arg_count) {
+    /* Not implemented: return -1.0 */
+    (void)vm; (void)args; (void)arg_count;
+    return vm_value_create_float(-1.0);
+}
+
+VMValue efun_call_out_info(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm; (void)args; (void)arg_count;
+    /* Return empty array for now until scheduler exposes metadata */
+    if (!vm || !vm->gc) return vm_value_create_null();
+    array_t *arr = array_new(vm->gc, 0);
+    if (!arr) return vm_value_create_null();
+    VMValue out; out.type = VALUE_ARRAY; out.data.array_value = arr; return out;
+}
+
 /* ========== Debugging Efuns ========== */
 
 VMValue efun_debug_set_flags(VirtualMachine *vm, VMValue *args, int arg_count) {
@@ -2659,6 +2688,12 @@ int efun_register_all(EfunRegistry *registry) {
     /* File metadata efuns */
     efun_register(registry, "file_mode", efun_file_mode, 1, 1, "string file_mode(string)");
     efun_register(registry, "file_mtime", efun_file_mtime, 1, 1, "int file_mtime(string)");
+
+    /* Callout efuns */
+    efun_register(registry, "call_out", efun_call_out, 2, 10, "int call_out(string, float, ...)");
+    efun_register(registry, "remove_call_out", efun_remove_call_out, 1, 1, "float remove_call_out(int)");
+    efun_register(registry, "find_call_out", efun_find_call_out, 1, 1, "float find_call_out(int)");
+    efun_register(registry, "call_out_info", efun_call_out_info, 0, 0, "mixed* call_out_info()");
 
     int registered = registry->efun_count - before;
     printf("[Efun] Registered %d standard efuns\n", registered);

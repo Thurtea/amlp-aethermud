@@ -17,7 +17,8 @@ string get_opposite_direction(string dir) {
     }
 }
 
-int execute(string args, object player) {
+int main(string args) {
+    object player = previous_object();
     object room, dest;
     string dest_path;
     
@@ -25,7 +26,7 @@ int execute(string args, object player) {
         tell_object(player, "Go where?\n");
         return 1;
     }
-    
+
     room = player->query_environment();
     if (!room) {
         tell_object(player, "You are nowhere.\n");

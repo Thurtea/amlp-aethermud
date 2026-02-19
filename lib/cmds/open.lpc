@@ -1,0 +1,23 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    object ob;
+    if(!str || str == "") { notify_fail("Open what?\n"); return 0; }
+    ob = find_ob(str, player);
+    if(!ob) ob = find_ob(str, environment(player));
+    if(!ob) { notify_fail("You do not see " + add_article(str) + " here.\n"); return 0; }
+    if(!function_exists("do_open", ob)) {
+        notify_fail(capitalize(obj_short(ob)) + " cannot be opened.\n"); return 0; }
+    return ob->do_open(player);
+}
+
+string query_help() {
+    return
+"OPEN - Open a door or container\n\n"
+"Usage:\n"
+"  open <object>      Open a container or door in your inventory or room\n\n"
+"The object must have an unlocked opening mechanism. Use 'unlock'\n"
+"first if it is locked.\n";
+}

@@ -1,0 +1,24 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    if(!living(player)) { notify_fail("Only living players can save.\n"); return 0; }
+    if(function_exists("save_player", player)) {
+        if(player->save_player()) { tell_object(player, "Saved.\n"); return 1; }
+        tell_object(player, "Save failed. Contact an administrator.\n");
+        return 1;
+    }
+    save_object("/save/players/" + lower_case(obj_name(player)));
+    tell_object(player, "Saved.\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"SAVE - Save your character\n\n"
+"Usage:\n"
+"  save                   Save your character data to disk\n\n"
+"Your character is also saved automatically on logout and\n"
+"periodically during play. Use this command to save manually.\n";
+}

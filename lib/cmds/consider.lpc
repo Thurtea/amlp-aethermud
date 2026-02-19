@@ -1,0 +1,34 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    object target;
+    if(!str || str == "") { notify_fail("Consider whom?\n"); return 0; }
+    target = find_living_here(str, environment(player));
+    if(!target) { notify_fail("You do not see " + str + " here.\n"); return 0; }
+    if(target == player) { tell_object(player, "You consider yourself -- looking good.\n"); return 1; }
+    int my_hp = 100, t_hp = 100;
+    if(function_exists("query_hp", player)) my_hp = (int)player->query_hp();
+    if(function_exists("query_hp", target)) t_hp = (int)target->query_hp();
+    float ratio = (my_hp > 0) ? (float)t_hp / (float)my_hp : 99.0;
+    string assessment;
+    if(ratio < 0.5)      assessment = "would be an easy fight for you.";
+    else if(ratio < 0.9) assessment = "is weaker than you.";
+    else if(ratio < 1.1) assessment = "appears to be an even match.";
+    else if(ratio < 1.5) assessment = "looks stronger than you.";
+    else if(ratio < 2.5) assessment = "would be a very dangerous fight.";
+    else                 assessment = "would almost certainly kill you.";
+    tell_object(player, capitalize(obj_name(target)) + " " + assessment + "\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"CONSIDER - Assess a potential opponent\n\n"
+"Usage:\n"
+"  consider <name>        Estimate how dangerous this opponent is\n\n"
+"Compares your current HP against the target's HP to give you a\n"
+"rough idea of how a fight might go. Does not account for armor\n"
+"or abilities.\n";
+}

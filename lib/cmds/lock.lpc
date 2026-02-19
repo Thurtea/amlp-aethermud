@@ -1,0 +1,22 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    object ob;
+    if(!str || str == "") { notify_fail("Lock what?\n"); return 0; }
+    ob = find_ob(str, player);
+    if(!ob) ob = find_ob(str, environment(player));
+    if(!ob) { notify_fail("You do not see " + add_article(str) + " here.\n"); return 0; }
+    if(!function_exists("do_lock", ob)) {
+        notify_fail(capitalize(obj_short(ob)) + " cannot be locked.\n"); return 0; }
+    return ob->do_lock(player);
+}
+
+string query_help() {
+    return
+"LOCK - Lock a door or container\n\n"
+"Usage:\n"
+"  lock <object>      Lock a container or door (must have key)\n\n"
+"You must be carrying the correct key or the object must allow locking.\n";
+}

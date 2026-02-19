@@ -1,0 +1,22 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    string pos = "standing";
+    if(function_exists("query_position", player)) pos = (string)player->query_position();
+    if(pos == "sleeping") { tell_object(player, "You are already asleep.\n"); return 1; }
+    if(function_exists("set_position", player)) player->set_position("sleeping");
+    tell_object(player, "You lie down and fall asleep.\n");
+    tell_room(environment(player), capitalize(obj_name(player)) + " lies down and falls asleep.\n", ({ player }));
+    return 1;
+}
+
+string query_help() {
+    return
+"SLEEP - Fall asleep\n\n"
+"Usage:\n"
+"  sleep                  Lie down and go to sleep\n\n"
+"Sleeping provides the fastest HP and SDC recovery. Use 'wake'\n"
+"to wake yourself or another player.\n";
+}

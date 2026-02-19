@@ -1,0 +1,24 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    object time_d;
+    catch { time_d = find_object("/daemon/time"); }
+    if(time_d && function_exists("query_time_string", time_d)) {
+        tell_object(player, (string)time_d->query_time_string() + "\n");
+        return 1;
+    }
+    tell_object(player, "The current time is: " + ctime(time()) + "\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"TIME / DATE - Show the current time\n\n"
+"Usage:\n"
+"  time                   Display the current game and real time\n"
+"  date                   Alias for time\n\n"
+"Shows the current server time. Game-world time (day/night cycle)\n"
+"is shown if a time daemon is running.\n";
+}

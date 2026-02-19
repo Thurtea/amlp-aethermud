@@ -69,7 +69,7 @@ void init_commands() {
     commands["take"] = "cmds/take";
     commands["put"] = "cmds/put";
     commands["get"] = "cmds/take";  // Alias for take
-    commands["drop"] = "cmds/put";  // Alias for put
+    commands["drop"] = "cmds/drop";  // use dedicated drop command
     commands["give"] = "cmds/give";
     // Equipment
     commands["wear"] = "cmds/wear";
@@ -127,17 +127,26 @@ void init_commands() {
     commands["destruct"] = "cmds/wizard/destruct";
     commands["setrole"] = "cmds/admin/setrole";
 
-    // Wizard building tools (check privilege internally)
-    commands["pwd"] = "/cmds/wizard/pwd";
-    commands["cd"] = "/cmds/wizard/cd";
-    commands["eval"] = "/cmds/wizard/eval";
-    commands["cat"] = "/cmds/wizard/cat";
-    commands["ed"] = "/cmds/wizard/ed";
-    commands["clone"] = "/cmds/wizard/clone";
-    commands["load"] = "/cmds/wizard/load";
-    commands["update"] = "/cmds/wizard/update";
-    commands["destruct"] = "/cmds/wizard/destruct";
-    commands["setrole"] = "/cmds/admin/setrole";
+    // Position commands
+    commands["sit"]      = "cmds/sit";
+    commands["stand"]    = "cmds/stand";
+    commands["sleep"]    = "cmds/sleep";
+    commands["wake"]     = "cmds/wake";
+    // Object interaction
+    commands["open"]     = "cmds/open";
+    commands["close"]    = "cmds/close";
+    commands["lock"]     = "cmds/lock";
+    commands["unlock"]   = "cmds/unlock";
+    commands["read"]     = "cmds/read";
+    commands["write"]    = "cmds/write";
+    // Social/group
+    commands["follow"]   = "cmds/follow";
+    commands["group"]    = "cmds/group";
+    // Utility
+    commands["time"]     = "cmds/time";
+    commands["date"]     = "cmds/time";
+    commands["save"]     = "cmds/save";
+    commands["consider"] = "cmds/consider";
 }
 
 // Main command execution function

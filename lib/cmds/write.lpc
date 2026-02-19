@@ -1,0 +1,25 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+int main(string str) {
+    object player = this_player();
+    string target, message;
+    object ob;
+    if(!str || str == "") { notify_fail("Usage: write <message> on <object>\n"); return 0; }
+    if(sscanf(str, "%s on %s", message, target) != 2) {
+        notify_fail("Usage: write <message> on <object>\n"); return 0; }
+    ob = find_ob(target, player);
+    if(!ob) ob = find_ob(target, environment(player));
+    if(!ob) { notify_fail("You do not see " + add_article(target) + " here.\n"); return 0; }
+    if(!function_exists("do_write", ob)) {
+        notify_fail("You cannot write on " + obj_short(ob) + ".\n"); return 0; }
+    return ob->do_write(player, message);
+}
+
+string query_help() {
+    return
+"WRITE - Write a message on an object\n\n"
+"Usage:\n"
+"  write <message> on <object>    Write text onto a writable object\n\n"
+"Only objects that support writing (notes, boards) will accept this.\n";
+}

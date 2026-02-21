@@ -1,72 +1,212 @@
 // /cmds/help.lpc
-// Help system - topic-based lookups from lib/help/
-// Usage: help              - Show command overview
-//        help <topic>      - Show help on topic
-//        help topics       - List all available topics
+// Dynamic help system - serves .txt files, command/spell/psionic/skill/OCC/race
+// query_help() fallbacks.
+//
+// CHANGE 1: 'help' with no args (or "topics"/"list"/"index") scans ALL .txt
+//           files recursively and lists them alphabetically in 6-column format.
+// CHANGE 2: 'help <cmd>' falls back to load_object(cmds/...) + query_help()
+// CHANGE 3: 'help <spell>' scans lib/spells/ recursively
+// CHANGE 4: 'help <psionic>' scans lib/psionics/ recursively
+// CHANGE 5: 'help <skill>' scans lib/skills/ recursively
+// CHANGE 6: 'help <occ>' checks lib/help/occs/ then lib/occs/<occ>.lpc
+// CHANGE 7: 'help <race>' checks lib/help/races/ then lib/races/<race>.lpc
+
+// -------------------------------------------------------------------------
+// Helpers
+// -------------------------------------------------------------------------
+
+// Collect all .txt basenames from a directory (non-recursive, flat list).
+// Returns a sorted string array with .txt stripped.
+string *collect_txt(string dir) {
+    string *files = get_dir(dir + "*.txt");
+    string *result = ({});
+    if (files) {
+        foreach (string f in files) {
+            if (strlen(f) > 4)
+                result += ({ f[0..(strlen(f) - 5)] });
+        }
+    }
+    return sort_array(result, 1);
+}
+
+// Collect .txt files from a directory AND its immediate subdirectories.
+// Returns sorted, deduplicated array.
+string *collect_txt_recursive(string base) {
+    string *result = ({});
+    // Flat files in base
+    string *flat = get_dir(base + "*.txt");
+    if (flat) {
+        foreach (string f in flat) {
+            if (strlen(f) > 4) result += ({ f[0..(strlen(f) - 5)] });
+        }
+    }
+    // Subdirectories
+    string *subdirs = get_dir(base + "*");
+    if (subdirs) {
+        foreach (string sub in subdirs) {
+            string subpath = base + sub + "/";
+            string *subfiles = get_dir(subpath + "*.txt");
+            if (subfiles) {
+                foreach (string f in subfiles) {
+                    if (strlen(f) > 4) result += ({ f[0..(strlen(f) - 5)] });
+                }
+            }
+        }
+    }
+    return sort_array(result, 1);
+}
+
+// Deduplicate a sorted string array.
+string *dedup(string *arr) {
+    string *out = ({});
+    string prev = "";
+    foreach (string s in arr) {
+        if (lower_case(s) != lower_case(prev)) { out += ({ s }); prev = s; }
+    }
+    return out;
+}
+
+// Display topics array in N-column format (width = col_width * per_row).
+void write_columns(string *topics, int per_row, int col_width) {
+    int count = sizeof(topics);
+    for (int i = 0; i < count; i++) {
+        string t = topics[i];
+        // Pad/truncate to col_width
+        while (strlen(t) < col_width) t += " ";
+        write("  " + t[0..(col_width - 1)]);
+        if ((i + 1) % per_row == 0 || i == count - 1) write("\n");
+    }
+}
+
+// Try to load an LPC file and call query_help() on it.
+// Returns the help string or "" if not found.
+string try_lpc_help(string lpc_path) {
+    object obj;
+    catch { obj = load_object(lpc_path); };
+    if (!obj) return "";
+    if (!function_exists("query_help", obj)) return "";
+    string h = obj->query_help();
+    return h ? h : "";
+}
+
+// Build spelling variants of a topic (exact, underscore, dash).
+string *topic_variants(string topic) {
+    string *v = ({ topic });
+    string u = replace_string(replace_string(topic, "-", "_"), " ", "_");
+    string d = replace_string(replace_string(topic, "_", "-"), " ", "-");
+    if (u != topic) v += ({ u });
+    if (d != topic && d != u) v += ({ d });
+    return v;
+}
+
+// Search a list of LPC directories for topic.lpc and call query_help().
+// Returns help text or "".
+string search_lpc_dirs(string *dirs, string topic) {
+    string *vars = topic_variants(topic);
+    foreach (string dir in dirs) {
+        foreach (string v in vars) {
+            string h = try_lpc_help(dir + v);
+            if (h && h != "") return h;
+        }
+    }
+    return "";
+}
+
+// Recursive .lpc search: checks dir/*.lpc and dir/**/*.lpc for topic.
+// Returns help text or "".
+string search_lpc_tree(string base, string topic) {
+    string *vars = topic_variants(topic);
+    // Flat
+    foreach (string v in vars) {
+        string h = try_lpc_help(base + v);
+        if (h && h != "") return h;
+    }
+    // One level of subdirs
+    string *subdirs = get_dir(base + "*");
+    if (subdirs) {
+        foreach (string sub in subdirs) {
+            foreach (string v in vars) {
+                string h = try_lpc_help(base + sub + "/" + v);
+                if (h && h != "") return h;
+            }
+        }
+    }
+    return "";
+}
+
+// -------------------------------------------------------------------------
+// Main entry point
+// -------------------------------------------------------------------------
 
 int main(string args) {
     object player = this_player();
-    int priv_level;
+    if (!player) { write("Error: No player context.\n"); return 1; }
+    int priv_level = player->query_privilege_level();
 
-    if (!player) {
-        write("Error: No player context.\n");
-        return 1;
-    }
-
-    priv_level = player->query_privilege_level();
-
-    // No args: show command overview
-    if (!args || args == "") {
-        return show_overview(priv_level);
-    }
-
+    if (!args || args == "") return show_all_topics(priv_level);
     args = lower_case(args);
-
-    // Special: list topics
-    if (args == "topics" || args == "index" || args == "list") {
-        return show_topics(priv_level);
-    }
-
-    // Search for the topic in help directories
+    if (args == "topics" || args == "index" || args == "list")
+        return show_all_topics(priv_level);
     return show_topic(args, priv_level);
 }
 
-int show_topic(string topic, int priv_level) {
-    // Search directories in order
-    string *search_dirs = ({
-        "/help/",
-        "/help/basics/",
-        "/help/systems/",
-        "/help/occs/",
-        "/help/social/",
-        "/help/meta/",
-    });
+// -------------------------------------------------------------------------
+// CHANGE 1 — Show all topics (dynamic index)
+// -------------------------------------------------------------------------
 
-    // Add wizard help if privileged
-    if (priv_level >= 1) {
-        search_dirs += ({ "/help/wizard/" });
+int show_all_topics(int priv_level) {
+    string *all = ({});
+
+    // Collect from lib/help/ and all subdirs
+    string *help_subdirs = ({ "", "basics/", "systems/", "occs/", "social/",
+                               "meta/" });
+    if (priv_level >= 1) help_subdirs += ({ "wizard/" });
+    foreach (string sub in help_subdirs) {
+        string *t = collect_txt("/help/" + sub);
+        if (t) all += t;
     }
 
-    // Try exact match first, then with common extensions
-    string *filenames = ({
-        topic + ".txt",
-        topic,
-    });
+    // Collect from lib/data/help/ and subdirs
+    string *data_subdirs = ({ "", "commands/", "concepts/", "systems/",
+                               "wizard/" });
+    foreach (string sub in data_subdirs) {
+        string *t = collect_txt("/data/help/" + sub);
+        if (t) all += t;
+    }
 
-    // Also try with dashes/underscores swapped
-    string alt = replace_string(topic, " ", "-");
-    if (alt != topic) filenames += ({ alt + ".txt", alt });
-    alt = replace_string(topic, " ", "_");
-    if (alt != topic) filenames += ({ alt + ".txt", alt });
-    alt = replace_string(topic, "_", "-");
-    if (alt != topic) filenames += ({ alt + ".txt", alt });
-    alt = replace_string(topic, "-", "_");
-    if (alt != topic) filenames += ({ alt + ".txt", alt });
+    all = dedup(sort_array(all, 1));
+
+    write("\033[1mAetherMUD Help System - All Topics\033[0m\n");
+    write("============================================================\n");
+    if (!all || !sizeof(all)) {
+        write("  (no topics found)\n");
+    } else {
+        write_columns(all, 6, 13);
+    }
+    write("\nType 'help <topic>' to read any topic.\n");
+    return 1;
+}
+
+// -------------------------------------------------------------------------
+// Topic lookup with LPC fallbacks (CHANGES 2-7)
+// -------------------------------------------------------------------------
+
+int show_topic(string topic, int priv_level) {
+    // Build variants
+    string *vars = topic_variants(topic);
+
+    // --- .txt search ---
+    string *search_dirs = ({
+        "/help/",      "/help/basics/",  "/help/systems/",
+        "/help/occs/", "/help/social/",  "/help/meta/",
+        "/data/help/", "/data/help/commands/", "/data/help/concepts/",
+        "/data/help/systems/",
+    });
+    if (priv_level >= 1) search_dirs += ({ "/help/wizard/", "/data/help/wizard/" });
 
     foreach (string dir in search_dirs) {
-        foreach (string fn in filenames) {
-            string path = dir + fn;
-            string content = read_file(path);
+        foreach (string v in vars) {
+            string content = read_file(dir + v + ".txt");
             if (content && content != "") {
                 write("\033[1m--- Help: " + topic + " ---\033[0m\n\n");
                 write(content);
@@ -76,119 +216,86 @@ int show_topic(string topic, int priv_level) {
         }
     }
 
-    // Not found - suggest similar topics
-    write("No help found for: " + topic + "\n\n");
-    write("Try one of these topics:\n");
-    write("  Basics:    combat, commands, credits, death, equipment, experience,\n");
-    write("             look, movement, stats\n");
-    write("  Systems:   skills, psionics, magic, languages\n");
-    write("  Social:    clans, communication, interaction\n");
-    write("  Character: occs, description, sirname\n");
-    write("  OCCs:      cyber-knight, dragon-hatchling, ley-line-walker,\n");
-    write("             sunaj-assassin, vagabond\n");
-    write("  Meta:      rules, newbie, admin, wizard\n");
-    write("\nType 'help topics' for the full list.\n");
+    // --- CHANGE 2: Command fallback ---
+    {
+        string *cmd_dirs = ({ "cmds/", "cmds/admin/", "cmds/wizard/",
+                               "cmds/creator/" });
+        string h = search_lpc_dirs(cmd_dirs, topic);
+        if (h && h != "") {
+            write("\033[1m--- Help: " + topic + " ---\033[0m\n\n");
+            write(h); write("\n"); return 1;
+        }
+    }
+
+    // --- CHANGE 3: Spell fallback ---
+    {
+        string h = search_lpc_tree("spells/", topic);
+        if (h && h != "") {
+            write("\033[1m--- Help: " + topic + " (spell) ---\033[0m\n\n");
+            write(h); write("\n"); return 1;
+        }
+    }
+
+    // --- CHANGE 4: Psionic fallback ---
+    {
+        string h = search_lpc_tree("psionics/", topic);
+        if (h && h != "") {
+            write("\033[1m--- Help: " + topic + " (psionic) ---\033[0m\n\n");
+            write(h); write("\n"); return 1;
+        }
+    }
+
+    // --- CHANGE 5: Skill fallback ---
+    {
+        string h = search_lpc_tree("skills/", topic);
+        if (h && h != "") {
+            write("\033[1m--- Help: " + topic + " (skill) ---\033[0m\n\n");
+            write(h); write("\n"); return 1;
+        }
+    }
+
+    // --- CHANGE 6: OCC fallback ---
+    {
+        string *occ_dirs = ({ "occs/" });
+        string h = search_lpc_dirs(occ_dirs, topic);
+        if (h && h != "") {
+            write("\033[1m--- Help: " + topic + " (OCC) ---\033[0m\n\n");
+            write(h); write("\n"); return 1;
+        }
+    }
+
+    // --- CHANGE 7: Race fallback ---
+    {
+        string *race_dirs = ({ "races/" });
+        string h = search_lpc_dirs(race_dirs, topic);
+        if (h && h != "") {
+            write("\033[1m--- Help: " + topic + " (race) ---\033[0m\n\n");
+            write(h); write("\n"); return 1;
+        }
+    }
+
+    // Not found
+    write("No help found for: " + topic + "\n");
+    write("Type 'help' to see all available topics.\n");
     return 1;
 }
 
-int show_topics(int priv_level) {
-    write("\033[1m=== Available Help Topics ===\033[0m\n\n");
-
-    write("\033[1mBasics:\033[0m\n");
-    write("  combat       commands     credits      death\n");
-    write("  equipment    experience   look         movement     stats\n\n");
-
-    write("\033[1mSystems:\033[0m\n");
-    write("  skills       psionics     magic        languages\n\n");
-
-    write("\033[1mCharacter:\033[0m\n");
-    write("  occs         description  sirname\n\n");
-
-    write("\033[1mSocial:\033[0m\n");
-    write("  clans        communication  interaction\n\n");
-
-    write("\033[1mOCCs (detailed):\033[0m\n");
-    write("  cyber-knight      dragon-hatchling    ley-line-walker\n");
-    write("  sunaj-assassin    vagabond\n\n");
-
-    write("\033[1mMeta:\033[0m\n");
-    write("  rules        newbie       admin        wizard\n\n");
-
-    if (priv_level >= 1) {
-        write("\033[1mWizard:\033[0m\n");
-        write("  building     qcs         setocc\n\n");
-    }
-
-    write("Type 'help <topic>' to read about a specific topic.\n");
-    return 1;
-}
-
-int show_overview(int priv_level) {
-    write("\033[1m=== AetherMUD Help ===\033[0m\n\n");
-
-    write("Type 'help <topic>' for detailed information.\n");
-    write("Type 'help topics' for a list of all help topics.\n\n");
-
-    write("\033[1mBasic Commands:\033[0m\n");
-    write("  look / l             Look at surroundings\n");
-    write("  inventory / i        Check inventory\n");
-    write("  equipment / eq       View worn equipment\n");
-    write("  stats                Character stats\n");
-    write("  score                Full character sheet\n");
-    write("  who                  Players online\n");
-    write("  quit / logout        Save and disconnect\n\n");
-
-    write("\033[1mMovement:\033[0m north, south, east, west, up, down (n, s, e, w, u, d)\n\n");
-
-    write("\033[1mCommunication:\033[0m\n");
-    write("  say / '              Say something in the room\n");
-    write("  tell <player> <msg>  Private message\n");
-    write("  shout <msg>          Shout to entire MUD\n");
-    write("  chat <msg>           Global chat channel\n");
-    write("  emote / :            Emote an action\n\n");
-
-    write("\033[1mCombat:\033[0m\n");
-    write("  kill <target>        Attack a target\n");
-    write("  flee                 Flee from combat\n");
-    write("  wield <weapon>       Wield a weapon\n");
-    write("  wear <armor>         Wear armor\n\n");
-
-    write("\033[1mCharacter:\033[0m\n");
-    write("  skills               List all skills\n");
-    write("  pskills              Primary skills (from OCC)\n");
-    write("  sskills              Secondary skills (chosen)\n");
-    write("  description          Set your character description\n");
-    write("  sirname              Request an honorific title (lvl 10+)\n");
-    write("  languages            View known languages\n");
-    write("  credits / balance    Check your credits\n\n");
-
-    write("\033[1mSocial:\033[0m\n");
-    write("  introduce            Introduce yourself to others\n");
-    write("  clan                 View/join clans\n");
-    write("  position             Set RP position\n\n");
-
-    // Wizard commands
-    if (priv_level >= 1) {
-        write("\033[1mWizard Commands:\033[0m\n");
-        write("  goto <room>          Teleport to room\n");
-        write("  clone <object>       Clone an object\n");
-        write("  create <type> <name> QCS: Create object template\n");
-        write("  modify <name> ...    QCS: Edit object properties\n");
-        write("  deploy <name> <loc>  QCS: Deploy to world\n");
-        write("  setocc <plr> <occ>   Assign OCC to player\n");
-        write("  sirname <plr> <ttl>  Grant sirname to player\n");
-        write("  wiz help             Wiztool commands\n");
-        write("  cat / ed / ls / cd   File navigation\n\n");
-    }
-
-    // Admin commands
-    if (priv_level >= 2) {
-        write("\033[1mAdmin Commands:\033[0m\n");
-        write("  promote <plr> <lvl>  Promote player (0/1/2)\n");
-        write("  setrole <plr> <role> Set wizard role\n");
-        write("  users                Detailed user list\n");
-        write("  shutdown [delay]     Shutdown server\n\n");
-    }
-
-    return 1;
+string query_help() {
+    return
+"HELP - Topic-based help system\n\n"
+"Usage:\n"
+"  help                  List all available topics (alphabetical)\n"
+"  help <topic>          Read a specific help topic\n"
+"  help topics           Same as 'help' (full topic list)\n"
+"  help <category>       List topics in a category\n\n"
+"Categories: basics, systems, occs, social, meta\n"
+"Wizard categories: wizard (requires wizard access)\n\n"
+"The help system searches:\n"
+"  1. Help text files   (lib/help/ and lib/data/help/)\n"
+"  2. Commands          (lib/cmds/) via query_help()\n"
+"  3. Spells            (lib/spells/) via query_help()\n"
+"  4. Psionics          (lib/psionics/) via query_help()\n"
+"  5. Skills            (lib/skills/) via query_help()\n"
+"  6. OCCs              (lib/occs/) via query_help()\n"
+"  7. Races             (lib/races/) via query_help()\n";
 }

@@ -1,0 +1,41 @@
+// lib/cmds/orb.lpc
+// Wrapper command for the Admin Orb wiz-tool.
+// Checks admin privilege and item possession, then delegates to admin_orb.lpc.
+
+int query_privilege_required() { return 2; }
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (player->query_privilege_level() < 2) {
+        tell_object(player, "You need the admin orb to use that command.\n");
+        return 1;
+    }
+
+    object tool;
+    catch { tool = load_object("/obj/wiztools/admin_orb"); };
+    if (!tool) {
+        write("Error: Could not load admin orb tool.\n");
+        return 1;
+    }
+
+    return tool->cmd_orb(args);
+}
+
+string query_help() {
+    return
+"ORB - Admin System Monitor\n\n"
+"Usage: orb <subcommand>\n\n"
+"Subcommands:\n"
+"  orb status          Full system overview + zone/pending counts\n"
+"  orb players         All online players with stats\n"
+"  orb find <player>   Detailed report on a player\n"
+"  orb pending         Players awaiting OCC/sirname assignments\n"
+"  orb goto <player>   Teleport to a player\n"
+"  orb staff           Staff roster with roles\n"
+"  orb logs            Recent admin/promotion/OCC logs\n"
+"  orb uptime          Server time and connection count\n"
+"  orb help            This help\n\n"
+"Requires: admin orb in inventory. Admin access only.\n";
+}

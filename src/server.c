@@ -66,11 +66,79 @@ static void get_player_home_dir(PlayerSession *session, char *buf, size_t buf_si
     }
 }
 
+/* Expand LPC path shorthand aliases.
+ * Aliases:
+ *   ~          → player home dir  (e.g. /domains/wizard/thurtea)
+ *   ~/path     → <home>/path
+ *   std        → /std
+ *   cmds       → /cmds
+ *   dom        → /domains
+ *   obj        → /obj
+ *   sec        → /secure
+ *   daemon     → /daemon
+ *   inc        → /include
+ * Trailing "/foo" is preserved for all aliases (e.g. dom/start → /domains/start).
+ * If no alias matches, the input is copied unchanged. */
+void expand_lpc_alias(const char *input, char *output, size_t out_size,
+                      PlayerSession *session) {
+    if (!input || !output || out_size == 0) return;
+
+    /* ~ or ~/... → home dir */
+    if (input[0] == '~') {
+        char home[256];
+        get_player_home_dir(session, home, sizeof(home));
+        if (input[1] == '\0') {
+            snprintf(output, out_size, "%s", home);
+        } else if (input[1] == '/') {
+            snprintf(output, out_size, "%s%s", home, input + 1);
+        } else {
+            snprintf(output, out_size, "%s", input);  /* ~foo — no expansion */
+        }
+        return;
+    }
+
+    static const struct { const char *alias; const char *expand; } table[] = {
+        { "std",    "/std"     },
+        { "cmds",   "/cmds"    },
+        { "dom",    "/domains" },
+        { "obj",    "/obj"     },
+        { "sec",    "/secure"  },
+        { "daemon", "/daemon"  },
+        { "inc",    "/include" },
+        { NULL, NULL }
+    };
+
+    for (int i = 0; table[i].alias; i++) {
+        size_t alen = strlen(table[i].alias);
+        if (strncmp(input, table[i].alias, alen) == 0) {
+            char next = input[alen];
+            if (next == '\0') {
+                snprintf(output, out_size, "%s", table[i].expand);
+                return;
+            }
+            if (next == '/') {
+                snprintf(output, out_size, "%s%s", table[i].expand, input + alen);
+                return;
+            }
+        }
+    }
+
+    /* No alias matched — copy unchanged */
+    snprintf(output, out_size, "%s", input);
+}
+
 /* ls - List directory contents */
 int cmd_ls_filesystem(PlayerSession *session, const char *args) {
     char path[512];
     char full_path[1024];
-    
+
+    /* Expand path aliases (std, cmds, dom, obj, sec, daemon, inc, ~) */
+    char alias_buf[512];
+    if (args && *args != '\0') {
+        expand_lpc_alias(args, alias_buf, sizeof(alias_buf), session);
+        args = alias_buf;
+    }
+
     /* Determine path */
     if (args && *args != '\0') {
         if (args[0] == '/') {
@@ -152,7 +220,14 @@ int cmd_cd_filesystem(PlayerSession *session, const char *args) {
         return 1;
     }
 
-    /* Handle ~ - go to home directory */
+    /* Expand path aliases (~ std cmds dom obj sec daemon inc).
+     * After expansion ~ and ~/foo become absolute /domains/wizard/<name>
+     * paths, so the absolute-path branch below handles them correctly. */
+    char alias_buf[512];
+    expand_lpc_alias(args, alias_buf, sizeof(alias_buf), session);
+    args = alias_buf;
+
+    /* Handle ~ alone (kept for safety; expand_lpc_alias already handles it) */
     if (strcmp(args, "~") == 0) {
         char home[256];
         get_player_home_dir(session, home, sizeof(home));
@@ -163,7 +238,7 @@ int cmd_cd_filesystem(PlayerSession *session, const char *args) {
         send_to_player(session, "Changed to: %s\r\n", home);
         return 1;
     }
-    
+
     /* Handle absolute path */
     if (args[0] == '/') {
         snprintf(new_dir, sizeof(new_dir), "%s", args);

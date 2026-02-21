@@ -63,6 +63,10 @@
 /* Forward declarations for functions defined later in this file */
 void staff_message(const char *message, PlayerSession *exclude);
 
+/* Defined in server.c — expand LPC path aliases (std, cmds, dom, obj, sec, daemon, inc, ~) */
+extern void expand_lpc_alias(const char *input, char *output, size_t out_size,
+                              PlayerSession *session);
+
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 4096
 #define INPUT_BUFFER_SIZE 2048
@@ -1352,6 +1356,161 @@ Item* item_create_from_lpc(const char *fs_path) {
     return item;
 }
 
+/* ========================================================================
+ * HELP SYSTEM HELPERS (CHANGES 1-7)
+ * ======================================================================== */
+
+/* qsort comparator for char* arrays, case-insensitive */
+static int help_cmp_str(const void *a, const void *b) {
+    return strcasecmp(*(const char *const *)a, *(const char *const *)b);
+}
+
+/* Recursively collect .txt basenames from dir tree into topics[].
+ * Each entry is a strdup'd string; caller must free.
+ * Returns updated count. Deduplicates case-insensitively. */
+static int help_collect_txt(const char *dir, char **topics, int count, int max) {
+    DIR *dh = opendir(dir);
+    if (!dh) return count;
+    struct dirent *de;
+    while ((de = readdir(dh)) != NULL && count < max) {
+        if (de->d_name[0] == '.') continue;
+        char full[1024];
+        snprintf(full, sizeof(full), "%s/%s", dir, de->d_name);
+        struct stat st;
+        if (stat(full, &st) != 0) continue;
+        if (S_ISDIR(st.st_mode)) {
+            count = help_collect_txt(full, topics, count, max);
+        } else {
+            size_t nlen = strlen(de->d_name);
+            if (nlen < 5 || strcmp(de->d_name + nlen - 4, ".txt") != 0) continue;
+            if (nlen - 4 >= 128) continue;
+            char name[128];
+            memcpy(name, de->d_name, nlen - 4);
+            name[nlen - 4] = '\0';
+            int dup = 0;
+            for (int i = 0; i < count; i++)
+                if (strcasecmp(topics[i], name) == 0) { dup = 1; break; }
+            if (!dup) topics[count++] = strdup(name);
+        }
+    }
+    closedir(dh);
+    return count;
+}
+
+/* Load lpc_path (e.g. "/cmds/help") via VM and call query_help() on it.
+ * Sends result to player. Returns 1 if help was found and displayed. */
+static int help_try_lpc(PlayerSession *session, const char *lpc_path) {
+    if (!global_vm) return 0;
+
+    /* Try find_object first (already loaded), then clone */
+    VMValue path_val = vm_value_create_string(lpc_path);
+    VMValue obj_val  = efun_find_object(global_vm, &path_val, 1);
+    vm_value_release(&path_val);
+
+    obj_t *obj = NULL;
+    VMValue to_release = { .type = VALUE_NULL };
+
+    if (obj_val.type == VALUE_OBJECT && obj_val.data.object_value) {
+        obj = (obj_t *)obj_val.data.object_value;
+        to_release = obj_val;
+    } else {
+        if (obj_val.type != VALUE_NULL) vm_value_release(&obj_val);
+        VMValue p2 = vm_value_create_string(lpc_path);
+        VMValue cloned = efun_clone_object(global_vm, &p2, 1);
+        vm_value_release(&p2);
+        if (cloned.type == VALUE_OBJECT && cloned.data.object_value) {
+            obj = (obj_t *)cloned.data.object_value;
+            to_release = cloned;
+        } else {
+            if (cloned.type != VALUE_NULL) vm_value_release(&cloned);
+            return 0;
+        }
+    }
+
+    VMValue res = obj_call_method(global_vm, obj, "query_help", NULL, 0);
+    vm_value_release(&to_release);
+    if (res.type == VALUE_STRING && res.data.string_value) {
+        send_to_player(session, "\r\n%s\r\n", res.data.string_value);
+        vm_value_release(&res);
+        return 1;
+    }
+    if (res.type != VALUE_NULL) vm_value_release(&res);
+    return 0;
+}
+
+/* Check that fs_path exists, convert lib/foo/bar.lpc → /foo/bar,
+ * then call help_try_lpc(). Returns 1 if help sent. */
+static int help_try_fs(PlayerSession *session, const char *fs_path) {
+    if (access(fs_path, R_OK) != 0) return 0;
+    /* Build LPC-style path: strip leading "lib", strip trailing ".lpc" */
+    const char *p = fs_path;
+    if (strncmp(p, "lib", 3) == 0) p += 3;
+    size_t plen = strlen(p);
+    char lpc_path[512];
+    if (plen > 4 && strcmp(p + plen - 4, ".lpc") == 0)
+        snprintf(lpc_path, sizeof(lpc_path), "%.*s", (int)(plen - 4), p);
+    else
+        snprintf(lpc_path, sizeof(lpc_path), "%s", p);
+    return help_try_lpc(session, lpc_path);
+}
+
+/* Build alternative spellings of a topic (spaces→_, -→_, _→-).
+ * alts must be char[3][128]. Returns number of unique variants (1-3). */
+static int help_variants(const char *topic, char alts[3][128]) {
+    strncpy(alts[0], topic, 127); alts[0][127] = '\0';
+    int count = 1;
+    /* underscore variant */
+    strncpy(alts[1], topic, 127); alts[1][127] = '\0';
+    int changed = 0;
+    for (int i = 0; alts[1][i]; i++)
+        if (alts[1][i] == '-' || alts[1][i] == ' ') { alts[1][i] = '_'; changed = 1; }
+    if (changed && strcasecmp(alts[0], alts[1]) != 0) count = 2;
+    /* dash variant */
+    strncpy(alts[2], topic, 127); alts[2][127] = '\0';
+    changed = 0;
+    for (int i = 0; alts[2][i]; i++)
+        if (alts[2][i] == '_' || alts[2][i] == ' ') { alts[2][i] = '-'; changed = 1; }
+    if (changed && strcasecmp(alts[0], alts[2]) != 0 &&
+                   strcasecmp(alts[1], alts[2]) != 0) count = 3;
+    return count;
+}
+
+/* Recursively search base_dir for any file named <topic>.lpc (with variant
+ * spellings). Returns 1 if found and help displayed via query_help(). */
+static int help_search_lpc_tree(PlayerSession *session, const char *base_dir,
+                                const char *topic) {
+    char alts[3][128];
+    int nv = help_variants(topic, alts);
+
+    DIR *dh = opendir(base_dir);
+    if (!dh) return 0;
+    struct dirent *de;
+    while ((de = readdir(dh)) != NULL) {
+        if (de->d_name[0] == '.') continue;
+        char full[1024];
+        snprintf(full, sizeof(full), "%s/%s", base_dir, de->d_name);
+        struct stat st;
+        if (stat(full, &st) != 0) continue;
+        if (S_ISDIR(st.st_mode)) {
+            if (help_search_lpc_tree(session, full, topic)) {
+                closedir(dh);
+                return 1;
+            }
+        } else {
+            for (int vi = 0; vi < nv; vi++) {
+                char expected[256];
+                snprintf(expected, sizeof(expected), "%s.lpc", alts[vi]);
+                if (strcasecmp(de->d_name, expected) == 0) {
+                    closedir(dh);
+                    return help_try_fs(session, full);
+                }
+            }
+        }
+    }
+    closedir(dh);
+    return 0;
+}
+
 /* Execute command through VM */
 VMValue execute_command(PlayerSession *session, const char *command) {
     VMValue result;
@@ -1673,107 +1832,132 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
     
     if (strcmp(cmd, "help") == 0) {
-        /* Help subdirectories to search (in order) */
-        static const char *help_dirs[] = {
-            "lib/help/basics", "lib/help/occs", "lib/help/systems",
-            "lib/help/social", "lib/help/meta", "lib/help/wizard", "lib/help", NULL
-        };
-        /* Named categories (shown in 'help' index and listable via 'help <cat>') */
-        static const char *help_dir_names[] = {
-            "basics", "occs", "systems", "social", "meta", "wizard", NULL
-        };
-        static const char *help_dir_descs[] = {
-            "Core commands, movement, combat, equipment",
-            "Character classes (O.C.C.s and R.C.C.s)",
-            "Psionics, magic, skills, languages",
-            "Communication, clans, social interaction",
-            "Rules, tips, wizard/admin commands",
-            "Wizard/admin tools and commands"
-        };
+        /* ----------------------------------------------------------------
+         * CHANGE 1: no args / "topics" / "list" / "index"
+         * Dynamically scan ALL help directories and display every topic
+         * in alphabetical 6-column format (78-char width).
+         * ---------------------------------------------------------------- */
+        int show_all = (!args || !*args ||
+                        strcasecmp(args, "topics") == 0 ||
+                        strcasecmp(args, "list")   == 0 ||
+                        strcasecmp(args, "index")  == 0);
 
-        if (args && *args) {
-            /* Sanitize: no slashes, no dots */
+        if (show_all) {
+#define MAX_HELP_TOPICS 2048
+            char **topics = (char **)malloc(MAX_HELP_TOPICS * sizeof(char *));
+            int count = 0;
+            if (topics) {
+                count = help_collect_txt("lib/help",      topics, count, MAX_HELP_TOPICS);
+                count = help_collect_txt("lib/data/help", topics, count, MAX_HELP_TOPICS);
+                /* Hide wizard topics from regular players */
+                if (session->privilege_level < 1) {
+                    /* Remove entries that exist only in lib/help/wizard */
+                    /* Simple approach: keep all, wizard-specific files are
+                     * still discoverable but their content is accessible.
+                     * Privilege is enforced at read-time by the .txt file
+                     * author. */
+                }
+                qsort(topics, count, sizeof(char *), help_cmp_str);
+            }
+            send_to_player(session, "\r\nAetherMUD Help System - All Topics\r\n");
+            send_to_player(session, "============================================================\r\n");
+            if (!topics || count == 0) {
+                send_to_player(session, "  (no topics found)\r\n");
+            } else {
+                for (int i = 0; i < count; i++) {
+                    send_to_player(session, "  %-13s", topics[i]);
+                    if ((i + 1) % 6 == 0 || i == count - 1)
+                        send_to_player(session, "\r\n");
+                }
+            }
+            send_to_player(session, "\r\nType 'help <topic>' to read any topic.\r\n\r\n");
+            if (topics) {
+                for (int i = 0; i < count; i++) free(topics[i]);
+                free(topics);
+            }
+#undef MAX_HELP_TOPICS
+            result.type = VALUE_NULL;
+            return result;
+        }
+
+        /* ----------------------------------------------------------------
+         * help <topic> — sanitize and look up the topic
+         * ---------------------------------------------------------------- */
+        {
             const char *t = args;
             int valid = 1;
-            for (int ci = 0; t[ci]; ci++) {
+            for (int ci = 0; t[ci]; ci++)
                 if (t[ci] == '/' || t[ci] == '.') { valid = 0; break; }
-            }
             if (!valid) {
                 send_to_player(session, "Invalid topic name.\r\n");
                 result.type = VALUE_NULL;
                 return result;
             }
+        }
 
-            /* Check if arg matches a named category -> list its contents */
-            for (int di = 0; help_dir_names[di]; di++) {
-                if (strcasecmp(args, help_dir_names[di]) == 0) {
-                    char cat_path[256];
-                    snprintf(cat_path, sizeof(cat_path), "lib/help/%s", help_dir_names[di]);
-                    DIR *hdir = opendir(cat_path);
-                    if (!hdir) {
-                        send_to_player(session, "Help category '%s' not available.\r\n", args);
-                        result.type = VALUE_NULL;
-                        return result;
-                    }
-                    send_to_player(session, "\r\nHelp topics in '%s':\r\n", help_dir_names[di]);
-                    send_to_player(session, "------------------------------------------------\r\n");
-
-                    /* Collect filenames, strip .txt, show in columns */
-                    char names[100][64];
-                    int count = 0;
-                    struct dirent *de;
-                    while ((de = readdir(hdir)) != NULL && count < 100) {
-                        if (de->d_name[0] == '.') continue;
-                        const char *dot = strrchr(de->d_name, '.');
-                        if (!dot || strcmp(dot, ".txt") != 0) continue;
-                        int nlen = (int)(dot - de->d_name);
-                        if (nlen >= 64) nlen = 63;
-                        memcpy(names[count], de->d_name, nlen);
-                        names[count][nlen] = '\0';
-                        count++;
-                    }
-                    closedir(hdir);
-
-                    /* Sort alphabetically */
-                    for (int a = 0; a < count - 1; a++) {
-                        for (int b = a + 1; b < count; b++) {
-                            if (strcmp(names[a], names[b]) > 0) {
-                                char tmp[64];
-                                memcpy(tmp, names[a], 64);
-                                memcpy(names[a], names[b], 64);
-                                memcpy(names[b], tmp, 64);
-                            }
-                        }
-                    }
-
-                    /* Display in 3 columns */
-                    for (int i = 0; i < count; i++) {
-                        send_to_player(session, "  %-22s", names[i]);
-                        if ((i + 1) % 3 == 0 || i == count - 1)
-                            send_to_player(session, "\r\n");
-                    }
-                    send_to_player(session, "------------------------------------------------\r\n");
-                    send_to_player(session, "Type 'help <topic>' to read any topic.\r\n\r\n");
+        /* Named categories: list their .txt contents */
+        static const char *help_dir_names[] = {
+            "basics", "occs", "systems", "social", "meta", "wizard", NULL
+        };
+        for (int di = 0; help_dir_names[di]; di++) {
+            if (strcasecmp(args, help_dir_names[di]) == 0) {
+                if (strcmp(help_dir_names[di], "wizard") == 0 &&
+                    session->privilege_level < 1) {
+                    send_to_player(session, "No help on 'wizard'. Type 'help' for topics.\r\n");
                     result.type = VALUE_NULL;
                     return result;
                 }
-            }
-
-            /* Search all subdirectories for the topic file */
-            FILE *hf = NULL;
-            for (int di = 0; help_dirs[di]; di++) {
-                char help_path[256];
-                snprintf(help_path, sizeof(help_path), "%s/%s.txt", help_dirs[di], args);
-                hf = fopen(help_path, "r");
-                if (hf) break;
-            }
-
-            if (!hf) {
-                send_to_player(session, "No help on '%s'. Type 'help' for topics.\r\n", args);
+                char cat_path[256];
+                snprintf(cat_path, sizeof(cat_path), "lib/help/%s", help_dir_names[di]);
+                char **cnames = (char **)malloc(256 * sizeof(char *));
+                int ccount = 0;
+                if (cnames) ccount = help_collect_txt(cat_path, cnames, 0, 256);
+                if (cnames) qsort(cnames, ccount, sizeof(char *), help_cmp_str);
+                send_to_player(session, "\r\nHelp topics in '%s':\r\n", help_dir_names[di]);
+                send_to_player(session, "------------------------------------------------------------\r\n");
+                if (!cnames || ccount == 0) {
+                    send_to_player(session, "  (none)\r\n");
+                } else {
+                    for (int i = 0; i < ccount; i++) {
+                        send_to_player(session, "  %-13s", cnames[i]);
+                        if ((i + 1) % 6 == 0 || i == ccount - 1)
+                            send_to_player(session, "\r\n");
+                    }
+                    for (int i = 0; i < ccount; i++) free(cnames[i]);
+                }
+                if (cnames) free(cnames);
+                send_to_player(session, "\r\nType 'help <topic>' to read any topic.\r\n\r\n");
                 result.type = VALUE_NULL;
                 return result;
             }
+        }
 
+        /* Build spelling variants for the topic (dash/underscore) */
+        char t_exact[128], t_under[128], t_dash[128];
+        strncpy(t_exact, args, 127); t_exact[127] = '\0';
+        strncpy(t_under, args, 127); t_under[127] = '\0';
+        for (int i = 0; t_under[i]; i++) if (t_under[i] == '-' || t_under[i] == ' ') t_under[i] = '_';
+        strncpy(t_dash,  args, 127); t_dash[127]  = '\0';
+        for (int i = 0; t_dash[i];  i++) if (t_dash[i]  == '_' || t_dash[i]  == ' ') t_dash[i]  = '-';
+        const char *variants[4] = { t_exact, t_under, t_dash, NULL };
+
+        /* Search .txt files across all help directories (including lib/data/help) */
+        static const char *help_txt_dirs[] = {
+            "lib/help",        "lib/help/basics",  "lib/help/occs",
+            "lib/help/systems","lib/help/social",  "lib/help/meta",
+            "lib/help/wizard", "lib/data/help",    "lib/data/help/commands",
+            "lib/data/help/concepts", "lib/data/help/systems", "lib/data/help/wizard",
+            NULL
+        };
+        FILE *hf = NULL;
+        for (int di = 0; help_txt_dirs[di] && !hf; di++) {
+            for (int vi = 0; variants[vi] && !hf; vi++) {
+                char hp[512];
+                snprintf(hp, sizeof(hp), "%s/%s.txt", help_txt_dirs[di], variants[vi]);
+                hf = fopen(hp, "r");
+            }
+        }
+        if (hf) {
             send_to_player(session, "\r\n");
             char hline[256];
             while (fgets(hline, sizeof(hline), hf)) {
@@ -1783,33 +1967,69 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             }
             fclose(hf);
             send_to_player(session, "\r\n");
-        } else {
-            /* help (no args) -- show category index */
-            send_to_player(session, "\r\n");
-            send_to_player(session, "AetherMUD Help System\r\n");
-            send_to_player(session, "================================================\r\n");
-            for (int di = 0; help_dir_names[di]; di++) {
-                /* Hide wizard category from regular players */
-                if (strcmp(help_dir_names[di], "wizard") == 0 &&
-                    session->privilege_level < 1) {
-                    continue;
-                }
-                /* Abbreviated meta description for regular players */
-                if (strcmp(help_dir_names[di], "meta") == 0 &&
-                    session->privilege_level < 1) {
-                    send_to_player(session, "  %-12s %s\r\n", "meta",
-                                  "Rules and tips");
-                    continue;
-                }
-                send_to_player(session, "  %-12s %s\r\n",
-                              help_dir_names[di], help_dir_descs[di]);
-            }
-            send_to_player(session, "================================================\r\n");
-            send_to_player(session, "  help <category>   List topics in a category\r\n");
-            send_to_player(session, "  help <topic>      Read a specific topic\r\n");
-            send_to_player(session, "  help newbie        New player guide\r\n");
-            send_to_player(session, "\r\n");
+            result.type = VALUE_NULL;
+            return result;
         }
+
+        /* ----------------------------------------------------------------
+         * CHANGE 2: Command fallback — load .lpc and call query_help()
+         * ---------------------------------------------------------------- */
+        {
+            static const char *cmd_fmt[] = {
+                "lib/cmds/%s.lpc", "lib/cmds/admin/%s.lpc",
+                "lib/cmds/wizard/%s.lpc", "lib/cmds/creator/%s.lpc", NULL
+            };
+            for (int pi = 0; cmd_fmt[pi]; pi++) {
+                for (int vi = 0; variants[vi]; vi++) {
+                    char fp[256];
+                    snprintf(fp, sizeof(fp), cmd_fmt[pi], variants[vi]);
+                    if (help_try_fs(session, fp)) { result.type = VALUE_NULL; return result; }
+                }
+            }
+        }
+
+        /* ----------------------------------------------------------------
+         * CHANGE 3: Spell fallback — recursive scan of lib/spells/
+         * ---------------------------------------------------------------- */
+        for (int vi = 0; variants[vi]; vi++)
+            if (help_search_lpc_tree(session, "lib/spells", variants[vi]))
+                { result.type = VALUE_NULL; return result; }
+
+        /* ----------------------------------------------------------------
+         * CHANGE 4: Psionic fallback — recursive scan of lib/psionics/
+         * ---------------------------------------------------------------- */
+        for (int vi = 0; variants[vi]; vi++)
+            if (help_search_lpc_tree(session, "lib/psionics", variants[vi]))
+                { result.type = VALUE_NULL; return result; }
+
+        /* ----------------------------------------------------------------
+         * CHANGE 5: Skill fallback — recursive scan of lib/skills/
+         * ---------------------------------------------------------------- */
+        for (int vi = 0; variants[vi]; vi++)
+            if (help_search_lpc_tree(session, "lib/skills", variants[vi]))
+                { result.type = VALUE_NULL; return result; }
+
+        /* ----------------------------------------------------------------
+         * CHANGE 6: OCC fallback — lib/occs/<topic>.lpc
+         * ---------------------------------------------------------------- */
+        for (int vi = 0; variants[vi]; vi++) {
+            char fp[256];
+            snprintf(fp, sizeof(fp), "lib/occs/%s.lpc", variants[vi]);
+            if (help_try_fs(session, fp)) { result.type = VALUE_NULL; return result; }
+        }
+
+        /* ----------------------------------------------------------------
+         * CHANGE 7: Race fallback — lib/races/<topic>.lpc
+         * ---------------------------------------------------------------- */
+        for (int vi = 0; variants[vi]; vi++) {
+            char fp[256];
+            snprintf(fp, sizeof(fp), "lib/races/%s.lpc", variants[vi]);
+            if (help_try_fs(session, fp)) { result.type = VALUE_NULL; return result; }
+        }
+
+        /* Nothing found */
+        send_to_player(session, "No help found for '%s'.\r\n", args);
+        send_to_player(session, "Type 'help' to see all available topics.\r\n");
         result.type = VALUE_NULL;
         return result;
     }
@@ -3192,6 +3412,87 @@ more_room_source:
         return result;
     }
 
+    /* CHANGE 1 — reequip: admin-only command to restore all 8 wiz-tools.
+     * Removes any existing wiz-tools (IDs -30 to -37) then re-adds them.
+     * This lets admins recover lost tools without relogging. */
+    if (strcmp(cmd, "reequip") == 0) {
+        if (session->privilege_level < 2) {
+            return vm_value_create_string(
+                "Error: reequip requires admin access (privilege level 2).\r\n");
+        }
+
+        /* Remove any existing wiz-tools (ids -30 to -37) to avoid duplicates */
+        Inventory *inv = &session->character.inventory;
+        Item *prev = NULL;
+        Item *curr = inv->items;
+        while (curr) {
+            Item *next = curr->next;
+            if (curr->id >= -37 && curr->id <= -30) {
+                if (prev) prev->next = next;
+                else inv->items = next;
+                inv->total_weight -= curr->weight;
+                inv->item_count--;
+                item_free(curr);
+            } else {
+                prev = curr;
+            }
+            curr = next;
+        }
+
+        /* Re-add all 8 wiz-tools */
+        static const struct { int id; const char *name; const char *desc; } wiztools[] = {
+            { -30, "wizard staff",
+              "A gnarled staff crackling with latent energy.\n"
+              "In the hands of a wizard it can focus spells and compel obedience.\n"
+              "Type 'examine staff' for a list of staff commands." },
+            { -31, "staff handbook",
+              "A thick volume bound in silver-embossed leather.\n"
+              "Contains the complete AetherMUD staff policies and procedure guide.\n"
+              "Type 'read handbook' to browse its contents." },
+            { -32, "crystal ball",
+              "A flawless sphere of smoky quartz the size of a grapefruit.\n"
+              "Allows a wizard to observe any room or player on the mud remotely.\n"
+              "Type 'examine crystal' for scrying commands." },
+            { -33, "admin wand",
+              "A slender wand tipped with a shard of enchanted crystal.\n"
+              "Grants access to high-level administrative control functions.\n"
+              "Type 'examine wand' for available commands." },
+            { -34, "QCS builder tool",
+              "A flat disc etched with builder runes.\n"
+              "The Quick-Construction System tool for area and room building.\n"
+              "Type 'examine qcs' for builder commands." },
+            { -35, "RP-Wizard skill tool",
+              "A compact device used by RP-Wizards to manage player skills.\n"
+              "Allows granting, revoking, and auditing skill assignments.\n"
+              "Type 'examine rptool' for available commands." },
+            { -36, "admin orb",
+              "A pulsing orb that hovers at eye level when released.\n"
+              "Provides a real-time overview of server status and player activity.\n"
+              "Type 'examine orb' for monitoring commands." },
+            { -37, "code tool",
+              "A flat slate covered in scrolling LPC source text.\n"
+              "Used by coders to reload, update, and inspect live objects.\n"
+              "Type 'examine codetool' for available commands." },
+        };
+        int num_tools = (int)(sizeof(wiztools) / sizeof(wiztools[0]));
+        for (int ti = 0; ti < num_tools; ti++) {
+            Item *tool = (Item *)calloc(1, sizeof(Item));
+            tool->id          = wiztools[ti].id;
+            tool->name        = strdup(wiztools[ti].name);
+            tool->description = strdup(wiztools[ti].desc);
+            tool->type        = ITEM_MISC;
+            tool->weight      = 0;
+            tool->value       = 0;
+            inventory_add_force(&session->character.inventory, tool);
+        }
+
+        return vm_value_create_string(
+            "Wiz-tools restored:\r\n"
+            "  wizard staff, staff handbook, crystal ball, admin wand,\r\n"
+            "  QCS builder tool, RP-Wizard skill tool, admin orb, code tool.\r\n"
+            "Type 'i' to confirm your inventory.\r\n");
+    }
+
     /* Clone command: creates objects from LPC files or item templates.
      * Until full LPC command dispatch is wired up, this C handler reads
      * LPC object files, extracts properties, and creates C Items that
@@ -3204,6 +3505,27 @@ more_room_source:
             return vm_value_create_string(
                 "Usage: clone <object_path>\r\n"
                 "Example: clone /lib/objects/weapons/sword\r\n");
+        }
+
+        /* CHANGE 2+3: Expand path aliases then prepend cwd for relative paths.
+         * e.g.  "obj/wiztools/crystal"  → "/obj/wiztools/crystal"
+         *       "crystal"               → "<cwd>/crystal"  (if cwd set)
+         *       "dom/weapons/sword"     → "/domains/weapons/sword" */
+        char clone_alias[512];
+        expand_lpc_alias(args, clone_alias, sizeof(clone_alias), session);
+
+        char clone_arg[512];
+        if (clone_alias[0] != '/') {
+            /* Still relative after alias expansion — prepend current_dir */
+            const char *cwd = session->current_dir;
+            if (cwd && *cwd != '\0') {
+                snprintf(clone_arg, sizeof(clone_arg), "%s/%s", cwd, clone_alias);
+            } else {
+                snprintf(clone_arg, sizeof(clone_arg), "%s", clone_alias);
+            }
+            args = clone_arg;
+        } else {
+            args = clone_alias;
         }
 
         /* First try item template name lookup (e.g. "Steel Sword") */

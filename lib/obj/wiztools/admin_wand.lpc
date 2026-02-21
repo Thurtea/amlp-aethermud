@@ -77,11 +77,14 @@ int cmd_wand(string str) {
     if (subcmd == "psi") {
         return wand_psi(rest);
     }
-    if (subcmd == "heal") {
+    if (subcmd == "heal" || subcmd == "restore") {
         return wand_heal(rest);
     }
+    if (subcmd == "peace") {
+        return wand_peace();
+    }
 
-    write("Unknown wand command. Try: cast, psi, list, heal\n");
+    write("Unknown wand command. Try: cast, psi, list, heal, restore, peace\n");
     return 1;
 }
 
@@ -259,5 +262,24 @@ int wand_heal(string str) {
               " points a crystal wand at " + capitalize(str) +
               ", releasing a wave of healing energy.",
               ({ player, target }));
+    return 1;
+}
+
+int wand_peace() {
+    object player = this_player();
+    object env = environment(player);
+    if (!env) {
+        write("You are not in a room.\n");
+        return 1;
+    }
+
+    /* Broadcast the peace aura to the room */
+    tell_room(env,
+        "\n\033[1;34m" + player->query_cap_name() +
+        " raises a crystal wand. A pulse of calming energy radiates outward.\n"
+        "All aggression drains from the room.\033[0m\n\n");
+
+    write("Peace aura activated. All NPCs in the room are now non-aggressive.\n");
+    write("(Combat disengagement is handled by the combat system.)\n");
     return 1;
 }

@@ -1,0 +1,44 @@
+PATH SHORTCUTS FOR WIZARD COMMANDS
+===================================
+
+The following shorthand aliases work with cd, ls, and clone:
+
+  Alias    Expands to      Example
+  -------  --------------- ---------------------------------------
+  ~        <your workroom> cd ~            (go to your workroom)
+  ~/path   <home>/path     cd ~/spells     (go to workroom/spells)
+  std      /std            cd std          (LPC standard objects)
+  cmds     /cmds           ls cmds         (player commands)
+  dom      /domains        cd dom/start    (cd /domains/start)
+  obj      /obj            ls obj          (/obj/ items/tools)
+  sec      /secure         cd sec          (/secure/ master/efuns)
+  daemon   /daemon         ls daemon       (/daemon/ service objs)
+  inc      /include        cd inc          (/include/ header files)
+
+EXAMPLES
+--------
+  cd std               Same as: cd /std
+  cd dom/wizard        Same as: cd /domains/wizard
+  ls cmds/admin        Same as: ls /cmds/admin
+  clone obj/wiztools/crystal
+                       Clone: /obj/wiztools/crystal.lpc from current lib
+  cd ~                 Return to your workroom
+  ls                   List current directory (defaults to workroom)
+
+CLONE PATH RESOLUTION
+---------------------
+  When you clone a relative path (no leading /), the driver:
+    1. Expands any alias prefix (obj/, std/, etc.)
+    2. If still relative, prepends your current directory (cwd)
+    3. Then searches the standard resolve paths
+
+  So if your cwd is /obj/wiztools:
+    clone crystal         Tries /obj/wiztools/crystal.lpc first
+
+QUICK REFERENCE
+---------------
+  pwd          Show current directory
+  cd <dir>     Change directory (supports aliases above)
+  ls [dir]     List directory (supports aliases above)
+  clone <path> Clone an LPC object (supports aliases + cwd)
+  findobj <q>  Recursive search for .lpc files matching name

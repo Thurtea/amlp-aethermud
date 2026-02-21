@@ -59,7 +59,9 @@ int cmd_code(string str) {
     subcmd = lower_case(subcmd);
 
     switch (subcmd) {
+        case "reload":   return cmd_reload(rest);
         case "check":    return cmd_check(rest);
+        case "list":     return cmd_list();
         case "info":     return cmd_info(rest);
         case "search":   return cmd_search(player, rest);
         case "memory":
@@ -322,10 +324,75 @@ int cmd_trace(string filepath) {
     return 1;
 }
 
+int cmd_reload(string filepath) {
+    if (!filepath || filepath == "") {
+        write("Usage: code reload <file_path>\n");
+        write("Example: code reload /std/player\n");
+        return 1;
+    }
+
+    write("\n\033[1;36m=== Reload: " + filepath + " ===\033[0m\n\n");
+
+    /* Delegate to the update command which handles LPC reload */
+    object cmd;
+    catch { cmd = load_object("/cmds/wizard/update"); };
+    if (cmd && function_exists("main", cmd)) {
+        int result = cmd->main(filepath);
+        if (!result) {
+            write("  Reload complete: " + filepath + "\n\n");
+        }
+        return 1;
+    }
+
+    /* Fallback: attempt direct load_object */
+    object obj;
+    catch { obj = load_object(filepath); };
+    if (obj) {
+        write("  \033[1;32m[OK]\033[0m Loaded: " + filepath + "\n\n");
+    } else {
+        write("  \033[1;31m[FAIL]\033[0m Could not reload: " + filepath + "\n");
+        write("  Check path and LPC syntax.\n\n");
+    }
+    return 1;
+}
+
+int cmd_list() {
+    write("\n\033[1;36m=== LPC Files in lib/ ===\033[0m\n\n");
+
+    string *dirs = ({
+        "/cmds/",
+        "/cmds/admin/",
+        "/cmds/wizard/",
+        "/cmds/creator/",
+        "/std/",
+        "/obj/wiztools/",
+        "/secure/",
+        "/daemon/",
+    });
+
+    int grand_total = 0;
+    foreach (string dir in dirs) {
+        string *files = get_dir(dir + "*.lpc");
+        int count = files ? sizeof(files) : 0;
+        if (count > 0) {
+            write("  \033[1m" + dir + "\033[0m  (" + count + " files)\n");
+            foreach (string f in files) {
+                write("    " + f + "\n");
+            }
+            grand_total += count;
+        }
+    }
+
+    write("\n  Total: " + grand_total + " LPC files.\n\n");
+    return 1;
+}
+
 int show_help() {
     write("\n\033[1;36m=== Coding Tool ===\033[0m\n\n");
     write("Commands:\n");
+    write("  code reload <file>     Reload/recompile a live LPC file\n");
     write("  code check <file>      Compile-check a file\n");
+    write("  code list              List LPC files in lib/ directories\n");
     write("  code info <obj>        Object info ('here', 'me', or path)\n");
     write("  code search <pattern>  Search files in cwd\n");
     write("  code memory            System status\n");

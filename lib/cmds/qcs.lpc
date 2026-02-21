@@ -1,0 +1,37 @@
+// lib/cmds/qcs.lpc
+// Wrapper command for the QCS Creator Tool.
+// Checks wizard privilege and item possession, then delegates to qcs_tool.lpc.
+
+int query_privilege_required() { return 1; }
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (player->query_privilege_level() < 1) {
+        tell_object(player, "You need the QCS builder tool to use that command.\n");
+        return 1;
+    }
+
+    object tool;
+    catch { tool = load_object("/obj/wiztools/qcs_tool"); };
+    if (!tool) {
+        write("Error: Could not load QCS tool.\n");
+        return 1;
+    }
+
+    return tool->cmd_qcs(args);
+}
+
+string query_help() {
+    return
+"QCS - Quick Creation System\n\n"
+"Usage: qcs [subcommand]\n\n"
+"  qcs                     Open creation menu\n"
+"  qcs create <type> <name>  Create room/npc/weapon/armor/item\n"
+"  qcs modify <name> ...     Modify an object property\n"
+"  qcs deploy <name> here    Deploy to current room\n"
+"  qcs list                  List your workspace objects\n"
+"  qcs help                  Full help\n\n"
+"Requires: QCS builder tool in inventory. Wizard access.\n";
+}

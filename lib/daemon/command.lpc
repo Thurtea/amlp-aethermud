@@ -104,6 +104,7 @@ void init_commands() {
     commands["grantskill"] = "cmds/admin/grantskill";
     commands["users"] = "cmds/admin/users";
     commands["tattoogun"] = "cmds/admin/tattoogun";
+    commands["reequip"]  = "cmds/admin/reequip";
     // Wizard commands (check privilege internally)
     commands["setocc"] = "cmds/wizard/setocc";
     commands["wiztool"] = "cmds/admin/wiztool";
@@ -148,6 +149,13 @@ void init_commands() {
     commands["save"]     = "cmds/save";
     commands["consider"] = "cmds/consider";
     commands["occs"] = "cmds/occs";
+    // Wiz-tool commands (privilege checked internally; item required)
+    commands["orb"]     = "cmds/orb";      /* Admin orb — admin only (priv>=2) */
+    commands["rp"]      = "cmds/rp";       /* RP tool — wizard+ (priv>=1) */
+    commands["wand"]    = "cmds/wand";     /* Admin wand — admin only (priv>=2) */
+    commands["qcs"]     = "cmds/qcs";      /* QCS creator tool — wizard+ (priv>=1) */
+    commands["code"]    = "cmds/code";     /* Code tool — wizard+ (priv>=1) */
+    commands["crystal"] = "cmds/crystal";  /* Crystal ball — wizard+ (priv>=1) */
 }
 
 // Main command execution function

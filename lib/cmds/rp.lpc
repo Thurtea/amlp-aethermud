@@ -1,0 +1,39 @@
+// lib/cmds/rp.lpc
+// Wrapper command for the RP-Wizard skill tool.
+// Checks wizard privilege and item possession, then delegates to rp_tool.lpc.
+
+int query_privilege_required() { return 1; }
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (player->query_privilege_level() < 1) {
+        tell_object(player, "You need the RP-Wizard skill tool to use that command.\n");
+        return 1;
+    }
+
+    object tool;
+    catch { tool = load_object("/obj/wiztools/rp_tool"); };
+    if (!tool) {
+        write("Error: Could not load RP tool.\n");
+        return 1;
+    }
+
+    return tool->cmd_rp(args);
+}
+
+string query_help() {
+    return
+"RP - Roleplay Wizard Tool\n\n"
+"Usage: rp <subcommand>\n\n"
+"Subcommands:\n"
+"  rp announce <msg>  Global RP announcement in purple\n"
+"  rp emoteall <msg>  Narrative emote to current room\n"
+"  rp listskills      List available skills for granting\n"
+"  rp events          View RP event calendar\n"
+"  rp addevent <desc> Add a timestamped event entry\n"
+"  rp costume <type>  Generate NPC costume description\n"
+"  rp help            This help\n\n"
+"Requires: RP-Wizard skill tool in inventory. Wizard access.\n";
+}

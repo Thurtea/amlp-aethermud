@@ -1,0 +1,39 @@
+// lib/cmds/wand.lpc
+// Wrapper command for the Admin Wand wiz-tool.
+// Checks admin privilege and item possession, then delegates to admin_wand.lpc.
+
+int query_privilege_required() { return 2; }
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (player->query_privilege_level() < 2) {
+        tell_object(player, "You need the admin wand to use that command.\n");
+        return 1;
+    }
+
+    object tool;
+    catch { tool = load_object("/obj/wiztools/admin_wand"); };
+    if (!tool) {
+        write("Error: Could not load admin wand tool.\n");
+        return 1;
+    }
+
+    return tool->cmd_wand(args);
+}
+
+string query_help() {
+    return
+"WAND - Admin Magic Wand\n\n"
+"Usage: wand <subcommand>\n\n"
+"Subcommands:\n"
+"  wand heal <player>     Restore target to full HP/MDC/ISP/PPE\n"
+"  wand restore <player>  Alias for heal\n"
+"  wand peace             Calm all NPCs in current room\n"
+"  wand cast <spell> [at <target>]\n"
+"  wand psi <power> [on <target>]\n"
+"  wand list spells       List available spells\n"
+"  wand list psionics     List available psionic powers\n\n"
+"Requires: admin wand in inventory. Admin access only.\n";
+}

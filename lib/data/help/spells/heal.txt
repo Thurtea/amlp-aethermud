@@ -1,0 +1,12 @@
+HEAL (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 4
+Damage: Restorative
+Range: Touch/Short
+Area: Single target
+
+Restores a moderate amount of HP and recovers minor wounds.
+More powerful versions or combinations can fully restore HP and
+secondary pools. Effective in and out of combat.
+
+See also: help magic, help first_aid

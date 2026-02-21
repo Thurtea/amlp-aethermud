@@ -1,0 +1,12 @@
+TELEPORT (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 10
+Damage: 0 MD (Utility)
+Range: Self/Touch (targeted teleport)
+Area: Single target
+
+Instantly transports the caster or a willing target to a known
+location or to another player. Highly disruptive if used in
+combat; some areas may block teleportation.
+
+See also: help magic, help rift

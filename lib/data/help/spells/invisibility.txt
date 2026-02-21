@@ -1,0 +1,12 @@
+INVISIBILITY (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 6
+Damage: 0 MD (Utility)
+Range: Self/Touch
+Area: Single target
+
+Renders the target invisible to normal sight for the duration.
+Invisibility breaks on direct attack or interaction. Does not
+hide magical detection effects.
+
+See also: help magic, help stealth

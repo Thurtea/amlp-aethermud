@@ -1,0 +1,12 @@
+FIREBALL (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 5
+Damage: 4d6 MD
+Range: 60 feet
+Area: 10-foot radius
+
+Launches a concentrated ball of fire that explodes on impact,
+dealing mega-damage to all targets within the blast radius.
+All NPCs and players in the room are hit simultaneously.
+
+See also: help magic, help psionics

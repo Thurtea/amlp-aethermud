@@ -1,0 +1,12 @@
+LIGHTNING_BOLT (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 6
+Damage: 5d6 MD
+Range: 80 feet
+Area: Single-target line
+
+Fires a concentrated bolt of electrical energy that arcs toward
+a target, potentially jumping to nearby foes. High damage to a
+single target with chance to stun briefly.
+
+See also: help magic, help psionics

@@ -1,0 +1,12 @@
+GLOBE_OF_DAYLIGHT (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 7
+Damage: 0 MD (Utility)
+Range: Self
+Area: 20-foot radius
+
+Creates a brilliant globe of daylight that illuminates the area,
+negates magical darkness, and damages or blinds undead and shadow
+creatures for the duration.
+
+See also: help magic, help light

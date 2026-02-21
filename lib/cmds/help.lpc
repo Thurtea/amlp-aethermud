@@ -213,6 +213,21 @@ int show_topic(string topic, int priv_level) {
                 write("\n");
                 return 1;
             }
+            /* Also check one level of subdirectories under this search dir */
+            string *subdirs = get_dir(dir + "*");
+            if (subdirs) {
+                foreach (string sub in subdirs) {
+                    if (sub[0] == '.') continue;
+                    string subpath = dir + sub + "/";
+                    string subcontent = read_file(subpath + v + ".txt");
+                    if (subcontent && subcontent != "") {
+                        write("\033[1m--- Help: " + topic + " ---\033[0m\n\n");
+                        write(subcontent);
+                        write("\n");
+                        return 1;
+                    }
+                }
+            }
         }
     }
 

@@ -1,0 +1,11 @@
+ENERGY_BOLT (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 4
+Damage: 3d6 MD
+Range: 50 feet
+Area: Single target
+
+A quick burst of raw arcane energy launched at a target,
+dealing focused mega-damage. Fast casting, reliable effect.
+
+See also: help magic, help psionics

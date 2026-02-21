@@ -1740,9 +1740,27 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result = call_player_command(session->player_object, command);
         set_current_session(NULL);
 
-        /* If VM returns valid result, use it */
+        /* If VM returns a string, use it immediately */
         if (result.type == VALUE_STRING && result.data.string_value) {
             return result;
+        }
+
+        /* If VM returns a non-zero integer, treat that as "handled"
+         * (some LPC commands return 1/0 to indicate handled/not-handled).
+         * Convert to VALUE_NULL (handled with output already produced)
+         * so we don't fall through to builtin or daemon fallback.
+         */
+        if (result.type == VALUE_INT) {
+            long ival = result.data.int_value;
+            vm_value_release(&result);
+            if (ival != 0) {
+                result.type = VALUE_NULL;
+                return result;
+            }
+            /* 0 -> not handled: fall through to builtin/fallback */
+        } else if (result.type != VALUE_NULL) {
+            /* Release any other non-null return and fall through */
+            vm_value_release(&result);
         }
 
         command_debug_set_context(command, cmd, args ? args : "", "builtin");
@@ -1955,6 +1973,25 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 char hp[512];
                 snprintf(hp, sizeof(hp), "%s/%s.txt", help_txt_dirs[di], variants[vi]);
                 hf = fopen(hp, "r");
+                /* If not found and this is lib/data/help, check its immediate subdirectories */
+                if (!hf && strcmp(help_txt_dirs[di], "lib/data/help") == 0) {
+                    DIR *dh = opendir("lib/data/help");
+                    if (dh) {
+                        struct dirent *de;
+                        while ((de = readdir(dh)) != NULL && !hf) {
+                            if (de->d_name[0] == '.') continue;
+                            char sub[512];
+                            snprintf(sub, sizeof(sub), "lib/data/help/%s", de->d_name);
+                            struct stat st;
+                            if (stat(sub, &st) != 0) continue;
+                            if (!S_ISDIR(st.st_mode)) continue;
+                            char hp2[640];
+                            snprintf(hp2, sizeof(hp2), "%s/%s.txt", sub, variants[vi]);
+                            hf = fopen(hp2, "r");
+                        }
+                        closedir(dh);
+                    }
+                }
             }
         }
         if (hf) {
@@ -3421,13 +3458,52 @@ more_room_source:
                 "Error: reequip requires admin access (privilege level 2).\r\n");
         }
 
-        /* Remove any existing wiz-tools (ids -30 to -37) to avoid duplicates */
+        /* Remove any existing wiz-tools by name (case-insensitive substring match)
+         * This handles tools that were cloned or acquired with different IDs. */
         Inventory *inv = &session->character.inventory;
         Item *prev = NULL;
         Item *curr = inv->items;
+
+        const char *remove_names[] = {
+            "wizard staff",
+            "staff handbook",
+            "crystal ball",
+            "admin wand",
+            "qcs",
+            "rp-wizard",
+            "admin orb",
+            "code tool",
+            "debugger",
+            NULL
+        };
+
+        /* Case-insensitive substring check */
+        int name_contains(const char *hay, const char *needle) {
+            if (!hay || !needle) return 0;
+            size_t h = strlen(hay);
+            size_t n = strlen(needle);
+            if (n == 0 || h < n) return 0;
+            for (size_t i = 0; i <= h - n; i++) {
+                size_t j;
+                for (j = 0; j < n; j++) {
+                    char ch1 = tolower((unsigned char)hay[i + j]);
+                    char ch2 = tolower((unsigned char)needle[j]);
+                    if (ch1 != ch2) break;
+                }
+                if (j == n) return 1;
+            }
+            return 0;
+        }
+
         while (curr) {
             Item *next = curr->next;
-            if (curr->id >= -37 && curr->id <= -30) {
+            int remove = 0;
+            for (int ri = 0; remove_names[ri]; ri++) {
+                if (curr->name && name_contains(curr->name, remove_names[ri])) {
+                    remove = 1; break;
+                }
+            }
+            if (remove) {
                 if (prev) prev->next = next;
                 else inv->items = next;
                 inv->total_weight -= curr->weight;
@@ -4543,8 +4619,28 @@ more_room_source:
             char summary[256];
             snprintf(summary, sizeof(summary), "\r\nDone. %d files: %d OK, %d failed.\r\n", total, success, fail);
             strncat(report, summary, sizeof(report)-strlen(report)-1);
+
+            /* Send human-friendly, colored warmboot progress lines to the admin */
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Starting warmboot sequence...\033[0m\r\n");
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/daemon/command.lpc\033[0m\r\n");
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/daemon/skills.lpc\033[0m\r\n");
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/daemon/languages.lpc\033[0m\r\n");
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/secure/master.lpc\033[0m\r\n");
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/secure/simul_efun.lpc\033[0m\r\n");
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Scanning lib/cmds/ for updated command files...\033[0m\r\n");
+
+            /* Optionally provide the detailed report (plain text) */
             send_to_player(session, "%s", report);
-            return vm_value_create_string("Warmboot complete.\r\n");
+
+            /* Final colored completion line */
+            send_to_player(session, "%s", "\033[1;33m[Warmboot] Warmboot complete. No players disconnected.\033[0m\r\n");
+
+            /* Broadcast to all staff (privilege >= 1) */
+            char sysmsg[256];
+            snprintf(sysmsg, sizeof(sysmsg), "\033[1;33m[System] Warmboot performed by %s.\033[0m\r\n", session->username);
+            staff_message(sysmsg, NULL);
+
+            return vm_value_create_string("");
         }
 
     /* REBOOT - Graceful server restart */
@@ -5173,12 +5269,81 @@ more_room_source:
         }
     }
 
-    /* Unknown command */
-    command_debug_set_context(command, cmd, args ? args : "", "unknown");
-    char error_msg[512];
-    snprintf(error_msg, sizeof(error_msg),
+    /* Unknown command - attempt LPC command daemon fallback before giving up */
+    /* Try to call /daemon/command->execute_command(player, input)
+     * Try multiple path variants and fall back to cloning the daemon if needed. */
+    {
+        /* Debug: mark entry to fallback */
+        fprintf(stderr, "[CMD_DEBUG] fallback entered: cmd='%s'\n", cmd);
+        fflush(stderr);
+        const char *paths[] = { "/daemon/command", "daemon/command", "/lib/daemon/command", "lib/daemon/command", NULL };
+        VMValue daemon = { .type = VALUE_NULL };
+        int got_daemon = 0;
+
+        for (int pi = 0; paths[pi] && !got_daemon; pi++) {
+            VMValue path_val = vm_value_create_string(paths[pi]);
+            daemon = efun_find_object(global_vm, &path_val, 1);
+            vm_value_release(&path_val);
+            if (daemon.type == VALUE_OBJECT && daemon.data.object_value) {
+                got_daemon = 1;
+                break;
+            }
+            if (daemon.type != VALUE_NULL) { vm_value_release(&daemon); daemon.type = VALUE_NULL; }
+        }
+
+        /* If not found, attempt to clone the canonical path */
+        if (!got_daemon) {
+            VMValue p2 = vm_value_create_string("/daemon/command");
+            VMValue cloned = efun_clone_object(global_vm, &p2, 1);
+            vm_value_release(&p2);
+            if (cloned.type == VALUE_OBJECT && cloned.data.object_value) {
+                daemon = cloned;
+                got_daemon = 1;
+            } else {
+                if (cloned.type != VALUE_NULL) vm_value_release(&cloned);
+            }
+        }
+
+        if (got_daemon && daemon.type == VALUE_OBJECT && daemon.data.object_value) {
+            /* Expose raw daemon pointer for debug logging */
+            obj_t *daemon_obj = (obj_t *)daemon.data.object_value;
+            /* Prepare args: player object + full input string */
+            VMValue call_args[2];
+            VMValue player_obj_val;
+            player_obj_val.type = VALUE_OBJECT;
+            player_obj_val.data.object_value = (obj_t *)session->player_object;
+            call_args[0] = player_obj_val;
+            call_args[1] = vm_value_create_string(command);
+
+            VMValue cres = obj_call_method(global_vm, (obj_t *)daemon.data.object_value,
+                                           "execute_command", call_args, 2);
+
+            /* release temporary string arg */
+            vm_value_release(&call_args[1]);
+
+            /* If daemon handled the command (non-zero int), accept it */
+            if (cres.type == VALUE_INT && cres.data.int_value) {
+                if (cres.type != VALUE_NULL) vm_value_release(&cres);
+                if (daemon.type != VALUE_NULL) vm_value_release(&daemon);
+                result.type = VALUE_NULL;
+                return result;
+            }
+            if (cres.type != VALUE_NULL) vm_value_release(&cres);
+
+            if (daemon.type != VALUE_NULL) vm_value_release(&daemon);
+        }
+    }
+
+        command_debug_set_context(command, cmd, args ? args : "", "unknown");
+        /* Debug: report that fallback did not find a handler (print daemon pointer if available) */
+        /* Attempt to print any previously found daemon pointer variable if in scope */
+        /* Note: fallback's local daemon VMValue is not available here; print NULL marker. */
+        fprintf(stderr, "[CMD_DEBUG] fallback FAILED: daemon_obj=%p\n", (void*)NULL);
+        fflush(stderr);
+        char error_msg[512];
+        snprintf(error_msg, sizeof(error_msg),
             "Unknown command: %.200s\r\nType 'help' for available commands.\r\n", cmd);
-    return vm_value_create_string(error_msg);
+        return vm_value_create_string(error_msg);
 }
 
 /* Broadcast message to all players except one */

@@ -1,0 +1,12 @@
+FLY (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 3
+Damage: 0 MD (Utility)
+Range: Self/Touch
+Area: Single target
+
+Grants the target the ability to fly for a limited duration,
+allowing movement over obstacles and negating difficult terrain
+penalties while airborne.
+
+See also: help magic, help movement

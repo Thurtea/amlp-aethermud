@@ -1,0 +1,44 @@
+
+AMLP MUD DRIVER - BUILD IN PROGRESS
+ [*] [ 1/33] Compiling driver.c
+ [*] [ 2/33] Compiling server.c
+ [*] [ 3/33] Compiling lexer.c
+ [*] [ 4/33] Compiling parser.c
+ [*] [ 5/33] Compiling vm.c
+ [*] [ 6/33] Compiling codegen.c
+ [*] [ 7/33] Compiling object.c
+ [*] [ 8/33] Compiling vm_trace.c
+ [*] [ 9/33] Compiling gc.c
+ [*] [10/33] Compiling efun.c
+ [*] [11/33] Compiling array.c
+ [*] [12/33] Compiling mapping.c
+ [*] [13/33] Compiling compiler.c
+ [*] [14/33] Compiling program.c
+ [*] [15/33] Compiling simul_efun.c
+ [*] [16/33] Compiling program_loader.c
+ [*] [17/33] Compiling preprocessor.c
+ [*] [18/33] Compiling master_object.c
+ [*] [19/33] Compiling terminal_ui.c
+ [*] [20/33] Compiling websocket.c
+ [*] [21/33] Compiling session.c
+ [*] [22/33] Compiling room.c
+ [*] [23/33] Compiling chargen.c
+ [*] [24/33] Compiling skills.c
+ [*] [25/33] Compiling combat.c
+ [*] [26/33] Compiling item.c
+ [*] [27/33] Compiling psionics.c
+ [*] [28/33] Compiling magic.c
+ [*] [29/33] Compiling wiz_tools.c
+ [*] [30/33] Compiling race_loader.c
+ [*] [31/33] Compiling ui_frames.c
+ [*] [32/33] Compiling death.c
+ [*] [33/33] Compiling npc.c
+
+[LINK] Creating driver executable...
+BUILD SUCCESSFUL
+Files compiled: 33
+Warnings:       117
+Errors:         0
+Warning details: diagnostics/README.md
+Quick reference: diagnostics/quick-reference.md
+

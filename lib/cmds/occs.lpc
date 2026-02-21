@@ -1,0 +1,61 @@
+// /lib/cmds/occs.lpc
+// List O.C.C.s available to the player's current race.
+
+int main(string args) {
+    object player, race_ob;
+    string race, race_path, race_display;
+    string *allowed;
+
+    player = this_player();
+    if (!player) return 0;
+
+    race = (string)player->query_race();
+    if (!race || race == "") {
+        write("You don't seem to have a race assigned.\n");
+        return 1;
+    }
+
+    // Normalize race string to a safe filename (lowercase, spaces to underscores)
+    race_path = "/races/" + lower_case(replace_string(race, " ", "_"));
+
+    catch { race_ob = load_object(race_path); };
+
+    if (!race_ob) {
+        write("Unable to load race data for: " + race + "\n");
+        return 1;
+    }
+
+    race_display = race_ob->query_race_name();
+    if (!race_display || race_display == "") race_display = capitalize(race);
+
+    // RCC races with no OCC option
+    if (race_ob->query_is_rcc() && !race_ob->query_can_have_occ()) {
+        write("Your race (" + race_display + ") does not select a standard O.C.C. "
+            + "Your abilities are determined by your R.C.C.\n");
+        return 1;
+    }
+
+    allowed = race_ob->query_allowed_occs();
+
+    if (!arrayp(allowed) || !sizeof(allowed)) {
+        // Empty whitelist = all standard OCCs are available
+        write("Available O.C.C.s for " + race_display + ":\n");
+        write("  All standard O.C.C.s are available to your race.\n");
+    } else {
+        write("Available O.C.C.s for " + race_display + ":\n");
+        int i;
+        for (i = 0; i < sizeof(allowed); i++) {
+            string display = capitalize(replace_string(allowed[i], "_", " "));
+            write("  - " + display + "\n");
+        }
+    }
+
+    write("\nTo select an OCC, speak with an RP-Wizard or use "
+        + "'help selectocc' for more info.\n");
+    return 1;
+}
+
+string query_help() {
+    return "occs - List O.C.C.s available for your race.\n"
+           "Usage: occs\n";
+}

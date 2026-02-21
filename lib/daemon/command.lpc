@@ -147,6 +147,7 @@ void init_commands() {
     commands["date"]     = "cmds/time";
     commands["save"]     = "cmds/save";
     commands["consider"] = "cmds/consider";
+    commands["occs"] = "cmds/occs";
 }
 
 // Main command execution function

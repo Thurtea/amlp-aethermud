@@ -1,0 +1,71 @@
+/*
+ * /lib/cmds/wizard/update.lpc - Reload/recompile an object (wizard+)
+ * Allows wizards (privilege >= 1) to run update.
+ */
+
+int query_privilege_required() { return 1; }
+
+int main(string args) {
+    object player = previous_object();
+    string path, resolved;
+    object ob;
+
+    if (!args || args == "") {
+        tell_object(player, "Syntax: update <object_path>\n");
+        tell_object(player, "Special: 'update here' to reload current room.\n");
+        return 1;
+    }
+
+    // Support 'here' to reload current room
+    if (args == "here" || args == ".") {
+        object room = environment(player);
+        if (!room) {
+            tell_object(player, "You are not in a room to update.\n");
+            return 1;
+        }
+        resolved = file_name(room);
+    } else {
+        // Try resolving relative paths first
+        resolved = player->resolve_path(args);
+        // If the player gave a short object name, try to find it directly
+        if (!file_size(resolved) && !find_object(resolved)) {
+            // try as given
+            if (find_object(args)) resolved = file_name(find_object(args));
+        }
+        if (strlen(resolved) < 4 || resolved[strlen(resolved)-4..] != ".lpc") {
+            resolved += ".lpc";
+        }
+    }
+
+    // Find existing object
+    ob = find_object(resolved);
+    if (ob) {
+        tell_object(player, "Destructing old version...\n");
+        destruct(ob);
+    }
+
+    // Reload
+    catch {
+        ob = load_object(resolved);
+    } : {
+        tell_object(player, "Error: Failed to reload " + resolved + "\n");
+        return 1;
+    }
+
+    if (!ob) {
+        tell_object(player, "Error: Reload failed\n");
+        return 1;
+    }
+
+    tell_object(player, "Updated: " + resolved + "\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"UPDATE - Update a deployed object with workspace changes\n\n"
+"Usage:\n"
+"  update <name>         Update an existing deployed object from workspace\n\n"
+"Replace or refresh a deployed file with the version from your creator\n"
+"workspace. Requires appropriate permissions (Wizard+).\n";
+}

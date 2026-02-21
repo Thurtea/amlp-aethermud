@@ -17,7 +17,7 @@ int main(string str) {
     if(function_exists("set_position", target)) target->set_position("standing");
     if(target == player) {
         tell_object(player, "You wake up.\n");
-        tell_room(environment(player), capitalize(obj_name(player)) + " wakes up.\n", ({ player }));
+        tell_room_vis(environment(player), player, "%s wakes up.\n", ({ player }));
     } else {
         tell_object(player, "You wake " + obj_name(target) + ".\n");
         tell_object(target, capitalize(obj_name(player)) + " wakes you up.\n");

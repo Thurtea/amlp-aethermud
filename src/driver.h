@@ -26,4 +26,7 @@ int callout_schedule(const char *func_name, double delay_seconds);
 /* Cancel a callout by handle. Returns 0 on success, -1 if not found. */
 int callout_cancel(int handle);
 
+/* Send a message only to staff (privilege_level >= 1), excluding one session. */
+void staff_message(const char *message, PlayerSession *exclude);
+
 #endif /* DRIVER_H */

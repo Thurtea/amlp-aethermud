@@ -60,6 +60,9 @@
 #include "ui_frames.h"
 #include "wiz_tools.h"
 
+/* Forward declarations for functions defined later in this file */
+void staff_message(const char *message, PlayerSession *exclude);
+
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 4096
 #define INPUT_BUFFER_SIZE 2048
@@ -1203,8 +1206,9 @@ static char* clone_extract_property_string(const char *buf, const char *key) {
  * Writes the result into out_path (max out_size bytes).
  * Returns 1 if the resolved file exists, 0 otherwise. */
 int resolve_lpc_path(const char *args, char *out_path, size_t out_size) {
-    /* Strip leading slash */
-    const char *p = (args[0] == '/') ? args + 1 : args;
+    /* Strip all leading slashes (handles // and /// prefixes) */
+    const char *p = args;
+    while (*p == '/') p++;
 
     /* Strip trailing .lpc if the user typed it (we add it ourselves) */
     char clean[512];
@@ -2496,34 +2500,51 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             }
         }
 
-        /* Player view: population + staff summary */
+        /* Player view: list staff by name, show player count without names */
         if (session->privilege_level < 1) {
             int total = 0;
+            int staff_total = admin_count + domain_count + code_count + rp_count;
             for (int i = 0; i < MAX_CLIENTS; i++) {
                 if (sessions[i] && sessions[i]->state == STATE_PLAYING) total++;
             }
-            const char *pop = (total <= 5) ? "Low" : (total <= 15) ? "Medium" : "High";
 
             send_to_player(session, "\r\n");
             frame_top(session, w);
-            frame_title(session, "AETHERMUD", w);
+            frame_title(session, "PLAYERS ONLINE", w);
             frame_sep(session, w);
-            snprintf(buf, sizeof(buf), "Population: %s", pop);
-            frame_line(session, buf, w);
 
-            /* Build staff summary */
-            char staff[256] = "";
-            int slen = 0;
-            if (admin_count > 0) slen += snprintf(staff + slen, sizeof(staff) - slen, "%d Admin%s", admin_count, admin_count > 1 ? "s" : "");
-            if (domain_count > 0) slen += snprintf(staff + slen, sizeof(staff) - slen, "%s%d Domain Wizard%s", slen ? ", " : "", domain_count, domain_count > 1 ? "s" : "");
-            if (code_count > 0) slen += snprintf(staff + slen, sizeof(staff) - slen, "%s%d Code Wizard%s", slen ? ", " : "", code_count, code_count > 1 ? "s" : "");
-            if (rp_count > 0) slen += snprintf(staff + slen, sizeof(staff) - slen, "%s%d Roleplay Wizard%s", slen ? ", " : "", rp_count, rp_count > 1 ? "s" : "");
+            /* List each visible staff member by name with colored role tag */
+            int any_staff = 0;
+            for (int i = 0; i < MAX_CLIENTS; i++) {
+                if (!sessions[i]) continue;
+                if (sessions[i]->state != STATE_PLAYING) continue;
+                if (sessions[i]->privilege_level < 1) continue;
+                if (sessions[i]->is_invisible) continue;
 
-            if (slen > 0) {
-                snprintf(buf, sizeof(buf), "Staff available: %s", staff);
+                char role_tag[64] = "";
+                const char *role = sessions[i]->wizard_role;
+                if (strcmp(role, "admin") == 0)
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;31m[Admin]\033[0m ");
+                else if (strcmp(role, "domain") == 0)
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
+                else if (strcmp(role, "code") == 0)
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
+                else
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
+
+                snprintf(buf, sizeof(buf), "%s%s", role_tag, sessions[i]->username);
                 frame_line(session, buf, w);
+                any_staff++;
             }
 
+            if (!any_staff) {
+                frame_line(session, "No staff currently online.", w);
+            }
+
+            frame_sep(session, w);
+            snprintf(buf, sizeof(buf), "Staff online: %d  |  Players online: %d",
+                     staff_total, total);
+            frame_line(session, buf, w);
             frame_bottom(session, w);
             result.type = VALUE_NULL;
             return result;
@@ -3189,7 +3210,11 @@ more_room_source:
         Item *tmpl = item_find_by_name(args);
         if (tmpl) {
             Item *new_item = item_clone(tmpl);
-            if (new_item && inventory_add(&session->character.inventory, new_item)) {
+            /* Staff/admin bypass weight check; players use normal limit */
+            bool added = (session->privilege_level >= 1)
+                ? inventory_add_force(&session->character.inventory, new_item)
+                : inventory_add(&session->character.inventory, new_item);
+            if (new_item && added) {
                 char msg[512];
                 snprintf(msg, sizeof(msg),
                     "You clone %s.\r\nIt has been added to your inventory.\r\n",
@@ -3218,7 +3243,11 @@ more_room_source:
             return vm_value_create_string(msg);
         }
 
-        if (!inventory_add(&session->character.inventory, new_item)) {
+        /* Staff/admin bypass weight check; players use normal limit */
+        bool added = (session->privilege_level >= 1)
+            ? inventory_add_force(&session->character.inventory, new_item)
+            : inventory_add(&session->character.inventory, new_item);
+        if (!added) {
             item_free(new_item);
             return vm_value_create_string("Error: Could not add item to inventory (weight limit?).\r\n");
         }
@@ -3669,9 +3698,9 @@ more_room_source:
                        session->username);
 
         char kick_msg[256];
-        snprintf(kick_msg, sizeof(kick_msg), "%s has been kicked from the game.\r\n",
+        snprintf(kick_msg, sizeof(kick_msg), "[Staff] %s has been kicked from the game.\r\n",
                 target->username);
-        broadcast_message(kick_msg, target);
+        staff_message(kick_msg, target);
 
         /* Remove from room */
         if (target->current_room) {
@@ -5123,8 +5152,8 @@ void process_playing_state(PlayerSession *session, const char *input) {
 
             char logout_msg[256];
             snprintf(logout_msg, sizeof(logout_msg),
-                    "%s has left the game.\r\n", session->username);
-            broadcast_message(logout_msg, session);
+                    "[Staff] %s has left the game.\r\n", session->username);
+            staff_message(logout_msg, session);
 
             session->state = STATE_DISCONNECTING;
         } else {

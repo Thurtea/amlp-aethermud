@@ -376,7 +376,11 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
                 send_to_player(sess, "Player '%s' not found.\n", target_name);
                 return 0;
             }
-            if (!inventory_add(&target->character.inventory, new_item)) {
+            /* Wiz/admin bypass weight check when giving items to players */
+            bool target_added = (sess->privilege_level >= 1)
+                ? inventory_add_force(&target->character.inventory, new_item)
+                : inventory_add(&target->character.inventory, new_item);
+            if (!target_added) {
                 item_free(new_item);
                 send_to_player(sess, "Could not add item to %s's inventory (weight limit?).\n", target->username);
                 return 0;
@@ -387,8 +391,8 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
             return 1;
         }
 
-        /* No target: add to wizard's inventory */
-        if (!inventory_add(&sess->character.inventory, new_item)) {
+        /* No target: add to wizard's own inventory (always bypass weight check) */
+        if (!inventory_add_force(&sess->character.inventory, new_item)) {
             item_free(new_item);
             send_to_player(sess, "Could not add item to your inventory (weight limit?).\n");
             return 0;

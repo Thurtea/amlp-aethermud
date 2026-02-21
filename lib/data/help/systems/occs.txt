@@ -1,0 +1,18 @@
+OCCS - List available Occupational Character Classes
+
+Usage:
+  occs       Show which O.C.C.s are available for your race
+
+Description:
+  Displays the list of Occupational Character Classes (O.C.C.s)
+  that your current race/R.C.C. is eligible to select.
+
+  Not all races may choose an O.C.C. Some races (such as dragons,
+  psi-stalkers, and Dog Boys) are defined entirely by their R.C.C.
+  and do not take a separate O.C.C.
+
+  O.C.C. selection is handled by an RP-Wizard during character setup.
+  Once applied, your O.C.C. grants you starting skills and special
+  abilities appropriate to your class.
+
+See also: pskills, sskills, selectocc, help skills

@@ -6,7 +6,7 @@
  *   introduce <name>       - Introduce to a specific person
  */
 
-int cmd(string args) {
+int main(string args) {
     object env = environment(this_player());
     
     if (!env) {
@@ -37,13 +37,17 @@ int cmd(string args) {
         }
         
         write("You introduce yourself as " + my_name + ".\n");
-        say(this_player()->query_introduction_name(this_player()) + 
-            " introduces themselves as " + my_name + ".\n");
+        tell_room_vis(
+            environment(this_player()),
+            this_player(),
+            "%s introduces themselves as " + my_name + ".\n",
+            ({ this_player() })
+        );
         return 1;
     }
     
     /* Introduce to a specific person */
-    object target = present(args, env);
+    object target = find_living_here(args, env);
     
     if (!target) {
         write("There is no '" + args + "' here.\n");

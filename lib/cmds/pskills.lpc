@@ -1,28 +1,53 @@
-// lib/cmds/pskills.lpc
-// Show primary skills (from OCC)
+// /lib/cmds/pskills.lpc
+// Display primary (O.C.C.) skills.
 
-int main(string arg) {
-    object player = this_player();
+int main(string str) {
+    object player;
+    mapping skills;
+    string *names;
+    string occ_name;
+    int i;
+
+    player = this_player();
     if (!player) return 0;
 
-    mapping prim = ([ ]);
-    if (function_exists("query_primary_skills", player)) {
-        prim = player->query_primary_skills();
-    }
+    skills = player->query_all_skills();
 
-    if (!prim || !sizeof(prim)) {
-        write("No primary skills assigned.\n");
+    if (!skills || !sizeof(skills)) {
+        write("You have no skills assigned yet.\n");
+        write("Your starting skills will be applied when you select your O.C.C.\n");
+        write("Type 'occs' to see which O.C.C.s are available to your race.\n");
+        write("Type 'help skills' for more information on the skill system.\n");
         return 1;
     }
 
-    write("Primary Skills:\n");
-    foreach (string k, mixed v in prim) {
-        int pct = intp(v) ? v : 0;
-        write(sprintf("  %-30s %3d%%\n", k, pct));
+    // Get OCC name for header
+    occ_name = "";
+    if (function_exists("query_occ", player))
+        occ_name = (string)player->query_occ();
+    if (!occ_name || occ_name == "")
+        occ_name = "Pending";
+    else
+        occ_name = capitalize(replace_string(occ_name, "_", " "));
+
+    write("=== Primary Skills (O.C.C.: " + occ_name + ") ===\n");
+
+    names = sort_array(keys(skills), 1);
+    for (i = 0; i < sizeof(names); i++) {
+        string display = capitalize(replace_string(names[i], "_", " "));
+        int pct = intp(skills[names[i]]) ? skills[names[i]] : 0;
+        write(sprintf("  %-35s %3d%%\n", display, pct));
     }
+
     return 1;
 }
 
 string query_help() {
-    return "PSKILLS - Show primary skills assigned by your O.C.C.\n\nUsage:\n  pskills\n\nDisplays the primary skills and their starting percentages.\n";
+    return
+"PSKILLS - Show your primary occupational skills\n\n"
+"Usage:\n"
+"  pskills    List all skills from your O.C.C.\n\n"
+"Displays all skills granted by your Occupational Character Class.\n"
+"If no skills are shown, you have not yet selected an O.C.C.\n\n"
+"See also: sskills, occs, selectocc, help skills\n";
 }

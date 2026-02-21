@@ -62,10 +62,10 @@ extern int num_loaded_races;
 extern LoadedOCC loaded_occs[MAX_LOADED_OCCS];
 extern int num_loaded_occs;
 
-/* Scan lib/races/*.lpc and populate loaded_races[]. Call once at startup. */
+// Scan lib/races/*.lpc and populate loaded_races[]. Call once at startup.
 void race_loader_scan_races(void);
 
-/* Scan lib/occs/*.lpc and populate loaded_occs[]. Call once at startup. */
+// Scan lib/occs/*.lpc and populate loaded_occs[]. Call once at startup.
 void race_loader_scan_occs(void);
 
 #endif /* RACE_LOADER_H */

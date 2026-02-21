@@ -8,7 +8,7 @@ int main(string str) {
     if(pos == "sleeping") { tell_object(player, "You are already asleep.\n"); return 1; }
     if(function_exists("set_position", player)) player->set_position("sleeping");
     tell_object(player, "You lie down and fall asleep.\n");
-    tell_room(environment(player), capitalize(obj_name(player)) + " lies down and falls asleep.\n", ({ player }));
+    tell_room_vis(environment(player), player, "%s lies down and falls asleep.\n", ({ player }));
     return 1;
 }
 

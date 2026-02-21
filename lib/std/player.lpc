@@ -539,9 +539,9 @@ string cmd_who() {
             string pname = player->query_name();
             string ptitle = player->query_privilege_title();
             int idle = query_idle(player);
-            
-            result += sprintf("  %-15s [%s] (idle: %d seconds)\n", 
-                             pname, ptitle, idle);
+
+            result += sprintf("  [%s] %s (idle: %d seconds)\n",
+                             ptitle, pname, idle);
         }
         
         result += sprintf("\nTotal: %d player%s\n", 
@@ -555,7 +555,7 @@ string cmd_who() {
             if (player->is_wizard()) {
                 string pname = player->query_name();
                 string ptitle = player->query_privilege_title();
-                result += sprintf("  %-15s [%s]\n", pname, ptitle);
+                result += sprintf("  [%s] %s\n", ptitle, pname);
                 staff_count++;
             }
         }
@@ -592,7 +592,8 @@ string cmd_stats() {
     // Basic info
     result += sprintf("Level: %d     Experience: %d\n", level, experience);
     result += sprintf("Race: %s     O.C.C.: %s\n",
-                     query_race_name(), query_occ_id() ? query_occ_id() : "Pending");
+                     query_race_name(),
+                     (query_occ_id() && query_occ_id() != "unknown") ? query_occ_id() : "Pending");
     result += "----------------------------------------\n";
     
     // Phase 1, Step 5b: Enhanced health display

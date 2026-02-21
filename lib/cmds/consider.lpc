@@ -19,7 +19,7 @@ int main(string str) {
     else if(ratio < 1.5) assessment = "looks stronger than you.";
     else if(ratio < 2.5) assessment = "would be a very dangerous fight.";
     else                 assessment = "would almost certainly kill you.";
-    tell_object(player, capitalize(obj_name(target)) + " " + assessment + "\n");
+    tell_object(player, capitalize(vis_name(target, player)) + " " + assessment + "\n");
     return 1;
 }
 

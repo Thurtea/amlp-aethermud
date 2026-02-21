@@ -6,7 +6,7 @@
  *   remember               - List people you remember
  */
 
-int cmd(string args) {
+int main(string args) {
     object env = environment(this_player());
     
     if (!args || args == "") {
@@ -21,7 +21,7 @@ int cmd(string args) {
         return 1;
     }
     
-    object target = present(args, env);
+    object target = find_living_here(args, env);
     
     if (!target) {
         write("There is no '" + args + "' here.\n");

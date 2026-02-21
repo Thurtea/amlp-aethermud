@@ -1484,6 +1484,14 @@ void cmd_look(PlayerSession *sess, const char *args) {
             return;
         }
 
+        /* Check for an open rift belonging to this player */
+        if (sess->rift_pending &&
+            (strcasecmp(target, "rift") == 0 || strcasecmp(target, "portal") == 0 ||
+             strcasecmp(target, "gateway") == 0)) {
+            send_to_player(sess, "An interdimensional rift swirls here, pulsing with dimensional energy.\n");
+            return;
+        }
+
         send_to_player(sess, "You don't see '%s' here.\n", target);
         return;
     }
@@ -1640,6 +1648,11 @@ show_room:
                               ? nt->position_text : "is standing around.";
             send_to_player(sess, "%s %s\n", display, pos);
         }
+    }
+
+    /* Show open rift if this player has one pending */
+    if (sess->rift_pending) {
+        send_to_player(sess, "An interdimensional rift.\n");
     }
 }
 
@@ -1807,9 +1820,6 @@ void cmd_rift(PlayerSession *sess, const char *args) {
 
     send_to_player(sess, "\nThe Moxim begins weaving dimensional energy...\n");
     send_to_player(sess, "A shimmering rift tears open before you, swirling with light.\n");
-    send_to_player(sess, "Destination: %s  (%d credits deducted)\n",
-        rift_destinations[dest_idx].name, RIFT_COST);
-    send_to_player(sess, "Type 'enter rift' to step through.\n");
 
     /* Notify others in the departure room */
     Room *current = sess->current_room;
@@ -1852,7 +1862,6 @@ void cmd_enter_rift(PlayerSession *sess) {
     sess->current_room = dest;
 
     send_to_player(sess, "\nYou step through the rift into blinding light...\n\n");
-    send_to_player(sess, "You have %d credits remaining.\n\n", sess->character.credits);
 
     for (int i = 0; i < dest->num_players; i++) {
         if (dest->players[i] != sess) {

@@ -555,6 +555,16 @@ bool inventory_add(Inventory *inv, Item *item) {
     return true;
 }
 
+/* Add item to inventory, bypassing weight limit (for staff/admin use) */
+bool inventory_add_force(Inventory *inv, Item *item) {
+    if (!inv || !item) return false;
+    item->next = inv->items;
+    inv->items = item;
+    inv->total_weight += item->weight;
+    inv->item_count++;
+    return true;
+}
+
 /* Remove item from inventory by name */
 Item* inventory_remove(Inventory *inv, const char *item_name) {
     if (!inv || !item_name || !inv->items) return NULL;

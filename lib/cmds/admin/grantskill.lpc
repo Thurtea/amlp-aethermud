@@ -8,7 +8,7 @@
  *   grantskill <player> <skill> [percentage]
  */
 
-int cmd(string args) {
+int main(string args) {
     object wiz, target;
     string player_name, skill_name, percent_str;
     int percentage;

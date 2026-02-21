@@ -454,7 +454,7 @@ void apply_race_and_occ(PlayerSession *sess) {
 
     /* Defensive defaults */
     if (!ch->race) ch->race = strdup("Human");
-    if (!ch->occ)  ch->occ  = strdup("None");
+    if (!ch->occ)  ch->occ  = strdup("Pending");
 
     /* Default health model */
     ch->health_type = HP_SDC;
@@ -673,7 +673,10 @@ void race_loader_scan_races(void) {
             free(name);
         } else {
             /* Fallback: convert filename to title case */
-            snprintf(r->name, sizeof(r->name), "%s", r->filename);
+            char tmp_rname[sizeof(r->name)];
+            strncpy(tmp_rname, r->filename, sizeof(tmp_rname) - 1);
+            tmp_rname[sizeof(tmp_rname) - 1] = '\0';
+            memcpy(r->name, tmp_rname, sizeof(r->name));
             r->name[0] = toupper((unsigned char)r->name[0]);
             for (size_t k = 0; r->name[k]; k++) {
                 if (r->name[k] == '_') r->name[k] = ' ';
@@ -740,7 +743,10 @@ void race_loader_scan_occs(void) {
             snprintf(o->name, sizeof(o->name), "%s", name);
             free(name);
         } else {
-            snprintf(o->name, sizeof(o->name), "%s", o->filename);
+            char tmp_oname[sizeof(o->name)];
+            strncpy(tmp_oname, o->filename, sizeof(tmp_oname) - 1);
+            tmp_oname[sizeof(tmp_oname) - 1] = '\0';
+            memcpy(o->name, tmp_oname, sizeof(o->name));
             o->name[0] = toupper((unsigned char)o->name[0]);
             for (size_t k = 0; o->name[k]; k++) {
                 if (o->name[k] == '_') o->name[k] = ' ';

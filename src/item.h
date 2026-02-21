@@ -105,6 +105,7 @@ const char* weapon_type_to_string(WeaponType type);
 /* Inventory Functions */
 void inventory_init(Inventory *inv, int ps_stat);
 bool inventory_add(Inventory *inv, Item *item);
+bool inventory_add_force(Inventory *inv, Item *item);  /* Bypasses weight check (admin/wiz) */
 Item* inventory_remove(Inventory *inv, const char *item_name);
 Item* inventory_find(Inventory *inv, const char *item_name);
 int inventory_get_weight(Inventory *inv);

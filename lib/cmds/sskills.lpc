@@ -1,28 +1,44 @@
-// lib/cmds/sskills.lpc
-// Show secondary skills (player chosen)
+// /lib/cmds/sskills.lpc
+// Display secondary (player-chosen) skills.
 
 int main(string arg) {
-    object player = this_player();
+    object player;
+    mapping sec;
+    string *names;
+    int i;
+
+    player = this_player();
     if (!player) return 0;
 
-    mapping sec = ([ ]);
-    if (function_exists("query_secondary_skills", player)) {
+    sec = ([]);
+    if (function_exists("query_secondary_skills", player))
         sec = player->query_secondary_skills();
-    }
 
     if (!sec || !sizeof(sec)) {
-        write("No secondary skills selected.\n");
+        write("You have no secondary skills yet.\n");
+        write("Secondary skills are selected in consultation with an RP-Wizard.\n");
+        write("Type 'help skills' for more information.\n");
         return 1;
     }
 
-    write("Secondary Skills:\n");
-    foreach (string k, mixed v in sec) {
-        int pct = intp(v) ? v : 0;
-        write(sprintf("  %-30s %3d%%\n", k, pct));
+    write("=== Secondary Skills ===\n");
+
+    names = sort_array(keys(sec), 1);
+    for (i = 0; i < sizeof(names); i++) {
+        string display = capitalize(replace_string(names[i], "_", " "));
+        int pct = intp(sec[names[i]]) ? sec[names[i]] : 0;
+        write(sprintf("  %-35s %3d%%\n", display, pct));
     }
+
     return 1;
 }
 
 string query_help() {
-    return "SSKILLS - Show secondary skills chosen by the player\n\nUsage:\n  sskills\n\nDisplays secondary skills and proficiency percentages.\n";
+    return
+"SSKILLS - Show your secondary skills\n\n"
+"Usage:\n"
+"  sskills    List all secondary skills\n\n"
+"Displays skills selected outside of your O.C.C. package.\n"
+"Secondary skills are chosen in consultation with an RP-Wizard.\n\n"
+"See also: pskills, occs, help skills\n";
 }

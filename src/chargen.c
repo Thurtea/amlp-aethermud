@@ -529,45 +529,55 @@ void chargen_create_admin(PlayerSession *sess) {
         }
     }
 
-    /* Auto-equip common admin wiztools by cloning LPC objects into the
-     * player's inventory/room. This uses the VM efun clone_object and
-     * calls the cloned object's move_to(player) to place it with the player.
-     */
+    /* Give admin their wiz-tools directly as C inventory items (weight=0).
+     * These mirror the LPC files in lib/obj/wiztools/ but are created as
+     * C Items so they integrate cleanly with the C inventory system. */
     {
-        const char *tools[] = {
-            "/lib/obj/wiztools/admin_orb.lpc",
-            "/lib/obj/wiztools/admin_wand.lpc",
-            "/lib/obj/wiztools/chest.lpc",
-            "/lib/obj/wiztools/staff.lpc",
-            "/lib/obj/wiztools/admin_map.lpc",
-            "/lib/obj/wiztools/admin_badge.lpc",
-            "/lib/obj/wiztools/admin_key.lpc",
-            "/lib/obj/wiztools/admin_scroll.lpc",
-            "/lib/obj/wiztools/admin_ring.lpc",
-            "/lib/obj/wiztools/admin_cloak.lpc",
-            "/lib/obj/wiztools/admin_chest.lpc"
+        struct { int id; const char *name; const char *desc; } wiztools[] = {
+            { -30, "wizard staff",
+              "A gnarled staff crackling with latent energy.\n"
+              "In the hands of a wizard it can focus spells and compel obedience.\n"
+              "Type 'examine staff' for a list of staff commands." },
+            { -31, "staff handbook",
+              "A thick volume bound in silver-embossed leather.\n"
+              "Contains the complete AetherMUD staff policies and procedure guide.\n"
+              "Type 'read handbook' to browse its contents." },
+            { -32, "crystal ball",
+              "A flawless sphere of smoky quartz the size of a grapefruit.\n"
+              "Allows a wizard to observe any room or player on the mud remotely.\n"
+              "Type 'examine crystal' for scrying commands." },
+            { -33, "admin wand",
+              "A slender wand tipped with a shard of enchanted crystal.\n"
+              "Grants access to high-level administrative control functions.\n"
+              "Type 'examine wand' for available commands." },
+            { -34, "QCS builder tool",
+              "A flat disc etched with builder runes.\n"
+              "The Quick-Construction System tool for area and room building.\n"
+              "Type 'examine qcs' for builder commands." },
+            { -35, "RP-Wizard skill tool",
+              "A compact device used by RP-Wizards to manage player skills.\n"
+              "Allows granting, revoking, and auditing skill assignments.\n"
+              "Type 'examine rptool' for available commands." },
+            { -36, "admin orb",
+              "A pulsing orb that hovers at eye level when released.\n"
+              "Provides a real-time overview of server status and player activity.\n"
+              "Type 'examine orb' for monitoring commands." },
+            { -37, "code tool",
+              "A flat slate covered in scrolling LPC source text.\n"
+              "Used by coders to reload, update, and inspect live objects.\n"
+              "Type 'examine codetool' for available commands." },
         };
-        int num_tools = sizeof(tools) / sizeof(tools[0]);
+        int num_tools = (int)(sizeof(wiztools) / sizeof(wiztools[0]));
 
         for (int ti = 0; ti < num_tools; ti++) {
-            const char *lpc_path = tools[ti];
-            VMValue path_val = vm_value_create_string(lpc_path);
-            VMValue res = efun_clone_object(global_vm, &path_val, 1);
-            vm_value_release(&path_val);
-
-            if (res.type == VALUE_OBJECT && res.data.object_value) {
-                /* If session has a player_object (LPC Player), call move_to on cloned object */
-                if (sess->player_object) {
-                    VMValue arg;
-                    arg.type = VALUE_OBJECT;
-                    arg.data.object_value = sess->player_object;
-                    obj_call_method(global_vm, (obj_t *)res.data.object_value, "move_to", &arg, 1);
-                }
-                vm_value_release(&res);
-            } else {
-                if (res.type != VALUE_NULL) vm_value_release(&res);
-                /* Non-fatal: cloning may fail if LPC file missing; continue */
-            }
+            Item *tool = (Item *)calloc(1, sizeof(Item));
+            tool->id          = wiztools[ti].id;
+            tool->name        = strdup(wiztools[ti].name);
+            tool->description = strdup(wiztools[ti].desc);
+            tool->type        = ITEM_MISC;
+            tool->weight      = 0;
+            tool->value       = 0;
+            inventory_add(&ch->inventory, tool);  /* weight=0 never fails check */
         }
     }
     /* Mark chargen as complete */
@@ -583,7 +593,8 @@ void chargen_create_admin(PlayerSession *sess) {
     send_to_player(sess, "Your admin character has been auto-created.\n");
     send_to_player(sess, "You are standing in your private workroom.\n");
     send_to_player(sess, "\n");
-    send_to_player(sess, "Your workroom contains wiz-tools: staff, handbook, crystal, wand.\n");
+    send_to_player(sess, "Your inventory contains wiz-tools: staff, handbook, crystal, admin wand,\n");
+    send_to_player(sess, "  QCS builder tool, RP-Wizard skill tool, admin orb, code tool.\n");
     send_to_player(sess, "Use 'home' command to return to your workroom anytime.\n");
     send_to_player(sess, "\n");
     send_to_player(sess, "Admin commands: promote, setrole, goto, set, giveskill, users, eval\n");
@@ -739,7 +750,7 @@ void chargen_display_stats(PlayerSession *sess) {
     snprintf(buf, sizeof(buf), "Name: %s", sess->username);
     frame_line(sess, buf, w);
     snprintf(buf, sizeof(buf), "Race: %-20s O.C.C.: %s",
-             ch->race ? ch->race : "N/A", ch->occ ? ch->occ : "N/A");
+             ch->race ? ch->race : "N/A", ch->occ ? ch->occ : "Pending");
     frame_line(sess, buf, w);
     if (ch->alignment) {
         snprintf(buf, sizeof(buf), "Alignment: %s", ch->alignment);
@@ -1035,12 +1046,7 @@ void chargen_complete(PlayerSession *sess) {
     cmd_look(sess, "");
     send_to_player(sess, "\n> ");
 
-    /* Announce new character to all + staff notification */
-    char new_msg[256];
-    snprintf(new_msg, sizeof(new_msg),
-            "%s has entered the game.\r\n", sess->username);
-    broadcast_message(new_msg, sess);
-
+    /* Staff-only: new character creation announcement */
     char staff_msg[256];
     snprintf(staff_msg, sizeof(staff_msg),
             "[Staff] %s created a new character (%s %s).\r\n",
@@ -1842,8 +1848,8 @@ int load_character(PlayerSession *sess, const char *username) {
         return 0;
     }
     
-    /* Accept save versions between 1 and current supported version (8). */
-    if (version < 1 || version > 8) {
+    /* Accept save versions between 1 and current supported version (10). */
+    if (version < 1 || version > 10) {
         ERROR_LOG("Unsupported save file version %d for '%s'", 
                 version, username);
         fclose(f);
@@ -1952,11 +1958,16 @@ int load_character(PlayerSession *sess, const char *username) {
             fread(occ_buf, 1, occ_len, f);
             occ_buf[occ_len] = '\0';
             ch->occ = strdup(occ_buf);
+            /* Migrate old saves: "None" was the pre-fix default, normalize to "Pending" */
+            if (strcmp(ch->occ, "None") == 0) {
+                free(ch->occ);
+                ch->occ = strdup("Pending");
+            }
         } else {
             fseek(f, occ_len, SEEK_CUR);  /* Skip invalid data */
         }
     }
-    
+
     /* Read stats */
     fread(&ch->stats, sizeof(CharacterStats), 1, f);
     

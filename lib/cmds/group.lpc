@@ -1,0 +1,54 @@
+#include <globals.h>
+inherit "/std/object";
+void create() { set_no_clean(1); }
+
+int main(string str) {
+    object player = this_player();
+    if(!str || str == "") {
+        mixed grp = 0;
+        if(function_exists("query_group", player)) grp = player->query_group();
+        if(!grp || sizeof(grp) == 0) {
+            tell_object(player, "You are not in a group.\n");
+        } else {
+            tell_object(player, "Your group:\n");
+            int i;
+            for(i = 0; i < sizeof(grp); i++)
+                tell_object(player, "  " + capitalize(vis_name(grp[i], player)) + "\n");
+        }
+        return 1;
+    }
+    if(str == "leave") {
+        if(function_exists("leave_group", player)) player->leave_group();
+        tell_object(player, "You leave your group.\n");
+        return 1;
+    }
+    string target_str;
+    if(sscanf(str, "join %s", target_str) == 1) {
+        object target = find_living_here(target_str, environment(player));
+        if(!target) { notify_fail("You do not see " + target_str + " here.\n"); return 0; }
+        if(function_exists("join_group", player)) player->join_group(target);
+        tell_object(player, "You join " + capitalize(vis_name(target, player)) + "'s group.\n");
+        tell_object(target, capitalize(vis_name(player, target)) + " joins your group.\n");
+        return 1;
+    }
+    object target = find_living_here(str, environment(player));
+    if(!target) { notify_fail("You do not see " + str + " here.\n"); return 0; }
+    if(target == player) { notify_fail("You cannot group with yourself.\n"); return 0; }
+    if(function_exists("invite_to_group", player)) player->invite_to_group(target);
+    tell_object(player, "You invite " + capitalize(vis_name(target, player)) + " to your group.\n");
+    tell_object(target, capitalize(vis_name(player, target)) +
+        " invites you to join their group. (type: group join " +
+        vis_name(player, target) + ")\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"GROUP - Manage your adventuring group\n\n"
+"Usage:\n"
+"  group                  List your current group members\n"
+"  group <name>           Invite someone to your group\n"
+"  group join <name>      Accept a group invitation\n"
+"  group leave            Leave your current group\n\n"
+"Groups allow coordinated combat and shared experience.\n";
+}

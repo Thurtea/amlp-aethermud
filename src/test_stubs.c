@@ -5,6 +5,17 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include "driver.h"
+
+/* Callout scheduler stubs — tests don't run a main loop, so no-op is fine. */
+int callout_schedule(const char *func_name, double delay_seconds) {
+    (void)func_name; (void)delay_seconds;
+    return -1;
+}
+int callout_cancel(int handle) {
+    (void)handle;
+    return -1;
+}
 
 /* No-op: send a message to a player session (test-only stub)
  * Mark weak so the real implementation in `session.c` can override it

@@ -1,5 +1,6 @@
 #include "program.h"
 #include "vm.h"
+#include "program_loader.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,22 +41,57 @@ VMValue program_execute_function(Program *prog, const char *function_name,
 }
 
 /**
- * Execute a function by index
- * Phase 7 Note: This is a stub that will integrate with vm.c in iteration 2
+ * Execute a function by index.
+ * Creates a fresh VM, loads the program, pushes args, calls the function,
+ * and returns a cloned copy of the result before tearing the VM down.
  */
 VMValue program_execute_by_index(Program *prog, int function_index,
                                  VMValue *args, int arg_count) {
-    (void)args;        // Unused in Phase 7 iteration 1
-    (void)arg_count;   // Unused in Phase 7 iteration 1
-    
     if (!prog || function_index < 0 || function_index >= (int)prog->function_count) {
+        fprintf(stderr, "[program] execute_by_index: invalid program or function index %d\n",
+                function_index);
         return (VMValue){.type = VALUE_NULL};
     }
-    
-    // Phase 7 Iteration 2: Initialize VM, load program, execute function
-    // For now, return a NULL value as placeholder
-    
-    return (VMValue){.type = VALUE_NULL};
+
+    VirtualMachine *vm = vm_init();
+    if (!vm) {
+        fprintf(stderr, "[program] execute_by_index: vm_init() failed\n");
+        return (VMValue){.type = VALUE_NULL};
+    }
+
+    if (program_loader_load(vm, prog) != 0) {
+        fprintf(stderr, "[program] execute_by_index: program_loader_load() failed\n");
+        vm_free(vm);
+        return (VMValue){.type = VALUE_NULL};
+    }
+
+    /* After loading, function_index maps 1:1 to vm->functions[function_index]. */
+    if (function_index >= vm->function_count) {
+        fprintf(stderr, "[program] execute_by_index: function_index %d out of range after load\n",
+                function_index);
+        vm_free(vm);
+        return (VMValue){.type = VALUE_NULL};
+    }
+
+    int stack_before = vm->stack->top;
+
+    for (int i = 0; i < arg_count; i++) {
+        if (vm_push_value(vm, args[i]) != 0) {
+            fprintf(stderr, "[program] execute_by_index: stack push failed at arg %d\n", i);
+            vm_free(vm);
+            return (VMValue){.type = VALUE_NULL};
+        }
+    }
+
+    VMValue result = {.type = VALUE_NULL};
+    if (vm_call_function(vm, function_index, arg_count) == 0
+            && vm->stack->top > stack_before) {
+        /* Clone before vm_free() releases the stack. */
+        result = vm_value_clone(vm_pop_value(vm));
+    }
+
+    vm_free(vm);
+    return result;
 }
 
 /**

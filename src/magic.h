@@ -119,7 +119,7 @@ void magic_spell_tick(struct Character *ch, struct PlayerSession *sess);
 void magic_meditate_tick(struct Character *ch);
 
 /* =============== SPELL TEMPLATES ARRAY =============== */
-extern MagicSpell MAGIC_SPELLS[34];
+extern MagicSpell MAGIC_SPELLS[35];
 extern int MAGIC_SPELL_COUNT;
 
 #endif /* MAGIC_H */

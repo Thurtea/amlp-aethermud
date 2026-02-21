@@ -23,6 +23,7 @@ typedef enum {
     NPC_DRAGON_HATCHLING,
     NPC_MOXIM,
     NPC_SPIKE,              /* Wizard Castle dog — friendly, pettable */
+    NPC_MAGE,               /* Rogue mage — casts Fireball in combat */
     NPC_TEMPLATE_COUNT
 } NpcTemplateId;
 

@@ -52,14 +52,6 @@ DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/server.c $(SRC_DIR)/lexer.c $(SRC_D
 # Count source files
 TOTAL_FILES = $(words $(DRIVER_SRCS))
 
-# Colors: disabled for simpler plain output
-C_CYAN =
-C_GREEN =
-C_YELLOW =
-C_RED =
-C_RESET =
-C_BOLD =
-
 # Default target - just build the driver
 .PHONY: all driver tests clean distclean help test debug release asan asan_tests
 
@@ -83,7 +75,7 @@ asan_tests: tests
 driver: $(BUILD_DIR)/driver
 
 
-# Build driver with custom unicode frame and ASCII indicators
+# Build driver
 $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	@mkdir -p $(BUILD_DIR)
 	@echo
@@ -116,90 +108,81 @@ $(BUILD_DIR)/driver: $(DRIVER_SRCS)
 	fi
 	@echo
 
-# Build all tests quietly
+# Build all tests
 tests: $(BUILD_DIR)/test_lexer $(BUILD_DIR)/test_parser $(BUILD_DIR)/test_vm \
        $(BUILD_DIR)/test_object $(BUILD_DIR)/test_gc $(BUILD_DIR)/test_efun \
        $(BUILD_DIR)/test_array $(BUILD_DIR)/test_mapping $(BUILD_DIR)/test_compiler \
        $(BUILD_DIR)/test_program $(BUILD_DIR)/test_simul_efun $(BUILD_DIR)/test_vm_execution \
-       $(BUILD_DIR)/test_parser_stability
-	@printf "All test binaries built\n"
+       $(BUILD_DIR)/test_parser_stability $(BUILD_DIR)/test_lpc_execution
+	@echo "All test binaries built"
 
 # Build everything
 all: driver tests
 
 
-# Pattern rule for all test targets (custom frame, ASCII indicators, no emojis)
+# Pattern rule for all test targets
 $(BUILD_DIR)/test_%: $(TEST_DIR)/test_%.c $(TEST_COMMON_SOURCES)
 	@mkdir -p $(BUILD_DIR)
-	@printf "$(C_CYAN)╔════════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "BUILDING TEST: $@"
-	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" " [*] Compiling test sources..."
+	@echo "[*] Building test: $@"
+	@echo "[*] Compiling test sources..."
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) -I$(TEST_DIR) $(LDFLAGS)
 	@status=$$?; \
 	       if [ "$$status" -eq 0 ]; then \
-		       printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  TEST BUILD SUCCESSFUL"; \
-		       printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+		       echo "[OK] Test build successful: $@"; \
 	else \
-		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
-		printf "║                         X TEST BUILD FAILED                             ║\n"; \
-		printf "╚════════════════════════════════════════════════════════════════════════════╝\n"; \
+		echo "[FAIL] Test build failed: $@"; \
 		exit 1; \
 	fi
 
 # Specific override for test_simul_efun (needs simul_efun.c)
 $(BUILD_DIR)/test_simul_efun: $(TEST_DIR)/test_simul_efun.c $(TEST_COMMON_SOURCES) $(SRC_DIR)/simul_efun.c
 	@mkdir -p $(BUILD_DIR)
-	@printf "$(C_CYAN)╔════════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "BUILDING TEST: $@"
-	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" " [*] Compiling test sources..."
+	@echo "[*] Building test: $@"
+	@echo "[*] Compiling test sources..."
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) -I$(TEST_DIR) $(LDFLAGS)
 	@status=$$?; \
 	       if [ "$$status" -eq 0 ]; then \
-		       printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"; \
-		       printf "$(C_CYAN)║$(C_RESET)%-76s$(C_CYAN)║$(C_RESET)\n" "  TEST BUILD SUCCESSFUL"; \
-		       printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"; \
+		       echo "[OK] Test build successful: $@"; \
 	else \
-		printf "╠════════════════════════════════════════════════════════════════════════════╣\n"; \
-		printf "║                         X TEST BUILD FAILED                             ║\n"; \
-		printf "╚════════════════════════════════════════════════════════════════════════════╝\n"; \
+		echo "[FAIL] Test build failed: $@"; \
 		exit 1; \
 	fi
 
-# Run all tests (custom frame, ASCII indicators, no emojis except checkmark)
+# Run all tests
 test: tests
-	@printf "\n$(C_CYAN)╔════════════════════════════════════════════════════════════════════════════╗$(C_RESET)\n"
-	@printf "$(C_CYAN)║$(C_BOLD)%-76s$(C_CYAN)║$(C_RESET)\n" "RUNNING TESTS"
-	@printf "$(C_CYAN)╠════════════════════════════════════════════════════════════════════════════╣$(C_RESET)\n"
-	@for t in lexer parser vm object gc efun array mapping compiler program simul_efun vm_execution; do \
-		printf "$(C_CYAN)║$(C_RESET) [*] Running %-62s$(C_CYAN)║$(C_RESET)\n" "$$t tests..."; \
+	@echo ""
+	@echo "=== RUNNING TESTS ==="
+	@for t in lexer parser vm object gc efun array mapping compiler program simul_efun vm_execution lpc_execution; do \
+		echo "[*] Running $$t tests..."; \
 		$(BUILD_DIR)/test_$$t 2>&1 | sed 's/^/  /'; \
-		printf "$(C_CYAN)║%-76s$(C_CYAN)║\n" ""; \
+		echo ""; \
 	done
-	@printf "$(C_CYAN)╚════════════════════════════════════════════════════════════════════════════╝$(C_RESET)\n"
+	@echo "=== DONE ==="
 
 # Clean build artifacts
 clean:
-	@printf "$(C_CYAN)▶$(C_RESET) Cleaning build artifacts...\n"
+	@echo "[*] Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
-	@printf "Clean complete\n"
+	@echo "Clean complete"
 
 # Clean everything
 distclean: clean
-	@printf "$(C_CYAN)▶$(C_RESET) Removing all generated files...\n"
-	@printf "Distclean complete\n"
+	@echo "[*] Removing all generated files..."
+	@echo "Distclean complete"
 
 # Display help
 help:
-	@printf "\n$(C_BOLD)AMLP MUD Driver Build System$(C_RESET)\n\n"
-	@printf "$(C_CYAN)Usage:$(C_RESET) make [target]\n\n"
-	@printf "$(C_CYAN)Targets:$(C_RESET)\n"
-	@printf "  $(C_GREEN)driver$(C_RESET)    - Build the main driver executable (default)\n"
-	@printf "  $(C_GREEN)tests$(C_RESET)     - Build all test executables\n"
-	@printf "  $(C_GREEN)all$(C_RESET)       - Build driver and tests\n"
-	@printf "  $(C_GREEN)test$(C_RESET)      - Build and run all tests\n"
-	@printf "  $(C_GREEN)clean$(C_RESET)     - Remove build artifacts\n"
-	@printf "  $(C_GREEN)distclean$(C_RESET) - Remove all generated files\n"
-	@printf "  $(C_GREEN)help$(C_RESET)      - Display this help message\n\n"
+	@echo ""
+	@echo "AMLP MUD Driver Build System"
+	@echo ""
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  driver    - Build the main driver executable (default)"
+	@echo "  tests     - Build all test executables"
+	@echo "  all       - Build driver and tests"
+	@echo "  test      - Build and run all tests"
+	@echo "  clean     - Remove build artifacts"
+	@echo "  distclean - Remove all generated files"
+	@echo "  help      - Display this help message"
+	@echo ""

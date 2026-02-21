@@ -206,7 +206,6 @@ static void apply_stat_map(Character *ch, const ParsedMapping *m) {
         int *field = stat_field(&ch->stats, key);
         if (field) {
             *field += m->vals[i];
-            fprintf(stderr, "DEBUG: stat %s += %d (now %d)\n", key, m->vals[i], *field);
         }
     }
 }
@@ -221,11 +220,10 @@ void load_race_data(const char *race_name, Character *ch) {
     char fname[256], path[512];
     name_to_filename(race_name, fname, sizeof(fname));
     snprintf(path, sizeof(path), "lib/races/%s.lpc", fname);
-    fprintf(stderr, "DEBUG: Loading race data for '%s' from %s\n", race_name, path);
 
     char *buf = read_file_to_buffer(path);
     if (!buf) {
-        fprintf(stderr, "DEBUG: Failed to read race file: %s\n", path);
+        fprintf(stderr, "[race_loader] Failed to read race file: %s\n", path);
         return;
     }
 

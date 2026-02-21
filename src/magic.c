@@ -18,7 +18,7 @@ void send_to_player(PlayerSession *session, const char *format, ...);
 
 /* =============== MAGIC SPELLS DATABASE =============== */
 
-MagicSpell MAGIC_SPELLS[34] = {
+MagicSpell MAGIC_SPELLS[35] = {
     /* WARLOCK GRADE SPELLS (0-7) - Level 1-5 */
     {
         .id = 0, .name = "Magic Armor", .description = "AR +4, 1d6 armor per caster level",
@@ -333,17 +333,28 @@ MagicSpell MAGIC_SPELLS[34] = {
         .area_effect_feet = 0, .school = SPELL_RITUAL, .level_name = "Level 20",
         .casting_time_rounds = 10, .can_overwhelm = false, .is_ritual = true,
         .is_passive_bonus = false, .keywords = "heal restore resurrection"
+    },
+
+    /* ENERGY BOLT (34) - Single-target concentrated MD blast */
+    {
+        .id = 34, .name = "Energy Bolt", .description = "1d6+2 MD concentrated energy blast",
+        .lpc_id = "energy_bolt",
+        .ppe_cost = 3, .ppe_per_round = 0, .duration_rounds = 1, .base_damage = 2,
+        .damage_dice = 1, .damage_sides = 6, .is_mega_damage = true, .range_feet = 200,
+        .area_effect_feet = 0, .school = SPELL_WIZARD, .level_name = "Level 3",
+        .casting_time_rounds = 1, .can_overwhelm = true, .is_ritual = false,
+        .is_passive_bonus = false, .keywords = "damage energy combat bolt"
     }
 };
 
-int MAGIC_SPELL_COUNT = 34;
+int MAGIC_SPELL_COUNT = 35;
 
 /* =============== INITIALIZATION =============== */
 
 void magic_init(void) {
     /* Verify spell database is loaded */
-    if (MAGIC_SPELL_COUNT != 34) {
-        fprintf(stderr, "WARNING: Magic database count mismatch! Expected 34, got %d\n",
+    if (MAGIC_SPELL_COUNT != 35) {
+        fprintf(stderr, "WARNING: Magic database count mismatch! Expected 35, got %d\n",
                 MAGIC_SPELL_COUNT);
     }
 }
@@ -452,6 +463,7 @@ void magic_add_starting_spells(struct Character *ch, const char *occ_name) {
         magic_learn_spell(ch, 2);   /* Light */
         magic_learn_spell(ch, 8);   /* Fireball */
         magic_learn_spell(ch, 9);   /* Lightning Bolt */
+        magic_learn_spell(ch, 34);  /* Energy Bolt */
         ch->magic.ppe_max = 50;
         ch->magic.ppe_current = 50;
     }
@@ -585,6 +597,68 @@ bool magic_continue_casting(struct Character *ch) {
     return ch->magic.casting_rounds_remaining > 0;
 }
 
+/* Apply 1d6 chain lightning to the nearest other target in the room,
+ * excluding the primary NPC/player targets already struck. */
+static void magic_chain_lightning(PlayerSession *caster,
+                                   NPC *exclude_npc,
+                                   PlayerSession *exclude_player,
+                                   Room *room) {
+    if (!caster || !room) return;
+
+    NPC *chain_npc = NULL;
+    PlayerSession *chain_player = NULL;
+
+    /* Prefer chaining to another NPC first */
+    for (int i = 0; i < room->num_npcs && !chain_npc; i++) {
+        NPC *n = room->npcs[i];
+        if (n && n->is_alive && n != exclude_npc) chain_npc = n;
+    }
+    if (!chain_npc) {
+        for (int i = 0; i < room->num_players && !chain_player; i++) {
+            PlayerSession *p = room->players[i];
+            if (p && p != caster && p != exclude_player && p->state == STATE_PLAYING)
+                chain_player = p;
+        }
+    }
+
+    if (!chain_npc && !chain_player) return;
+
+    int chain_dmg = 1 + (rand() % 6);  /* 1d6 chain damage (half of 2d6) */
+
+    if (chain_npc) {
+        char display[64];
+        snprintf(display, sizeof(display), "%s", chain_npc->name);
+        display[0] = (char)toupper((unsigned char)display[0]);
+        send_to_player(caster, "Lightning arcs to %s for %d M.D.C.!\n",
+                       display, chain_dmg);
+        chain_npc->character.mdc -= chain_dmg;
+        if (chain_npc->character.mdc < 0) chain_npc->character.mdc = 0;
+        if (chain_npc->character.mdc == 0)
+            npc_handle_death(chain_npc, caster);
+    } else {
+        send_to_player(caster, "Lightning arcs to %s for %d M.D.!\n",
+                       chain_player->username, chain_dmg);
+        send_to_player(chain_player, "%s's lightning bolt chains to you for %d M.D.!\n",
+                       caster->username, chain_dmg);
+        if (chain_player->character.health_type == MDC_ONLY) {
+            chain_player->character.mdc -= chain_dmg;
+            if (chain_player->character.mdc < 0) chain_player->character.mdc = 0;
+        } else {
+            int sdc_eq = chain_dmg * 100;
+            if (sdc_eq >= chain_player->character.sdc) {
+                sdc_eq -= chain_player->character.sdc;
+                chain_player->character.sdc = 0;
+                chain_player->character.hp -= sdc_eq;
+                if (chain_player->character.hp < 0) chain_player->character.hp = 0;
+            } else {
+                chain_player->character.sdc -= sdc_eq;
+            }
+        }
+        if (chain_player->character.hp <= 0 || chain_player->character.mdc <= 0)
+            handle_player_death(chain_player, caster, NULL);
+    }
+}
+
 bool magic_complete_cast(PlayerSession *sess, struct Character *ch) {
     if (!sess || !ch) return false;
 
@@ -615,11 +689,45 @@ bool magic_complete_cast(PlayerSession *sess, struct Character *ch) {
         target_sess = sess->combat_target;
     }
 
-    /* Apply the spell effect */
-    if (target_npc) {
+    /* Apply the spell effect — area vs. single target */
+    if (spell->area_effect_feet > 0 && sess->current_room) {
+        /* Area-effect spell (e.g. Fireball): hit all enemies in the room */
+        Room *room = sess->current_room;
+        int hit_count = 0;
+
+        send_to_player(sess, "Your %s erupts in a %d-foot radius!\n",
+                       spell->name, spell->area_effect_feet);
+
+        for (int i = 0; i < room->num_npcs; i++) {
+            NPC *n = room->npcs[i];
+            if (n && n->is_alive) {
+                magic_apply_effect_npc(sess, n, spell);
+                hit_count++;
+            }
+        }
+        for (int i = 0; i < room->num_players; i++) {
+            PlayerSession *p = room->players[i];
+            if (p && p != sess && p->state == STATE_PLAYING) {
+                magic_apply_effect(sess, p, spell);
+                hit_count++;
+            }
+        }
+        if (hit_count == 0)
+            send_to_player(sess, "Your %s detonates but finds no targets!\n", spell->name);
+
+    } else if (target_npc) {
+        /* Single-target NPC */
         magic_apply_effect_npc(sess, target_npc, spell);
+        /* Lightning Bolt chains to a 2nd target */
+        if (spell->id == 9 && sess->current_room)
+            magic_chain_lightning(sess, target_npc, NULL, sess->current_room);
+
     } else {
+        /* Single-target player (or self-cast) */
         magic_apply_effect(sess, target_sess, spell);
+        /* Lightning Bolt chains to a 2nd target */
+        if (spell->id == 9 && sess->current_room)
+            magic_chain_lightning(sess, NULL, target_sess, sess->current_room);
     }
 
     /* Clear spell targets after use */
@@ -666,6 +774,8 @@ void magic_apply_effect(PlayerSession *caster, PlayerSession *target,
         for (int i = 0; i < spell->damage_dice; i++) {
             damage += (rand() % spell->damage_sides) + 1;
         }
+        /* Base damage bonus (e.g. Energy Bolt +2) */
+        damage += spell->base_damage;
 
         /* Rank bonus: +1 damage per rank above 1 */
         KnownSpell *ks = magic_find_known_spell(caster_ch, spell->id);
@@ -780,7 +890,7 @@ void magic_apply_effect(PlayerSession *caster, PlayerSession *target,
         /* Check for death */
         if (target_ch->hp <= 0) {
             send_to_player(caster, "%s collapses from your spell!\n", target_name);
-            handle_player_death(target, caster);
+            handle_player_death(target, caster, NULL);
         }
         return;
     }
@@ -818,6 +928,8 @@ void magic_apply_effect_npc(PlayerSession *caster, NPC *target, MagicSpell *spel
     for (int i = 0; i < spell->damage_dice; i++) {
         damage += (rand() % spell->damage_sides) + 1;
     }
+    /* Base damage bonus (e.g. Energy Bolt +2) */
+    damage += spell->base_damage;
 
     /* Rank bonus */
     KnownSpell *ks = magic_find_known_spell(caster_ch, spell->id);

@@ -5,6 +5,8 @@
 #include "room.h"
 #include "session_internal.h"
 #include "race_loader.h"
+#include "vm.h"
+#include "object.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -12,6 +14,7 @@
 
 /* External */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
+extern VirtualMachine *global_vm;
 
 /* ================================================================ */
 /*  NPC Templates                                                    */
@@ -110,6 +113,24 @@ const NpcTemplate NPC_TEMPLATES[NPC_TEMPLATE_COUNT] = {
             "in belly rubs than guarding anything. A small collar around\n"
             "his neck reads 'Spike - Good Boy Since Day One.'\n",
         .position_text = "lounges by the fire."
+    },
+    /* Rogue Mage: L4, SDC creature — casts Fireball when below 30% HP */
+    {
+        .template_id = NPC_MAGE,
+        .name = "a rogue mage", .keyword = "mage",
+        .level = 4, .health_type = HP_SDC,
+        .hp = 20, .max_hp = 20, .sdc = 15, .max_sdc = 15, .mdc = 0, .max_mdc = 0,
+        .attacks_per_round = 2, .parries_per_round = 1,
+        .auto_parry = 0, .auto_dodge = 0,
+        .iq = 18, .me = 16, .ma = 10, .ps = 10, .pp = 12, .pe = 12, .pb = 10, .spd = 10,
+        .weapon_dice = 1, .weapon_sides = 4, .weapon_name = "staff",
+        .xp_reward = 200, .aggro = 1,
+        .can_pet = 0,
+        .long_desc =
+            "A weathered mage clad in scorched robes. Arcane sigils glow faintly\n"
+            "on the staff gripped in one hand, and an unsettling energy crackles\n"
+            "around their fingertips. This one has clearly gone rogue.\n",
+        .position_text = "stands here studying a tattered spellbook."
     }
 };
 
@@ -297,6 +318,63 @@ void npc_tick(void) {
                 }
             }
         }
+
+        /* Mage AI: cast Fireball in combat (always 15% chance; 60% when below 30% HP) */
+        if (npc->template_id == NPC_MAGE &&
+            npc->in_combat && npc->combat_target_player) {
+            Character *npc_ch = &npc->character;
+            int cast_chance = (npc_ch->hp <= npc_ch->max_hp * 30 / 100) ? 60 : 15;
+
+            if ((rand() % 100) < cast_chance) {
+                PlayerSession *target = npc->combat_target_player;
+
+                /* Roll 4d6 Fireball damage (Mega-Damage) */
+                int damage = 0;
+                for (int d = 0; d < 4; d++) damage += 1 + (rand() % 6);
+
+                char display[64];
+                snprintf(display, sizeof(display), "%s", npc->name);
+                display[0] = (char)toupper((unsigned char)display[0]);
+
+                char cast_msg[256];
+                snprintf(cast_msg, sizeof(cast_msg),
+                         "%s shouts a mystic incantation and hurls a FIREBALL!\r\n",
+                         display);
+                if (npc->current_room)
+                    room_broadcast(npc->current_room, cast_msg, NULL);
+
+                /* Apply MDC damage to target */
+                Character *tch = &target->character;
+                if (target->is_godmode) {
+                    send_to_player(target,
+                        "The fireball fizzles against your divine protection!\n");
+                } else if (tch->health_type == MDC_ONLY) {
+                    tch->mdc -= damage;
+                    if (tch->mdc < 0) tch->mdc = 0;
+                    send_to_player(target,
+                        "The fireball blasts you for %d M.D.C.! (MDC: %d/%d)\n",
+                        damage, tch->mdc, tch->max_mdc);
+                    if (tch->mdc <= 0)
+                        handle_player_death(target, NULL, npc->name);
+                } else {
+                    /* SDC creature: 1 MD = 100 SDC */
+                    int sdc_eq = damage * 100;
+                    if (sdc_eq >= tch->sdc) {
+                        sdc_eq -= tch->sdc;
+                        tch->sdc = 0;
+                        tch->hp -= sdc_eq;
+                        if (tch->hp < 0) tch->hp = 0;
+                    } else {
+                        tch->sdc -= sdc_eq;
+                    }
+                    send_to_player(target,
+                        "The fireball devastates you for %d M.D.! (HP: %d/%d SDC: %d/%d)\n",
+                        damage, tch->hp, tch->max_hp, tch->sdc, tch->max_sdc);
+                    if (tch->hp <= 0)
+                        handle_player_death(target, NULL, npc->name);
+                }
+            }
+        }
     }
 }
 
@@ -315,13 +393,13 @@ void npc_handle_death(NPC *npc, PlayerSession *killer) {
     /* Set respawn timer: Moxim respawns fast (10 ticks = 20s), others 30 ticks = 60s */
     npc->respawn_timer = (npc->template_id == NPC_MOXIM) ? 10 : 30;
 
-    /* Remove from room */
+    /* Remove from room — broadcast defeat message using NPC display name */
     if (npc->current_room) {
         char msg[128];
         char display[64];
         snprintf(display, sizeof(display), "%s", npc->name);
         display[0] = (char)toupper((unsigned char)display[0]);
-        snprintf(msg, sizeof(msg), "%s collapses and dies!\r\n", display);
+        snprintf(msg, sizeof(msg), "%s collapses to the ground, defeated!\n", display);
         room_broadcast(npc->current_room, msg, NULL);
         room_remove_npc(npc->current_room, npc);
         npc->current_room = NULL;
@@ -331,11 +409,19 @@ void npc_handle_death(NPC *npc, PlayerSession *killer) {
     if (killer) {
         const NpcTemplate *t = &NPC_TEMPLATES[npc->template_id];
         int xp = t->xp_reward;
-        killer->character.xp += xp;
-        send_to_player(killer, "You gain %d experience points!\n", xp);
 
-        /* Check for level up */
-        check_and_apply_level_up(killer);
+        /* Prefer LPC add_experience() so level-up logic stays in player.lpc */
+        obj_t *lpc_obj = (obj_t *)killer->player_object;
+        if (lpc_obj && global_vm) {
+            VMValue xp_arg = vm_value_create_int(xp);
+            obj_call_method(global_vm, lpc_obj, "add_experience", &xp_arg, 1);
+        } else {
+            /* Fallback: C-side XP + level-up */
+            killer->character.xp += xp;
+            check_and_apply_level_up(killer);
+        }
+
+        send_to_player(killer, "You gain %d experience points!\n", xp);
     }
 }
 

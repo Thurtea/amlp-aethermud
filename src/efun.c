@@ -17,6 +17,7 @@
 #include "object.h"
 #include "session.h"
 #include "room.h"
+#include "driver.h"
 #include <sys/stat.h>
 #include <libgen.h>
 #include <limits.h>
@@ -1804,15 +1805,28 @@ VMValue efun_query_verb(VirtualMachine *vm, VMValue *args, int arg_count) {
 /* ========== Callout Efuns (bridge to C scheduler) ========== */
 
 VMValue efun_call_out(VirtualMachine *vm, VMValue *args, int arg_count) {
-    /* Callout scheduler not implemented yet on this driver. Return -1 as failure. */
-    (void)vm; (void)args; (void)arg_count;
-    return vm_value_create_int(-1);
+    /* call_out(string func, float delay, ...) -> int handle */
+    (void)vm;
+    if (arg_count < 2) return vm_value_create_int(-1);
+    if (args[0].type != VALUE_STRING) return vm_value_create_int(-1);
+
+    double delay = 0.0;
+    if (args[1].type == VALUE_FLOAT)
+        delay = args[1].data.float_value;
+    else if (args[1].type == VALUE_INT)
+        delay = (double)args[1].data.int_value;
+
+    int handle = callout_schedule(args[0].data.string_value, delay);
+    return vm_value_create_int(handle);
 }
 
 VMValue efun_remove_call_out(VirtualMachine *vm, VMValue *args, int arg_count) {
-    /* Scheduler removal not implemented; return -1.0 to indicate failure */
-    (void)vm; (void)args; (void)arg_count;
-    return vm_value_create_float(-1.0);
+    /* remove_call_out(int handle) -> float seconds_remaining (-1.0 on error) */
+    (void)vm;
+    if (arg_count < 1 || args[0].type != VALUE_INT)
+        return vm_value_create_float(-1.0);
+    int rc = callout_cancel(args[0].data.int_value);
+    return vm_value_create_float(rc == 0 ? 0.0 : -1.0);
 }
 
 VMValue efun_find_call_out(VirtualMachine *vm, VMValue *args, int arg_count) {

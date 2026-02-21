@@ -460,6 +460,8 @@ void chargen_create_admin(PlayerSession *sess) {
     /* Lives */
     ch->lives_remaining = 5;
     ch->scar_count = 0;
+    ch->permanently_dead = 0;
+    memset(ch->death_killer, 0, sizeof(ch->death_killer));
     ch->description = NULL;
     ch->position = NULL;
     ch->original_race = NULL;
@@ -693,6 +695,8 @@ void chargen_roll_stats(PlayerSession *sess) {
     ch->attacks_per_round = 2;   /* Default 2 attacks per round */
     ch->lives_remaining = 5;     /* Start with 5 lives */
     ch->scar_count = 0;
+    ch->permanently_dead = 0;
+    memset(ch->death_killer, 0, sizeof(ch->death_killer));
     ch->description = NULL;
     ch->position = NULL;
     ch->original_race = NULL;
@@ -1210,9 +1214,8 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     ch->alignment = strdup(alignment_names[choice - 1]);
                     send_to_player(sess, "\nAlignment set to: %s\n", ch->alignment);
 
-                    /* Transition to zone selection */
-                    sess->chargen_state = CHARGEN_ZONE_SELECT;
-                    chargen_show_zones(sess);
+                    /* Complete character creation */
+                    chargen_complete(sess);
                 } else {
                     send_to_player(sess, "Invalid choice. Enter 1-7: ");
                 }
@@ -1488,8 +1491,11 @@ int save_character(PlayerSession *sess) {
      *  5 - added wizard_role (32 bytes) after privilege_level
      *  6 - added title, enter_msg, leave_msg, goto_msg (128 bytes each) after wizard_role
      *  7 - added bm_credits (int) appended after original_mdc_max
+     *  8 - added tattoos (int count + fixed MAX_TATTOO_NAME bytes each) after bm_credits
+     *  9 - added permanently_dead (int) after tattoos
+     * 10 - added death_killer (64 bytes) after permanently_dead
      */
-    uint16_t version = 7;
+    uint16_t version = 10;
     fwrite(&version, sizeof(uint16_t), 1, f);
     
     /* Write username */
@@ -1778,6 +1784,23 @@ int save_character(PlayerSession *sess) {
     /* Version 7: bm_credits */
     fwrite(&ch->bm_credits, sizeof(int), 1, f);
 
+    /* Version 8: tattoos */
+    {
+        int nt = ch->num_tattoos;
+        if (nt < 0) nt = 0;
+        if (nt > MAX_TATTOOS) nt = MAX_TATTOOS;
+        fwrite(&nt, sizeof(int), 1, f);
+        for (i = 0; i < nt; i++) {
+            fwrite(ch->tattoos[i].name, 1, MAX_TATTOO_NAME, f);
+        }
+    }
+
+    /* Version 9: permanently_dead */
+    fwrite(&ch->permanently_dead, sizeof(int), 1, f);
+
+    /* Version 10: death_killer (fixed 64 bytes) */
+    fwrite(ch->death_killer, 1, sizeof(ch->death_killer), f);
+
     fclose(f);
 
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
@@ -1819,8 +1842,8 @@ int load_character(PlayerSession *sess, const char *username) {
         return 0;
     }
     
-    /* Accept save versions between 1 and current supported version (7). */
-    if (version < 1 || version > 7) {
+    /* Accept save versions between 1 and current supported version (8). */
+    if (version < 1 || version > 8) {
         ERROR_LOG("Unsupported save file version %d for '%s'", 
                 version, username);
         fclose(f);
@@ -1838,7 +1861,9 @@ int load_character(PlayerSession *sess, const char *username) {
     sess->username[name_len] = '\0';
     
     /* Read privilege level */
-    fread(&sess->privilege_level, sizeof(int), 1, f);
+    if (fread(&sess->privilege_level, sizeof(int), 1, f) != 1) {
+        sess->privilege_level = 0;
+    }
 
     /* Read wizard role (version >= 5) */
     if (version >= 5) {
@@ -2280,6 +2305,41 @@ int load_character(PlayerSession *sess, const char *username) {
     ch->bm_credits = 0;
     if (version >= 7) {
         if (fread(&ch->bm_credits, sizeof(int), 1, f) != 1) ch->bm_credits = 0;
+    }
+
+    /* Version 8: tattoos */
+    ch->num_tattoos = 0;
+    memset(ch->tattoos, 0, sizeof(ch->tattoos));
+    if (version >= 8) {
+        int nt = 0;
+        if (fread(&nt, sizeof(int), 1, f) == 1) {
+            if (nt < 0) nt = 0;
+            if (nt > MAX_TATTOOS) nt = MAX_TATTOOS;
+            ch->num_tattoos = nt;
+            for (i = 0; i < nt; i++) {
+                if (fread(ch->tattoos[i].name, 1, MAX_TATTOO_NAME, f) != MAX_TATTOO_NAME) {
+                    memset(ch->tattoos[i].name, 0, MAX_TATTOO_NAME);
+                }
+                ch->tattoos[i].name[MAX_TATTOO_NAME - 1] = '\0';
+            }
+        }
+    }
+
+    /* Version 9: permanently_dead */
+    ch->permanently_dead = 0;
+    if (version >= 9) {
+        if (fread(&ch->permanently_dead, sizeof(int), 1, f) != 1) {
+            ch->permanently_dead = 0;
+        }
+    }
+
+    /* Version 10: death_killer */
+    memset(ch->death_killer, 0, sizeof(ch->death_killer));
+    if (version >= 10) {
+        if (fread(ch->death_killer, 1, sizeof(ch->death_killer), f) != sizeof(ch->death_killer)) {
+            memset(ch->death_killer, 0, sizeof(ch->death_killer));
+        }
+        ch->death_killer[sizeof(ch->death_killer) - 1] = '\0';
     }
 
     fclose(f);

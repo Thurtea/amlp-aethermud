@@ -56,6 +56,13 @@ typedef struct Scar {
     int death_number;
 } Scar;
 
+/* Magical tattoos (applied by roleplay wizards) */
+#define MAX_TATTOOS     8
+#define MAX_TATTOO_NAME 48
+typedef struct {
+    char name[MAX_TATTOO_NAME]; /* empty string = unused slot */
+} Tattoo;
+
 typedef struct Character {
     char *race;
     char *occ;
@@ -119,6 +126,8 @@ typedef struct Character {
         /* Lives and scars (death system) */
     
         int lives_remaining;      /* Remaining lives (starts at 5) */
+        int permanently_dead;     /* 1 = character has died permanently, cannot log in */
+        char death_killer[64];    /* Name of what delivered the permanent kill */
         /* scars array and Scar type are defined above the Character struct */
         Scar scars[MAX_SCARS];
         int scar_count;
@@ -134,6 +143,10 @@ typedef struct Character {
     char *original_occ;           /* O.C.C. before becoming wizard */
     int original_hp_max;          /* HP before wizard transformation */
     int original_mdc_max;         /* MDC before wizard transformation */
+
+    /* Magical tattoos (applied by wiz tattoo-gun) */
+    Tattoo tattoos[MAX_TATTOOS];
+    int num_tattoos;
 } Character;
 
 /* Chargen initialization */
@@ -143,7 +156,8 @@ void chargen_init(PlayerSession *sess);
 void chargen_create_admin(PlayerSession *sess);
 
 /* Death handler (implemented in src/death.c) */
-void handle_player_death(struct PlayerSession *sess, struct PlayerSession *killer);
+void handle_player_death(struct PlayerSession *sess, struct PlayerSession *killer,
+                         const char *npc_killer_name);
 
 /* Chargen state machine */
 void chargen_process_input(PlayerSession *sess, const char *input);

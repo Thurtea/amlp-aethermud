@@ -1,4 +1,5 @@
 #include "simul_efun.h"
+#include "program.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -126,29 +127,23 @@ int simul_efun_find(simul_efun_registry_t *registry, const char *name) {
 }
 
 /**
- * Call a simul efun
- * Phase 7 Note: Execution integration in Phase 7 Iteration 2
+ * Call a simul efun by name.
+ * Looks up the registered entry and delegates to program_execute_by_index().
  */
 VMValue simul_efun_call(simul_efun_registry_t *registry, const char *name,
                         VMValue *args, int arg_count) {
-    (void)args;        // Unused in Phase 7 iteration 1
-    (void)arg_count;   // Unused in Phase 7 iteration 1
-    
     if (!registry || !name) {
         return (VMValue){.type = VALUE_NULL};
     }
-    
+
     int index = simul_efun_find(registry, name);
     if (index < 0) {
         return (VMValue){.type = VALUE_NULL};
     }
-    
-    // simul_efun_t *efun = &registry->efuns[index];
-    
-    // Phase 7 Iteration 2: Execute the simul efun function
-    // For now, return NULL as placeholder
-    
-    return (VMValue){.type = VALUE_NULL};
+
+    simul_efun_t *efun = &registry->efuns[index];
+    return program_execute_by_index(efun->program, efun->function_index,
+                                    args, arg_count);
 }
 
 /**

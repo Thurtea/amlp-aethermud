@@ -158,6 +158,14 @@ CombatParticipant* combat_find_participant(CombatRound *combat, const char *name
 CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender) {
     if (!attacker || !defender) return NULL;
 
+    /* Block combat in safe rooms (e.g. death recovery) */
+    if (attacker->current_room && attacker->current_room->lpc_path &&
+        strstr(attacker->current_room->lpc_path, "recovery_room")) {
+        send_to_player(attacker,
+            "A gentle force prevents violence here. Rest and recover.\n");
+        return NULL;
+    }
+
     // Check if attacker is already in a combat
     CombatRound *existing = combat_get_active(attacker);
     if (existing) {
@@ -255,6 +263,14 @@ CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender) {
 
 CombatRound* combat_engage_npc(PlayerSession *attacker, NPC *npc) {
     if (!attacker || !npc) return NULL;
+
+    /* Block combat in safe rooms (e.g. death recovery) */
+    if (attacker->current_room && attacker->current_room->lpc_path &&
+        strstr(attacker->current_room->lpc_path, "recovery_room")) {
+        send_to_player(attacker,
+            "A gentle force prevents violence here. Rest and recover.\n");
+        return NULL;
+    }
 
     /* Check if attacker already in combat */
     CombatRound *existing = combat_get_active(attacker);
@@ -759,7 +775,7 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
 
     /* If kill occurred, trigger death handler for player victims */
     if (result.is_kill && defender->session) {
-        handle_player_death(defender->session, attacker->session);
+        handle_player_death(defender->session, attacker->session, NULL);
     }
 
     /* Descriptive combat messages (no numeric damage shown) */
@@ -863,7 +879,7 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
 
     /* If kill occurred, trigger death handler for player victims */
     if (result.is_kill && defender->session) {
-        handle_player_death(defender->session, attacker->session);
+        handle_player_death(defender->session, attacker->session, NULL);
     }
 
     /* Descriptive ranged messages */

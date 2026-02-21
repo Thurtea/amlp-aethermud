@@ -174,6 +174,10 @@ int wiz_grant_xp(PlayerSession *sess, const char *target_name, int xp_amount);
 int wiz_heal(PlayerSession *sess, const char *target_name);
 int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name);
 
+/* Admin combat / spawn commands */
+int cmd_slay(PlayerSession *sess, const char *target_name);
+int cmd_npcspawn(PlayerSession *sess, const char *npc_type_str);
+
 /* Skill configuration loader */
 OCCSkillConfig *get_occ_skill_config(const char *occ_name);
 

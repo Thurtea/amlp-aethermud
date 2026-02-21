@@ -96,7 +96,7 @@ void psionics_record_power_use(struct Character *ch, int power_id);
 void psionics_check_power_rank_advance(struct Character *ch, int power_id);
 
 /* =============== POWER TEMPLATES ARRAY =============== */
-extern PsionicPower PSION_POWERS[25];
+extern PsionicPower PSION_POWERS[26];
 extern int PSIONICS_POWER_COUNT;
 
 #endif /* PSIONICS_H */

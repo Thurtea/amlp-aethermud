@@ -58,6 +58,7 @@
 #include "race_loader.h"
 #include "npc.h"
 #include "ui_frames.h"
+#include "wiz_tools.h"
 
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 4096
@@ -1619,7 +1620,32 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result.type = VALUE_NULL;
         return result;
     }
-    
+
+    if (strcmp(cmd, "return") == 0) {
+        Room *rroom = session->current_room;
+        if (!rroom || !rroom->lpc_path ||
+            !strstr(rroom->lpc_path, "recovery_room")) {
+            send_to_player(session, "Return where?\n");
+        } else {
+            Room *start = room_get_start();
+            if (!start) {
+                send_to_player(session, "Cannot find a destination.\n");
+            } else {
+                room_remove_player(rroom, session);
+                session->current_room = start;
+                room_add_player(start, session);
+                send_to_player(session,
+                    "\nYou take a deep breath and step through the veil back into the world.\n");
+                cmd_look(session, "");
+                room_broadcast(start,
+                    "A shimmering portal opens and a figure steps through.\n",
+                    session);
+            }
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "logout") == 0) {
         /* Auto-save before quitting */
         send_to_player(session, "\r\nSaving your character...\r\n");
@@ -1870,7 +1896,28 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         result.type = VALUE_NULL;
         return result;
     }
-    
+
+    if (strcmp(cmd, "xp") == 0 || strcmp(cmd, "experience") == 0) {
+        int cur_xp = 0, cur_lvl = 0;
+        obj_t *lpc_obj = (obj_t *)session->player_object;
+        if (lpc_obj && global_vm) {
+            VMValue xp_res = obj_call_method(global_vm, lpc_obj, "query_experience", NULL, 0);
+            VMValue lv_res = obj_call_method(global_vm, lpc_obj, "query_level", NULL, 0);
+            cur_xp = (xp_res.type == VALUE_INT) ? (int)xp_res.data.int_value : 0;
+            cur_lvl = (lv_res.type == VALUE_INT) ? (int)lv_res.data.int_value : 1;
+        } else {
+            cur_xp = session->character.xp;
+            cur_lvl = session->character.level;
+            if (cur_lvl < 1) cur_lvl = 1;
+        }
+        int next_xp = cur_lvl * 1000;
+        send_to_player(session,
+            "Level: %d | XP: %d | Next level at: %d XP\n",
+            cur_lvl, cur_xp, next_xp);
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "skills") == 0) {
         cmd_skills(session, args ? args : "");
         result.type = VALUE_NULL;
@@ -3456,43 +3503,6 @@ more_room_source:
         return vm_value_create_string(response);
     }
 
-    /* SLAY - Instant kill a target */
-    if (strcmp(cmd, "slay") == 0) {
-        if (session->privilege_level < 1) {
-            return vm_value_create_string("You don't have permission to use that command.\r\n");
-        }
-        if (!args || !*args) {
-            return vm_value_create_string("Usage: slay <player>\r\n");
-        }
-
-        PlayerSession *target = find_player_by_name(args);
-        if (!target) {
-            return vm_value_create_string("Player not found.\r\n");
-        }
-
-        target->character.hp = 0;
-        target->character.sdc = 0;
-
-        /* End combat if target is in one */
-        CombatRound *combat = combat_get_active(target);
-        if (combat) {
-            combat_end(combat);
-        }
-
-        send_to_player(target, "\r\nYou have been slain by %s!\r\n",
-                       session->username);
-
-        if (session->current_room) {
-            char msg[256];
-            snprintf(msg, sizeof(msg), "%s has been slain by %s!\r\n",
-                    target->username, session->username);
-            room_broadcast(session->current_room, msg, session);
-        }
-
-        char response[256];
-        snprintf(response, sizeof(response), "You slay %s.\r\n", target->username);
-        return vm_value_create_string(response);
-    }
 
     /* AWARD - Give experience points to a player */
     if (strcmp(cmd, "award") == 0) {
@@ -3909,6 +3919,28 @@ more_room_source:
         snprintf(response, sizeof(response), "You force %s to: %s\r\n",
                 target_name, forced_cmd);
         return vm_value_create_string(response);
+    }
+
+    /* SLAY - Instantly kill a player (admin, privilege_level >= 2) */
+    if (strcmp(cmd, "slay") == 0) {
+        if (session->privilege_level < 2) {
+            send_to_player(session, "You don't have permission to do that.\n");
+        } else {
+            cmd_slay(session, args ? args : "");
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
+    /* NPCSPAWN - Spawn an NPC in current room (admin, privilege_level >= 2) */
+    if (strcmp(cmd, "npcspawn") == 0) {
+        if (session->privilege_level < 2) {
+            send_to_player(session, "You don't have permission to do that.\n");
+        } else {
+            cmd_npcspawn(session, args ? args : "");
+        }
+        result.type = VALUE_NULL;
+        return result;
     }
 
     /* ====================================================================
@@ -4913,6 +4945,21 @@ void process_login_state(PlayerSession *session, const char *input) {
                     session->state = STATE_DISCONNECTING;
                     break;
                 }
+                /* Permanently dead characters cannot log in */
+                if (session->character.permanently_dead) {
+                    const char *killer = session->character.death_killer[0]
+                        ? session->character.death_killer
+                        : "an unknown force";
+                    send_to_player(session,
+                        "\n=== CHARACTER DECEASED ===\n"
+                        "This character has permanently died.\n"
+                        "Slain by: %s\n"
+                        "Please create a new character.\n\n",
+                        killer);
+                    session->state = STATE_DISCONNECTING;
+                    break;
+                }
+
                 send_to_player(session, "\r\nWelcome back!\r\n");
                 send_to_player(session, "Your character has been restored.\r\n\r\n");
 
@@ -5392,6 +5439,80 @@ int test_parse_file(const char *filename) {
     vm_free(global_vm);
     
     return 0;
+}
+
+/* ======================================================================
+ * Callout scheduler
+ * Implements call_out() / remove_call_out() for LPC code running on
+ * the global_vm (master object and simul-efuns).
+ * ====================================================================== */
+
+#include "driver.h"
+
+static Callout callout_queue[MAX_CALLOUTS];
+static int     callout_next_handle = 1;  /* monotonically increasing handle */
+
+int callout_schedule(const char *func_name, double delay_seconds) {
+    if (!func_name) return -1;
+    for (int i = 0; i < MAX_CALLOUTS; i++) {
+        if (!callout_queue[i].active) {
+            callout_queue[i].active   = 1;
+            callout_queue[i].fire_at  = time(NULL) + (time_t)delay_seconds;
+            callout_queue[i].handle   = callout_next_handle++;
+            strncpy(callout_queue[i].func_name, func_name,
+                    MAX_CALLOUT_FUNC_NAME - 1);
+            callout_queue[i].func_name[MAX_CALLOUT_FUNC_NAME - 1] = '\0';
+            return callout_queue[i].handle;
+        }
+    }
+    fprintf(stderr, "[callout] queue full — ignoring call_out(\"%s\")\n", func_name);
+    return -1;
+}
+
+int callout_cancel(int handle) {
+    for (int i = 0; i < MAX_CALLOUTS; i++) {
+        if (callout_queue[i].active && callout_queue[i].handle == handle) {
+            callout_queue[i].active = 0;
+            return 0;
+        }
+    }
+    return -1;
+}
+
+/* Fire expired callouts by looking up the function name in global_vm. */
+static void process_callouts(void) {
+    if (!global_vm) return;
+    time_t now = time(NULL);
+    for (int i = 0; i < MAX_CALLOUTS; i++) {
+        if (!callout_queue[i].active) continue;
+        if (now < callout_queue[i].fire_at) continue;
+
+        /* Mark inactive before firing to prevent re-entry */
+        callout_queue[i].active = 0;
+
+        /* Find function by name in global_vm */
+        int func_idx = -1;
+        for (int f = 0; f < global_vm->function_count; f++) {
+            if (global_vm->functions[f] &&
+                strcmp(global_vm->functions[f]->name, callout_queue[i].func_name) == 0) {
+                func_idx = f;
+                break;
+            }
+        }
+        if (func_idx < 0) {
+            fprintf(stderr, "[callout] function '%s' not found in global_vm\n",
+                    callout_queue[i].func_name);
+            continue;
+        }
+        /* Call with no arguments */
+        if (vm_call_function(global_vm, func_idx, 0) != 0) {
+            fprintf(stderr, "[callout] vm_call_function('%s') failed\n",
+                    callout_queue[i].func_name);
+        } else if (global_vm->stack && global_vm->stack->top > 0) {
+            /* Discard any return value */
+            (void)vm_pop_value(global_vm);
+        }
+    }
 }
 
 /* Main server */

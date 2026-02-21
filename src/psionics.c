@@ -2,6 +2,8 @@
 #include "chargen.h"
 #include "session_internal.h"
 #include "room.h"
+#include "npc.h"
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -11,7 +13,7 @@ void send_to_player(PlayerSession *session, const char *format, ...);
 
 /* =============== PSIONIC POWERS DATABASE =============== */
 
-PsionicPower PSION_POWERS[25] = {
+PsionicPower PSION_POWERS[26] = {
     /* SUPER PSIONIC POWERS (0-5) */
     {
         .id = 0, .name = "Mind Block", .description = "Shield mind from psychic attacks",
@@ -195,17 +197,26 @@ PsionicPower PSION_POWERS[25] = {
         .base_damage = 0, .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false,
         .range_feet = 30, .area_effect_feet = 0, .category = PSION_TELEPATHY,
         .is_combat_usable = false, .is_passive = false, .keywords = "telepathy probe mind"
+    },
+
+    /* SUPER PSIONIC COMBAT POWER (25) */
+    {
+        .id = 25, .name = "Mind Bolt", .description = "2d6 MD psionic force blast, bypasses armor",
+        .isp_cost = 8, .isp_cost_per_round = 0, .duration_rounds = 1,
+        .base_damage = 0, .damage_dice = 2, .damage_sides = 6, .is_mega_damage = true,
+        .range_feet = 150, .area_effect_feet = 0, .category = PSION_SUPER,
+        .is_combat_usable = true, .is_passive = false, .keywords = "damage mind psionic combat bolt"
     }
 };
 
-int PSIONICS_POWER_COUNT = 25;
+int PSIONICS_POWER_COUNT = 26;
 
 /* =============== INITIALIZATION =============== */
 
 void psionics_init(void) {
     /* Verify power database is loaded */
-    if (PSIONICS_POWER_COUNT != 25) {
-        fprintf(stderr, "WARNING: Psionics database count mismatch! Expected 25, got %d\n", 
+    if (PSIONICS_POWER_COUNT != 26) {
+        fprintf(stderr, "WARNING: Psionics database count mismatch! Expected 26, got %d\n",
                 PSIONICS_POWER_COUNT);
     }
 }
@@ -343,6 +354,7 @@ void psionics_add_starting_powers(struct Character *ch, const char *occ_name) {
         psionics_learn_power(ch, 17);  /* Sixth Sense */
         psionics_learn_power(ch, 21);  /* Clairvoyance */
         psionics_learn_power(ch, 14);  /* Pyrokinesis */
+        psionics_learn_power(ch, 25);  /* Mind Bolt */
         ch->psionics.isp_max = 50;
         ch->psionics.isp_current = 50;
     }
@@ -516,10 +528,100 @@ bool psionics_activate_power(PlayerSession *sess, struct Character *ch,
         }
 
         case PSION_SUPER: {
-            /* Mind Block, Mental Acceleration, Meditation */
-            if (power_id == 2) {
+            if (power_id == 25) {
+                /* Mind Bolt: 2d6 MD psionic attack vs. player or NPC target */
+                if (!target_name || !*target_name) {
+                    send_to_player(sess, "Use: manifest mind bolt <target>\n");
+                    break;
+                }
+                Room *room = sess->current_room;
+                if (!room) {
+                    send_to_player(sess, "You need to be in a room to use Mind Bolt.\n");
+                    break;
+                }
+                PlayerSession *bolt_player = NULL;
+                NPC *bolt_npc = NULL;
+                int res = resolve_target(room, target_name, sess, &bolt_player, &bolt_npc);
+                if (res == 0) {
+                    send_to_player(sess, "You don't see '%s' here.\n", target_name);
+                    break;
+                }
+
+                int dmg = 0;
+                for (int d = 0; d < power->damage_dice; d++)
+                    dmg += 1 + (rand() % power->damage_sides);
+
+                if (res == 2 && bolt_npc) {
+                    /* NPC target */
+                    char display[64];
+                    snprintf(display, sizeof(display), "%s", bolt_npc->name);
+                    display[0] = (char)toupper((unsigned char)display[0]);
+
+                    send_to_player(sess,
+                        "You hurl a bolt of pure psionic force at %s for %d M.D.! "
+                        "(ISP: %d/%d)\n",
+                        display, dmg,
+                        ch->psionics.isp_current, ch->psionics.isp_max);
+
+                    /* Bypasses armor — apply directly to MDC/HP */
+                    if (bolt_npc->character.health_type == MDC_ONLY) {
+                        bolt_npc->character.mdc -= dmg;
+                        if (bolt_npc->character.mdc < 0) bolt_npc->character.mdc = 0;
+                        if (bolt_npc->character.mdc == 0)
+                            npc_handle_death(bolt_npc, sess);
+                    } else {
+                        int sdc_eq = dmg * 100;
+                        if (sdc_eq >= bolt_npc->character.sdc) {
+                            sdc_eq -= bolt_npc->character.sdc;
+                            bolt_npc->character.sdc = 0;
+                            bolt_npc->character.hp -= sdc_eq;
+                            if (bolt_npc->character.hp < 0) bolt_npc->character.hp = 0;
+                        } else {
+                            bolt_npc->character.sdc -= sdc_eq;
+                        }
+                        if (bolt_npc->character.hp <= 0)
+                            npc_handle_death(bolt_npc, sess);
+                    }
+                } else if (res == 1 && bolt_player) {
+                    /* Player target */
+                    if (bolt_player->is_godmode) {
+                        send_to_player(sess,
+                            "Your Mind Bolt fizzles against %s's divine protection!\n",
+                            bolt_player->username);
+                        break;
+                    }
+                    send_to_player(sess,
+                        "You hurl a bolt of pure psionic force at %s for %d M.D.! "
+                        "(ISP: %d/%d)\n",
+                        bolt_player->username, dmg,
+                        ch->psionics.isp_current, ch->psionics.isp_max);
+                    send_to_player(bolt_player,
+                        "%s strikes you with a Mind Bolt for %d M.D.!\n",
+                        sess->username, dmg);
+
+                    Character *tch = &bolt_player->character;
+                    if (tch->health_type == MDC_ONLY) {
+                        tch->mdc -= dmg;
+                        if (tch->mdc < 0) tch->mdc = 0;
+                    } else {
+                        int sdc_eq = dmg * 100;
+                        if (sdc_eq >= tch->sdc) {
+                            sdc_eq -= tch->sdc;
+                            tch->sdc = 0;
+                            tch->hp -= sdc_eq;
+                            if (tch->hp < 0) tch->hp = 0;
+                        } else {
+                            tch->sdc -= sdc_eq;
+                        }
+                    }
+                    if (tch->hp <= 0 || tch->mdc <= 0)
+                        handle_player_death(bolt_player, sess, NULL);
+                }
+            } else if (power_id == 2) {
                 /* Mental Acceleration: +3 init, +20% dodge feedback */
-                send_to_player(sess, "You activate Mental Acceleration! Your reflexes sharpen. (ISP: %d/%d)\n",
+                send_to_player(sess,
+                    "You activate Mental Acceleration! Your reflexes sharpen. "
+                    "(ISP: %d/%d)\n",
                     ch->psionics.isp_current, ch->psionics.isp_max);
             } else {
                 send_to_player(sess, "You activate %s! (ISP: %d/%d)\n",

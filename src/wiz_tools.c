@@ -8,11 +8,13 @@
  */
 
 #include "wiz_tools.h"
+#include "chargen.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include "room.h"
+#include "npc.h"
 #include "session_internal.h"
 #include "vm.h"
 #include "efun.h"
@@ -23,6 +25,8 @@
 #include <time.h>
 
 /* Forward declarations for driver helpers used here (defined in driver.c) */
+extern void handle_player_death(PlayerSession *sess, PlayerSession *killer,
+                                const char *npc_killer_name);
 extern PlayerSession* find_player_by_name(const char *name);
 extern void room_add_player(Room *room, PlayerSession *player);
 extern void room_remove_player(Room *room, PlayerSession *player);
@@ -42,7 +46,7 @@ int assign_primary_skills(Character *player, const char *occ_name);
 
 /* Simple wizard action logger */
 static void wiz_log(const char *fmt, ...) {
-    FILE *f = fopen("logs/wizard.log", "a");
+    FILE *f = fopen("lib/log/wizard.log", "a");
     if (!f) return;
     time_t now = time(NULL);
     char tbuf[32];
@@ -945,34 +949,156 @@ int cmd_demotion(PlayerSession *sess, const char *player_name, const char *actio
  * - Shifter Seal: +5% physical skills, shape-shifting affinity
  * - Mystic Rune: +5% all magic, +15% PPE pool
  */
-int cmd_tattoo_gun(PlayerSession *sess, const char *action, 
+/* Static table of available tattoos */
+static const struct {
+    const char *name;
+    const char *effect;
+} KNOWN_TATTOOS[] = {
+    { "Atlantean Dragon", "+15% combat skills, +2 Physical Strength"    },
+    { "Ley Line Mark",    "+10% spell casting, +10% PPE pool"           },
+    { "Shifter Seal",     "+5% physical skills, shape-shifting affinity" },
+    { "Mystic Rune",      "+5% all magic, +15% PPE pool"                },
+    { NULL, NULL }
+};
+#define NUM_KNOWN_TATTOOS 4
+
+int cmd_tattoo_gun(PlayerSession *sess, const char *action,
                    const char *player_name, const char *tattoo_name) {
-    if (!sess || !action) {
-        return 0;
-    }
-    
+    if (!sess || !action) return 0;
+
     if (strcmp(action, "list") == 0) {
-        /* Tattoo list would be displayed via output system */
+        send_to_player(sess, "\n--- Available Tattoos ---\n");
+        for (int i = 0; KNOWN_TATTOOS[i].name; i++) {
+            send_to_player(sess, "  %-22s %s\n",
+                           KNOWN_TATTOOS[i].name, KNOWN_TATTOOS[i].effect);
+        }
+        send_to_player(sess, "\nSyntax: tattoo-gun apply <player> <tattoo>\n");
+        send_to_player(sess, "        tattoo-gun remove <player> <tattoo>\n");
+        send_to_player(sess, "        tattoo-gun show <player>\n");
         return 1;
     }
-    
-    /* Stubs for tattoo actions until tattoo system exists */
+
     if (strcmp(action, "show") == 0) {
-        send_to_player(sess, "Tattoo display not implemented yet.\n");
+        if (!player_name || !player_name[0]) {
+            send_to_player(sess, "Syntax: tattoo-gun show <player>\n");
+            return 0;
+        }
+        PlayerSession *target = find_player_by_name(player_name);
+        if (!target) {
+            send_to_player(sess, "Player '%s' not found.\n", player_name);
+            return 0;
+        }
+        Character *ch = &target->character;
+        if (ch->num_tattoos == 0) {
+            send_to_player(sess, "%s has no tattoos.\n", target->username);
+            return 1;
+        }
+        send_to_player(sess, "\n--- Tattoos on %s ---\n", target->username);
+        for (int i = 0; i < ch->num_tattoos; i++) {
+            /* Look up effect string */
+            const char *effect = "(unknown effect)";
+            for (int j = 0; KNOWN_TATTOOS[j].name; j++) {
+                if (strcasecmp(ch->tattoos[i].name, KNOWN_TATTOOS[j].name) == 0) {
+                    effect = KNOWN_TATTOOS[j].effect;
+                    break;
+                }
+            }
+            send_to_player(sess, "  %d. %-22s %s\n", i + 1, ch->tattoos[i].name, effect);
+        }
         return 1;
     }
 
     if (strcmp(action, "apply") == 0) {
-        send_to_player(sess, "Tattoo application is not implemented; TODO.\n");
+        if (!player_name || !player_name[0] || !tattoo_name || !tattoo_name[0]) {
+            send_to_player(sess, "Syntax: tattoo-gun apply <player> <tattoo>\n");
+            return 0;
+        }
+        PlayerSession *target = find_player_by_name(player_name);
+        if (!target) {
+            send_to_player(sess, "Player '%s' not found.\n", player_name);
+            return 0;
+        }
+        Character *ch = &target->character;
+        if (ch->num_tattoos >= MAX_TATTOOS) {
+            send_to_player(sess, "%s already has the maximum number of tattoos (%d).\n",
+                           target->username, MAX_TATTOOS);
+            return 0;
+        }
+        /* Validate tattoo name */
+        const char *found_name = NULL;
+        for (int i = 0; KNOWN_TATTOOS[i].name; i++) {
+            if (strcasecmp(tattoo_name, KNOWN_TATTOOS[i].name) == 0) {
+                found_name = KNOWN_TATTOOS[i].name;
+                break;
+            }
+        }
+        if (!found_name) {
+            send_to_player(sess, "Unknown tattoo '%s'. Use 'tattoo-gun list' to see options.\n",
+                           tattoo_name);
+            return 0;
+        }
+        /* Check for duplicate */
+        for (int i = 0; i < ch->num_tattoos; i++) {
+            if (strcasecmp(ch->tattoos[i].name, found_name) == 0) {
+                send_to_player(sess, "%s already has the %s tattoo.\n",
+                               target->username, found_name);
+                return 0;
+            }
+        }
+        /* Apply */
+        strncpy(ch->tattoos[ch->num_tattoos].name, found_name, MAX_TATTOO_NAME - 1);
+        ch->tattoos[ch->num_tattoos].name[MAX_TATTOO_NAME - 1] = '\0';
+        ch->num_tattoos++;
+        save_character(target);
+        send_to_player(target, "%s has inscribed a %s tattoo upon you.\n",
+                       sess->username, found_name);
+        send_to_player(sess, "Applied %s tattoo to %s.\n", found_name, target->username);
+        wiz_log("%s applied tattoo '%s' to %s", sess->username, found_name, target->username);
         return 1;
     }
 
     if (strcmp(action, "remove") == 0) {
-        send_to_player(sess, "Tattoo removal is not implemented; TODO.\n");
+        if (!player_name || !player_name[0] || !tattoo_name || !tattoo_name[0]) {
+            send_to_player(sess, "Syntax: tattoo-gun remove <player> <tattoo>\n");
+            return 0;
+        }
+        PlayerSession *target = find_player_by_name(player_name);
+        if (!target) {
+            send_to_player(sess, "Player '%s' not found.\n", player_name);
+            return 0;
+        }
+        Character *ch = &target->character;
+        int found_idx = -1;
+        for (int i = 0; i < ch->num_tattoos; i++) {
+            if (strcasecmp(ch->tattoos[i].name, tattoo_name) == 0) {
+                found_idx = i;
+                break;
+            }
+        }
+        if (found_idx < 0) {
+            send_to_player(sess, "%s does not have the %s tattoo.\n",
+                           target->username, tattoo_name);
+            return 0;
+        }
+        /* Shift array down */
+        char removed_name[MAX_TATTOO_NAME];
+        strncpy(removed_name, ch->tattoos[found_idx].name, MAX_TATTOO_NAME - 1);
+        removed_name[MAX_TATTOO_NAME - 1] = '\0';
+        for (int i = found_idx; i < ch->num_tattoos - 1; i++) {
+            ch->tattoos[i] = ch->tattoos[i + 1];
+        }
+        memset(&ch->tattoos[ch->num_tattoos - 1], 0, sizeof(Tattoo));
+        ch->num_tattoos--;
+        save_character(target);
+        send_to_player(target, "Your %s tattoo has been removed by %s.\n",
+                       removed_name, sess->username);
+        send_to_player(sess, "Removed %s tattoo from %s.\n", removed_name, target->username);
+        wiz_log("%s removed tattoo '%s' from %s", sess->username, removed_name, target->username);
         return 1;
     }
 
-    return 1;
+    send_to_player(sess, "Unknown action '%s'. Use: list, show, apply, remove\n", action);
+    return 0;
 }
 
 /* ============================================================================
@@ -1078,12 +1204,127 @@ int assign_primary_skills(Character *player, const char *occ_name) {
  */
 void display_occ_skills(PlayerSession *sess, const char *occ_name) {
     OCCSkillConfig *config = get_occ_skill_config(occ_name);
-    
+
     if (!config) {
         return;
     }
-    
+
     /* Output would be sent through the session/output system */
     /* TODO: Implement output via session system */
 }
 
+/* ============================================================================
+ * ADMIN COMBAT / SPAWN COMMANDS
+ * ============================================================================ */
+
+/**
+ * cmd_slay()
+ * Instantly kill a player (or self).  Requires privilege_level >= 2 (Admin).
+ *
+ * Syntax: slay [<player>|me]
+ */
+int cmd_slay(PlayerSession *sess, const char *target_name) {
+    if (!sess) return 0;
+    if (sess->privilege_level < 2) {
+        send_to_player(sess, "You don't have permission to do that.\n");
+        return 0;
+    }
+
+    PlayerSession *target = NULL;
+
+    if (!target_name || !*target_name || strcmp(target_name, "me") == 0) {
+        target = sess;
+    } else {
+        target = find_player_by_name(target_name);
+        if (!target) {
+            send_to_player(sess, "No player found: %s\n", target_name);
+            return 0;
+        }
+    }
+
+    send_to_player(sess, "You smite %s from existence.\n", target->username);
+
+    if (sess->current_room) {
+        room_broadcast(sess->current_room,
+            "A divine force strikes the area!\n", sess);
+    }
+
+    wiz_log("%s smote %s", sess->username ? sess->username : "<unknown>", target->username);
+    handle_player_death(target, sess, NULL);
+    return 1;
+}
+
+/**
+ * cmd_npcspawn()
+ * Spawn an NPC by type string into the wizard's current room.
+ * Requires privilege_level >= 2 (Admin).
+ *
+ * Syntax: npcspawn <type>
+ * Types: guard, bandit, mage, merchant, goblin, scout, dead_boy, brodkil, dragon, moxim, spike
+ */
+int cmd_npcspawn(PlayerSession *sess, const char *npc_type_str) {
+    if (!sess) return 0;
+    if (sess->privilege_level < 2) {
+        send_to_player(sess, "You don't have permission to do that.\n");
+        return 0;
+    }
+    if (!sess->current_room) {
+        send_to_player(sess, "You have no current room.\n");
+        return 0;
+    }
+    if (!npc_type_str || !*npc_type_str) {
+        send_to_player(sess,
+            "Usage: npcspawn <type>\n"
+            "Valid: guard, bandit, mage, merchant, goblin, scout, dead_boy, brodkil, dragon\n");
+        return 0;
+    }
+
+    /* Map type string to NpcTemplateId.
+     * guard=Dog Boy (Coalition guard), bandit=Brodkil (aggressive raider),
+     * merchant=Moxim (trader), and all original keywords preserved. */
+    static const struct { const char *name; NpcTemplateId id; } type_map[] = {
+        { "guard",     NPC_DOG_BOY         },
+        { "bandit",    NPC_BRODKIL         },
+        { "merchant",  NPC_MOXIM           },
+        { "goblin",    NPC_GOBLIN          },
+        { "scout",     NPC_DOG_BOY         },
+        { "dog_boy",   NPC_DOG_BOY         },
+        { "dead_boy",  NPC_DEAD_BOY        },
+        { "deadboy",   NPC_DEAD_BOY        },
+        { "brodkil",   NPC_BRODKIL         },
+        { "dragon",    NPC_DRAGON_HATCHLING},
+        { "moxim",     NPC_MOXIM           },
+        { "spike",     NPC_SPIKE           },
+        { "mage",      NPC_MAGE            },
+        { NULL,        0                   }
+    };
+
+    NpcTemplateId template_id = -1;
+    for (int i = 0; type_map[i].name; i++) {
+        if (strcasecmp(type_map[i].name, npc_type_str) == 0) {
+            template_id = type_map[i].id;
+            break;
+        }
+    }
+
+    if (template_id < 0) {
+        send_to_player(sess,
+            "Unknown NPC type '%s'. Valid: guard, bandit, mage, merchant\n",
+            npc_type_str);
+        return 0;
+    }
+
+    NPC *npc = npc_spawn(template_id, sess->current_room->id);
+    if (!npc) {
+        send_to_player(sess, "Failed to spawn NPC (pool full?).\n");
+        return 0;
+    }
+
+    send_to_player(sess, "You summon %s into the room.\n", npc->name);
+    room_broadcast(sess->current_room,
+        "The air shimmers and something steps out of the ether!\n", sess);
+    wiz_log("%s spawned NPC '%s' in room %d",
+            sess->username ? sess->username : "<unknown>",
+            npc->name, sess->current_room->id);
+    return 1;
+}

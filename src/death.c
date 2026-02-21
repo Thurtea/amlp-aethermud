@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 /* send_to_player is defined in the UI layer (used across modules) */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
@@ -41,15 +42,29 @@ void create_player_corpse(PlayerSession *sess) {
     INFO_LOG("Corpse creation stub for %s", sess->username);
 }
 
-void handle_player_death(PlayerSession *sess, PlayerSession *killer) {
+void handle_player_death(PlayerSession *sess, PlayerSession *killer,
+                         const char *npc_killer_name) {
     if (!sess) return;
     Character *ch = &sess->character;
 
     if (ch->lives_remaining <= 0) {
-        send_to_player(sess, "\r\n*** PERMANENT DEATH ***\r\n");
-        send_to_player(sess, "Your character has died permanently.\r\n");
-        INFO_LOG("Permanent death: %s", sess->username);
-        /* TODO: delete character file and boot player */
+        ch->permanently_dead = 1;
+        /* Record what killed them for the login screen */
+        if (killer && killer->username[0]) {
+            snprintf(ch->death_killer, sizeof(ch->death_killer), "%s", killer->username);
+        } else if (npc_killer_name && npc_killer_name[0]) {
+            snprintf(ch->death_killer, sizeof(ch->death_killer), "%s", npc_killer_name);
+            ch->death_killer[0] = (char)toupper((unsigned char)ch->death_killer[0]);
+        } else {
+            snprintf(ch->death_killer, sizeof(ch->death_killer), "an unknown assailant");
+        }
+        ch->death_killer[sizeof(ch->death_killer) - 1] = '\0';
+        save_character(sess);
+        send_to_player(sess,
+            "\n*** Your life force is completely exhausted. ***\n"
+            "Your soul dissolves into the void... This character is gone.\n\n");
+        INFO_LOG("Permanent death: %s (killed by %s)", sess->username, ch->death_killer);
+        sess->state = STATE_DISCONNECTING;
         return;
     }
 

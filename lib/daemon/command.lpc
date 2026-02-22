@@ -159,7 +159,7 @@ void init_commands() {
 }
 
 // Main command execution function
-int execute_command(object player, string input) {
+int execute_command(object player, string input, int priv_level) {
     string verb, args;
     object room, wiztool;
     int result;
@@ -204,11 +204,11 @@ int execute_command(object player, string input) {
     
     // Priority 5: Check global command registry
     if (commands[verb]) {
-        return execute_global_command(player, commands[verb], verb, args);
+        return execute_global_command(player, commands[verb], verb, args, priv_level);
     }
 
     // Priority 6: Try to find command in search paths
-    result = search_command_paths(player, verb, args);
+    result = search_command_paths(player, verb, args, priv_level);
     if (result) return 1;
 
     // Command not found
@@ -218,13 +218,16 @@ int execute_command(object player, string input) {
 }
 
 // Execute a registered global command
-private int execute_global_command(object player, string path, string verb, string args) {
+private int execute_global_command(object player, string path, string verb, string args, int priv_level) {
     object cmd;
     int result;
-    
+
+    // Ensure absolute path — VM requires leading slash
+    string abs_path = (path[0] == '/') ? path : "/" + path;
+
     // Try to load the command object
     catch {
-        cmd = load_object(path);
+        cmd = load_object(abs_path);
     };
 
     if (!cmd) {
@@ -235,13 +238,17 @@ private int execute_global_command(object player, string path, string verb, stri
     // Check if command has privilege requirements
     if (function_exists("query_privilege_required", cmd)) {
         int required = cmd->query_privilege_required();
-        int player_priv = player->query_privilege_level();
-        if (player_priv < required) {
+        if (priv_level < required) {
             tell_object(player, "You don't have sufficient privileges for that command.");
             return 1;
         }
     }
-    
+
+    // Pass caller privilege to the command if it supports it
+    if (function_exists("set_caller_privilege", cmd)) {
+        cmd->set_caller_privilege(priv_level);
+    }
+
     // Execute the command
     if (function_exists("main", cmd)) {
         result = cmd->main(args);
@@ -253,22 +260,23 @@ private int execute_global_command(object player, string path, string verb, stri
 }
 
 // Search command paths for a matching command file
-private int search_command_paths(object player, string verb, string args) {
+private int search_command_paths(object player, string verb, string args, int priv_level) {
     string path;
     object cmd;
-    
+
     foreach (string dir in command_paths) {
         path = dir + verb;
-        
+
         catch {
-            cmd = load_object(path);
+            string abs_path = (path[0] == '/') ? path : "/" + path;
+            cmd = load_object(abs_path);
         };
-        
+
         if (cmd && function_exists("main", cmd)) {
-            return execute_global_command(player, path, verb, args);
+            return execute_global_command(player, path, verb, args, priv_level);
         }
     }
-    
+
     return 0;
 }
 

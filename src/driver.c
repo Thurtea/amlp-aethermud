@@ -2789,8 +2789,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             if (!sessions[i]->username || !sessions[i]->username[0]) continue;
 
             time_t idle = time(NULL) - sessions[i]->last_activity;
-            const char *invis_tag  = sessions[i]->is_invisible ? " \033[2m(invis)\033[0m" : "";
-            const char *state_tag  = (st == STATE_CHARGEN)     ? " \033[2m(chargen)\033[0m" : "";
+            const char *invis_tag  = sessions[i]->is_invisible ? " (invis)" : "";
+            const char *state_tag  = (st == STATE_CHARGEN)     ? " (chargen)" : "";
             const char *title_str  = sessions[i]->title[0]     ? sessions[i]->title : "";
 
             /* Colored role tag for wizards */
@@ -4487,67 +4487,6 @@ more_room_source:
         return vm_value_create_string(response);
     }
 
-    /* WIZTOOL - Framed wizard command reference */
-    if (strcmp(cmd, "wiztool") == 0 || strcmp(cmd, "wiz") == 0) {
-        if (session->privilege_level < 1) {
-            return vm_value_create_string("You don't have permission to use that command.\r\n");
-        }
-
-        int w = FRAME_WIDTH;
-        send_to_player(session, "\r\n");
-        frame_top(session, w);
-        frame_title(session, "WIZARD TOOLBOX", w);
-
-        frame_header(session, "CHARACTER MGMT", w);
-        frame_line(session, "set <p> <field> <val>  - Set attribute", w);
-        frame_line(session, "  fields: occ, race, level, hp, max_hp,", w);
-        frame_line(session, "  sdc, max_sdc, mdc, max_mdc, isp, ppe,", w);
-        frame_line(session, "  max_isp, max_ppe, xp, stat_*", w);
-        frame_line(session, "heal <player> [amt]    - Restore pools", w);
-        frame_line(session, "slay <player>          - Instant kill", w);
-        frame_line(session, "award <player> <xp>    - Give XP", w);
-        frame_line(session, "finger <player>        - Detailed info", w);
-
-        frame_header(session, "TELEPORTATION", w);
-        frame_line(session, "goto <room_id>         - Teleport self", w);
-        frame_line(session, "trans/summon <player>   - Summon player", w);
-        frame_line(session, "whereis <player>       - Locate player", w);
-
-        frame_header(session, "ROOM CONTROL", w);
-        frame_line(session, "peace                  - End all combat", w);
-        frame_line(session, "reset                  - Reset room", w);
-        frame_line(session, "clean                  - Remove items", w);
-
-        frame_header(session, "ITEMS & OBJECTS", w);
-        frame_line(session, "clone <path|name>      - Clone item", w);
-        frame_line(session, "destruct <item>        - Destroy item", w);
-        frame_line(session, "grant <p> <type> <n>   - Grant ability", w);
-        frame_line(session, "revoke <p> <type> <n>  - Revoke ability", w);
-
-        frame_header(session, "UTILITY", w);
-        frame_line(session, "snoop [player]         - Spy on player", w);
-        frame_line(session, "invis                  - Toggle invisible", w);
-        frame_line(session, "godmode                - Toggle immunity", w);
-        frame_line(session, "eval <lpc_code>        - Execute LPC", w);
-        frame_line(session, "ls/cd/pwd/cat          - Filesystem", w);
-
-        if (session->privilege_level >= 2) {
-            frame_header(session, "ADMIN ONLY", w);
-            frame_line(session, "promote <p> <level>    - Set privilege", w);
-            frame_line(session, "kick <player>          - Disconnect", w);
-            frame_line(session, "ban <player>           - Permanent ban", w);
-            frame_line(session, "force <p> <cmd>        - Force command", w);
-            frame_line(session, "broadcast <msg>        - Message all", w);
-            frame_line(session, "users                  - User listing", w);
-            frame_line(session, "reboot [delay]         - Restart server", w);
-            frame_line(session, "shutdown [delay]       - Stop server", w);
-        }
-
-        frame_bottom(session, w);
-        result.type = VALUE_NULL;
-        return result;
-    }
-
     /* ====================================================================
      * ADMIN COMMANDS (Phase 6)
      * ==================================================================== */
@@ -4604,24 +4543,24 @@ more_room_source:
             snprintf(summary, sizeof(summary), "\r\nDone. %d files: %d OK, %d failed.\r\n", total, success, fail);
             strncat(report, summary, sizeof(report)-strlen(report)-1);
 
-            /* Send human-friendly, colored warmboot progress lines to the admin */
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Starting warmboot sequence...\033[0m\r\n");
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/daemon/command.lpc\033[0m\r\n");
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/daemon/skills.lpc\033[0m\r\n");
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/daemon/languages.lpc\033[0m\r\n");
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/secure/master.lpc\033[0m\r\n");
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Reloading: lib/secure/simul_efun.lpc\033[0m\r\n");
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Scanning lib/cmds/ for updated command files...\033[0m\r\n");
+            /* Send warmboot progress lines to the admin */
+            send_to_player(session, "%s", "[Warmboot] Starting warmboot sequence...\r\n");
+            send_to_player(session, "%s", "[Warmboot] Reloading: lib/daemon/command.lpc\r\n");
+            send_to_player(session, "%s", "[Warmboot] Reloading: lib/daemon/skills.lpc\r\n");
+            send_to_player(session, "%s", "[Warmboot] Reloading: lib/daemon/languages.lpc\r\n");
+            send_to_player(session, "%s", "[Warmboot] Reloading: lib/secure/master.lpc\r\n");
+            send_to_player(session, "%s", "[Warmboot] Reloading: lib/secure/simul_efun.lpc\r\n");
+            send_to_player(session, "%s", "[Warmboot] Scanning lib/cmds/ for updated command files...\r\n");
 
             /* Optionally provide the detailed report (plain text) */
             send_to_player(session, "%s", report);
 
-            /* Final colored completion line */
-            send_to_player(session, "%s", "\033[1;33m[Warmboot] Warmboot complete. No players disconnected.\033[0m\r\n");
+            /* Completion line */
+            send_to_player(session, "%s", "[Warmboot] Warmboot complete. No players disconnected.\r\n");
 
             /* Broadcast to all staff (privilege >= 1) */
             char sysmsg[256];
-            snprintf(sysmsg, sizeof(sysmsg), "\033[1;33m[System] Warmboot performed by %s.\033[0m\r\n", session->username);
+            snprintf(sysmsg, sizeof(sysmsg), "[System] Warmboot performed by %s.\r\n", session->username);
             staff_message(sysmsg, NULL);
 
             return vm_value_create_string("");
@@ -5261,19 +5200,21 @@ more_room_source:
         vm_value_release(&path_arg);
 
         if (daemon.type == VALUE_OBJECT && daemon.data.object_value) {
-            VMValue call_args[2];
+            VMValue call_args[3];
             VMValue player_obj_val;
             player_obj_val.type = VALUE_OBJECT;
             player_obj_val.data.object_value = (obj_t *)session->player_object;
             call_args[0] = player_obj_val;
             call_args[1] = vm_value_create_string(command);
+            call_args[2] = vm_value_create_int(session->privilege_level);
 
             set_current_session(session);
             VMValue cres = obj_call_method(global_vm, (obj_t *)daemon.data.object_value,
-                                           "execute_command", call_args, 2);
+                                           "execute_command", call_args, 3);
             set_current_session(NULL);
 
             vm_value_release(&call_args[1]);
+            vm_value_release(&call_args[2]);
             /* daemon is a singleton owned by ObjManager - do not release */
 
             if (cres.type == VALUE_INT && cres.data.int_value) {
@@ -5452,7 +5393,58 @@ void process_login_state(PlayerSession *session, const char *input) {
                 }
 
                 session->state = STATE_PLAYING;
-                
+
+                /* Re-give wiz-tools on every admin login: C items are not
+                 * preserved through the binary save format, so we always
+                 * recreate them here instead of relying on save/load. */
+                if (session->privilege_level >= 2) {
+                    static const struct { int id; const char *name; const char *desc; } wt[] = {
+                        { -30, "wizard staff",
+                          "A gnarled staff crackling with latent energy.\n"
+                          "In the hands of a wizard it can focus spells and compel obedience.\n"
+                          "Type 'examine staff' for a list of staff commands." },
+                        { -31, "staff handbook",
+                          "A thick volume bound in silver-embossed leather.\n"
+                          "Contains the complete AetherMUD staff policies and procedure guide.\n"
+                          "Type 'read handbook' to browse its contents." },
+                        { -32, "crystal ball",
+                          "A flawless sphere of smoky quartz the size of a grapefruit.\n"
+                          "Allows a wizard to observe any room or player on the mud remotely.\n"
+                          "Type 'examine crystal' for scrying commands." },
+                        { -33, "admin wand",
+                          "A slender wand tipped with a shard of enchanted crystal.\n"
+                          "Grants access to high-level administrative control functions.\n"
+                          "Type 'examine wand' for available commands." },
+                        { -34, "QCS builder tool",
+                          "A flat disc etched with builder runes.\n"
+                          "The Quick-Construction System tool for area and room building.\n"
+                          "Type 'examine qcs' for builder commands." },
+                        { -35, "RP-Wizard skill tool",
+                          "A compact device used by RP-Wizards to manage player skills.\n"
+                          "Allows granting, revoking, and auditing skill assignments.\n"
+                          "Type 'examine rptool' for available commands." },
+                        { -36, "admin orb",
+                          "A pulsing orb that hovers at eye level when released.\n"
+                          "Provides a real-time overview of server status and player activity.\n"
+                          "Type 'examine orb' for monitoring commands." },
+                        { -37, "code tool",
+                          "A flat slate covered in scrolling LPC source text.\n"
+                          "Used by coders to reload, update, and inspect live objects.\n"
+                          "Type 'examine codetool' for available commands." },
+                    };
+                    int nwt = (int)(sizeof(wt) / sizeof(wt[0]));
+                    for (int ti = 0; ti < nwt; ti++) {
+                        Item *tool = (Item *)calloc(1, sizeof(Item));
+                        tool->id          = wt[ti].id;
+                        tool->name        = strdup(wt[ti].name);
+                        tool->description = strdup(wt[ti].desc);
+                        tool->type        = ITEM_MISC;
+                        tool->weight      = 0;
+                        tool->value       = 0;
+                        inventory_add_force(&session->character.inventory, tool);
+                    }
+                }
+
                 /* Add player to their saved room */
                 if (session->current_room) {
                     room_add_player(session->current_room, session);

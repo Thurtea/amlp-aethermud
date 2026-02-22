@@ -8,11 +8,6 @@ int main(string args) {
     object player = this_player();
     if (!player) return 0;
 
-    if (player->query_privilege_level() < 2) {
-        tell_object(player, "You need the admin wand to use that command.\n");
-        return 1;
-    }
-
     object tool;
     catch { tool = load_object("/obj/wiztools/admin_wand"); };
     if (!tool) {

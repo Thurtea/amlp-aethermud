@@ -2,7 +2,7 @@
 // Roleplay Wizard Tool - Event calendar, costume generator, skill granting
 // For Roleplay wizards (wizard_role == "roleplay")
 
-inherit "/lib/obj/wiztools/base_wiztool";
+inherit "/obj/wiztools/base_wiztool";
 
 void create() {
     ::create();
@@ -10,16 +10,16 @@ void create() {
     set_id(({ "rp tool", "rp_tool", "roleplay tool", "event tool" }));
     set_short("a Roleplay Wizard's event tome");
     set_long(
-        "A leather-bound tome radiating faint magical energy. Its pages\n"
-        "shimmer with lists of skills, event schedules, and NPC disguises.\n"
-        "A true storyteller's companion.\n\n"
-        "Commands:\n"
-        "  rp events          View/manage event calendar\n"
-        "  rp addevent <desc> Add an event to the calendar\n"
-        "  rp costume <type>  Generate NPC costume description\n"
-        "  rp announce <msg>  Broadcast RP announcement\n"
-        "  rp emoteall <msg>  Room-wide narrative emote\n"
-        "  rp listskills      List available skills for granting\n"
+        "A leather-bound tome radiating faint magical energy. Its pages\n" +
+        "shimmer with lists of skills, event schedules, and NPC disguises.\n" +
+        "A true storyteller's companion.\n\n" +
+        "Commands:\n" +
+        "  rp events          View/manage event calendar\n" +
+        "  rp addevent <desc> Add an event to the calendar\n" +
+        "  rp costume <type>  Generate NPC costume description\n" +
+        "  rp announce <msg>  Broadcast RP announcement\n" +
+        "  rp emoteall <msg>  Room-wide narrative emote\n" +
+        "  rp listskills      List available skills for granting\n" +
         "  rp help            This help\n"
     );
     set_weight(2);

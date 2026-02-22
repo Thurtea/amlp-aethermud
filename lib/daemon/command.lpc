@@ -255,6 +255,8 @@ private int execute_global_command(object player, string path, string verb, stri
 
     // Execute the command
     if (function_exists("main", cmd)) {
+        object debug_player = this_player();
+        write("DEBUG daemon: calling " + verb + " for player=" + (debug_player ? file_name(debug_player) : "NULL") + "\n");
         result = cmd->main(args);
         return result;
     }

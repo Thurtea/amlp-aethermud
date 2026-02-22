@@ -2,7 +2,7 @@
 // Admin Magic Wand - Cast any spell or psionic without resource cost
 // Admin-only tool
 
-inherit "/lib/obj/wiztools/base_wiztool";
+inherit "/obj/wiztools/base_wiztool";
 
 void create() {
     ::create();
@@ -10,17 +10,17 @@ void create() {
     set_id(({ "wand", "magic wand", "admin wand", "crystal wand" }));
     set_short("a shimmering crystal wand");
     set_long(
-        "A shimmering crystal wand crackling with raw magical energy. "
-        "Arcs of blue-white lightning dance along its surface, and the "
-        "crystal tip pulses with an inner light that shifts between all "
-        "colors of the spectrum.\n\n"
-        "This is an Admin tool. It can cast any spell or use any psionic "
-        "power without consuming P.P.E. or I.S.P.\n\n"
-        "Commands:\n"
-        "  wand cast <spell> [at <target>]\n"
-        "  wand psi <power> [on <target>]\n"
-        "  wand list spells\n"
-        "  wand list psionics\n"
+        "A shimmering crystal wand crackling with raw magical energy. " +
+        "Arcs of blue-white lightning dance along its surface, and the " +
+        "crystal tip pulses with an inner light that shifts between all " +
+        "colors of the spectrum.\n\n" +
+        "This is an Admin tool. It can cast any spell or use any psionic " +
+        "power without consuming P.P.E. or I.S.P.\n\n" +
+        "Commands:\n" +
+        "  wand cast <spell> [at <target>]\n" +
+        "  wand psi <power> [on <target>]\n" +
+        "  wand list spells\n" +
+        "  wand list psionics\n" +
         "  wand heal <target>\n"
     );
     set_weight(1);

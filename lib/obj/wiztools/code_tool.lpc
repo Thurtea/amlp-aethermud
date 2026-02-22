@@ -2,7 +2,7 @@
 // Coding Wizard Tool - File browser, syntax checker, system info
 // For Coding wizards (wizard_role == "coding")
 
-inherit "/lib/obj/wiztools/base_wiztool";
+inherit "/obj/wiztools/base_wiztool";
 
 void create() {
     ::create();
@@ -10,16 +10,16 @@ void create() {
     set_id(({ "code tool", "code_tool", "coding tool", "debugger" }));
     set_short("a Coding Wizard's debugger");
     set_long(
-        "A sleek obsidian tablet covered in scrolling green runes.\n"
-        "It hums softly, constantly analyzing the underlying code\n"
-        "that powers the world. Useful for debugging and inspection.\n\n"
-        "Commands:\n"
-        "  code check <file>      Attempt to load/compile a file\n"
-        "  code info <object>     Show object info (functions, vars)\n"
-        "  code search <pattern>  Search files in current directory\n"
-        "  code memory            Show system memory/object stats\n"
-        "  code children <file>   List clones of an object\n"
-        "  code trace <object>    Show inheritance chain\n"
+        "A sleek obsidian tablet covered in scrolling green runes.\n" +
+        "It hums softly, constantly analyzing the underlying code\n" +
+        "that powers the world. Useful for debugging and inspection.\n\n" +
+        "Commands:\n" +
+        "  code check <file>      Attempt to load/compile a file\n" +
+        "  code info <object>     Show object info (functions, vars)\n" +
+        "  code search <pattern>  Search files in current directory\n" +
+        "  code memory            Show system memory/object stats\n" +
+        "  code children <file>   List clones of an object\n" +
+        "  code trace <object>    Show inheritance chain\n" +
         "  code help              This help\n"
     );
     set_weight(1);

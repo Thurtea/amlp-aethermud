@@ -569,6 +569,45 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
             break;
         }
 
+        case NODE_TERNARY_OP: {
+            TernaryOpNode *ternary = (TernaryOpNode *)node->data;
+            if (ternary && ternary->condition && ternary->true_expr && ternary->false_expr) {
+                /* Evaluate condition */
+                compiler_codegen_expression(state, ternary->condition);
+
+                /* Jump to false branch if condition is false */
+                int jump_false_addr = state->bytecode_len;
+                compiler_emit(state, OP_JUMP_IF_FALSE, node->line);
+                compiler_emit_byte(state, 0);
+                compiler_emit_byte(state, 0);
+
+                /* Evaluate true expression */
+                compiler_codegen_expression(state, ternary->true_expr);
+
+                /* Jump over false expression */
+                int jump_end_addr = state->bytecode_len;
+                compiler_emit(state, OP_JUMP, node->line);
+                compiler_emit_byte(state, 0);
+                compiler_emit_byte(state, 0);
+
+                /* Patch false jump to here */
+                int false_target = state->bytecode_len;
+                state->bytecode[jump_false_addr + 1] = false_target & 0xFF;
+                state->bytecode[jump_false_addr + 2] = (false_target >> 8) & 0xFF;
+
+                /* Evaluate false expression */
+                compiler_codegen_expression(state, ternary->false_expr);
+
+                /* Patch end jump to here */
+                int end_target = state->bytecode_len;
+                state->bytecode[jump_end_addr + 1] = end_target & 0xFF;
+                state->bytecode[jump_end_addr + 2] = (end_target >> 8) & 0xFF;
+            } else {
+                compiler_emit(state, OP_PUSH_NULL, node->line);
+            }
+            break;
+        }
+
         default:
             // Unsupported expression type - push null as placeholder
             compiler_emit(state, OP_PUSH_NULL, node->line);

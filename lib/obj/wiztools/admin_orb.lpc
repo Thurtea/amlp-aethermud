@@ -2,7 +2,7 @@
 // Admin Orb - Full system stats, player search, system management
 // Admin-only tool (privilege level 2+)
 
-inherit "/lib/obj/wiztools/base_wiztool";
+inherit "/obj/wiztools/base_wiztool";
 
 void create() {
     ::create();
@@ -10,18 +10,18 @@ void create() {
     set_id(({ "admin orb", "admin_orb", "orb", "crystal orb" }));
     set_short("an Admin's crystal orb");
     set_long(
-        "A polished crystal orb that swirls with dark energy. When\n"
-        "activated, it reveals the inner workings of the entire MUD -\n"
-        "player locations, system stats, and administrative controls.\n\n"
-        "Commands:\n"
-        "  orb status          System overview + zone counts\n"
-        "  orb players         Detailed player list with stats\n"
-        "  orb find <player>   Locate and inspect a player\n"
-        "  orb pending         Pending OCC/sirname requests\n"
-        "  orb goto <player>   Teleport to a player\n"
-        "  orb staff           Staff roster with roles\n"
-        "  orb logs            Recent admin log entries\n"
-        "  orb uptime          Server uptime and stats\n"
+        "A polished crystal orb that swirls with dark energy. When\n" +
+        "activated, it reveals the inner workings of the entire MUD -\n" +
+        "player locations, system stats, and administrative controls.\n\n" +
+        "Commands:\n" +
+        "  orb status          System overview + zone counts\n" +
+        "  orb players         Detailed player list with stats\n" +
+        "  orb find <player>   Locate and inspect a player\n" +
+        "  orb pending         Pending OCC/sirname requests\n" +
+        "  orb goto <player>   Teleport to a player\n" +
+        "  orb staff           Staff roster with roles\n" +
+        "  orb logs            Recent admin log entries\n" +
+        "  orb uptime          Server uptime and stats\n" +
         "  orb help            This help\n"
     );
     set_weight(2);

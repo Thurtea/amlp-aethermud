@@ -98,13 +98,26 @@ int program_loader_decode_instruction(const uint8_t *bytecode, size_t offset, VM
             
         case OP_LOAD_LOCAL:
         case OP_STORE_LOCAL:
-        case OP_LOAD_GLOBAL:
-        case OP_STORE_GLOBAL:
         case OP_MAKE_ARRAY:
         case OP_MAKE_MAPPING:
         case OP_CALL_METHOD:
             instr->operand.int_operand = read_u16(bytecode, &offset);
             break;
+
+        case OP_LOAD_GLOBAL:
+        case OP_STORE_GLOBAL: {
+            /* Name operand: uint16 length + name bytes (same as OP_PUSH_STRING) */
+            uint8_t len_lo = read_u8(bytecode, &offset);
+            uint8_t len_hi = read_u8(bytecode, &offset);
+            uint16_t name_len = (uint16_t)(len_lo | (len_hi << 8));
+            char *name = (char *)malloc(name_len + 1);
+            if (!name) return -1;
+            memcpy(name, &bytecode[offset], name_len);
+            name[name_len] = '\0';
+            offset += name_len;
+            instr->operand.string_operand = name;
+            break;
+        }
             
         case OP_JUMP:
         case OP_JUMP_IF_FALSE:
@@ -259,7 +272,9 @@ int program_loader_load(VirtualMachine *vm, Program *program) {
                 instr_offsets[fi] = scan_pos;
                 VMInstruction tmp_instr;
                 int ilen = program_loader_decode_instruction(program->bytecode, scan_pos, &tmp_instr);
-                if (tmp_instr.opcode == OP_PUSH_STRING && tmp_instr.operand.string_operand)
+                if ((tmp_instr.opcode == OP_PUSH_STRING ||
+                     tmp_instr.opcode == OP_LOAD_GLOBAL ||
+                     tmp_instr.opcode == OP_STORE_GLOBAL) && tmp_instr.operand.string_operand)
                     free(tmp_instr.operand.string_operand);
                 else if (tmp_instr.opcode == OP_CALL && tmp_instr.operand.call_operand.name)
                     free(tmp_instr.operand.call_operand.name);

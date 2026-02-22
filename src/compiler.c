@@ -265,6 +265,16 @@ static int compiler_find_local(compiler_state_t *state, const char *name) {
     return -1;
 }
 
+/* Find global variable by name — returns index in state->globals[], or -1 */
+static int compiler_find_global(compiler_state_t *state, const char *name) {
+    if (!state || !name) return -1;
+    for (size_t i = 0; i < state->global_count; i++) {
+        if (state->globals[i].name && strcmp(state->globals[i].name, name) == 0)
+            return (int)i;
+    }
+    return -1;
+}
+
 /* ========== Bytecode Emission ========== */
 
 /**
@@ -363,9 +373,15 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
                     compiler_emit_byte(state, local_idx & 0xFF);
                     compiler_emit_byte(state, (local_idx >> 8) & 0xFF);
                 } else {
+                    /* Global variable — encode name as length-prefixed string
+                     * (same wire format as OP_PUSH_STRING: uint16 len + bytes) */
+                    const char *gname = id->name;
+                    size_t glen = strlen(gname);
                     compiler_emit(state, OP_LOAD_GLOBAL, node->line);
-                    compiler_emit_byte(state, 0);
-                    compiler_emit_byte(state, 0);
+                    compiler_emit_byte(state, (uint8_t)(glen & 0xFF));
+                    compiler_emit_byte(state, (uint8_t)((glen >> 8) & 0xFF));
+                    for (size_t gi = 0; gi < glen; gi++)
+                        compiler_emit_byte(state, (uint8_t)gname[gi]);
                 }
             }
             break;
@@ -499,10 +515,14 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
                                 compiler_emit_byte(state, local_idx & 0xFF);
                                 compiler_emit_byte(state, (local_idx >> 8) & 0xFF);
                             } else {
-                                /* Global variable */
+                                /* Global variable — encode name as length-prefixed string */
+                                const char *gname = id->name;
+                                size_t glen = strlen(gname);
                                 compiler_emit(state, OP_STORE_GLOBAL, node->line);
-                                compiler_emit_byte(state, 0);
-                                compiler_emit_byte(state, 0);
+                                compiler_emit_byte(state, (uint8_t)(glen & 0xFF));
+                                compiler_emit_byte(state, (uint8_t)((glen >> 8) & 0xFF));
+                                for (size_t gi = 0; gi < glen; gi++)
+                                    compiler_emit_byte(state, (uint8_t)gname[gi]);
                             }
                         }
                     } else {

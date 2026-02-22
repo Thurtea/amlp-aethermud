@@ -19,16 +19,5 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-        "RP - Roleplay Wizard Tool\n\n" +
-        "Usage: rp <subcommand>\n\n" +
-        "Subcommands:\n" +
-        "  rp announce <msg>  Global RP announcement in purple\n" +
-        "  rp emoteall <msg>  Narrative emote to current room\n" +
-        "  rp listskills      List available skills for granting\n" +
-        "  rp events          View RP event calendar\n" +
-        "  rp addevent <desc> Add a timestamped event entry\n" +
-        "  rp costume <type>  Generate NPC costume description\n" +
-        "  rp help            This help\n\n" +
-        "Requires: RP-Wizard skill tool in inventory. Wizard access.\n";
+    return "RP - Roleplay Wizard Tool\n\nUsage: rp <subcommand>\n\nSubcommands:\n  rp announce <msg>  Global RP announcement in purple\n  rp emoteall <msg>  Narrative emote to current room\n  rp listskills      List available skills for granting\n  rp events          View RP event calendar\n  rp addevent <desc> Add a timestamped event entry\n  rp costume <type>  Generate NPC costume description\n  rp help            This help\n\nRequires: RP-Wizard skill tool in inventory. Wizard access.\n";
 }

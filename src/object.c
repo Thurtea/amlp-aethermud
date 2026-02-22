@@ -261,8 +261,9 @@ int obj_add_method(obj_t *obj, VMFunction *method) {
 VMFunction* obj_get_method(obj_t *obj, const char *method_name) {
     if (!obj || !method_name) return NULL;
     
-    /* Search this object's methods */
-    for (int i = 0; i < obj->method_count; i++) {
+    /* Search this object's methods — backwards so child overrides take precedence
+     * over parent methods added with the same name (child methods are added last) */
+    for (int i = obj->method_count - 1; i >= 0; i--) {
         if (obj->methods[i] && strcmp(obj->methods[i]->name, method_name) == 0) {
             return obj->methods[i];
         }

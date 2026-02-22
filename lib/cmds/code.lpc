@@ -19,17 +19,5 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-        "CODE - Coding Wizard Tool\n\n" +
-        "Usage: code <subcommand>\n\n" +
-        "  code reload <file>     Reload/recompile a live LPC file\n" +
-        "  code check <file>      Compile-check a file for errors\n" +
-        "  code list              List recently modified LPC files in lib/\n" +
-        "  code info <obj>        Object info ('here', 'me', or path)\n" +
-        "  code search <pattern>  Search files in current directory\n" +
-        "  code memory            System status and object counts\n" +
-        "  code children <file>   List clones of a blueprint\n" +
-        "  code trace <obj>       Show object capabilities\n" +
-        "  code help              This help\n\n" +
-        "Requires: code tool in inventory. Wizard access.\n";
+    return "CODE - Coding Wizard Tool\n\nUsage: code <subcommand>\n\n  code reload <file>     Reload/recompile a live LPC file\n  code check <file>      Compile-check a file for errors\n  code list              List recently modified LPC files in lib/\n  code info <obj>        Object info ('here', 'me', or path)\n  code search <pattern>  Search files in current directory\n  code memory            System status and object counts\n  code children <file>   List clones of a blueprint\n  code trace <obj>       Show object capabilities\n  code help              This help\n\nRequires: code tool in inventory. Wizard access.\n";
 }

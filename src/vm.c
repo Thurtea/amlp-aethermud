@@ -771,27 +771,21 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         }
         
         case OP_LOAD_GLOBAL: {
-            int idx = instr->operand.int_operand;
-            if (idx < 0 || idx >= vm->global_count) return -1;
-            VMValue v = vm->global_variables[idx];
+            const char *name = instr->operand.string_operand;
+            if (!name) return vm_push_value(vm, vm_value_create_null());
+            obj_t *cur_obj = (obj_t *)vm->current_object;
+            VMValue v = cur_obj ? obj_get_prop(cur_obj, name) : vm_value_create_null();
             return vm_push_value(vm, v);
         }
-        
+
         case OP_STORE_GLOBAL: {
-            int idx = instr->operand.int_operand;
-            if (idx < 0) {
-                if (vm->global_count >= vm->global_capacity) {
-                    vm->global_capacity *= 2;
-                    vm->global_variables = (VMValue *)realloc(vm->global_variables,
-                                                               sizeof(VMValue) * vm->global_capacity);
-                }
-                idx = vm->global_count++;
-            }
+            const char *name = instr->operand.string_operand;
             VMValue v = vm_pop_value(vm);
-            if (idx >= 0 && idx < vm->global_count) {
-                vm_value_release(&vm->global_variables[idx]);
+            if (name && vm->current_object) {
+                obj_t *cur_obj = (obj_t *)vm->current_object;
+                obj_set_prop(cur_obj, name, v);
             }
-            vm->global_variables[idx] = v;
+            vm_value_release(&v);
             return 0;
         }
         
@@ -1395,11 +1389,13 @@ void vm_disassemble_instruction(VMInstruction instruction, int index) {
             break;
         case OP_LOAD_LOCAL:
         case OP_STORE_LOCAL:
-        case OP_LOAD_GLOBAL:
-        case OP_STORE_GLOBAL:
         case OP_MAKE_ARRAY:
         case OP_MAKE_MAPPING:
             printf(" %ld\n", instruction.operand.int_operand);
+            break;
+        case OP_LOAD_GLOBAL:
+        case OP_STORE_GLOBAL:
+            printf(" \"%s\"\n", instruction.operand.string_operand ? instruction.operand.string_operand : "(null)");
             break;
         default:
             printf("\n");

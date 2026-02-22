@@ -1302,11 +1302,13 @@ VMValue efun_clone_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         return vm_value_create_null();
     }
 
-    /* Load into VM (adds VMFunction entries) */
+    /* Load into VM (adds VMFunction entries) — record range */
+    int clone_func_start = (int)vm->function_count;
     if (program_loader_load(vm, prog) != 0) {
         program_free(prog);
         return vm_value_create_null();
     }
+    int clone_func_end = (int)vm->function_count;
 
     /* Create object and register it */
     obj_t *o = obj_new(lpc_path);
@@ -1317,12 +1319,11 @@ VMValue efun_clone_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     ObjManager *mgr = get_global_obj_manager();
     if (mgr) obj_manager_register(mgr, o);
 
-    /* Attach functions from program to object by name lookup in VM */
+    /* Attach functions using exact range — avoids collision with other objects */
     for (size_t fi = 0; fi < prog->function_count; fi++) {
         const char *fname = prog->functions[fi].name;
         if (!fname) continue;
-        /* Find VMFunction pointer by name */
-        for (int i = 0; i < vm->function_count; i++) {
+        for (int i = clone_func_end - 1; i >= clone_func_start; i--) {
             if (vm->functions[i] && strcmp(vm->functions[i]->name, fname) == 0) {
                 obj_add_method(o, vm->functions[i]);
                 break;
@@ -1484,14 +1485,15 @@ VMValue efun_file_name(VirtualMachine *vm, VMValue *args, int arg_count) {
  * (used for parent methods with "__parent__" prefix).
  */
 static void attach_program_methods(VirtualMachine *vm, obj_t *o,
-                                   Program *prog, const char *name_prefix) {
+                                   Program *prog, const char *name_prefix,
+                                   int func_start, int func_end) {
     for (size_t fi = 0; fi < prog->function_count; fi++) {
         const char *fname = prog->functions[fi].name;
         if (!fname) continue;
 
-        /* Find VMFunction pointer by name lookup in VM (search from end
-         * to find the most recently loaded version of this function) */
-        for (int i = vm->function_count - 1; i >= 0; i--) {
+        /* Find VMFunction pointer by name within the known range for this
+         * program (prevents child/parent name collisions in global table) */
+        for (int i = func_end - 1; i >= func_start; i--) {
             if (vm->functions[i] && strcmp(vm->functions[i]->name, fname) == 0) {
                 if (name_prefix) {
                     /* Create a copy of the VMFunction with prefixed name */
@@ -1638,12 +1640,14 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         return vm_value_create_null();
     }
 
-    /* Load into VM */
+    /* Load into VM — record child function range for correct method attachment */
+    int child_func_start = (int)vm->function_count;
     if (program_loader_load(vm, prog) != 0) {
         fprintf(stderr, "[Efun] load_object: program_loader_load failed\n");
         program_free(prog);
         return vm_value_create_null();
     }
+    int child_func_end = (int)vm->function_count;
 
     /* Create object and register it */
     obj_t *o = obj_new(lpc_path);
@@ -1668,9 +1672,12 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         /* Compile parent */
         Program *parent_prog = compiler_compile_file(parent_fs);
         if (parent_prog) {
+            int parent_func_start = (int)vm->function_count;
             if (program_loader_load(vm, parent_prog) == 0) {
-                /* Attach parent methods with __parent__ prefix */
-                attach_program_methods(vm, o, parent_prog, "__parent__");
+                int parent_func_end = (int)vm->function_count;
+                /* Attach parent methods with __parent__ prefix using parent's range */
+                attach_program_methods(vm, o, parent_prog, "__parent__",
+                                       parent_func_start, parent_func_end);
                 fprintf(stderr, "[Efun] load_object: attached parent '%s' methods\n",
                         parent_path);
             }
@@ -1681,8 +1688,8 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         }
     }
 
-    /* Attach child methods (override parent methods with same names) */
-    attach_program_methods(vm, o, prog, NULL);
+    /* Attach child methods using child's function range (not parent's) */
+    attach_program_methods(vm, o, prog, NULL, child_func_start, child_func_end);
 
     fprintf(stderr, "[Efun] load_object: created '%s' with %d methods\n",
             o->name ? o->name : "<noname>", o->method_count);

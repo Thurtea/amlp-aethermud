@@ -1257,58 +1257,22 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
     }
     
     /* Copy parameters from stack to local variables array */
-    // CRITICAL: Log stack state BEFORE copying
-    if (strcmp(func->name, "process_command") == 0) {
-        fprintf(stderr, "[VM CRITICAL] BEFORE PARAM COPY: func=%s args=%d stack_base=%d stack->top=%d\n",
-                func->name, arg_count, frame->stack_base, vm->stack->top);
-        for (int j = 0; j < arg_count; j++) {
-            fprintf(stderr, "[VM CRITICAL]   stack[%d].type=%d\n", 
-                    frame->stack_base + j, vm->stack->values[frame->stack_base + j].type);
-        }
-    }
-    
     for (int i = 0; i < arg_count; i++) {
         frame->local_variables[i] = vm->stack->values[frame->stack_base + i];
         vm_value_addref(&frame->local_variables[i]);
         DEBUG_LOG_VM("Copied param %d from stack[%d] to local[%d]: type=%d (str_ptr=%p)",
                 i, frame->stack_base + i, i, frame->local_variables[i].type,
                 (void*)frame->local_variables[i].data.string_value);
-        
-        // CRITICAL DEBUG for process_command
-        if (strcmp(func->name, "process_command") == 0) {
-            fprintf(stderr, "[VM CRITICAL] %s param %d: stack_base=%d, stack[%d].type=%d, local[%d].type=%d\n",
-                    func->name, i, frame->stack_base, frame->stack_base + i,
-                    vm->stack->values[frame->stack_base + i].type, i, frame->local_variables[i].type);
-            if (frame->local_variables[i].type == VALUE_STRING) {
-                fprintf(stderr, "[VM CRITICAL]   String value: '%s'\n", 
-                        frame->local_variables[i].data.string_value ? frame->local_variables[i].data.string_value : "(NULL PTR)");
-            }
-        }
     }
-    
+
     vm->current_frame = frame;
-    
-    /* Debug: Print frame state before execution */
-    if (strcmp(func->name, "process_command") == 0) {
-        DEBUG_LOG_VM("FRAME SETUP for %s: frame=%p local_vars=%p param_count=%d local_count=%d",
-                func->name, (void*)frame, (void*)frame->local_variables, 
-                func->param_count, func->local_var_count);
-        /* Enable instruction tracing for this function */
-        vm->debug_flags |= VM_DEBUG_TRACE;
-    }
-    
+
     int saved_running = vm->running;
     vm->running = 1;
 
     while (frame->instruction_pointer < func->instruction_count && vm->running) {
         VMInstruction *instr = &func->instructions[frame->instruction_pointer++];
-        
-        /* Debug EVERY instruction in process_command */
-        if (strcmp(func->name, "process_command") == 0) {
-            DEBUG_LOG_VM("[%s] IP=%d opcode=%d",
-                    func->name, frame->instruction_pointer - 1, instr->opcode);
-        }
-        
+
         if (vm->debug_flags & VM_DEBUG_TRACE) {
             vm_trace_instruction(vm, frame, instr, frame->instruction_pointer - 1);
         }

@@ -25,11 +25,11 @@ int main(string args) {
 
 string query_help() {
     return
-"CRYSTAL - Server Monitor\n\n"
-"Usage: crystal [subcommand]\n\n"
-"  crystal            Show server status summary\n"
-"  crystal status     Same as above\n"
-"  crystal scan       List all LPC files in lib/ directories\n"
-"  crystal help       This help\n\n"
-"Requires: crystal ball in inventory. Wizard access.\n";
+        "CRYSTAL - Server Monitor\n\n" +
+        "Usage: crystal [subcommand]\n\n" +
+        "  crystal            Show server status summary\n" +
+        "  crystal status     Same as above\n" +
+        "  crystal scan       List all LPC files in lib/ directories\n" +
+        "  crystal help       This help\n\n" +
+        "Requires: crystal ball in inventory. Wizard access.\n";
 }

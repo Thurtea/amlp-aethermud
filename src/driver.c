@@ -324,48 +324,16 @@ VMValue call_player_command(void *player_obj, const char *command) {
         return result;
     }
 
-    fprintf(stderr, "[Server] Calling player command: '%s' (len=%zu)\n", command, strlen(command));
-
     // Cast player_obj to obj_t*
     obj_t *obj = (obj_t *)player_obj;
 
     // Prepare argument (command string)
     VMValue cmd_arg = vm_value_create_string(command);
-    fprintf(stderr, "[Server] DEBUG: Created VMValue string: type=%d, ptr=%p, value='%s'\n",
-            cmd_arg.type, (void*)cmd_arg.data.string_value, 
-            cmd_arg.data.string_value ? cmd_arg.data.string_value : "(null)");
-
-    /* Debug: check whether object exposes process_command */
-    VMFunction *m = obj_get_method(obj, "process_command");
-    if (!m) {
-        fprintf(stderr, "[Server] DEBUG: player object '%s' has no process_command()\n",
-                obj->name ? obj->name : "<unnamed>");
-    } else {
-        fprintf(stderr, "[Server] DEBUG: player object '%s' has process_command (%d params, %d locals)\n",
-                obj->name ? obj->name : "<unnamed>", m->param_count, m->local_var_count);
-    }
-    
-    fprintf(stderr, "[Server] DEBUG: Before call_method: stack->top=%d\n", 
-            global_vm->stack ? global_vm->stack->top : -1);
 
     // Call process_command on the player object
     result = obj_call_method(global_vm, obj, "process_command", &cmd_arg, 1);
-    
-    fprintf(stderr, "[Server] DEBUG: After call_method: stack->top=%d\n", 
-            global_vm->stack ? global_vm->stack->top : -1);
 
-    /* Debug: log return type */
-    if (result.type == VALUE_STRING) {
-        fprintf(stderr, "[Server] DEBUG: process_command returned string: %s\n",
-                result.data.string_value ? result.data.string_value : "(null)");
-    } else if (result.type == VALUE_INT) {
-        fprintf(stderr, "[Server] DEBUG: process_command returned int: %ld\n",
-                result.data.int_value);
-    } else {
-        fprintf(stderr, "[Server] DEBUG: process_command returned type %d\n", result.type);
-    }
-
-    /* PHASE 2: Release our reference to the string
+    /* Release our reference to the string
      * The string was ref-counted when created and again when pushed to stack.
      * We release our local reference here.
      * The stack's reference will be released when the function returns.
@@ -1520,9 +1488,6 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
     
-    fprintf(stderr, "[execute_command] INPUT: command=%p '%s'\n", 
-            (void*)command, command ? command : "(NULL)");
-    
     /* Parse command early for filesystem checks */
     char cmd_buffer[256];
     strncpy(cmd_buffer, command, sizeof(cmd_buffer) - 1);
@@ -1964,7 +1929,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             "lib/help",        "lib/help/basics",  "lib/help/occs",
             "lib/help/systems","lib/help/social",  "lib/help/meta",
             "lib/help/wizard", "lib/data/help",    "lib/data/help/commands",
-            "lib/data/help/concepts", "lib/data/help/systems", "lib/data/help/wizard",
+            "lib/data/help/concepts", "lib/data/help/spells",
+            "lib/data/help/systems", "lib/data/help/wizard",
             NULL
         };
         FILE *hf = NULL;
@@ -2944,6 +2910,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             if (target->wizard_role[0] == '\0') {
                 strncpy(target->wizard_role, "roleplay", sizeof(target->wizard_role));
             }
+            if (target->player_object) {
+                VMValue parg = vm_value_create_int(target->privilege_level);
+                obj_call_method(global_vm, target->player_object,
+                    "set_privilege_level", &parg, 1);
+                vm_value_release(&parg);
+            }
 
             send_to_player(session, "You promote %s to Wizard.\n", target->username);
             send_to_player(target,
@@ -2998,6 +2970,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
             target->privilege_level = 2;
             strncpy(target->wizard_role, "admin", sizeof(target->wizard_role));
+            if (target->player_object) {
+                VMValue parg = vm_value_create_int(target->privilege_level);
+                obj_call_method(global_vm, target->player_object,
+                    "set_privilege_level", &parg, 1);
+                vm_value_release(&parg);
+            }
 
             send_to_player(session, "You promote %s to Admin.\n", target->username);
             send_to_player(target,
@@ -3061,6 +3039,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             tch->max_isp = 200;  tch->isp = 200;
 
             target->privilege_level = 1;
+            if (target->player_object) {
+                VMValue parg = vm_value_create_int(target->privilege_level);
+                obj_call_method(global_vm, target->player_object,
+                    "set_privilege_level", &parg, 1);
+                vm_value_release(&parg);
+            }
 
             send_to_player(session, "You demote %s from Admin to Wizard.\n", target->username);
             send_to_player(target, "Your admin powers have been revoked. You remain a Wizard.\n");
@@ -5269,45 +5253,14 @@ more_room_source:
         }
     }
 
-    /* Unknown command - attempt LPC command daemon fallback before giving up */
-    /* Try to call /daemon/command->execute_command(player, input)
-     * Try multiple path variants and fall back to cloning the daemon if needed. */
+    /* Unknown command - attempt LPC command daemon fallback.
+     * Use efun_load_object (singleton, handles inheritance) to load /daemon/command. */
     {
-        /* Debug: mark entry to fallback */
-        fprintf(stderr, "[CMD_DEBUG] fallback entered: cmd='%s'\n", cmd);
-        fflush(stderr);
-        const char *paths[] = { "/daemon/command", "daemon/command", "/lib/daemon/command", "lib/daemon/command", NULL };
-        VMValue daemon = { .type = VALUE_NULL };
-        int got_daemon = 0;
+        VMValue path_arg = vm_value_create_string("/daemon/command");
+        VMValue daemon = efun_load_object(global_vm, &path_arg, 1);
+        vm_value_release(&path_arg);
 
-        for (int pi = 0; paths[pi] && !got_daemon; pi++) {
-            VMValue path_val = vm_value_create_string(paths[pi]);
-            daemon = efun_find_object(global_vm, &path_val, 1);
-            vm_value_release(&path_val);
-            if (daemon.type == VALUE_OBJECT && daemon.data.object_value) {
-                got_daemon = 1;
-                break;
-            }
-            if (daemon.type != VALUE_NULL) { vm_value_release(&daemon); daemon.type = VALUE_NULL; }
-        }
-
-        /* If not found, attempt to clone the canonical path */
-        if (!got_daemon) {
-            VMValue p2 = vm_value_create_string("/daemon/command");
-            VMValue cloned = efun_clone_object(global_vm, &p2, 1);
-            vm_value_release(&p2);
-            if (cloned.type == VALUE_OBJECT && cloned.data.object_value) {
-                daemon = cloned;
-                got_daemon = 1;
-            } else {
-                if (cloned.type != VALUE_NULL) vm_value_release(&cloned);
-            }
-        }
-
-        if (got_daemon && daemon.type == VALUE_OBJECT && daemon.data.object_value) {
-            /* Expose raw daemon pointer for debug logging */
-            obj_t *daemon_obj = (obj_t *)daemon.data.object_value;
-            /* Prepare args: player object + full input string */
+        if (daemon.type == VALUE_OBJECT && daemon.data.object_value) {
             VMValue call_args[2];
             VMValue player_obj_val;
             player_obj_val.type = VALUE_OBJECT;
@@ -5315,31 +5268,26 @@ more_room_source:
             call_args[0] = player_obj_val;
             call_args[1] = vm_value_create_string(command);
 
+            set_current_session(session);
             VMValue cres = obj_call_method(global_vm, (obj_t *)daemon.data.object_value,
                                            "execute_command", call_args, 2);
+            set_current_session(NULL);
 
-            /* release temporary string arg */
             vm_value_release(&call_args[1]);
+            /* daemon is a singleton owned by ObjManager - do not release */
 
-            /* If daemon handled the command (non-zero int), accept it */
             if (cres.type == VALUE_INT && cres.data.int_value) {
-                if (cres.type != VALUE_NULL) vm_value_release(&cres);
-                if (daemon.type != VALUE_NULL) vm_value_release(&daemon);
+                vm_value_release(&cres);
                 result.type = VALUE_NULL;
                 return result;
             }
             if (cres.type != VALUE_NULL) vm_value_release(&cres);
-
-            if (daemon.type != VALUE_NULL) vm_value_release(&daemon);
+        } else {
+            fprintf(stderr, "[Server] command daemon failed to load\n");
         }
     }
 
         command_debug_set_context(command, cmd, args ? args : "", "unknown");
-        /* Debug: report that fallback did not find a handler (print daemon pointer if available) */
-        /* Attempt to print any previously found daemon pointer variable if in scope */
-        /* Note: fallback's local daemon VMValue is not available here; print NULL marker. */
-        fprintf(stderr, "[CMD_DEBUG] fallback FAILED: daemon_obj=%p\n", (void*)NULL);
-        fflush(stderr);
         char error_msg[512];
         snprintf(error_msg, sizeof(error_msg),
             "Unknown command: %.200s\r\nType 'help' for available commands.\r\n", cmd);
@@ -5494,7 +5442,15 @@ void process_login_state(PlayerSession *session, const char *input) {
                             session->username);
                     /* Continue anyway - C commands will still work */
                 }
-                
+
+                /* Sync C privilege level to LPC player object */
+                if (session->player_object && session->privilege_level > 0) {
+                    VMValue parg = vm_value_create_int(session->privilege_level);
+                    obj_call_method(global_vm, session->player_object,
+                        "set_privilege_level", &parg, 1);
+                    vm_value_release(&parg);
+                }
+
                 session->state = STATE_PLAYING;
                 
                 /* Add player to their saved room */
@@ -5582,6 +5538,12 @@ void process_login_state(PlayerSession *session, const char *input) {
                 first_player_created = 1;
                 fprintf(stderr, "[Server] First player created: %s (privilege: Admin)\n",
                        session->username);
+                if (session->player_object) {
+                    VMValue parg = vm_value_create_int(session->privilege_level);
+                    obj_call_method(global_vm, session->player_object,
+                        "set_privilege_level", &parg, 1);
+                    vm_value_release(&parg);
+                }
                 chargen_create_admin(session);
             } else {
                 session->privilege_level = 0;  /* Regular player */

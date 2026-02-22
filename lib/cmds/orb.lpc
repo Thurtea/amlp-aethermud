@@ -25,17 +25,17 @@ int main(string args) {
 
 string query_help() {
     return
-"ORB - Admin System Monitor\n\n"
-"Usage: orb <subcommand>\n\n"
-"Subcommands:\n"
-"  orb status          Full system overview + zone/pending counts\n"
-"  orb players         All online players with stats\n"
-"  orb find <player>   Detailed report on a player\n"
-"  orb pending         Players awaiting OCC/sirname assignments\n"
-"  orb goto <player>   Teleport to a player\n"
-"  orb staff           Staff roster with roles\n"
-"  orb logs            Recent admin/promotion/OCC logs\n"
-"  orb uptime          Server time and connection count\n"
-"  orb help            This help\n\n"
-"Requires: admin orb in inventory. Admin access only.\n";
+        "ORB - Admin System Monitor\n\n" +
+        "Usage: orb <subcommand>\n\n" +
+        "Subcommands:\n" +
+        "  orb status          Full system overview + zone/pending counts\n" +
+        "  orb players         All online players with stats\n" +
+        "  orb find <player>   Detailed report on a player\n" +
+        "  orb pending         Players awaiting OCC/sirname assignments\n" +
+        "  orb goto <player>   Teleport to a player\n" +
+        "  orb staff           Staff roster with roles\n" +
+        "  orb logs            Recent admin/promotion/OCC logs\n" +
+        "  orb uptime          Server time and connection count\n" +
+        "  orb help            This help\n\n" +
+        "Requires: admin orb in inventory. Admin access only.\n";
 }

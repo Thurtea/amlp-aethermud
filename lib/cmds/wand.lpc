@@ -25,15 +25,15 @@ int main(string args) {
 
 string query_help() {
     return
-"WAND - Admin Magic Wand\n\n"
-"Usage: wand <subcommand>\n\n"
-"Subcommands:\n"
-"  wand heal <player>     Restore target to full HP/MDC/ISP/PPE\n"
-"  wand restore <player>  Alias for heal\n"
-"  wand peace             Calm all NPCs in current room\n"
-"  wand cast <spell> [at <target>]\n"
-"  wand psi <power> [on <target>]\n"
-"  wand list spells       List available spells\n"
-"  wand list psionics     List available psionic powers\n\n"
-"Requires: admin wand in inventory. Admin access only.\n";
+        "WAND - Admin Magic Wand\n\n" +
+        "Usage: wand <subcommand>\n\n" +
+        "Subcommands:\n" +
+        "  wand heal <player>     Restore target to full HP/MDC/ISP/PPE\n" +
+        "  wand restore <player>  Alias for heal\n" +
+        "  wand peace             Calm all NPCs in current room\n" +
+        "  wand cast <spell> [at <target>]\n" +
+        "  wand psi <power> [on <target>]\n" +
+        "  wand list spells       List available spells\n" +
+        "  wand list psionics     List available psionic powers\n\n" +
+        "Requires: admin wand in inventory. Admin access only.\n";
 }

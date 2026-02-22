@@ -427,8 +427,6 @@ int program_loader_load(VirtualMachine *vm, Program *program) {
                                 break;
                             }
                         }
-                        fprintf(stderr, "[program_loader] %s: jump fixup byte_off=%u -> instr_idx=%d\n",
-                                func->name, byte_target, target_idx);
                         func->instructions[fi].operand.address_operand = target_idx;
                     }
                 }
@@ -501,23 +499,6 @@ int program_loader_load(VirtualMachine *vm, Program *program) {
             
             vm->string_pool[vm->string_pool_count++] = 
                 strdup(program->constants[i].data.string_value);
-        }
-    }
-    
-    printf("[program_loader] Loaded program: %d instructions, %zu functions, %zu globals\n",
-           instruction_count, program->function_count, program->global_count);
-    
-    if (vm->function_count > 0) {
-        printf("[program_loader] Functions registered:\n");
-        for (int i = 0; i < vm->function_count; i++) {
-            if (vm->functions[i]) {
-                printf("  [%d] %s (%d params, %d locals, %d instructions)\n",
-                       i,
-                       vm->functions[i]->name,
-                       vm->functions[i]->param_count,
-                       vm->functions[i]->local_var_count,
-                       vm->functions[i]->instruction_count);
-            }
         }
     }
     

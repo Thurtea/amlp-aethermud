@@ -25,13 +25,13 @@ int main(string args) {
 
 string query_help() {
     return
-"QCS - Quick Creation System\n\n"
-"Usage: qcs [subcommand]\n\n"
-"  qcs                     Open creation menu\n"
-"  qcs create <type> <name>  Create room/npc/weapon/armor/item\n"
-"  qcs modify <name> ...     Modify an object property\n"
-"  qcs deploy <name> here    Deploy to current room\n"
-"  qcs list                  List your workspace objects\n"
-"  qcs help                  Full help\n\n"
-"Requires: QCS builder tool in inventory. Wizard access.\n";
+        "QCS - Quick Creation System\n\n" +
+        "Usage: qcs [subcommand]\n\n" +
+        "  qcs                     Open creation menu\n" +
+        "  qcs create <type> <name>  Create room/npc/weapon/armor/item\n" +
+        "  qcs modify <name> ...     Modify an object property\n" +
+        "  qcs deploy <name> here    Deploy to current room\n" +
+        "  qcs list                  List your workspace objects\n" +
+        "  qcs help                  Full help\n\n" +
+        "Requires: QCS builder tool in inventory. Wizard access.\n";
 }

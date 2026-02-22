@@ -1330,21 +1330,8 @@ VMValue efun_clone_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         }
     }
 
-    /* Debug: report which key methods were attached */
-    {
-        int has_process = obj_get_method(o, "process_command") ? 1 : 0;
-        int has_setup = obj_get_method(o, "setup_player") ? 1 : 0;
-        int has_save = obj_get_method(o, "save_me") ? 1 : 0;
-        fprintf(stderr, "[Efun] clone_object: created '%s' methods=%d setup=%d save_me=%d\n",
-                o->name ? o->name : "<noname>", o->method_count, has_setup, has_save);
-    }
-
     /* Call create() on object if present */
-    fprintf(stderr, "[Efun] clone_object: calling create() on %s\n",
-            o->name ? o->name : "<noname>");
     obj_call_method(vm, o, "create", NULL, 0);
-    fprintf(stderr, "[Efun] clone_object: create() returned for %s\n",
-            o->name ? o->name : "<noname>");
 
     program_free(prog);
 
@@ -1621,14 +1608,11 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     const char *lpc_path = args[0].data.string_value;
     if (!lpc_path) return vm_value_create_null();
 
-    fprintf(stderr, "[Efun] load_object: requested '%s'\n", lpc_path);
-
     /* Check if object is already loaded (singleton pattern) */
     ObjManager *mgr = get_global_obj_manager();
     if (mgr) {
         obj_t *existing = obj_manager_find(mgr, lpc_path);
         if (existing) {
-            fprintf(stderr, "[Efun] load_object: '%s' already loaded, returning existing\n", lpc_path);
             VMValue v;
             v.type = VALUE_OBJECT;
             v.data.object_value = existing;
@@ -1646,8 +1630,6 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         fprintf(stderr, "[Efun] load_object: path too long\n");
         return vm_value_create_null();
     }
-
-    fprintf(stderr, "[Efun] load_object: compiling '%s'\n", fs_path);
 
     /* Compile source file */
     Program *prog = compiler_compile_file(fs_path);

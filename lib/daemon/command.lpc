@@ -176,22 +176,11 @@ int execute_command(object player, string input) {
     
     verb = lower_case(verb);
     
-    // DEBUG: Log command attempts (only for wiztool/wiz commands)
-    if (verb == "wiztool" || verb == "wiz") {
-        tell_object(player, "[DEBUG] Command daemon received: verb='" + verb + "' args='" + args + "'");
-        tell_object(player, "[DEBUG] Player privilege level: " + player->query_privilege_level());
-    }
-    
     // Priority 1: Check wiztool (for wizards/admins)
     wiztool = player->query_wiztool();
     if (wiztool) {
-        if (verb == "wiztool" || verb == "wiz") {
-            tell_object(player, "[DEBUG] Player has wiztool object loaded, delegating to it");
-        }
         result = wiztool->process_command(verb, args);
         if (result) return 1;
-    } else if (verb == "wiztool" || verb == "wiz") {
-        tell_object(player, "[DEBUG] Player does NOT have wiztool object loaded");
     }
     
     // Priority 2: Check add_action registered commands
@@ -215,23 +204,17 @@ int execute_command(object player, string input) {
     
     // Priority 5: Check global command registry
     if (commands[verb]) {
-        if (verb == "wiztool" || verb == "wiz") {
-            tell_object(player, "[DEBUG] Found in global registry: " + commands[verb]);
-        }
         return execute_global_command(player, commands[verb], verb, args);
-    } else if (verb == "wiztool" || verb == "wiz") {
-        tell_object(player, "[DEBUG] NOT found in global command registry");
-        tell_object(player, "[DEBUG] Available commands: " + implode(keys(commands), ", "));
     }
-    
+
     // Priority 6: Try to find command in search paths
     result = search_command_paths(player, verb, args);
     if (result) return 1;
-    
+
     // Command not found
     tell_object(player, "Unknown command: " + verb);
     tell_object(player, "Type 'help' for available commands.");
-    return 0;
+    return 1;
 }
 
 // Execute a registered global command
@@ -239,40 +222,23 @@ private int execute_global_command(object player, string path, string verb, stri
     object cmd;
     int result;
     
-    // DEBUG logging for wiztool/wiz commands
-    if (verb == "wiztool" || verb == "wiz") {
-        tell_object(player, "[DEBUG] execute_global_command called with path: " + path);
-    }
-    
     // Try to load the command object
     catch {
-        if (verb == "wiztool" || verb == "wiz") {
-            tell_object(player, "[DEBUG] Attempting load_object(\"" + path + "\")");
-        }
         cmd = load_object(path);
     };
-    
+
     if (!cmd) {
-        if (verb == "wiztool" || verb == "wiz") {
-            tell_object(player, "[DEBUG] load_object FAILED - cmd is NULL");
-        }
         tell_object(player, "Error: Command '" + verb + "' failed to load.");
-        return 0;
+        return 1;
     }
-    
-    if (verb == "wiztool" || verb == "wiz") {
-        tell_object(player, "[DEBUG] load_object SUCCESS - got object");
-        tell_object(player, "[DEBUG] Checking for main() function");
-    }
-    
+
     // Check if command has privilege requirements
     if (function_exists("query_privilege_required", cmd)) {
         int required = cmd->query_privilege_required();
         int player_priv = player->query_privilege_level();
-        
         if (player_priv < required) {
             tell_object(player, "You don't have sufficient privileges for that command.");
-            return 0;
+            return 1;
         }
     }
     
@@ -283,7 +249,7 @@ private int execute_global_command(object player, string path, string verb, stri
     }
     
     tell_object(player, "Error: Command '" + verb + "' is not properly implemented.");
-    return 0;
+    return 1;
 }
 
 // Search command paths for a matching command file

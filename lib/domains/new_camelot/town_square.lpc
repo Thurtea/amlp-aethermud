@@ -20,4 +20,20 @@ void create() {
         add_exit("southeast", "/domains/new_camelot/gate");
 
     set_property("light", 2);
+
+    /* Spawn the town guard and register it with npc_daemon for auto-respawn.
+     * npc_daemon must already be loaded by master.lpc before rooms init. */
+    object npc_daemon = find_object("/daemon/npc_daemon");
+    if (!npc_daemon) {
+        catch { npc_daemon = load_object("/daemon/npc_daemon"); };
+    }
+    if (npc_daemon) {
+        object guard = clone_object("/domains/new_camelot/npc/guard");
+        if (guard) {
+            move_object(guard, this_object());
+            npc_daemon->register_npc(guard,
+                                     "/domains/new_camelot/town_square",
+                                     120);   /* 2-minute respawn delay */
+        }
+    }
 }

@@ -65,20 +65,23 @@ Priority fix list (highest → lowest)
    - `corpse_tick()` added to `src/death.c`: global `CorpseDecayEntry` registry (32 slots), sweeps expired corpses every 2-second heartbeat; broadcasts crumble message; removes and frees corpse + contents.
    - Wired into `src/driver.c` heartbeat alongside `npc_tick()`; `src/death.h` created.
    - LPC corpse creation via VM bridge is a future task.
-7. [IN PROGRESS — 2026-02-23] Implement NPC spawn/respawn system (LPC daemon layer). (Gameplay)
-   - C-level NPC respawn already functional in `npc_tick()` / `npc_handle_death()` / `npc_respawn()`.
-   - **NEW**: `lib/daemon/npc_daemon.lpc` — LPC daemon tracking active NPCs; `register_npc()`, `npc_died()`, `heartbeat()` API; respawn_queue with epoch-time countdown.
-   - **NEW**: `lib/std/npc.lpc` — base NPC object; `set_template()`, `die()` override that notifies daemon, `receive_damage()`, `on_spawn()` hook.
-   - **NEW**: `lib/domains/new_camelot/npc/guard.lpc` — example level-4 non-aggro town guard.
-   - Wired: `npc_daemon` added to `lib/secure/master.lpc` daemon list.
-   - Remaining: domain rooms should call `register_npc()` on clone; NPC heartbeat not yet wired from C (C calls `combat_tick` not LPC heartbeat).
-8. [IN PROGRESS — 2026-02-23] Apply race/OCC LPC fields at chargen (stat modifiers, OCC bonuses, attribute-based skill adjustments, racial abilities). (Gameplay)
-   - **Audit confirmed**: `load_race_data()` and `load_occ_data()` already apply stat modifiers, SDC/MDC/ISP/PPE, natural weapons, and HP bonuses.
-   - **Bug fixed**: `chargen_complete()` race combat override restored via `apply_race_combat_attributes()`.
-   - **NEW** (2026-02-23): `save_vs_magic`, `save_vs_horror`, `save_vs_fear` fields added to `Character` (chargen.h); `racial_abilities[16][32]` + `num_racial_abilities` added; `race_skill_bonus` added.
-   - **NEW** (2026-02-23): `load_race_data()` now parses `set_combat_bonuses()` mapping and `add_racial_ability()` calls; populates new struct fields.
-   - Remaining: `race_skill_bonus` requires `TODO:VM-BRIDGE` (query_skill_bonus() cannot be text-parsed); save format not yet updated to persist new fields.
-9. Harden LPC room loader, or provide an explicit `load_object()` path that executes `create()`/`init()` for rooms that need dynamic behavior; document loader limitations. (Content authoring)
+7. [DONE — 2026-02-23] Implement NPC spawn/respawn system (LPC daemon layer). (Gameplay)
+   - C-level NPC respawn fully functional (npc_tick/npc_handle_death/npc_respawn).
+   - `lib/daemon/npc_daemon.lpc`: register_npc(), npc_died(), heartbeat() API.
+   - `lib/std/npc.lpc` + `lib/domains/new_camelot/npc/guard.lpc` — base NPC + example guard.
+   - **NEW (2026-02-23)**: C heartbeat wires `efun_load_object("/daemon/npc_daemon")` + `obj_call_method("heartbeat")` every 2 seconds in `src/driver.c`.
+   - **NEW (2026-02-23)**: `lib/domains/new_camelot/town_square.lpc` `create()` clones the guard and calls `npc_daemon->register_npc(guard, room, 120)` for 2-minute respawn.
+   - Remaining: other domain rooms can follow the same `register_npc()` pattern in their `create()`.
+8. [DONE — 2026-02-23] Apply race/OCC LPC fields at chargen (stat modifiers, OCC bonuses, racial abilities, skill bonus). (Gameplay)
+   - `save_vs_magic/horror/fear`, `racial_abilities[16][32]`, `race_skill_bonus` added to `Character` (chargen.h).
+   - `load_race_data()` parses `set_combat_bonuses()` and `add_racial_ability()` calls.
+   - **NEW (2026-02-23)**: VM bridge wired — `load_race_data()` loads race LPC object via `efun_load_object()` and calls `query_skill_bonus()` to populate `race_skill_bonus`.
+   - Remaining: `race_skill_bonus` not yet applied in skills.c; new fields not yet in save format (version 11 needed).
+9. [DONE — 2026-02-23] Wire LPC room `create()` and document `init()` gap. (Content authoring)
+   - **Root cause**: `room_load_from_lpc()` in `src/room.c` text-scraped but never called the VM.
+   - **Fix**: After text-scraping, `room_load_from_lpc()` now calls `efun_load_object(global_vm, lpc_path)`, which fires the room's `create()` as a side-effect.
+   - `efun_load_object()` (and `efun_clone_object()`) already call `obj_call_method(vm, o, "create", NULL, 0)` internally.
+   - **Documented in implementation-plan.md Priority 9**: init() on player arrival requires a TODO:VM-DISPATCH hook in the player-move path (Priority 9b).
 10. Add/repair tests for session manager, websocket handling, save/load integrity, and master `valid_write()` policies; remove hardcoded paths in test scripts and tools. (Quality)
 
 Directory status table (directory — status — key notes)

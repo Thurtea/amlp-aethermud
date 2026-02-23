@@ -7,6 +7,9 @@
 
 #include "race_loader.h"
 #include "chargen.h"
+#include "vm.h"
+#include "efun.h"
+#include "object.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -412,15 +415,38 @@ void load_race_data(const char *race_name, Character *ch) {
         }
     }
 
-    /* ---- Skill bonus: query_skill_bonus() ----
-     * TODO:VM-BRIDGE — query_skill_bonus() is a LPC function that returns a
-     * per-race % bonus applied to all skills (e.g. Human +5%, Atlantean +3%).
-     * Text-parsing cannot evaluate a function return; the VM bridge
-     * (obj_call_method on the race object) must be wired before this value
-     * can be populated.  Signature: int query_skill_bonus() in lib/races/RACE.lpc
-     * When wired: call obj_call_method(race_obj, "query_skill_bonus", ...)
-     * and store the result in ch->race_skill_bonus, then apply in
-     * skills.c when computing final skill percentages. */
+    /* ---- Skill bonus: query_skill_bonus() via VM bridge ---- */
+    /* Load the race as a VM object and call query_skill_bonus() to get the
+     * per-race % bonus that is applied to all skill checks.  This cannot
+     * be text-parsed because it is a computed return value in LPC code.
+     * Example: Atlantean returns 3 (+3%), Human returns 5 (+5%). */
+    if (global_vm) {
+        /* Build the LPC singleton path: /races/<fname_without_ext>
+         * Buffer: 7 ("/races/") + 255 (fname max) + 1 (null) = 263 → 264 */
+        char lpc_race_path[264];
+        size_t flen = strlen(fname);
+        /* fname already has the raw filename, without "lib/races/" prefix or ".lpc" */
+        snprintf(lpc_race_path, sizeof(lpc_race_path), "/races/%s", fname);
+        /* Strip trailing .lpc if present (fname should not have it, but be safe) */
+        size_t plen = strlen(lpc_race_path);
+        if (plen > 4 && strcmp(lpc_race_path + plen - 4, ".lpc") == 0)
+            lpc_race_path[plen - 4] = '\0';
+        (void)flen; /* suppress unused-variable warning when stripped away */
+
+        VMValue race_path_val = vm_value_create_string(lpc_race_path);
+        VMValue race_obj_val  = efun_load_object(global_vm, &race_path_val, 1);
+        vm_value_release(&race_path_val);
+
+        if (race_obj_val.type == VALUE_OBJECT && race_obj_val.data.object_value) {
+            VMValue bonus = obj_call_method(global_vm,
+                                (obj_t *)race_obj_val.data.object_value,
+                                "query_skill_bonus", NULL, 0);
+            if (bonus.type == VALUE_INT)
+                ch->race_skill_bonus = (int)bonus.data.int_value;
+            if (bonus.type != VALUE_NULL) vm_value_release(&bonus);
+            /* race_obj_val is a singleton in ObjManager — do not release */
+        }
+    }
 
     fprintf(stderr, "DEBUG: Race data loaded for '%s'\n", race_name);
     free(buf);

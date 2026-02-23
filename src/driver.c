@@ -6280,6 +6280,21 @@ int main(int argc, char **argv) {
             npc_tick();
             corpse_tick();
 
+            /* Drive LPC npc_daemon heartbeat: poll respawn queue,
+             * re-clone dead NPCs into their origin rooms. */
+            if (global_vm) {
+                VMValue npc_daemon_path = vm_value_create_string("/daemon/npc_daemon");
+                VMValue npc_daemon_obj  = efun_load_object(global_vm, &npc_daemon_path, 1);
+                vm_value_release(&npc_daemon_path);
+                if (npc_daemon_obj.type == VALUE_OBJECT && npc_daemon_obj.data.object_value) {
+                    VMValue hb_res = obj_call_method(global_vm,
+                                        (obj_t *)npc_daemon_obj.data.object_value,
+                                        "heartbeat", NULL, 0);
+                    if (hb_res.type != VALUE_NULL) vm_value_release(&hb_res);
+                    /* npc_daemon_obj is a singleton owned by ObjManager — do not release */
+                }
+            }
+
             /* Magic, psionics, and meditation ticks */
             for (int i = 0; i < MAX_CLIENTS; i++) {
                 if (sessions[i] && sessions[i]->state == STATE_PLAYING) {

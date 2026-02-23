@@ -65,6 +65,9 @@ void format_item_name(const char *iname, char *out, size_t out_sz) {
     out[out_sz-1] = '\0';
 }
 #include "session_internal.h"
+#include "vm.h"
+#include "efun.h"
+#include "object.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -553,6 +556,43 @@ static Room* room_load_from_lpc(const char *lpc_path) {
         if (hilt) {
             room_add_item(room, hilt);
             fprintf(stderr, "[Room] Spawned Techno-Wizard Hilt in lake_far_shore\n");
+        }
+    }
+
+    /* ---- Fire LPC create() for dynamic room initialisation ----
+     * Load the room as a VM object via efun_load_object().  That function
+     * already calls create() on the new object, so any dynamic behaviour
+     * defined in the LPC file (cloning NPCs, registering with npc_daemon,
+     * adding conditional exits) will run.
+     *
+     * Note on init():
+     *   In classic LPMuds, init() is called on each object in the room
+     *   when a *living* enters.  Implementing that requires hooking the
+     *   player-move path in driver.c to call init() on all room contents
+     *   when a player arrives.  That is tracked under Priority 9 in
+     *   docs/implementation-plan.md (TODO:VM-DISPATCH for per-move init).
+     *
+     * Loader limitations (see docs/implementation-plan.md Priority 9):
+     *   - create() body can call LPC efuns (clone_object, move_object, etc.)
+     *     but cannot directly modify the C Room struct (exits, description).
+     *     Static properties are already populated by the text-scraper above.
+     *   - If create() calls clone_object() before npc_daemon is loaded,
+     *     register_npc() silently no-ops.  Load order: master.lpc daemons
+     *     first, then rooms.
+     *   - Deep inheritance (e.g. /std/room -> /std/object) is compiled
+     *     recursively; missing parent files produce a warning but do not
+     *     prevent the room struct from being usable.
+     */
+    if (global_vm) {
+        VMValue lpc_path_val = vm_value_create_string(lpc_path);
+        VMValue room_obj_val = efun_load_object(global_vm, &lpc_path_val, 1);
+        vm_value_release(&lpc_path_val);
+        /* room_obj_val is a singleton owned by ObjManager — do not release */
+        if (room_obj_val.type == VALUE_OBJECT && room_obj_val.data.object_value) {
+            fprintf(stderr, "[Room] LPC create() fired for '%s'\n", lpc_path);
+        } else {
+            fprintf(stderr, "[Room] LPC create() skipped for '%s' (compile/VM error)\n",
+                    lpc_path);
         }
     }
 

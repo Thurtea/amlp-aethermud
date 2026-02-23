@@ -32,9 +32,17 @@ void create() {
 }
 
 int check_wizard_level(object who) {
-    if (!who) return 0;
-    if (function_exists("query_privilege_level", who))
-        return (int)who->query_privilege_level() >= 2;
+    if (!who) {
+        write("[DEBUG orb] check_wizard_level: player is NULL\n");
+        return 0;
+    }
+    write("[DEBUG orb] player=" + file_name(who) + "\n");
+    if (function_exists("query_privilege_level", who)) {
+        int priv = (int)who->query_privilege_level();
+        write("[DEBUG orb] query_privilege_level=" + priv + " (need>=2)\n");
+        return priv >= 2;
+    }
+    write("[DEBUG orb] function_exists returned false for query_privilege_level\n");
     return 0;
 }
 
@@ -396,9 +404,10 @@ int cmd_logs() {
         string *lines = explode(content, "\n");
         int start = sizeof(lines) - 20;
         if (start < 0) start = 0;
-        int i;
-        for (i = start; i < sizeof(lines); i++) {
+        int i = start;
+        while (i < sizeof(lines)) {
             if (lines[i] != "") write("  " + lines[i] + "\n");
+            i = i + 1;
         }
         write("\n");
     }
@@ -410,9 +419,10 @@ int cmd_logs() {
         string *plines = explode(promo_content, "\n");
         int pstart = sizeof(plines) - 10;
         if (pstart < 0) pstart = 0;
-        int j;
-        for (j = pstart; j < sizeof(plines); j++) {
+        int j = pstart;
+        while (j < sizeof(plines)) {
             if (plines[j] != "") write("  " + plines[j] + "\n");
+            j = j + 1;
         }
         write("\n");
     }
@@ -424,9 +434,10 @@ int cmd_logs() {
         string *olines = explode(occ_content, "\n");
         int ostart = sizeof(olines) - 10;
         if (ostart < 0) ostart = 0;
-        int k;
-        for (k = ostart; k < sizeof(olines); k++) {
+        int k = ostart;
+        while (k < sizeof(olines)) {
             if (olines[k] != "") write("  " + olines[k] + "\n");
+            k = k + 1;
         }
         write("\n");
     }
@@ -438,9 +449,10 @@ int cmd_logs() {
         string *qlines = explode(qcs_content, "\n");
         int qstart = sizeof(qlines) - 10;
         if (qstart < 0) qstart = 0;
-        int m;
-        for (m = qstart; m < sizeof(qlines); m++) {
+        int m = qstart;
+        while (m < sizeof(qlines)) {
             if (qlines[m] != "") write("  " + qlines[m] + "\n");
+            m = m + 1;
         }
         write("\n");
     }

@@ -427,7 +427,35 @@ static void vm_arithmetic_op(VirtualMachine *vm, int op) {
     VMValue b = vm_pop_value(vm);
     VMValue a = vm_pop_value(vm);
     VMValue result;
-    
+
+    /* String concatenation: OP_ADD where either operand is a string */
+    if (op == 0 && (a.type == VALUE_STRING || b.type == VALUE_STRING)) {
+        char a_buf[64], b_buf[64];
+        const char *a_str = "";
+        const char *b_str = "";
+        if (a.type == VALUE_STRING)      a_str = a.data.string_value ? a.data.string_value : "";
+        else if (a.type == VALUE_INT)  { snprintf(a_buf, sizeof(a_buf), "%ld", a.data.int_value);   a_str = a_buf; }
+        else if (a.type == VALUE_FLOAT){ snprintf(a_buf, sizeof(a_buf), "%g",  a.data.float_value); a_str = a_buf; }
+        if (b.type == VALUE_STRING)      b_str = b.data.string_value ? b.data.string_value : "";
+        else if (b.type == VALUE_INT)  { snprintf(b_buf, sizeof(b_buf), "%ld", b.data.int_value);   b_str = b_buf; }
+        else if (b.type == VALUE_FLOAT){ snprintf(b_buf, sizeof(b_buf), "%g",  b.data.float_value); b_str = b_buf; }
+        size_t a_len = strlen(a_str), b_len = strlen(b_str);
+        char *concat = malloc(a_len + b_len + 1);
+        if (concat) {
+            memcpy(concat, a_str, a_len);
+            memcpy(concat + a_len, b_str, b_len);
+            concat[a_len + b_len] = '\0';
+            result = vm_value_create_string(concat);
+            free(concat);
+        } else {
+            result = vm_value_create_string("");
+        }
+        vm_push_value(vm, result);
+        vm_value_release(&a);
+        vm_value_release(&b);
+        return;
+    }
+
     int a_is_float = (a.type == VALUE_FLOAT);
     int b_is_float = (b.type == VALUE_FLOAT);
     

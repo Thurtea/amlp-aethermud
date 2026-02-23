@@ -5,7 +5,7 @@
  *   forget <name>        - Forget this person's name
  */
 
-int cmd(string args) {
+int main(string args) {
     object env = environment(this_player());
     
     if (!args || args == "") {

@@ -23,7 +23,7 @@ extern void send_to_player(PlayerSession *session, const char *format, ...);
 // Utility: convert "\033" to binary ESC (27) in LPC strings for ANSI color support
 void send_ansi(PlayerSession *session, const char *text) {
     char buf[4096];
-    int bi = 0;
+    size_t bi = 0;
     for (int i = 0; text[i] && bi < sizeof(buf)-1; ) {
         // Look for "\\033["
         if (text[i] == '\\' && text[i+1] == '0' && text[i+2] == '3' && text[i+3] == '3' && text[i+4] == '[') {

@@ -10,7 +10,7 @@
  *   prompt help
  */
 
-int cmd(string args) {
+int main(string args) {
     object player = this_player();
     string new_prompt;
     

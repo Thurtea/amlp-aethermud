@@ -5,7 +5,7 @@
  *   languages              - List all languages you know
  */
 
-int cmd(string args) {
+int main(string args) {
     mapping langs = this_player()->query_languages();
     string primary = this_player()->query_primary_language();
     

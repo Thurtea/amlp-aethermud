@@ -6,7 +6,7 @@
  *   language <lang>       - Switch to speaking that language
  */
 
-int cmd(string args) {
+int main(string args) {
     string primary = this_player()->query_primary_language();
     
     if (!args || args == "") {

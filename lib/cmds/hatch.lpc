@@ -9,7 +9,7 @@
 #define HAWK_PATH "/lib/obj/pets/hawk"
 #define EGG_PATH  "/lib/obj/pets/hawk_egg"
 
-int cmd(string arg) {
+int main(string arg) {
     object player, egg, hawk;
     object *inv;
     string egg_type, tier_name;

@@ -1,0 +1,564 @@
+src/driver.c: In function ‘command_debug_log_result’:
+src/driver.c:267:40: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘SessionState’ due to unsignedness of other operand [-Wsign-compare]
+  267 |             session ? session->state : -1,
+      |                                        ^~
+src/driver.c: In function ‘free_session’:
+src/driver.c:433:13: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  433 |         if (session->username && session->username[0]) {
+      |             ^~~~~~~
+In file included from src/skills.h:6,
+                 from src/driver.c:48:
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c: In function ‘find_player_by_name’:
+src/driver.c:634:49: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  634 |             sessions[i]->state == STATE_PLAYING &&
+      |                                                 ^~
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c: In function ‘cmd_whisper’:
+src/driver.c:734:61: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  734 |         if (room->players[i] && room->players[i] != session &&
+      |                                                             ^~
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c: In function ‘cmd_examine’:
+src/driver.c:876:30: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  876 |         if (room->players[i] && room->players[i]->username &&
+      |                              ^~
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c: In function ‘execute_command’:
+src/driver.c:2629:62: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+ 2629 |                 const char *speaker_name = session->username ? session->username : "Someone";
+      |                                                              ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c:2620:24: warning: unused variable ‘speaker_ch’ [-Wunused-variable]
+ 2620 |             Character *speaker_ch = &session->character;
+      |                        ^~~~~~~~~~
+src/driver.c:2823:17: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+ 2823 |             if (!sessions[i]->username || !sessions[i]->username[0]) continue;
+      |                 ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c:4801:65: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+ 4801 |             if (room->players[i] && room->players[i] != session &&
+      |                                                                 ^~
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c: In function ‘check_session_timeouts’:
+src/driver.c:5725:25: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+ 5725 |                     if (sessions[i]->username && sessions[i]->username[0]) {
+      |                         ^~~~~~~~
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/driver.c: In function ‘execute_command’:
+src/driver.c:2845:59: warning: ‘  (’ directive output may be truncated writing 3 bytes into a region of size between 2 and 239 [-Wformat-truncation=]
+ 2845 |                 snprintf(buf, sizeof(buf), "%s%-16s%s%s %s  (%lds idle)",
+      |                                                           ^~~
+src/driver.c:2845:17: note: ‘snprintf’ output 29 or more bytes (assuming 266) into a destination of size 256
+ 2845 |                 snprintf(buf, sizeof(buf), "%s%-16s%s%s %s  (%lds idle)",
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 2846 |                         role_tag, sessions[i]->username, invis_tag, state_tag,
+      |                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 2847 |                         title_str, idle);
+      |                         ~~~~~~~~~~~~~~~~
+src/driver.c:2567:68: warning: ‘%s’ directive output may be truncated writing up to 127 bytes into a region of size 126 [-Wformat-truncation=]
+ 2567 |                         snprintf(race_desc, sizeof(race_desc), "%s %s",
+      |                                                                    ^~
+ 2568 |                                 vowel ? "An" : "A", lowercase_race);
+      |                                                     ~~~~~~~~~~~~~~  
+src/driver.c:2567:25: note: ‘snprintf’ output 3 or more bytes (assuming 130) into a destination of size 128
+ 2567 |                         snprintf(race_desc, sizeof(race_desc), "%s %s",
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 2568 |                                 vowel ? "An" : "A", lowercase_race);
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/driver.c:4364:64: warning: ‘%s’ directive output may be truncated writing up to 511 bytes into a region of size between 178 and 241 [-Wformat-truncation=]
+ 4364 |         snprintf(response, sizeof(response), "You force %s to: %s\r\n",
+      |                                                                ^~
+ 4365 |                 target_name, forced_cmd);
+      |                              ~~~~~~~~~~                         
+src/driver.c:4364:9: note: ‘snprintf’ output between 18 and 592 bytes into a destination of size 256
+ 4364 |         snprintf(response, sizeof(response), "You force %s to: %s\r\n",
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 4365 |                 target_name, forced_cmd);
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~
+src/driver.c:3616:62: warning: ‘snprintf’ output may be truncated before the last format character [-Wformat-truncation=]
+ 3616 |                 snprintf(clone_arg, sizeof(clone_arg), "%s/%s", cwd, clone_alias);
+      |                                                              ^
+src/driver.c:3616:17: note: ‘snprintf’ output 2 or more bytes (assuming 513) into a destination of size 512
+ 3616 |                 snprintf(clone_arg, sizeof(clone_arg), "%s/%s", cwd, clone_alias);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/driver.c:3658:53: warning: ‘%s’ directive output may be truncated writing up to 511 bytes into a region of size 477 [-Wformat-truncation=]
+ 3658 |                 "Error: Failed to parse LPC object: %s\r\n", fs_path);
+      |                                                     ^~       ~~~~~~~
+src/driver.c:3657:13: note: ‘snprintf’ output between 38 and 549 bytes into a destination of size 512
+ 3657 |             snprintf(msg, sizeof(msg),
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+ 3658 |                 "Error: Failed to parse LPC object: %s\r\n", fs_path);
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/driver.c:3649:49: warning: ‘%s’ directive output may be truncated writing up to 511 bytes into a region of size 481 [-Wformat-truncation=]
+ 3649 |                 "Error: Failed to clone object: %s\r\n"
+      |                                                 ^~
+src/driver.c:3648:13: note: ‘snprintf’ output between 81 and 592 bytes into a destination of size 512
+ 3648 |             snprintf(msg, sizeof(msg),
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+ 3649 |                 "Error: Failed to clone object: %s\r\n"
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 3650 |                 "File not found. Check the path and try again.\r\n", args);
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c: In function ‘cmd_cd_filesystem’:
+src/server.c:259:48: warning: zero-length gnu_printf format string [-Wformat-zero-length]
+  259 |             snprintf(new_dir, sizeof(new_dir), "");
+      |                                                ^~
+src/server.c: In function ‘cmd_ls_filesystem’:
+src/server.c:148:52: warning: ‘snprintf’ output may be truncated before the last format character [-Wformat-truncation=]
+  148 |                 snprintf(path, sizeof(path), "%s/%s", session->current_dir, args);
+      |                                                    ^
+src/server.c:148:17: note: ‘snprintf’ output 2 or more bytes (assuming 513) into a destination of size 512
+  148 |                 snprintf(path, sizeof(path), "%s/%s", session->current_dir, args);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c:152:50: warning: ‘%s’ directive output may be truncated writing up to 511 bytes into a region of size between 256 and 511 [-Wformat-truncation=]
+  152 |                 snprintf(path, sizeof(path), "%s/%s", home, args);
+      |                                                  ^~
+src/server.c:152:17: note: ‘snprintf’ output between 2 and 768 bytes into a destination of size 512
+  152 |                 snprintf(path, sizeof(path), "%s/%s", home, args);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c:188:52: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size between 0 and 1023 [-Wformat-truncation=]
+  188 |         snprintf(item_path, sizeof(item_path), "%s/%s", full_path, entry->d_name);
+      |                                                    ^~
+src/server.c:188:9: note: ‘snprintf’ output between 2 and 1280 bytes into a destination of size 1024
+  188 |         snprintf(item_path, sizeof(item_path), "%s/%s", full_path, entry->d_name);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c:196:52: warning: ‘
+   ’ directive output may be truncated writing 2 bytes into a region of size between 1 and 226 [-Wformat-truncation=]
+  196 |                 snprintf(line, sizeof(line), "%-30s\r\n", entry->d_name);
+      |                                                    ^~~~
+src/server.c:196:17: note: ‘snprintf’ output between 33 and 258 bytes into a destination of size 256
+  196 |                 snprintf(line, sizeof(line), "%-30s\r\n", entry->d_name);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c:194:52: warning: ‘/
+   ’ directive output may be truncated writing 3 bytes into a region of size between 1 and 226 [-Wformat-truncation=]
+  194 |                 snprintf(line, sizeof(line), "%-30s/\r\n", entry->d_name);
+      |                                                    ^~~~~
+src/server.c:194:17: note: ‘snprintf’ output between 34 and 259 bytes into a destination of size 256
+  194 |                 snprintf(line, sizeof(line), "%-30s/\r\n", entry->d_name);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c: In function ‘cmd_cd_filesystem’:
+src/server.c:265:54: warning: ‘snprintf’ output may be truncated before the last format character [-Wformat-truncation=]
+  265 |             snprintf(new_dir, sizeof(new_dir), "%s/%s", session->current_dir, args);
+      |                                                      ^
+src/server.c:265:13: note: ‘snprintf’ output 2 or more bytes (assuming 513) into a destination of size 512
+  265 |             snprintf(new_dir, sizeof(new_dir), "%s/%s", session->current_dir, args);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c:269:52: warning: ‘%s’ directive output may be truncated writing up to 511 bytes into a region of size between 256 and 511 [-Wformat-truncation=]
+  269 |             snprintf(new_dir, sizeof(new_dir), "%s/%s", home, args);
+      |                                                    ^~
+src/server.c:269:13: note: ‘snprintf’ output between 2 and 768 bytes into a destination of size 512
+  269 |             snprintf(new_dir, sizeof(new_dir), "%s/%s", home, args);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c: In function ‘cmd_more_filesystem’:
+src/server.c:406:47: warning: ‘.lpc’ directive output may be truncated writing 4 bytes into a region of size between 1 and 1024 [-Wformat-truncation=]
+  406 |         snprintf(try_lpc, sizeof(try_lpc), "%s.lpc", full_path);
+      |                                               ^~~~
+src/server.c:406:9: note: ‘snprintf’ output between 5 and 1028 bytes into a destination of size 1024
+  406 |         snprintf(try_lpc, sizeof(try_lpc), "%s.lpc", full_path);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/server.c: In function ‘cmd_ed_filesystem’:
+src/server.c:503:55: warning: ‘.lpc’ directive output may be truncated writing 4 bytes into a region of size between 1 and 1024 [-Wformat-truncation=]
+  503 |         snprintf(actual_path, sizeof(actual_path), "%s.lpc", full_path);
+      |                                                       ^~~~
+src/server.c:503:9: note: ‘snprintf’ output between 5 and 1028 bytes into a destination of size 1024
+  503 |         snprintf(actual_path, sizeof(actual_path), "%s.lpc", full_path);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/parser.c: In function ‘parser_parse_declaration’:
+src/parser.c:1213:9: warning: variable ‘is_public’ set but not used [-Wunused-but-set-variable]
+ 1213 |     int is_public = 0;
+      |         ^~~~~~~~~
+src/compiler.c:269:12: warning: ‘compiler_find_global’ defined but not used [-Wunused-function]
+  269 | static int compiler_find_global(compiler_state_t *state, const char *name) {
+      |            ^~~~~~~~~~~~~~~~~~~~
+src/preprocessor.c: In function ‘pp_handle_include’:
+src/preprocessor.c:319:47: warning: ‘/include/’ directive output may be truncated writing 9 bytes into a region of size between 1 and 4096 [-Wformat-truncation=]
+  319 |     snprintf(full_path, sizeof(full_path), "%s/include/%s",
+      |                                               ^~~~~~~~~
+src/preprocessor.c:319:5: note: ‘snprintf’ output 10 or more bytes (assuming 4105) into a destination of size 4096
+  319 |     snprintf(full_path, sizeof(full_path), "%s/include/%s",
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  320 |              pp->mudlib_path, inc_path);
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/room.c: In function ‘room_reload_lpc’:
+src/room.c:584:9: warning: variable ‘cache_idx’ set but not used [-Wunused-but-set-variable]
+  584 |     int cache_idx = -1;
+      |         ^~~~~~~~~
+src/room.c: In function ‘room_broadcast’:
+src/room.c:1224:41: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+ 1224 |         if (room->players[i] != exclude && room->players[i]->username) {
+      |                                         ^~
+In file included from src/room.c:67:
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/room.c: In function ‘cmd_look’:
+src/room.c:1576:54: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size 254 [-Wformat-truncation=]
+ 1576 |                 snprintf(outbuf, sizeof(outbuf), "%s %s", vowel ? "an" : "a", fmt_name);
+      |                                                      ^~                       ~~~~~~~~
+src/room.c:1576:17: note: ‘snprintf’ output 3 or more bytes (assuming 258) into a destination of size 256
+ 1576 |                 snprintf(outbuf, sizeof(outbuf), "%s %s", vowel ? "an" : "a", fmt_name);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/chargen.c:56:64: warning: ‘/*’ within comment [-Wcomment]
+   56 | /* ========== RACE DATABASE - dynamically loaded from lib/races/*.lpc ========== */
+src/chargen.c:60:49: warning: ‘/*’ within comment [-Wcomment]
+   60 | /* OCC database dynamically loaded from lib/occs/*.lpc by race_loader_scan_occs() */
+src/chargen.c: In function ‘cmd_stats’:
+src/chargen.c:1279:49: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 1279 | void cmd_stats(PlayerSession *sess, const char *args) {
+      |                                     ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_skills’:
+src/chargen.c:1291:50: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 1291 | void cmd_skills(PlayerSession *sess, const char *args) {
+      |                                      ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘save_character’:
+src/chargen.c:1523:13: warning: the comparison will always evaluate as ‘true’ for the address of ‘title’ will never be NULL [-Waddress]
+ 1523 |         if (sess->title) strncpy(tmp, sess->title, sizeof(tmp) - 1);
+      |             ^~~~
+In file included from src/chargen.c:2:
+src/session_internal.h:69:10: note: ‘title’ declared here
+   69 |     char title[128];                     /* Custom title for who list */
+      |          ^~~~~
+src/chargen.c:1527:13: warning: the comparison will always evaluate as ‘true’ for the address of ‘enter_msg’ will never be NULL [-Waddress]
+ 1527 |         if (sess->enter_msg) strncpy(tmp, sess->enter_msg, sizeof(tmp) - 1);
+      |             ^~~~
+src/session_internal.h:70:10: note: ‘enter_msg’ declared here
+   70 |     char enter_msg[128];                 /* Custom room enter message */
+      |          ^~~~~~~~~
+src/chargen.c:1531:13: warning: the comparison will always evaluate as ‘true’ for the address of ‘leave_msg’ will never be NULL [-Waddress]
+ 1531 |         if (sess->leave_msg) strncpy(tmp, sess->leave_msg, sizeof(tmp) - 1);
+      |             ^~~~
+src/session_internal.h:71:10: note: ‘leave_msg’ declared here
+   71 |     char leave_msg[128];                 /* Custom room leave message */
+      |          ^~~~~~~~~
+src/chargen.c:1535:13: warning: the comparison will always evaluate as ‘true’ for the address of ‘goto_msg’ will never be NULL [-Waddress]
+ 1535 |         if (sess->goto_msg) strncpy(tmp, sess->goto_msg, sizeof(tmp) - 1);
+      |             ^~~~
+src/session_internal.h:72:10: note: ‘goto_msg’ declared here
+   72 |     char goto_msg[128];                  /* Custom goto arrival message */
+      |          ^~~~~~~~
+src/chargen.c: In function ‘cmd_inventory’:
+src/chargen.c:2384:53: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2384 | void cmd_inventory(PlayerSession *sess, const char *args) {
+      |                                         ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_worn’:
+src/chargen.c:2435:48: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2435 | void cmd_worn(PlayerSession *sess, const char *args) {
+      |                                    ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_powers’:
+src/chargen.c:2717:50: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2717 | void cmd_powers(PlayerSession *sess, const char *args) {
+      |                                      ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_isp’:
+src/chargen.c:2723:47: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2723 | void cmd_isp(PlayerSession *sess, const char *args) {
+      |                                   ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_spells’:
+src/chargen.c:2809:50: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2809 | void cmd_spells(PlayerSession *sess, const char *args) {
+      |                                      ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_ppe’:
+src/chargen.c:2815:47: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2815 | void cmd_ppe(PlayerSession *sess, const char *args) {
+      |                                   ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_meditate’:
+src/chargen.c:2821:52: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2821 | void cmd_meditate(PlayerSession *sess, const char *args) {
+      |                                        ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_languages’:
+src/chargen.c:2966:53: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2966 | void cmd_languages(PlayerSession *sess, const char *args) {
+      |                                         ~~~~~~~~~~~~^~~~
+src/chargen.c: In function ‘cmd_swim’:
+src/chargen.c:2998:48: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 2998 | void cmd_swim(PlayerSession *sess, const char *args) {
+      |                                    ~~~~~~~~~~~~^~~~
+src/chargen.c: At top level:
+src/chargen.c:849:13: warning: ‘chargen_show_secondary_skills’ defined but not used [-Wunused-function]
+  849 | static void chargen_show_secondary_skills(PlayerSession *sess) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/chargen.c: In function ‘create_wizard_workroom’:
+src/chargen.c:193:47: warning: ‘/workroom.lpc’ directive output may be truncated writing 13 bytes into a region of size between 1 and 512 [-Wformat-truncation=]
+  193 |     snprintf(file_path, sizeof(file_path), "%s/workroom.lpc", dir_path);
+      |                                               ^~~~~~~~~~~~~
+src/chargen.c:193:5: note: ‘snprintf’ output between 14 and 525 bytes into a destination of size 512
+  193 |     snprintf(file_path, sizeof(file_path), "%s/workroom.lpc", dir_path);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/chargen.c: In function ‘save_character’:
+src/chargen.c:1477:41: warning: ‘.bak’ directive output may be truncated writing 4 bytes into a region of size between 1 and 512 [-Wformat-truncation=]
+ 1477 |     snprintf(backup, sizeof(backup), "%s.bak", filepath);
+      |                                         ^~~~
+src/chargen.c:1477:5: note: ‘snprintf’ output between 5 and 516 bytes into a destination of size 512
+ 1477 |     snprintf(backup, sizeof(backup), "%s.bak", filepath);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/chargen.c: In function ‘cmd_get’:
+src/chargen.c:2599:52: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size between 181 and 244 [-Wformat-truncation=]
+ 2599 |         snprintf(msg, sizeof(msg), "%s picks up %s %s.\n",
+      |                                                    ^~
+ 2600 |                  sess->username, vowel ? "an" : "a", fmt_name);
+      |                                                      ~~~~~~~~
+src/chargen.c:2599:9: note: ‘snprintf’ output 15 or more bytes (assuming 333) into a destination of size 256
+ 2599 |         snprintf(msg, sizeof(msg), "%s picks up %s %s.\n",
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 2600 |                  sess->username, vowel ? "an" : "a", fmt_name);
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/combat.c: In function ‘combat_create_participant’:
+src/combat.c:86:27: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+   86 |     p->name = strdup(sess && sess->username ? sess->username : "Unknown");
+      |                           ^~
+In file included from src/combat.h:6,
+                 from src/combat.c:1:
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/item.c: In function ‘inventory_display’:
+src/item.c:741:25: warning: unused variable ‘dmg_type’ [-Wunused-variable]
+  741 |             const char *dmg_type = curr->stats.is_mega_damage ? "MD" : "SDC";
+      |                         ^~~~~~~~
+src/item.c: In function ‘cmd_activate’:
+src/item.c:1071:52: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 1071 | void cmd_activate(PlayerSession *sess, const char *args) {
+      |                                        ~~~~~~~~~~~~^~~~
+src/item.c: In function ‘cmd_deactivate’:
+src/item.c:1121:54: warning: unused parameter ‘args’ [-Wunused-parameter]
+ 1121 | void cmd_deactivate(PlayerSession *sess, const char *args) {
+      |                                          ~~~~~~~~~~~~^~~~
+src/item.c: In function ‘inventory_display’:
+src/item.c:762:65: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size 254 [-Wformat-truncation=]
+  762 |                         snprintf(name_buf, sizeof(name_buf), "A %s", fmt);
+      |                                                                 ^~   ~~~
+src/item.c:762:25: note: ‘snprintf’ output between 3 and 258 bytes into a destination of size 256
+  762 |                         snprintf(name_buf, sizeof(name_buf), "A %s", fmt);
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/item.c:760:66: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size 253 [-Wformat-truncation=]
+  760 |                         snprintf(name_buf, sizeof(name_buf), "An %s", fmt);
+      |                                                                  ^~   ~~~
+src/item.c:760:25: note: ‘snprintf’ output between 4 and 259 bytes into a destination of size 256
+  760 |                         snprintf(name_buf, sizeof(name_buf), "An %s", fmt);
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/magic.c: In function ‘magic_start_casting’:
+src/magic.c:572:52: warning: unused parameter ‘target_name’ [-Wunused-parameter]
+  572 |                          int spell_id, const char *target_name) {
+      |                                        ~~~~~~~~~~~~^~~~~~~~~~~
+src/wiz_tools.c: In function ‘wiz_goto’:
+src/wiz_tools.c:96:50: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+   96 |     wiz_log("%s used goto -> %s", sess->username ? sess->username : "<unknown>", room_arg);
+      |                                                  ^
+In file included from src/wiz_tools.c:18:
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_summon’:
+src/wiz_tools.c:124:60: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  124 |     wiz_log("%s summoned %s to room id=%d", sess->username ? sess->username : "<unknown>", target->username, sess->current_room ? sess->current_room->id : -1);
+      |                                                            ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_teleport’:
+src/wiz_tools.c:160:54: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  160 |     wiz_log("%s teleported %s -> %s", sess->username ? sess->username : "<unknown>", target->username, room_arg);
+      |                                                      ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_force’:
+src/wiz_tools.c:177:51: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  177 |     wiz_log("%s forced %s to: %s", sess->username ? sess->username : "<unknown>", target->username, command);
+      |                                                   ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_shutdown’:
+src/wiz_tools.c:202:64: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  202 |     wiz_log("%s initiated shutdown (delay=%d)", sess->username ? sess->username : "<unknown>", delay_seconds);
+      |                                                                ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_reload’:
+src/wiz_tools.c:216:50: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  216 |         wiz_log("%s reloaded %s", sess->username ? sess->username : "<unknown>", lpc_path);
+      |                                                  ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_snoop’:
+src/wiz_tools.c:238:58: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  238 |         wiz_log("%s started snooping %s", sess->username ? sess->username : "<unknown>", target->username);
+      |                                                          ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:247:58: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  247 |         wiz_log("%s stopped snooping %s", sess->username ? sess->username : "<unknown>", target->username);
+      |                                                          ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_invisible’:
+src/wiz_tools.c:257:51: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  257 |     wiz_log("%s set invisible=%d", sess->username ? sess->username : "<unknown>", sess->is_invisible);
+      |                                                   ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_set_stat’:
+src/wiz_tools.c:321:49: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  321 |     wiz_log("%s set %s.%s = %d", sess->username ? sess->username : "<unknown>", target->username, stat, value);
+      |                                                 ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_grant_xp’:
+src/wiz_tools.c:334:65: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  334 |     wiz_log("%s granted %d XP to %s (total %d)", sess->username ? sess->username : "<unknown>", xp_amount, target->username, ch->xp);
+      |                                                                 ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_heal’:
+src/wiz_tools.c:351:73: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  351 |     wiz_log("%s healed %s (hp=%d sdc=%d ppe=%d isp=%d)", sess->username ? sess->username : "<unknown>", target->username, ch->hp, ch->sdc, ch->ppe, ch->isp);
+      |                                                                         ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_clone’:
+src/wiz_tools.c:390:58: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  390 |             wiz_log("%s cloned %s -> %s", sess->username ? sess->username : "<unknown>", fs_path, target->username);
+      |                                                          ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:401:56: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  401 |         wiz_log("%s cloned %s -> self", sess->username ? sess->username : "<unknown>", fs_path);
+      |                                                        ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:434:58: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  434 |             wiz_log("%s cloned %s -> %s", sess->username ? sess->username : "<unknown>", lpc_path, target->username);
+      |                                                          ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:448:60: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  448 |             wiz_log("%s cloned %s -> self", sess->username ? sess->username : "<unknown>", lpc_path);
+      |                                                            ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_destruct’:
+src/wiz_tools.c:478:52: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  478 |         wiz_log("%s destructed %s", sess->username ? sess->username : "<unknown>", target);
+      |                                                    ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_promote’:
+src/wiz_tools.c:504:59: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  504 |     wiz_log("%s changed %s from %d -> %d", sess->username ? sess->username : "<unknown>", target->username, old, new_level);
+      |                                                           ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_ban’:
+src/wiz_tools.c:562:51: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  562 |         wiz_log("%s banned IP %s", sess->username ? sess->username : "<unknown>", target);
+      |                                                   ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:570:56: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  570 |         wiz_log("%s banned account %s", sess->username ? sess->username : "<unknown>", target);
+      |                                                        ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘wiz_unban’:
+src/wiz_tools.c:583:53: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  583 |         wiz_log("%s unbanned IP %s", sess->username ? sess->username : "<unknown>", target);
+      |                                                     ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:591:58: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  591 |         wiz_log("%s unbanned account %s", sess->username ? sess->username : "<unknown>", target);
+      |                                                          ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘cmd_skill_assign’:
+src/wiz_tools.c:870:59: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  870 |     wiz_log("%s assigned O.C.C. %s -> %s", sess->username ? sess->username : "<unknown>", occ_name, target->username);
+      |                                                           ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘cmd_demotion’:
+src/wiz_tools.c:915:61: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  915 |         wiz_log("%s demoted %s -> level %d", sess->username ? sess->username : "<unknown>", target->username, value);
+      |                                                             ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:921:62: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  921 |         wiz_log("%s stripped O.C.C. from %s", sess->username ? sess->username : "<unknown>", target->username);
+      |                                                              ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c:927:58: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+  927 |         wiz_log("%s reset skills for %s", sess->username ? sess->username : "<unknown>", target->username);
+      |                                                          ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘display_occ_skills’:
+src/wiz_tools.c:1209:40: warning: unused parameter ‘sess’ [-Wunused-parameter]
+ 1209 | void display_occ_skills(PlayerSession *sess, const char *occ_name) {
+      |                         ~~~~~~~~~~~~~~~^~~~
+src/wiz_tools.c: In function ‘cmd_slay’:
+src/wiz_tools.c:1256:43: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+ 1256 |     wiz_log("%s smote %s", sess->username ? sess->username : "<unknown>", target->username);
+      |                                           ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: In function ‘cmd_npcspawn’:
+src/wiz_tools.c:1331:28: warning: the comparison will always evaluate as ‘true’ for the address of ‘username’ will never be NULL [-Waddress]
+ 1331 |             sess->username ? sess->username : "<unknown>",
+      |                            ^
+src/session_internal.h:39:10: note: ‘username’ declared here
+   39 |     char username[64];
+      |          ^~~~~~~~
+src/wiz_tools.c: At top level:
+src/wiz_tools.c:810:20: warning: ‘occ_pool_rogue’ defined but not used [-Wunused-variable]
+  810 | static const char *occ_pool_rogue[] = {
+      |                    ^~~~~~~~~~~~~~
+src/wiz_tools.c:805:20: warning: ‘occ_pool_scholar’ defined but not used [-Wunused-variable]
+  805 | static const char *occ_pool_scholar[] = {
+      |                    ^~~~~~~~~~~~~~~~
+src/wiz_tools.c:800:20: warning: ‘occ_pool_wilderness’ defined but not used [-Wunused-variable]
+  800 | static const char *occ_pool_wilderness[] = {
+      |                    ^~~~~~~~~~~~~~~~~~~
+src/wiz_tools.c:794:20: warning: ‘occ_pool_combat’ defined but not used [-Wunused-variable]
+  794 | static const char *occ_pool_combat[] = {
+      |                    ^~~~~~~~~~~~~~~

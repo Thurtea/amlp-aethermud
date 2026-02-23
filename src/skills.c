@@ -766,58 +766,58 @@ OCCSkillPackage OCC_PACKAGES[65];
 /* ========== INITIALIZATION ========== */
 
 void skill_init(void) {
-    int i;
-    
+    size_t i;
+
     /* Copy skill database */
     for (i = 0; i < TOTAL_SKILLS; i++) {
         ALL_SKILLS[i] = SKILL_DATABASE[i];
     }
-    
+
     /* Copy OCC packages */
     for (i = 0; i < 65; i++) {
         OCC_PACKAGES[i] = OCC_SKILL_PACKAGES[i];
     }
-    
-    DEBUG_LOG("Initialized %ld skills for 65 OCCs", TOTAL_SKILLS);
+
+    DEBUG_LOG("Initialized %ld skills for 65 OCCs", (long)TOTAL_SKILLS);
 }
 
 /* ========== SKILL LOOKUPS ========== */
 
 SkillDef *skill_get_by_id(int id) {
-    if (id < 0 || id >= TOTAL_SKILLS) return NULL;
+    if (id < 0 || (size_t)id >= TOTAL_SKILLS) return NULL;
     return &ALL_SKILLS[id];
 }
 
 SkillDef *skill_get_by_name(const char *name) {
-    int i;
-    
+    size_t i;
+
     if (!name || !name[0]) return NULL;
-    
+
     for (i = 0; i < TOTAL_SKILLS; i++) {
         if (strcasecmp(ALL_SKILLS[i].name, name) == 0) {
             return &ALL_SKILLS[i];
         }
     }
-    
+
     return NULL;
 }
 
 int skill_get_id_by_name(const char *name) {
-    int i;
-    
+    size_t i;
+
     if (!name || !name[0]) return -1;
-    
+
     for (i = 0; i < TOTAL_SKILLS; i++) {
         if (strcasecmp(ALL_SKILLS[i].name, name) == 0) {
-            return i;
+            return (int)i;
         }
     }
-    
+
     return -1;
 }
 
 const char *skill_get_name(int skill_id) {
-    if (skill_id < 0 || skill_id >= TOTAL_SKILLS) return "Unknown";
+    if (skill_id < 0 || (size_t)skill_id >= TOTAL_SKILLS) return "Unknown";
     return ALL_SKILLS[skill_id].name;
 }
 

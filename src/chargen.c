@@ -35,7 +35,7 @@ static int character_add_language(Character *ch, const char *lang);
 // Grant all languages at 98% proficiency (if supported) to a character
 static void grant_all_languages(Character *ch) {
     if (!ch) return;
-    for (int i = 0; i < NUM_ALL_LANGUAGES; i++) {
+    for (size_t i = 0; i < NUM_ALL_LANGUAGES; i++) {
         character_add_language(ch, all_language_ids[i]);
         // If language proficiency is tracked, set to 98 here
         // Example: ch->language_proficiency[i] = 98;
@@ -1719,7 +1719,11 @@ int save_character(PlayerSession *sess) {
     /* Write inventory (appended after alignment for backwards compatibility).
      * Format: item_count, then for each item: template_id + equip_slot.
      * equip_slot: 0=not equipped, 1=primary weapon, 2=secondary weapon,
-     *             3=armor, 4=accessory1, 5=accessory2, 6=accessory3 */
+     *             3=armor, 4=accessory1, 5=accessory2, 6=accessory3
+     * TODO:INCOMPLETE — only the template_id is persisted per item.  Items
+     * with player-modified properties or items sourced from the LPC object
+     * system (no C template) need an extended serialisation format that also
+     * stores an LPC object path and/or a property delta map. */
     {
         int item_count = ch->inventory.item_count;
         fwrite(&item_count, sizeof(int), 1, f);
@@ -2189,6 +2193,16 @@ int load_character(PlayerSession *sess, const char *username) {
                 if (fread(&template_id, sizeof(int), 1, f) != 1) break;
                 if (fread(&slot, sizeof(uint8_t), 1, f) != 1) break;
 
+                /* TODO:INCOMPLETE — item_create() reconstructs items from the C
+                 * ITEM_TEMPLATES[] array using only the template_id.  This means:
+                 *  - Player-specific modifications (renamed items, custom enchants,
+                 *    changed durability beyond sdc_mdc default) are NOT restored.
+                 *  - Items originally granted by the LPC object system (not
+                 *    registered in ITEM_TEMPLATES[]) will silently be skipped here
+                 *    (item_create returns NULL for unknown template_ids).
+                 * Full fix: store the LPC object path or a serialised property map
+                 * alongside template_id, then reconstruct via the VM + LPC item
+                 * object when a valid path is present. */
                 Item *item = item_create(template_id);
                 if (!item) continue;
 

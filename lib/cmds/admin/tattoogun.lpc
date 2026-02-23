@@ -39,7 +39,7 @@ string *valid_locations = ({
     "right_hand", "left_hand", "forehead", "neck", "abdomen", "shoulders"
 });
 
-int cmd(string args) {
+int main(string args) {
     object wiz, target;
     string player_name, tattoo_name, body_location;
     int current_tattoos, max_tattoos;

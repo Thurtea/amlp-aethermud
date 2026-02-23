@@ -10,7 +10,7 @@
 
 #define PSI_DAEMON "/daemon/psionics"
 
-int cmd(string args) {
+int main(string args) {
     object psi_d = find_object(PSI_DAEMON);
     if (!psi_d) {
         psi_d = load_object(PSI_DAEMON);

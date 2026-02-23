@@ -10,7 +10,7 @@
 
 #define SPELLS_DAEMON "/daemon/spells"
 
-int cmd(string args) {
+int main(string args) {
     object spells_d = find_object(SPELLS_DAEMON);
     if (!spells_d) {
         spells_d = load_object(SPELLS_DAEMON);

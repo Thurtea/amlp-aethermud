@@ -2,7 +2,7 @@
 // Display player's magical tattoos
 // For Atlanteans and Sunaj Assassins
 
-int cmd(string args) {
+int main(string args) {
     object player;
     mapping tattoo_map;
     string *tattoo_names, output;

@@ -8,7 +8,7 @@
  * The position resets automatically when moving rooms or taking actions.
  */
 
-int cmd(string args) {
+int main(string args) {
     object user = this_player();
     
     if (!args || args == "") {

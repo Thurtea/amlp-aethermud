@@ -1,6 +1,6 @@
 // /lib/cmds/stats.lpc - Display character statistics
 
-int cmd(string args) {
+int main(string args) {
     object player = this_player();
     
     if (!player) {

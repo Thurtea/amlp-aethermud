@@ -60,6 +60,40 @@
 #include "ui_frames.h"
 #include "wiz_tools.h"
 
+/* ============================================================
+ * TODO:SECURITY — Password hashing stubs
+ *
+ * hash_password() and verify_password() are intentional STUBS.
+ * They currently store and compare PLAINTEXT passwords, which is
+ * a critical security vulnerability.
+ *
+ * REQUIRED ACTION: Replace both functions with a proper KDF such
+ * as bcrypt (libbcrypt / crypt_r with $2b$) or Argon2 (libargon2).
+ * The password_hash field in PlayerSession (session_internal.h:41)
+ * must be widened to at least 128 bytes to hold a bcrypt/Argon2
+ * digest before that change is made.
+ *
+ * DO NOT deploy this server on a public network until this is done.
+ * ============================================================ */
+
+/* TODO:SECURITY — Replace with bcrypt_hashpw() or argon2id_hash_encoded().
+ * Returns a pointer to a static buffer — caller must copy immediately. */
+static const char *hash_password(const char *plaintext) {
+    /* STUB: returns plaintext unchanged.  Replace with real KDF. */
+    static char buf[128];
+    strncpy(buf, plaintext ? plaintext : "", sizeof(buf) - 1);
+    buf[sizeof(buf) - 1] = '\0';
+    return buf;
+}
+
+/* TODO:SECURITY — Replace with bcrypt_checkpw() or argon2id_verify().
+ * Returns 1 if plaintext matches stored hash, 0 otherwise. */
+static int verify_password(const char *plaintext, const char *stored_hash) {
+    /* STUB: plain strcmp — replace with constant-time KDF verify. */
+    if (!plaintext || !stored_hash) return 0;
+    return (strcmp(plaintext, stored_hash) == 0);
+}
+
 /* Forward declarations for functions defined later in this file */
 void staff_message(const char *message, PlayerSession *exclude);
 
@@ -4921,12 +4955,14 @@ more_room_source:
             return vm_value_create_string("Usage: password <old_password> <new_password>\r\n");
         }
 
-        /* Verify old password */
-        if (strcmp(old_pw, session->password_hash) != 0) {
+        /* TODO:SECURITY — verify_password is a stub; replace with bcrypt/argon2 */
+        if (!verify_password(old_pw, session->password_hash)) {
             return vm_value_create_string("Incorrect old password.\r\n");
         }
 
-        strncpy(session->password_hash, new_pw, sizeof(session->password_hash) - 1);
+        /* TODO:SECURITY — hash_password is a stub; replace with bcrypt/argon2 */
+        strncpy(session->password_hash, hash_password(new_pw), sizeof(session->password_hash) - 1);
+        session->password_hash[sizeof(session->password_hash) - 1] = '\0';
         save_character(session);
         return vm_value_create_string("Password changed successfully.\r\n");
     }
@@ -5343,9 +5379,8 @@ void process_login_state(PlayerSession *session, const char *input) {
             
             /* Load existing character (this populates password_hash) */
             if (load_character(session, session->username)) {
-                /* Simple password verification - compare with stored hash */
-                /* Note: For dev purposes, storing plaintext. TODO: Use proper bcrypt */
-                if (session->password_hash[0] && strcmp(session->password_hash, start) != 0) {
+                /* TODO:SECURITY — verify_password is a stub; replace with bcrypt/argon2 */
+                if (session->password_hash[0] && !verify_password(start, session->password_hash)) {
                     send_to_player(session, "\r\nIncorrect password.\r\n");
                     session->state = STATE_DISCONNECTING;
                     break;
@@ -5504,8 +5539,8 @@ void process_login_state(PlayerSession *session, const char *input) {
                 return;
             }
             
-            /* Store password hash (using plaintext for dev - TODO: bcrypt) */
-            strncpy(session->password_hash, session->password_buffer, sizeof(session->password_hash) - 1);
+            /* TODO:SECURITY — hash_password is a stub; replace with bcrypt/argon2 */
+            strncpy(session->password_hash, hash_password(session->password_buffer), sizeof(session->password_hash) - 1);
             session->password_hash[sizeof(session->password_hash) - 1] = '\0';
             
             /* Create player object */

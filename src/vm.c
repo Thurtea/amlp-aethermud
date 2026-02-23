@@ -694,7 +694,7 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
             
             // CRITICAL DEBUG for process_command
             if (vm->current_frame->function && strcmp(vm->current_frame->function->name, "process_command") == 0) {
-                fprintf(stderr, "[VM LOAD_LOCAL] process_command loading idx=%d, operand.int_operand=%d\n", 
+                fprintf(stderr, "[VM LOAD_LOCAL] process_command loading idx=%d, operand.int_operand=%ld\n",
                         idx, instr->operand.int_operand);
                 fprintf(stderr, "[VM LOAD_LOCAL]   local_variables=%p, local[%d].type=%d\n",
                         (void*)vm->current_frame->local_variables, idx,

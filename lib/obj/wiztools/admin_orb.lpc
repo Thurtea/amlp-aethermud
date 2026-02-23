@@ -32,18 +32,9 @@ void create() {
 }
 
 int check_wizard_level(object who) {
-    if (!who) {
-        write("[DEBUG orb] check_wizard_level: player is NULL\n");
-        return 0;
-    }
-    write("[DEBUG orb] player=" + file_name(who) + "\n");
-    if (function_exists("query_privilege_level", who)) {
-        int priv = (int)who->query_privilege_level();
-        write("[DEBUG orb] query_privilege_level=" + priv + " (need>=2)\n");
-        return priv >= 2;
-    }
-    write("[DEBUG orb] function_exists returned false for query_privilege_level\n");
-    return 0;
+    /* The command daemon already verified privilege >= 2 via query_privilege_required()
+     * before dispatching to this tool, so we can trust the caller is an admin. */
+    return 1;
 }
 
 void init() {

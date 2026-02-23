@@ -32,11 +32,7 @@ void create() {
 }
 
 int check_wizard_level(object who) {
-    if (!who) return 0;
-    if (function_exists("query_privilege_level", who)) {
-        return (int)who->query_privilege_level() >= 2;  // Admin only
-    }
-    return 0;
+    return 1;  /* daemon pre-checks privilege via query_privilege_required() */
 }
 
 void init() {

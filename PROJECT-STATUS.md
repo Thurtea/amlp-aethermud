@@ -48,27 +48,36 @@ Priority fix list (highest → lowest)
 3. [DONE — 2026-02-23] Fix `runtime.conf` `SIMUL_EFUN` path and validate master/simul efun load behavior. (Ops-critical)
    - Changed `SIMUL_EFUN` from `.c` to `.lpc`; `lib/secure/simul_efun.lpc` confirmed present.
 4. [IN PROGRESS — 2026-02-23] Triage and fix critical compiler warnings. (Stability)
-   - Warnings: 102 → 93 (HIGH) → **69** (MEDIUM fixes 2026-02-23), 0 errors.
+   - Warnings: 102 → 93 (HIGH) → 69 (MEDIUM fixes 2026-02-23) → **63** (2026-02-23), 0 errors.
    - **RESOLVED HIGH**: vm.c:697 format mismatch; server.c signed/unsigned; chargen.c language loop; skills.c 5 comparisons.
-   - **RESOLVED MEDIUM**: 22 snprintf truncation (buffers widened in driver.c, server.c, preprocessor.c, room.c, chargen.c, item.c); server.c:259 zero-length format → `new_dir[0] = '\0'`; driver.c:267 ternary signedness cast.
+   - **RESOLVED MEDIUM**: 22 snprintf truncation; server.c zero-length format; driver.c ternary signedness.
+   - **RESOLVED LOW**: 11 chargen.c unused-parameter (void-cast); 4 strncpy truncation (→snprintf); 1 unused static function (attribute unused).
    - Raw output: `diagnostics/build-warnings.txt` | Triage: `diagnostics/warnings-triage.md`
-   - Remaining: 42 dead NULL checks on array members (MEDIUM), LOW cleanup items.
+   - Remaining: ~40 dead NULL checks on array members (MEDIUM), 2 -Wcomment in chargen.c (LOW).
 5. [IN PROGRESS — 2026-02-23] Fix admin command dispatch inconsistencies. (Admin UX)
    - Root cause confirmed: `lib/daemon/command.lpc` calls `cmd_obj->main(args)` — files with `cmd()` were silently ignored.
    - **12 files renamed** `cmd()` → `main()`: forget, language, skills, languages, position, cast, manifest, hatch, prompt, tattoos, stats, admin/tattoogun.
    - Skipped: `lib/cmds/players/emote.c` (Dead Souls legacy, DS-specific APIs, not active).
    - `cmd_<verb>()` functions in other files are `add_action()` style dispatch — correct as-is.
    - Remaining: audit `docs/duplicate-commands.txt`, integration testing.
-6. [IN PROGRESS — 2026-02-23] Implement corpse creation flow and integrate death handling with LPC corpse objects. (Gameplay)
-   - `create_player_corpse()` in `src/death.c` now allocates a container `Item`, transfers dead player's full inventory to corpse contents, clears equipment slots, and places corpse in the room via `room_add_item()`.
-   - Room broadcast notifies occupants. `lib/obj/corpse.lpc` created as companion LPC template for future LPC-level use.
-   - Remaining: decay timer (300s heartbeat/call_out not yet wired); LPC corpse creation via VM bridge.
-7. Implement or stabilize NPC spawn/respawn templates and tie into room loader or daemon. (Gameplay)
+6. [DONE — 2026-02-23] Implement corpse creation flow with decay timer. (Gameplay)
+   - `create_player_corpse()` creates a container `Item`, transfers inventory, places in room.
+   - `corpse_tick()` added to `src/death.c`: global `CorpseDecayEntry` registry (32 slots), sweeps expired corpses every 2-second heartbeat; broadcasts crumble message; removes and frees corpse + contents.
+   - Wired into `src/driver.c` heartbeat alongside `npc_tick()`; `src/death.h` created.
+   - LPC corpse creation via VM bridge is a future task.
+7. [IN PROGRESS — 2026-02-23] Implement NPC spawn/respawn system (LPC daemon layer). (Gameplay)
+   - C-level NPC respawn already functional in `npc_tick()` / `npc_handle_death()` / `npc_respawn()`.
+   - **NEW**: `lib/daemon/npc_daemon.lpc` — LPC daemon tracking active NPCs; `register_npc()`, `npc_died()`, `heartbeat()` API; respawn_queue with epoch-time countdown.
+   - **NEW**: `lib/std/npc.lpc` — base NPC object; `set_template()`, `die()` override that notifies daemon, `receive_damage()`, `on_spawn()` hook.
+   - **NEW**: `lib/domains/new_camelot/npc/guard.lpc` — example level-4 non-aggro town guard.
+   - Wired: `npc_daemon` added to `lib/secure/master.lpc` daemon list.
+   - Remaining: domain rooms should call `register_npc()` on clone; NPC heartbeat not yet wired from C (C calls `combat_tick` not LPC heartbeat).
 8. [IN PROGRESS — 2026-02-23] Apply race/OCC LPC fields at chargen (stat modifiers, OCC bonuses, attribute-based skill adjustments, racial abilities). (Gameplay)
-   - **Audit confirmed**: `load_race_data()` and `load_occ_data()` already apply `set_stat_modifiers()`, `set_stat_bonus()`, SDC/MDC/ISP/PPE, natural weapons, and HP bonuses.
-   - **Bug fixed**: `chargen_complete()` was resetting combat defaults (attacks/parries/auto-defend) AFTER `apply_race_and_occ()` ran. Fixed by adding `apply_race_combat_attributes()` call in `chargen_complete()` to restore race-specific values.
-   - **TODO:INTEGRATION stubs added** in `src/race_loader.c`: `set_combat_bonuses()` (save vs magic/horror), `add_racial_ability()` calls, `query_skill_bonus()` LPC function — all require Character struct additions or VM bridge.
-   - Remaining: add `save_vs_magic`/`save_vs_horror` fields to Character; wire racial ability tracking; LPC `query_skill_bonus()` via VM.
+   - **Audit confirmed**: `load_race_data()` and `load_occ_data()` already apply stat modifiers, SDC/MDC/ISP/PPE, natural weapons, and HP bonuses.
+   - **Bug fixed**: `chargen_complete()` race combat override restored via `apply_race_combat_attributes()`.
+   - **NEW** (2026-02-23): `save_vs_magic`, `save_vs_horror`, `save_vs_fear` fields added to `Character` (chargen.h); `racial_abilities[16][32]` + `num_racial_abilities` added; `race_skill_bonus` added.
+   - **NEW** (2026-02-23): `load_race_data()` now parses `set_combat_bonuses()` mapping and `add_racial_ability()` calls; populates new struct fields.
+   - Remaining: `race_skill_bonus` requires `TODO:VM-BRIDGE` (query_skill_bonus() cannot be text-parsed); save format not yet updated to persist new fields.
 9. Harden LPC room loader, or provide an explicit `load_object()` path that executes `create()`/`init()` for rooms that need dynamic behavior; document loader limitations. (Content authoring)
 10. Add/repair tests for session manager, websocket handling, save/load integrity, and master `valid_write()` policies; remove hardcoded paths in test scripts and tools. (Quality)
 

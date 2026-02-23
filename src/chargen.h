@@ -147,6 +147,22 @@ typedef struct Character {
     /* Magical tattoos (applied by wiz tattoo-gun) */
     Tattoo tattoos[MAX_TATTOOS];
     int num_tattoos;
+
+    /* Race save-vs bonuses (from set_combat_bonuses in LPC race file) */
+    int save_vs_magic;   /* Bonus to saving throw vs. magic effects */
+    int save_vs_horror;  /* Bonus to saving throw vs. horror factor */
+    int save_vs_fear;    /* Bonus to saving throw vs. fear/mind control */
+
+    /* Racial abilities (from add_racial_ability() in LPC race file) */
+#define MAX_RACIAL_ABILITIES 16
+    char racial_abilities[MAX_RACIAL_ABILITIES][32];
+    int  num_racial_abilities;
+
+    /* Per-race flat % bonus to all skills (from query_skill_bonus() in LPC) */
+    /* TODO:VM-BRIDGE — query_skill_bonus() must be called via obj_call_method()
+     * on the race LPC object; text-parsing is not possible for a function return.
+     * When wired, store the result here and apply in skills.c's percentage calc. */
+    int race_skill_bonus;
 } Character;
 
 /* Chargen initialization */

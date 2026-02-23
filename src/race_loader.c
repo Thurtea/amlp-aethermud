@@ -374,29 +374,53 @@ void load_race_data(const char *race_name, Character *ch) {
         }
     }
 
-    /* ---- Combat bonuses: set_combat_bonuses(([ "save_magic": 2, ... ])) ----
-     * TODO:INTEGRATION — these values are present in LPC race files (e.g.
-     * atlantean: save_magic +2, save_horror +2) but the Character struct has
-     * no dedicated fields for save-vs bonuses or horror-factor modifiers.
-     * To implement: add save_vs_magic, save_vs_horror, save_vs_fear fields to
-     * CharacterStats (chargen.h) then parse and apply them here using
-     * lpc_extract_mapping_ints(buf, "set_combat_bonuses(", &map). */
+    /* ---- Combat bonuses: set_combat_bonuses(([ "save_magic": 2, ... ])) ---- */
+    {
+        ParsedMapping bmap;
+        if (lpc_extract_mapping_ints(buf, "set_combat_bonuses(", &bmap) > 0) {
+            for (int i = 0; i < bmap.count; i++) {
+                if (strcmp(bmap.keys[i], "save_magic") == 0)
+                    ch->save_vs_magic += bmap.vals[i];
+                else if (strcmp(bmap.keys[i], "save_horror") == 0)
+                    ch->save_vs_horror += bmap.vals[i];
+                else if (strcmp(bmap.keys[i], "save_fear") == 0)
+                    ch->save_vs_fear += bmap.vals[i];
+            }
+        }
+    }
 
     /* ---- Racial abilities: add_racial_ability("name", rank) ----
-     * TODO:INTEGRATION — racial abilities listed in LPC race files (e.g.
-     * atlantean: magic_tattoos, sense_ley_lines) are not tracked in the C
-     * Character struct.  To implement: add a racial_abilities string array
-     * (or a flags bitmask) to Character, then parse add_racial_ability() calls
-     * here and populate that array.  The LPC layer can also read these via
-     * query_racial_abilities() on the player object. */
+     * Scan the entire buffer for every add_racial_ability("...") call and
+     * record the ability name in ch->racial_abilities[]. */
+    {
+        const char *search = buf;
+        const char *tag    = "add_racial_ability(\"";
+        size_t      tlen   = strlen(tag);
+        while ((search = strstr(search, tag)) != NULL) {
+            search += tlen;
+            const char *end = strchr(search, '"');
+            if (!end) break;
+            int len = (int)(end - search);
+            if (len > 0 && ch->num_racial_abilities < MAX_RACIAL_ABILITIES) {
+                int copy = (len < 31) ? len : 31;
+                strncpy(ch->racial_abilities[ch->num_racial_abilities],
+                        search, (size_t)copy);
+                ch->racial_abilities[ch->num_racial_abilities][copy] = '\0';
+                ch->num_racial_abilities++;
+            }
+            search = end + 1;
+        }
+    }
 
     /* ---- Skill bonus: query_skill_bonus() ----
-     * TODO:INTEGRATION — LPC race files expose query_skill_bonus() returning a
+     * TODO:VM-BRIDGE — query_skill_bonus() is a LPC function that returns a
      * per-race % bonus applied to all skills (e.g. Human +5%, Atlantean +3%).
-     * This requires calling a LPC function via the VM (obj_call_method) rather
-     * than text parsing.  Until the VM bridge is wired, the bonus is not applied.
-     * When wired: retrieve the bonus and store in ch->race_skill_bonus (new field)
-     * then apply in skills.c when computing final skill percentages. */
+     * Text-parsing cannot evaluate a function return; the VM bridge
+     * (obj_call_method on the race object) must be wired before this value
+     * can be populated.  Signature: int query_skill_bonus() in lib/races/RACE.lpc
+     * When wired: call obj_call_method(race_obj, "query_skill_bonus", ...)
+     * and store the result in ch->race_skill_bonus, then apply in
+     * skills.c when computing final skill percentages. */
 
     fprintf(stderr, "DEBUG: Race data loaded for '%s'\n", race_name);
     free(buf);

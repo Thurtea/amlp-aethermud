@@ -1,0 +1,43 @@
+/*
+ * /lib/domains/new_camelot/npc/guard.lpc
+ *
+ * New Camelot town guard — example NPC using /std/npc as a base.
+ *
+ * Registered in new_camelot/town_square.lpc via:
+ *   npc_daemon->register_npc(clone_object("/domains/new_camelot/npc/guard"),
+ *                             "/domains/new_camelot/town_square",
+ *                             120);
+ *
+ * Stats (Palladium-inspired):
+ *   Level 4, 35 HP, SDC 20, non-aggro by default.
+ *   Carries a vibro-sword (flavour only; combat wired at C level).
+ */
+
+inherit "/std/npc";
+
+void create() {
+    ::create();
+
+    set_name("guard");
+    set_id(({"guard", "town guard", "new camelot guard"}));
+    set_short("a New Camelot guard");
+    set_long(
+        "A Coalition-era guard in battered Coalition armour stands watch.\n"
+        "A vibro-sword hangs at their hip, and their eyes scan the square.\n"
+    );
+
+    set_template("guard");
+    set_level(4);
+    set_hp(35);
+    set_aggro(0);   /* Non-aggressive unless attacked */
+    set_position_text("is standing watch near the gate.");
+}
+
+void on_spawn() {
+    /* Called after moving into the room — could greet players */
+}
+
+/* Guards respond to 'talk guard' or 'say' with a brief line */
+string query_talk() {
+    return "The guard nods. \"Move along, citizen. Keep the peace.\"\n";
+}

@@ -1,3 +1,4 @@
+#include "death.h"
 #include "chargen.h"
 #include "session_internal.h"
 #include "room.h"
@@ -7,6 +8,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
+
+/* ---- Corpse decay registry ---- */
+#define MAX_ACTIVE_CORPSES 32
+#define CORPSE_DECAY_SECS  300
+
+typedef struct {
+    Item  *corpse;   /* NULL = unused slot */
+    Room  *room;
+    time_t expires;
+} CorpseDecayEntry;
+
+static CorpseDecayEntry corpse_registry[MAX_ACTIVE_CORPSES];
 
 /* send_to_player is defined in the UI layer (used across modules) */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
@@ -82,8 +96,16 @@ void create_player_corpse(PlayerSession *sess) {
         snprintf(msg, sizeof(msg),
                  "%s collapses and their body falls lifeless.\n", sess->username);
         room_broadcast(room, msg, sess);
-        /* TODO: decay — remove corpse from room after ~300 seconds via heartbeat
-         * or call_out once that infrastructure is wired into the driver. */
+
+        /* Register corpse for heartbeat-based decay (CORPSE_DECAY_SECS seconds). */
+        for (int i = 0; i < MAX_ACTIVE_CORPSES; i++) {
+            if (!corpse_registry[i].corpse) {
+                corpse_registry[i].corpse  = corpse;
+                corpse_registry[i].room    = room;
+                corpse_registry[i].expires = time(NULL) + CORPSE_DECAY_SECS;
+                break;
+            }
+        }
     } else {
         /* No room — free the corpse to avoid a leak */
         Item *c = corpse->contents;
@@ -95,6 +117,42 @@ void create_player_corpse(PlayerSession *sess) {
 
     INFO_LOG("Corpse created for %s in room %d",
              sess->username, room ? room->id : -1);
+}
+
+/* ------------------------------------------------------------------ */
+/* corpse_tick — called every 2-second heartbeat from driver.c.        */
+/* Sweeps the corpse registry: when a corpse's expiry time is reached  */
+/* it is broadcast to the room, removed from the room, and freed.      */
+/* ------------------------------------------------------------------ */
+void corpse_tick(void) {
+    time_t now = time(NULL);
+    for (int i = 0; i < MAX_ACTIVE_CORPSES; i++) {
+        CorpseDecayEntry *e = &corpse_registry[i];
+        if (!e->corpse) continue;
+        if (now < e->expires) continue;
+
+        /* Announce decay to the room */
+        if (e->room && e->corpse->name) {
+            char msg[160];
+            snprintf(msg, sizeof(msg), "%s crumbles to dust.\n", e->corpse->name);
+            /* Capitalise first letter for presentation */
+            if (msg[0] >= 'a' && msg[0] <= 'z') msg[0] = (char)(msg[0] - 32);
+            room_broadcast(e->room, msg, NULL);
+        }
+
+        /* Remove from room and free corpse + contents */
+        if (e->room) room_remove_item(e->room, e->corpse);
+        Item *c = e->corpse->contents;
+        while (c) { Item *nx = c->next; item_free(c); c = nx; }
+        free(e->corpse->name);
+        free(e->corpse->description);
+        free(e->corpse);
+
+        /* Clear registry slot */
+        e->corpse  = NULL;
+        e->room    = NULL;
+        e->expires = 0;
+    }
 }
 
 void handle_player_death(PlayerSession *sess, PlayerSession *killer,

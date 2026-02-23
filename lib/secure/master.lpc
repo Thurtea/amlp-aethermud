@@ -66,6 +66,7 @@ private void init_daemons() {
         "/daemon/languages",
         "/daemon/psionics",
         "/daemon/spells",
+        "/daemon/npc_daemon",
     });
     
     foreach (string daemon in daemon_list) {

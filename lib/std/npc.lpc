@@ -1,0 +1,92 @@
+/*
+ * /lib/std/npc.lpc
+ *
+ * Base LPC NPC object.  All domain NPCs should inherit this.
+ *
+ * Provides:
+ *   - set_template() / query_template()  — template id string
+ *   - die() override that notifies npc_daemon before destructing
+ *   - on_spawn() hook for subclass initialization
+ *
+ * Usage (in a domain NPC file):
+ *   inherit "/std/npc";
+ *   void create() {
+ *       ::create();
+ *       set_name("guard");
+ *       set_short("a town guard");
+ *       set_long("A vigilant guard watches over the town.\n");
+ *       set_template("guard");
+ *       set_level(3);
+ *       set_hp(30);
+ *   }
+ */
+
+inherit "/std/living";
+
+private string npc_template;
+private int    npc_level;
+private int    npc_hp;
+private int    npc_hp_max;
+private int    npc_aggro;    /* 1 = attacks players on sight */
+private string npc_position; /* position text shown in room look */
+
+void create() {
+    npc_template = "generic_npc";
+    npc_level    = 1;
+    npc_hp       = 10;
+    npc_hp_max   = 10;
+    npc_aggro    = 0;
+    npc_position = "is standing here.";
+}
+
+/* Called after the NPC is moved into its spawn room.  Override in subclasses
+ * to run initialisation that requires a valid environment(). */
+void on_spawn() { }
+
+/* ---- Template ---- */
+void   set_template(string t) { npc_template = t; }
+string query_template()       { return npc_template; }
+
+/* ---- Level ---- */
+void set_level(int l) { npc_level = l; }
+int  query_level()    { return npc_level; }
+
+/* ---- HP ---- */
+void set_hp(int h) { npc_hp = npc_hp_max = h; }
+int  query_hp()    { return npc_hp; }
+int  query_hp_max(){ return npc_hp_max; }
+
+/* ---- Aggression ---- */
+void set_aggro(int a) { npc_aggro = a; }
+int  query_aggro()    { return npc_aggro; }
+
+/* ---- Position ---- */
+void   set_position_text(string p) { npc_position = p; }
+string query_position()            { return npc_position; }
+
+/* ---- die() — notify npc_daemon then destruct ---- */
+void die(object killer) {
+    /* Award any XP / drop loot here in subclasses before calling ::die() */
+    object env = environment(this_object());
+    if (env) {
+        tell_room(env, query_short() + " dies with a final groan.\n");
+    }
+
+    /* Notify the NPC daemon so it can queue a respawn */
+    object daemon = find_object("/daemon/npc_daemon");
+    if (daemon) {
+        daemon->npc_died(this_object());
+    }
+
+    destruct(this_object());
+}
+
+/* ---- Receive damage (basic stub) ---- */
+int receive_damage(int damage, object attacker) {
+    npc_hp -= damage;
+    if (npc_hp <= 0) {
+        die(attacker);
+        return 1;  /* dead */
+    }
+    return 0;
+}

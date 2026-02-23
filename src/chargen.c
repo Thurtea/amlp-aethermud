@@ -846,7 +846,7 @@ static void chargen_show_zones(PlayerSession *sess) {
 }
 
 /* Display available secondary skills for selection */
-static void chargen_show_secondary_skills(PlayerSession *sess) {
+static void __attribute__((unused)) chargen_show_secondary_skills(PlayerSession *sess) {
     Character *ch = &sess->character;
     int remaining = 3 - sess->chargen_temp_choice;
 
@@ -1281,8 +1281,9 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
 
 /* Stats command */
 void cmd_stats(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
-    
+
     if (sess->state != STATE_PLAYING) {
         send_to_player(sess, "You must complete character creation first.\n");
         return;
@@ -1293,8 +1294,9 @@ void cmd_stats(PlayerSession *sess, const char *args) {
 
 /* Skills command */
 void cmd_skills(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
-    
+
     if (sess->state != STATE_PLAYING) {
         send_to_player(sess, "You must complete character creation first.\n");
         return;
@@ -1522,21 +1524,15 @@ int save_character(PlayerSession *sess) {
     /* Write custom title and messages (version 6 additions) - fixed 128 bytes each */
     {
         char tmp[128];
-        /* title */
-        memset(tmp, 0, sizeof(tmp));
-        if (sess->title) strncpy(tmp, sess->title, sizeof(tmp) - 1);
+        /* All four fields are fixed-size arrays so their address is always
+         * valid; use snprintf to avoid strncpy truncation warnings. */
+        memset(tmp, 0, sizeof(tmp)); snprintf(tmp, sizeof(tmp), "%s", sess->title);
         fwrite(tmp, 1, sizeof(tmp), f);
-        /* enter_msg */
-        memset(tmp, 0, sizeof(tmp));
-        if (sess->enter_msg) strncpy(tmp, sess->enter_msg, sizeof(tmp) - 1);
+        memset(tmp, 0, sizeof(tmp)); snprintf(tmp, sizeof(tmp), "%s", sess->enter_msg);
         fwrite(tmp, 1, sizeof(tmp), f);
-        /* leave_msg */
-        memset(tmp, 0, sizeof(tmp));
-        if (sess->leave_msg) strncpy(tmp, sess->leave_msg, sizeof(tmp) - 1);
+        memset(tmp, 0, sizeof(tmp)); snprintf(tmp, sizeof(tmp), "%s", sess->leave_msg);
         fwrite(tmp, 1, sizeof(tmp), f);
-        /* goto_msg */
-        memset(tmp, 0, sizeof(tmp));
-        if (sess->goto_msg) strncpy(tmp, sess->goto_msg, sizeof(tmp) - 1);
+        memset(tmp, 0, sizeof(tmp)); snprintf(tmp, sizeof(tmp), "%s", sess->goto_msg);
         fwrite(tmp, 1, sizeof(tmp), f);
     }
 
@@ -2400,6 +2396,7 @@ int load_character(PlayerSession *sess, const char *username) {
 
 /* Display inventory */
 void cmd_inventory(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     inventory_display(sess);
 }
@@ -2451,6 +2448,7 @@ void cmd_unequip(PlayerSession *sess, const char *args) {
 
 /* Display equipped items */
 void cmd_worn(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     equipment_display(sess);
 }
@@ -2733,12 +2731,14 @@ void cmd_use_power(PlayerSession *sess, const char *args) {
 
 /* Display known psionic powers */
 void cmd_powers(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     psionics_display_powers(sess);
 }
 
 /* Display ISP status */
 void cmd_isp(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     psionics_display_isp(sess);
 }
@@ -2825,20 +2825,23 @@ void cmd_cast(PlayerSession *sess, const char *args) {
 
 /* Display known spells */
 void cmd_spells(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     magic_display_spells(sess);
 }
 
 /* Display PPE status */
 void cmd_ppe(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     magic_display_ppe(sess);
 }
 
 /* Meditate to recover ISP/PPE */
 void cmd_meditate(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
-    
+
     Character *ch = &sess->character;
     
     if (ch->psionics.is_meditating || ch->magic.is_meditating) {
@@ -2982,6 +2985,7 @@ void cmd_speak(PlayerSession *sess, const char *args) {
 
 /* List known languages */
 void cmd_languages(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     Character *ch = &sess->character;
     int w = FRAME_WIDTH;
@@ -3014,6 +3018,7 @@ void cmd_languages(PlayerSession *sess, const char *args) {
 /* ========== SWIM COMMAND ========== */
 
 void cmd_swim(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     Character *ch = &sess->character;
 

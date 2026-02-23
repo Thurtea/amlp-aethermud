@@ -57,6 +57,7 @@
 #include "chargen.h"
 #include "race_loader.h"
 #include "npc.h"
+#include "death.h"
 #include "ui_frames.h"
 #include "wiz_tools.h"
 
@@ -6277,6 +6278,7 @@ int main(int argc, char **argv) {
             combat_tick();
             combat_regen_tick();
             npc_tick();
+            corpse_tick();
 
             /* Magic, psionics, and meditation ticks */
             for (int i = 0; i < MAX_CLIENTS; i++) {

@@ -742,7 +742,7 @@ void inventory_display(struct PlayerSession *sess) {
             
             /* Add indefinite article (a/an) with formatted (lowercase) name */
             const char *name = curr->name;
-            char name_buf[256];
+            char name_buf[260];
             if (name && name[0]) {
                 char fmt[256];
                 format_item_name(name, fmt, sizeof(fmt));

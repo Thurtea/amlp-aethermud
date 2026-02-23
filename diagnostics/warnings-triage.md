@@ -1,7 +1,7 @@
 # Compiler Warnings Triage — AMLP AetherMUD
-Date: 2026-02-23 (updated 2026-02-23 after HIGH-severity fixes)
+Date: 2026-02-23 (updated 2026-02-23 after MEDIUM-severity fixes)
 Build: `make clean && make` (debug target, -Wall -Wextra -g -O0 -std=c99)
-Total warnings: 102 → **93** after fixes | Total errors: 0
+Total warnings: 102 → 93 (HIGH fixes) → **69** (MEDIUM fixes) | Total errors: 0
 Raw output: `diagnostics/build-warnings.txt`
 
 ---
@@ -12,14 +12,14 @@ Raw output: `diagnostics/build-warnings.txt`
 |---|----------|-------|----------|-------|
 | 1 | Always-true NULL check on fixed-size array member | 42 | MEDIUM | driver.c, wiz_tools.c, chargen.c, combat.c, room.c |
 | 2 | Signed/unsigned integer comparison [-Wsign-compare] | 8 → **0** | ~~HIGH~~ **RESOLVED** | server.c, chargen.c, skills.c |
-| 3 | `snprintf` output may be truncated [-Wformat-truncation] | 22 | MEDIUM | driver.c, server.c |
+| 3 | `snprintf` output may be truncated [-Wformat-truncation] | 22 → **0** | ~~MEDIUM~~ **RESOLVED** | driver.c, server.c, preprocessor.c, room.c, chargen.c, item.c |
 | 4 | `printf`/`fprintf` format type mismatch [-Wformat] | 1 → **0** | ~~HIGH~~ **RESOLVED** | vm.c |
 | 5 | Unused variable / set-but-not-used | 7 | LOW | driver.c, parser.c, combat.c, wiz_tools.c |
 | 6 | Unused parameter [-Wunused-parameter] | 13 | LOW | multiple |
 | 7 | Unused static function [-Wunused-function] | 2 | LOW | compiler.c, chargen.c |
-| 8 | Zero-length format string [-Wformat-zero-length] | 1 | MEDIUM | server.c |
+| 8 | Zero-length format string [-Wformat-zero-length] | 1 → **0** | ~~MEDIUM~~ **RESOLVED** | server.c |
 | 9 | `/*` nested inside comment [-Wcomment] | 2 | LOW | chargen.c |
-| 10 | Signed `?:` operand type change [-Wsign-compare] | 1 | MEDIUM | driver.c |
+| 10 | Signed `?:` operand type change [-Wsign-compare] | 1 → **0** | ~~MEDIUM~~ **RESOLVED** | driver.c |
 | 11 | Unused static array variables | 4 | LOW | wiz_tools.c |
 
 ---
@@ -74,7 +74,7 @@ handles arbitrary user input.
 
 ---
 
-### 3. `snprintf` output may be truncated — MEDIUM (22 instances)
+### 3. `snprintf` output may be truncated — ~~MEDIUM~~ RESOLVED (22 instances fixed 2026-02-23)
 
 **Pattern:** `-Wformat-truncation` fires when GCC can statically prove that the
 formatted output *might* exceed the destination buffer size.
@@ -150,7 +150,7 @@ allows it.
 
 ---
 
-### 8. Zero-length format string — MEDIUM (1 instance)
+### 8. Zero-length format string — ~~MEDIUM~~ RESOLVED (1 instance fixed 2026-02-23)
 
 **Location:** `src/server.c:259` — `snprintf(new_dir, sizeof(new_dir), "")`.
 
@@ -171,7 +171,7 @@ technically implementation-defined.
 
 ---
 
-### 10. Ternary signedness change — MEDIUM (1 instance)
+### 10. Ternary signedness change — ~~MEDIUM~~ RESOLVED (1 instance fixed 2026-02-23)
 
 **Location:** `src/driver.c:233` — `session ? session->state : -1` where
 `session->state` is `SessionState` (an unsigned enum) and `-1` is a signed `int`.
@@ -190,12 +190,9 @@ use a sentinel enum value instead of `-1`.
 1. ~~**HIGH — `vm.c:697` format mismatch**~~ **RESOLVED 2026-02-23** — changed `%d` to `%ld` in `vm.c:697`.
 2. ~~**HIGH — `server.c` signed/unsigned comparisons**~~ **RESOLVED 2026-02-23** — changed `int bi` to `size_t bi` in `send_ansi()` (`server.c:26`).
 3. ~~**HIGH — `skills.c` signed/unsigned comparisons**~~ **RESOLVED 2026-02-23** — changed loop vars to `size_t`, used `(size_t)id >= TOTAL_SKILLS` guards in `skills.c`.
-4. **MEDIUM — `driver.c:4330` snprintf truncation** of `forced_cmd`: a wizard-
-   forced command could be silently truncated, producing wrong output.
-5. **MEDIUM — `server.c:188` path snprintf truncation**: path overflow risk in
-   filesystem ls command.
-6. **MEDIUM — `server.c:259` zero-length format string**: trivial fix.
-7. **MEDIUM — `driver.c:233` ternary signedness**: low impact but formally UB.
-8. **MEDIUM — NULL checks on array addresses** (42 instances): dead code, replace
+4. ~~**MEDIUM — snprintf truncation (22 sites)**~~ **RESOLVED 2026-02-23** — widened destination buffers in driver.c, server.c, preprocessor.c, room.c, chargen.c, item.c.
+5. ~~**MEDIUM — `server.c:259` zero-length format string**~~ **RESOLVED 2026-02-23** — replaced with `new_dir[0] = '\0';`.
+6. ~~**MEDIUM — `driver.c:267` ternary signedness**~~ **RESOLVED 2026-02-23** — cast to `(int)(session ? (int)session->state : -1)`.
+7. **MEDIUM — NULL checks on array addresses** (42 instances): dead code, replace
    with `[0]` checks.
-9. **LOW** — remaining unused vars/params/functions.
+8. **LOW** — remaining unused vars/params/functions.

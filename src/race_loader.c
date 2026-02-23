@@ -374,7 +374,65 @@ void load_race_data(const char *race_name, Character *ch) {
         }
     }
 
+    /* ---- Combat bonuses: set_combat_bonuses(([ "save_magic": 2, ... ])) ----
+     * TODO:INTEGRATION — these values are present in LPC race files (e.g.
+     * atlantean: save_magic +2, save_horror +2) but the Character struct has
+     * no dedicated fields for save-vs bonuses or horror-factor modifiers.
+     * To implement: add save_vs_magic, save_vs_horror, save_vs_fear fields to
+     * CharacterStats (chargen.h) then parse and apply them here using
+     * lpc_extract_mapping_ints(buf, "set_combat_bonuses(", &map). */
+
+    /* ---- Racial abilities: add_racial_ability("name", rank) ----
+     * TODO:INTEGRATION — racial abilities listed in LPC race files (e.g.
+     * atlantean: magic_tattoos, sense_ley_lines) are not tracked in the C
+     * Character struct.  To implement: add a racial_abilities string array
+     * (or a flags bitmask) to Character, then parse add_racial_ability() calls
+     * here and populate that array.  The LPC layer can also read these via
+     * query_racial_abilities() on the player object. */
+
+    /* ---- Skill bonus: query_skill_bonus() ----
+     * TODO:INTEGRATION — LPC race files expose query_skill_bonus() returning a
+     * per-race % bonus applied to all skills (e.g. Human +5%, Atlantean +3%).
+     * This requires calling a LPC function via the VM (obj_call_method) rather
+     * than text parsing.  Until the VM bridge is wired, the bonus is not applied.
+     * When wired: retrieve the bonus and store in ch->race_skill_bonus (new field)
+     * then apply in skills.c when computing final skill percentages. */
+
     fprintf(stderr, "DEBUG: Race data loaded for '%s'\n", race_name);
+    free(buf);
+}
+
+/* ------------------------------------------------------------------ */
+/*  apply_race_combat_attributes - re-apply ONLY combat defaults from  */
+/*  the race file without touching stat modifiers or resource pools.   */
+/*  Called from chargen_complete() after default combat values are set */
+/*  so that racial attack counts, auto-parry, etc. override the base. */
+/* ------------------------------------------------------------------ */
+
+void apply_race_combat_attributes(PlayerSession *sess) {
+    if (!sess) return;
+    Character *ch = &sess->character;
+    if (!ch->race) return;
+
+    char fname[256], path[512];
+    name_to_filename(ch->race, fname, sizeof(fname));
+    snprintf(path, sizeof(path), "lib/races/%s.lpc", fname);
+
+    char *buf = read_file_to_buffer(path);
+    if (!buf) return;
+
+    int val = lpc_extract_int(buf, "set_attacks_per_round(", NULL, -1);
+    if (val >= 0) ch->attacks_per_round = 1 + val;
+
+    val = lpc_extract_int(buf, "set_parries_per_round(", NULL, -1);
+    if (val >= 0) ch->parries_per_round = val;
+
+    val = lpc_extract_int(buf, "set_auto_parry(", NULL, -1);
+    if (val >= 0) ch->racial_auto_parry = val;
+
+    val = lpc_extract_int(buf, "set_auto_dodge(", NULL, -1);
+    if (val >= 0) ch->racial_auto_dodge = val;
+
     free(buf);
 }
 
@@ -439,6 +497,18 @@ void load_occ_data(const char *occ_name, Character *ch) {
         ch->mdc = ch->max_mdc = mdc_class;
         fprintf(stderr, "DEBUG: OCC mdc_class=%d\n", mdc_class);
     }
+
+    /* ---- OCC combat bonuses: set_combat_bonuses(([ ... ])) ----
+     * TODO:INTEGRATION — some OCC files define combat bonus mappings
+     * (e.g. Cyber-Knight strike/parry/dodge bonuses from psi-sword training).
+     * Apply once Character struct gains save_vs_magic/save_vs_horror/strike_bonus
+     * fields.  Use lpc_extract_mapping_ints(buf, "set_combat_bonuses(", &map)
+     * as in the race loader above. */
+
+    /* ---- OCC starting attacks (some OCCs have class-based attack bonus) ----
+     * TODO:INTEGRATION — set_attacks_per_round() in OCC files should ADD to the
+     * race base (not override it).  For now, race value set by
+     * apply_race_combat_attributes() is used as the sole source. */
 
     fprintf(stderr, "DEBUG: OCC data loaded for '%s'\n", occ_name);
     free(buf);

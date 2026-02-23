@@ -1552,7 +1552,7 @@ show_room:
     if (room->items) {
         Item *curr = room->items;
         while (curr) {
-            char outbuf[256];
+            char outbuf[260];
             const char *iname = curr->name && curr->name[0] ? curr->name : "something";
 
             /* Format item name to lowercase except acronyms/proper nouns */

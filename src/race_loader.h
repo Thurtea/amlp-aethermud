@@ -21,6 +21,11 @@ extern const int XP_TABLE[MAX_LEVEL + 1];
 /* Apply race and O.C.C. effects to the session's character. */
 void apply_race_and_occ(PlayerSession *sess);
 
+/* Re-apply only combat attributes (attacks/parries/auto-defense) from the race
+ * file.  Call this in chargen_complete() AFTER setting combat defaults so that
+ * race-specific values (e.g. dragon 4 attacks/round) override the base 2. */
+void apply_race_combat_attributes(PlayerSession *sess);
+
 /* Loaders that parse LPC definitions from disk and apply to Character */
 void load_race_data(const char *race_name, Character *ch);
 void load_occ_data(const char *occ_name, Character *ch);

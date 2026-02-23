@@ -129,8 +129,8 @@ void expand_lpc_alias(const char *input, char *output, size_t out_size,
 
 /* ls - List directory contents */
 int cmd_ls_filesystem(PlayerSession *session, const char *args) {
-    char path[512];
-    char full_path[1024];
+    char path[1025];
+    char full_path[1028];
 
     /* Expand path aliases (std, cmds, dom, obj, sec, daemon, inc, ~) */
     char alias_buf[512];
@@ -184,12 +184,12 @@ int cmd_ls_filesystem(PlayerSession *session, const char *args) {
         if (entry->d_name[0] == '.') continue;
         
         /* Check if directory or file */
-        char item_path[1024];
+        char item_path[1285];
         snprintf(item_path, sizeof(item_path), "%s/%s", full_path, entry->d_name);
         
         struct stat st;
         if (stat(item_path, &st) == 0) {
-            char line[256];
+            char line[264];
             if (S_ISDIR(st.st_mode)) {
                 snprintf(line, sizeof(line), "%-30s/\r\n", entry->d_name);
             } else {
@@ -205,8 +205,8 @@ int cmd_ls_filesystem(PlayerSession *session, const char *args) {
 
 /* cd - Change directory */
 int cmd_cd_filesystem(PlayerSession *session, const char *args) {
-    char new_dir[512];
-    char full_path[1024];
+    char new_dir[1025];
+    char full_path[1028];
     
     /* Handle no argument - go to home directory */
     if (!args || *args == '\0') {
@@ -256,7 +256,7 @@ int cmd_cd_filesystem(PlayerSession *session, const char *args) {
         if (last_slash) {
             *last_slash = '\0';
         } else {
-            snprintf(new_dir, sizeof(new_dir), "");
+            new_dir[0] = '\0';
         }
     }
     /* Handle relative path */
@@ -402,7 +402,7 @@ int cmd_more_filesystem(PlayerSession *session, const char *args) {
     /* Also try with .lpc extension */
     FILE *f = fopen(full_path, "r");
     if (!f) {
-        char try_lpc[1024];
+        char try_lpc[1029];
         snprintf(try_lpc, sizeof(try_lpc), "%s.lpc", full_path);
         f = fopen(try_lpc, "r");
         if (!f) {
@@ -497,7 +497,7 @@ int cmd_ed_filesystem(PlayerSession *session, const char *args) {
 
     /* Try with .lpc extension if not found */
     struct stat st;
-    char actual_path[1024];
+    char actual_path[1029];
     strncpy(actual_path, full_path, sizeof(actual_path) - 1);
     if (stat(actual_path, &st) != 0) {
         snprintf(actual_path, sizeof(actual_path), "%s.lpc", full_path);

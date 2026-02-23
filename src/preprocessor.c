@@ -312,7 +312,7 @@ static void pp_handle_include(PPState *pp, const char *inc_path,
     }
 
     /* Resolve the include path */
-    char full_path[PATH_MAX];
+    char full_path[PATH_MAX + 32];
     char *content = NULL;
 
     /* Try mudlib_path/include/inc_path */

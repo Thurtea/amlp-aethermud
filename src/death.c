@@ -1,6 +1,7 @@
 #include "chargen.h"
 #include "session_internal.h"
 #include "room.h"
+#include "item.h"
 #include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,14 +33,68 @@ void add_death_scar(Character *ch) {
 
 void create_player_corpse(PlayerSession *sess) {
     if (!sess) return;
-    /* TODO: hook into LPC corpse creation. For now, log and notify room. */
     Room *room = sess->current_room;
-    if (room) {
-        char msg[256];
-        snprintf(msg, sizeof(msg), "%s collapses and their body falls lifeless. A corpse lies here.\n", sess->username);
-        room_broadcast(room, msg, sess);
+
+    /* Allocate and initialise a container item for the corpse */
+    Item *corpse = (Item *)calloc(1, sizeof(Item));
+    if (!corpse) {
+        INFO_LOG("create_player_corpse: out of memory for %s", sess->username);
+        return;
     }
-    INFO_LOG("Corpse creation stub for %s", sess->username);
+
+    /* Build corpse name / description */
+    char corpse_name[96];
+    snprintf(corpse_name, sizeof(corpse_name), "the corpse of %s", sess->username);
+    char corpse_desc[256];
+    snprintf(corpse_desc, sizeof(corpse_desc),
+             "The lifeless body of %s lies here.", sess->username);
+
+    corpse->id          = -1;  /* Dynamic item, not from template */
+    corpse->name        = strdup(corpse_name);
+    corpse->description = strdup(corpse_desc);
+    corpse->type        = ITEM_MISC;
+    corpse->weight      = 150;  /* Dead weight (lbs) */
+    corpse->is_container = true;
+    corpse->next        = NULL;
+
+    /* Transfer the dead player's entire inventory into the corpse.
+     * The player's inventory linked list head becomes the corpse's contents. */
+    Character *ch = &sess->character;
+    corpse->contents = ch->inventory.items;
+    ch->inventory.items      = NULL;
+    ch->inventory.item_count = 0;
+    ch->inventory.total_weight = 0;
+
+    /* Also strip equipped items into the corpse.
+     * Items in equipment slots are still pointed to from inventory so the
+     * transfer above already covers them; just clear the slot pointers. */
+    ch->equipment.weapon_primary   = NULL;
+    ch->equipment.weapon_secondary = NULL;
+    ch->equipment.armor            = NULL;
+    ch->equipment.accessory1       = NULL;
+    ch->equipment.accessory2       = NULL;
+    ch->equipment.accessory3       = NULL;
+
+    /* Place corpse in the room */
+    if (room) {
+        room_add_item(room, corpse);
+        char msg[128];
+        snprintf(msg, sizeof(msg),
+                 "%s collapses and their body falls lifeless.\n", sess->username);
+        room_broadcast(room, msg, sess);
+        /* TODO: decay — remove corpse from room after ~300 seconds via heartbeat
+         * or call_out once that infrastructure is wired into the driver. */
+    } else {
+        /* No room — free the corpse to avoid a leak */
+        Item *c = corpse->contents;
+        while (c) { Item *nx = c->next; item_free(c); c = nx; }
+        free(corpse->name);
+        free(corpse->description);
+        free(corpse);
+    }
+
+    INFO_LOG("Corpse created for %s in room %d",
+             sess->username, room ? room->id : -1);
 }
 
 void handle_player_death(PlayerSession *sess, PlayerSession *killer,

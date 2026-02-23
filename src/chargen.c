@@ -189,7 +189,7 @@ int create_wizard_workroom(const char *username) {
     }
 
     /* Create workroom.lpc */
-    char file_path[512];
+    char file_path[528];
     snprintf(file_path, sizeof(file_path), "%s/workroom.lpc", dir_path);
 
     if (stat(file_path, &st) == 0) {
@@ -885,7 +885,10 @@ void chargen_complete(PlayerSession *sess) {
     inventory_init(&sess->character.inventory, sess->character.stats.ps);
     equipment_init(&sess->character.equipment);
     
-    /* Initialize real-time combat defaults (before race loading overrides) */
+    /* Initialize real-time combat defaults, then let race override them.
+     * apply_race_combat_attributes() re-reads only combat fields so that
+     * racial attack counts (e.g. Dragon Hatchling = 4) override the base 2
+     * without re-applying stat modifiers that were already rolled. */
     sess->character.attacks_per_round = 2;
     sess->character.parries_per_round = 2;
     sess->character.racial_auto_parry = 0;
@@ -893,6 +896,7 @@ void chargen_complete(PlayerSession *sess) {
     sess->character.auto_parry_enabled = 1;
     sess->character.auto_dodge_enabled = 1;
     sess->character.wimpy_threshold = 0;
+    apply_race_combat_attributes(sess);
 
     /* Initialize psionics and magic (Phase 5) */
     psionics_init_abilities(&sess->character);
@@ -1473,7 +1477,7 @@ int save_character(PlayerSession *sess) {
     snprintf(filepath, sizeof(filepath), "lib/save/players/%s.dat", sess->username);
     
     /* Create backup of existing save */
-    char backup[512];
+    char backup[520];
     snprintf(backup, sizeof(backup), "%s.bak", filepath);
     rename(filepath, backup);  /* Move old save to backup (ignore errors) */
     
@@ -2609,7 +2613,7 @@ void cmd_get(PlayerSession *sess, const char *args) {
                      fmt_name[0] == 'o' || fmt_name[0] == 'u');
         send_to_player(sess, "You pick up %s %s.\n", vowel ? "an" : "a", fmt_name);
 
-        char msg[256];
+        char msg[384];
         snprintf(msg, sizeof(msg), "%s picks up %s %s.\n",
                  sess->username, vowel ? "an" : "a", fmt_name);
         room_broadcast(sess->current_room, msg, sess);

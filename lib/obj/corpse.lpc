@@ -1,0 +1,65 @@
+/*
+ * /lib/obj/corpse.lpc
+ *
+ * Player corpse object — created by death.c (C layer) and mirrored here for
+ * future use when the LPC object system drives corpse creation directly.
+ *
+ * Properties set by the C layer via item_create_from_lpc() or by LPC clone():
+ *   corpse_of   — player name (string)
+ *   contents    — mapping of item name → item object
+ *
+ * Decay: after DECAY_SECONDS the corpse removes itself from the room.
+ * TODO: wire call_out() once the C driver exposes it to LPC.
+ */
+
+#define DECAY_SECONDS 300
+
+string corpse_of;
+mapping contents;
+
+void create() {
+    set_name("corpse");
+    set_id(({"corpse", "body"}));
+    set_short("a corpse");
+    set_long("An unremarkable corpse. There may still be items on it.\n");
+    contents = ([]);
+}
+
+/* Called by whoever creates this corpse (wiz command, C death handler, etc.) */
+void set_corpse_of(string player_name) {
+    corpse_of = player_name;
+    set_short("the corpse of " + player_name);
+    set_long("The lifeless body of " + player_name + " lies here.\n");
+    set_name("corpse of " + player_name);
+    set_id(({"corpse", "body", "corpse of " + player_name, player_name}));
+    /* TODO: call_out("decay", DECAY_SECONDS); */
+}
+
+string query_corpse_of() { return corpse_of; }
+
+/* Inventory container interface */
+void add_item_to_corpse(string item_name, object item_ob) {
+    contents[item_name] = item_ob;
+}
+
+mixed query_item(string name) {
+    return contents[name];
+}
+
+mapping query_contents() {
+    return contents;
+}
+
+/* Remove self from room after decay timer fires */
+void decay() {
+    object env = environment(this_object());
+    if (env) {
+        tell_room(env, "The corpse of " + (corpse_of || "someone") +
+                  " crumbles to dust.\n");
+    }
+    destruct(this_object());
+}
+
+string query_help() {
+    return "A player corpse. Use 'get <item> from corpse' to loot it.\n";
+}

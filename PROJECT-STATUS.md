@@ -48,19 +48,27 @@ Priority fix list (highest → lowest)
 3. [DONE — 2026-02-23] Fix `runtime.conf` `SIMUL_EFUN` path and validate master/simul efun load behavior. (Ops-critical)
    - Changed `SIMUL_EFUN` from `.c` to `.lpc`; `lib/secure/simul_efun.lpc` confirmed present.
 4. [IN PROGRESS — 2026-02-23] Triage and fix critical compiler warnings. (Stability)
-   - Warnings: 102 → **93** (9 HIGH-severity eliminated, 0 errors).
-   - **RESOLVED**: vm.c:697 `%d`/`long` format mismatch; server.c `send_ansi()` signed/unsigned; chargen.c language loop; skills.c 5 signed/unsigned comparisons.
+   - Warnings: 102 → 93 (HIGH) → **69** (MEDIUM fixes 2026-02-23), 0 errors.
+   - **RESOLVED HIGH**: vm.c:697 format mismatch; server.c signed/unsigned; chargen.c language loop; skills.c 5 comparisons.
+   - **RESOLVED MEDIUM**: 22 snprintf truncation (buffers widened in driver.c, server.c, preprocessor.c, room.c, chargen.c, item.c); server.c:259 zero-length format → `new_dir[0] = '\0'`; driver.c:267 ternary signedness cast.
    - Raw output: `diagnostics/build-warnings.txt` | Triage: `diagnostics/warnings-triage.md`
-   - Remaining: 22 snprintf truncation (MEDIUM), 42 dead NULL checks (MEDIUM), LOW cleanup items.
+   - Remaining: 42 dead NULL checks on array members (MEDIUM), LOW cleanup items.
 5. [IN PROGRESS — 2026-02-23] Fix admin command dispatch inconsistencies. (Admin UX)
    - Root cause confirmed: `lib/daemon/command.lpc` calls `cmd_obj->main(args)` — files with `cmd()` were silently ignored.
    - **12 files renamed** `cmd()` → `main()`: forget, language, skills, languages, position, cast, manifest, hatch, prompt, tattoos, stats, admin/tattoogun.
    - Skipped: `lib/cmds/players/emote.c` (Dead Souls legacy, DS-specific APIs, not active).
    - `cmd_<verb>()` functions in other files are `add_action()` style dispatch — correct as-is.
    - Remaining: audit `docs/duplicate-commands.txt`, integration testing.
-6. Implement corpse creation flow and integrate death handling with LPC corpse objects. (Gameplay)
+6. [IN PROGRESS — 2026-02-23] Implement corpse creation flow and integrate death handling with LPC corpse objects. (Gameplay)
+   - `create_player_corpse()` in `src/death.c` now allocates a container `Item`, transfers dead player's full inventory to corpse contents, clears equipment slots, and places corpse in the room via `room_add_item()`.
+   - Room broadcast notifies occupants. `lib/obj/corpse.lpc` created as companion LPC template for future LPC-level use.
+   - Remaining: decay timer (300s heartbeat/call_out not yet wired); LPC corpse creation via VM bridge.
 7. Implement or stabilize NPC spawn/respawn templates and tie into room loader or daemon. (Gameplay)
-8. Apply race/OCC LPC fields at chargen (stat modifiers, OCC bonuses, attribute-based skill adjustments, racial abilities). (Gameplay)
+8. [IN PROGRESS — 2026-02-23] Apply race/OCC LPC fields at chargen (stat modifiers, OCC bonuses, attribute-based skill adjustments, racial abilities). (Gameplay)
+   - **Audit confirmed**: `load_race_data()` and `load_occ_data()` already apply `set_stat_modifiers()`, `set_stat_bonus()`, SDC/MDC/ISP/PPE, natural weapons, and HP bonuses.
+   - **Bug fixed**: `chargen_complete()` was resetting combat defaults (attacks/parries/auto-defend) AFTER `apply_race_and_occ()` ran. Fixed by adding `apply_race_combat_attributes()` call in `chargen_complete()` to restore race-specific values.
+   - **TODO:INTEGRATION stubs added** in `src/race_loader.c`: `set_combat_bonuses()` (save vs magic/horror), `add_racial_ability()` calls, `query_skill_bonus()` LPC function — all require Character struct additions or VM bridge.
+   - Remaining: add `save_vs_magic`/`save_vs_horror` fields to Character; wire racial ability tracking; LPC `query_skill_bonus()` via VM.
 9. Harden LPC room loader, or provide an explicit `load_object()` path that executes `create()`/`init()` for rooms that need dynamic behavior; document loader limitations. (Content authoring)
 10. Add/repair tests for session manager, websocket handling, save/load integrity, and master `valid_write()` policies; remove hardcoded paths in test scripts and tools. (Quality)
 
@@ -68,7 +76,7 @@ Directory status table (directory — status — key notes)
 - `/` — Partial/Healthy — Build scripts, `mud.sh`, `Makefile`, and top-level docs present; unify control script references in docs.
 - `config/` — Improved — `runtime.conf` `SIMUL_EFUN` path fixed (2026-02-23); still lacks production settings (RUN_AS_USER, LOG_DIR, TLS).
 - `docs/` — Good — detailed audits and per-directory reports exist; `docs/project-report.md` synthesized recent analysis.
-- `diagnostics/` — Good — `build-warnings.txt` (93 warnings) and `warnings-triage.md` with severity ratings now present; HIGH items resolved.
+- `diagnostics/` — Good — `build-warnings.txt` (69 warnings) and `warnings-triage.md` updated; HIGH + MEDIUM items resolved.
 - `lib/` — Partial — rich mudlib exists (std, daemons, cmds) but many command stubs and some admin commands are incomplete; simul_efun is feature-rich but ANSI usage should be audited.
 - `src/` — Partial/Critical issues — engine and VM present; TODOs in `driver.c` (passwords, destruct lifecycle), `death.c`, `wiz_tools.c` need attention; many warnings reported.
 - `tests/` — Partial — robust unit tests for lexer/parser/VM/containers exist; integration/network tests rely on a running server and some tests/scripts use hardcoded paths and need stabilization for CI.

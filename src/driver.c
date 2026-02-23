@@ -264,7 +264,7 @@ static void command_debug_log_result(PlayerSession *session, VMValue result) {
             timestamp,
             user,
             ip,
-            session ? session->state : -1,
+            (int)(session ? (int)session->state : -1),
             path,
             command_debug_ctx.cmd,
             command_debug_ctx.args,
@@ -2563,7 +2563,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                         int vowel = (lowercase_race[0] == 'a' || lowercase_race[0] == 'e' ||
                                      lowercase_race[0] == 'i' || lowercase_race[0] == 'o' ||
                                      lowercase_race[0] == 'u');
-                        char race_desc[128];
+                        char race_desc[132];
                         snprintf(race_desc, sizeof(race_desc), "%s %s",
                                 vowel ? "An" : "A", lowercase_race);
 
@@ -2744,7 +2744,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         int w = FRAME_WIDTH;
         int count = 0;
         int admin_count = 0, domain_count = 0, code_count = 0, rp_count = 0;
-        char buf[256];
+        char buf[512];
 
         /* Count staff by role first */
         for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -3608,7 +3608,7 @@ more_room_source:
         char clone_alias[512];
         expand_lpc_alias(args, clone_alias, sizeof(clone_alias), session);
 
-        char clone_arg[512];
+        char clone_arg[1025];
         if (clone_alias[0] != '/') {
             /* Still relative after alias expansion — prepend current_dir */
             const char *cwd = session->current_dir;
@@ -3644,7 +3644,7 @@ more_room_source:
         /* Try LPC file path (e.g. /lib/objects/weapons/sword) */
         char fs_path[512];
         if (!resolve_lpc_path(args, fs_path, sizeof(fs_path))) {
-            char msg[512];
+            char msg[1120];
             snprintf(msg, sizeof(msg),
                 "Error: Failed to clone object: %s\r\n"
                 "File not found. Check the path and try again.\r\n", args);
@@ -3653,7 +3653,7 @@ more_room_source:
 
         Item *new_item = item_create_from_lpc(fs_path);
         if (!new_item) {
-            char msg[512];
+            char msg[560];
             snprintf(msg, sizeof(msg),
                 "Error: Failed to parse LPC object: %s\r\n", fs_path);
             return vm_value_create_string(msg);
@@ -4360,7 +4360,7 @@ more_room_source:
         send_to_player(target, "%s forces you to: %s\r\n", session->username, forced_cmd);
         execute_command(target, forced_cmd);
 
-        char response[256];
+        char response[640];
         snprintf(response, sizeof(response), "You force %s to: %s\r\n",
                 target_name, forced_cmd);
         return vm_value_create_string(response);

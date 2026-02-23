@@ -410,8 +410,9 @@ Item* item_create(int template_id) {
     item->is_equipped = false;
     item->stack_count = 1;
     item->current_durability = item->stats.sdc_mdc;
+    item->lpc_path = NULL;
     item->next = NULL;
-    
+
     return item;
 }
 
@@ -427,6 +428,7 @@ void item_free(Item *item) {
     }
     if (item->name) free(item->name);
     if (item->description) free(item->description);
+    if (item->lpc_path) free(item->lpc_path);
     free(item);
 }
 
@@ -1151,4 +1153,104 @@ void cmd_deactivate(PlayerSession *sess, const char *args) {
                  "The flaming blade on %s's sword dissipates.\r\n", sess->username);
         room_broadcast(room, msg, sess);
     }
+}
+
+/* -----------------------------------------------------------------------
+ * Inventory binary serialization
+ * ----------------------------------------------------------------------- */
+
+static uint8_t equip_slot_for(const Item *item, const EquipmentSlots *eq) {
+    if (!item->is_equipped || !eq) return 0;
+    if (item == eq->weapon_primary)   return 1;
+    if (item == eq->weapon_secondary) return 2;
+    if (item == eq->armor)            return 3;
+    if (item == eq->accessory1)       return 4;
+    if (item == eq->accessory2)       return 5;
+    if (item == eq->accessory3)       return 6;
+    return 0;
+}
+
+static void restore_equip_slot(Item *item, EquipmentSlots *eq, uint8_t slot) {
+    if (!slot || !eq) return;
+    item->is_equipped = true;
+    switch (slot) {
+        case 1: eq->weapon_primary   = item; break;
+        case 2: eq->weapon_secondary = item; break;
+        case 3: eq->armor            = item; break;
+        case 4: eq->accessory1       = item; break;
+        case 5: eq->accessory2       = item; break;
+        case 6: eq->accessory3       = item; break;
+        default: item->is_equipped   = false; break;
+    }
+}
+
+void inventory_write_to_file(const Inventory *inv, const EquipmentSlots *eq, FILE *f) {
+    int count = inv ? inv->item_count : 0;
+    fwrite(&count, sizeof(int), 1, f);
+    if (!inv) return;
+    Item *curr = inv->items;
+    while (curr) {
+        if (curr->lpc_path) {
+            /* LPC-sourced item: sentinel + path + slot + delta_count */
+            int sentinel = -2;
+            fwrite(&sentinel, sizeof(int), 1, f);
+            uint16_t path_len = (uint16_t)strlen(curr->lpc_path);
+            fwrite(&path_len, sizeof(uint16_t), 1, f);
+            fwrite(curr->lpc_path, 1, path_len, f);
+            uint8_t slot = equip_slot_for(curr, eq);
+            fwrite(&slot, sizeof(uint8_t), 1, f);
+            uint8_t delta_count = 0; /* TODO:VM-BRIDGE property deltas */
+            fwrite(&delta_count, sizeof(uint8_t), 1, f);
+        } else {
+            /* C-template item: id + slot */
+            fwrite(&curr->id, sizeof(int), 1, f);
+            uint8_t slot = equip_slot_for(curr, eq);
+            fwrite(&slot, sizeof(uint8_t), 1, f);
+        }
+        curr = curr->next;
+    }
+}
+
+int inventory_read_from_file(Inventory *inv, EquipmentSlots *eq, FILE *f) {
+    int item_count = 0;
+    if (fread(&item_count, sizeof(int), 1, f) != 1) return 0;
+    if (item_count <= 0 || item_count >= 200) return 0;
+    for (int i = 0; i < item_count; i++) {
+        int template_id = -1;
+        if (fread(&template_id, sizeof(int), 1, f) != 1) break;
+
+        if (template_id == -2) {
+            /* LPC-sourced item */
+            uint16_t path_len = 0;
+            if (fread(&path_len, sizeof(uint16_t), 1, f) != 1) break;
+            if (path_len == 0 || path_len > 512) break;
+            char lpc_path[513];
+            if ((size_t)fread(lpc_path, 1, path_len, f) != (size_t)path_len) break;
+            lpc_path[path_len] = '\0';
+            uint8_t slot = 0;
+            if (fread(&slot, sizeof(uint8_t), 1, f) != 1) break;
+            uint8_t delta_count = 0;
+            if (fread(&delta_count, sizeof(uint8_t), 1, f) != 1) break;
+            /* Reconstruct from LPC source via filesystem text-scraping */
+            char fs_path[512];
+            Item *item = NULL;
+            if (resolve_lpc_path(lpc_path, fs_path, sizeof(fs_path))) {
+                item = item_create_from_lpc(fs_path);
+                if (item) item->lpc_path = strdup(lpc_path);
+            }
+            /* TODO:VM-BRIDGE: delta_count > 0 would replay property delta here */
+            if (!item) continue;
+            inventory_add(inv, item);
+            restore_equip_slot(item, eq, slot);
+        } else {
+            /* C-template item */
+            uint8_t slot = 0;
+            if (fread(&slot, sizeof(uint8_t), 1, f) != 1) break;
+            Item *item = item_create(template_id);
+            if (!item) continue;
+            inventory_add(inv, item);
+            restore_equip_slot(item, eq, slot);
+        }
+    }
+    return 0;
 }

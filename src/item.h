@@ -69,6 +69,9 @@ typedef struct Item {
     int charged;                /* Activated state (TW hilt blade) */
     struct Item *next;          /* Linked list */
 
+    /* LPC-sourced items: path of the originating LPC object (NULL for C-template items) */
+    char *lpc_path;             /* e.g. "/obj/weapons/laser_pistol" */
+
     /* Container support: items stored inside this object (e.g., a chest) */
     bool is_container;          /* True if this item holds other items */
     struct Item *contents;      /* Linked list of contained items (NULL if empty) */
@@ -121,6 +124,17 @@ void equipment_get_bonuses(EquipmentSlots *eq, int *strike, int *parry, int *dod
 bool equipment_can_equip(struct Character *ch, Item *item);
 void equipment_free(EquipmentSlots *eq);
 void equipment_display(PlayerSession *sess);
+
+/* Inventory binary serialization (used by save_character / load_character).
+ * Format: item_count (int) + per-item records:
+ *   C-template: template_id (int ≥0) + equip_slot (uint8_t)
+ *   LPC-sourced: sentinel -2 (int) + path_len (uint16_t) + path + equip_slot (uint8_t)
+ *                + delta_count (uint8_t, always 0 until VM-BRIDGE is implemented)
+ * Backward-compatible: old saves (no LPC items) load unchanged; old readers skip -2
+ * records gracefully (item_create(-2) returns NULL → continue). */
+#include <stdio.h>
+void inventory_write_to_file(const Inventory *inv, const EquipmentSlots *eq, FILE *f);
+int  inventory_read_from_file(Inventory *inv, EquipmentSlots *eq, FILE *f);
 
 /* Create an Item by parsing an LPC source file (used by clone parsing)
  * Returns a newly allocated Item or NULL on failure. */

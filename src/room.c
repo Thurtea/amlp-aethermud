@@ -65,6 +65,7 @@ void format_item_name(const char *iname, char *out, size_t out_sz) {
     out[out_sz-1] = '\0';
 }
 #include "session_internal.h"
+#include "session.h"
 #include "vm.h"
 #include "efun.h"
 #include "object.h"
@@ -1761,6 +1762,27 @@ void cmd_move(PlayerSession *sess, const char *direction) {
     room_remove_player(current, sess);
     room_add_player(next_room, sess);
     sess->current_room = next_room;
+
+    /* Fire init() on LPC room to let it run add_action() etc. for this player.
+     * Only called when: the room has an LPC object AND the player has a VM object.
+     * obj_call_method silently no-ops if the room doesn't define init(). */
+    if (global_vm && next_room->lpc_path && sess->player_object) {
+        set_current_session(sess);
+        VMValue path_val = vm_value_create_string(next_room->lpc_path);
+        VMValue room_obj = efun_find_object(global_vm, &path_val, 1);
+        vm_value_release(&path_val);
+        if (room_obj.type == VALUE_OBJECT && room_obj.data.object_value) {
+            VMValue player_arg;
+            player_arg.type = VALUE_OBJECT;
+            player_arg.data.object_value = (struct obj_t *)sess->player_object;
+            VMValue res = obj_call_method(global_vm,
+                              (struct obj_t *)room_obj.data.object_value,
+                              "init", &player_arg, 1);
+            vm_value_release(&res);
+        }
+        vm_value_release(&room_obj);
+        set_current_session(NULL);
+    }
 
     /* Notify new room of arrival */
     for (int i = 0; i < next_room->num_players; i++) {

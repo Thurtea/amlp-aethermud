@@ -7,7 +7,7 @@ CC = gcc
 # Default CFLAGS (can be overridden by target-specific assignments)
 CFLAGS ?= -Wall -Wextra -D_DEFAULT_SOURCE -g -O2 -std=c99
 CPPFLAGS += -Isrc
-LDFLAGS = -lm
+LDFLAGS = -lm -lcrypt
 
 # Directories
 SRC_DIR = src
@@ -47,7 +47,8 @@ DRIVER_SRCS = $(SRC_DIR)/driver.c $(SRC_DIR)/server.c $(SRC_DIR)/lexer.c $(SRC_D
               $(SRC_DIR)/room.c $(SRC_DIR)/chargen.c $(SRC_DIR)/skills.c \
 			  $(SRC_DIR)/combat.c $(SRC_DIR)/item.c $(SRC_DIR)/psionics.c \
 			  $(SRC_DIR)/magic.c $(SRC_DIR)/wiz_tools.c $(SRC_DIR)/race_loader.c \
-			  $(SRC_DIR)/ui_frames.c $(SRC_DIR)/death.c $(SRC_DIR)/npc.c
+			  $(SRC_DIR)/ui_frames.c $(SRC_DIR)/death.c $(SRC_DIR)/npc.c \
+			  $(SRC_DIR)/password.c
 
 # Count source files
 TOTAL_FILES = $(words $(DRIVER_SRCS))
@@ -113,7 +114,8 @@ tests: $(BUILD_DIR)/test_lexer $(BUILD_DIR)/test_parser $(BUILD_DIR)/test_vm \
        $(BUILD_DIR)/test_object $(BUILD_DIR)/test_gc $(BUILD_DIR)/test_efun \
        $(BUILD_DIR)/test_array $(BUILD_DIR)/test_mapping $(BUILD_DIR)/test_compiler \
        $(BUILD_DIR)/test_program $(BUILD_DIR)/test_simul_efun $(BUILD_DIR)/test_vm_execution \
-       $(BUILD_DIR)/test_parser_stability $(BUILD_DIR)/test_lpc_execution
+       $(BUILD_DIR)/test_parser_stability $(BUILD_DIR)/test_lpc_execution \
+       $(BUILD_DIR)/test_password $(BUILD_DIR)/test_save_load
 	@echo "All test binaries built"
 
 # Build everything
@@ -126,6 +128,32 @@ $(BUILD_DIR)/test_%: $(TEST_DIR)/test_%.c $(TEST_COMMON_SOURCES)
 	@echo "[*] Building test: $@"
 	@echo "[*] Compiling test sources..."
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) -I$(TEST_DIR) $(LDFLAGS)
+	@status=$$?; \
+	       if [ "$$status" -eq 0 ]; then \
+		       echo "[OK] Test build successful: $@"; \
+	else \
+		echo "[FAIL] Test build failed: $@"; \
+		exit 1; \
+	fi
+
+# Standalone override for test_save_load (needs item.c; provides its own stubs)
+$(BUILD_DIR)/test_save_load: $(TEST_DIR)/test_save_load.c $(SRC_DIR)/item.c
+	@mkdir -p $(BUILD_DIR)
+	@echo "[*] Building test: $@"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
+	@status=$$?; \
+	       if [ "$$status" -eq 0 ]; then \
+		       echo "[OK] Test build successful: $@"; \
+	else \
+		echo "[FAIL] Test build failed: $@"; \
+		exit 1; \
+	fi
+
+# Standalone override for test_password (only needs password.c + libcrypt)
+$(BUILD_DIR)/test_password: $(TEST_DIR)/test_password.c $(SRC_DIR)/password.c
+	@mkdir -p $(BUILD_DIR)
+	@echo "[*] Building test: $@"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
 	@status=$$?; \
 	       if [ "$$status" -eq 0 ]; then \
 		       echo "[OK] Test build successful: $@"; \

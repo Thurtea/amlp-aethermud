@@ -35,20 +35,23 @@ What is missing entirely
 - Runtime configuration for production (dedicated `RUN_AS_USER`, `LOG_DIR`, TLS options for websocket, and path validation).
 
 Priority fix list (highest → lowest)
-1. [IN PROGRESS — 2026-02-23] Replace plaintext password handling with secure hashing and eliminate any code-paths that log or store raw passwords. (Security-critical)
-   - Added `hash_password()` and `verify_password()` stubs in `src/driver.c` (~line 64).
-   - All plaintext `strcmp`/`strncpy` password sites wired to stubs (STATE_GET_PASSWORD, STATE_CONFIRM_PASSWORD, `password` command).
-   - Build: 0 errors, 102 warnings.  Remaining work: wire real bcrypt/argon2 KDF into stub bodies and add `libargon2` dependency.
-   - See `docs/implementation-plan.md` Priority 1 for exact steps.
-2. [IN PROGRESS — 2026-02-23] Implement inventory serialization in `save_character()`/`load_character()` and add tests to validate persistence. (Gameplay-critical)
-   - Audit confirmed: inventory IS already serialized in `src/chargen.c` (save lines ~1719, load lines ~2180).
-   - Format: item_count (int) + per-item {template_id (int), equip_slot (uint8_t)}.
-   - Added `TODO:INCOMPLETE` comments in both `save_character()` and `load_character()` explaining the LPC item reconstruction gap (`item_create()` only handles C-template items; LPC-sourced items need path + property delta serialisation).
-   - Remaining work: add `tests/test_save_load.c` regression test.
+1. [DONE — 2026-02-23] Replace plaintext password handling with bcrypt. (Security-critical)
+   - Extracted `hash_password()` and `verify_password()` to `src/password.c` / `src/password.h`.
+   - Uses `crypt_r()` with `$2b$10$` prefix; 16 bytes of salt from `/dev/urandom`; bcrypt-base64 encoded.
+   - `src/driver.c` stubs removed; real functions linked via `-lcrypt` (added to Makefile LDFLAGS).
+   - `tests/test_password.c`: 10 tests covering hash prefix, verify match/mismatch, unique salts, NULL/empty edge cases — all PASS.
+   - Build: 64 warnings, 0 errors.
+2. [DONE — 2026-02-23] Implement inventory serialization for LPC-sourced items; add test. (Gameplay-critical)
+   - Extracted inventory I/O to `inventory_write_to_file()` / `inventory_read_from_file()` in `src/item.c`.
+   - Format extended: C-template items unchanged (template_id ≥0 + equip_slot); LPC items use sentinel -2 + uint16 path_len + path + equip_slot + delta_count=0.
+   - Added `char *lpc_path` field to `Item` struct; `item_free()` frees it; `item_create()` zeros it.
+   - `chargen.c` save/load delegated to item.c helpers (TODO:INCOMPLETE comments resolved).
+   - `tests/test_save_load.c`: 11 tests — empty round-trip, 2 C-template items with equip slot, LPC sentinel written + graceful load without VM — all PASS.
+   - TODO:VM-BRIDGE: property delta replay not yet implemented (delta_count always 0).
 3. [DONE — 2026-02-23] Fix `runtime.conf` `SIMUL_EFUN` path and validate master/simul efun load behavior. (Ops-critical)
    - Changed `SIMUL_EFUN` from `.c` to `.lpc`; `lib/secure/simul_efun.lpc` confirmed present.
 4. [IN PROGRESS — 2026-02-23] Triage and fix critical compiler warnings. (Stability)
-   - Warnings: 102 → 93 (HIGH) → 69 (MEDIUM fixes 2026-02-23) → **63** (2026-02-23), 0 errors.
+   - Warnings: 102 → 93 (HIGH) → 69 (MEDIUM fixes 2026-02-23) → 63 → **64** (2026-02-23, +1 from password.c), 0 errors.
    - **RESOLVED HIGH**: vm.c:697 format mismatch; server.c signed/unsigned; chargen.c language loop; skills.c 5 comparisons.
    - **RESOLVED MEDIUM**: 22 snprintf truncation; server.c zero-length format; driver.c ternary signedness.
    - **RESOLVED LOW**: 11 chargen.c unused-parameter (void-cast); 4 strncpy truncation (→snprintf); 1 unused static function (attribute unused).
@@ -77,11 +80,11 @@ Priority fix list (highest → lowest)
    - `load_race_data()` parses `set_combat_bonuses()` and `add_racial_ability()` calls.
    - **NEW (2026-02-23)**: VM bridge wired — `load_race_data()` loads race LPC object via `efun_load_object()` and calls `query_skill_bonus()` to populate `race_skill_bonus`.
    - Remaining: `race_skill_bonus` not yet applied in skills.c; new fields not yet in save format (version 11 needed).
-9. [DONE — 2026-02-23] Wire LPC room `create()` and document `init()` gap. (Content authoring)
+9. [DONE — 2026-02-23] Wire LPC room `create()` and `init()` on player arrival. (Content authoring)
    - **Root cause**: `room_load_from_lpc()` in `src/room.c` text-scraped but never called the VM.
-   - **Fix**: After text-scraping, `room_load_from_lpc()` now calls `efun_load_object(global_vm, lpc_path)`, which fires the room's `create()` as a side-effect.
-   - `efun_load_object()` (and `efun_clone_object()`) already call `obj_call_method(vm, o, "create", NULL, 0)` internally.
-   - **Documented in implementation-plan.md Priority 9**: init() on player arrival requires a TODO:VM-DISPATCH hook in the player-move path (Priority 9b).
+   - **create() fix**: After text-scraping, `room_load_from_lpc()` calls `efun_load_object(global_vm, lpc_path)`, which fires the room's `create()` as a side-effect.
+   - **init() fix (Priority 9b — NEW 2026-02-23)**: `cmd_move()` in `src/room.c` now calls `efun_find_object()` on the destination room's LPC path after `room_add_player()`, then dispatches `obj_call_method("init", player_arg)`. Guard: only if `global_vm && next_room->lpc_path && sess->player_object`. No-ops silently if room doesn't define `init()`.
+   - Added `#include "session.h"` to `src/room.c` for `set_current_session()` prototype.
 10. Add/repair tests for session manager, websocket handling, save/load integrity, and master `valid_write()` policies; remove hardcoded paths in test scripts and tools. (Quality)
 
 Directory status table (directory — status — key notes)

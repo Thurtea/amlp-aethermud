@@ -7,6 +7,19 @@
 #include <stdlib.h>
 #include "driver.h"
 
+/* Forward declaration — avoids pulling in item.h and its header dependencies */
+typedef struct Item Item;
+
+/* Stubs for driver.c LPC-item helpers used by inventory_read_from_file(). */
+int resolve_lpc_path(const char *args, char *out_path, size_t out_size) {
+    (void)args; (void)out_path; (void)out_size;
+    return 0; /* can't resolve paths without the real driver */
+}
+Item *item_create_from_lpc(const char *fs_path) {
+    (void)fs_path;
+    return NULL; /* no LPC runtime in unit tests */
+}
+
 /* Callout scheduler stubs — tests don't run a main loop, so no-op is fine. */
 int callout_schedule(const char *func_name, double delay_seconds) {
     (void)func_name; (void)delay_seconds;

@@ -1716,33 +1716,10 @@ int save_character(PlayerSession *sess) {
         fwrite(&zero, sizeof(size_t), 1, f);
     }
 
-    /* Write inventory (appended after alignment for backwards compatibility).
-     * Format: item_count, then for each item: template_id + equip_slot.
-     * equip_slot: 0=not equipped, 1=primary weapon, 2=secondary weapon,
-     *             3=armor, 4=accessory1, 5=accessory2, 6=accessory3
-     * TODO:INCOMPLETE — only the template_id is persisted per item.  Items
-     * with player-modified properties or items sourced from the LPC object
-     * system (no C template) need an extended serialisation format that also
-     * stores an LPC object path and/or a property delta map. */
-    {
-        int item_count = ch->inventory.item_count;
-        fwrite(&item_count, sizeof(int), 1, f);
-        Item *curr = ch->inventory.items;
-        while (curr) {
-            fwrite(&curr->id, sizeof(int), 1, f);
-            uint8_t slot = 0;
-            if (curr->is_equipped) {
-                if (curr == ch->equipment.weapon_primary)   slot = 1;
-                else if (curr == ch->equipment.weapon_secondary) slot = 2;
-                else if (curr == ch->equipment.armor)        slot = 3;
-                else if (curr == ch->equipment.accessory1)   slot = 4;
-                else if (curr == ch->equipment.accessory2)   slot = 5;
-                else if (curr == ch->equipment.accessory3)   slot = 6;
-            }
-            fwrite(&slot, sizeof(uint8_t), 1, f);
-            curr = curr->next;
-        }
-    }
+    /* Write inventory — delegates to inventory_write_to_file() in item.c.
+     * Supports both C-template items (template_id ≥0) and LPC-sourced items
+     * (lpc_path set; serialised with sentinel -2 + path). */
+    inventory_write_to_file(&ch->inventory, &ch->equipment, f);
 
     /* Write death/lives/scars (version 4+) */
     int lives = ch->lives_remaining;
@@ -2181,48 +2158,9 @@ int load_character(PlayerSession *sess, const char *username) {
         }
     }
 
-    /* Read inventory (appended after alignment, may not exist in older saves).
-     * Format: item_count, then for each item: template_id (int) + equip_slot (uint8_t).
-     * equip_slot: 0=not equipped, 1=primary, 2=secondary, 3=armor, 4-6=accessories */
-    {
-        int item_count = 0;
-        if (fread(&item_count, sizeof(int), 1, f) == 1 && item_count > 0 && item_count < 200) {
-            for (int i = 0; i < item_count; i++) {
-                int template_id = -1;
-                uint8_t slot = 0;
-                if (fread(&template_id, sizeof(int), 1, f) != 1) break;
-                if (fread(&slot, sizeof(uint8_t), 1, f) != 1) break;
-
-                /* TODO:INCOMPLETE — item_create() reconstructs items from the C
-                 * ITEM_TEMPLATES[] array using only the template_id.  This means:
-                 *  - Player-specific modifications (renamed items, custom enchants,
-                 *    changed durability beyond sdc_mdc default) are NOT restored.
-                 *  - Items originally granted by the LPC object system (not
-                 *    registered in ITEM_TEMPLATES[]) will silently be skipped here
-                 *    (item_create returns NULL for unknown template_ids).
-                 * Full fix: store the LPC object path or a serialised property map
-                 * alongside template_id, then reconstruct via the VM + LPC item
-                 * object when a valid path is present. */
-                Item *item = item_create(template_id);
-                if (!item) continue;
-
-                inventory_add(&ch->inventory, item);
-
-                if (slot > 0) {
-                    item->is_equipped = true;
-                    switch (slot) {
-                        case 1: ch->equipment.weapon_primary   = item; break;
-                        case 2: ch->equipment.weapon_secondary = item; break;
-                        case 3: ch->equipment.armor            = item; break;
-                        case 4: ch->equipment.accessory1       = item; break;
-                        case 5: ch->equipment.accessory2       = item; break;
-                        case 6: ch->equipment.accessory3       = item; break;
-                        default: item->is_equipped = false; break;
-                    }
-                }
-            }
-        }
-    }
+    /* Read inventory — delegates to inventory_read_from_file() in item.c.
+     * Handles both C-template items and LPC-sourced items (sentinel -2 + path). */
+    inventory_read_from_file(&ch->inventory, &ch->equipment, f);
 
     /* Read lives/scars if saved by newer version (version >=4) */
     if (version >= 4) {

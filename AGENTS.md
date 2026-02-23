@@ -8,7 +8,7 @@ RULE 1 — NO COLOR CODES
 - Do not add ANSI color codes (`\033[`, `\e[`, `\x1b[`) to anything unless explicitly instructed.
 - This includes build scripts, `Makefile`, `mud.sh`, server logs, warmboot output, error messages, help text, admin tool output, and all in-game messages.
 - The ONLY approved uses of color are:
-  - WHO command: staff rank shown in red
+  - WHO command: staff per rank shown in red for admins, blue for domains and coding, and green for roleplay. creators that are apprentices yet to become any position will be cyan.
   - Room exits: shown in green
   - Player-to-player tells and wizard tells
 

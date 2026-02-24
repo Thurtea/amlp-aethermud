@@ -877,6 +877,17 @@ void occ_assign_skills(PlayerSession *sess, const char *occ_name) {
     }
     
     sess->character.num_skills = package->num_skills;
+
+    /* Apply per-race flat skill bonus (if present). This mirrors the intended
+     * behavior from PROJECT-STATUS: add race_skill_bonus to every assigned
+     * skill percentage and clamp to 100. */
+    for (int i = 0; i < MAX_PLAYER_SKILLS; i++) {
+        if (sess->character.race && sess->character.race_skill_bonus > 0) {
+            sess->character.skills[i].percentage += sess->character.race_skill_bonus;
+            if (sess->character.skills[i].percentage > 100)
+                sess->character.skills[i].percentage = 100;
+        }
+    }
 }
 
 /* ========== SKILL CHECKS ========== */

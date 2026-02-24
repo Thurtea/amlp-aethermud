@@ -1195,6 +1195,18 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                     occ_assign_skills(sess, ch->occ);
                     send_to_player(sess, "\nYour primary skills have been assigned based on your O.C.C.\n");
                     skill_display_list(sess);
+
+                    /* Apply per-race flat skill bonus (if present). This mirrors
+                     * the behavior applied in occ_assign_skills(): add
+                     * race_skill_bonus to each skill percentage and clamp to 100.
+                     */
+                    for (int i = 0; i < MAX_PLAYER_SKILLS; i++) {
+                        if (sess->character.race && sess->character.race_skill_bonus > 0) {
+                            sess->character.skills[i].percentage += sess->character.race_skill_bonus;
+                            if (sess->character.skills[i].percentage > 100)
+                                sess->character.skills[i].percentage = 100;
+                        }
+                    }
                 } else {
                     send_to_player(sess, "\nYou will receive skills through in-game training and progression.\n");
                 }

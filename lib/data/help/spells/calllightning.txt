@@ -1,0 +1,12 @@
+CALL_LIGHTNING (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 9
+Damage: 6d6 MD (area)
+Range: Sky/Area
+Area: 15-foot radius (strikes from above)
+
+Calls down a stormbolt from the sky to strike multiple targets
+in the area, dealing heavy electrical damage and possibly
+stunning or knocking targets off balance.
+
+See also: help magic, help weather

@@ -1,0 +1,28 @@
+// /lib/cmds/wizard/destruct.lpc
+// Destruct an object (wizard+)
+
+int query_privilege_required() { return 1; }
+
+int main(string args) {
+    object player = previous_object();
+    if (!args || args == "") {
+        tell_object(player, "Syntax: destruct <object>\n");
+        return 1;
+    }
+
+    string target = args;
+    object ob = find_object(target);
+    if (!ob) ob = present(target, environment(player));
+    if (!ob) {
+        tell_object(player, "Object not found: " + target + "\n");
+        return 1;
+    }
+
+    destruct(ob);
+    tell_object(player, "Destructed: " + file_name(ob) + "\n");
+    return 1;
+}
+
+string query_help() {
+    return "Syntax: destruct <object>\n\nDestructs the specified object. Wizard+ only.";
+}

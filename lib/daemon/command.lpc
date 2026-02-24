@@ -125,6 +125,7 @@ void init_commands() {
     commands["clone"] = "cmds/wizard/clone";
     commands["load"] = "cmds/wizard/load";
     commands["update"] = "cmds/wizard/update";
+    commands["reload"] = "cmds/wizard/reload";
     commands["destruct"] = "cmds/wizard/destruct";
     commands["setrole"] = "cmds/admin/setrole";
 
@@ -216,8 +217,8 @@ int execute_command(object player, string input, int priv_level) {
     if (result) return 1;
 
     // Command not found
-    tell_object(player, "Unknown command: " + verb);
-    tell_object(player, "Type 'help' for available commands.");
+    tell_object(player, "Unknown command: " + verb + "\n");
+    tell_object(player, "Type 'help' for available commands.\n");
     return 1;
 }
 

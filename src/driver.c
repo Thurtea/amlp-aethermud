@@ -4552,15 +4552,62 @@ more_room_source:
             send_to_player(session, "%s", "[Warmboot] Reloading: lib/secure/simul_efun.lpc\r\n");
             send_to_player(session, "%s", "[Warmboot] Scanning lib/cmds/ for updated command files...\r\n");
 
+            /* Rescan lib/cmds/ for command files and attempt to load them.
+             * If a command fails to compile, report to the admin but continue. */
+            DIR *cmdd = opendir("lib/cmds");
+            if (cmdd) {
+                struct dirent *ent;
+                char cmdpath[1024];
+                while ((ent = readdir(cmdd)) != NULL) {
+                    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+                    snprintf(cmdpath, sizeof(cmdpath), "lib/cmds/%s", ent->d_name);
+                    /* Recursive walk for subdirs */
+                    if (stat(cmdpath, &(struct stat){0}) == 0 && access(cmdpath, R_OK) == 0) {
+                        /* If directory, do a small recursive scan */
+                        if (opendir(cmdpath)) {
+                            /* scan files in subdir */
+                            DIR *sub = opendir(cmdpath);
+                            struct dirent *s;
+                            while ((s = readdir(sub)) != NULL) {
+                                if (strcmp(s->d_name, ".") == 0 || strcmp(s->d_name, "..") == 0) continue;
+                                if (strstr(s->d_name, ".lpc")) {
+                                    char full[1024];
+                                    snprintf(full, sizeof(full), "%s/%s", cmdpath, s->d_name);
+                                    /* Build lpc path by stripping leading lib/ and .lpc */
+                                    char *rel = full + strlen("lib/");
+                                    size_t rlen = strlen(rel);
+                                    if (rlen > 4 && strcmp(rel + rlen - 4, ".lpc") == 0) rel[rlen - 4] = '\0';
+                                    char lpcp[1024]; snprintf(lpcp, sizeof(lpcp), "/%s", rel);
+                                    VMValue pv = vm_value_create_string(lpcp);
+                                    VMValue crec = efun_load_object(global_vm, &pv, 1);
+                                    vm_value_release(&pv);
+                                    if (crec.type == VALUE_NULL) {
+                                        send_to_player(session, "%s", "[Warmboot] Command failed to load: ");
+                                        send_to_player(session, "%s", full);
+                                        send_to_player(session, "%s", "\r\n");
+                                    }
+                                    if (crec.type != VALUE_NULL) vm_value_release(&crec);
+                                }
+                            }
+                            closedir(sub);
+                        }
+                    }
+                }
+                closedir(cmdd);
+            }
+
             /* Optionally provide the detailed report (plain text) */
             send_to_player(session, "%s", report);
 
-            /* Completion line */
-            send_to_player(session, "%s", "[Warmboot] Warmboot complete. No players disconnected.\r\n");
+            /* Completion line to invoking admin */
+            send_to_player(session, "%s", "[Warmboot] Complete.\r\n");
+
+            /* Notify regular players with a gentle system message */
+            broadcast_message("[System] The world shimmers briefly.\r\n", NULL);
 
             /* Broadcast to all staff (privilege >= 1) */
             char sysmsg[256];
-            snprintf(sysmsg, sizeof(sysmsg), "[System] Warmboot performed by %s.\r\n", session->username);
+            snprintf(sysmsg, sizeof(sysmsg), "[Warmboot] Complete (by %s).\r\n", session->username);
             staff_message(sysmsg, NULL);
 
             return vm_value_create_string("");

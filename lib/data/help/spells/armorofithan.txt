@@ -1,0 +1,12 @@
+ARMOR_OF_ITHAN (Spell - Warlock/Mystic)
+===================================
+PPE Cost: 8
+Damage: 0 MD (Defensive)
+Range: Self/Touch
+Area: Single target
+
+Conjures an invisible field of protective energy around the
+recipient, granting a substantial bonus to damage resistance
+and reducing incoming mega-damage for the spell duration.
+
+See also: help magic, help armor

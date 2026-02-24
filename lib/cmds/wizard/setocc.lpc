@@ -57,14 +57,13 @@ int main(string arg) {
     object wiz = this_player();
     if (!wiz) return 0;
 
-    // Wizard privilege check
+    // Caller privilege level
     int priv = 0;
     if (function_exists("query_privilege_level", wiz))
         priv = wiz->query_privilege_level();
-    if (priv < 1) {
-        write("This command requires wizard privileges.\n");
-        return 1;
-    }
+
+    // Allow regular players (priv < 1) to set their own OCC during chargen
+    // but disallow changing other players. Wizard+ retains full capability.
 
     if (!arg || arg == "") {
         return show_help();
@@ -81,13 +80,27 @@ int main(string arg) {
     int has_confirm = 0;
 
     if (sscanf(arg, "reset %s", player_name) == 1) {
+        // Only wizards may reset other players
+        if (priv < 1) { write("This command requires wizard privileges.\n"); return 1; }
         return do_reset(wiz, player_name);
     }
 
     if (sscanf(arg, "%s %s %s", player_name, occ_name, extra) == 3) {
         if (lower_case(extra) == "confirm") has_confirm = 1;
     } else if (sscanf(arg, "%s %s", player_name, occ_name) != 2) {
-        return show_help();
+        // If non-wizard and only provided a single token, treat as self-selection
+        if (priv < 1) {
+            // disallow 'reset' or 'player occ' forms for non-wizards
+            if (strsrch(arg, " ") != -1) {
+                write("This command requires wizard privileges to set another player.\n");
+                return 1;
+            }
+            // single token -> set player's own OCC
+            player_name = (function_exists("query_name", wiz) ? wiz->query_name() : "");
+            occ_name = arg;
+        } else {
+            return show_help();
+        }
     }
 
     occ_name = lower_case(occ_name);

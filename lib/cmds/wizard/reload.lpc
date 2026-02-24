@@ -1,0 +1,37 @@
+// /lib/cmds/wizard/reload.lpc
+// Reload/recompile an object (wizard+). Uses driver efun reload_object.
+
+int query_privilege_required() { return 1; }
+
+int main(string args) {
+    object player = previous_object();
+    if (!args || args == "") {
+        tell_object(player, "Syntax: reload <object_path>\n");
+        return 1;
+    }
+
+    string path = args;
+    // Support 'here'
+    if (path == "here" || path == ".") {
+        object room = environment(player);
+        if (!room) { tell_object(player, "You are not in a room.\n"); return 1; }
+        path = file_name(room);
+    }
+
+    mixed res = reload_object(path);
+    if (intp(res) && res == 1) {
+        tell_object(player, "Reloaded: " + path + "\n");
+        return 1;
+    }
+    if (stringp(res)) {
+        tell_object(player, "Update failed: " + path + " - " + res + "\n");
+        return 1;
+    }
+
+    tell_object(player, "Reload failed: " + path + "\n");
+    return 1;
+}
+
+string query_help() {
+    return "Syntax: reload <path>\n\nRecompile and reload an LPC object from disk. Wizard+ only.";
+}

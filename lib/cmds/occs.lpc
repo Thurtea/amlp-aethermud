@@ -1,61 +1,50 @@
 // /lib/cmds/occs.lpc
-// List O.C.C.s available to the player's current race.
+// List all available O.C.C.s from lib/occs/ with short descriptions.
 
 int main(string args) {
-    object player, race_ob;
-    string race, race_path, race_display;
-    string *allowed;
-
-    player = this_player();
+    object player = this_player();
     if (!player) return 0;
 
-    race = (string)player->query_race();
-    if (!race || race == "") {
-        write("You don't seem to have a race assigned.\n");
+    write("Available O.C.C.s:\n\n");
+
+    // Gather OCC files from /occs/
+    string *files = get_dir("/occs/*.lpc");
+    if (!files || !sizeof(files)) {
+        write("  (no OCC definitions found)\n");
         return 1;
     }
 
-    // Normalize race string to a safe filename (lowercase, spaces to underscores)
-    race_path = "/races/" + lower_case(replace_string(race, " ", "_"));
-
-    catch { race_ob = load_object(race_path); };
-
-    if (!race_ob) {
-        write("Unable to load race data for: " + race + "\n");
-        return 1;
-    }
-
-    race_display = race_ob->query_race_name();
-    if (!race_display || race_display == "") race_display = capitalize(race);
-
-    // RCC races with no OCC option
-    if (race_ob->query_is_rcc() && !race_ob->query_can_have_occ()) {
-        write("Your race (" + race_display + ") does not select a standard O.C.C. "
-            + "Your abilities are determined by your R.C.C.\n");
-        return 1;
-    }
-
-    allowed = race_ob->query_allowed_occs();
-
-    if (!arrayp(allowed) || !sizeof(allowed)) {
-        // Empty whitelist = all standard OCCs are available
-        write("Available O.C.C.s for " + race_display + ":\n");
-        write("  All standard O.C.C.s are available to your race.\n");
-    } else {
-        write("Available O.C.C.s for " + race_display + ":\n");
-        int i;
-        for (i = 0; i < sizeof(allowed); i++) {
-            string display = capitalize(replace_string(allowed[i], "_", " "));
-            write("  - " + display + "\n");
+    files = sort_array(files, 1);
+    foreach (string f in files) {
+        if (strlen(f) <= 4) continue;
+        string name = f[0..(strlen(f)-5)];
+        string display = replace_string(name, "_", " ");
+        // Try to load the occ object to get a nicer title or short help
+        string desc = "";
+        object occ;
+        catch { occ = load_object("/occs/" + name); };
+        if (occ) {
+            if (function_exists("query_occ_name", occ))
+                display = occ->query_occ_name();
+            if (function_exists("query_help", occ)) {
+                string h = occ->query_help();
+                if (h && h != "") {
+                    string *lines = explode(h, "\n");
+                    foreach (string L in lines) {
+                        string t = trim(L);
+                        if (t && t != "") { desc = t; break; }
+                    }
+                }
+            }
         }
+        if (!desc || desc == "") desc = "No description available.";
+        write(sprintf("  %-20s - %s\n", display, desc));
     }
 
-    write("\nTo select an OCC, speak with an RP-Wizard or use "
-        + "'help selectocc' for more info.\n");
+    write("\nUsage: occs\n");
     return 1;
 }
 
 string query_help() {
-    return "occs - List O.C.C.s available for your race.\n"
-           "Usage: occs\n";
+    return "occs - List all defined O.C.C.s and short descriptions.\nUsage: occs\n";
 }

@@ -1,0 +1,40 @@
+CODE_TOOL - Coding Wizard Debugging Tool
+=========================================
+
+The Code Tool provides system inspection and debugging capabilities
+for Coding wizards.
+
+USAGE:
+  code <subcommand>
+
+SUBCOMMANDS:
+  code check <file>       Test-compile an LPC file
+  code info <object>      Show object details (functions, env, inventory)
+  code search <pattern>   Search loaded objects by name pattern
+  code memory             Show memory/object statistics
+  code children <file>    List all clones of a blueprint
+  code trace              Show recent error trace (if available)
+
+EXAMPLES:
+  code check /domains/wizard/thurtea/area/npc/goblin
+  code info /std/room
+  code search goblin
+  code children /domains/wizard/thurtea/area/npc/goblin
+
+CHECK COMMAND:
+  Attempts to load_object() the specified file. If it compiles
+  successfully, reports success. If it fails, shows the error.
+  Useful for testing LPC files before deploying.
+
+INFO COMMAND:
+  Shows detailed information about a loaded object:
+  - All defined functions
+  - Current environment
+  - Inventory contents
+  - File path and clone status
+
+REQUIREMENTS:
+  - Coding or Admin wizard role
+  - Tool must be in your inventory (granted on promotion)
+
+See also: help qcs, help workspace

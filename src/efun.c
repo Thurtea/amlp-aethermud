@@ -1705,6 +1705,128 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     return v;
 }
 
+/* Reload a previously-loaded LPC object: recompile source and swap methods
+ * on all live instances of that object. Returns integer 1 on success or
+ * a string describing the compiler error on failure. */
+VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 1 || args[0].type != VALUE_STRING) return vm_value_create_null();
+    const char *lpc_path = args[0].data.string_value;
+    if (!lpc_path) return vm_value_create_null();
+
+    /* Resolve filesystem path candidates (try a few common forms) */
+    char fs_path[PATH_MAX];
+    const char *mudlib = getenv("AMLP_MUDLIB");
+    if (!mudlib || !*mudlib) mudlib = "./lib";
+
+    const char *p = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
+    /* ensure no trailing .lpc in p for canonical form */
+    size_t plen = strlen(p);
+    char p_noext[PATH_MAX];
+    if (plen > 4 && strcmp(p + plen - 4, ".lpc") == 0) {
+        strncpy(p_noext, p, plen - 4);
+        p_noext[plen - 4] = '\0';
+    } else {
+        strncpy(p_noext, p, sizeof(p_noext));
+        p_noext[sizeof(p_noext)-1] = '\0';
+    }
+
+    /* Candidate filesystem path */
+    snprintf(fs_path, sizeof(fs_path), "%s/%s.lpc", mudlib, p_noext);
+    if (access(fs_path, R_OK) != 0) {
+        /* Try without prepending mudlib (explicit lib/ prefixed path) */
+        snprintf(fs_path, sizeof(fs_path), "%s", p);
+        if (access(fs_path, R_OK) != 0) {
+            /* Not found */
+            return vm_value_create_string("Source file not found");
+        }
+    }
+
+    /* Compile source file */
+    Program *prog = compiler_compile_file(fs_path);
+    if (!prog || prog->last_error != COMPILE_SUCCESS) {
+        char errbuf[512];
+        if (prog) {
+            snprintf(errbuf, sizeof(errbuf), "%s: %s", compiler_error_string(prog->last_error), prog->error_info.message ? prog->error_info.message : "");
+            program_free(prog);
+        } else {
+            snprintf(errbuf, sizeof(errbuf), "Compilation failed (unknown error)");
+        }
+        return vm_value_create_string(errbuf);
+    }
+
+    /* Prepare to load parent programs first (to attach parent methods) */
+    int child_func_start = (int)vm->function_count;
+    const char *mudlib_prefix = mudlib; /* alias for clarity */
+
+    /* Compile/load each parent program and attach to VM (so functions exist) */
+    for (size_t ih = 0; ih < prog->inherit_count; ih++) {
+        const char *parent_path = prog->inherit_paths[ih];
+        char parent_fs[PATH_MAX];
+        const char *pp = parent_path[0] == '/' ? parent_path + 1 : parent_path;
+        snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib_prefix, pp);
+        Program *parent_prog = compiler_compile_file(parent_fs);
+        if (parent_prog) {
+            int parent_start = (int)vm->function_count;
+            if (program_loader_load(vm, parent_prog) == 0) {
+                int parent_end = (int)vm->function_count;
+                /* don't attach to objects yet; attach will be done below */
+            }
+            program_free(parent_prog);
+        }
+    }
+
+    /* Load child program into VM */
+    if (program_loader_load(vm, prog) != 0) {
+        program_free(prog);
+        return vm_value_create_string("Program loader failed");
+    }
+    int child_func_end = (int)vm->function_count;
+
+    /* Find all live objects matching this LPC path and replace methods */
+    ObjManager *mgr = get_global_obj_manager();
+    if (mgr) {
+        for (int i = 0; i < mgr->object_count; i++) {
+            obj_t *o = mgr->objects[i];
+            if (!o || !o->name) continue;
+            /* Match canonical lpc_name variants: exact or with .lpc appended/removed */
+            if (strcmp(o->name, lpc_path) == 0 || strcmp(o->name, p_noext) == 0 || strcmp(o->name, p) == 0) {
+                /* Clear current methods array (do not free VMFunction pointers) */
+                if (o->methods) free(o->methods);
+                o->method_capacity = OBJ_INITIAL_METHOD_CAPACITY;
+                o->method_count = 0;
+                o->methods = (VMFunction **)malloc(sizeof(VMFunction *) * o->method_capacity);
+
+                /* Attach parent methods (if any) using ranges already loaded */
+                for (size_t ih = 0; ih < prog->inherit_count; ih++) {
+                    /* parent functions are already appended earlier; attach_program_methods will search by name */
+                    /* attempt to compile parent path again to provide Program* for attach */
+                    const char *parent_path = prog->inherit_paths[ih];
+                    char parent_fs[PATH_MAX];
+                    const char *pp = parent_path[0] == '/' ? parent_path + 1 : parent_path;
+                    snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib_prefix, pp);
+                    Program *parent_prog = compiler_compile_file(parent_fs);
+                    if (parent_prog) {
+                        /* use current VM function range for parent (best-effort) */
+                        int parent_start = 0;
+                        int parent_end = (int)vm->function_count;
+                        attach_program_methods(vm, o, parent_prog, "__parent__", parent_start, parent_end);
+                        program_free(parent_prog);
+                    }
+                }
+
+                /* Attach child methods */
+                attach_program_methods(vm, o, prog, NULL, child_func_start, child_func_end);
+
+                /* Call create() on object to allow reinitialization if desired */
+                obj_call_method(vm, o, "create", NULL, 0);
+            }
+        }
+    }
+
+    program_free(prog);
+    return vm_value_create_int(1);
+}
+
 VMValue efun_all_inventory(VirtualMachine *vm, VMValue *args, int arg_count) {
     if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_null();
     if (!vm || !vm->gc) return vm_value_create_null();
@@ -2641,6 +2763,7 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "this_object", efun_this_object, 0, 0, "object this_object()");
     efun_register(registry, "previous_object", efun_previous_object, 0, 0, "object previous_object()");
     efun_register(registry, "destruct", efun_destruct, 0, 1, "void destruct(object|void)");
+    efun_register(registry, "reload_object", efun_reload_object, 1, 1, "mixed reload_object(string)");
 
     /* Array utilities */
     efun_register(registry, "member_array", efun_member_array, 2, 2, "int member_array(mixed, mixed*)");

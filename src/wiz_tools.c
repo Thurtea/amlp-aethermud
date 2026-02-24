@@ -208,13 +208,21 @@ int wiz_reload(PlayerSession *sess, const char *lpc_path) {
     /* Level 2: read-only / testing reloads */
     if (!sess || sess->privilege_level < 2 || !lpc_path) return 0;
     VMValue path_val = vm_value_create_string(lpc_path);
-    VMValue res = efun_load_object(global_vm, &path_val, 1);
+    VMValue res = efun_reload_object(global_vm, &path_val, 1);
     vm_value_release(&path_val);
-    /* If result is an object, consider successful; basic check: not null */
-    if (res.type != VALUE_NULL) {
-        vm_value_release(&res);
+
+    if (res.type == VALUE_INT && res.data.int_value == 1) {
         wiz_log("%s reloaded %s", sess->username[0] ? sess->username : "<unknown>", lpc_path);
         return 1;
+    }
+    if (res.type == VALUE_STRING) {
+        /* Send compiler error message back to caller */
+        char *err = NULL;
+        err = strdup(res.data.string_value ? res.data.string_value : "Unknown error");
+        vm_value_release(&res);
+        send_to_player(sess, "Reload failed: %s\n", err);
+        free(err);
+        return 0;
     }
     return 0;
 }

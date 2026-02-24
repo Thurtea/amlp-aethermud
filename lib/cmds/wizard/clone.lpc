@@ -1,0 +1,32 @@
+// /lib/cmds/wizard/clone.lpc
+// Clone an object into your current room (wizard+)
+
+int query_privilege_required() { return 1; }
+
+int main(string args) {
+    object player = previous_object();
+    if (!args || args == "") {
+        tell_object(player, "Syntax: clone <lpc_path>\n");
+        return 1;
+    }
+
+    string path = args;
+    // normalize: ensure path refers to LPC object token
+    // allow leading / or relative
+    object obj = clone_object(path);
+    if (!obj) {
+        tell_object(player, "Clone failed: could not create " + path + "\n");
+        return 1;
+    }
+
+    // Move into player's room if possible
+    object env = environment(player);
+    if (env) move_object(obj, env);
+
+    tell_object(player, "Cloned " + file_name(obj) + " into " + (env ? file_name(env) : "nowhere") + "\n");
+    return 1;
+}
+
+string query_help() {
+    return "clone <path> - create a new instance of an object into your room. Wizard+.";
+}

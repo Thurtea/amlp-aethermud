@@ -23,6 +23,32 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (!target) {
+        tell_object(user, "Perform psychic surgery on whom?\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your patient is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a valid patient.\n");
+        return 0;
+    }
+
+    int lvl = (user->query_psionic_level ? user->query_psionic_level() : 1);
+    int healing = (random(6) + 1) + (random(6) + 1) + (lvl * 2); /* ~2d6 + 2*level */
+
+    tell_object(user, "You carefully reshape flesh and mend wounds with your mind...\n");
+    tell_object(target, user->query_cap_name() + " performs a delicate psychic procedure on you.\n");
+
+    if (function_exists("heal_damage", target)) {
+        target->heal_damage(healing, 0);
+    } else if (function_exists("add_hp", target)) {
+        target->add_hp(healing);
+    }
+
+    tell_object(user, "Psychic surgery complete. Healed " + healing + " points.\n");
     return 1;
 }

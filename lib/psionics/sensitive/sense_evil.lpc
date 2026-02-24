@@ -23,6 +23,44 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+
+    object env = environment(user);
+    if (!env) {
+        tell_object(user, "You sense nothing.\n");
+        return 0;
+    }
+
+    if (target && objectp(target)) {
+        if (!living(target)) {
+            tell_object(user, "You can only sense intent in living beings.\n");
+            return 0;
+        }
+        string align = (function_exists("query_alignment", target) ? target->query_alignment() : "neutral");
+        if (target->query_property("is_evil") || align == "diabolic" || align == "miscreant") {
+            tell_object(user, target->query_cap_name() + " radiates malevolent intent.\n");
+        } else {
+            tell_object(user, target->query_cap_name() + " seems harmless or neutral.\n");
+        }
+        return 1;
+    }
+
+    /* Scan the room */
+    object *all = all_inventory(env);
+    string *found = ({});
+    foreach (object ob : all) {
+        if (living(ob) && ob != user) {
+            string align = (function_exists("query_alignment", ob) ? ob->query_alignment() : "neutral");
+            if (ob->query_property("is_evil") || align == "diabolic" || align == "miscreant") {
+                found += ({ ob->query_cap_name() });
+            }
+        }
+    }
+
+    if (sizeof(found) == 0) {
+        tell_object(user, "You sense no overt malevolence nearby.\n");
+    } else {
+        tell_object(user, "You sense malevolent presences: " + implode(found, ", ") + "\n");
+    }
     return 1;
 }

@@ -1,0 +1,13 @@
+// lib/domains/chi_town/obj/vendor_stall.lpc
+inherit "/lib/std/object.lpc";
+
+void create() {
+    ::create();
+    set_short("a wooden vendor stall");
+    set_long(
+        "A small wooden stall with shelves of trinkets and wrapped parcels.
+"        "A sign lists prices in a local sliver-currency.\n"
+    );
+    set_id(({"stall", "vendor stall", "vendor_stall"}));
+    set_weight(50);
+}

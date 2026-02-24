@@ -6,12 +6,16 @@ inherit "std/object.c";
 object *inventory;
 int max_weight;
 int current_weight;
+int open_state;
+int is_open;
 
 void create() {
     ::create();
     inventory = ({});
     max_weight = 1000;
     current_weight = 0;
+    open_state = 0; /* default: closed */
+    is_open = 0;
 }
 
 void add_item(object item) {
@@ -41,6 +45,10 @@ int query_current_weight() {
 // Return a nicely formatted listing of internal contents for "look in".
 string GetInternalDesc() {
     object *inv = query_inventory();
+    if (!open_state) {
+        return "The container is closed.";
+    }
+
     if (!inv || sizeof(inv) == 0) {
         return "It is empty.";
     }
@@ -84,5 +92,104 @@ string GetInternalDesc() {
     return out;
 }
 
-// Make interior contents visible by default
-int inventory_visible() { return 1; }
+// inventory visibility now depends on open/closed state
+
+/* Open/close API */
+int query_open() { return open_state; }
+
+void set_open(int x) { open_state = x ? 1 : 0; }
+
+varargs mixed eventOpen(object who) {
+    if (open_state) return "It is already open.";
+    open_state = 1;
+    return "You open the container.";
+}
+
+varargs mixed eventClose(object who) {
+    if (!open_state) return "It is already closed.";
+    open_state = 0;
+    return "You close the container.";
+}
+
+/* Compatibility API required by game code */
+void set_starts_open(int val) {
+    open_state = val ? 1 : 0;
+    is_open = open_state;
+}
+
+string open() {
+    if (is_open) return "It is already open.";
+    is_open = 1;
+    open_state = 1;
+    return "You open the container.";
+}
+
+string close() {
+    if (!is_open) return "It is already closed.";
+    is_open = 0;
+    open_state = 0;
+    return "You close the container.";
+}
+
+int query_is_open() { return is_open; }
+
+object *query_contents() { return query_inventory(); }
+
+/* Determine if inventory should be visible to look/verbs */
+int inventory_visible() { return open_state; }
+
+/* Called when player does 'look in <obj>' or related verbs. */
+varargs mixed eventShowInterior(object who, object target) {
+    if (!open_state) {
+        return "The " + (query_short() || "container") + " is closed.";
+    }
+    return GetInternalDesc();
+}
+
+/* Direct look handlers used by verbs */
+varargs mixed direct_look_in_obj(object who) {
+    return eventShowInterior(who);
+}
+
+varargs mixed direct_look_at_obj(object who) {
+    string out = "";
+    if (!who) who = this_player();
+    out = query_long() || query_short() || "";
+    out += "\n";
+    if (is_open) {
+        out += "It is open.\n";
+        string contents = GetInternalDesc();
+        if (contents && contents != "") out += contents;
+    } else {
+        out += "It is closed.";
+    }
+    return out;
+}
+
+/* Generic show handler for look/examine */
+varargs mixed eventShow(object who, string component) {
+    string out = "";
+    if (!who) who = this_player();
+    /* Short or long depending on component */
+    if (component && component != "") {
+        if (component == "examine" || component == "long") {
+            out = query_long();
+        } else {
+            out = query_short();
+        }
+    } else {
+        out = query_short();
+    }
+
+    if (open_state) {
+        string contents = GetInternalDesc();
+        if (contents && contents != "") {
+            out += "\n" + contents;
+        }
+        out += "\nIt is open.";
+    } else {
+        out += "\nIt is closed.";
+    }
+
+    return out;
+}

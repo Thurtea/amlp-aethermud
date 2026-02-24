@@ -28,5 +28,25 @@ void create() {
 
 /* TODO:CONTENT - implement perform() when skill system wired */
 int perform(object user, string args) {
+    if (!user) return 0;
+    int level = (user->query_level() ? user->query_level() : 1);
+    int pct = query_base_percentage() + (level * query_level_bonus());
+    string stat = "pp";
+    int stat_mod = 0;
+    if (user->query_stat) stat_mod = (user->query_stat(stat) - 10);
+    pct += stat_mod;
+    if (pct > query_max_percentage()) pct = query_max_percentage();
+
+    int roll = random(100) + 1;
+    tell_object(user, "You attempt an acrobatic move...\n");
+    if (roll >= 96) {
+        tell_object(user, "You botch it in a spectacular way.\n");
+        return -1;
+    }
+    if (roll <= pct) {
+        tell_object(user, "You land the maneuver gracefully.\n");
+        return 1;
+    }
+    tell_object(user, "You fail to complete the acrobatic move.\n");
     return 0;
 }

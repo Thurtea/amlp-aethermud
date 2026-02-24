@@ -23,6 +23,32 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+
+    object obj = target;
+    if (!obj) {
+        tell_object(user, "Touch what?\n");
+        return 0;
+    }
+
+    /* Must be an object (not necessarily living) */
+    tell_object(user, "You place your hands on the object and reach into its history...\n");
+
+    string short = (function_exists("query_short", obj) ? obj->query_short() : 0);
+    string long = (function_exists("query_long", obj) ? obj->query_long() : 0);
+    string fname = file_name(obj);
+
+    tell_object(user, "Object: " + (short ? short : "Unnamed object") + "\n");
+    if (long) tell_object(user, long + "\n");
+    tell_object(user, "File: " + fname + "\n");
+
+    if (obj->query_property("owner")) {
+        tell_object(user, "Senses of ownership: Previously held by " + obj->query_property("owner") + "\n");
+    }
+
+    if (obj->query_property("emotion_imprint")) {
+        tell_object(user, "Emotional imprints: " + obj->query_property("emotion_imprint") + "\n");
+    }
+
     return 1;
 }

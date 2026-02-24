@@ -23,6 +23,39 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (!target) {
+        tell_object(user, "Fire a mind bolt at whom?\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living target.\n");
+        return 0;
+    }
+
+    if (target->query_property("mind_block")) {
+        tell_object(user, "Your mind bolt is absorbed by a mental barrier!\n");
+        tell_object(target, "You feel an attempt to assault your mind, but it is blocked.\n");
+        return 0;
+    }
+
+    int level = (user->query_psionic_level ? user->query_psionic_level() : 1);
+    int damage = (random(6) + 1) + (random(6) + 1) + level; /* 2d6 + level */
+
+    tell_object(user, "You launch a searing bolt of psychic energy at " + target->query_cap_name() + "!\n");
+    tell_object(target, "A sudden psychic lance tears into your mind and body!\n");
+
+    if (function_exists("take_damage", target)) {
+        target->take_damage(damage, 0);
+    } else if (function_exists("receive_damage", target)) {
+        target->receive_damage(damage, user);
+    } else if (function_exists("add_hp", target)) {
+        target->add_hp(-damage);
+    }
+
     return 1;
 }

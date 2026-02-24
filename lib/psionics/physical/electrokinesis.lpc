@@ -23,6 +23,41 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+
+    if (!target) {
+        tell_object(user, "Who do you direct the electrical charge at?\n");
+        return 0;
+    }
+
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(user, "That is not a living target.\n");
+        return 0;
+    }
+
+    if (target->query_property("mind_block")) {
+        tell_object(user, "Your electrical assault fizzles against a mental barrier.\n");
+        return 0;
+    }
+
+    int level = (user->query_psionic_level ? user->query_psionic_level() : 1);
+    int damage = random(6) + 1 + level;
+
+    tell_object(user, "You hurl crackling arcs of electricity at " + target->query_cap_name() + "!\n");
+    tell_object(target, "Shocking energy sears your flesh as " + user->query_cap_name() + " strikes you!\n");
+
+    if (function_exists("take_damage", target)) {
+        target->take_damage(damage, 0);
+    } else if (function_exists("receive_damage", target)) {
+        target->receive_damage(damage, user);
+    } else if (function_exists("add_hp", target)) {
+        target->add_hp(-damage);
+    }
+
     return 1;
 }

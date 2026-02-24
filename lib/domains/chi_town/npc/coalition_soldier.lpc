@@ -1,0 +1,19 @@
+// lib/domains/chi_town/npc/coalition_soldier.lpc
+inherit "/std/npc";
+
+void create() {
+    ::create();
+
+    set_name("coalition soldier");
+    set_id(({"soldier", "coalition soldier", "guard"}));
+    set_short("a Coalition soldier");
+    set_long(
+        "A battle-hardened soldier in Coalition gear stands alert by the gate.
+"        "They look ready to respond to trouble and keep the peace.\n"
+    );
+
+    set_template("soldier");
+    set_level(5);
+    set_hp(45);
+    set_aggro(0);
+}

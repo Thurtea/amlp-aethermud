@@ -1,0 +1,21 @@
+// lib/domains/chi_town/chi_town_gate.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Chi-Town - South Gate");
+    set_long(
+        "A reinforced gate stands between Chi-Town and the open road. A
+"        "watchtower overlooks the approach and a veteran soldier keeps an eye
+"        "on arrivals.\n"
+    );
+
+    add_exit("north", "/domains/chi_town/chi_town_entry");
+    add_exit("out", "/domains/start/village_center");
+
+    set_property("light", 1);
+
+    /* Place a coalition soldier if possible */
+    object soldier = clone_object("/domains/chi_town/npc/coalition_soldier");
+    if (soldier) { move_object(soldier, this_object()); }
+}

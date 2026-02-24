@@ -35,3 +35,27 @@ int query_sdc_heal() {
 int query_hp_heal() {
     return random(4) + 1;  /* 1d4 */
 }
+
+int perform(object user, string args) {
+    if (!user) return 0;
+    int level = (user->query_level() ? user->query_level() : 1);
+    int pct = query_base_percentage() + (level * query_level_bonus());
+    string stat = "iq";
+    int stat_mod = 0;
+    if (user->query_stat) stat_mod = (user->query_stat(stat) - 10);
+    pct += stat_mod;
+    if (pct > query_max_percentage()) pct = query_max_percentage();
+
+    int roll = random(100) + 1;
+    tell_object(user, "You attempt to provide first aid...\n");
+    if (roll >= 96) {
+        tell_object(user, "You botch the treatment — critical failure!\n");
+        return -1;
+    }
+    if (roll <= pct) {
+        tell_object(user, "Your treatment stabilizes and heals the patient.\n");
+        return 1;
+    }
+    tell_object(user, "You fail to help the patient effectively.\n");
+    return 0;
+}

@@ -150,39 +150,114 @@ int main(string args) {
     return show_topic(args, priv_level);
 }
 
+/* Helper: return a human-friendly display name for a topic token.
+   Tries to read the help file header (first non-empty line) from
+   common help locations; falls back to converting separators to spaces
+   and capitalizing words. */
+string display_name(string token) {
+    string line;
+    string *try_dirs = ({ "/help/", "/help/basics/", "/help/systems/",
+                          "/help/occs/", "/help/social/", "/help/meta/",
+                          "/help/wizard/",
+                          "/data/help/", "/data/help/commands/",
+                          "/data/help/concepts/", "/data/help/systems/",
+                          "/data/help/spells/", "/data/help/wizard/" });
+    foreach (string d in try_dirs) {
+        string path = d + token + ".txt";
+        string content = read_file(path);
+        if (content && content != "") {
+            // extract first non-empty line
+            string *lines = explode(content, "\n");
+            foreach (string l in lines) {
+                string t = trim(l);
+                if (t && t != "") {
+                    // Use the line if looks like a title (contains letters)
+                    return capitalize(replace_string(replace_string(t, "_", " "), "-", " "));
+                }
+            }
+        }
+    }
+
+    // Fallback: replace separators and capitalize words
+    string s = token;
+    s = replace_string(s, "_", " ");
+    s = replace_string(s, "-", " ");
+    string *words = explode(s, " ");
+    for (int i = 0; i < sizeof(words); i++) {
+        words[i] = capitalize(words[i]);
+    }
+    return implode(words, " ");
+}
+
+/* Determine whether a topic is admin/wizard-only by checking wizard help
+   locations and admin command help sources */
+int is_admin_topic(string topic) {
+    // Check wizard help text locations
+    string p1 = "/help/wizard/" + topic + ".txt";
+    string p2 = "/data/help/wizard/" + topic + ".txt";
+    if (file_size(p1) > 0 || file_size(p2) > 0) return 1;
+
+    // Check admin commands (cmds/admin)
+    string *cmd_dirs = ({ "cmds/admin/", "cmds/wizard/" });
+    foreach (string d in cmd_dirs) {
+        string path = d + topic + ".lpc";
+        if (file_size(path) > 0) return 1;
+    }
+    return 0;
+}
+
 // -------------------------------------------------------------------------
 // CHANGE 1 — Show all topics (dynamic index)
 // -------------------------------------------------------------------------
 
 int show_all_topics(int priv_level) {
-    string *all = ({});
+    string *player = ({});
+    string *admin = ({});
 
-    // Collect from lib/help/ and all subdirs
-    string *help_subdirs = ({ "", "basics/", "systems/", "occs/", "social/",
-                               "meta/" });
-    if (priv_level >= 1) help_subdirs += ({ "wizard/" });
-    foreach (string sub in help_subdirs) {
+    // Player-visible help (exclude wizard/) from /help/
+    string *help_player_subdirs = ({ "", "basics/", "systems/", "occs/", "social/", "meta/" });
+    foreach (string sub in help_player_subdirs) {
         string *t = collect_txt("/help/" + sub);
-        if (t) all += t;
+        if (t) player += t;
     }
 
-    // Collect from lib/data/help/ and subdirs
-    string *data_subdirs = ({ "", "commands/", "concepts/", "systems/",
-                               "wizard/" });
-    foreach (string sub in data_subdirs) {
+    // Player-visible from /data/help/
+    string *data_player_subdirs = ({ "", "commands/", "concepts/", "systems/" });
+    foreach (string sub in data_player_subdirs) {
         string *t = collect_txt("/data/help/" + sub);
-        if (t) all += t;
+        if (t) player += t;
     }
 
-    all = dedup(sort_array(all, 1));
+    // Admin-only (wizard) topics from /help/wizard and /data/help/wizard
+    string *hw = collect_txt("/help/wizard/");
+    if (hw) admin += hw;
+    string *dw = collect_txt("/data/help/wizard/");
+    if (dw) admin += dw;
 
-    write("\033[1mAetherMUD Help System - All Topics\033[0m\n");
+    // Deduplicate/sort
+    player = dedup(sort_array(player, 1));
+    admin = dedup(sort_array(admin, 1));
+
+    write("\033[1mAetherMUD Help System - Topics\033[0m\n");
     write("============================================================\n");
-    if (!all || !sizeof(all)) {
-        write("  (no topics found)\n");
+
+    if (!player || !sizeof(player)) {
+        write("  (no player topics found)\n");
     } else {
-        write_columns(all, 6, 13);
+        write("\nPlayer Topics:\n");
+        // Convert tokens to human-friendly display names for printing
+        string *display = ({});
+        foreach (string t in player) display += ({ display_name(t) });
+        write_columns(display, 6, 20);
     }
+
+    if (priv_level >= 1 && admin && sizeof(admin)) {
+        write("\nADMIN COMMANDS:\n");
+        string *display_admin = ({});
+        foreach (string t in admin) display_admin += ({ display_name(t) });
+        write_columns(display_admin, 4, 20);
+    }
+
     write("\nType 'help <topic>' to read any topic.\n");
     return 1;
 }
@@ -194,6 +269,12 @@ int show_all_topics(int priv_level) {
 int show_topic(string topic, int priv_level) {
     // Build variants
     string *vars = topic_variants(topic);
+
+    // Restrict admin topics for non-privileged players
+    if (is_admin_topic(topic) && priv_level < 1) {
+        write("That help topic is restricted.\n");
+        return 1;
+    }
 
     // --- .txt search ---
     string *search_dirs = ({
@@ -208,7 +289,7 @@ int show_topic(string topic, int priv_level) {
         foreach (string v in vars) {
             string content = read_file(dir + v + ".txt");
             if (content && content != "") {
-                write("\033[1m--- Help: " + topic + " ---\033[0m\n\n");
+                write("\033[1m--- Help: " + display_name(topic) + " ---\033[0m\n\n");
                 write(content);
                 write("\n");
                 return 1;
@@ -221,7 +302,7 @@ int show_topic(string topic, int priv_level) {
                     string subpath = dir + sub + "/";
                     string subcontent = read_file(subpath + v + ".txt");
                     if (subcontent && subcontent != "") {
-                        write("\033[1m--- Help: " + topic + " ---\033[0m\n\n");
+                        write("\033[1m--- Help: " + display_name(topic) + " ---\033[0m\n\n");
                         write(subcontent);
                         write("\n");
                         return 1;
@@ -237,7 +318,7 @@ int show_topic(string topic, int priv_level) {
                                "cmds/creator/" });
         string h = search_lpc_dirs(cmd_dirs, topic);
         if (h && h != "") {
-            write("\033[1m--- Help: " + topic + " ---\033[0m\n\n");
+            write("\033[1m--- Help: " + display_name(topic) + " ---\033[0m\n\n");
             write(h); write("\n"); return 1;
         }
     }
@@ -246,7 +327,7 @@ int show_topic(string topic, int priv_level) {
     {
         string h = search_lpc_tree("spells/", topic);
         if (h && h != "") {
-            write("\033[1m--- Help: " + topic + " (spell) ---\033[0m\n\n");
+            write("\033[1m--- Help: " + display_name(topic) + " (spell) ---\033[0m\n\n");
             write(h); write("\n"); return 1;
         }
     }
@@ -255,7 +336,7 @@ int show_topic(string topic, int priv_level) {
     {
         string h = search_lpc_tree("psionics/", topic);
         if (h && h != "") {
-            write("\033[1m--- Help: " + topic + " (psionic) ---\033[0m\n\n");
+            write("\033[1m--- Help: " + display_name(topic) + " (psionic) ---\033[0m\n\n");
             write(h); write("\n"); return 1;
         }
     }
@@ -264,7 +345,7 @@ int show_topic(string topic, int priv_level) {
     {
         string h = search_lpc_tree("skills/", topic);
         if (h && h != "") {
-            write("\033[1m--- Help: " + topic + " (skill) ---\033[0m\n\n");
+            write("\033[1m--- Help: " + display_name(topic) + " (skill) ---\033[0m\n\n");
             write(h); write("\n"); return 1;
         }
     }
@@ -274,7 +355,7 @@ int show_topic(string topic, int priv_level) {
         string *occ_dirs = ({ "occs/" });
         string h = search_lpc_dirs(occ_dirs, topic);
         if (h && h != "") {
-            write("\033[1m--- Help: " + topic + " (OCC) ---\033[0m\n\n");
+            write("\033[1m--- Help: " + display_name(topic) + " (OCC) ---\033[0m\n\n");
             write(h); write("\n"); return 1;
         }
     }
@@ -284,7 +365,7 @@ int show_topic(string topic, int priv_level) {
         string *race_dirs = ({ "races/" });
         string h = search_lpc_dirs(race_dirs, topic);
         if (h && h != "") {
-            write("\033[1m--- Help: " + topic + " (race) ---\033[0m\n\n");
+            write("\033[1m--- Help: " + display_name(topic) + " (race) ---\033[0m\n\n");
             write(h); write("\n"); return 1;
         }
     }

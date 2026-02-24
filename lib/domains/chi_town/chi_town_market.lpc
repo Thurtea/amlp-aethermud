@@ -1,0 +1,17 @@
+// lib/domains/chi_town/chi_town_market.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Chi-Town - Market Street");
+    set_long(
+        "A narrow street packed with stalls and neon awnings. The smell of
+"        "fried foods and incense mixes with the clink of coins. People haggle
+"        "over trinkets and strange wares from distant districts.\n"
+    );
+
+    add_exit("south", "/domains/chi_town/chi_town_entry");
+    add_exit("east", "/domains/chi_town/chi_town_gate");
+
+    set_property("light", 2);
+}

@@ -23,6 +23,29 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+
+    if (!target && !stringp(target)) {
+        tell_object(user, "Where do you wish to sense? Provide a room file or object.\n");
+        return 0;
+    }
+
+    object place = target;
+    if (!place && stringp(target)) {
+        place = find_object(target);
+        if (!place) {
+            place = load_object(target);
+        }
+    }
+
+    if (!place) {
+        tell_object(user, "Unable to locate that place.\n");
+        return 0;
+    }
+
+    tell_object(user, "You extend your senses far away...\n");
+    if (function_exists("query_short", place)) tell_object(user, place->query_short() + "\n");
+    if (function_exists("query_long", place)) tell_object(user, place->query_long() + "\n");
+
     return 1;
 }

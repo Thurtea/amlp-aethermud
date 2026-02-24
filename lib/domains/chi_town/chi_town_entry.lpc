@@ -1,0 +1,32 @@
+// lib/domains/chi_town/chi_town_entry.lpc
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+    set_short("Chi-Town - Entry Plaza");
+    set_long(
+        "A bustling plaza marks the entry to Chi-Town. Neon signs and low\n"
+        "arches welcome travelers from the road. Merchants shout their wares\n"
+        "from nearby stalls and a small gate lies to the south leading out.\n"
+    );
+
+    add_exit("north", "/domains/chi_town/chi_town_market");
+    add_exit("south", "/domains/chi_town/chi_town_gate");
+
+    set_property("light", 2);
+
+    /* Spawn a generic vendor for atmosphere if npc_daemon is available */
+    object npc_daemon = find_object("/daemon/npc_daemon");
+    if (!npc_daemon) {
+        catch { npc_daemon = load_object("/daemon/npc_daemon"); };
+    }
+    if (npc_daemon) {
+        object vendor = clone_object("/domains/chi_town/npc/vendor_generic");
+        if (vendor) {
+            move_object(vendor, this_object());
+            npc_daemon->register_npc(vendor,
+                                     "/domains/chi_town/chi_town_entry",
+                                     300);
+        }
+    }
+}

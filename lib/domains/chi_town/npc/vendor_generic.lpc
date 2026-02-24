@@ -1,0 +1,19 @@
+// lib/domains/chi_town/npc/vendor_generic.lpc
+inherit "/std/npc";
+
+void create() {
+    ::create();
+    set_name("vendor");
+    set_id(({"vendor", "stall vendor", "chi vendor"}));
+    set_short("a stall vendor");
+    set_long(
+        "A quick-talking vendor tends a small stall, offering curios and
+"        "street-food specialties. They seem friendly but keen to make a
+"        "sale.\n"
+    );
+
+    set_template("vendor");
+    set_level(2);
+    set_hp(20);
+    set_aggro(0);
+}

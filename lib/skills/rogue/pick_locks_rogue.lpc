@@ -28,5 +28,25 @@ void create() {
 
 /* TODO:CONTENT - implement perform() when skill system wired */
 int perform(object user, string args) {
+    if (!user) return 0;
+    int level = (user->query_level() ? user->query_level() : 1);
+    int pct = query_base_percentage() + (level * query_level_bonus());
+    string stat = "pe"; /* Perception/awareness for rogue tasks */
+    int stat_mod = 0;
+    if (user->query_stat) stat_mod = (user->query_stat(stat) - 10);
+    pct += stat_mod;
+    if (pct > query_max_percentage()) pct = query_max_percentage();
+
+    int roll = random(100) + 1;
+    tell_object(user, "You attempt to pick the lock...\n");
+    if (roll >= 96) {
+        tell_object(user, "You fumble and trigger a critical failure!\n");
+        return -1;
+    }
+    if (roll <= pct) {
+        tell_object(user, "You successfully manipulate the lock mechanism.\n");
+        return 1;
+    }
+    tell_object(user, "You fail to pick the lock.\n");
     return 0;
 }

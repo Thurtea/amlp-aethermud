@@ -23,6 +23,17 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+
+    int duration_minutes = (user->query_psionic_level ? user->query_psionic_level() * 5 : 10);
+    tell_object(user, "You steel your body against fatigue.\n");
+    user->set_property("resist_fatigue_active", 1);
+    call_out("end_resist_fatigue", duration_minutes * 60, user);
     return 1;
+}
+
+void end_resist_fatigue(object user) {
+    if (!user) return;
+    user->remove_property("resist_fatigue_active");
+    tell_object(user, "You feel normal levels of fatigue return.\n");
 }

@@ -5,6 +5,9 @@ inherit "/lib/std/container.lpc";
 
 void create() {
     ::create();
+    set_name("chest");
+    set_id(({"chest","wizard chest","wizard's chest"}));
+    set_starts_open(0);
     set_short("wizard's chest");
     set_long(
         "A sturdy oak chest with arcane symbols carved into its lid.\n"

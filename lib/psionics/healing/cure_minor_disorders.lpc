@@ -23,6 +23,28 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
-    return 1;
+    if (!user) return 0;
+    if (!target) {
+        tell_object(user, "Cure whom?\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living target.\n");
+        return 0;
+    }
+
+    /* Remove simple 'disease' properties if present */
+    if (target->query_property("diseased")) {
+        target->remove_property("diseased");
+        tell_object(user, "You cleanse minor ailments from " + target->query_cap_name() + ".\n");
+        tell_object(target, "You feel your sickness ebb away.\n");
+        return 1;
+    }
+
+    tell_object(user, "You cannot find any minor disorders to cure.\n");
+    return 0;
 }

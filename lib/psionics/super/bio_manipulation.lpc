@@ -23,6 +23,31 @@ void create() {
 
 /* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (!target) {
+        tell_object(user, "Who is the subject of your bio-manipulation?\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your subject is not present.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living subject.\n");
+        return 0;
+    }
+
+    /* Example effect: temporarily reduce target's physical strength */
+    tell_object(user, "You reach into the subject's biology and alter its processes.\n");
+    tell_object(target, "You feel your muscles slacken as something invisible tampers with your body.\n");
+
+    target->set_property("bio_manipulated", 1);
+    call_out("end_bio_manipulation", user->query_psionic_level() ? user->query_psionic_level() * 60 : 300, target);
     return 1;
+}
+
+void end_bio_manipulation(object target) {
+    if (!target) return;
+    target->remove_property("bio_manipulated");
+    tell_object(target, "You feel your body return to normal.\n");
 }

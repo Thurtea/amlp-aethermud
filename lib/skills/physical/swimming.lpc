@@ -27,3 +27,27 @@ void create() {
     set_training_time(2);
     set_is_primary_only(0);
 }
+
+int perform(object user, string args) {
+    if (!user) return 0;
+    int level = (user->query_level() ? user->query_level() : 1);
+    int pct = query_base_percentage() + (level * query_level_bonus());
+    string stat = "pp";
+    int stat_mod = 0;
+    if (user->query_stat) stat_mod = (user->query_stat(stat) - 10);
+    pct += stat_mod;
+    if (pct > query_max_percentage()) pct = query_max_percentage();
+
+    int roll = random(100) + 1;
+    tell_object(user, "You begin to swim...\n");
+    if (roll >= 96) {
+        tell_object(user, "You panic and risk drowning!\n");
+        return -1;
+    }
+    if (roll <= pct) {
+        tell_object(user, "You swim effectively and make good progress.\n");
+        return 1;
+    }
+    tell_object(user, "You struggle in the water and make little progress.\n");
+    return 0;
+}

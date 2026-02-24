@@ -28,5 +28,25 @@ void create() {
 
 /* TODO:CONTENT - implement perform() when skill system wired */
 int perform(object user, string args) {
+    if (!user) return 0;
+    int level = (user->query_level() ? user->query_level() : 1);
+    int pct = query_base_percentage() + (level * query_level_bonus());
+    string stat = "pp";
+    int stat_mod = 0;
+    if (user->query_stat) stat_mod = (user->query_stat(stat) - 10);
+    pct += stat_mod;
+    if (pct > query_max_percentage()) pct = query_max_percentage();
+
+    int roll = random(100) + 1;
+    tell_object(user, "You begin to track through the wilderness...\n");
+    if (roll >= 96) {
+        tell_object(user, "You lose the trail completely!\n");
+        return -1;
+    }
+    if (roll <= pct) {
+        tell_object(user, "You find and follow the trail successfully.\n");
+        return 1;
+    }
+    tell_object(user, "You fail to pick up the trail.\n");
     return 0;
 }

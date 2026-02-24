@@ -1,247 +1,74 @@
-// std/room.c - Base object for all rooms/locations
-// Inherits from std/object and adds room-specific features
+// Minimal, conservative room implementation
+// Only implements the small subset of behavior used by domains.
 
 inherit "/std/object";
 
-string short_desc;
-string long_desc;
-mapping exits;
+private mapping exits;
+private mapping room_items;
 
 void create() {
     ::create();
-    short_desc = "A generic room";
-    long_desc = "This is a generic room.";
+    set_short("A nondescript place");
+    set_long("You see nothing in particular.");
     exits = ([]);
+    room_items = ([]);
+    set_light(1);
 }
 
-string query_short() {
-    return short_desc;
+/* Exits */
+void set_exits(m) { exits = m ? m : ([]); }
+mapping query_exits() { return exits; }
+void add_exit(dir, dest) {
+    if (!exits) exits = ([]);
+    exits[dir] = dest;
 }
 
-void set_short(string desc) {
-    short_desc = desc;
-}
+/* Items */
+void set_items(m) { room_items = m ? m : ([]); }
+mapping query_items() { return room_items; }
 
-string query_long() {
-    return long_desc;
-}
+/* Light helper (thin wrapper around properties provided by /std/object) */
+void set_light(level) { set_property("light", level); }
 
-void set_long(string desc) {
-    long_desc = desc;
-}
-
-void add_exit(string direction, string destination) {
-    exits[direction] = destination;
-}
-
-mapping query_exits() {
-    return exits;
-}
-
-string *query_exit_dirs() {
-    return keys(exits);
-}
-// Generate the description shown when a player looks at the room
+/* A simple, conservative look() that writes the long description,
+   lists obvious exits and lists contents. Returns empty string. */
 string look() {
-    string desc = "";
     object *contents;
-    object *living_things = ({ });
-    object *items = ({ });
-    object viewer = this_player();
-    int brief_mode = 0;
+    object ob;
+    int i, s;
 
-    if (viewer && function_exists("GetBriefMode", viewer)) {
-        brief_mode = (int)viewer->GetBriefMode();
-    }
+    write(query_long() + "\n");
 
-    // Render header based on brief/verbose preference
-    if (brief_mode) {
-        desc += query_short() + "\n";
-    } else {
-        write(query_long() + "\033[0m");
-        return "";
-    }
-    
-    // Get room contents
-    contents = all_inventory(this_object());
-    
-    if (contents && sizeof(contents) > 0) {
-        // Separate living creatures from items
-        foreach (object ob : contents) {
-            if (living(ob)) {
-                living_things += ({ ob });
-            } else {
-                items += ({ ob });
-            }
-        }
-        
-        // List living creatures (players and NPCs)
-        if (sizeof(living_things) > 0) {
-            desc += "\n";
-            foreach (object liv : living_things) {
-                string person_desc;
-                string position;
-                
-                // Get the name as this observer should see it
-                if (function_exists("query_introduction_name", liv)) {
-                    person_desc = liv->query_introduction_name(this_player());
-                } else {
-                    // Fallback if introduction system not available
-                    person_desc = liv->query_name ? liv->query_name() : "someone";
-                }
-                
-                // Get position description
-                if (function_exists("query_position", liv)) {
-                    position = liv->query_position();
-                } else {
-                    position = "is here.";
-                }
-                
-                // Capitalize first letter
-                if (person_desc && sizeof(person_desc) > 0) {
-                    person_desc = capitalize(person_desc);
-                }
-                
-                desc += "  " + person_desc + " " + position + "\n";
-            }
-        }
-        
-        // List items on the ground
-        if (sizeof(items) > 0) {
-            desc += "\n";
-            foreach (object item : items) {
-                string item_desc;
-                
-                if (function_exists("query_short", item)) {
-                    item_desc = item->query_short();
-                } else {
-                    item_desc = "something";
-                }
-                
-                // Format item short description (lowercase except acronyms/proper nouns)
-                if (item_desc && sizeof(item_desc) > 0) {
-                    item_desc = format_item_short(item_desc);
-                }
-
-                // Use centralized renderer when possible to add articles/punctuation
-                if (function_exists("render_item_description", this_object())) {
-                    string rendered = render_item_description(item, viewer);
-                    if (rendered && rendered != "") {
-                        desc += "  " + rendered + "\n";
-                        continue;
-                    }
-                }
-
-                desc += "  " + item_desc + " is here.\n";
-            }
-        }
-    }
-    
-    // List exits if any
-    if (exits && sizeof(exits) > 0) {
+    /* List exits */
+    if (exits && sizeof(keys(exits)) > 0) {
         string *dirs = keys(exits);
-        desc += "\n\033[1;32mExits:\033[0m ";
-        for (int i = 0; i < sizeof(dirs); i++) {
-            desc += dirs[i];
-            if (i < sizeof(dirs) - 1) {
-                desc += ", ";
-            }
+        write("Obvious exits: ");
+        for (i = 0; i < sizeof(dirs); i++) {
+            write(dirs[i] + (i < sizeof(dirs) - 1 ? ", " : "\n"));
         }
-        desc += "\n";
     }
-    return desc;
+
+    /* List visible contents */
+    contents = all_inventory(this_object());
+    if (contents && sizeof(contents) > 0) {
+        write("You see:\n");
+        for (i = 0, s = sizeof(contents); i < s; i++) {
+            ob = contents[i];
+            if (!objectp(ob)) continue;
+            /* Skip the player doing the look, driver will place player in room
+               so they will be listed; it's okay. */
+            string desc = "";
+            if (function_exists("query_short", ob)) {
+                desc = (string)ob->query_short();
+            }
+            if (!desc || desc == "") {
+                if (living(ob)) desc = "someone";
+                else desc = "something";
+            }
+            write("  " + desc + "\n");
+        }
+    }
+
+    return "";
 }
 
-
-// Helper: return a nicely-phrased single-line description for an item
-// Format item short description to lowercase while preserving acronyms
-// (e.g. EBA) and obvious proper-nouns with apostrophes (e.g. Wilk's)
-string format_item_short(string s) {
-    if (!s || s == "") return s;
-    string orig = s;
-    string lc = lower_case(orig);
-    string *ow = explode(orig, " ");
-    string *lw = explode(lc, " ");
-    int n = sizeof(lw);
-    int m = sizeof(ow);
-    for (int i = 0; i < n; i++) {
-        string o = (i < m) ? ow[i] : lw[i];
-        string a, b;
-        if (upper_case(o) == o && strlen(o) > 1) {
-            lw[i] = o;
-            continue;
-        }
-        if (sscanf(o, "%s'%s", a, b) == 2 && a[0] == upper_case(a[0])) {
-            lw[i] = o;
-            continue;
-        }
-    }
-    return implode(lw, " ");
-}
-
-string render_item_description(object item, object viewer) {
-    string short_desc;
-    string article = "";
-    string out;
-
-    if (!objectp(item)) return "";
-
-    // Living things should use their introduction name if available
-    if (living(item)) {
-        if (function_exists("query_introduction_name", item)) {
-            out = item->query_introduction_name(viewer);
-            if (out && sizeof(out) > 0) {
-                out = capitalize(out);
-                // Ensure trailing punctuation
-                if (out[<1] != '.' && out[<1] != '!') out += ".";
-                return out;
-            }
-        }
-    }
-
-    // Non-living: attempt to get a short
-    if (function_exists("query_short", item)) {
-        short_desc = item->query_short();
-    } else {
-        short_desc = "something";
-    }
-
-    if (!short_desc || short_desc == "") return "";
-
-    
-
-    // If object provides an explicit article hook, use it
-    if (function_exists("query_article", item)) {
-        article = item->query_article();
-    } else {
-        // If the short already begins with an article, don't add another
-        string lc = lower_case(short_desc);
-        if (startswith(lc, "a ") || startswith(lc, "an ") || startswith(lc, "the ")) {
-            article = "";
-        } else {
-            // Simple vowel rule for indefinite article
-            string first = lc[0..0];
-            if (member(({ 'a','e','i','o','u' }), first) != -1) {
-                article = "An";
-            } else {
-                article = "A";
-            }
-        }
-    }
-
-    // Assemble and ensure punctuation; use formatted short (lowercase
-    // except acronyms/proper nouns) and lowercase articles.
-    string formatted = format_item_short(short_desc);
-    if (article && article != "") {
-        article = lower_case(article);
-        out = article + " " + formatted;
-    } else {
-        out = formatted;
-    }
-    // Capitalise the first character of the fully assembled line so that
-    // both "a wizard's staff" (article stripped) and "a" + "wizard's staff"
-    // (article prepended then lowercased) become "A wizard's staff."
-    out = capitalize(out);
-    if (out[<1] != '.' && out[<1] != '!') out += ".";
-    return out;
-}

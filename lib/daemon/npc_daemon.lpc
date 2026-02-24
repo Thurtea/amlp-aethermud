@@ -1,96 +1,87 @@
-/*
- * /lib/daemon/npc_daemon.lpc
+/* Minimal NPC daemon - conservative implementation
+ * Responsibilities:
+ *  - Track registered NPC templates
+ *  - Queue respawns when NPCs die
+ *  - heartbeat() to perform due respawns
  *
- * NPC spawn/respawn daemon.
- *
- * Tracks all LPC-authored NPCs and handles automatic respawn when they die.
- * C-template NPCs (goblin, dog_boy, etc.) are managed by npc.c's own tick;
- * this daemon is for NPCs defined entirely in LPC under lib/domains/.
- *
- * API
- * ---
- *   register_npc(object npc, string room_path, int respawn_delay)
- *       Register an NPC with the daemon.  room_path is the LPC path of the
- *       room that owns the NPC; respawn_delay is seconds until it respawns
- *       after death (0 = no respawn).
- *
- *   npc_died(object npc)
- *       Called by lib/std/npc.lpc's die() override when an NPC is destroyed.
- *       Queues the NPC's room for a respawn after the registered delay.
- *
+ * API (backwards-compatible wrappers):
+ *   register_npc(a, b, c) - accepts either (object npc, room_path, delay)
+ *                           or (id_string, npc_path, room_path)
+ *   npc_died(npc)
  *   heartbeat()
- *       Called every 2 seconds (wired via master.lpc).  Decrements respawn
- *       timers and re-clones dead NPCs into their origin rooms.
- *
- * Respawn record layout (mapping per NPC object name):
- *   "path"         — LPC file path of the NPC (e.g. "/domains/new_camelot/npc/guard")
- *   "room"         — LPC path of the origin room
- *   "delay"        — configured respawn delay in seconds
- *   "respawn_at"   — epoch time when the NPC should respawn (0 = alive)
  */
 
-#define HEARTBEAT_SECS 2
-
-/* active: ([ object npc : mapping record, ... ]) for living NPCs  */
-/* queue:  ([ string key : mapping record, ... ]) for dead NPCs    */
-private mapping active_npcs;
-private mapping respawn_queue;
-private int     heartbeat_counter;
+private mapping npc_templates;   /* mapping key -> record (path, room, delay) */
+private mapping respawn_queue;   /* mapping key -> record (path, room, delay, respawn_at) */
 
 void create() {
-    active_npcs      = ([]);
-    respawn_queue    = ([]);
-    heartbeat_counter = 0;
+    npc_templates = ([]);
+    respawn_queue = ([]);
 }
 
-/* ------------------------------------------------------------------ */
-/* register_npc(npc, room_path, respawn_delay)                        */
-/* ------------------------------------------------------------------ */
-void register_npc(object npc, string room_path, int respawn_delay) {
-    if (!npc) return;
-    string key = file_name(npc);
-    active_npcs[key] = ([
-        "path"  : file_name(npc),
-        "room"  : room_path,
-        "delay" : respawn_delay,
-    ]);
-}
+/* register_npc(a, b, c)
+   - If 'a' is an object, register that object's file as the template
+     and use 'b' as the origin room and 'c' as delay.
+   - If 'a' is a string, treat as an id and use 'b' as npc_path and
+     'c' as room_path. */
+void register_npc(a, b, c) {
+    string key;
+    string path;
+    string room_path;
+    int delay;
 
-/* ------------------------------------------------------------------ */
-/* npc_died(npc)                                                       */
-/* Called by lib/std/npc.lpc when the NPC destructs.                  */
-/* ------------------------------------------------------------------ */
-void npc_died(object npc) {
-    if (!npc) return;
-    string key = file_name(npc);
-    mapping rec = active_npcs[key];
-    if (!rec) return;  /* Not registered with us */
+    if (!a) return;
 
-    if (rec["delay"] > 0) {
-        /* Move record to the respawn queue with a future time */
-        rec["respawn_at"] = time() + rec["delay"];
-        respawn_queue[key] = rec;
+    if (objectp(a)) {
+        path = file_name(a);
+        key = path;
+        room_path = b;
+        delay = c;
+    } else {
+        /* assume (id, npc_path, room_path) */
+        key = a;
+        path = b;
+        room_path = c;
+        delay = 0;
     }
-    map_delete(active_npcs, key);
+
+    if (!path || !room_path) return;
+
+    npc_templates[key] = ([ "path": path, "room": room_path, "delay": delay ]);
 }
 
-/* ------------------------------------------------------------------ */
-/* heartbeat()                                                         */
-/* ------------------------------------------------------------------ */
-void heartbeat() {
-    heartbeat_counter++;
+/* npc_died(npc)
+   - When an NPC is destroyed, place a respawn record if configured. */
+void npc_died(npc) {
+    if (!npc) return;
+    string key = file_name(npc);
+    mapping rec = npc_templates[key];
+    if (!rec) return;
+    if (rec["delay"] && rec["delay"] > 0) {
+        mapping r = ([ ]);
+        r["path"] = rec["path"];
+        r["room"] = rec["room"];
+        r["delay"] = rec["delay"];
+        r["respawn_at"] = time() + rec["delay"];
+        respawn_queue[key] = r;
+    }
+    map_delete(npc_templates, key);
+}
 
-    int now = time();
+/* heartbeat: iterate over keys and respawn due entries */
+void heartbeat() {
     string *klist = keys(respawn_queue);
     int i;
+    int now = time();
+
     for (i = 0; i < sizeof(klist); i++) {
-        string key  = klist[i];
+        string key = klist[i];
         mapping rec = respawn_queue[key];
         if (!rec) continue;
+        if (!rec["respawn_at"]) continue;
         if (rec["respawn_at"] > now) continue;
 
-        /* Time to respawn: clone the NPC into its origin room */
-        string npc_path  = rec["path"];
+        string npc_path = rec["path"];
         string room_path = rec["room"];
 
         object room_ob = find_object(room_path);
@@ -98,34 +89,31 @@ void heartbeat() {
             catch { room_ob = load_object(room_path); };
         }
 
-        object new_npc;
         if (room_ob) {
+            object new_npc;
             catch {
                 new_npc = clone_object(npc_path);
                 if (new_npc) {
                     move_object(new_npc, room_ob);
-                    /* Re-register the new clone */
                     string new_key = file_name(new_npc);
-                    active_npcs[new_key] = ([
-                        "path"  : npc_path,
-                        "room"  : room_path,
-                        "delay" : rec["delay"],
-                    ]);
-                    /* Announce respawn */
-                    if (room_ob) {
-                        string short_n = (string)new_npc->query_short();
-                        tell_room(room_ob,
-                            (short_n || "Someone") + " arrives.\n");
+                    npc_templates[new_key] = ([ "path": npc_path,
+                                                "room": room_path,
+                                                "delay": rec["delay"] ]);
+                    /* announce simply */
+                    string short_n = "someone";
+                    if (function_exists("query_short", new_npc)) {
+                        short_n = (string)new_npc->query_short();
+                        if (!short_n || short_n == "") short_n = "someone";
                     }
+                    tell_room(room_ob, short_n + " arrives.\n");
                 }
             };
         }
+
         map_delete(respawn_queue, key);
     }
 }
 
-/* Query helpers */
-mapping query_active_npcs()  { return active_npcs; }
+mapping query_active_templates() { return npc_templates; }
 mapping query_respawn_queue() { return respawn_queue; }
-int     query_registered()   { return sizeof(keys(active_npcs))
-                                     + sizeof(keys(respawn_queue)); }
+

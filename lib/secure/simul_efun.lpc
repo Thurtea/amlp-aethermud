@@ -17,18 +17,18 @@ void create() {}
 // ============================================================
 private mapping _nf = ([]);
 
-void notify_fail(string msg) {
+void notify_fail(msg) {
     if(previous_object() && msg) _nf[previous_object()] = msg;
 }
 
-string query_notify_fail(object ob) { return _nf[ob]; }
-void clear_notify_fail(object ob) { map_delete(_nf, ob); }
+string query_notify_fail(ob) { return _nf[ob]; }
+void clear_notify_fail(ob) { map_delete(_nf, ob); }
 
 // ============================================================
 // STRING UTILITIES
 // ============================================================
 
-string strip_ansi(string str) {
+string strip_ansi(str) {
     if(!stringp(str)) return "";
     string out = ""; int i = 0; int n = strlen(str);
     while(i < n) {
@@ -36,55 +36,55 @@ string strip_ansi(string str) {
             i += 2;
             while(i < n && str[i] != 'm') i++;
             i++;
-        } else { out += str[i..i]; i++; }
+        } else { out += substr(str, i, 1); i++; }
     }
     return out;
 }
 
-int visible_len(string str) { return strlen(strip_ansi(str)); }
+int visible_len(str) { return strlen(strip_ansi(str)); }
 
-string trim(string str) {
+string trim(str) {
     if(!stringp(str)) return "";
-    while(strlen(str) > 0 && (str[0]==' ' || str[0]=='\t')) str = str[1..];
-    while(strlen(str) > 0 && (str[<1]==' ' || str[<1]=='\t')) str = str[..<2];
+    while(strlen(str) > 0 && (str[0]==' ' || str[0]=='\t')) str = substr(str, 1, strlen(str)-1);
+    while(strlen(str) > 0 && (str[strlen(str)-1]==' ' || str[strlen(str)-1]=='\t')) str = substr(str, 0, strlen(str)-1);
     return str;
 }
 
-string capitalize(string str) {
+string capitalize(str) {
     if(!stringp(str) || str == "") return str;
-    return upper_case(str[0..0]) + str[1..];
+    return upper_case(substr(str, 0, 1)) + substr(str, 1, strlen(str)-1);
 }
 
-string repeat_str(string s, int n) {
+string repeat_str(s, n) {
     string r = ""; int i;
     for(i = 0; i < n; i++) r += s;
     return r;
 }
 
-string pad_str(string s, int width) {
+string pad_str(s, width) {
     int vl = visible_len(s);
     if(vl >= width) return s;
     return s + repeat_str(" ", width - vl);
 }
 
-string center_str(string s, int width) {
+string center_str(s, width) {
     int vl = visible_len(s);
     if(vl >= width) return s;
     int pad = width - vl; int left = pad / 2;
     return repeat_str(" ", left) + s + repeat_str(" ", pad - left);
 }
 
-string array_to_list(string *arr) {
+string array_to_list(arr) {
     int sz;
     if(!arrayp(arr) || !(sz = sizeof(arr))) return "";
     if(sz == 1) return arr[0];
     if(sz == 2) return arr[0] + " and " + arr[1];
-    return implode(arr[0..<2], ", ") + ", and " + arr[<1];
+    return implode(arr[0..(sz-2)], ", ") + ", and " + arr[sz-1];
 }
 
-string add_article(string noun) {
+string add_article(noun) {
     if(!stringp(noun) || noun == "") return noun;
-    string c = lower_case(noun[0..0]);
+    string c = lower_case(substr(noun,0,1));
     if(c=="a"||c=="e"||c=="i"||c=="o"||c=="u") return "an " + noun;
     return "a " + noun;
 }
@@ -103,9 +103,9 @@ private mapping _ansi = ([
     "bcyan":"\x1b[96m",   "bwhite":"\x1b[97m",
 ]);
 
-string ansi_code(string color) { return _ansi[color] || ""; }
+string ansi_code(color) { return _ansi[color] || ""; }
 
-string ansi_color(string color, string text) {
+string ansi_color(color, text) {
     string code = _ansi[color];
     if(!code) return text;
     return code + text + _ansi["reset"];
@@ -115,46 +115,46 @@ string ansi_color(string color, string text) {
 // PATH UTILITIES
 // ============================================================
 
-string resolve_path(string base, string path) {
+string resolve_path(base, path) {
     if(!stringp(path)) return base || "/";
     if(!stringp(base)) base = "/";
     string full;
     if(path[0] == '/') { full = path; }
-    else { if(base[<1] != '/') base += "/"; full = base + path; }
+    else { if(base[strlen(base)-1] != '/') base += "/"; full = base + path; }
     string *parts = explode(full, "/"), *out = ({}); int i;
     for(i = 0; i < sizeof(parts); i++) {
         if(parts[i]=="" || parts[i]==".") continue;
-        if(parts[i]=="..") { if(sizeof(out)) out = out[0..<2]; }
+        if(parts[i]=="..") { if(sizeof(out)) out = out[0..(sizeof(out)-2)]; }
         else out += ({ parts[i] });
     }
     return "/" + implode(out, "/");
 }
 
-int safe_path(string path) {
+int safe_path(path) {
     if(!stringp(path)) return 0;
     if(strsrch(path, "..") != -1) return 0;
     return 1;
 }
 
-string dirname(string path) {
+string dirname(path) {
     if(!stringp(path)) return "/";
     int idx = strsrch(path, "/", -1);
     if(idx <= 0) return "/";
-    return path[0..idx-1];
+    return substr(path, 0, idx);
 }
 
-string basename_path(string path) {
+string basename_path(path) {
     if(!stringp(path)) return "";
     int idx = strsrch(path, "/", -1);
     if(idx < 0) return path;
-    return path[idx+1..];
+    return substr(path, idx + 1, strlen(path) - (idx + 1));
 }
 
 // ============================================================
 // OBJECT UTILITIES
 // ============================================================
 
-string obj_name(object ob) {
+string obj_name(ob) {
     if(!objectp(ob)) return "(void)";
     string n = 0;
     if(function_exists("query_name", ob)) n = (string)ob->query_name();
@@ -162,7 +162,7 @@ string obj_name(object ob) {
     return n;
 }
 
-string obj_short(object ob) {
+string obj_short(ob) {
     if(!objectp(ob)) return "nothing";
     if(function_exists("query_short", ob)) {
         string s = (string)ob->query_short();
@@ -171,7 +171,7 @@ string obj_short(object ob) {
     return capitalize(obj_name(ob));
 }
 
-object find_ob(string str, object env) {
+object find_ob(str, env) {
     object *inv; int i;
     if(!objectp(env) || !stringp(str) || str == "") return 0;
     inv = all_inventory(env);
@@ -182,7 +182,7 @@ object find_ob(string str, object env) {
     return 0;
 }
 
-object find_living_here(string name, object env) {
+object find_living_here(name, env) {
     object *inv; int i;
     if(!objectp(env) || !stringp(name)) return 0;
     inv = all_inventory(env);
@@ -201,7 +201,7 @@ object find_living_here(string name, object env) {
 // Falls back to race/article for unintroduced players.
 // ============================================================
 
-string vis_name(object ob, object viewer) {
+string vis_name(ob, viewer) {
     if(!objectp(ob)) return "someone";
     if(function_exists("query_introduction_name", ob)) {
         string n = (string)ob->query_introduction_name(viewer);
@@ -214,7 +214,7 @@ string vis_name(object ob, object viewer) {
 // capitalize(vis_name(actor, that_viewer)).
 // actor is excluded (they see "You ..." separately).
 
-void tell_room_vis(object room, object actor, string format, object *exclude) {
+void tell_room_vis(room, actor, format, exclude) {
     object *inv; int i;
     if(!objectp(room) || !stringp(format)) return;
     if(!arrayp(exclude)) exclude = ({});
@@ -225,7 +225,7 @@ void tell_room_vis(object room, object actor, string format, object *exclude) {
         string aname = capitalize(vis_name(actor, inv[i]));
         string msg = format;
         int idx = strsrch(msg, "%s");
-        if(idx >= 0) msg = msg[0..idx-1] + aname + msg[idx+2..];
+        if(idx >= 0) msg = substr(msg, 0, idx) + aname + substr(msg, idx+2, strlen(msg) - (idx+2));
         tell_object(inv[i], msg);
     }
 }
@@ -234,7 +234,7 @@ void tell_room_vis(object room, object actor, string format, object *exclude) {
 // MESSAGING UTILITIES
 // ============================================================
 
-void tell_room(object room, string msg, object *exclude) {
+void tell_room(room, msg, exclude) {
     object *inv; int i;
     if(!objectp(room) || !stringp(msg)) return;
     if(!arrayp(exclude)) exclude = ({});
@@ -245,7 +245,7 @@ void tell_room(object room, string msg, object *exclude) {
     }
 }
 
-void shout_all(string msg) {
+void shout_all(msg) {
     object *us = users(); int i;
     if(!arrayp(us)) return;
     for(i = 0; i < sizeof(us); i++)
@@ -256,13 +256,13 @@ void shout_all(string msg) {
 // MATH / RANDOM
 // ============================================================
 
-int clamp(int val, int mn, int mx) {
+int clamp(val, mn, mx) {
     if(val < mn) return mn;
     if(val > mx) return mx;
     return val;
 }
 
-int random_range(int mn, int mx) {
+int random_range(mn, mx) {
     if(mx <= mn) return mn;
     return mn + random(mx - mn + 1);
 }
@@ -271,7 +271,7 @@ int random_range(int mn, int mx) {
 // TYPE COERCION
 // ============================================================
 
-string to_string(mixed v) {
+string to_string(v) {
     if(!v && v != 0) return "";
     if(stringp(v)) return v;
     if(intp(v)) return sprintf("%d", v);
@@ -280,7 +280,7 @@ string to_string(mixed v) {
     return "";
 }
 
-int to_int(mixed v) {
+int to_int(v) {
     if(intp(v)) return v;
     if(stringp(v) && v != "") return (int)v;
     if(floatp(v)) return (int)v;
@@ -291,7 +291,7 @@ int to_int(mixed v) {
 // TIME FORMATTING
 // ============================================================
 
-string format_duration(int seconds) {
+string format_duration(seconds) {
     int h, m, s;
     if(seconds < 0) seconds = 0;
     h = seconds / 3600;
@@ -306,7 +306,7 @@ string format_duration(int seconds) {
 // CASE CONVERSION
 // ============================================================
 
-string lower_case(string str) {
+string lower_case(str) {
     if(!str) return "";
     int i; string out = "";
     for(i = 0; i < strlen(str); i++) {
@@ -317,7 +317,7 @@ string lower_case(string str) {
     return out;
 }
 
-string upper_case(string str) {
+string upper_case(str) {
     if(!str) return "";
     int i; string out = "";
     for(i = 0; i < strlen(str); i++) {
@@ -332,7 +332,7 @@ string upper_case(string str) {
 // ARRAY UTILITIES
 // ============================================================
 
-int member_array(mixed item, mixed *arr) {
+int member_array(item, arr) {
     int i;
     if(!arr) return -1;
     for(i = 0; i < sizeof(arr); i++)
@@ -344,24 +344,24 @@ int member_array(mixed item, mixed *arr) {
 // OBJECT TYPE CHECKS
 // ============================================================
 
-int is_player(object ob) {
-    if(!ob) return 0;
-    return ob->query_privilege_level() >= 0 && !ob->query_is_npc();
-}
+ int is_player(ob) {
+     if(!ob) return 0;
+     return ob->query_privilege_level() >= 0 && !ob->query_is_npc();
+ }
 
-int is_npc(object ob) {
-    if(!ob) return 0;
-    return ob->query_is_npc();
-}
+ int is_npc(ob) {
+     if(!ob) return 0;
+     return ob->query_is_npc();
+ }
 
 // ============================================================
 // SKILL HELPERS
 // ============================================================
 
-mixed query_skill_pct(object player, string skill_name) {
-    if(!player || !skill_name) return 0;
-    mapping skills = player->query_all_skills();
-    if(!skills) return 0;
-    if(member(skills, skill_name)) return skills[skill_name];
-    return 0;
-}
+ mixed query_skill_pct(player, skill_name) {
+     if(!player || !skill_name) return 0;
+     mapping skills = player->query_all_skills();
+     if(!skills) return 0;
+     if(member(skills, skill_name)) return skills[skill_name];
+     return 0;
+ }

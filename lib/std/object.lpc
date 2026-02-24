@@ -108,16 +108,16 @@ string query_long() {
     return long_desc ? long_desc : "This is a generic object.";
 }
 
-void set_short(string desc) {
+void set_short(desc) {
     short_desc = desc;
 }
 
-void set_long(string desc) {
+void set_long(desc) {
     long_desc = desc;
 }
 
 /* Blueprint path helpers for save/restore */
-void set_object_path(string path) {
+void set_object_path(path) {
     object_blueprint_path = path;
 }
 
@@ -134,7 +134,7 @@ int query_weight() {
     return weight;
 }
 
-void set_weight(int w) {
+void set_weight(w) {
     weight = w;
 }
 
@@ -142,21 +142,21 @@ int query_value() {
     return value;
 }
 
-void set_value(int v) {
+void set_value(v) {
     value = v;
 }
 
 // Generic properties system
-mixed query_property(string prop) {
+mixed query_property(prop) {
     return properties ? properties[prop] : 0;
 }
 
-void set_property(string prop, mixed val) {
+void set_property(prop, val) {
     if (!properties) properties = ([ ]);
     properties[prop] = val;
 }
 
-void remove_property(string prop) {
+void remove_property(prop) {
     if (properties) {
         map_delete(properties, prop);
     }
@@ -171,12 +171,12 @@ object query_environment() {
     return environment;
 }
 
-void set_environment(object env) {
+void set_environment(env) {
     environment = env;
 }
 
 // Movement function
-void move(object dest) {
+void move(dest) {
     environment = dest;
     // Note: The driver's move_object() handles inventory tracking
 }
@@ -195,7 +195,7 @@ int query_wielded() {
     return wielded;
 }
 
-void set_wielded(int val) {
+void set_wielded(val) {
     wielded = val;
 }
 
@@ -203,7 +203,7 @@ int query_worn() {
     return worn;
 }
 
-void set_worn(int val) {
+void set_worn(val) {
     worn = val;
 }
 
@@ -221,7 +221,7 @@ string query_slot() {
     return query_property("armor_slot");
 }
 
-void set_slot(string s) {
+void set_slot(s) {
     set_property("armor_slot", s);
 }
 
@@ -234,7 +234,7 @@ int query_size() {
     return size;
 }
 
-void set_size(int s) {
+void set_size(s) {
     if (s < 0) s = 0;
     if (s > 4) s = 4;
     size = s;
@@ -254,7 +254,7 @@ int query_armor_rating() {
     return armor_rating;
 }
 
-void set_armor_rating(int rating) {
+void set_armor_rating(rating) {
     armor_rating = rating;
 }
 
@@ -272,7 +272,7 @@ int query_armor_max_damage() {
     return armor_max_damage;
 }
 
-void set_armor_max_damage(int max) {
+void set_armor_max_damage(max) {
     armor_max_damage = max;
 }
 
@@ -290,7 +290,7 @@ int query_armor_condition() {
 }
 
 // Damage the armor
-void damage_armor(int amount) {
+void damage_armor(amount) {
     if (armor_max_damage <= 0) return;  // Not armor or indestructible
     armor_damage += amount;
     if (armor_damage > armor_max_damage) {
@@ -299,7 +299,7 @@ void damage_armor(int amount) {
 }
 
 // Repair the armor
-void repair_armor(int amount) {
+void repair_armor(amount) {
     armor_damage -= amount;
     if (armor_damage < 0) armor_damage = 0;
 }

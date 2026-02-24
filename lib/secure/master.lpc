@@ -1,8 +1,4 @@
-// Export send_ansi as an efun for LPC
-// TEMP DEBUG: Pass-through efun_send_ansi for diagnostics
-nomask string efun_send_ansi(string s) {
-    return s;
-}
+// Temporary helper removed: efun_send_ansi was a debug passthrough.
 // /lib/secure/master.c
 // Master Object - Core LPC driver interface
 

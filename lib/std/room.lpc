@@ -1,7 +1,7 @@
 // std/room.c - Base object for all rooms/locations
 // Inherits from std/object and adds room-specific features
 
-inherit "std/object.c";
+inherit "/std/object";
 
 string short_desc;
 string long_desc;

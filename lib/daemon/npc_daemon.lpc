@@ -81,10 +81,10 @@ void heartbeat() {
     heartbeat_counter++;
 
     int now = time();
-    string *keys = keys(respawn_queue);
+    string *klist = keys(respawn_queue);
     int i;
-    for (i = 0; i < sizeof(keys); i++) {
-        string key  = keys[i];
+    for (i = 0; i < sizeof(klist); i++) {
+        string key  = klist[i];
         mapping rec = respawn_queue[key];
         if (!rec) continue;
         if (rec["respawn_at"] > now) continue;

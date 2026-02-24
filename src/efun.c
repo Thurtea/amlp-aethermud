@@ -1291,10 +1291,21 @@ VMValue efun_clone_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     if (!mudlib || !*mudlib) mudlib = "./lib";
 
     /* strip leading slash */
-    const char *p = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
-    if (snprintf(fs_path, sizeof(fs_path), "%s/%s.lpc", mudlib, p) >= (int)sizeof(fs_path)) {
-        return vm_value_create_null();
+    const char *p_raw = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
+    /* If path starts with "lib/", remove that prefix so we don't double-prepend mudlib */
+    const char *p = (strncmp(p_raw, "lib/", 4) == 0) ? p_raw + 4 : p_raw;
+    /* Append .lpc only if not already present */
+    size_t plen = strlen(p);
+    if (plen > 4 && strcmp(p + plen - 4, ".lpc") == 0) {
+        if (snprintf(fs_path, sizeof(fs_path), "%s/%s", mudlib, p) >= (int)sizeof(fs_path)) {
+            return vm_value_create_null();
+        }
+    } else {
+        if (snprintf(fs_path, sizeof(fs_path), "%s/%s.lpc", mudlib, p) >= (int)sizeof(fs_path)) {
+            return vm_value_create_null();
+        }
     }
+    
 
     /* Compile source file */
     Program *prog = compiler_compile_file(fs_path);
@@ -1627,10 +1638,20 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     const char *mudlib = getenv("AMLP_MUDLIB");
     if (!mudlib || !*mudlib) mudlib = "./lib";
 
-    const char *p = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
-    if (snprintf(fs_path, sizeof(fs_path), "%s/%s.lpc", mudlib, p) >= (int)sizeof(fs_path)) {
-        fprintf(stderr, "[Efun] load_object: path too long\n");
-        return vm_value_create_null();
+    const char *p_raw = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
+    const char *p = (strncmp(p_raw, "lib/", 4) == 0) ? p_raw + 4 : p_raw;
+    /* Only append .lpc when the path does not already include it */
+    size_t plen = strlen(p);
+    if (plen > 4 && strcmp(p + plen - 4, ".lpc") == 0) {
+        if (snprintf(fs_path, sizeof(fs_path), "%s/%s", mudlib, p) >= (int)sizeof(fs_path)) {
+            fprintf(stderr, "[Efun] load_object: path too long\n");
+            return vm_value_create_null();
+        }
+    } else {
+        if (snprintf(fs_path, sizeof(fs_path), "%s/%s.lpc", mudlib, p) >= (int)sizeof(fs_path)) {
+            fprintf(stderr, "[Efun] load_object: path too long\n");
+            return vm_value_create_null();
+        }
     }
 
     /* Compile source file */
@@ -1666,8 +1687,14 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
 
         /* Build parent filesystem path */
         char parent_fs[PATH_MAX];
-        const char *pp = parent_path[0] == '/' ? parent_path + 1 : parent_path;
-        snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib, pp);
+        const char *pp_raw = parent_path[0] == '/' ? parent_path + 1 : parent_path;
+        const char *pp = (strncmp(pp_raw, "lib/", 4) == 0) ? pp_raw + 4 : pp_raw;
+        size_t pplen = strlen(pp);
+        if (pplen > 4 && strcmp(pp + pplen - 4, ".lpc") == 0) {
+            snprintf(parent_fs, sizeof(parent_fs), "%s/%s", mudlib, pp);
+        } else {
+            snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib, pp);
+        }
 
         /* Compile parent */
         Program *parent_prog = compiler_compile_file(parent_fs);
@@ -1718,7 +1745,9 @@ VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     const char *mudlib = getenv("AMLP_MUDLIB");
     if (!mudlib || !*mudlib) mudlib = "./lib";
 
-    const char *p = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
+    const char *p_raw = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
+    /* remove optional leading lib/ */
+    const char *p = (strncmp(p_raw, "lib/", 4) == 0) ? p_raw + 4 : p_raw;
     /* ensure no trailing .lpc in p for canonical form */
     size_t plen = strlen(p);
     char p_noext[PATH_MAX];
@@ -1762,8 +1791,14 @@ VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     for (size_t ih = 0; ih < prog->inherit_count; ih++) {
         const char *parent_path = prog->inherit_paths[ih];
         char parent_fs[PATH_MAX];
-        const char *pp = parent_path[0] == '/' ? parent_path + 1 : parent_path;
-        snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib_prefix, pp);
+        const char *pp_raw = parent_path[0] == '/' ? parent_path + 1 : parent_path;
+        const char *pp = (strncmp(pp_raw, "lib/", 4) == 0) ? pp_raw + 4 : pp_raw;
+        size_t pplen = strlen(pp);
+        if (pplen > 4 && strcmp(pp + pplen - 4, ".lpc") == 0) {
+            snprintf(parent_fs, sizeof(parent_fs), "%s/%s", mudlib_prefix, pp);
+        } else {
+            snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib_prefix, pp);
+        }
         Program *parent_prog = compiler_compile_file(parent_fs);
         if (parent_prog) {
             int parent_start = (int)vm->function_count;
@@ -1802,8 +1837,14 @@ VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count) {
                     /* attempt to compile parent path again to provide Program* for attach */
                     const char *parent_path = prog->inherit_paths[ih];
                     char parent_fs[PATH_MAX];
-                    const char *pp = parent_path[0] == '/' ? parent_path + 1 : parent_path;
-                    snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib_prefix, pp);
+                    const char *pp_raw = parent_path[0] == '/' ? parent_path + 1 : parent_path;
+                    const char *pp = (strncmp(pp_raw, "lib/", 4) == 0) ? pp_raw + 4 : pp_raw;
+                    size_t pplen = strlen(pp);
+                    if (pplen > 4 && strcmp(pp + pplen - 4, ".lpc") == 0) {
+                        snprintf(parent_fs, sizeof(parent_fs), "%s/%s", mudlib_prefix, pp);
+                    } else {
+                        snprintf(parent_fs, sizeof(parent_fs), "%s/%s.lpc", mudlib_prefix, pp);
+                    }
                     Program *parent_prog = compiler_compile_file(parent_fs);
                     if (parent_prog) {
                         /* use current VM function range for parent (best-effort) */

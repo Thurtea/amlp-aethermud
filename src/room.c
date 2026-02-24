@@ -638,22 +638,18 @@ Room* room_reload_lpc(const char *lpc_path) {
     /* Temporarily remove from cache so room_load_from_lpc creates a new entry */
     /* Instead, load the file directly and update the existing room in place */
 
-    /* Resolve path */
+    /* Resolve path: strip leading '/', optional leading 'lib/', and avoid double .lpc */
     char fs_path[512];
-    if (lpc_path[0] == '/') {
-        snprintf(fs_path, sizeof(fs_path), "lib%s.lpc", lpc_path);
+    const char *p_raw = lpc_path[0] == '/' ? lpc_path + 1 : lpc_path;
+    const char *p = (strncmp(p_raw, "lib/", 4) == 0) ? p_raw + 4 : p_raw;
+    size_t plen = strlen(p);
+    if (plen > 4 && strcmp(p + plen - 4, ".lpc") == 0) {
+        snprintf(fs_path, sizeof(fs_path), "lib/%s", p);
     } else {
-        snprintf(fs_path, sizeof(fs_path), "lib/%s.lpc", lpc_path);
+        snprintf(fs_path, sizeof(fs_path), "lib/%s.lpc", p);
     }
     if (access(fs_path, R_OK) != 0) {
-        size_t plen = strlen(lpc_path);
-        if (plen > 4 && strcmp(lpc_path + plen - 4, ".lpc") == 0) {
-            if (lpc_path[0] == '/') {
-                snprintf(fs_path, sizeof(fs_path), "lib%s", lpc_path);
-            } else {
-                snprintf(fs_path, sizeof(fs_path), "lib/%s", lpc_path);
-            }
-        }
+        /* Not found - give up */
     }
 
     FILE *f = fopen(fs_path, "r");

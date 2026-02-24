@@ -570,6 +570,7 @@ bool magic_can_cast_spell(struct Character *ch, int spell_id) {
 
 bool magic_start_casting(PlayerSession *sess, struct Character *ch,
                          int spell_id, const char *target_name) {
+    (void)target_name; /* target resolution deferred; resolved in magic_complete_cast */
     if (!sess || !ch) return false;
     
     if (!magic_can_cast_spell(ch, spell_id)) {

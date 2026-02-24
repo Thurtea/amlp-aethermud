@@ -622,11 +622,9 @@ Room* room_reload_lpc(const char *lpc_path) {
 
     /* Find existing cached room */
     Room *old_room = NULL;
-    int cache_idx = -1;
     for (int i = 0; i < num_path_entries; i++) {
         if (strcmp(path_table[i].path, lpc_path) == 0) {
             old_room = path_table[i].room;
-            cache_idx = i;
             break;
         }
     }
@@ -1262,7 +1260,7 @@ void room_broadcast(Room *room, const char *message, PlayerSession *exclude) {
     if (!room || !message) return;
     
     for (int i = 0; i < room->num_players; i++) {
-        if (room->players[i] != exclude && room->players[i]->username) {
+        if (room->players[i] != exclude) {
             send_to_player(room->players[i], "%s", message);
         }
     }

@@ -265,7 +265,10 @@ static int compiler_find_local(compiler_state_t *state, const char *name) {
     return -1;
 }
 
-/* Find global variable by name — returns index in state->globals[], or -1 */
+/* Find global variable by name — returns index in state->globals[], or -1.
+ * Not currently called; retained for future compiler diagnostics use. */
+static int compiler_find_global(compiler_state_t *state, const char *name)
+    __attribute__((unused));
 static int compiler_find_global(compiler_state_t *state, const char *name) {
     if (!state || !name) return -1;
     for (size_t i = 0; i < state->global_count; i++) {

@@ -1,5 +1,7 @@
 # AMLP Driver
 
+[![CI](https://github.com/thurtea/amlp-aethermud/actions/workflows/ci.yml/badge.svg)](https://github.com/thurtea/amlp-aethermud/actions/workflows/ci.yml)
+
 A modern LPC MUD driver written from scratch in C, featuring a complete LPC implementation with lexer, parser, bytecode compiler, and stack-based virtual machine.
 
 ## Overview

@@ -740,8 +740,6 @@ void inventory_display(struct PlayerSession *sess) {
         Item *curr = ch->inventory.items;
         int count = 1;
         while (curr) {
-            const char *dmg_type = curr->stats.is_mega_damage ? "MD" : "SDC";
-            
             /* Add indefinite article (a/an) with formatted (lowercase) name */
             const char *name = curr->name;
             char name_buf[260];
@@ -1071,6 +1069,7 @@ void cmd_charge(PlayerSession *sess, const char *args) {
 }
 
 void cmd_activate(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     Character *ch = &sess->character;
 
@@ -1121,6 +1120,7 @@ void cmd_activate(PlayerSession *sess, const char *args) {
 }
 
 void cmd_deactivate(PlayerSession *sess, const char *args) {
+    (void)args;
     if (!sess) return;
     Character *ch = &sess->character;
 

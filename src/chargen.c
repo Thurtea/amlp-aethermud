@@ -53,11 +53,11 @@ extern void broadcast_message(const char *message, PlayerSession *exclude);
 /* External from room.c - movement command */
 extern void cmd_move(PlayerSession *sess, const char *direction);
 
-/* ========== RACE DATABASE - dynamically loaded from lib/races/*.lpc ========== */
-/* loaded_races[] and num_loaded_races are populated by race_loader_scan_races()
- * at startup.  See race_loader.c for the scanning logic. */
+// RACE DATABASE - dynamically loaded from lib/races/*.lpc
+// loaded_races[] and num_loaded_races are populated by race_loader_scan_races()
+// at startup.  See race_loader.c for the scanning logic.
 
-/* OCC database dynamically loaded from lib/occs/*.lpc by race_loader_scan_occs() */
+// OCC database dynamically loaded from lib/occs/*.lpc by race_loader_scan_occs()
 #define ITEMS_PER_PAGE 10
 
 /* Dice rolling */
@@ -2177,8 +2177,7 @@ int load_character(PlayerSession *sess, const char *username) {
                 char buf_loc[128];
                 fread(buf_loc, 1, loc_len, f);
                 buf_loc[loc_len] = '\0';
-                strncpy(ch->scars[i].location, buf_loc, sizeof(ch->scars[i].location)-1);
-                ch->scars[i].location[sizeof(ch->scars[i].location)-1] = '\0';
+                snprintf(ch->scars[i].location, sizeof(ch->scars[i].location), "%s", buf_loc);
             } else {
                 if (loc_len > 0) fseek(f, loc_len, SEEK_CUR);
                 ch->scars[i].location[0] = '\0';
@@ -2189,8 +2188,7 @@ int load_character(PlayerSession *sess, const char *username) {
                 char buf_desc[256];
                 fread(buf_desc, 1, desc_len, f);
                 buf_desc[desc_len] = '\0';
-                strncpy(ch->scars[i].description, buf_desc, sizeof(ch->scars[i].description)-1);
-                ch->scars[i].description[sizeof(ch->scars[i].description)-1] = '\0';
+                snprintf(ch->scars[i].description, sizeof(ch->scars[i].description), "%s", buf_desc);
             } else {
                 if (desc_len > 0) fseek(f, desc_len, SEEK_CUR);
                 ch->scars[i].description[0] = '\0';

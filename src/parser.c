@@ -1210,7 +1210,6 @@ static ASTNode* parser_parse_statement(Parser *parser) {
 static ASTNode* parser_parse_declaration(Parser *parser, ProgramNode *program) {
     /* Check for type modifiers (private, public, protected, static) */
     int is_private = 0;
-    int is_public = 0;
     int is_protected = 0;
     int is_static = 0;
 
@@ -1219,7 +1218,7 @@ static ASTNode* parser_parse_declaration(Parser *parser, ProgramNode *program) {
             is_private = 1;
             parser_advance(parser);
         } else if (strcmp(parser->current_token.value, "public") == 0) {
-            is_public = 1;
+            /* public is the LPC default; parse and discard */
             parser_advance(parser);
         } else if (strcmp(parser->current_token.value, "protected") == 0) {
             is_protected = 1;

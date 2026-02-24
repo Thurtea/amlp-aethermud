@@ -555,8 +555,8 @@ int cmd_ed_filesystem(PlayerSession *session, const char *args) {
             }
 
             /* Copy virtual and filesystem path into session */
-            strncpy(session->ed_vpath, vpath, sizeof(session->ed_vpath) - 1);
-            strncpy(session->ed_fspath, actual_path, sizeof(session->ed_fspath) - 1);
+            snprintf(session->ed_vpath, sizeof(session->ed_vpath), "%s", vpath);
+            snprintf(session->ed_fspath, sizeof(session->ed_fspath), "%s", actual_path);
             /* Load lines into session->ed_lines */
             /* Free prior buffer if any */
             if (session->ed_lines) {

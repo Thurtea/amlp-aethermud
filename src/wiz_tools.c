@@ -93,7 +93,7 @@ int wiz_goto(PlayerSession *sess, const char *room_arg) {
     room_broadcast(target, arrive_msg, sess);
 
     cmd_look(sess, "");
-    wiz_log("%s used goto -> %s", sess->username ? sess->username : "<unknown>", room_arg);
+    wiz_log("%s used goto -> %s", sess->username[0] ? sess->username : "<unknown>", room_arg);
     return 1;
 }
 
@@ -121,7 +121,7 @@ int wiz_summon(PlayerSession *sess, const char *player_name) {
 
     send_to_player(target, "You have been summoned by %s!\r\n", sess->username);
     cmd_look(target, "");
-    wiz_log("%s summoned %s to room id=%d", sess->username ? sess->username : "<unknown>", target->username, sess->current_room ? sess->current_room->id : -1);
+    wiz_log("%s summoned %s to room id=%d", sess->username[0] ? sess->username : "<unknown>", target->username, sess->current_room ? sess->current_room->id : -1);
     return 1;
 }
 
@@ -157,7 +157,7 @@ int wiz_teleport(PlayerSession *sess, const char *player_name, const char *room_
     room_broadcast(dest, arrive_msg, target);
     send_to_player(target, "You have been teleported by %s!\r\n", sess->username);
     cmd_look(target, "");
-    wiz_log("%s teleported %s -> %s", sess->username ? sess->username : "<unknown>", target->username, room_arg);
+    wiz_log("%s teleported %s -> %s", sess->username[0] ? sess->username : "<unknown>", target->username, room_arg);
     return 1;
 }
 
@@ -174,7 +174,7 @@ int wiz_force(PlayerSession *sess, const char *target_name, const char *command)
     VMValue res = execute_command(target, command);
     /* Release VM return value if any */
     if (res.type != VALUE_NULL) vm_value_release(&res);
-    wiz_log("%s forced %s to: %s", sess->username ? sess->username : "<unknown>", target->username, command);
+    wiz_log("%s forced %s to: %s", sess->username[0] ? sess->username : "<unknown>", target->username, command);
     return 1;
 }
 
@@ -199,7 +199,7 @@ int wiz_shutdown(PlayerSession *sess, int delay_seconds) {
 
     fprintf(stderr, "[Server] Shutdown initiated by %s\n", sess->username);
     server_running = 0;
-    wiz_log("%s initiated shutdown (delay=%d)", sess->username ? sess->username : "<unknown>", delay_seconds);
+    wiz_log("%s initiated shutdown (delay=%d)", sess->username[0] ? sess->username : "<unknown>", delay_seconds);
     return 1;
 }
 
@@ -213,7 +213,7 @@ int wiz_reload(PlayerSession *sess, const char *lpc_path) {
     /* If result is an object, consider successful; basic check: not null */
     if (res.type != VALUE_NULL) {
         vm_value_release(&res);
-        wiz_log("%s reloaded %s", sess->username ? sess->username : "<unknown>", lpc_path);
+        wiz_log("%s reloaded %s", sess->username[0] ? sess->username : "<unknown>", lpc_path);
         return 1;
     }
     return 0;
@@ -235,7 +235,7 @@ int wiz_snoop(PlayerSession *sess, const char *target_name, int enable) {
         sess->snooping = target;
         target->snooped_by = sess;
         send_to_player(sess, "You are now snooping %s.\n", target->username);
-        wiz_log("%s started snooping %s", sess->username ? sess->username : "<unknown>", target->username);
+        wiz_log("%s started snooping %s", sess->username[0] ? sess->username : "<unknown>", target->username);
     } else {
         if (sess->snooping != target) {
             send_to_player(sess, "You are not snooping %s.\n", target->username);
@@ -244,7 +244,7 @@ int wiz_snoop(PlayerSession *sess, const char *target_name, int enable) {
         sess->snooping = NULL;
         target->snooped_by = NULL;
         send_to_player(sess, "Stopped snooping %s.\n", target->username);
-        wiz_log("%s stopped snooping %s", sess->username ? sess->username : "<unknown>", target->username);
+        wiz_log("%s stopped snooping %s", sess->username[0] ? sess->username : "<unknown>", target->username);
     }
     return 1;
 }
@@ -254,7 +254,7 @@ int wiz_invisible(PlayerSession *sess, int enable) {
     if (!sess || sess->privilege_level < 3) return 0;
     sess->is_invisible = enable ? 1 : 0;
     send_to_player(sess, "You are now %svisible.\n", sess->is_invisible ? "" : "not ");
-    wiz_log("%s set invisible=%d", sess->username ? sess->username : "<unknown>", sess->is_invisible);
+    wiz_log("%s set invisible=%d", sess->username[0] ? sess->username : "<unknown>", sess->is_invisible);
     return 1;
 }
 
@@ -318,7 +318,7 @@ int wiz_set_stat(PlayerSession *sess, const char *target_name, const char *stat,
 
     send_to_player(sess, "Set %s's %s = %d\n", target->username, stat, value);
     send_to_player(target, "Your %s was set to %d by %s\n", stat, value, sess->username);
-    wiz_log("%s set %s.%s = %d", sess->username ? sess->username : "<unknown>", target->username, stat, value);
+    wiz_log("%s set %s.%s = %d", sess->username[0] ? sess->username : "<unknown>", target->username, stat, value);
     return 1;
 }
 
@@ -331,7 +331,7 @@ int wiz_grant_xp(PlayerSession *sess, const char *target_name, int xp_amount) {
     ch->xp += xp_amount;
     send_to_player(sess, "Granted %d XP to %s (total XP=%d)\n", xp_amount, target->username, ch->xp);
     send_to_player(target, "You were awarded %d XP by %s\n", xp_amount, sess->username);
-    wiz_log("%s granted %d XP to %s (total %d)", sess->username ? sess->username : "<unknown>", xp_amount, target->username, ch->xp);
+    wiz_log("%s granted %d XP to %s (total %d)", sess->username[0] ? sess->username : "<unknown>", xp_amount, target->username, ch->xp);
     return 1;
 }
 
@@ -348,7 +348,7 @@ int wiz_heal(PlayerSession *sess, const char *target_name) {
     ch->mdc = ch->max_mdc;
     send_to_player(target, "You feel fully restored by %s's magic.\n", sess->username);
     send_to_player(sess, "Healed %s to full health.\n", target->username);
-    wiz_log("%s healed %s (hp=%d sdc=%d ppe=%d isp=%d)", sess->username ? sess->username : "<unknown>", target->username, ch->hp, ch->sdc, ch->ppe, ch->isp);
+    wiz_log("%s healed %s (hp=%d sdc=%d ppe=%d isp=%d)", sess->username[0] ? sess->username : "<unknown>", target->username, ch->hp, ch->sdc, ch->ppe, ch->isp);
     return 1;
 }
 
@@ -387,7 +387,7 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
             }
             send_to_player(target, "An object '%s' has been created for you by %s.\n", new_item->name, sess->username);
             send_to_player(sess, "Created %s and moved to %s.\n", new_item->name, target->username);
-            wiz_log("%s cloned %s -> %s", sess->username ? sess->username : "<unknown>", fs_path, target->username);
+            wiz_log("%s cloned %s -> %s", sess->username[0] ? sess->username : "<unknown>", fs_path, target->username);
             return 1;
         }
 
@@ -398,7 +398,7 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
             return 0;
         }
         send_to_player(sess, "Created %s and added to your inventory.\n", new_item->name);
-        wiz_log("%s cloned %s -> self", sess->username ? sess->username : "<unknown>", fs_path);
+        wiz_log("%s cloned %s -> self", sess->username[0] ? sess->username : "<unknown>", fs_path);
         return 1;
     }
 
@@ -431,7 +431,7 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
             obj_call_method(global_vm, (obj_t *)cloned_obj, "move_to", &arg, 1);
             send_to_player(target, "An object %s has been cloned for you by %s.\n", lpc_path, sess->username);
             send_to_player(sess, "Cloned %s and moved to %s.\n", lpc_path, target->username);
-            wiz_log("%s cloned %s -> %s", sess->username ? sess->username : "<unknown>", lpc_path, target->username);
+            wiz_log("%s cloned %s -> %s", sess->username[0] ? sess->username : "<unknown>", lpc_path, target->username);
         } else {
             vm_value_release(&res);
             send_to_player(sess, "Target player has no LPC object to receive the cloned object.\n");
@@ -445,7 +445,7 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
             arg.data.object_value = sess->player_object;
             obj_call_method(global_vm, (obj_t *)cloned_obj, "move_to", &arg, 1);
             send_to_player(sess, "Cloned %s and moved into your inventory/room.\n", lpc_path);
-            wiz_log("%s cloned %s -> self", sess->username ? sess->username : "<unknown>", lpc_path);
+            wiz_log("%s cloned %s -> self", sess->username[0] ? sess->username : "<unknown>", lpc_path);
         } else {
             vm_value_release(&res);
             send_to_player(sess, "No player object to receive the cloned item.\n");
@@ -475,7 +475,7 @@ int wiz_destruct(PlayerSession *sess, const char *target) {
         obj_destroy(o);
         vm_value_release(&found);
         send_to_player(sess, "Destructed object: %s\n", target);
-        wiz_log("%s destructed %s", sess->username ? sess->username : "<unknown>", target);
+        wiz_log("%s destructed %s", sess->username[0] ? sess->username : "<unknown>", target);
         return 1;
     }
 
@@ -501,7 +501,7 @@ int wiz_promote(PlayerSession *sess, const char *target_name, int new_level) {
     save_character(target);
     send_to_player(sess, "%s -> %s set to level %d\n", target->username, target->username, new_level);
     send_to_player(target, "Your privilege level was changed by %s to %d\n", sess->username, new_level);
-    wiz_log("%s changed %s from %d -> %d", sess->username ? sess->username : "<unknown>", target->username, old, new_level);
+    wiz_log("%s changed %s from %d -> %d", sess->username[0] ? sess->username : "<unknown>", target->username, old, new_level);
     return 1;
 }
 
@@ -559,7 +559,7 @@ int wiz_ban(PlayerSession *sess, const char *target) {
             return 0;
         }
         send_to_player(sess, "Banned IP: %s\n", target);
-        wiz_log("%s banned IP %s", sess->username ? sess->username : "<unknown>", target);
+        wiz_log("%s banned IP %s", sess->username[0] ? sess->username : "<unknown>", target);
         return 1;
     } else {
         if (!write_line_to_file("data/banned_accounts.txt", target)) {
@@ -567,7 +567,7 @@ int wiz_ban(PlayerSession *sess, const char *target) {
             return 0;
         }
         send_to_player(sess, "Banned account: %s\n", target);
-        wiz_log("%s banned account %s", sess->username ? sess->username : "<unknown>", target);
+        wiz_log("%s banned account %s", sess->username[0] ? sess->username : "<unknown>", target);
         return 1;
     }
 }
@@ -580,7 +580,7 @@ int wiz_unban(PlayerSession *sess, const char *target) {
             return 0;
         }
         send_to_player(sess, "Unbanned IP: %s\n", target);
-        wiz_log("%s unbanned IP %s", sess->username ? sess->username : "<unknown>", target);
+        wiz_log("%s unbanned IP %s", sess->username[0] ? sess->username : "<unknown>", target);
         return 1;
     } else {
         if (!remove_line_from_file("data/banned_accounts.txt", target)) {
@@ -588,7 +588,7 @@ int wiz_unban(PlayerSession *sess, const char *target) {
             return 0;
         }
         send_to_player(sess, "Unbanned account: %s\n", target);
-        wiz_log("%s unbanned account %s", sess->username ? sess->username : "<unknown>", target);
+        wiz_log("%s unbanned account %s", sess->username[0] ? sess->username : "<unknown>", target);
         return 1;
     }
 }
@@ -790,27 +790,6 @@ static const SkillConfigEntry skill_configs[] = {
     {NULL, NULL}  /* Sentinel */
 };
 
-/* Simplified OCC pool skills - just names for now */
-static const char *occ_pool_combat[] = {
-    "Hand to Hand: Boxing", "Hand to Hand: Wrestling", "Axe",
-    "Hammer/Mace", "Crossbow", "Energy Pistol", "Energy Rifle",
-    "Armor Repair", "Weapon Repair", NULL
-};
-
-static const char *occ_pool_wilderness[] = {
-    "Preserve Food", "Animal Husbandry", "Herbal Lore",
-    "Cooking", "Rope Use", "Cryptography", NULL
-};
-
-static const char *occ_pool_scholar[] = {
-    "Lore: Geography", "Lore: Technology", "Heraldry",
-    "Alchemy", "Metallurgy", NULL
-};
-
-static const char *occ_pool_rogue[] = {
-    "Etiquette", "Seduction", "Performance",
-    "Dance", "Play Instrument", NULL
-};
 
 /* ============================================================================
  * INITIALIZATION & DISCOVERY
@@ -867,7 +846,7 @@ int cmd_skill_assign(PlayerSession *sess, const char *player_name, const char *o
     save_character(target);
     send_to_player(sess, "Assigned O.C.C. %s to %s (%d primary skills set)\n", occ_name, target->username, assigned);
     send_to_player(target, "A wizard has assigned you the O.C.C. %s\n", occ_name);
-    wiz_log("%s assigned O.C.C. %s -> %s", sess->username ? sess->username : "<unknown>", occ_name, target->username);
+    wiz_log("%s assigned O.C.C. %s -> %s", sess->username[0] ? sess->username : "<unknown>", occ_name, target->username);
     return 1;
 }
 
@@ -912,19 +891,19 @@ int cmd_demotion(PlayerSession *sess, const char *player_name, const char *actio
         if (target->character.hp > target->character.max_hp) target->character.hp = target->character.max_hp;
         send_to_player(sess, "%s's level set to %d\n", target->username, value);
         send_to_player(target, "You have been demoted to level %d by %s\n", value, sess->username);
-        wiz_log("%s demoted %s -> level %d", sess->username ? sess->username : "<unknown>", target->username, value);
+        wiz_log("%s demoted %s -> level %d", sess->username[0] ? sess->username : "<unknown>", target->username, value);
     } else if (strcmp(action, "strip-occ") == 0) {
         if (target->character.occ) free(target->character.occ);
         target->character.occ = strdup("Awaiting Wizard Assignment");
         send_to_player(sess, "Stripped O.C.C. from %s\n", target->username);
         send_to_player(target, "Your O.C.C. has been removed by a wizard.\n");
-        wiz_log("%s stripped O.C.C. from %s", sess->username ? sess->username : "<unknown>", target->username);
+        wiz_log("%s stripped O.C.C. from %s", sess->username[0] ? sess->username : "<unknown>", target->username);
     } else if (strcmp(action, "reset-skills") == 0) {
         target->character.num_skills = 0;
         memset(target->character.skills, 0, sizeof(target->character.skills));
         send_to_player(sess, "Reset skills for %s\n", target->username);
         send_to_player(target, "Your skills have been reset by a wizard.\n");
-        wiz_log("%s reset skills for %s", sess->username ? sess->username : "<unknown>", target->username);
+        wiz_log("%s reset skills for %s", sess->username[0] ? sess->username : "<unknown>", target->username);
     } else {
         send_to_player(sess, "Unknown demotion action: %s\n", action);
         return 0;
@@ -1207,6 +1186,7 @@ int assign_primary_skills(Character *player, const char *occ_name) {
  * Show all skills for an O.C.C. (for wizard reference)
  */
 void display_occ_skills(PlayerSession *sess, const char *occ_name) {
+    (void)sess; /* output not yet wired; see TODO in body */
     OCCSkillConfig *config = get_occ_skill_config(occ_name);
 
     if (!config) {
@@ -1253,7 +1233,7 @@ int cmd_slay(PlayerSession *sess, const char *target_name) {
             "A divine force strikes the area!\n", sess);
     }
 
-    wiz_log("%s smote %s", sess->username ? sess->username : "<unknown>", target->username);
+    wiz_log("%s smote %s", sess->username[0] ? sess->username : "<unknown>", target->username);
     handle_player_death(target, sess, NULL);
     return 1;
 }
@@ -1328,7 +1308,7 @@ int cmd_npcspawn(PlayerSession *sess, const char *npc_type_str) {
     room_broadcast(sess->current_room,
         "The air shimmers and something steps out of the ether!\n", sess);
     wiz_log("%s spawned NPC '%s' in room %d",
-            sess->username ? sess->username : "<unknown>",
+            sess->username[0] ? sess->username : "<unknown>",
             npc->name, sess->current_room->id);
     return 1;
 }

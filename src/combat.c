@@ -83,7 +83,7 @@ CombatParticipant* combat_create_participant(PlayerSession *sess, Character *ch)
     CombatParticipant *p = malloc(sizeof(CombatParticipant));
     if (!p) return NULL;
 
-    p->name = strdup(sess && sess->username ? sess->username : "Unknown");
+    p->name = strdup(sess ? sess->username : "Unknown");
     p->is_player = (sess != NULL);
     p->session = sess;
     p->character = ch;

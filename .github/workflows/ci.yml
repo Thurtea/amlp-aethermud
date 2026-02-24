@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build driver
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc make libcrypt-dev
+
+      - name: Build driver (warnings as errors)
+        run: make clean && make driver CFLAGS="-Wall -Wextra -D_DEFAULT_SOURCE -g -O2 -std=c99 -Werror"
+
+      - name: Upload driver binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: driver
+          path: build/driver
+          retention-days: 7
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc make libcrypt-dev
+
+      - name: Build tests
+        run: make tests
+
+      - name: Run tests
+        run: |
+          PASS=0
+          FAIL=0
+          for binary in build/test_lexer build/test_parser build/test_vm \
+                        build/test_object build/test_gc build/test_efun \
+                        build/test_array build/test_mapping build/test_compiler \
+                        build/test_program build/test_simul_efun \
+                        build/test_vm_execution build/test_lpc_execution \
+                        build/test_password build/test_save_load; do
+            name=$(basename "$binary")
+            if [ -x "$binary" ]; then
+              echo "--- $name ---"
+              if "$binary"; then
+                echo "PASS: $name"
+                PASS=$((PASS + 1))
+              else
+                echo "FAIL: $name (exit $?)"
+                FAIL=$((FAIL + 1))
+              fi
+            else
+              echo "SKIP: $binary (not built)"
+            fi
+          done
+          echo ""
+          echo "Results: $PASS passed, $FAIL failed"
+          [ "$FAIL" -eq 0 ]
+
+  warnings:
+    name: Zero-warning check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc make libcrypt-dev
+
+      - name: Build and capture warnings
+        run: make clean && make driver
+
+      - name: Fail if any warnings found
+        run: |
+          if [ -f build/.warnings.txt ] && grep -q "warning:" build/.warnings.txt; then
+            echo "ERROR: Build produced warnings:"
+            grep "warning:" build/.warnings.txt
+            exit 1
+          fi
+          echo "No warnings found."
+
+      - name: Upload warnings log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-warnings
+          path: build/.warnings.txt
+          retention-days: 30

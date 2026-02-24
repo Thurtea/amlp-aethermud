@@ -97,7 +97,7 @@ typedef struct PlayerSession {
     /* In-game editor (ed) state */
     int ed_active;                 /* 1 when in interactive ed mode */
     char ed_vpath[512];            /* virtual path seen by player (/domains/...) */
-    char ed_fspath[1024];          /* actual filesystem path (lib/...) */
+    char ed_fspath[1030];          /* actual filesystem path (lib/...) */
     char **ed_lines;               /* dynamically allocated array of lines */
     int ed_lines_count;            /* number of lines loaded */
     int ed_lines_capacity;         /* allocated capacity for ed_lines */

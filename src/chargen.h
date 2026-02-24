@@ -51,8 +51,8 @@ typedef enum {
 /* Lives and scars (death system) */
 #define MAX_SCARS 5
 typedef struct Scar {
-    char location[64];
-    char description[128];
+    char location[128];
+    char description[256];
     int death_number;
 } Scar;
 

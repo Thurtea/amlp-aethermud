@@ -400,7 +400,7 @@ void free_session(PlayerSession *session) {
          * until the VM-backed LPC objects are fully implemented. This
          * creates lib/save/players/<name>.o with basic info so the mudlib
          * can detect a savefile exists. */
-        if (session->username && session->username[0]) {
+        if (session->username[0]) {
             char path[512];
             snprintf(path, sizeof(path), "lib/save/players/%s.o", session->username);
             FILE *f = fopen(path, "w");
@@ -601,8 +601,7 @@ PlayerSession* find_player_by_name(const char *name) {
     
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (sessions[i] && 
-            sessions[i]->state == STATE_PLAYING && 
-            sessions[i]->username && 
+            sessions[i]->state == STATE_PLAYING &&
             strcasecmp(sessions[i]->username, name) == 0) {
             return sessions[i];
         }
@@ -702,13 +701,12 @@ static int cmd_whisper(PlayerSession *session, const char *arg) {
     
     for (int i = 0; i < room->num_players; i++) {
         if (room->players[i] && room->players[i] != session &&
-            room->players[i]->username &&
             strcasecmp(room->players[i]->username, target_name) == 0) {
             target = room->players[i];
             break;
         }
     }
-    
+
     if (!target) {
         send_to_player(session, "Player '%s' not found in this room.\n", target_name);
         return 1;
@@ -843,7 +841,7 @@ static int cmd_examine(PlayerSession *session, const char *arg) {
     /* Look for player in room */
     Room *room = session->current_room;
     for (int i = 0; i < room->num_players; i++) {
-        if (room->players[i] && room->players[i]->username &&
+        if (room->players[i] &&
             strcasecmp(room->players[i]->username, arg) == 0) {
             
             PlayerSession *target = room->players[i];
@@ -1470,7 +1468,7 @@ static int help_search_lpc_tree(PlayerSession *session, const char *base_dir,
             }
         } else {
             for (int vi = 0; vi < nv; vi++) {
-                char expected[256];
+                char expected[512];
                 snprintf(expected, sizeof(expected), "%s.lpc", alts[vi]);
                 if (strcasecmp(de->d_name, expected) == 0) {
                     closedir(dh);
@@ -2587,8 +2585,6 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     
     if (strcmp(cmd, "ooc") == 0) {
         if (args && *args) {
-            Character *speaker_ch = &session->character;
-
             /* Message to speaker */
             char self_msg[BUFFER_SIZE];
             snprintf(self_msg, sizeof(self_msg), "You [OOC]: %s\r\n", args);
@@ -2596,7 +2592,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             /* Broadcast to room - OOC always uses player username, no intro check */
             if (session->current_room) {
                 Room *room = session->current_room;
-                const char *speaker_name = session->username ? session->username : "Someone";
+                const char *speaker_name = session->username;
                 for (int i = 0; i < room->num_players; i++) {
                     PlayerSession *listener = room->players[i];
                     if (!listener || listener == session) continue;
@@ -2790,7 +2786,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             if (!sessions[i]) continue;
             SessionState st = sessions[i]->state;
             if (st != STATE_PLAYING && st != STATE_CHARGEN) continue;
-            if (!sessions[i]->username || !sessions[i]->username[0]) continue;
+            if (!sessions[i]->username[0]) continue;
 
             time_t idle = time(NULL) - sessions[i]->last_activity;
             const char *invis_tag  = sessions[i]->is_invisible ? " (invis)" : "";
@@ -3827,7 +3823,7 @@ more_room_source:
             return vm_value_create_string("Usage: giveskill <player> <skillname> <percentage>\r\n");
         }
         *first_space = '\0';
-        strncpy(target_name, args_copy, sizeof(target_name) - 1);
+        snprintf(target_name, sizeof(target_name), "%.63s", args_copy);
         strncpy(skill_name, first_space + 1, sizeof(skill_name) - 1);
 
         PlayerSession *target = find_player_by_name(target_name);
@@ -4680,7 +4676,7 @@ more_room_source:
         }
 
         send_to_player(target, "\n%s tells you: %s\n", session->username, args);
-        strncpy(target->last_tell_from, session->username, sizeof(target->last_tell_from) - 1);
+        snprintf(target->last_tell_from, sizeof(target->last_tell_from), "%s", session->username);
 
         char response[1024];
         snprintf(response, sizeof(response), "You tell %s: %s\r\n", target->username, args);
@@ -4769,7 +4765,6 @@ more_room_source:
         PlayerSession *target = NULL;
         for (int i = 0; i < room->num_players; i++) {
             if (room->players[i] && room->players[i] != session &&
-                room->players[i]->username &&
                 strcasecmp(room->players[i]->username, args) == 0) {
                 target = room->players[i];
                 break;
@@ -5324,13 +5319,13 @@ void process_login_state(PlayerSession *session, const char *input) {
                 }
             }
 
-            strncpy(session->username, start, sizeof(session->username) - 1);
+            snprintf(session->username, sizeof(session->username), "%s", start);
 
             /* Case-insensitive check for existing character */
             char found_name[64];
             if (character_exists(session->username, found_name, sizeof(found_name))) {
                 /* Adopt the capitalization from the save file */
-                strncpy(session->username, found_name, sizeof(session->username) - 1);
+                snprintf(session->username, sizeof(session->username), "%s", found_name);
                 send_to_player(session,
                     "\r\nWelcome back, %s!\r\n",
                     session->username);
@@ -5692,7 +5687,7 @@ void check_session_timeouts(void) {
                 if (sessions[i]->privilege_level == 0) {
                     /* Check for per-player no-idle token file: lib/save/noidle/<name>.token */
                     char noidle_path[512];
-                    if (sessions[i]->username && sessions[i]->username[0]) {
+                    if (sessions[i]->username[0]) {
                         /* lower-case username for path */
                         char lower[64];
                         size_t j;

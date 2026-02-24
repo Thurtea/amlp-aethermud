@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/technical/research.lpc - Research
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("research");
+    set_skill_name("Research");
+    set_skill_desc(
+        "TODO:CONTENT — Gather information from libraries, databases, and archives."
+    );
+    set_skill_category("technical");
+
+    set_base_percentage(45);
+    set_level_bonus(5);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

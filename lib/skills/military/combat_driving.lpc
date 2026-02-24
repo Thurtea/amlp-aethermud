@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/military/combat_driving.lpc - Combat Driving
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("combat_driving");
+    set_skill_name("Combat Driving");
+    set_skill_desc(
+        "TODO:CONTENT — Drive vehicles at high speed in combat situations."
+    );
+    set_skill_category("military");
+
+    set_base_percentage(0);
+    set_level_bonus(0);
+    set_max_percentage(0);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

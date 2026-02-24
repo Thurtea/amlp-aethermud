@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/wilderness/fishing_wild.lpc - Fishing (Wilderness)
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("fishing_wild");
+    set_skill_name("Fishing (Wilderness)");
+    set_skill_desc(
+        "TODO:CONTENT — Catch fish by hand, spear, or improvised rod."
+    );
+    set_skill_category("wilderness");
+
+    set_base_percentage(50);
+    set_level_bonus(5);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

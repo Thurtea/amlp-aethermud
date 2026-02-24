@@ -1,0 +1,28 @@
+/*
+ * /lib/psionics/super/sense_ley_lines.lpc - Sense Ley Lines
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+
+    set_power_id("sense_ley_lines");
+    set_power_name("Sense Ley Lines");
+    set_power_desc(
+        "TODO:CONTENT — Detect ley lines, nexus points, and dimensional anomalies."
+    );
+    set_power_category("super");
+
+    set_isp_cost(4);
+    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_base_duration(2);
+    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
+    set_base_range(500);        /* feet */
+}
+
+/* TODO:CONTENT - implement activate() */
+int apply_effect(object user, object target) {
+    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    return 1;
+}

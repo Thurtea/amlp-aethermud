@@ -1,0 +1,162 @@
+// /lib/occs/psi_mystic.lpc
+// Psi-Mystic O.C.C. - Psionic/Magic Hybrid
+//
+// Psi-Mystics are rare individuals who have awakened to both psionic
+// abilities and magical sensitivity simultaneously, blending the two
+// into a unique spiritual discipline.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+
+    set_occ_name("Psi-Mystic");
+    set_occ_id("psi_mystic");
+    set_occ_category(OCC_CAT_MAGIC);
+    set_alignment_requirement("not_evil");
+
+    set_occ_description(
+        "Psi-Mystics are unusual individuals who have simultaneously awakened "
+        "both psionic powers and magical sensitivity. Unlike the Mystic who "
+        "channels magic instinctively, or the Mind Melter who relies purely "
+        "on psychic power, the Psi-Mystic weaves both arts together into a "
+        "unified spiritual practice. They develop a smaller pool of each "
+        "ability type than specialists, but their ability to combine psionic "
+        "and magical effects creates unique tactical possibilities. Psi-Mystics "
+        "are often spiritual guides, seers, and advisors as well as capable "
+        "combatants."
+    );
+
+    set_stat_requirements(([
+        "me": 12,
+        "ma": 12,
+        "iq": 10
+    ]));
+
+    set_stat_bonuses(([
+        "me": 2,
+        "ma": 1
+    ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_abilities(({
+        "psionic_sensitive",
+        "magic_sensing",
+        "spiritual_awareness",
+        "sense_ley_lines"
+    }));
+
+    set_occ_abilities(([
+        2:  ({ "psi_magic_blend" }),
+        4:  ({ "aura_reading_superior" }),
+        6:  ({ "spirit_communion" }),
+        8:  ({ "psi_magic_mastery" }),
+        12: ({ "transcendence" })
+    ]));
+
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "lore_demons_monsters",
+        "lore_magic",
+        "meditation",
+        "land_navigation",
+        "wilderness_survival",
+        "first_aid",
+        "wp_knife",
+        "htoh_basic"
+    }));
+
+    set_occ_related_skills(({
+        "language_*", "literacy_*",
+        "anthropology", "archaeology", "history",
+        "lore_faeries_creatures",
+        "holistic_medicine",
+        "research", "writing",
+        "horsemanship_general",
+        "climbing", "swimming"
+    }));
+    set_occ_skill_count(5);
+
+    set_elective_categories(({
+        SKILL_CAT_COMMUNICATION, SKILL_CAT_DOMESTIC,
+        SKILL_CAT_MEDICAL, SKILL_CAT_PHYSICAL,
+        SKILL_CAT_SCIENCE, SKILL_CAT_TECHNICAL,
+        SKILL_CAT_WILDERNESS
+    }));
+    set_elective_count(3);
+    set_secondary_count(5);
+
+    set_skill_bonuses(([
+        "lore": 10,
+        "technical": 5
+    ]));
+
+    /* Both magic and psionic, but less than specialists */
+    set_base_ppe(20);
+    set_ppe_per_level(8);
+    set_base_isp(30);
+    set_isp_per_level(8);
+    set_magic_type("minor");
+    set_psionic_type("major");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(15);
+    set_sdc_per_level(1);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/item/first_aid_kit",
+        "/obj/clothing/mystic_robes",
+        "/obj/item/meditation_focus"
+    }));
+
+    set_starting_credits(100, 300);
+
+    set_starting_weapons(({
+        "/obj/weapon/staff",
+        "/obj/weapon/knife"
+    }));
+
+    set_starting_armor(({ }));  /* Relies on psychic/magic protection */
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+
+    /* Starting psionic and magic abilities */
+    set_property("starting_psionics", ({
+        "empathy", "sixth_sense", "see_the_invisible",
+        "sense_evil", "presence_sense"
+    }));
+    set_property("starting_spells", ({
+        "see_aura", "sense_magic", "sense_evil",
+        "globe_of_daylight"
+    }));
+
+    set_background(
+        "Psi-Mystics discover their dual gifts spontaneously, usually in "
+        "moments of extreme stress or spiritual crisis. They are drawn to "
+        "seek out masters of both traditions and often spend years traveling "
+        "to learn. Many become wandering advisors and troubleshooters, "
+        "using their unique blend of gifts to help communities deal with "
+        "supernatural threats and spiritual imbalances."
+    );
+    set_organizations(({ }));
+    set_enemies(({ }));
+}
+
+/* Psi-Mystics gain less per level than specialists but have both pools */
+int query_psi_magic_synergy() {
+    return 1;  /* TODO:CONTENT — combined effects */
+}

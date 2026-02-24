@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/domestic/sewing.lpc - Sewing
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("sewing");
+    set_skill_name("Sewing");
+    set_skill_desc(
+        "TODO:CONTENT — Sew, mend, and tailor clothing and fabric items."
+    );
+    set_skill_category("domestic");
+
+    set_base_percentage(25);
+    set_level_bonus(5);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

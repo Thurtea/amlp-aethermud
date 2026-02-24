@@ -1,0 +1,28 @@
+/*
+ * /lib/psionics/physical/telekinetic_punch.lpc - Telekinetic Punch
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+
+    set_power_id("telekinetic_punch");
+    set_power_name("Telekinetic Punch");
+    set_power_desc(
+        "TODO:CONTENT — Strike a distant target with a focused telekinetic blow."
+    );
+    set_power_category("physical");
+
+    set_isp_cost(6);
+    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_base_duration(0);
+    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
+    set_base_range(30);        /* feet */
+}
+
+/* TODO:CONTENT - implement activate() */
+int apply_effect(object user, object target) {
+    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    return 1;
+}

@@ -1,0 +1,190 @@
+// /lib/occs/ranger.lpc
+// Ranger O.C.C. - Wilderness Guerrilla Fighter
+//
+// Rangers are elite wilderness fighters who blend military training with
+// expert survival and tracking skills. They are masters of terrain,
+// guerrilla tactics, and long-range operations behind enemy lines.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+
+    set_occ_name("Ranger");
+    set_occ_id("ranger");
+    set_occ_category(OCC_CAT_MILITARY);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Rangers are elite light infantry who combine exceptional wilderness "
+        "survival skills with expert military training. Unlike conventional "
+        "soldiers who fight in organized formations, Rangers operate in small "
+        "teams or alone, striking from ambush, scouting enemy territory, and "
+        "living off the land for weeks at a time. Many Rangers serve as scouts "
+        "for kingdoms, free cities, and resistance movements. Others are lone "
+        "wolves who hire out as wilderness guides, bounty hunters, and "
+        "troubleshooters. Rangers are not as heavily augmented as Headhunters "
+        "or as specialized as Wilderness Scouts — they are consummate "
+        "all-around survival fighters."
+    );
+
+    set_stat_requirements(([
+        "iq": 10,
+        "ps": 10,
+        "pe": 12,
+        "pp": 10
+    ]));
+
+    set_stat_bonuses(([
+        "pe": 1,
+        "pp": 1,
+        "spd": 1
+    ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_abilities(({
+        "woodland_camouflage",
+        "long_range_patrol",
+        "superior_tracking",
+        "ambush_tactics"
+    }));
+
+    set_occ_abilities(([
+        2:  ({ "guerrilla_tactics" }),
+        4:  ({ "woodland_master" }),
+        6:  ({ "long_shot" }),
+        8:  ({ "ranger_elite" }),
+        10: ({ "ghost_in_wilderness" }),
+        13: ({ "ranger_legend" })
+    ]));
+
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("expert");
+
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "radio_basic",
+        "land_navigation",
+        "wilderness_survival",
+        "tracking",
+        "camouflage",
+        "detect_ambush",
+        "detect_concealment",
+        "climbing",
+        "swimming",
+        "hunting",
+        "wp_rifle",
+        "wp_energy_rifle",
+        "wp_knife",
+        "htoh_expert"
+    }));
+
+    set_occ_related_skills(({
+        "pilot_motorcycle", "pilot_hovercycle",
+        "horsemanship_general", "horsemanship_exotic",
+        "first_aid", "paramedic",
+        "demolitions", "trap_detection",
+        "sniper", "intelligence",
+        "foraging", "fishing_wild",
+        "track_trap_animals",
+        "mountain_man", "outdoorsmanship",
+        "skin_hides",
+        "language_*"
+    }));
+    set_occ_skill_count(7);
+
+    set_elective_categories(({
+        SKILL_CAT_COMMUNICATION, SKILL_CAT_ESPIONAGE,
+        SKILL_CAT_MECHANICAL, SKILL_CAT_MEDICAL,
+        SKILL_CAT_MILITARY, SKILL_CAT_PHYSICAL,
+        SKILL_CAT_PILOT, SKILL_CAT_WEAPON,
+        SKILL_CAT_WILDERNESS
+    }));
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_skill_bonuses(([
+        "wilderness": 15,
+        "military": 10,
+        "weapon_proficiencies": 5
+    ]));
+
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(35);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/item/first_aid_kit",
+        "/obj/item/binoculars",
+        "/obj/item/survival_kit",
+        "/obj/item/rope",
+        "/obj/item/camouflage_netting",
+        "/obj/item/rations_2weeks"
+    }));
+
+    set_optional_gear(({
+        "/obj/item/multi_optics_band",
+        "/obj/vehicle/motorcycle",
+        "/obj/vehicle/horse"
+    }));
+
+    set_starting_credits(250, 600);
+
+    set_starting_weapons(({
+        "/obj/weapon/wilks_447_laser_rifle",
+        "/obj/weapon/vibro_knife",
+        "/obj/weapon/survival_knife"
+    }));
+
+    set_starting_armor(({
+        "/obj/armor/lightweight_body_armor"
+    }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(3);
+    set_starting_cybernetics(({
+        "gyro_compass",
+        "clock_calendar"
+    }));
+
+    set_property("tracking_bonus", 20);        /* +20% to tracking */
+    set_property("camouflage_bonus", 15);      /* +15% to camouflage */
+    set_property("wilderness_survival_bonus", 10);
+
+    set_background(
+        "Rangers emerge from wilderness communities, resistance movements, "
+        "and military scout units. Many are the children of nomads or "
+        "wilderness communities who grew up learning survival as a necessity. "
+        "Others are military veterans who found they preferred the freedom "
+        "of operating alone over conventional command structures. Rangers "
+        "are found across Rifts Earth wherever there is wilderness to traverse "
+        "and dangers to scout."
+    );
+    set_organizations(({ }));
+    set_enemies(({ }));
+}
+
+int query_tracking_bonus() {
+    return 20;
+}
+
+int query_ambush_initiative_bonus() {
+    return 4;  /* +4 to initiative when ambushing */
+}

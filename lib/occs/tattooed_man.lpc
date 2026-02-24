@@ -1,0 +1,168 @@
+// /lib/occs/tattooed_man.lpc
+// Tattooed Man O.C.C. - Atlantean Tattoo Warrior
+//
+// Tattooed Men are Atlanteans who have undergone extensive tattoo magic
+// rituals, covering their bodies with living magical tattoos that grant
+// supernatural powers. Each tattoo is a permanent magical ability.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+
+    set_occ_name("Tattooed Man");
+    set_occ_id("tattooed_man");
+    set_occ_category(OCC_CAT_MAGIC);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Tattooed Men (and Women) are Atlanteans who have sacrificed much of "
+        "their life force to inscribe magical tattoos across their bodies. "
+        "Each tattoo is a living spell, permanently bonded to the wearer and "
+        "activated by touching it and channeling P.P.E. The more tattoos worn, "
+        "the more powerful — and the more dangerous — the warrior becomes. "
+        "Tattooed warriors fight using their magical tattoos in combination "
+        "with conventional weapons and martial skill. They are among the most "
+        "feared supernatural warriors in the Megaverse, but the toll of so "
+        "many living tattoos gradually shortens the wearer's lifespan."
+    );
+
+    set_stat_requirements(([
+        "ps": 12,
+        "pe": 12,
+        "iq": 9
+    ]));
+
+    set_stat_bonuses(([
+        "ps": 2,
+        "pe": 2,
+        "me": 1
+    ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_abilities(({
+        "magic_tattoos",
+        "tattoo_activation",
+        "sense_supernatural",
+        "resist_horror"
+    }));
+
+    set_occ_abilities(([
+        1:  ({ "tattoo_warrior_training" }),
+        3:  ({ "tattoo_power_boost" }),
+        5:  ({ "tattoo_mastery" }),
+        8:  ({ "living_tattoo_aura" }),
+        12: ({ "tattoo_grandmaster" })
+    ]));
+
+    set_base_attacks(4);
+    set_attacks_per_level(1, 2);
+    set_hand_to_hand_type("martial_arts");
+
+    set_occ_skills(({
+        "language_atlantean",
+        "literacy_atlantean",
+        "language_dragonese",
+        "lore_demons_monsters",
+        "lore_magic",
+        "land_navigation",
+        "wilderness_survival",
+        "climbing",
+        "swimming",
+        "wp_sword",
+        "wp_knife",
+        "htoh_martial_arts"
+    }));
+
+    set_occ_related_skills(({
+        "language_*", "literacy_*",
+        "acrobatics", "gymnastics",
+        "horsemanship_general",
+        "tracking", "detect_ambush",
+        "lore_faeries_creatures",
+        "history", "anthropology",
+        "first_aid", "holistic_medicine"
+    }));
+    set_occ_skill_count(6);
+
+    set_elective_categories(({
+        SKILL_CAT_COMMUNICATION, SKILL_CAT_PHYSICAL,
+        SKILL_CAT_WEAPON, SKILL_CAT_WILDERNESS,
+        SKILL_CAT_TECHNICAL, SKILL_CAT_MEDICAL
+    }));
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_skill_bonuses(([
+        "physical": 10,
+        "weapon_proficiencies": 5
+    ]));
+
+    /* Tattoo magic uses PPE; no ISP unless also psionic */
+    set_base_ppe(30);
+    set_ppe_per_level(10);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("tattoo");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(30);
+    set_sdc_per_level(3);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/clothing/atlantean_warrior_garb",
+        "/obj/item/first_aid_kit"
+    }));
+
+    set_starting_credits(200, 500);
+
+    set_starting_weapons(({
+        "/obj/weapon/vibro_sword",
+        "/obj/weapon/knife"
+    }));
+
+    set_starting_armor(({
+        "/obj/armor/light_body_armor"
+    }));
+
+    /* Tattooed Man is Atlantean-exclusive */
+    set_race_requirements(({ "atlantean", "true_atlantean" }));
+    set_race_exclusions(({ }));
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+
+    /* Starting tattoos - TODO:CONTENT select from tattoo list */
+    set_property("starting_tattoos", ({
+        "dragon", "phoenix", "eyes_of_knowledge",
+        "fist_of_fury", "heart_of_darkness"
+    }));
+    set_property("max_tattoos", 30);
+    set_property("tattoos_per_level", 2);
+
+    set_background(
+        "Tattooed Men are carefully selected Atlantean warriors who undergo "
+        "years of ritual preparation before receiving their first tattoos. "
+        "The tattoo ceremonies are extremely painful and each one shortens "
+        "the warrior's natural lifespan. Despite this cost, many Atlanteans "
+        "eagerly seek the power to fight against the Splugorth who enslaved "
+        "their homeland."
+    );
+    set_organizations(({ "atlantean_clans", "tattoo_warrior_orders" }));
+    set_enemies(({ "splugorth", "splugorth_minions" }));
+}
+
+/* TODO:CONTENT - tattoo activation mechanics */
+int query_tattoo_count() {
+    return 5; /* Starting tattoos */
+}
+
+int query_max_tattoos() {
+    return 30;
+}

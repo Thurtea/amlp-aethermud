@@ -1,0 +1,28 @@
+/*
+ * /lib/psionics/physical/alter_aura.lpc - Alter Aura (Self)
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+
+    set_power_id("alter_aura");
+    set_power_name("Alter Aura (Self)");
+    set_power_desc(
+        "TODO:CONTENT — Mask or change the appearance of one's psychic and magical aura."
+    );
+    set_power_category("physical");
+
+    set_isp_cost(2);
+    set_duration_type(3);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_base_duration(0);
+    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
+    set_base_range(0);        /* feet */
+}
+
+/* TODO:CONTENT - implement activate() */
+int apply_effect(object user, object target) {
+    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    return 1;
+}

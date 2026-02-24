@@ -1,0 +1,177 @@
+// /lib/occs/cyber_doc.lpc
+// Cyber-Doc O.C.C. - Cybernetics/Bionics Specialist
+//
+// Cyber-Docs are highly trained surgeons and engineers specializing in
+// cybernetic and bionic augmentation. They install, repair, and maintain
+// cybernetics and bionics — and can fight if cornered.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+
+    set_occ_name("Cyber-Doc");
+    set_occ_id("cyber_doc");
+    set_occ_category(OCC_CAT_TECHNICAL);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Cyber-Docs are the surgeons and engineers of Rifts Earth's cybernetic "
+        "age. They specialize in the installation, maintenance, and repair of "
+        "cybernetic implants and bionic limb replacements. A good Cyber-Doc "
+        "is worth their weight in credits — they can restore a soldier's "
+        "lost limb, enhance a warrior's natural abilities with cybernetics, "
+        "or upgrade aging equipment. Many Cyber-Docs work in Body-Chop-Shops "
+        "performing illegal augmentations, while others operate as independent "
+        "field surgeons or work for wealthy patrons. Unlike Body Fixers who "
+        "specialize in organic healing, Cyber-Docs are primarily engineers "
+        "who happen to work inside living bodies."
+    );
+
+    set_stat_requirements(([
+        "iq": 12,
+        "pp": 11,
+        "me": 10
+    ]));
+
+    set_stat_bonuses(([
+        "iq": 1,
+        "pp": 1
+    ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_abilities(({
+        "cybernetic_surgery",
+        "bionic_installation",
+        "cyberware_diagnosis",
+        "medical_knowledge"
+    }));
+
+    set_occ_abilities(([
+        2:  ({ "expert_installation" }),
+        4:  ({ "black_market_contacts" }),
+        6:  ({ "experimental_augmentation" }),
+        8:  ({ "master_surgeon" }),
+        12: ({ "cyber_doc_legend" })
+    ]));
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "radio_basic",
+        "basic_electronics",
+        "computer_operation",
+        "first_aid",
+        "medical_doctor",      /* primary_only */
+        "field_surgery",
+        "mechanical_engineer",
+        "basic_mechanics",
+        "armorer",
+        "wp_knife",
+        "htoh_basic"
+    }));
+
+    set_occ_related_skills(({
+        "computer_programming", "computer_repair",
+        "electrical_engineer", "robot_electronics",
+        "chemistry", "chemistry_analytical",
+        "biology", "xenobiology",
+        "holistic_medicine", "forensics",
+        "research", "writing",
+        "language_*", "literacy_*"
+    }));
+    set_occ_skill_count(7);
+
+    set_elective_categories(({
+        SKILL_CAT_COMMUNICATION, SKILL_CAT_ELECTRICAL,
+        SKILL_CAT_MECHANICAL, SKILL_CAT_MEDICAL,
+        SKILL_CAT_SCIENCE, SKILL_CAT_TECHNICAL
+    }));
+    set_elective_count(4);
+    set_secondary_count(5);
+
+    set_skill_bonuses(([
+        "medical": 15,
+        "electrical": 10,
+        "mechanical": 10,
+        "science": 5
+    ]));
+
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(20);
+    set_sdc_per_level(1);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/item/backpack",
+        "/obj/item/medical_bag",
+        "/obj/item/surgical_tools",
+        "/obj/item/cybernetic_tools",
+        "/obj/item/first_aid_kit",
+        "/obj/item/computer_tablet"
+    }));
+
+    set_optional_gear(({
+        "/obj/item/portable_surgical_suite",
+        "/obj/item/cyberware_diagnostic_scanner",
+        "/obj/vehicle/medical_van"
+    }));
+
+    set_starting_credits(500, 1500);
+
+    set_starting_weapons(({
+        "/obj/weapon/surgical_laser",
+        "/obj/weapon/knife"
+    }));
+
+    set_starting_armor(({
+        "/obj/armor/light_body_armor"
+    }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({
+        "universal_headjack",
+        "gyro_compass"
+    }));
+
+    set_property("cyberware_install_bonus", 15); /* +15% to cyberware installation */
+    set_property("black_market_cyberware", 1);   /* Access to black market parts */
+    set_property("surgery_bonus", 20);           /* +20% to all surgical procedures */
+
+    set_background(
+        "Cyber-Docs come from a variety of backgrounds — some trained at "
+        "Coalition hospitals, others in free city medical schools, some "
+        "are self-taught tinkerers who grew up in chop-shops. What unites "
+        "them is a fascination with the interface between flesh and machine "
+        "and the lucrative business of keeping augmented warriors operational. "
+        "A good Cyber-Doc can name their price in any settlement."
+    );
+    set_organizations(({ "cyber_doc_guild", "mercenary_guilds" }));
+    set_enemies(({ }));
+}
+
+int query_max_simultaneous_surgeries() {
+    return 1;
+}
+
+/* TODO:CONTENT - surgery mechanics for cybernetic installation */
+int perform_surgery(object patient, string cyberware_id) {
+    return 0;
+}

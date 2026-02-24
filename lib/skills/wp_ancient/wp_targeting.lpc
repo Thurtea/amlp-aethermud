@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/wp_ancient/wp_targeting.lpc - W.P. Targeting/Thrown
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("wp_targeting");
+    set_skill_name("W.P. Targeting/Thrown");
+    set_skill_desc(
+        "TODO:CONTENT — Accurately throw weapons and small objects."
+    );
+    set_skill_category("wp_ancient");
+
+    set_base_percentage(0);
+    set_level_bonus(0);
+    set_max_percentage(0);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

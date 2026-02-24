@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/technical/computer_programming.lpc - Computer Programming
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("computer_programming");
+    set_skill_name("Computer Programming");
+    set_skill_desc(
+        "TODO:CONTENT — Write and debug computer programs."
+    );
+    set_skill_category("technical");
+
+    set_base_percentage(30);
+    set_level_bonus(5);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/pilot_related/read_sensory_equipment.lpc - Read Sensory Equipment
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("read_sensory_equipment");
+    set_skill_name("Read Sensory Equipment");
+    set_skill_desc(
+        "TODO:CONTENT — Interpret data from radar, sonar, and sensors."
+    );
+    set_skill_category("pilot_related");
+
+    set_base_percentage(25);
+    set_level_bonus(5);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

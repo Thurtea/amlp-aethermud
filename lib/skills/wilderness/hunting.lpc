@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/wilderness/hunting.lpc - Hunting
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("hunting");
+    set_skill_name("Hunting");
+    set_skill_desc(
+        "TODO:CONTENT — Track and hunt game animals for food."
+    );
+    set_skill_category("wilderness");
+
+    set_base_percentage(0);
+    set_level_bonus(0);
+    set_max_percentage(0);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

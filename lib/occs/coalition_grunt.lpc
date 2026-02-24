@@ -1,0 +1,179 @@
+// /lib/occs/coalition_grunt.lpc
+// Coalition Grunt (CS Soldier) O.C.C. - Basic Coalition States Soldier
+//
+// The backbone of the Coalition States military. Coalition Grunts are
+// well-trained, well-equipped conventional soldiers who follow orders
+// and serve the CS without question. Distinct from Special Forces.
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+
+    set_occ_name("Coalition Grunt");
+    set_occ_id("coalition_grunt");
+    set_occ_category(OCC_CAT_MILITARY);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Coalition Grunts are the standard infantry soldiers of the Coalition "
+        "States — the most powerful human military on Rifts Earth. They are "
+        "trained to use dead boy armor and CS military weapons, follow orders "
+        "without question, and hold an intense distrust of magic and the "
+        "supernatural. Coalition Grunts are indoctrinated from an early age "
+        "to believe that non-humans are inferior and dangerous, and that "
+        "magic is evil. While they lack the specialized skills of Headhunters "
+        "or Special Forces, they are well-equipped, disciplined, and "
+        "dangerous in numbers. Many Coalition soldiers eventually question "
+        "their programming and go AWOL, becoming disillusioned freedom fighters."
+    );
+
+    set_stat_requirements(([
+        "ps": 10,
+        "pe": 10,
+        "iq": 8
+    ]));
+
+    set_stat_bonuses(([
+        "ps": 1,
+        "pe": 1
+    ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_abilities(({
+        "dead_boy_armor_training",
+        "cs_military_training",
+        "anti_magic_indoctrination"
+    }));
+
+    set_occ_abilities(([
+        3:  ({ "combat_veteran" }),
+        6:  ({ "tactical_experience" }),
+        10: ({ "seasoned_soldier" })
+    ]));
+
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("expert");
+
+    set_occ_skills(({
+        "language_american",
+        "literacy_american",
+        "radio_basic",
+        "land_navigation",
+        "wilderness_survival",
+        "detect_ambush",
+        "detect_concealment",
+        "military_etiquette",
+        "climbing",
+        "swimming",
+        "wp_energy_rifle",
+        "wp_energy_pistol",
+        "wp_knife",
+        "htoh_expert"
+    }));
+
+    set_occ_related_skills(({
+        "pilot_automobile", "pilot_hovercycle", "pilot_motorcycle",
+        "pilot_tanks_apcs",
+        "first_aid", "paramedic",
+        "camouflage", "parachuting",
+        "demolitions", "trap_detection",
+        "weapon_systems", "read_sensory_equipment",
+        "tracking", "intelligence",
+        "wp_heavy_md", "wp_rifle", "wp_shotgun"
+    }));
+    set_occ_skill_count(6);
+
+    set_elective_categories(({
+        SKILL_CAT_COMMUNICATION, SKILL_CAT_MECHANICAL,
+        SKILL_CAT_MILITARY, SKILL_CAT_PHYSICAL,
+        SKILL_CAT_PILOT, SKILL_CAT_TECHNICAL,
+        SKILL_CAT_WEAPON
+    }));
+    set_elective_count(3);
+    set_secondary_count(5);
+
+    set_skill_bonuses(([
+        "weapon_proficiencies": 5,
+        "military": 5
+    ]));
+
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(30);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/item/backpack",
+        "/obj/item/canteen",
+        "/obj/item/first_aid_kit",
+        "/obj/item/rations_1week",
+        "/obj/item/cs_id_card"
+    }));
+
+    set_optional_gear(({
+        "/obj/vehicle/hovercycle",
+        "/obj/item/multi_optics_band"
+    }));
+
+    set_starting_credits(150, 400);
+
+    set_starting_weapons(({
+        "/obj/weapon/cs_c12_laser_rifle",
+        "/obj/weapon/cs_pistol",
+        "/obj/weapon/vibro_knife"
+    }));
+
+    set_starting_armor(({
+        "/obj/armor/dead_boy_armor"   /* Coalition Dead Boy armor */
+    }));
+
+    set_race_requirements(({ }));
+    /* CS allows only humans and certain mutants */
+    set_race_exclusions(({
+        "elf", "dwarf", "wolfen", "ogre", "atlantean",
+        "true_atlantean", "minotaur", "troll"
+    }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(3);
+    set_starting_cybernetics(({
+        "gyro_compass",
+        "clock_calendar"
+    }));
+
+    set_property("cs_loyalty", 1);
+    set_property("anti_magic_bias", 1);
+    set_property("cs_rank", "private");
+
+    set_background(
+        "Coalition Grunts are recruited from the millions of humans living "
+        "under Coalition rule. Most enlist voluntarily, driven by patriotism "
+        "or lack of other options. CS military training is thorough and "
+        "intensive, emphasizing discipline, loyalty, and hatred of "
+        "supernatural threats. Many soldiers spend their entire careers "
+        "believing in the CS cause. Others eventually see the truth "
+        "about their government and desert."
+    );
+    set_organizations(({ "coalition_states_military" }));
+    set_enemies(({ "demons", "vampires", "splugorth", "magic_users" }));
+}
+
+int query_cs_rank_bonus() {
+    return 5;  /* +5% to military etiquette and protocol within CS */
+}
+
+/* TODO:CONTENT - CS loyalty/defection mechanics */
+int query_defection_risk() {
+    return 0;
+}

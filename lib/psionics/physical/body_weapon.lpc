@@ -1,0 +1,28 @@
+/*
+ * /lib/psionics/physical/body_weapon.lpc - Body Weapon
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+
+    set_power_id("body_weapon");
+    set_power_name("Body Weapon");
+    set_power_desc(
+        "TODO:CONTENT — Manifest a blade or spike of solid psionic energy from the hand."
+    );
+    set_power_category("physical");
+
+    set_isp_cost(6);
+    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_base_duration(4);
+    set_range_type(1);      /* 0=self, 1=touch, 2=ranged, 3=area */
+    set_base_range(0);        /* feet */
+}
+
+/* TODO:CONTENT - implement activate() */
+int apply_effect(object user, object target) {
+    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    return 1;
+}

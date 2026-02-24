@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/physical/wrestling.lpc - Wrestling
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("wrestling");
+    set_skill_name("Wrestling");
+    set_skill_desc(
+        "TODO:CONTENT — Trained grappling and takedown combat."
+    );
+    set_skill_category("physical");
+
+    set_base_percentage(0);
+    set_level_bonus(0);
+    set_max_percentage(0);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

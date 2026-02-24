@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/rogue/forgery_rogue.lpc - Forgery (Rogue)
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("forgery_rogue");
+    set_skill_name("Forgery (Rogue)");
+    set_skill_desc(
+        "TODO:CONTENT — Create fake documents, IDs, and currency."
+    );
+    set_skill_category("rogue");
+
+    set_base_percentage(20);
+    set_level_bonus(4);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

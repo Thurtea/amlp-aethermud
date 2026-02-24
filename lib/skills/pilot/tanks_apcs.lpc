@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/pilot/tanks_apcs.lpc - Pilot: Tanks & APCs
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("tanks_apcs");
+    set_skill_name("Pilot: Tanks & APCs");
+    set_skill_desc(
+        "TODO:CONTENT — Operate armored fighting vehicles and APCs."
+    );
+    set_skill_category("pilot");
+
+    set_base_percentage(50);
+    set_level_bonus(4);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

@@ -1,0 +1,28 @@
+/*
+ * /lib/psionics/physical/impervious_to_fire.lpc - Impervious to Fire
+ */
+
+inherit "/std/psionic";
+
+void create() {
+    ::create();
+
+    set_power_id("impervious_to_fire");
+    set_power_name("Impervious to Fire");
+    set_power_desc(
+        "TODO:CONTENT — Become completely unaffected by fire, heat, and flame attacks."
+    );
+    set_power_category("physical");
+
+    set_isp_cost(4);
+    set_duration_type(2);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_base_duration(2);
+    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
+    set_base_range(0);        /* feet */
+}
+
+/* TODO:CONTENT - implement activate() */
+int apply_effect(object user, object target) {
+    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    return 1;
+}

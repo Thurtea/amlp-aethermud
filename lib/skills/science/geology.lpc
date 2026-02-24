@@ -1,0 +1,32 @@
+/*
+ * /lib/skills/science/geology.lpc - Geology
+ */
+
+inherit "/std/skill";
+
+void create() {
+    ::create();
+
+    set_skill_id("geology");
+    set_skill_name("Geology");
+    set_skill_desc(
+        "TODO:CONTENT — Study of rocks, minerals, and planetary structures."
+    );
+    set_skill_category("science");
+
+    set_base_percentage(20);
+    set_level_bonus(5);
+    set_max_percentage(98);
+
+    set_stat_requirements(([ ]));
+    set_related_skills(({ }));
+    set_related_bonuses(({ }));
+
+    set_training_time(2);
+    set_is_primary_only(0);
+}
+
+/* TODO:CONTENT - implement perform() when skill system wired */
+int perform(object user, string args) {
+    return 0;
+}

@@ -16,6 +16,9 @@
 extern void send_to_player(PlayerSession *sess, const char *format, ...);
 extern void send_prompt(PlayerSession *session);
 
+/* Minimal external death function (compat stub call) */
+extern void death_function(PlayerSession *sess);
+
 // Forward declarations
 extern void cmd_move(PlayerSession *sess, const char *direction);
 extern PlayerSession *sessions[];
@@ -58,6 +61,31 @@ int combat_roll_dice(int num_dice, int sides) {
 
 int combat_d20(void) {
     return combat_roll_dice(1, 20);
+}
+
+/* -------------------------------------------------------------------------
+ * Minimal compatibility attack/damage functions (Phase 2 stub)
+ * These provide a tiny API for commands to call for quick hits.
+ * ------------------------------------------------------------------------- */
+
+int attack_roll(PlayerSession *attacker, PlayerSession *defender) {
+    if (!attacker || !defender || !attacker->character || !defender->character) return 0;
+    int roll = (rand() % 20) + attacker->character->STR;
+    return (roll > defender->character->AC) ? 1 : 0;
+}
+
+int damage_roll(PlayerSession *attacker, int weapon_type) {
+    /* weapon_type: 0 = unarmed (1d4), otherwise 1d6 */
+    int sides = (weapon_type == 0) ? 4 : 6;
+    return combat_roll_dice(1, sides);
+}
+
+void apply_damage(PlayerSession *target, int damage) {
+    if (!target || !target->character) return;
+    target->character->hp -= damage;
+    if (target->character->hp <= 0) {
+        death_function(target);
+    }
 }
 
 // ============================================================================

@@ -45,39 +45,42 @@ int main(string args) {
         return 1;
     }
     
-    // Load combat daemon
-    combat_daemon = load_object("/daemon/combat");
-    if (!combat_daemon) {
-        write("Error: Combat system unavailable.\n");
-        return 1;
+    // Minimal instant attack using C combat stubs (attack_roll/damage_roll/apply_damage)
+    // This is a minimal compatibility path that performs one immediate attack.
+    int hit = 0;
+    if (function_exists("attack_roll", this_object()) || function_exists("attack_roll", attacker)) {
+        hit = attack_roll(attacker, target);
+    } else {
+        // Fallback: use d20 roll + simple hit check if attack_roll not exposed
+        hit = (random(20) + (int)attacker->query_skill("strength")) > (int)target->query_ac();
     }
-    
-    // Check if already in combat
-    if (combat_daemon->is_in_combat(attacker)) {
-        object current_target = attacker->query_combat_target();
-        if (current_target == target) {
-            write("You're already fighting " + target->query_cap_name() + "!\n");
-            return 1;
-        } else if (current_target) {
-            write("You're already fighting " + current_target->query_cap_name() + "!\n");
-            write("Finish your current fight first, or use 'flee' to escape.\n");
-            return 1;
+
+    if (hit) {
+        int weapon_type = 0;
+        if (function_exists("query_weapon_type", attacker)) {
+            weapon_type = (int)attacker->query_weapon_type();
         }
+        int dmg = 0;
+        if (function_exists("damage_roll", this_object()) || function_exists("damage_roll", attacker)) {
+            dmg = damage_roll(attacker, weapon_type);
+        } else {
+            dmg = (weapon_type == 0) ? (random(4) + 1) : (random(6) + 1);
+        }
+
+        if (function_exists("apply_damage", this_object()) || function_exists("apply_damage", attacker)) {
+            apply_damage(target, dmg);
+        } else {
+            // best-effort fallback: call target->take_damage if available
+            if (function_exists("take_damage", target)) {
+                target->take_damage(dmg);
+            }
+        }
+
+        write("You hit " + target->query_cap_name() + " for " + dmg + " damage.\n");
+    } else {
+        write("You miss " + target->query_cap_name() + ".\n");
     }
-    
-    // Start combat via daemon
-    int combat_id = combat_daemon->start_combat(attacker, target);
-    
-    if (!combat_id) {
-        write("Failed to initiate combat.\n");
-        return 1;
-    }
-    
-    // Perform immediate first attack
-    if (function_exists("perform_single_attack", combat_daemon)) {
-        combat_daemon->perform_single_attack(combat_id, attacker, target);
-    }
-    
+
     return 1;
 }
 

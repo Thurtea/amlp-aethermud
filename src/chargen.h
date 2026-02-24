@@ -73,6 +73,9 @@ typedef struct Character {
     int sdc;
     int max_sdc;
     CharacterStats stats;
+    /* Compatibility fields for simplified combat stubs */
+    int STR; /* Strength (compat) */
+    int AC;  /* Armor class (compat) */
     
     /* Skills system (Phase 2) */
     PlayerSkill skills[20];     /* Max 20 skills per character */

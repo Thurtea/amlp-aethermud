@@ -112,4 +112,9 @@ void combat_send_to_participant(CombatParticipant *p, const char *message);
 int combat_roll_dice(int num_dice, int sides);
 int combat_d20(void);
 
+/* Minimal compatibility API (Phase 2 stub functions) */
+int attack_roll(PlayerSession *attacker, PlayerSession *defender);
+int damage_roll(PlayerSession *attacker, int weapon_type);
+void apply_damage(PlayerSession *target, int damage);
+
 #endif // COMBAT_H

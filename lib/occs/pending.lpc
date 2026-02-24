@@ -1,0 +1,7 @@
+/* Minimal OCC placeholder for 'Pending' so code can load it safely. */
+
+string query_occ_name() { return "Pending"; }
+string query_occ_id()   { return "pending"; }
+string get_occ_info()   { return "Pending OCC placeholder."; }
+
+void create() { /* no-op */ }

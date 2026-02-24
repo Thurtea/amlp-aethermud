@@ -5,10 +5,10 @@ void create() {
     ::create();
     set_short("New Camelot - Town Square");
     set_long(
-        "The central square of New Camelot, a human kingdom built on the\n"
-        "ideals of chivalry and honor. Stone buildings surround a marble\n"
-        "fountain. Knights in gleaming armor patrol the cobblestone streets.\n"
-        "A shimmering figure -- the Moxim -- stands near the fountain,\n"
+        "The central square of New Camelot, a human kingdom built on the\n" +
+        "ideals of chivalry and honor. Stone buildings surround a marble\n" +
+        "fountain. Knights in gleaming armor patrol the cobblestone streets.\n" +
+        "A shimmering figure -- the Moxim -- stands near the fountain,\n" +
         "offering passage to distant lands."
     );
 

@@ -809,7 +809,7 @@ void chargen_display_stats(PlayerSession *sess) {
     } else {
         frame_line(sess, "Scars:", w);
         for (i = 0; i < ch->scar_count && i < MAX_SCARS; i++) {
-            char sline[256];
+            char sline[416];
             const char *loc = ch->scars[i].location[0] ? ch->scars[i].location : "unknown";
             const char *desc = ch->scars[i].description[0] ? ch->scars[i].description : "(no description)";
             snprintf(sline, sizeof(sline), " - %s: %s (death %d)", loc, desc, ch->scars[i].death_number);

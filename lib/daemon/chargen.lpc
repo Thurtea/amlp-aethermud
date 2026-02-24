@@ -112,7 +112,7 @@ string get_race_selection_menu() {
         }
     }
     
-    menu += "Type 'race <name>' to see details, or 'choose <name>' to select.\n";
+    menu += "Type 'race [name]' to see details, or 'choose [name]' to select.\n";
     
     return menu;
 }
@@ -204,7 +204,7 @@ string get_occ_selection_menu(string race_id) {
         }
     }
     
-    menu += "Type 'occ <name>' to see details, or 'choose <name>' to select.\n";
+    menu += "Type 'occ [name]' to see details, or 'choose [name]' to select.\n";
     
     return menu;
 }
@@ -303,27 +303,27 @@ string* get_all_alignments() {
 
 string get_alignment_description(string alignment) {
     switch (alignment) {
-        case ALIGN_PRINCIPLED:
-            return "Principled (Good): Follows a strict moral code, always helps the "
-                   "innocent, never lies or kills prisoners. The classic 'white knight'.";
+         case ALIGN_PRINCIPLED:
+             return "Principled (Good): Follows a strict moral code, always helps the " +
+                 "innocent, never lies or kills prisoners. The classic 'white knight'.";
         case ALIGN_SCRUPULOUS:
-            return "Scrupulous (Good): Has a strong moral compass but is more pragmatic. "
-                   "Will lie if necessary to protect innocents, avoids killing when possible.";
+             return "Scrupulous (Good): Has a strong moral compass but is more pragmatic. " +
+                 "Will lie if necessary to protect innocents, avoids killing when possible.";
         case ALIGN_UNPRINCIPLED:
-            return "Unprincipled (Selfish): Looks out for themselves but won't harm "
-                   "innocents. Will bend rules and laws for personal gain but has limits.";
+             return "Unprincipled (Selfish): Looks out for themselves but won't harm " +
+                 "innocents. Will bend rules and laws for personal gain but has limits.";
         case ALIGN_ANARCHIST:
-            return "Anarchist (Selfish): Values freedom above all else, despises authority. "
-                   "Unpredictable but not malicious, acts on whims and desires.";
+             return "Anarchist (Selfish): Values freedom above all else, despises authority. " +
+                 "Unpredictable but not malicious, acts on whims and desires.";
         case ALIGN_ABERRANT:
-            return "Aberrant (Evil): Follows a strict code of conduct but for evil purposes. "
-                   "Has honor among thieves, keeps word, but ruthless in pursuing goals.";
+             return "Aberrant (Evil): Follows a strict code of conduct but for evil purposes. " +
+                 "Has honor among thieves, keeps word, but ruthless in pursuing goals.";
         case ALIGN_MISCREANT:
-            return "Miscreant (Evil): Self-serving and willing to hurt others for gain. "
-                   "No moral code, but not sadistically cruel without purpose.";
+             return "Miscreant (Evil): Self-serving and willing to hurt others for gain. " +
+                 "No moral code, but not sadistically cruel without purpose.";
         case ALIGN_DIABOLIC:
-            return "Diabolic (Evil): The ultimate evil - cruel, sadistic, and enjoys "
-                   "causing suffering. No limits on their depravity.";
+             return "Diabolic (Evil): The ultimate evil - cruel, sadistic, and enjoys " +
+                 "causing suffering. No limits on their depravity.";
         default:
             return "Unknown alignment.";
     }
@@ -363,7 +363,7 @@ string get_alignment_menu(string race_id) {
         }
     }
     
-    menu += "\nType 'align <name>' to see details, or 'choose <name>' to select.\n";
+    menu += "\nType 'align [name]' to see details, or 'choose [name]' to select.\n";
     
     return menu;
 }
@@ -529,7 +529,7 @@ int process_stats_roll(object player, string cmd, string arg) {
         // Check if this is an RCC that can optionally take an OCC
         object race = load_race(data["race"]);
         if (race && race->query_is_rcc() && race->query_can_have_occ()) {
-            tell_object(player, "\n<<< RCC NOTICE >>>\n");
+            tell_object(player, "\n*** RCC NOTICE ***\n");
             tell_object(player, race->query_race_name() + " is a Racial Character Class (R.C.C.).\n");
             tell_object(player, "You may function as " + race->query_race_name() + " without an O.C.C.,\n");
             tell_object(player, "or optionally select an O.C.C. for additional abilities.\n\n");

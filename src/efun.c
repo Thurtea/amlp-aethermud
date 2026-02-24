@@ -1714,7 +1714,7 @@ VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     if (!lpc_path) return vm_value_create_null();
 
     /* Resolve filesystem path candidates (try a few common forms) */
-    char fs_path[PATH_MAX];
+    char fs_path[4112];
     const char *mudlib = getenv("AMLP_MUDLIB");
     if (!mudlib || !*mudlib) mudlib = "./lib";
 

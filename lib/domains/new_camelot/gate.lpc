@@ -5,8 +5,8 @@ void create() {
     ::create();
     set_short("New Camelot Gate");
     set_long(
-        "The southern gate of New Camelot. Heavy iron-banded doors stand\n"
-        "open, flanked by guards in plate armor. A dirt road leads south\n"
+        "The southern gate of New Camelot. Heavy iron-banded doors stand\n" +
+        "open, flanked by guards in plate armor. A dirt road leads south\n" +
         "into the wilderness beyond the kingdom walls. The chapel is north."
     );
 

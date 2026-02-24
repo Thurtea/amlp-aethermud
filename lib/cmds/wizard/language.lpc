@@ -1,0 +1,8 @@
+/* Stub: wizard copy of language command - delegates to /cmds/language */
+int main(string args) {
+    return (int)"/cmds/language"->main(args);
+}
+
+string query_help() {
+    return (string)"/cmds/language"->query_help();
+}

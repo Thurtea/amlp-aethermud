@@ -5,9 +5,9 @@ void create() {
     ::create();
     set_short("Training Grounds");
     set_long(
-        "An open dirt yard where knights and warriors practice their combat\n"
-        "skills. Wooden training dummies stand in rows and weapon racks line\n"
-        "the edges. The clash of practice swords echoes off the stone walls.\n"
+        "An open dirt yard where knights and warriors practice their combat\n" +
+        "skills. Wooden training dummies stand in rows and weapon racks line\n" +
+        "the edges. The clash of practice swords echoes off the stone walls.\n" +
         "The town square is to the west, and stables lie to the east."
     );
 

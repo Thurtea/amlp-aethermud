@@ -156,6 +156,7 @@ VMValue efun_file_name(VirtualMachine *vm, VMValue *args, int arg_count);
 /* ========== Object/Player Efuns (additional) ========== */
 
 VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count);
+VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_all_inventory(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_users(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_function_exists(VirtualMachine *vm, VMValue *args, int arg_count);

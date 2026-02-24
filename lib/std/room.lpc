@@ -1,74 +1,26 @@
-// Minimal, conservative room implementation
-// Only implements the small subset of behavior used by domains.
-
 inherit "/std/object";
 
-private mapping exits;
-private mapping room_items;
+mapping exits;
+mapping room_items;
 
 void create() {
     ::create();
-    set_short("A nondescript place");
-    set_long("You see nothing in particular.");
-    exits = ([]);
-    room_items = ([]);
-    set_light(1);
+    set_short("New Camelot - Town Square");
+    set_long(
+        "The central square of New Camelot, a human kingdom built on the\n" +
+        "ideals of chivalry and honor. Stone buildings surround a marble\n" +
+        "fountain. Knights in gleaming armor patrol the cobblestone streets.\n" +
+        "A shimmering figure -- the Moxim -- stands near the fountain,\n" +
+        "offering passage to distant lands."
+    );
+    set_exits(([]));
+    set_items(([]));
 }
 
-/* Exits */
-void set_exits(m) { exits = m ? m : ([]); }
 mapping query_exits() { return exits; }
-void add_exit(dir, dest) {
-    if (!exits) exits = ([]);
-    exits[dir] = dest;
-}
+void set_exits(mapping e) { exits = e; }
+void add_exit(string d, string dest) { exits[d] = dest; }
 
-/* Items */
-void set_items(m) { room_items = m ? m : ([]); }
 mapping query_items() { return room_items; }
-
-/* Light helper (thin wrapper around properties provided by /std/object) */
-void set_light(level) { set_property("light", level); }
-
-/* A simple, conservative look() that writes the long description,
-   lists obvious exits and lists contents. Returns empty string. */
-string look() {
-    object *contents;
-    object ob;
-    int i, s;
-
-    write(query_long() + "\n");
-
-    /* List exits */
-    if (exits && sizeof(keys(exits)) > 0) {
-        string *dirs = keys(exits);
-        write("Obvious exits: ");
-        for (i = 0; i < sizeof(dirs); i++) {
-            write(dirs[i] + (i < sizeof(dirs) - 1 ? ", " : "\n"));
-        }
-    }
-
-    /* List visible contents */
-    contents = all_inventory(this_object());
-    if (contents && sizeof(contents) > 0) {
-        write("You see:\n");
-        for (i = 0, s = sizeof(contents); i < s; i++) {
-            ob = contents[i];
-            if (!objectp(ob)) continue;
-            /* Skip the player doing the look, driver will place player in room
-               so they will be listed; it's okay. */
-            string desc = "";
-            if (function_exists("query_short", ob)) {
-                desc = (string)ob->query_short();
-            }
-            if (!desc || desc == "") {
-                if (living(ob)) desc = "someone";
-                else desc = "something";
-            }
-            write("  " + desc + "\n");
-        }
-    }
-
-    return "";
-}
+void set_items(mapping i) { room_items = i; }
 

@@ -2972,7 +2972,7 @@ void cmd_swim(PlayerSession *sess, const char *args) {
         return;
     }
 
-    if (skill_check(swim_pct)) {
+    if (skill_check_sess(sess, 2, swim_pct)) {
         send_to_player(sess, "You swim skillfully through the water. [Skill check: %d%% - Success]\n", swim_pct);
         Room *room = sess->current_room;
         if (room) {

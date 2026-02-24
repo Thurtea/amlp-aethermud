@@ -31,9 +31,9 @@ void create() {
         object guard = clone_object("/domains/new_camelot/npc/guard");
         if (guard) {
             move_object(guard, this_object());
-            npc_daemon->register_npc(guard,
-                                     "/domains/new_camelot/town_square",
-                                     120);   /* 2-minute respawn delay */
+            npc_daemon->register_npc("new_camelot_guard",
+                                     "/domains/new_camelot/npc/guard",
+                                     "/domains/new_camelot/town_square");
         }
     }
 }

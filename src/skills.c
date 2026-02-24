@@ -886,6 +886,31 @@ int skill_check(int skill_percentage) {
     return (roll <= skill_percentage) ? 1 : 0;
 }
 
+/* Minimal stub for race skill bonus. The real implementation is provided by
+ * the race loader/VM bridge; this provides a safe default so the code
+ * compiles and race bonuses are neutral until wired.
+ */
+int race_skill_bonus(char *race, int skill_id) {
+    (void)race; (void)skill_id;
+    return 0;
+}
+
+/* Session-aware wrapper: applies per-race flat % bonus (if present) and
+ * performs the d100 roll. This keeps the original `skill_check()` for
+ * compatibility while enabling minimal race-bonus behaviour.
+ */
+int skill_check_sess(PlayerSession *sess, int skill_id, int skill_percentage) {
+    int bonus = 0;
+    if (sess && sess->character.race) {
+        bonus = race_skill_bonus(sess->character.race, skill_id);
+        skill_percentage += bonus;
+    }
+    /* clamp between 0 and 100 */
+    if (skill_percentage < 0) skill_percentage = 0;
+    if (skill_percentage > 100) skill_percentage = 100;
+    return skill_check(skill_percentage);
+}
+
 /* ========== DISPLAY FUNCTIONS ========== */
 
 void skill_display_list(PlayerSession *sess) {

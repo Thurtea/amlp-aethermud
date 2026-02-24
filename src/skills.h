@@ -54,6 +54,10 @@ int skill_get_id_by_name(const char *name);
 void occ_assign_skills(PlayerSession *sess, const char *occ_name);
 void skill_display_list(PlayerSession *sess);
 int skill_check(int skill_percentage);
+/* Skill check variant that accepts session and skill id so race bonuses
+ * can be applied. Minimal compatibility wrapper.
+ */
+int skill_check_sess(PlayerSession *sess, int skill_id, int skill_percentage);
 const char *skill_get_name(int skill_id);
 
 /* Global skill database (defined in skills.c) */

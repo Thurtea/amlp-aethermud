@@ -72,7 +72,9 @@ int attack_roll(PlayerSession *attacker, PlayerSession *defender) {
     int d20 = combat_d20();
     int hit = 0;
     int crit = 0;
-    int strike_bonus = 0;
+    /* strike_bonus previously declared but unused; removed to avoid
+     * compiler warning. If a future formula needs it, reintroduce and
+     * apply appropriately. */
     // Use STR for legacy, but prefer stats.ps if available
     int attacker_str = attacker->character.stats.ps > 0 ? attacker->character.stats.ps : attacker->character.STR;
     int defender_ac = defender->character.AC;

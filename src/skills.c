@@ -904,15 +904,16 @@ extern LoadedRace loaded_races[];
 extern int num_loaded_races;
 
 int race_skill_bonus(char *race, int skill_id) {
-    if (!race || skill_id < 0) return 0;
-    for (int i = 0; i < num_loaded_races; i++) {
-        if (strcasecmp(loaded_races[i].name, race) == 0) {
-            // If race has a skill bonus mapping, use it
-            // For now, use the per-race flat bonus (race_skill_bonus field)
-            // If future: add per-skill mapping, look up by skill_id
-            return loaded_races[i].race_skill_bonus;
-        }
-    }
+    /* The per-race flat skill bonus is stored on Character (populated by
+     * race_loader.c via the VM bridge) as `race_skill_bonus`. The
+     * LoadedRace struct (from race_loader.h) does not contain per-race
+     * bonus fields, so avoid accessing a non-existent member here.
+     *
+     * Keep this helper for API compatibility; currently return 0 since
+     * the character-level field should be used (sess->character.race_skill_bonus).
+     */
+    (void)race;
+    (void)skill_id;
     return 0;
 }
 

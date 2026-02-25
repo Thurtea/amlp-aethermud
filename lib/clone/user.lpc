@@ -66,29 +66,15 @@ mapping query_all_languages() {
 void set_wizard_level(int level) {
     wizard_level = level;
     if (wizard_level >= WIZARD_LEVEL) {
-        /* Debug: log attempt to attach wiztool */
-        write_file("/log/server.log", sprintf("[DEBUG user] set_wizard_level(%d) called for %s\n", level, (function_exists("query_name", this_object()) ? this_object()->query_name() : "<unknown>")));
-        if (!objectp(_wiztool)) {
-            write_file("/log/server.log", sprintf("[DEBUG user] no existing _wiztool, checking file_size(%s)\n", STD_WIZTOOL));
-        }
-
         if (!objectp(_wiztool) && file_size(WIZTOOL) > 0) {
             object wt = 0;
-            write_file("/log/server.log", sprintf("[DEBUG user] cloning wiztool from %s\n", WIZTOOL));
             catch(wt = clone_object(WIZTOOL));
             if (objectp(wt)) {
-                write_file("/log/server.log", sprintf("[DEBUG user] clone_object succeeded: %s\n", file_name(wt)));
                 _wiztool = wt;
                 if (function_exists("attach", _wiztool)) {
                     int attached = 0;
-                    write_file("/log/server.log", sprintf("[DEBUG user] calling attach on %s\n", file_name(_wiztool)));
                     catch(attached = (int)_wiztool->attach(this_object()));
-                    write_file("/log/server.log", sprintf("[DEBUG user] attach call returned %d for %s\n", attached, (function_exists("query_name", this_object()) ? this_object()->query_name() : "<unknown>")));
-                } else {
-                    write_file("/log/server.log", sprintf("[DEBUG user] wiztool has no attach() function: %s\n", file_name(_wiztool)));
                 }
-            } else {
-                write_file("/log/server.log", sprintf("[DEBUG user] clone_object failed for %s\n", WIZTOOL));
             }
         }
     }
@@ -223,21 +209,13 @@ object query_wiztool() { return _wiztool; }
 int attach_wiztool(object wt) {
     int attached = 0;
     if (!objectp(wt)) {
-        write_file("/log/server.log", "[DEBUG user] attach_wiztool called with invalid object\n");
         return 0;
     }
     _wiztool = wt;
-    write_file("/log/server.log", sprintf("[DEBUG user] attach_wiztool called for %s with wiztool=%s\n",
-        (function_exists("query_name", this_object()) ? this_object()->query_name() : "<unknown>"),
-        file_name(wt)));
     if (function_exists("attach", _wiztool)) {
         catch(attached = (int)_wiztool->attach(this_object()));
-        write_file("/log/server.log", sprintf("[DEBUG user] _wiztool->attach() returned %d for %s\n", attached,
-            (function_exists("query_name", this_object()) ? this_object()->query_name() : "<unknown>")));
         return attached ? 1 : 0;
     } else {
-        write_file("/log/server.log", sprintf("[DEBUG user] _wiztool has no attach() for %s\n",
-            (function_exists("query_name", this_object()) ? this_object()->query_name() : "<unknown>")));
         return 0;
     }
 }
@@ -266,9 +244,7 @@ void save_me() {
     string save_file;
     save_file = DIR_SAVE + "/players/" + query_name() + ".o";
     int res = 0;
-    write_file("/log/server.log", sprintf("[DEBUG save_me] %s attempting to save to %s\n", query_name(), save_file));
     catch(res = save_object(save_file));
-    write_file("/log/server.log", sprintf("[DEBUG save_me] %s save result: %d\n", query_name(), res));
 }
 
 void restore_me() {

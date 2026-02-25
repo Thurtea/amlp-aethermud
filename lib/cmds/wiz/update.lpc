@@ -1,0 +1,32 @@
+// lib/cmds/wiz/update.lpc
+// Admin/code wizard command to reload an LPC file
+
+#include "/secure/wiz_perms.lpc"
+
+int main(string args) {
+    object player = this_player();
+    if (query_wiz_role(player) < 2) {
+        tell_object(player, "You are not authorized to use update.\n");
+        return 1;
+    }
+    if (!args || args == "") {
+        tell_object(player, "Usage: update <lpc_file_path>\n");
+        return 1;
+    }
+    string path = args;
+    // Security: block master.lpc and wiz_perms.lpc
+    if (path == "/lib/master.lpc" || path == "/lib/secure/wiz_perms.lpc") {
+        tell_object(player, "Reload failed: cannot reload master.lpc or wiz_perms.lpc.\n");
+        return 1;
+    }
+    object obj;
+    string err;
+    catch { obj = load_object(path); } err;
+    if (obj) {
+        tell_object(player, "Reloaded: " + path + "\n");
+        return 1;
+    } else {
+        tell_object(player, "Reload failed: " + (err ? err : "unknown error") + "\n");
+        return 1;
+    }
+}

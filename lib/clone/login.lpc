@@ -219,25 +219,25 @@ void enter_game() {
      * Previously the check used == 2 which prevented newly created players
      * from being promoted to admin. Accept creating_new == 1 here. */
     if (player_name == "Admin" || creating_new == 1 || is_first_player) {
-        write("[DEBUG] Granting admin to: " + player_name + " (creating_new=" + creating_new + ", is_first_player=" + is_first_player + ")\n");
+        // ...existing code...
         user->set_wizard_level(ADMIN_LEVEL);
 
         /* Ensure wiztool is attached. If set_wizard_level didn't attach for
          * some reason, clone and attach explicitly and log outcomes. */
         catch {
             if (!objectp(user->query_wiztool())) {
-                write_file("/log/server.log", sprintf("[DEBUG login] wiztool not attached for %s, attempting explicit clone+attach\n", player_name));
+                // ...existing code...
                 object wt = 0;
                 catch(wt = clone_object(WIZTOOL));
                 if (objectp(wt)) {
-                    write_file("/log/server.log", sprintf("[DEBUG login] cloned wiztool: %s\n", file_name(wt)));
+                    // ...existing code...
                     int res = 0;
                     if (function_exists("attach_wiztool", user)) {
                         catch(res = user->attach_wiztool(wt));
-                        write_file("/log/server.log", sprintf("[DEBUG login] user->attach_wiztool returned %d for %s\n", res, player_name));
+                        // ...existing code...
                     } else if (function_exists("attach", wt)) {
                         catch(res = (int)wt->attach(user));
-                        write_file("/log/server.log", sprintf("[DEBUG login] wt->attach returned %d for %s\n", res, player_name));
+                        // ...existing code...
                     } else {
                         write_file("/log/server.log", sprintf("[DEBUG login] no attach path available for %s\n", player_name));
                     }

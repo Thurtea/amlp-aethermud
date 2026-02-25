@@ -18,58 +18,5 @@ int activate(string cmd, object player, string args) {
     }
     string *tokens = explode(args || "", " ");
     string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
-    switch(subcmd) {
+    // Not yet implemented.
         case "":
-            return show_menu(player);
-        case "room":
-            return qcs_room(player, tokens[1..]);
-        case "desc":
-            return qcs_desc(player, tokens[1..]);
-        case "addex":
-            return qcs_addex(player, tokens[1..]);
-        case "obj":
-            return qcs_obj(player, tokens[1..]);
-        case "list":
-            return qcs_list(player);
-        default:
-            tell_object(player, "Unknown qcs command.\n");
-            return 1;
-    }
-}
-
-int show_menu(object player) {
-    string msg =
-        "========================================\n" +
-        "         QCS TOOL MENU\n" +
-        "========================================\n" +
-        " qcs            Show this menu\n" +
-        " qcs room <name>        New room\n" +
-        " qcs desc <text>        Set room desc\n" +
-        " qcs addex <dir> <room> Add exit\n" +
-        " qcs obj <name>         New object\n" +
-        " qcs list               List domain\n" +
-        "========================================\n";
-    tell_object(player, msg);
-    return 1;
-}
-
-int qcs_room(object player, string *args) {
-    tell_object(player, "Room command not yet implemented.\n");
-    return 1;
-}
-int qcs_desc(object player, string *args) {
-    tell_object(player, "Desc command not yet implemented.\n");
-    return 1;
-}
-int qcs_addex(object player, string *args) {
-    tell_object(player, "Addex command not yet implemented.\n");
-    return 1;
-}
-int qcs_obj(object player, string *args) {
-    tell_object(player, "Obj command not yet implemented.\n");
-    return 1;
-}
-int qcs_list(object player) {
-    tell_object(player, "List command not yet implemented.\n");
-    return 1;
-}

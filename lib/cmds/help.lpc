@@ -26,6 +26,7 @@ string *collect_txt(string dir) {
                 result += ({ f[0..(strlen(f) - 5)] });
         }
     }
+    // Only canonical underscore topic names, no alias generation
     return sort_array(result, 1);
 }
 
@@ -53,6 +54,7 @@ string *collect_txt_recursive(string base) {
             }
         }
     }
+    // Only canonical underscore topic names, no alias generation
     return sort_array(result, 1);
 }
 

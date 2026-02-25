@@ -37,11 +37,15 @@ void create() {
     npc_hp_max   = 10;
     npc_aggro    = 0;
     npc_position = "is standing here.";
+    ::create();
 }
 
 /* Called after the NPC is moved into its spawn room.  Override in subclasses
  * to run initialisation that requires a valid environment(). */
-void on_spawn() { }
+void on_spawn() {
+    // Register combat AI heartbeat if not already
+    call_out("npc_heartbeat", 2);
+}
 
 /* ---- Template ---- */
 void   set_template(string t) { npc_template = t; }
@@ -81,12 +85,49 @@ void die(object killer) {
     destruct(this_object());
 }
 
-/* ---- Receive damage (basic stub) ---- */
-int receive_damage(int damage, object attacker) {
+
+// Called when this NPC is attacked
+int receive_attack(object attacker, int damage) {
     npc_hp -= damage;
     if (npc_hp <= 0) {
         die(attacker);
-        return 1;  /* dead */
+        return 1;
+    }
+    // Retaliate if alive
+    if (attacker && living(attacker)) {
+        retaliate(attacker);
     }
     return 0;
 }
+
+// Retaliate against attacker (simple AI)
+void retaliate(object attacker) {
+    if (!attacker || !environment() || !present(attacker, environment())) return;
+    // Attack back after 2 seconds
+    call_out("npc_attack", 2, attacker);
+}
+
+// NPC attacks a target
+void npc_attack(object target) {
+    if (!target || !environment() || !present(target, environment())) return;
+    if (npc_hp <= 0) return;
+    int dmg = random(6) + 1; // Default: 1d6
+    tell_room(environment(), query_short() + " attacks " + target->query_name() + "!\n");
+    tell_object(target, query_short() + " slashes at you!\n");
+    target->receive_attack(this_object(), dmg);
+}
+
+// Heartbeat for ongoing combat (AI)
+void npc_heartbeat() {
+    if (npc_hp <= 0) return;
+    object *attackers = filter(all_inventory(environment()), (: living($1) && $1->query_attack_target() == this_object() :));
+    if (sizeof(attackers)) {
+        object target = attackers[0];
+        retaliate(target);
+    }
+    call_out("npc_heartbeat", 2);
+}
+
+int query_hp()    { return npc_hp; }
+int query_max_hp(){ return npc_hp_max; }
+string query_name() { return query_short(); }

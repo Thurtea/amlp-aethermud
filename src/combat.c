@@ -65,17 +65,42 @@ int combat_d20(void) {
  * These provide a tiny API for commands to call for quick hits.
  * ------------------------------------------------------------------------- */
 
+// Minimal compatibility attack/damage functions for quick-hit API
+// Implements Palladium crit rules and PS bonus for melee
 int attack_roll(PlayerSession *attacker, PlayerSession *defender) {
     if (!attacker || !defender) return 0;
-    int roll = (rand() % 20) + attacker->character.STR;
-    return (roll > defender->character.AC) ? 1 : 0;
+    int d20 = combat_d20();
+    int hit = 0;
+    int crit = 0;
+    int strike_bonus = 0;
+    // Use STR for legacy, but prefer stats.ps if available
+    int attacker_str = attacker->character.stats.ps > 0 ? attacker->character.stats.ps : attacker->character.STR;
+    int defender_ac = defender->character.AC;
+    // Critical hit on natural 20
+    if (d20 == 20) {
+        crit = 1;
+        hit = 1;
+    } else if ((d20 + attacker_str) > defender_ac) {
+        hit = 1;
+    }
+    // Optionally: send crit message here if needed
+    return crit ? 2 : hit;
 }
 
 int damage_roll(PlayerSession *attacker, int weapon_type) {
-    (void)attacker; /* reserved for future attacker-stat modifiers */
-    /* weapon_type: 0 = unarmed (1d4), otherwise 1d6 */
+    // weapon_type: 0 = unarmed (1d4), otherwise 1d6
     int sides = (weapon_type == 0) ? 4 : 6;
-    return combat_roll_dice(1, sides);
+    int base = combat_roll_dice(1, sides);
+    // PS bonus: 1-15=0, 16-20=+1, 21-25=+2, 26-30=+4, 31+=+6
+    int ps = attacker && attacker->character.stats.ps > 0 ? attacker->character.stats.ps : attacker->character.STR;
+    int ps_bonus = 0;
+    if (ps >= 31) ps_bonus = 6;
+    else if (ps >= 26) ps_bonus = 4;
+    else if (ps >= 21) ps_bonus = 2;
+    else if (ps >= 16) ps_bonus = 1;
+    // No negative bonuses
+    int dmg = base + ps_bonus;
+    return (dmg > 0) ? dmg : 1;
 }
 
 void apply_damage(PlayerSession *target, int damage) {

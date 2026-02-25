@@ -4972,12 +4972,31 @@ more_room_source:
         }
 
         /* TODO:SECURITY — verify_password is a stub; replace with bcrypt/argon2 */
-        if (!verify_password(old_pw, session->password_hash)) {
+        /* Secure password verification and upgrade if needed */
+        int pw_valid = 0;
+        if (session->password_hash[0] == '\0') {
+            pw_valid = 0;
+        } else if (session->password_hash[0] != '$') {
+            /* Plaintext password in save: upgrade if matches */
+            if (strcmp(old_pw, session->password_hash) == 0) {
+                pw_valid = 1;
+                /* Upgrade to hash */
+                const char *new_hash = hash_password(new_pw);
+                strncpy(session->password_hash, new_hash, sizeof(session->password_hash) - 1);
+                session->password_hash[sizeof(session->password_hash) - 1] = '\0';
+                save_character(session);
+            } else {
+                pw_valid = 0;
+            }
+        } else {
+            pw_valid = verify_password(old_pw, session->password_hash);
+        }
+        if (!pw_valid) {
             return vm_value_create_string("Incorrect old password.\r\n");
         }
-
-        /* TODO:SECURITY — hash_password is a stub; replace with bcrypt/argon2 */
-        strncpy(session->password_hash, hash_password(new_pw), sizeof(session->password_hash) - 1);
+        /* Hash and store new password */
+        const char *new_hash = hash_password(new_pw);
+        strncpy(session->password_hash, new_hash, sizeof(session->password_hash) - 1);
         session->password_hash[sizeof(session->password_hash) - 1] = '\0';
         save_character(session);
         return vm_value_create_string("Password changed successfully.\r\n");
@@ -5395,8 +5414,26 @@ void process_login_state(PlayerSession *session, const char *input) {
             
             /* Load existing character (this populates password_hash) */
             if (load_character(session, session->username)) {
-                /* TODO:SECURITY — verify_password is a stub; replace with bcrypt/argon2 */
-                if (session->password_hash[0] && !verify_password(start, session->password_hash)) {
+                /* Secure password verification and auto-upgrade if needed */
+                int pw_valid = 0;
+                if (session->password_hash[0] == '\0') {
+                    pw_valid = 0;
+                } else if (session->password_hash[0] != '$') {
+                    /* Plaintext password in save: upgrade if matches */
+                    if (strcmp(start, session->password_hash) == 0) {
+                        pw_valid = 1;
+                        /* Upgrade to hash */
+                        const char *new_hash = hash_password(start);
+                        strncpy(session->password_hash, new_hash, sizeof(session->password_hash) - 1);
+                        session->password_hash[sizeof(session->password_hash) - 1] = '\0';
+                        save_character(session);
+                    } else {
+                        pw_valid = 0;
+                    }
+                } else {
+                    pw_valid = verify_password(start, session->password_hash);
+                }
+                if (!pw_valid) {
                     send_to_player(session, "\r\nIncorrect password.\r\n");
                     session->state = STATE_DISCONNECTING;
                     break;
@@ -5555,8 +5592,9 @@ void process_login_state(PlayerSession *session, const char *input) {
                 return;
             }
             
-            /* TODO:SECURITY — hash_password is a stub; replace with bcrypt/argon2 */
-            strncpy(session->password_hash, hash_password(session->password_buffer), sizeof(session->password_hash) - 1);
+            /* Secure password hashing */
+            const char *new_hash = hash_password(session->password_buffer);
+            strncpy(session->password_hash, new_hash, sizeof(session->password_hash) - 1);
             session->password_hash[sizeof(session->password_hash) - 1] = '\0';
             
             /* Create player object */

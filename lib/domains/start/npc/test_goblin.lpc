@@ -1,48 +1,45 @@
 // /lib/domains/start/npc/test_goblin.lpc - Simple test enemy for combat
 
-inherit "/std/living";
+inherit "/std/npc";
 
 void create() {
     ::create();
-    
     set_name("goblin");
-    set_real_name("Goblin Raider");
-    set_race("goblin");
-    
-    set_short("a goblin raider");
-    set_long(
-        "This is a nasty-looking goblin, about four feet tall with greenish skin\n"
-        "and sharp teeth. It wears tattered leather armor and carries a crude sword.\n"
-        "Its beady eyes glitter with malice.\n"
-    );
-    
-    // Combat stats
-    set_level(3);
-    set_max_hp(25);
-    set_hp(25);
-    set_max_sdc(30);
-    set_sdc(30);
-    
-    // Stats (weak enemy)
-    // The query_stat override in living.lpc will handle these
-    
-    enable_commands();
+    set_short("a goblin");
+    set_long("A squat green-skinned goblin, armed with a rusty blade.\n");
+    set_hp(15);
+    set_level(1);
+    set_aggro(0); // Not aggressive
+    // SDC and other stats can be set if needed
+}
+
+// Override NPC attack to use 1d6+1
+void npc_attack(object target) {
+    if (!target || !environment() || !present(target, environment())) return;
+    if (query_hp() <= 0) return;
+    int dmg = random(6) + 2; // 1d6+1
+    tell_room(environment(), query_short() + " attacks " + target->query_name() + "!\n");
+    tell_object(target, query_short() + " slashes at you!\n");
+    target->receive_attack(this_object(), dmg);
 }
 
 void die(object killer) {
-    tell_room(environment(this_object()), 
-              "The goblin raider falls to the ground, defeated!\n");
-    
-    // Drop some loot (placeholder for now)
-    tell_room(environment(this_object()), 
-              "The goblin's crude equipment scatters on the ground.\n");
-    
-    // Remove after a delay
-    call_out("remove_corpse", 3);
+    object env = environment(this_object());
+    tell_room(env, "The goblin falls to the ground, defeated!\n");
+    // 50% chance to drop a rusty blade
+    if (random(2) == 0) {
+        object blade = clone_object("/obj/weapons/rusty_blade");
+        if (blade) blade->move(env);
+        tell_room(env, "A rusty blade drops to the ground.\n");
+    }
+    // Leave corpse (could be a corpse object or just a message)
+    tell_room(env, "The goblin's corpse lies here.\n");
+    // Remove after 60 seconds
+    call_out("remove_corpse", 60);
 }
 
 void remove_corpse() {
-    tell_room(environment(this_object()), 
-              "The goblin's corpse dissolves into nothing.\n");
+    object env = environment(this_object());
+    if (env) tell_room(env, "The goblin's corpse dissolves into nothing.\n");
     destruct(this_object());
 }

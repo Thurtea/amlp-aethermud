@@ -897,12 +897,22 @@ int skill_check(int skill_percentage) {
     return (roll <= skill_percentage) ? 1 : 0;
 }
 
-/* Minimal stub for race skill bonus. The real implementation is provided by
- * the race loader/VM bridge; this provides a safe default so the code
- * compiles and race bonuses are neutral until wired.
- */
+// Returns the race-specific skill bonus for a given skill_id
+// Looks up the race in loaded_races[] (populated by race_loader_scan_races)
+#include "race_loader.h"
+extern LoadedRace loaded_races[];
+extern int num_loaded_races;
+
 int race_skill_bonus(char *race, int skill_id) {
-    (void)race; (void)skill_id;
+    if (!race || skill_id < 0) return 0;
+    for (int i = 0; i < num_loaded_races; i++) {
+        if (strcasecmp(loaded_races[i].name, race) == 0) {
+            // If race has a skill bonus mapping, use it
+            // For now, use the per-race flat bonus (race_skill_bonus field)
+            // If future: add per-skill mapping, look up by skill_id
+            return loaded_races[i].race_skill_bonus;
+        }
+    }
     return 0;
 }
 

@@ -11,11 +11,69 @@ void setup() {
 }
 
 void init() {
+    ::init();
     if (environment() == this_player()) {
         add_action("cmd_giveskill", "giveskill");
+        add_action("cmd_rp_wiz", "rp-wiz");
+        add_action("cmd_rp_wiz", "rpwiz");
+        add_action("cmd_rptool", "rptool");
     }
 }
 
+int cmd_rp_wiz(string args) {
+    if (!this_player() || call_other("/secure/wiz_perms", "query_wiz_role", this_player()) < 1) {
+        write("You lack permission to use RP-Wiz tool.\n");
+        return 1;
+    }
+    if (!args || args == "") {
+        write("Usage: rp-wiz <subcommand> <player> <target> <value>\n");
+        write("Subcommands: stat, skill, spell, psionic\n");
+        return 1;
+    }
+    string subcmd, pname, target, value;
+    int percent;
+    if (sscanf(args, "%s %s %s %s", subcmd, pname, target, value) == 4) {
+        subcmd = lower_case(subcmd);
+        pname = lower_case(pname);
+        object player = find_player(pname);
+        if (!player) {
+            write("Player '" + pname + "' is not online.\n");
+            return 1;
+        }
+        if (subcmd == "stat") {
+            int statval = to_int(value);
+            if (player->set_stat) player->set_stat(target, statval);
+            write("Set stat '" + target + "' for " + pname + " to " + statval + ".\n");
+            return 1;
+        } else if (subcmd == "skill") {
+            percent = to_int(value);
+            if (player->add_skill) player->add_skill(target, percent);
+            write("Added skill '" + target + "' to " + pname + " at " + percent + "%.\n");
+            return 1;
+        } else if (subcmd == "spell") {
+            percent = to_int(value);
+            if (player->add_spell) player->add_spell(target, percent);
+            write("Added spell '" + target + "' to " + pname + " at " + percent + "%.\n");
+            return 1;
+        } else if (subcmd == "psionic") {
+            percent = to_int(value);
+            if (player->add_psionic) player->add_psionic(target, percent);
+            write("Added psionic power '" + target + "' to " + pname + " at " + percent + "%.\n");
+            return 1;
+        } else {
+            write("Unknown subcommand: '" + subcmd + "'.\n");
+            return 1;
+        }
+    } else {
+        write("Usage: rp-wiz <stat|skill|spell|psionic> <player> <target> <value>\n");
+        return 1;
+    }
+}
+
+int cmd_rptool(string args) {
+    write("RP tool command stub.\n");
+    return 1;
+}
 int cmd_giveskill(string args) {
     if (!this_player() || call_other("/secure/wiz_perms", "query_wiz_role", this_player()) < 1) {
         write("You lack permission to inscribe skills.\n");

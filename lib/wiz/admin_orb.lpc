@@ -18,6 +18,7 @@ void create() {
     }
 
     void init() {
+        ::init();
         if (environment() == this_player()) {
             add_action("cmd_orb", "orb");
         }

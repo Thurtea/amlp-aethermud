@@ -105,6 +105,7 @@ void init_commands() {
     commands["users"] = "cmds/admin/users";
     commands["tattoogun"] = "cmds/admin/tattoogun";
     commands["reequip"]  = "cmds/admin/reequip";
+    commands["buildtest"] = "cmds/admin/buildtest";
     // Wizard commands (check privilege internally)
     commands["setocc"] = "cmds/wizard/setocc";
     commands["wiztool"] = "cmds/admin/wiztool";

@@ -20,3 +20,6 @@ void corpse_tick(void);
 int corpse_reclaim_for_player(PlayerSession *sess);
 
 #endif /* DEATH_H */
+// Death room path helpers
+void set_death_room(PlayerSession *sess, const char *path);
+const char *get_death_room(PlayerSession *sess);

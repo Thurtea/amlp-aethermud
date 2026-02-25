@@ -754,7 +754,7 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
         snprintf(msg_room, sizeof(msg_room), "%s misses %s.\n", attacker->name, defender->name);
         combat_send_to_participant(attacker, msg_att);
         combat_send_to_participant(defender, msg_def);
-        combat_send_to_room(attacker->room, msg_room);
+        room_broadcast(attacker->session && attacker->session->current_room ? attacker->session->current_room : NULL, msg_room, NULL);
         return result;
     }
 
@@ -803,7 +803,7 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
     if (result.is_kill && defender->session && !defender->session->is_dead) {
         defender->session->is_dead = 1;
         handle_player_death(defender->session, attacker->session, NULL);
-        break; // Stop combat loop after death
+        return result; // Stop combat loop after death
     }
 
     /* Combat hit messages */
@@ -815,7 +815,7 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
         snprintf(msg_room, sizeof(msg_room), "%s hits %s!\n", attacker->name, defender->name);
         combat_send_to_participant(attacker, msg_att);
         combat_send_to_participant(defender, msg_def);
-        combat_send_to_room(attacker->room, msg_room);
+        room_broadcast(attacker->session && attacker->session->current_room ? attacker->session->current_room : NULL, msg_room, NULL);
     }
 
     return result;
@@ -885,7 +885,7 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
     if (result.is_kill && defender->session && !defender->session->is_dead) {
         defender->session->is_dead = 1;
         handle_player_death(defender->session, attacker->session, NULL);
-        break; // Stop combat loop after death
+        return result; // Stop combat loop after death
     }
 
     /* Descriptive ranged messages */
@@ -1104,7 +1104,7 @@ bool combat_check_death(CombatParticipant *p) {
         snprintf(msg, sizeof(msg),
                  "Splynncryth collapses and dies.\n",
                  p->name);
-        combat_send_to_room(p->room, msg);
+        room_broadcast(p->session && p->session->current_room ? p->session->current_room : NULL, msg, NULL);
 
         /* Find combat via session or participant pointer */
         CombatRound *combat = NULL;

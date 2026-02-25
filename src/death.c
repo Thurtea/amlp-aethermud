@@ -257,7 +257,7 @@ void handle_player_death(PlayerSession *sess, PlayerSession *killer,
     if (sess->current_room) {
         char msg[128];
         snprintf(msg, sizeof(msg), "%s collapses and dies.\n", sess->username);
-        send_to_room(sess->current_room, msg);
+        room_broadcast(sess->current_room, msg, NULL);
     }
 
     /* Teleport to recovery room */
@@ -268,8 +268,8 @@ void handle_player_death(PlayerSession *sess, PlayerSession *killer,
     }
 
     /* Store death room path */
-    if (sess->current_room && sess->current_room->path) {
-        set_death_room(sess, sess->current_room->path);
+    if (sess->current_room && sess->current_room->lpc_path) {
+        set_death_room(sess, sess->current_room->lpc_path);
     }
 
     /* Remove from current room */

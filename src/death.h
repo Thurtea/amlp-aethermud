@@ -1,3 +1,5 @@
+void set_death_room(PlayerSession *sess, const char *path);
+const char *get_death_room(PlayerSession *sess);
 /* death.h - Death system: corpse creation, decay, and death handling */
 
 #ifndef DEATH_H

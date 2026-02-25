@@ -1101,9 +1101,7 @@ bool combat_check_death(CombatParticipant *p) {
 
     if (dead) {
         char msg[256];
-        snprintf(msg, sizeof(msg),
-                 "Splynncryth collapses and dies.\n",
-                 p->name);
+        snprintf(msg, sizeof(msg), "%s collapses and dies.\n", p->name ? p->name : "Someone");
         room_broadcast(p->session && p->session->current_room ? p->session->current_room : NULL, msg, NULL);
 
         /* Find combat via session or participant pointer */

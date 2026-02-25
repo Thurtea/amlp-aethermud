@@ -111,4 +111,6 @@ typedef struct PlayerSession {
     int is_dead;                   /* 1 if player is dead, prevents duplicate death */
 } PlayerSession;
 
+/* Player communication */
+void send_to_player(PlayerSession *session, const char *format, ...);
 #endif /* SESSION_INTERNAL_H */

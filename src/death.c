@@ -15,7 +15,25 @@ const char *get_death_room(PlayerSession *sess) {
 #include "death.h"
 #include "chargen.h"
 #include "session_internal.h"
+// ...existing code replaced...
+#include "death.h"
+#include "chargen.h"
+#include "session_internal.h"
 #include "room.h"
+#include "item.h"
+#include "debug.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <time.h>
+
+/* Corpse/blood pool creation: handled by LPC lib/std/corpse.lpc */
+
+/* ---- Corpse decay registry ---- */
+#define MAX_ACTIVE_CORPSES 32
+#define CORPSE_DECAY_SECS  300
+
 #include "item.h"
 #include "debug.h"
 #include <stdio.h>

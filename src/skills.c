@@ -2,6 +2,17 @@
  * Perform a skill check for a player session using Palladium rules.
  * Returns: 2 = crit success, 1 = success, 0 = failure, -1 = crit fail
  */
+// System includes
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Project includes
+#include "session_internal.h"
+#include "skills.h"
+#include "chargen.h"
+#include "debug.h"
+
 int perform_skill_check(PlayerSession *sess, const char *skill_name, int difficulty_modifier) {
     if (!sess || !skill_name) return 0;
     int roll = (rand() % 100) + 1;
@@ -54,14 +65,7 @@ int perform_skill_check(PlayerSession *sess, const char *skill_name, int difficu
     return result;
 }
 /* skills.c - Rifts RPG Skill System Implementation */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "skills.h"
-#include "session_internal.h"
-#include "debug.h"
-#include "ui_frames.h"
+// ...existing code...
 
 /* External declarations */
 extern void send_to_player(PlayerSession *session, const char *format, ...);

@@ -32,7 +32,7 @@ void create() {
         } else {
             write("[MASTER TEST] Failed to load test clone.\n");
         }
-    };
+    }
     
     write("Master object initialized successfully.\n");
 }
@@ -43,7 +43,7 @@ private void load_simul_efun() {
     
     catch {
         simul = load_object("/secure/simul_efun");
-    };
+    }
     
     if (simul) {
         write("Simul_efun loaded.\n");
@@ -70,7 +70,7 @@ private void init_daemons() {
         
         catch {
             d = load_object(daemon);
-        };
+        }
         
         if (d) {
             loaded_daemons[daemon] = d;
@@ -104,7 +104,7 @@ object connect() {
     
     catch {
         login = clone_object("/clone/login");
-    };
+    }
     
     if (!login) {
         write("ERROR: Failed to clone login object!\n");

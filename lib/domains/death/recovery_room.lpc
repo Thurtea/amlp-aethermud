@@ -16,9 +16,7 @@ void create() {
             "\"Your gear is still where you fell. Head back when you're ready, or type RECLAIM to call your belongings to you.\""
     );
     
-    set_exits(([
-        "chute": "/domains/start/village_center"
-    ]));
+    // Removed set_exits for chute; only add_exit remains
     
     set_property("indoors", 1);
     set_property("light", 1);

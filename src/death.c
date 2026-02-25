@@ -1,3 +1,4 @@
+/* Corpse/blood pool creation: handled by LPC lib/std/corpse.lpc */
 void set_death_room(PlayerSession *sess, const char *path) {
     if (!sess) return;
     if (sess->death_room_path) free(sess->death_room_path);

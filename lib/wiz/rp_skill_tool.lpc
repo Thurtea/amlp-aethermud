@@ -72,15 +72,52 @@ int cmd_giveskill(string args) {
 }
 
 int rptool_ls(object player, string *args) {
-    tell_object(player, "LS command not yet implemented.\n");
+    string base = "/domains/rp/";
+    string path = base;
+    if (args && sizeof(args) > 0 && args[0] && args[0] != "") {
+        path = base + args[0];
+        // Prevent path traversal
+        if (strsrch(path, "../") != -1 || strsrch(path, "/domains/rp/") != 0) {
+            tell_object(player, "Access denied.\n");
+            return 1;
+        }
+    }
+    string *files = get_dir(path);
+    tell_object(player, path + "\n----------------------\n");
+    if (!files || sizeof(files) == 0) {
+        tell_object(player, "(empty)\n");
+    } else {
+        foreach(string f : files) {
+            tell_object(player, f + "\n");
+        }
+    }
     return 1;
 }
 int rptool_cd(object player, string *args) {
-    tell_object(player, "CD command not yet implemented.\n");
+    string base = "/domains/rp/";
+    string path = base;
+    if (args && sizeof(args) > 0 && args[0] && args[0] != "") {
+        path = base + args[0];
+        // Prevent path traversal
+        if (strsrch(path, "../") != -1 || strsrch(path, "/domains/rp/") != 0) {
+            tell_object(player, "Access denied.\n");
+            return 1;
+        }
+        // Check directory exists
+        string *files = get_dir(path);
+        if (!files) {
+            tell_object(player, "Directory not found.\n");
+            return 1;
+        }
+    }
+    player->set_property("rp_cwd", path);
+    tell_object(player, "Current directory: " + path + "\n");
     return 1;
 }
 int rptool_pwd(object player) {
-    tell_object(player, "PWD command not yet implemented.\n");
+    string path = player->query_property("rp_cwd");
+    if (!path || path == "") path = "/domains/rp/";
+    tell_object(player, path + "\n");
     return 1;
 }
 int rptool_cat(object player, string *args) {

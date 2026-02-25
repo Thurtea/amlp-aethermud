@@ -1,7 +1,7 @@
 // lib/wiz/admin_orb.lpc
 // Admin Orb - Wizard Tool (role: admin_wizard only)
 
-#include "/secure/wiz_perms.lpc"
+// Removed unused include for wiz_perms; orb uses call_other for role checks
 
 inherit "/std/object";
 

@@ -94,3 +94,8 @@ unsigned char *ws_encode_text(const char *text, size_t *out_len) {
     *out_len = n;
     return buf;
 }
+
+/* Weak stub for corpse_reclaim_for_player used by driver; tests don't
+ * perform real reclaim behavior, so return 0 by default. */
+int corpse_reclaim_for_player(PlayerSession *sess) __attribute__((weak));
+int corpse_reclaim_for_player(PlayerSession *sess) { (void)sess; return 0; }

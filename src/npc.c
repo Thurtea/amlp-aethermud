@@ -415,6 +415,22 @@ void npc_handle_death(NPC *npc, PlayerSession *killer) {
         if (lpc_obj && global_vm) {
             VMValue xp_arg = vm_value_create_int(xp);
             obj_call_method(global_vm, lpc_obj, "add_experience", &xp_arg, 1);
+
+            /* Read back authoritative XP and level from the LPC player object
+             * so the C-side Character stays in sync with player.lpc state. */
+            VMValue qe_result = {0};
+            qe_result = obj_call_method(global_vm, lpc_obj, "query_experience", NULL, 0);
+            if (qe_result.type == VALUE_INT) {
+                killer->character.xp = (int)qe_result.data.int_value;
+            }
+            vm_value_release(&qe_result);
+
+            VMValue ql_result = {0};
+            ql_result = obj_call_method(global_vm, lpc_obj, "query_level", NULL, 0);
+            if (ql_result.type == VALUE_INT) {
+                killer->character.level = (int)ql_result.data.int_value;
+            }
+            vm_value_release(&ql_result);
         } else {
             /* Fallback: C-side XP + level-up */
             killer->character.xp += xp;

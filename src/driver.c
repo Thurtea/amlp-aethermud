@@ -1794,6 +1794,25 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
 
+    if (strcmp(cmd, "reclaim") == 0) {
+        if (!session->current_room || !session->current_room->lpc_path ||
+            !strstr(session->current_room->lpc_path, "recovery_room")) {
+            send_to_player(session,
+                "You can only reclaim your belongings from the Recovery Chamber.\n");
+            result.type = VALUE_NULL;
+            return result;
+        }
+        if (corpse_reclaim_for_player(session)) {
+            send_to_player(session,
+                "You concentrate... your belongings teleport back to you from where you fell.\n");
+        } else {
+            send_to_player(session,
+                "Your belongings have crumbled to dust. Nothing remains.\n");
+        }
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "logout") == 0) {
         /* Auto-save before quitting */
         send_to_player(session, "\r\nSaving your character...\r\n");

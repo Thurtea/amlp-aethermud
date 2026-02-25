@@ -15,4 +15,8 @@ void handle_player_death(PlayerSession *sess, PlayerSession *killer,
 /* Called every 2-second heartbeat: sweep expired corpses out of their rooms. */
 void corpse_tick(void);
 
+/* Reclaim player's corpse items into their inventory.
+ * Returns 1 on success (items transferred), 0 if corpse already decayed. */
+int corpse_reclaim_for_player(PlayerSession *sess);
+
 #endif /* DEATH_H */

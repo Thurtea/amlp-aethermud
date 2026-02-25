@@ -155,6 +155,51 @@ void corpse_tick(void) {
     }
 }
 
+/* Attempt to reclaim a player's corpse into their inventory.
+ * Returns 1 if corpse found and items transferred, 0 if not found
+ * (already decayed or never registered). */
+int corpse_reclaim_for_player(PlayerSession *sess) {
+    if (!sess) return 0;
+    char expected[96];
+    snprintf(expected, sizeof(expected), "the corpse of %s", sess->username);
+
+    for (int i = 0; i < MAX_ACTIVE_CORPSES; i++) {
+        CorpseDecayEntry *e = &corpse_registry[i];
+        if (!e->corpse) continue;
+        if (strcmp(e->corpse->name, expected) != 0) continue;
+
+        /* Found the corpse — move contents to player inventory */
+        Item *item = e->corpse->contents;
+        int count = 0;
+        while (item) {
+            Item *next = item->next;
+            item->next = NULL;
+            /* Add to player inventory (append to head for simplicity) */
+            item->next = sess->character.inventory.items;
+            sess->character.inventory.items = item;
+            sess->character.inventory.item_count++;
+            count++;
+            item = next;
+        }
+        e->corpse->contents = NULL;
+
+        /* Remove corpse from room and free it */
+        if (e->room) room_remove_item(e->room, e->corpse);
+        free(e->corpse->name);
+        free(e->corpse->description);
+        free(e->corpse);
+
+        /* Clear registry slot */
+        e->corpse  = NULL;
+        e->room    = NULL;
+        e->expires = 0;
+
+        INFO_LOG("Corpse reclaimed for %s (%d items)", sess->username, count);
+        return 1;
+    }
+    return 0;  /* Not found — already decayed */
+}
+
 void handle_player_death(PlayerSession *sess, PlayerSession *killer,
                          const char *npc_killer_name) {
     if (!sess) return;

@@ -1,0 +1,201 @@
+// /lib/cmds/admin/buildtest.lpc
+// Admin command: buildtest <template> <playername>
+// Instantly creates a fully-configured level 15 test character
+// Templates: dragon, atlantean, vampire, cyberknight
+
+inherit "/std/command";
+
+int main(string arg) {
+    object tp = previous_object();
+    string template, pname;
+    object target;
+
+    if (!tp || tp->query_privilege_level() < 100) {
+        tell_object(tp, "You must be an admin (level 100) to use this command.\n");
+        return 1;
+    }
+    if (!arg || sscanf(arg, "%s %s", template, pname) != 2) {
+        tell_object(tp, "Usage: buildtest <dragon|atlantean|vampire|cyberknight> <playername>\n");
+        return 1;
+    }
+    template = lower_case(template);
+    pname = capitalize(pname);
+    target = find_player(lower_case(pname));
+    if (!target) {
+        tell_object(tp, "Player "+pname+" is not online.\n");
+        return 1;
+    }
+    // Set level, race, occ, stats, vitals, lives, skills, spells, psionics, equipment
+    target->set_level(15);
+    target->set_hp(0); // Will be set below
+    target->set_max_hp(0);
+    target->set_sdc(0);
+    target->set_max_sdc(0);
+    target->set_mdc(0);
+    target->set_max_mdc(0);
+    target->set_ppe(0);
+    target->set_max_ppe(0);
+    target->set_isp(0);
+    target->set_max_isp(0);
+    target->set_lives_remaining(5);
+    target->set_permanently_dead(0);
+    // Attributes and wizard level must be set with other commands:
+    // Use 'rp-wiz stat <player> <stat> <value>' for IQ, ME, MA, PS, PP, PE, PB, SPD
+    // Use 'promote <player> 100' for wizard level
+    if (template == "dragon") {
+        target->set_race("Great Horned Dragon Hatchling");
+        target->set_occ("Dragon");
+        target->set_hp(180);
+        target->set_max_hp(180);
+        target->set_sdc(200);
+        target->set_max_sdc(200);
+        target->set_mdc(150);
+        target->set_max_mdc(150);
+        target->set_ppe(250);
+        target->set_max_ppe(250);
+        target->set_isp(180);
+        target->set_max_isp(180);
+        // Spells (80%)
+        target->set_spell("Armor of Ithan", 80);
+        target->set_spell("Fireball", 80);
+        target->set_spell("Lightning Bolt", 80);
+        target->set_spell("Carpet of Adhesion", 80);
+        target->set_spell("Telekinesis", 80);
+        target->set_spell("Fly", 80);
+        target->set_spell("Invisibility: Simple", 80);
+        target->set_spell("Globe of Daylight", 80);
+        // Psionics (75%)
+        target->set_psionic("Telepathy", 75);
+        target->set_psionic("Mind Block", 75);
+        target->set_psionic("See the Invisible", 75);
+        target->set_psionic("Levitation", 75);
+        target->set_psionic("Telekinesis", 75);
+        // Skills
+        target->set_skill("All Combat", 85);
+        target->set_skill("All Wilderness", 70);
+        target->set_skill("Lore: Dragons & Demons", 90);
+        tell_object(tp, "Test character 'dragon' built for "+pname+".\n");
+    } else if (template == "atlantean") {
+        target->set_race("True Atlantean");
+        target->set_occ("Sunaj Assassin");
+        target->set_hp(120);
+        target->set_max_hp(120);
+        target->set_sdc(180);
+        target->set_max_sdc(180);
+        target->set_mdc(90);
+        target->set_max_mdc(90);
+        target->set_ppe(180);
+        target->set_max_ppe(180);
+        target->set_isp(120);
+        target->set_max_isp(120);
+        // Spells (90%)
+        target->set_spell("Armor of Ithan", 90);
+        target->set_spell("Dimensional Portal", 90);
+        target->set_spell("Fireball", 90);
+        target->set_spell("Lightning Bolt", 90);
+        target->set_spell("Invisibility: Simple", 90);
+        target->set_spell("Teleport: Lesser", 90);
+        target->set_spell("Carpet of Adhesion", 90);
+        // Psionics (85%)
+        target->set_psionic("Mind Block", 85);
+        target->set_psionic("Telepathy", 85);
+        target->set_psionic("Object Read", 85);
+        target->set_psionic("Telekinesis", 85);
+        target->set_psionic("See the Invisible", 85);
+        // Skills
+        target->set_skill("Prowl", 90);
+        target->set_skill("Detect Ambush", 85);
+        target->set_skill("Disguise", 80);
+        target->set_skill("Intelligence", 75);
+        target->set_skill("Acrobatics", 90);
+        target->set_skill("Climbing", 85);
+        target->set_skill("Swimming", 80);
+        target->set_skill("Land Navigation", 70);
+        target->set_skill("W.P. Sword", 95);
+        target->set_skill("W.P. Energy Rifle", 95);
+        target->set_skill("W.P. Energy Pistol", 90);
+        target->set_skill("Hand to Hand: Martial Arts", 98);
+        // Equipment
+        target->add_inventory("Wilk's 320 Laser Pistol");
+        target->add_inventory("Vibro-Blade");
+        target->add_inventory("Light MDC Armor");
+        tell_object(tp, "Test character 'atlantean' built for "+pname+".\n");
+    } else if (template == "vampire") {
+        target->set_race("Secondary Vampire");
+        target->set_occ("Vampire");
+        target->set_hp(150);
+        target->set_max_hp(150);
+        target->set_sdc(250);
+        target->set_max_sdc(250);
+        target->set_mdc(0);
+        target->set_max_mdc(0);
+        target->set_ppe(100);
+        target->set_max_ppe(100);
+        target->set_isp(80);
+        target->set_max_isp(80);
+        // Psionics (85%)
+        target->set_psionic("Telepathy", 85);
+        target->set_psionic("Mind Block", 85);
+        target->set_psionic("Bio-Manipulation", 85);
+        // Skills
+        target->set_skill("Prowl", 98);
+        target->set_skill("Detect Ambush", 90);
+        target->set_skill("Streetwise", 85);
+        target->set_skill("Climbing", 90);
+        target->set_skill("Swimming", 70);
+        target->set_skill("Track Animals", 85);
+        target->set_skill("Hand to Hand: Martial Arts", 95);
+        // Special note
+        target->set_note("Vampire: Regeneration, shape-shift, hypnotic gaze (passive abilities)");
+        tell_object(tp, "Test character 'vampire' built for "+pname+".\n");
+    } else if (template == "cyberknight") {
+        target->set_race("Human");
+        target->set_occ("Cyber-Knight");
+        target->set_hp(110);
+        target->set_max_hp(110);
+        target->set_sdc(150);
+        target->set_max_sdc(150);
+        target->set_mdc(120);
+        target->set_max_mdc(120);
+        target->set_ppe(50);
+        target->set_max_ppe(50);
+        target->set_isp(200);
+        target->set_max_isp(200);
+        // Psionics (90%)
+        target->set_psionic("Psi-Sword", 90);
+        target->set_psionic("Psi-Shield", 90);
+        target->set_psionic("Mind Block", 90);
+        target->set_psionic("Telepathy", 90);
+        target->set_psionic("Telekinesis", 90);
+        target->set_psionic("Levitation", 90);
+        target->set_psionic("Bio-Regeneration", 90);
+        target->set_psionic("Resist Fatigue", 90);
+        // Skills
+        target->set_skill("Hand to Hand: Martial Arts", 98);
+        target->set_skill("Paired Weapons", 95);
+        target->set_skill("W.P. Sword", 98);
+        target->set_skill("W.P. Energy Rifle", 95);
+        target->set_skill("W.P. Energy Pistol", 90);
+        target->set_skill("Acrobatics", 90);
+        target->set_skill("Climbing", 85);
+        target->set_skill("Running", 80);
+        target->set_skill("Pilot Hovercraft", 80);
+        target->set_skill("Pilot Robots & Power Armor", 85);
+        target->set_skill("Computer Operations", 75);
+        target->set_skill("Sensory Equipment", 70);
+        target->set_skill("Land Navigation", 85);
+        target->set_skill("Wilderness Survival", 80);
+        // Equipment
+        target->add_inventory("NG-57 Ion Blaster");
+        target->add_inventory("Cyber-Knight Armor");
+        target->add_inventory("Survival knife");
+        tell_object(tp, "Test character 'cyberknight' built for "+pname+".\n");
+    } else {
+        tell_object(tp, "Unknown template: "+template+".\n");
+        return 1;
+    }
+    // Save character
+    target->save_character();
+    tell_object(tp, "Character saved.\n");
+    return 1;
+}

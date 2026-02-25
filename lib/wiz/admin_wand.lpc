@@ -1,0 +1,81 @@
+// lib/wiz/admin_wand.lpc
+// Admin Wand - Wizard Tool (role: admin_wizard only)
+
+#include "/secure/wiz_perms.lpc"
+
+inherit "/std/object";
+
+void create() {
+    set_name("admin wand");
+    set_short("a gleaming admin wand");
+    set_long("A powerful wand for admin wizards. Type 'wand' for commands.");
+}
+
+int activate(string cmd, object player, string args) {
+    if (query_wiz_role(player) < 4) {
+        tell_object(player, "You are not authorized to use the admin wand.\n");
+        return 1;
+    }
+    string *tokens = explode(args || "", " ");
+    string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
+    switch(subcmd) {
+        case "":
+            return show_menu(player);
+        case "set":
+            return wand_set(player, tokens[1..]);
+        case "slay":
+            return wand_slay(player, tokens[1..]);
+        case "promote":
+            return wand_promote(player, tokens[1..]);
+        case "setrole":
+            return wand_setrole(player, tokens[1..]);
+        case "heal":
+            return wand_heal(player, tokens[1..]);
+        case "goto":
+            return wand_goto(player, tokens[1..]);
+        default:
+            tell_object(player, "Unknown wand command.\n");
+            return 1;
+    }
+}
+
+int show_menu(object player) {
+    string msg =
+        "========================================\n" +
+        "         ADMIN WAND MENU\n" +
+        "========================================\n" +
+        " wand set <player> <field> <value>\n" +
+        " wand slay <player>\n" +
+        " wand promote <player>\n" +
+        " wand setrole <player> <role>\n" +
+        " wand heal <player>\n" +
+        " wand goto <player>\n" +
+        "========================================\n";
+    tell_object(player, msg);
+    return 1;
+}
+
+int wand_set(object player, string *args) {
+    tell_object(player, "Set command not yet implemented.\n");
+    return 1;
+}
+int wand_slay(object player, string *args) {
+    tell_object(player, "Slay command not yet implemented.\n");
+    return 1;
+}
+int wand_promote(object player, string *args) {
+    tell_object(player, "Promote command not yet implemented.\n");
+    return 1;
+}
+int wand_setrole(object player, string *args) {
+    tell_object(player, "Setrole command not yet implemented.\n");
+    return 1;
+}
+int wand_heal(object player, string *args) {
+    tell_object(player, "Heal command not yet implemented.\n");
+    return 1;
+}
+int wand_goto(object player, string *args) {
+    tell_object(player, "Goto command not yet implemented.\n");
+    return 1;
+}

@@ -22,13 +22,10 @@ int main(string arg) {
     // Save character before quitting
     tell_object(user, "Saving character...\n");
     // Instrumentation: log to server.log for crash diagnostics
-    write_file("/log/server.log", sprintf("[DEBUG quit] %s calling save_me()\n", (function_exists("query_name", user) ? (string)user->query_name() : "<unknown>")));
     if (catch(user->save_me())) {
         tell_object(user, "Warning: Save failed.\n");
-        write_file("/log/server.log", sprintf("[DEBUG quit] %s save_me() raised an error\n", (function_exists("query_name", user) ? (string)user->query_name() : "<unknown>")));
     } else {
         tell_object(user, "Character saved successfully.\n");
-        write_file("/log/server.log", sprintf("[DEBUG quit] %s save_me() returned normally\n", (function_exists("query_name", user) ? (string)user->query_name() : "<unknown>")));
     }
     
     // Defer the actual removal to next tick to avoid reentrancy crash

@@ -654,19 +654,17 @@ string cmd_stats() {
     return result;
 }
 
-// Wizard commands
-string cmd_goto(string location) {
-    if (!location || location == "") {
-        return "Goto where?\n";
+
+// Home command: teleport to correct workroom by role
+string cmd_home() {
+    string home_path = "/secure/wiz_perms.lpc"->query_wiz_home(this_object());
+    object dest = find_object(home_path);
+    if (!dest) dest = load_object(home_path);
+    if (!dest) {
+        return "Workroom not found: " + home_path + "\n";
     }
-    
-    object target = find_object(location);
-    if (!target) {
-        return "Location not found: " + location + "\n";
-    }
-    
-    move_player(target);
-    return "You teleport to " + location + ".\n" + cmd_look("");
+    move_player(dest);
+    return "You teleport to your workroom.\n";
 }
 
 string cmd_clone(string obj_path) {

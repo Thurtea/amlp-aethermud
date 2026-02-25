@@ -1,0 +1,119 @@
+// lib/wiz/admin_orb.lpc
+// Admin Orb - Wizard Tool (role: admin_wizard only)
+
+#include "/secure/wiz_perms.lpc"
+
+inherit "/std/object";
+
+void create() {
+    set_name("admin orb");
+    set_short("a shimmering admin orb");
+    set_long("A powerful artifact for admin wizards. Type 'orb' for menu.");
+}
+
+int activate(string cmd, object player, string args) {
+    if (query_wiz_role(player) < 4) {
+        tell_object(player, "You are not authorized to use the admin orb.\n");
+        return 1;
+    }
+    string *tokens = explode(args || "", " ");
+    string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
+    switch(subcmd) {
+        case "":
+            return show_menu(player);
+        case "who":
+            return orb_who(player);
+        case "goto":
+            return orb_goto(player, tokens[1..]);
+        case "pull":
+            return orb_pull(player, tokens[1..]);
+        case "stats":
+            return orb_stats(player);
+        case "shutdown":
+            return orb_shutdown(player);
+        case "reboot":
+            return orb_reboot(player);
+        default:
+            tell_object(player, "Unknown orb command.\n");
+            return 1;
+    }
+}
+
+int show_menu(object player) {
+    string msg =
+        "========================================\n" +
+        "         ADMIN ORB MENU\n" +
+        "========================================\n" +
+        " orb            Show this menu\n" +
+        " orb who        List all online players\n" +
+        " orb goto <x>   Teleport to player/room\n" +
+        " orb pull <x>   Summon player to you\n" +
+        " orb stats      Server stats\n" +
+        " orb shutdown   Shutdown server\n" +
+        " orb reboot     Soft reboot\n" +
+        "========================================\n";
+    tell_object(player, msg);
+    return 1;
+}
+
+int orb_who(object player) {
+    object *users = users();
+    string msg = "Online players:\n";
+    foreach(object u : users) {
+        msg += sprintf("%-15s %-10s %s\n", u->query_name(), u->query_privilege_title(), environment(u) ? file_name(environment(u)) : "nowhere");
+    }
+    tell_object(player, msg);
+    return 1;
+}
+
+int orb_goto(object player, string *args) {
+    if (!args || sizeof(args) == 0) {
+        tell_object(player, "Usage: orb goto <player|room>\n");
+        return 1;
+    }
+    string target = args[0];
+    object dest = find_player(target);
+    if (!dest) dest = find_object(target);
+    if (!dest) {
+        tell_object(player, "Target not found.\n");
+        return 1;
+    }
+    player->move_player(dest);
+    tell_object(player, "You teleport to " + target + ".\n");
+    return 1;
+}
+
+int orb_pull(object player, string *args) {
+    if (!args || sizeof(args) == 0) {
+        tell_object(player, "Usage: orb pull <player>\n");
+        return 1;
+    }
+    object target = find_player(args[0]);
+    if (!target) {
+        tell_object(player, "Player not found.\n");
+        return 1;
+    }
+    target->move_player(environment(player));
+    tell_object(player, "You summon " + args[0] + " to your location.\n");
+    tell_object(target, "You have been summoned by an admin.\n");
+    return 1;
+}
+
+int orb_stats(object player) {
+    string msg = "Server stats: (stub)\n";
+    // TODO: Implement real stats
+    tell_object(player, msg);
+    return 1;
+}
+
+int orb_shutdown(object player) {
+    tell_object(player, "Shutdown initiated.\n");
+    // TODO: Implement shutdown logic
+    return 1;
+}
+
+int orb_reboot(object player) {
+    tell_object(player, "Reboot initiated.\n");
+    // TODO: Implement reboot logic
+    return 1;
+}

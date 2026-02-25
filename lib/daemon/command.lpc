@@ -254,14 +254,16 @@ private int execute_global_command(object player, string path, string verb, stri
         cmd->set_caller_privilege(priv_level);
     }
 
-    // Execute the command
+    // Standardize: if tool object, call activate(cmd, player, args)
+    if (function_exists("activate", cmd)) {
+        result = cmd->activate(verb, player, args);
+        return result;
+    }
+    // Fallback: legacy main()
     if (function_exists("main", cmd)) {
-        object debug_player = this_player();
-        write("DEBUG daemon: calling " + verb + " for player=" + (debug_player ? file_name(debug_player) : "NULL") + "\n");
         result = cmd->main(args);
         return result;
     }
-    
     tell_object(player, "Error: Command '" + verb + "' is not properly implemented.");
     return 1;
 }

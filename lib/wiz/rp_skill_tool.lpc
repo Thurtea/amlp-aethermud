@@ -1,0 +1,116 @@
+// lib/wiz/rp_skill_tool.lpc
+// RP-Wizard Skill Tool (role: rp_wizard or higher)
+
+#include "/secure/wiz_perms.lpc"
+
+inherit "/std/object";
+
+void create() {
+    set_name("rp skill tool");
+    set_short("an RP-wizard's skill tool");
+    set_long("A toolkit for RP wizards. Type 'rptool' for menu.");
+}
+
+int activate(string cmd, object player, string args) {
+    if (query_wiz_role(player) < 1) {
+        tell_object(player, "You are not authorized to use the RP skill tool.\n");
+        return 1;
+    }
+    string *tokens = explode(args || "", " ");
+    string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
+    switch(subcmd) {
+        case "":
+            return show_menu(player);
+        case "ls":
+            return rptool_ls(player, tokens[1..]);
+        case "cd":
+            return rptool_cd(player, tokens[1..]);
+        case "pwd":
+            return rptool_pwd(player);
+        case "cat":
+            return rptool_cat(player, tokens[1..]);
+        case "ed":
+            return rptool_ed(player, tokens[1..]);
+        case "new":
+            return rptool_new(player, tokens[1..]);
+        case "del":
+            return rptool_del(player, tokens[1..]);
+        case "mkdir":
+            return rptool_mkdir(player, tokens[1..]);
+        case "giveskill":
+            return rptool_giveskill(player, tokens[1..]);
+        case "skills":
+            return rptool_skills(player, tokens[1..]);
+        case "pending":
+            return rptool_pending(player);
+        default:
+            tell_object(player, "Unknown rptool command.\n");
+            return 1;
+    }
+}
+
+int show_menu(object player) {
+    string msg =
+        "========================================\n" +
+        "         RP SKILL TOOL MENU\n" +
+        "========================================\n" +
+        " rptool ls [path]        List contents\n" +
+        " rptool cd <path>        Change directory\n" +
+        " rptool pwd              Show directory\n" +
+        " rptool cat <file>       View file\n" +
+        " rptool ed <file>        Edit file\n" +
+        " rptool new <file>       New file\n" +
+        " rptool del <file>       Delete file\n" +
+        " rptool mkdir <name>     Make subdir\n" +
+        " rptool giveskill <player> <skill> <pct>\n" +
+        " rptool skills <player>  Show skills\n" +
+        " rptool pending          Show pending\n" +
+        "========================================\n";
+    tell_object(player, msg);
+    return 1;
+}
+
+int rptool_ls(object player, string *args) {
+    tell_object(player, "LS command not yet implemented.\n");
+    return 1;
+}
+int rptool_cd(object player, string *args) {
+    tell_object(player, "CD command not yet implemented.\n");
+    return 1;
+}
+int rptool_pwd(object player) {
+    tell_object(player, "PWD command not yet implemented.\n");
+    return 1;
+}
+int rptool_cat(object player, string *args) {
+    tell_object(player, "CAT command not yet implemented.\n");
+    return 1;
+}
+int rptool_ed(object player, string *args) {
+    tell_object(player, "ED command not yet implemented.\n");
+    return 1;
+}
+int rptool_new(object player, string *args) {
+    tell_object(player, "NEW command not yet implemented.\n");
+    return 1;
+}
+int rptool_del(object player, string *args) {
+    tell_object(player, "DEL command not yet implemented.\n");
+    return 1;
+}
+int rptool_mkdir(object player, string *args) {
+    tell_object(player, "MKDIR command not yet implemented.\n");
+    return 1;
+}
+int rptool_giveskill(object player, string *args) {
+    tell_object(player, "GIVESKILL command not yet implemented.\n");
+    return 1;
+}
+int rptool_skills(object player, string *args) {
+    tell_object(player, "SKILLS command not yet implemented.\n");
+    return 1;
+}
+int rptool_pending(object player) {
+    tell_object(player, "PENDING command not yet implemented.\n");
+    return 1;
+}

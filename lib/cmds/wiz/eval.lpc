@@ -1,0 +1,15 @@
+// lib/cmds/wiz/eval.lpc
+// Standalone eval command — admin_wizard only
+
+#include "/secure/wiz_perms.lpc"
+
+int main(string args) {
+    object player = this_player();
+    if (query_wiz_role(player) < 4) {
+        tell_object(player, "You are not authorized to use eval.\n");
+        return 1;
+    }
+    // Safe eval stub
+    tell_object(player, "Eval not yet implemented.\n");
+    return 1;
+}

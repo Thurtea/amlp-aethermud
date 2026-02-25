@@ -1,0 +1,40 @@
+// lib/wiz/id_card.lpc
+// Universal ID Card - Wizard Tool (no role restriction)
+
+inherit "/std/object";
+
+void create() {
+    set_name("id card");
+    set_short("a universal ID card");
+    set_long("A card showing player stats. Type 'id <player>' or 'id' for self.");
+}
+
+int activate(string cmd, object player, string args) {
+    string *tokens = explode(args || "", " ");
+    string target = sizeof(tokens) > 0 ? tokens[0] : "";
+    if (!target || target == "") {
+        return id_show(player, player);
+    }
+    object who = find_player(target);
+    if (!who) {
+        tell_object(player, "Player not found.\n");
+        return 1;
+    }
+    return id_show(player, who);
+}
+
+int id_show(object player, object who) {
+    string msg = "========================================\n";
+    msg += "         PLAYER ID CARD\n";
+    msg += "========================================\n";
+    msg += "Name:       " + who->query_name() + "\n";
+    msg += "Race:       " + (function_exists("query_race_name", who) ? who->query_race_name() : "?") + "\n";
+    msg += "OCC:        " + (function_exists("query_occ_id", who) ? who->query_occ_id() : "?") + "\n";
+    msg += "Level:      " + (function_exists("query_level", who) ? who->query_level() : "?") + "\n";
+    msg += "Alignment:  " + (function_exists("query_alignment", who) ? who->query_alignment() : "?") + "\n";
+    msg += "Location:   " + (environment(who) ? file_name(environment(who)) : "nowhere") + "\n";
+    msg += "Role:       " + (function_exists("query_property", who) ? who->query_property("wizard_role") : "none") + "\n";
+    msg += "========================================\n";
+    tell_object(player, msg);
+    return 1;
+}

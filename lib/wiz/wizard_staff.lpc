@@ -1,0 +1,63 @@
+// lib/wiz/wizard_staff.lpc
+// Wizard Staff - Universal shortcut launcher (any wiz role)
+
+#include "/secure/wiz_perms.lpc"
+
+inherit "/std/object";
+
+void create() {
+    set_name("wizard staff");
+    set_short("a wizard's staff");
+    set_long("A staff for all wizard roles. Type 'staff' for menu.");
+}
+
+int activate(string cmd, object player, string args) {
+    if (query_wiz_role(player) < 1) {
+        tell_object(player, "You are not authorized to use the wizard staff.\n");
+        return 1;
+    }
+    string *tokens = explode(args || "", " ");
+    string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
+    switch(subcmd) {
+        case "":
+            return show_menu(player);
+        case "home":
+            return staff_home(player);
+        case "version":
+            return staff_version(player);
+        case "ping":
+            return staff_ping(player);
+        default:
+            tell_object(player, "Unknown staff command.\n");
+            return 1;
+    }
+}
+
+int show_menu(object player) {
+    string msg =
+        "========================================\n" +
+        "         WIZARD STAFF MENU\n" +
+        "========================================\n" +
+        " staff          Show this menu\n" +
+        " staff home     Teleport to workroom\n" +
+        " staff version  Show driver version\n" +
+        " staff ping     Latency test\n" +
+        "========================================\n";
+    tell_object(player, msg);
+    return 1;
+}
+
+int staff_home(object player) {
+    string home = query_wiz_home(player);
+    player->move_player(find_object(home));
+    tell_object(player, "You teleport to your workroom.\n");
+    return 1;
+}
+int staff_version(object player) {
+    tell_object(player, "Driver version: (stub)\n");
+    return 1;
+}
+int staff_ping(object player) {
+    tell_object(player, "Pong!\n");
+    return 1;
+}

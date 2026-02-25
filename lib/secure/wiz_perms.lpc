@@ -1,0 +1,59 @@
+// /lib/secure/wiz_perms.lpc
+// Wizard Role and Permission System
+// Implements role hierarchy and permission checks for wizard tools
+
+#define ROLE_NONE         0
+#define ROLE_RP_WIZARD    1
+#define ROLE_CODE_WIZARD  2
+#define ROLE_DOMAIN_WIZARD 3
+#define ROLE_ADMIN_WIZARD 4
+
+// Query the wizard role for a player object
+int query_wiz_role(object player) {
+    if (!objectp(player)) return ROLE_NONE;
+    if (function_exists("query_property", player)) {
+        string role = player->query_property("wizard_role");
+        if (role == "admin") return ROLE_ADMIN_WIZARD;
+        if (role == "domain") return ROLE_DOMAIN_WIZARD;
+        if (role == "coding") return ROLE_CODE_WIZARD;
+        if (role == "rp") return ROLE_RP_WIZARD;
+    }
+    // Fallback: use privilege_level if present
+    if (function_exists("query_privilege_level", player)) {
+        int priv = player->query_privilege_level();
+        if (priv >= 2) return ROLE_ADMIN_WIZARD;
+        if (priv == 1) return ROLE_DOMAIN_WIZARD; // Default to domain if not set
+    }
+    return ROLE_NONE;
+}
+
+// Check if player has permission to access a given path
+int check_wiz_perm(object player, string path) {
+    int role = query_wiz_role(player);
+    string name = function_exists("query_name", player) ? player->query_name() : "";
+    if (role == ROLE_ADMIN_WIZARD) return 1;
+    if (role == ROLE_DOMAIN_WIZARD) {
+        if (path && strsrch(path, "/domains/" + name + "/") == 0) return 1;
+        return 0;
+    }
+    if (role == ROLE_CODE_WIZARD) {
+        if (path && (strsrch(path, "/lib/") == 0 || strsrch(path, "/domains/code/") == 0)) return 1;
+        return 0;
+    }
+    if (role == ROLE_RP_WIZARD) {
+        if (path && strsrch(path, "/domains/rp/" + name + "/") == 0) return 1;
+        return 0;
+    }
+    return 0;
+}
+
+// Return the home workroom path for a wizard
+string query_wiz_home(object player) {
+    int role = query_wiz_role(player);
+    string name = function_exists("query_name", player) ? player->query_name() : "";
+    if (role == ROLE_ADMIN_WIZARD) return "/domains/admin/workroom.lpc";
+    if (role == ROLE_DOMAIN_WIZARD) return "/domains/" + name + "/workroom.lpc";
+    if (role == ROLE_CODE_WIZARD) return "/domains/code/workroom.lpc";
+    if (role == ROLE_RP_WIZARD) return "/domains/rp/workroom.lpc";
+    return "/domains/start";
+}

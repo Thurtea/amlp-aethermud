@@ -1,0 +1,14 @@
+// lib/cmds/wiz/goto.lpc
+// Standalone goto command — delegates to admin orb
+
+#include "/secure/wiz_perms.lpc"
+
+int main(string args) {
+    object player = this_player();
+    if (query_wiz_role(player) < 4) {
+        tell_object(player, "You are not authorized to use goto.\n");
+        return 1;
+    }
+    object tool = load_object("/wiz/admin_orb");
+    return tool->activate("goto", player, args);
+}

@@ -1,0 +1,6 @@
+inherit "/std/room";
+void create() {
+    set_short("The Code Wizard's Workroom");
+    set_long("A quiet chamber filled with code scrolls, glowing runes, and a magical terminal for code-wizards.");
+    add_exit("out", "/domains/village/square.lpc");
+}

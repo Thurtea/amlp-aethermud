@@ -1,0 +1,14 @@
+// lib/cmds/wiz/ed.lpc
+// Standalone ed command — delegates to code tool
+
+#include "/secure/wiz_perms.lpc"
+
+int main(string args) {
+    object player = this_player();
+    if (query_wiz_role(player) < 2) {
+        tell_object(player, "You are not authorized to use ed.\n");
+        return 1;
+    }
+    object tool = load_object("/wiz/code_tool");
+    return tool->activate("ed", player, args);
+}

@@ -1,0 +1,73 @@
+// lib/wiz/crystal_ball.lpc
+// Crystal Ball - Wizard Tool (role: domain_wizard or admin_wizard)
+
+#include "/secure/wiz_perms.lpc"
+
+inherit "/std/object";
+
+void create() {
+    set_name("crystal ball");
+    set_short("a glowing crystal ball");
+    set_long("A magical orb for domain and admin wizards. Type 'crystal' for menu.");
+}
+
+int activate(string cmd, object player, string args) {
+    if (query_wiz_role(player) < 3) {
+        tell_object(player, "You are not authorized to use the crystal ball.\n");
+        return 1;
+    }
+    string *tokens = explode(args || "", " ");
+    string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
+    switch(subcmd) {
+        case "":
+            return show_menu(player);
+        case "watch":
+            return crystal_watch(player, tokens[1..]);
+        case "unwatch":
+            return crystal_unwatch(player);
+        case "where":
+            return crystal_where(player);
+        case "scan":
+            return crystal_scan(player, tokens[1..]);
+        default:
+            tell_object(player, "Unknown crystal command.\n");
+            return 1;
+    }
+}
+
+int show_menu(object player) {
+    string msg =
+        "========================================\n" +
+        "         CRYSTAL BALL MENU\n" +
+        "========================================\n" +
+        " crystal            Show this menu\n" +
+        " crystal watch <player>  Snoop player\n" +
+        " crystal unwatch        Stop snooping\n" +
+        " crystal where         Show all player locations\n" +
+        " crystal scan <room>  Show room contents\n" +
+        "========================================\n";
+    tell_object(player, msg);
+    return 1;
+}
+
+int crystal_watch(object player, string *args) {
+    tell_object(player, "Watch command not yet implemented.\n");
+    return 1;
+}
+int crystal_unwatch(object player) {
+    tell_object(player, "Unwatch command not yet implemented.\n");
+    return 1;
+}
+int crystal_where(object player) {
+    object *users = users();
+    string msg = "Player locations:\n";
+    foreach(object u : users) {
+        msg += sprintf("%-15s %s\n", u->query_name(), environment(u) ? file_name(environment(u)) : "nowhere");
+    }
+    tell_object(player, msg);
+    return 1;
+}
+int crystal_scan(object player, string *args) {
+    tell_object(player, "Scan command not yet implemented.\n");
+    return 1;
+}

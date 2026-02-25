@@ -1,0 +1,14 @@
+// lib/cmds/wiz/giveskill.lpc
+// Standalone giveskill command — delegates to RP skill tool
+
+#include "/secure/wiz_perms.lpc"
+
+int main(string args) {
+    object player = this_player();
+    if (query_wiz_role(player) < 1) {
+        tell_object(player, "You are not authorized to use giveskill.\n");
+        return 1;
+    }
+    object tool = load_object("/wiz/rp_skill_tool");
+    return tool->activate("giveskill", player, args);
+}

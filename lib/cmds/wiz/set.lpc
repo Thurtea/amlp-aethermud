@@ -1,0 +1,14 @@
+// lib/cmds/wiz/set.lpc
+// Standalone set command — delegates to admin wand
+
+#include "/secure/wiz_perms.lpc"
+
+int main(string args) {
+    object player = this_player();
+    if (query_wiz_role(player) < 4) {
+        tell_object(player, "You are not authorized to use set.\n");
+        return 1;
+    }
+    object tool = load_object("/wiz/admin_wand");
+    return tool->activate("set", player, args);
+}

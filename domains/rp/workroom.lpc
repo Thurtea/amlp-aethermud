@@ -1,0 +1,6 @@
+inherit "/std/room";
+void create() {
+    set_short("The RP Coordinator's Office");
+    set_long("A tidy office used by Roleplay Wizards to manage player skill requests. A cork board on the wall holds pending requests. A filing cabinet contains completed grants.");
+    add_exit("out", "/domains/village/square.lpc");
+}

@@ -12,6 +12,7 @@
 #include "skills.h"
 #include "chargen.h"
 #include "debug.h"
+#include "ui_frames.h"
 
 int perform_skill_check(PlayerSession *sess, const char *skill_name, int difficulty_modifier) {
     if (!sess || !skill_name) return 0;
@@ -67,8 +68,7 @@ int perform_skill_check(PlayerSession *sess, const char *skill_name, int difficu
 /* skills.c - Rifts RPG Skill System Implementation */
 // ...existing code...
 
-/* External declarations */
-extern void send_to_player(PlayerSession *session, const char *format, ...);
+// ...existing code...
 
 /* ========== SKILL DATABASE ========== */
 

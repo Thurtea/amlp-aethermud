@@ -254,9 +254,61 @@ static Token lexer_read_string(Lexer *lexer, char quote) {
     }
 
     int length = lexer->position - string_start;
+    /* Allocate output buffer — processed string is always <= raw length */
+    char *raw = &lexer->buffer[string_start];
     char *value = malloc(length + 1);
-    strncpy(value, &lexer->buffer[string_start], length);
-    value[length] = '\0';
+    int out = 0;
+    for (int i = 0; i < length; i++) {
+        if (raw[i] == '\\' && i + 1 < length) {
+            i++;  /* consume backslash */
+            switch (raw[i]) {
+                case 'n':  value[out++] = '\n'; break;
+                case 't':  value[out++] = '\t'; break;
+                case 'r':  value[out++] = '\r'; break;
+                case '\\': value[out++] = '\\'; break;
+                case '"':  value[out++] = '"';  break;
+                case '\'': value[out++] = '\''; break;
+                case 'a':  value[out++] = '\a'; break;
+                case 'b':  value[out++] = '\b'; break;
+                case 'x': {
+                    /* Hex escape \xNN — consume 1 or 2 hex digits */
+                    int val = 0, ndig = 0;
+                    while (ndig < 2 && i + 1 < length &&
+                           ((raw[i+1] >= '0' && raw[i+1] <= '9') ||
+                            (raw[i+1] >= 'a' && raw[i+1] <= 'f') ||
+                            (raw[i+1] >= 'A' && raw[i+1] <= 'F'))) {
+                        i++; ndig++;
+                        int d = (raw[i] >= '0' && raw[i] <= '9') ? raw[i] - '0'
+                              : (raw[i] >= 'a' && raw[i] <= 'f') ? raw[i] - 'a' + 10
+                              : raw[i] - 'A' + 10;
+                        val = val * 16 + d;
+                    }
+                    if (ndig == 0) { value[out++] = 'x'; }
+                    else           { value[out++] = (char)val; }
+                    break;
+                }
+                case '0': case '1': case '2': case '3':
+                case '4': case '5': case '6': case '7': {
+                    /* Octal escape \NNN — up to 3 octal digits */
+                    int val = raw[i] - '0', ndig = 1;
+                    while (ndig < 3 && i + 1 < length &&
+                           raw[i+1] >= '0' && raw[i+1] <= '7') {
+                        i++; ndig++;
+                        val = val * 8 + (raw[i] - '0');
+                    }
+                    value[out++] = (char)val;
+                    break;
+                }
+                default:
+                    value[out++] = '\\';
+                    value[out++] = raw[i];
+                    break;
+            }
+        } else {
+            value[out++] = raw[i];
+        }
+    }
+    value[out] = '\0';
 
     lexer_advance(lexer);  /* Skip closing quote */
 

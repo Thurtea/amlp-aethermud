@@ -89,8 +89,9 @@ int efun_register(EfunRegistry *registry, const char *name, EfunCallback callbac
 
 EfunEntry* efun_find(EfunRegistry *registry, const char *name) {
     if (!registry || !name) return NULL;
-    
     for (int i = 0; i < registry->efun_count; i++) {
+        /* Be defensive: skip entries with no name to avoid strcmp(NULL, ..) */
+        if (!registry->efuns[i].name) continue;
         if (strcmp(registry->efuns[i].name, name) == 0) {
             return &registry->efuns[i];
         }
@@ -1722,6 +1723,18 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
             o->name ? o->name : "<noname>", o->method_count);
 
     /* Call create() on object if present */
+    /* Diagnostic: dump method list to help track recursion/inheritance issues */
+    fprintf(stderr, "[Efun] load_object: method list for '%s' (count=%d):\n",
+            o->name ? o->name : "<noname>", o->method_count);
+    for (int mi = 0; mi < o->method_count; mi++) {
+        VMFunction *m = o->methods[mi];
+        if (m && m->name) {
+            fprintf(stderr, "  [%d] %s\n", mi, m->name);
+        } else {
+            fprintf(stderr, "  [%d] <null method ptr>\n", mi);
+        }
+    }
+
     obj_call_method(vm, o, "create", NULL, 0);
 
     program_free(prog);

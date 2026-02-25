@@ -1250,11 +1250,24 @@ int vm_execute(VirtualMachine *vm) {
 /* Forward declaration */
 static const char* opcode_name(OpCode opcode);
 
+/* Maximum LPC call depth — prevents stack overflow from infinite recursion
+ * (e.g. __parent__create alias whose bytecode calls ::create() again). */
+#define VM_MAX_CALL_DEPTH 200
+
 int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
+    static int call_depth = 0;
+
     if (!vm || function_index < 0 || function_index >= vm->function_count) return -1;
-    
+
     VMFunction *func = vm->functions[function_index];
     if (!func || arg_count != func->param_count) return -1;
+
+    if (call_depth >= VM_MAX_CALL_DEPTH) {
+        fprintf(stderr, "[VM] Call depth limit %d exceeded in '%s' -- aborting (infinite recursion?)\n",
+                VM_MAX_CALL_DEPTH, func->name ? func->name : "<unknown>");
+        return -1;
+    }
+    call_depth++;
     
     /* CRITICAL: Allocate space for BOTH parameters and local variables
      * Parameters are stored in local_variables[0..param_count-1]
@@ -1311,6 +1324,7 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
             }
             if (frame->local_variables) free(frame->local_variables);
             free(frame);
+            call_depth--;
             return -1;
         }
     }
@@ -1323,7 +1337,7 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
     }
     if (frame->local_variables) free(frame->local_variables);
     free(frame);
-    
+    call_depth--;
     return 0;
 }
 

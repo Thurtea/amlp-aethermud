@@ -3,6 +3,7 @@
 #include "room.h"
 #include "session_internal.h"
 #include "debug.h"
+#include "vm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,10 @@
 
 /* External function declaration */
 extern void send_to_player(PlayerSession *sess, const char *fmt, ...);
+
+/* Forward declarations for VM bridge helpers and delta application */
+extern VMValue vm_bridge_read_property_delta(void *global_vm, int delta_index);
+static void apply_property_delta(Item *item, VMValue *delta);
 
 /* Item Template Database */
 Item ITEM_TEMPLATES[TOTAL_ITEM_TEMPLATES];
@@ -1240,6 +1245,20 @@ int inventory_read_from_file(Inventory *inv, EquipmentSlots *eq, FILE *f) {
             }
             /* TODO:VM-BRIDGE: delta_count > 0 would replay property delta here */
             if (!item) continue;
+
+            /* TODO: delta replay when Item struct supports it
+             * #if 0
+            while (item->delta_count > 0 && item->delta_count <= MAX_PROPERTY_DELTAS) {
+                VMValue delta = vm_bridge_read_property_delta(global_vm, item->delta_properties[item->delta_count-1]);
+                if (delta.type == VALUE_INT || delta.type == VALUE_STRING) {
+                    apply_property_delta(item, &delta);
+                }
+                vm_value_release(&delta);
+                item->delta_count--;
+            }
+            #endif
+            */
+
             inventory_add(inv, item);
             restore_equip_slot(item, eq, slot);
         } else {
@@ -1254,3 +1273,4 @@ int inventory_read_from_file(Inventory *inv, EquipmentSlots *eq, FILE *f) {
     }
     return 0;
 }
+

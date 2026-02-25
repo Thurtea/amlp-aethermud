@@ -1518,8 +1518,10 @@ int save_character(PlayerSession *sess) {
      *  8 - added tattoos (int count + fixed MAX_TATTOO_NAME bytes each) after bm_credits
      *  9 - added permanently_dead (int) after tattoos
      * 10 - added death_killer (64 bytes) after permanently_dead
+     * 11 - added save_vs_magic/horror/fear (3 ints), num_racial_abilities + racial_abilities
+     *      (int + MAX_RACIAL_ABILITIES*32 bytes), race_skill_bonus (int) after death_killer
      */
-    uint16_t version = 10;
+    uint16_t version = 11;
     fwrite(&version, sizeof(uint16_t), 1, f);
     
     /* Write username */
@@ -1800,6 +1802,20 @@ int save_character(PlayerSession *sess) {
     /* Version 10: death_killer (fixed 64 bytes) */
     fwrite(ch->death_killer, 1, sizeof(ch->death_killer), f);
 
+    /* Version 11: save_vs bonuses, racial abilities, race_skill_bonus */
+    fwrite(&ch->save_vs_magic,  sizeof(int), 1, f);
+    fwrite(&ch->save_vs_horror, sizeof(int), 1, f);
+    fwrite(&ch->save_vs_fear,   sizeof(int), 1, f);
+    {
+        int na = ch->num_racial_abilities;
+        if (na < 0) na = 0;
+        if (na > MAX_RACIAL_ABILITIES) na = MAX_RACIAL_ABILITIES;
+        fwrite(&na, sizeof(int), 1, f);
+        /* Write all ability slots (fixed MAX_RACIAL_ABILITIES * 32 bytes) */
+        fwrite(ch->racial_abilities, 1, (size_t)(MAX_RACIAL_ABILITIES * 32), f);
+    }
+    fwrite(&ch->race_skill_bonus, sizeof(int), 1, f);
+
     fclose(f);
 
     INFO_LOG("Character '%s' saved to %s", sess->username, filepath);
@@ -1841,8 +1857,8 @@ int load_character(PlayerSession *sess, const char *username) {
         return 0;
     }
     
-    /* Accept save versions between 1 and current supported version (10). */
-    if (version < 1 || version > 10) {
+    /* Accept save versions between 1 and current supported version (11). */
+    if (version < 1 || version > 11) {
         ERROR_LOG("Unsupported save file version %d for '%s'", 
                 version, username);
         fclose(f);
@@ -2313,6 +2329,31 @@ int load_character(PlayerSession *sess, const char *username) {
             memset(ch->death_killer, 0, sizeof(ch->death_killer));
         }
         ch->death_killer[sizeof(ch->death_killer) - 1] = '\0';
+    }
+
+    /* Version 11: save_vs bonuses, racial abilities, race_skill_bonus
+     * Zero-fill all new fields when loading a v10 (or earlier) file. */
+    ch->save_vs_magic  = 0;
+    ch->save_vs_horror = 0;
+    ch->save_vs_fear   = 0;
+    ch->num_racial_abilities = 0;
+    memset(ch->racial_abilities, 0, sizeof(ch->racial_abilities));
+    ch->race_skill_bonus = 0;
+    if (version >= 11) {
+        if (fread(&ch->save_vs_magic,  sizeof(int), 1, f) != 1) ch->save_vs_magic  = 0;
+        if (fread(&ch->save_vs_horror, sizeof(int), 1, f) != 1) ch->save_vs_horror = 0;
+        if (fread(&ch->save_vs_fear,   sizeof(int), 1, f) != 1) ch->save_vs_fear   = 0;
+        int na = 0;
+        if (fread(&na, sizeof(int), 1, f) == 1) {
+            if (na < 0) na = 0;
+            if (na > MAX_RACIAL_ABILITIES) na = MAX_RACIAL_ABILITIES;
+            ch->num_racial_abilities = na;
+        }
+        if (fread(ch->racial_abilities, 1, (size_t)(MAX_RACIAL_ABILITIES * 32), f)
+                != (size_t)(MAX_RACIAL_ABILITIES * 32)) {
+            memset(ch->racial_abilities, 0, sizeof(ch->racial_abilities));
+        }
+        if (fread(&ch->race_skill_bonus, sizeof(int), 1, f) != 1) ch->race_skill_bonus = 0;
     }
 
     fclose(f);

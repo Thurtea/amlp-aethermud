@@ -355,6 +355,17 @@ int member_array(item, arr) {
  }
 
 // ============================================================
+// FILESYSTEM HELPERS
+// ============================================================
+
+/* file_exists(path) - return 1 if the path exists (file or directory), 0 if not.
+ * Delegates to the C efun of the same name registered via efun_file_exists(). */
+int file_exists(string path) {
+    if(!path || path == "") return 0;
+    return (int)file_size(path) != -1;
+}
+
+// ============================================================
 // SKILL HELPERS
 // ============================================================
 

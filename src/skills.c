@@ -906,15 +906,15 @@ int race_skill_bonus(char *race, int skill_id) {
     return 0;
 }
 
-/* Session-aware wrapper: applies per-race flat % bonus (if present) and
- * performs the d100 roll. This keeps the original `skill_check()` for
- * compatibility while enabling minimal race-bonus behaviour.
+/* Session-aware wrapper: applies per-race flat % bonus (populated at chargen
+ * via query_skill_bonus() LPC bridge) and performs the d100 roll. This keeps
+ * the original `skill_check()` for compatibility while enabling race-bonus
+ * behaviour.
  */
 int skill_check_sess(PlayerSession *sess, int skill_id, int skill_percentage) {
-    int bonus = 0;
-    if (sess && sess->character.race) {
-        bonus = race_skill_bonus(sess->character.race, skill_id);
-        skill_percentage += bonus;
+    (void)skill_id; /* skill_id reserved for future per-skill overrides */
+    if (sess && sess->character.race_skill_bonus > 0) {
+        skill_percentage += sess->character.race_skill_bonus;
     }
     /* clamp between 0 and 100 */
     if (skill_percentage < 0) skill_percentage = 0;

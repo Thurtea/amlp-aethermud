@@ -7,6 +7,7 @@ int main(string str) {
     if(function_exists("query_position", player)) pos = (string)player->query_position();
     if(pos == "sleeping") { tell_object(player, "You are already asleep.\n"); return 1; }
     if(function_exists("set_position", player)) player->set_position("sleeping");
+    set_resting(1);
     tell_object(player, "You lie down and fall asleep.\n");
     tell_room_vis(environment(player), player, "%s lies down and falls asleep.\n", ({ player }));
     return 1;

@@ -72,6 +72,7 @@ int attack_roll(PlayerSession *attacker, PlayerSession *defender) {
 }
 
 int damage_roll(PlayerSession *attacker, int weapon_type) {
+    (void)attacker; /* reserved for future attacker-stat modifiers */
     /* weapon_type: 0 = unarmed (1d4), otherwise 1d6 */
     int sides = (weapon_type == 0) ? 4 : 6;
     return combat_roll_dice(1, sides);

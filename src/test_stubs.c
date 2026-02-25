@@ -54,6 +54,12 @@ void set_current_session(void *session) {
     (void)session;
 }
 
+/* No-op resting flag setter for tests. */
+void set_current_session_resting(int val) __attribute__((weak));
+void set_current_session_resting(int val) {
+    (void)val;
+}
+
 /* Weak placeholder for websocket/ANSI conversion helpers that may be referenced
  * by test-linked code; provide safe no-op implementations if missing. */
 char *ws_convert_ansi(const char *text, int keep_colors) {

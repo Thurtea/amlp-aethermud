@@ -1155,6 +1155,18 @@ VMValue efun_file_size(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_int(-1);
 }
 
+/* file_exists(path) - return 1 if file or directory exists, 0 otherwise */
+VMValue efun_file_exists(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count != 1 || args[0].type != VALUE_STRING) return vm_value_create_int(0);
+    const char *path = args[0].data.string_value;
+    if (!path) return vm_value_create_int(0);
+    char resolved[PATH_MAX];
+    if (!resolve_safe_path(path, resolved, sizeof(resolved))) return vm_value_create_int(0);
+    struct stat st;
+    return vm_value_create_int(stat(resolved, &st) == 0 ? 1 : 0);
+}
+
 /* Return human-readable mode string like "-rwxr-xr-x" for a path, or "" on error */
 VMValue efun_file_mode(VirtualMachine *vm, VMValue *args, int arg_count) {
     (void)vm;
@@ -1481,6 +1493,17 @@ VMValue efun_this_player(VirtualMachine *vm, VMValue *args, int arg_count) {
     return v;
 }
 
+/* set_resting(int val) - update the C-side is_resting flag for the current player.
+ * Called by LPC position commands (sit, sleep, stand, wake) to keep the C regen
+ * system in sync with the LPC position system. */
+VMValue efun_set_resting(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    int val = (arg_count >= 1 && args[0].type == VALUE_INT)
+              ? (int)args[0].data.int_value : 0;
+    set_current_session_resting(val);
+    return vm_value_create_int(val);
+}
+
 VMValue efun_file_name(VirtualMachine *vm, VMValue *args, int arg_count) {
     (void)vm;
     if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_string("");
@@ -1765,7 +1788,7 @@ VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     size_t plen = strlen(p);
     char p_noext[PATH_MAX];
     if (plen > 4 && strcmp(p + plen - 4, ".lpc") == 0) {
-        strncpy(p_noext, p, plen - 4);
+        memcpy(p_noext, p, plen - 4);
         p_noext[plen - 4] = '\0';
     } else {
         strncpy(p_noext, p, sizeof(p_noext));
@@ -1814,11 +1837,8 @@ VMValue efun_reload_object(VirtualMachine *vm, VMValue *args, int arg_count) {
         }
         Program *parent_prog = compiler_compile_file(parent_fs);
         if (parent_prog) {
-            int parent_start = (int)vm->function_count;
-            if (program_loader_load(vm, parent_prog) == 0) {
-                int parent_end = (int)vm->function_count;
-                /* don't attach to objects yet; attach will be done below */
-            }
+            /* Load parent program into VM; method attachment is done below */
+            program_loader_load(vm, parent_prog);
             program_free(parent_prog);
         }
     }
@@ -2866,8 +2886,11 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "set_terminal_width", efun_set_terminal_width, 1, 1, "int set_terminal_width(int)");
     efun_register(registry, "query_terminal_height", efun_query_terminal_height, 0, 0, "int query_terminal_height()");
     /* File metadata efuns */
+    efun_register(registry, "file_exists", efun_file_exists, 1, 1, "int file_exists(string)");
     efun_register(registry, "file_mode", efun_file_mode, 1, 1, "string file_mode(string)");
     efun_register(registry, "file_mtime", efun_file_mtime, 1, 1, "int file_mtime(string)");
+    /* Player state efun */
+    efun_register(registry, "set_resting", efun_set_resting, 1, 1, "int set_resting(int)");
 
     /* Callout efuns */
     efun_register(registry, "call_out", efun_call_out, 2, 10, "int call_out(string, float, ...)");

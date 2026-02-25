@@ -2325,23 +2325,8 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
 
-    /* WAKE / STAND - Stand up from resting */
-    if (strcmp(cmd, "wake") == 0 || strcmp(cmd, "stand") == 0) {
-        if (!session->is_resting) {
-            send_to_player(session, "You are already standing.\n");
-        } else {
-            session->is_resting = 0;
-            send_to_player(session, "You stand up.\n");
-            if (session->current_room) {
-                char msg[256];
-                snprintf(msg, sizeof(msg), "%s stands up.\n", session->username);
-                room_broadcast(session->current_room, msg, session);
-            }
-        }
-        result.type = VALUE_NULL;
-        return result;
-    }
-    
+    /* wake and stand are handled by LPC lib/cmds/wake.lpc and stand.lpc */
+
     if (strcmp(cmd, "inventory") == 0 || strcmp(cmd, "i") == 0) {
         cmd_inventory(session, args ? args : "");
         result.type = VALUE_NULL;
@@ -4571,7 +4556,7 @@ more_room_source:
                             while ((s = readdir(sub)) != NULL) {
                                 if (strcmp(s->d_name, ".") == 0 || strcmp(s->d_name, "..") == 0) continue;
                                 if (strstr(s->d_name, ".lpc")) {
-                                    char full[1024];
+                                    char full[1280];
                                     snprintf(full, sizeof(full), "%s/%s", cmdpath, s->d_name);
                                     /* Build lpc path by stripping leading lib/ and .lpc */
                                     char *rel = full + strlen("lib/");
@@ -5366,7 +5351,7 @@ void process_login_state(PlayerSession *session, const char *input) {
                 }
             }
 
-            snprintf(session->username, sizeof(session->username), "%s", start);
+            snprintf(session->username, sizeof(session->username), "%.63s", start);
 
             /* Case-insensitive check for existing character */
             char found_name[64];

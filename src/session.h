@@ -12,6 +12,9 @@ void *get_current_player_object(void);
 /* Set the current session for the VM context (opaque pointer). */
 void set_current_session(void *session);
 
+/* Update the resting flag on the current session (0=standing, 1=resting). */
+void set_current_session_resting(int val);
+
 /* Find the session for a given player object */
 PlayerSession* find_session_for_player(void *player_obj);
 

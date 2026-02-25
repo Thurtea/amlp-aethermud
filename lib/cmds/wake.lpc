@@ -15,6 +15,7 @@ int main(string str) {
         return 1;
     }
     if(function_exists("set_position", target)) target->set_position("standing");
+    if(target == player) set_resting(0);
     if(target == player) {
         tell_object(player, "You wake up.\n");
         tell_room_vis(environment(player), player, "%s wakes up.\n", ({ player }));

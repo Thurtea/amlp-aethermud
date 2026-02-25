@@ -13,9 +13,8 @@
 /* External function declaration */
 extern void send_to_player(PlayerSession *sess, const char *fmt, ...);
 
-/* Forward declarations for VM bridge helpers and delta application */
+/* Forward declarations for VM bridge helpers */
 extern VMValue vm_bridge_read_property_delta(void *global_vm, int delta_index);
-static void apply_property_delta(Item *item, VMValue *delta);
 
 /* Item Template Database */
 Item ITEM_TEMPLATES[TOTAL_ITEM_TEMPLATES];

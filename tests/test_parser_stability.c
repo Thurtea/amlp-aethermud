@@ -206,6 +206,7 @@ static int test_state_isolation() {
 
 /* Main test runner */
 int main(int argc, char **argv) {
+    (void)argc; (void)argv;
     printf("Parser Stability Test Harness\n");
     printf("==============================\n");
     printf("PID: %d\n", getpid());

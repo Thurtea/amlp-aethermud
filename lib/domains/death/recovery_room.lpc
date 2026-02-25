@@ -9,13 +9,11 @@ void create() {
     
     set_short("Recovery Chamber");
     set_long(
-        "You are in a dimly lit chamber that seems to exist outside of normal space and time. " 
-        "The walls shimmer with an ethereal glow, and the air smells faintly of healing herbs and " 
-        "alchemical reagents. Several hooded figures move silently about the room, tending to the " 
-        "injured and dying.\n\n"
-        "A BODY CHUTE in the floor leads back to the world of the living.\n\n"
-        "Type RECLAIM to call your belongings back to you "
-        "(if your corpse has not yet decayed).\n"
+            "You find yourself in a dim chamber smelling of herbs and antiseptic. "
+            "A hooded medic moves silently between cots, tending to the wounded. "
+            "A faint shimmer marks the way back to the world of the living.\n\n"
+            "\"Thought we'd lost you,\" the medic says without looking up. "
+            "\"Your gear is still where you fell. Head back when you're ready, or type RECLAIM to call your belongings to you.\""
     );
     
     set_exits(([
@@ -25,6 +23,8 @@ void create() {
     set_property("indoors", 1);
     set_property("light", 1);
     set_property("no_combat", 1);  // Safe room
+        add_exit("chute", "/domains/village/square.lpc");
+    }
 }
 
 void reset() {
@@ -80,11 +80,54 @@ void describe_death_recovery(object player) {
 
 void init() {
     ::init();
-    add_action("use_chute", "chute");
-    add_action("use_chute", "enter");
-    add_action("do_reclaim", "reclaim");
+        add_action("cmd_back", "back");
+        add_action("cmd_reclaim", "reclaim");
+    }
 }
+    int cmd_back(string args) {
+        string path = this_player()->query_death_room_path();
+        if (!path || path == "") {
+            write("You don't remember where you died.\n");
+            return 1;
+        }
+        object death_room = find_object(path);
+        if (!death_room) {
+            write("The place you died no longer exists.\n");
+            return 1;
+        }
+        move_object(this_player(), death_room);
+        write("You return to the scene of your death.\n");
+        tell_room(death_room, this_player()->query_name() + " walks in, looking shaken but alive.\n", ({ this_player() }));
+        return 1;
+    }
 
+    int cmd_reclaim(string args) {
+        string path = this_player()->query_death_room_path();
+        if (!path || path == "") {
+            write("You don't remember where you died.\n");
+            return 1;
+        }
+        object death_room = find_object(path);
+        if (!death_room) {
+            write("The place you died no longer exists.\n");
+            return 1;
+        }
+        object *objs = all_inventory(death_room);
+        foreach(object ob : objs) {
+            if (ob->query_owner && ob->query_owner() == this_player()->query_name()) {
+                string *items = ob->query_items();
+                foreach(string item_path : items) {
+                    object item = clone_object(item_path);
+                    if (item) move_object(item, this_player());
+                }
+                destruct(ob);
+                write("You reclaim your belongings from the corpse.\n");
+                return 1;
+            }
+        }
+        write("Your corpse is not here or has already decayed.\n");
+        return 1;
+    }
 int use_chute(string str) {
     object player;
     

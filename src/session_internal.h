@@ -60,6 +60,7 @@ typedef struct PlayerSession {
     /* For LPC rooms persistence: store original LPC path (if any).
      * New in save format version 3. NULL when not used. */
     char *current_room_path;
+    char *death_room_path; /* Path to room where player died */
 
     /* Wizard tools */
     struct PlayerSession *snooping;      /* Session being snooped on */
@@ -105,6 +106,9 @@ typedef struct PlayerSession {
     int ed_cursor;                 /* current line index for paging (0-based) */
     int ed_input_mode;             /* 0=command, 1=append, 2=insert, 3=change */
     int ed_target_line;            /* target line number for insert/change/delete (1-based) */
+
+    /* Death state guard */
+    int is_dead;                   /* 1 if player is dead, prevents duplicate death */
 } PlayerSession;
 
 #endif /* SESSION_INTERNAL_H */

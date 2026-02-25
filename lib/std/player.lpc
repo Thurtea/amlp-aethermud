@@ -530,49 +530,32 @@ string cmd_who() {
     object *players = users();
     int total = sizeof(players);
     string result = "";
-    
-    // Wizards and admins see everyone
-    if (is_wizard()) {
+    int wiz_role = this_player()->query_wiz_role();
+
+    if (wiz_role >= 1) {
+        // Wizards and admins see everyone
         result = "Players online:\n";
-        
         foreach(object player : players) {
             string pname = player->query_name();
             string ptitle = player->query_privilege_title();
             int idle = query_idle(player);
-
             result += sprintf("  [%s] %s (idle: %d seconds)\n",
                              ptitle, pname, idle);
         }
-        
         result += sprintf("\nTotal: %d player%s\n", 
                          total, total == 1 ? "" : "s");
     } else {
-        // Players only see wizards and admins
-        result = "Staff online:\n";
-        int staff_count = 0;
-        
-        foreach(object player : players) {
-            if (player->is_wizard()) {
-                string pname = player->query_name();
-                string ptitle = player->query_privilege_title();
-                result += sprintf("  [%s] %s\n", ptitle, pname);
-                staff_count++;
-            }
-        }
-        
-        if (staff_count == 0) {
-            result = "No staff currently online.\n";
-        }
-        
-        // Population indicator
+        // Players see only population indicator
         string pop_level;
-        if (total <= 10) pop_level = "Low";
-        else if (total <= 50) pop_level = "Medium";
+        if (total < 10) pop_level = "Low";
+        else if (total < 50) pop_level = "Medium";
         else pop_level = "High";
-        
-        result += "\nWorld Population: " + pop_level + "\n";
+        result = "Population: " + pop_level + "        (";
+        if (pop_level == "Low") result += "< 10 players online)";
+        else if (pop_level == "Medium") result += "10-49 players online)";
+        else result += "50+ players online)";
+        result += "\n";
     }
-    
     return result;
 }
 

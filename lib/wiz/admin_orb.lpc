@@ -7,90 +7,91 @@ inherit "/std/object";
 
 void create() {
     set_name("admin orb");
-    set_short("a shimmering admin orb");
-    set_long("A powerful artifact for admin wizards. Type 'orb' for menu.");
-}
 
-int activate(string cmd, object player, string args) {
-    if (query_wiz_role(player) < 4) {
-        tell_object(player, "You are not authorized to use the admin orb.\n");
-        return 1;
+    inherit "/std/object";
+
+    void setup() {
+        set_short("admin orb");
+        set_long("A swirling sphere of dark energy. Gazing into it reveals every soul on the server and their current state.");
+        set_weight(1);
+        set_value(0);
     }
-    string *tokens = explode(args || "", " ");
-    string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
-    switch(subcmd) {
-        case "":
-            return show_menu(player);
-        case "who":
-            return orb_who(player);
-        case "goto":
-            return orb_goto(player, tokens[1..]);
-        case "pull":
-            return orb_pull(player, tokens[1..]);
-        case "stats":
-            return orb_stats(player);
-        case "shutdown":
-            return orb_shutdown(player);
-        case "reboot":
-            return orb_reboot(player);
-        default:
-            tell_object(player, "Unknown orb command.\n");
+
+    void init() {
+        if (environment() == this_player()) {
+            add_action("cmd_orb", "orb");
+        }
+    }
+
+    string format_idle(int secs) {
+        if (secs < 60) return sprintf("%ds", secs);
+        if (secs < 3600) return sprintf("%dm %ds", secs/60, secs%60);
+        return sprintf("%dh %dm", secs/3600, (secs%3600)/60);
+    }
+
+    string role_name(int role) {
+        switch(role) {
+            case 4: return "Admin";
+            case 3: return "Domain Wizard";
+            case 2: return "Code Wizard";
+            case 1: return "RP Wizard";
+            default: return "Mortal";
+        }
+    }
+
+    int cmd_orb(string args) {
+        if (!this_player() || this_player()->query_wiz_role() < 4) {
+            write("You need the Admin Orb to access this.\n");
             return 1;
-    }
-}
-
-int show_menu(object player) {
-    string msg =
-        "========================================\n" +
-        "         ADMIN ORB MENU\n" +
-        "========================================\n" +
-        " orb            Show this menu\n" +
-        " orb who        List all online players\n" +
-        " orb goto <x>   Teleport to player/room\n" +
-        " orb pull <x>   Summon player to you\n" +
-        " orb stats      Server stats\n" +
-        " orb shutdown   Shutdown server\n" +
-        " orb reboot     Soft reboot\n" +
-        "========================================\n";
-    tell_object(player, msg);
-    return 1;
-}
-
-int orb_who(object player) {
-    object *users = users();
-    string msg = "Online players:\n";
-    foreach(object u : users) {
-        msg += sprintf("%-15s %-10s %s\n", u->query_name(), u->query_privilege_title(), environment(u) ? file_name(environment(u)) : "nowhere");
-    }
-    tell_object(player, msg);
-    return 1;
-}
-
-int orb_goto(object player, string *args) {
-    if (!args || sizeof(args) == 0) {
-        tell_object(player, "Usage: orb goto <player|room>\n");
-        return 1;
-    }
-    string target = args[0];
-    object dest = find_player(target);
-    if (!dest) dest = find_object(target);
-    if (!dest) {
-        tell_object(player, "Target not found.\n");
-        return 1;
-    }
-    player->move_player(dest);
-    tell_object(player, "You teleport to " + target + ".\n");
-    return 1;
-}
-
-int orb_pull(object player, string *args) {
-    if (!args || sizeof(args) == 0) {
-        tell_object(player, "Usage: orb pull <player>\n");
-        return 1;
-    }
-    object target = find_player(args[0]);
-    if (!target) {
-        tell_object(player, "Player not found.\n");
+        }
+        if (environment() != this_player()) {
+            write("You need the Admin Orb to access this.\n");
+            return 1;
+        }
+        object *players = users();
+        if (!args || args == "" || args == "who") {
+            string out = "+------------------------------------------------------------------------+\n";
+            out += "|                      SERVER: FULL PLAYER LIST                          |\n";
+            out += "+------------------------------------------------------------------------+\n";
+            out += "| Name           Role          Location                      Idle        |\n";
+            foreach(object player : players) {
+                string pname = player->query_name();
+                string prole = role_name(player->query_wiz_role());
+                string ploc = file_name(environment(player));
+                string pidle = format_idle(query_idle(player));
+                out += sprintf("| %-13s %-13s %-28s %-10s |\n", pname, prole, ploc, pidle);
+            }
+            out += "+------------------------------------------------------------------------+\n";
+            out += sprintf("| Total: %d online                                                        |\n", sizeof(players));
+            out += "+------------------------------------------------------------------------+\n";
+            write(out);
+            return 1;
+        }
+        // Single player detail
+        object target = find_player(args);
+        if (!target) {
+            write("Player '" + args + "' is not online.\n");
+            return 1;
+        }
+        string out = "+------------------------------------------------------------------------+\n";
+        out += sprintf("| Player: %-63s|\n", target->query_name());
+        out += sprintf("| Race: %-12s OCC: %-9s Level: %-3d Align: %-15s|\n",
+            target->query_race_name(),
+            (target->query_occ_id() && target->query_occ_id() != "unknown") ? target->query_occ_id() : "Pending",
+            target->query_level(),
+            target->query_alignment());
+        out += sprintf("| Location: %-56s|\n", file_name(environment(target)));
+        out += sprintf("| Idle: %-12s Connected: %-15s|\n",
+            format_idle(query_idle(target)),
+            format_idle(time() - target->query_login_time()));
+        out += sprintf("| Role: %-13s (%d) Lives: %d/%d      HP: %d/%d   SDC: %d/%d             |\n",
+            role_name(target->query_wiz_role()),
+            target->query_wiz_role(),
+            target->query_lives(), target->query_max_lives(),
+            target->query_hp(), target->query_max_hp(),
+            target->query_sdc(), target->query_max_sdc());
+        out += "+------------------------------------------------------------------------+\n";
+        write(out);
         return 1;
     }
     target->move_player(environment(player));

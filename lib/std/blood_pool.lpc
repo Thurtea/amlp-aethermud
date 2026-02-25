@@ -1,0 +1,14 @@
+inherit "/std/object";
+
+void create() {
+    set_short("a pool of blood");
+    set_long("A dark red pool of blood slowly drying on the ground.");
+    set_weight(0);
+    call_out("do_decay", 600);
+}
+
+int get() { write("You cannot pick that up.\n"); return 0; }
+
+void do_decay() {
+    destruct(this_object());
+}

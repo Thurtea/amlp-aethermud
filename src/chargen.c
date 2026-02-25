@@ -471,6 +471,7 @@ void chargen_create_admin(PlayerSession *sess) {
 
     /* Combat defaults */
     ch->attacks_per_round = 2;
+    send_to_player(sess, "You have %d attacks per melee round.\n", ch->attacks_per_round);
     ch->parries_per_round = 2;
     ch->racial_auto_parry = 0;
     ch->racial_auto_dodge = 0;

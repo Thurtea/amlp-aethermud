@@ -1,72 +1,73 @@
 // lib/wiz/rp_skill_tool.lpc
 // RP-Wizard Skill Tool (role: rp_wizard or higher)
 
-#include "/secure/wiz_perms.lpc"
-
 inherit "/std/object";
 
-void create() {
-    set_name("rp skill tool");
-    set_short("an RP-wizard's skill tool");
-    set_long("A toolkit for RP wizards. Type 'rptool' for menu.");
+void setup() {
+    set_short("tattoo gun");
+    set_long("A sleek instrument used by RP Coordinators to inscribe skills onto willing players. The grip is worn smooth from use.");
+    set_weight(1);
+    set_value(0);
 }
 
-int activate(string cmd, object player, string args) {
-    if (query_wiz_role(player) < 1) {
-        tell_object(player, "You are not authorized to use the RP skill tool.\n");
+void init() {
+    if (environment() == this_player()) {
+        add_action("cmd_giveskill", "giveskill");
+    }
+}
+
+int cmd_giveskill(string args) {
+    if (!this_player() || call_other("/secure/wiz_perms", "query_wiz_role", this_player()) < 1) {
+        write("You lack permission to inscribe skills.\n");
         return 1;
     }
-    string *tokens = explode(args || "", " ");
-    string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
-    switch(subcmd) {
-        case "":
-            return show_menu(player);
-        case "ls":
-            return rptool_ls(player, tokens[1..]);
-        case "cd":
-            return rptool_cd(player, tokens[1..]);
-        case "pwd":
-            return rptool_pwd(player);
-        case "cat":
-            return rptool_cat(player, tokens[1..]);
-        case "ed":
-            return rptool_ed(player, tokens[1..]);
-        case "new":
-            return rptool_new(player, tokens[1..]);
-        case "del":
-            return rptool_del(player, tokens[1..]);
-        case "mkdir":
-            return rptool_mkdir(player, tokens[1..]);
-        case "giveskill":
-            return rptool_giveskill(player, tokens[1..]);
-        case "skills":
-            return rptool_skills(player, tokens[1..]);
-        case "pending":
-            return rptool_pending(player);
-        default:
-            tell_object(player, "Unknown rptool command.\n");
-            return 1;
+    if (environment() != this_player()) {
+        write("You need the Tattoo Gun to inscribe skills.\n");
+        return 1;
     }
+    if (!args || args == "") {
+        write("Usage: giveskill <player_name> <skill_name> <percentage>\n");
+        return 1;
+    }
+    string pname, skill_name, perc_str;
+    int perc;
+    // Parse quoted skill name
+    if (sscanf(args, "%s \"%s\" %s", pname, skill_name, perc_str) == 3) {
+        // quoted skill name
+    } else if (sscanf(args, "%s %s %s", pname, skill_name, perc_str) == 3) {
+        // unquoted skill name
+    } else {
+        write("Usage: giveskill <player_name> <skill_name> <percentage>\n");
+        return 1;
+    }
+    perc = to_int(perc_str);
+    if (perc < 1 || perc > 98) {
+        write("Percentage must be between 1 and 98.\n");
+        return 1;
+    }
+    object target = find_player(pname);
+    if (!target) {
+        write("Player '" + pname + "' is not online.\n");
+        return 1;
+    }
+    // Get skill list from daemon
+    string *skill_list = "/daemon/skills"->query_skill_list();
+    if (member_array(skill_name, skill_list) == -1) {
+        write("Unknown skill: '" + skill_name + "'.\n");
+        return 1;
+    }
+    // Add skill via giveskill mechanism
+    if (!target->add_skill(skill_name, perc)) {
+        write("Failed to inscribe skill.\n");
+        return 1;
+    }
+    write("You inscribe " + skill_name + " at " + perc + "% onto " + pname + ".\n");
+    target->write(this_player()->query_name() + " inscribes " + skill_name + " into your muscle memory. (" + perc + "%)\n");
+    // Log
+    string log_entry = sprintf("[%s] %s gave %s %d%% to %s\n", ctime(time()), this_player()->query_name(), skill_name, perc, pname);
+    write_file("/domains/rp/logs/skill_grants.log", log_entry);
+    return 1;
 }
-
-int show_menu(object player) {
-    string msg =
-        "========================================\n" +
-        "         RP SKILL TOOL MENU\n" +
-        "========================================\n" +
-        " rptool ls [path]        List contents\n" +
-        " rptool cd <path>        Change directory\n" +
-        " rptool pwd              Show directory\n" +
-        " rptool cat <file>       View file\n" +
-        " rptool ed <file>        Edit file\n" +
-        " rptool new <file>       New file\n" +
-        " rptool del <file>       Delete file\n" +
-        " rptool mkdir <name>     Make subdir\n" +
-        " rptool giveskill <player> <skill> <pct>\n" +
-        " rptool skills <player>  Show skills\n" +
-        " rptool pending          Show pending\n" +
-        "========================================\n";
-    tell_object(player, msg);
     return 1;
 }
 

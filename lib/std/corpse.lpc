@@ -1,4 +1,33 @@
-// /lib/std/corpse.lpc
+inherit "/std/object";
+
+string owner_name;
+string *carried_items;
+int decay_timer;
+
+void create(string name, string *items) {
+    owner_name = name;
+    carried_items = items;
+    set_short("the corpse of " + name);
+    set_long("The lifeless body of " + name + " lies here in a pool of blood.");
+    set_weight(50);
+    call_out("do_decay", 1800);
+}
+
+void do_decay() {
+    tell_room(environment(this_object()),
+        "The corpse of " + owner_name + " has rotted away.\n" +
+        "Their belongings lie scattered on the ground.\n");
+    if (carried_items) {
+        foreach(string item_path : carried_items) {
+            object item = clone_object(item_path);
+            if (item) move_object(item, environment(this_object()));
+        }
+    }
+    destruct(this_object());
+}
+
+string *query_items() { return carried_items; }
+string query_owner() { return owner_name; }// /lib/std/corpse.lpc
 // Corpse object - contains dead player's items
 
 inherit "/std/object";

@@ -1,0 +1,66 @@
+inherit "/std/object";
+
+void setup() {
+    set_short("staff of demotion");
+    set_long("A gnarled wooden staff crackling with punitive energy.");
+    set_weight(2);
+    set_value(0);
+}
+
+void init() {
+    if (environment() == this_player()) {
+        add_action("cmd_demote", "demote");
+    }
+}
+
+string role_name(int role) {
+    switch(role) {
+        case 3: return "Domain Wizard";
+        case 2: return "Code Wizard";
+        case 1: return "RP Wizard";
+        default: return "Mortal";
+    }
+}
+
+int cmd_demote(string args) {
+    if (!this_player() || this_player()->query_wiz_role() < 4) {
+        write("You lack permission to demote.\n");
+        return 1;
+    }
+    if (environment() != this_player()) {
+        write("You need the Staff of Demotion to demote someone.\n");
+        return 1;
+    }
+    if (!args || args == "") {
+        write("Usage: demote <player_name> [reason]\n");
+        return 1;
+    }
+    string pname, reason;
+    if (sscanf(args, "%s %s", pname, reason) < 1) {
+        pname = args;
+        reason = "";
+    }
+    object target = find_player(pname);
+    if (!target) {
+        write("Player '" + pname + "' is not online.\n");
+        return 1;
+    }
+    int t_role = target->query_wiz_role();
+    if (t_role >= 4) {
+        write("You cannot demote another admin.\n");
+        return 1;
+    }
+    int new_role = t_role - 1;
+    if (new_role < 0) new_role = 0;
+    target->set_wiz_role(new_role);
+    target->write("Your wizard rank has been reduced to " + role_name(new_role) + ".\n");
+    // Room message
+    object room = environment(this_player());
+    foreach(object ob : all_inventory(room)) {
+        if (ob != this_player() && ob != target) {
+            ob->write(this_player()->query_name() + " points the Staff of Demotion at " + target->query_name() + ".\nA crackling energy envelops them.\n");
+        }
+    }
+    write("You have demoted " + pname + " to " + role_name(new_role) + ".\n");
+    return 1;
+}

@@ -1,3 +1,13 @@
+void set_death_room(PlayerSession *sess, const char *path) {
+    if (!sess) return;
+    if (sess->death_room_path) free(sess->death_room_path);
+    sess->death_room_path = path ? strdup(path) : NULL;
+}
+
+const char *get_death_room(PlayerSession *sess) {
+    if (!sess) return NULL;
+    return sess->death_room_path;
+}
 #include "death.h"
 #include "chargen.h"
 #include "session_internal.h"
@@ -160,6 +170,7 @@ void corpse_tick(void) {
  * (already decayed or never registered). */
 int corpse_reclaim_for_player(PlayerSession *sess) {
     if (!sess) return 0;
+    sess->is_dead = 0;
     char expected[96];
     snprintf(expected, sizeof(expected), "the corpse of %s", sess->username);
 
@@ -204,6 +215,7 @@ int corpse_reclaim_for_player(PlayerSession *sess) {
 void handle_player_death(PlayerSession *sess, PlayerSession *killer,
                          const char *npc_killer_name) {
     if (!sess) return;
+    if (sess->is_dead) return;
     Character *ch = &sess->character;
 
     if (ch->lives_remaining <= 0) {
@@ -235,14 +247,28 @@ void handle_player_death(PlayerSession *sess, PlayerSession *killer,
     create_player_corpse(sess);
 
     /* Death messages */
-    send_to_player(sess, "\r\n*** YOU HAVE BEEN SLAIN ***\r\n");
-    send_to_player(sess, "Everything fades to black...\r\n\r\n");
+    if (killer && killer->username[0]) {
+        char msg[128];
+        snprintf(msg, sizeof(msg), "You have been slain by %s.\n", killer->username);
+        send_to_player(sess, msg);
+    }
+    // Room message
+    if (sess->current_room) {
+        char msg[128];
+        snprintf(msg, sizeof(msg), "%s collapses and dies.\n", sess->username);
+        send_to_room(sess->current_room, msg);
+    }
 
     /* Teleport to recovery room */
     Room *death_room = room_get_by_path("/domains/death/recovery_room.lpc");
     if (!death_room) {
         INFO_LOG("Death recovery room not found for %s", sess->username);
         return;
+    }
+
+    /* Store death room path */
+    if (sess->current_room && sess->current_room->path) {
+        set_death_room(sess, sess->current_room->path);
     }
 
     /* Remove from current room */

@@ -15,6 +15,7 @@ void *get_current_player_object(void) {
 
 void set_current_session(void *session) {
     vm_current_session = (PlayerSession *)session;
+    if (vm_current_session) vm_current_session->is_dead = 0;
 }
 
 void set_current_session_resting(int val) {

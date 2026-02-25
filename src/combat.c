@@ -80,8 +80,10 @@ int damage_roll(PlayerSession *attacker, int weapon_type) {
 
 void apply_damage(PlayerSession *target, int damage) {
     if (!target) return;
+    if (target->is_dead) return;
     target->character.hp -= damage;
     if (target->character.hp <= 0) {
+        target->is_dead = 1;
         handle_player_death(target, NULL, NULL);
     }
 }
@@ -279,10 +281,6 @@ CombatRound* combat_engage(PlayerSession *attacker, PlayerSession *defender) {
              attacker->username, defender->username);
     combat_broadcast(combat, msg);
 
-    // Show attacks per round info
-    send_to_player(attacker, "  You have %d attack%s per melee round.\n",
-                   attacker->character.attacks_per_round,
-                   attacker->character.attacks_per_round == 1 ? "" : "s");
 
     return combat;
 }
@@ -750,11 +748,13 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
 
     // Miss check
     if (total_strike < target_number) {
-        char msg[256];
-        snprintf(msg, sizeof(msg), "%s swings at %s but misses! (%d+%d=%d vs %d)\n",
-                 attacker->name, defender->name, attack_roll, strike_bonus, total_strike, target_number);
-        combat_send_to_participant(attacker, msg);
-        combat_send_to_participant(defender, msg);
+        char msg_att[128], msg_def[128], msg_room[128];
+        snprintf(msg_att, sizeof(msg_att), "You swing at %s and miss!\n", defender->name);
+        snprintf(msg_def, sizeof(msg_def), "%s swings at you and misses!\n", attacker->name);
+        snprintf(msg_room, sizeof(msg_room), "%s misses %s.\n", attacker->name, defender->name);
+        combat_send_to_participant(attacker, msg_att);
+        combat_send_to_participant(defender, msg_def);
+        combat_send_to_room(attacker->room, msg_room);
         return result;
     }
 
@@ -800,44 +800,22 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
     combat_apply_damage(defender, &result);
 
     /* If kill occurred, trigger death handler for player victims */
-    if (result.is_kill && defender->session) {
+    if (result.is_kill && defender->session && !defender->session->is_dead) {
+        defender->session->is_dead = 1;
         handle_player_death(defender->session, attacker->session, NULL);
+        break; // Stop combat loop after death
     }
 
-    /* Descriptive combat messages (no numeric damage shown) */
+    /* Combat hit messages */
     {
-        int max_pool = defender->character->max_hp + defender->character->max_sdc + (defender->character->max_mdc * 100);
-        if (max_pool <= 0) max_pool = 1;
-        int pct = (result.damage * 100) / max_pool;
-        const char *severity = "mildly";
-        if (pct <= 10) severity = "mildly";
-        else if (pct <= 30) severity = "lightly";
-        else if (pct <= 60) severity = "severely";
-        else severity = result.is_critical ? "critically" : "viciously";
-
-        const char *verb = "hits";
-        /* Choose verb by attacker's race or weapon */
-        if (attacker->character && attacker->character->race && strcasestr(attacker->character->race, "Dragon")) {
-            verb = "claws";
-        } else {
-            /* If primary weapon is energy/ranged, use ranged verbs */
-            if (attacker->character && attacker->character->equipment.weapon_primary) {
-                Item *w = attacker->character->equipment.weapon_primary;
-                if (w->type == ITEM_WEAPON_RANGED) {
-                    verb = "shoots";
-                } else {
-                    verb = "strikes";
-                }
-            } else {
-                verb = "strikes";
-            }
-        }
-
-        char bufmsg[256];
-        snprintf(bufmsg, sizeof(bufmsg), "%s %s %s %s!\n",
-                 attacker->name, verb, defender->name, severity);
-        combat_send_to_participant(attacker, bufmsg);
-        combat_send_to_participant(defender, bufmsg);
+        int remaining_hp = defender->character->hp;
+        char msg_att[128], msg_def[128], msg_room[128];
+        snprintf(msg_att, sizeof(msg_att), "You hit %s for %d damage! (%d HP remaining)\n", defender->name, result.damage, remaining_hp);
+        snprintf(msg_def, sizeof(msg_def), "%s hits you for %d damage!\n", attacker->name, result.damage);
+        snprintf(msg_room, sizeof(msg_room), "%s hits %s!\n", attacker->name, defender->name);
+        combat_send_to_participant(attacker, msg_att);
+        combat_send_to_participant(defender, msg_def);
+        combat_send_to_room(attacker->room, msg_room);
     }
 
     return result;
@@ -904,8 +882,10 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
     combat_apply_damage(defender, &result);
 
     /* If kill occurred, trigger death handler for player victims */
-    if (result.is_kill && defender->session) {
+    if (result.is_kill && defender->session && !defender->session->is_dead) {
+        defender->session->is_dead = 1;
         handle_player_death(defender->session, attacker->session, NULL);
+        break; // Stop combat loop after death
     }
 
     /* Descriptive ranged messages */
@@ -1122,9 +1102,9 @@ bool combat_check_death(CombatParticipant *p) {
     if (dead) {
         char msg[256];
         snprintf(msg, sizeof(msg),
-                 "\n>>> %s has been defeated! <<<\n\n",
+                 "Splynncryth collapses and dies.\n",
                  p->name);
-        combat_send_to_participant(p, msg);
+        combat_send_to_room(p->room, msg);
 
         /* Find combat via session or participant pointer */
         CombatRound *combat = NULL;

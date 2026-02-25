@@ -843,27 +843,31 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
         case OP_RSHIFT: vm_bitwise_op(vm, 5); return 0;
         
         case OP_JUMP:
-            /* Debug jump target for loop backedges */
-            fprintf(stderr, "[VM] OP_JUMP -> addr=%d (ip=%d)\n", instr->operand.address_operand, vm->current_frame ? vm->current_frame->instruction_pointer : -1);
-            vm->current_frame->instruction_pointer = instr->operand.address_operand;
+            if (vm->current_frame)
+                vm->current_frame->instruction_pointer = instr->operand.address_operand;
+            else
+                vm->instruction_pointer = instr->operand.address_operand;
             return 0;
-        
+
         case OP_JUMP_IF_FALSE: {
             VMValue cond = vm_pop_value(vm);
-            int truthy = vm_value_is_truthy(cond);
-            fprintf(stderr, "[VM] OP_JUMP_IF_FALSE cond_type=%d truthy=%d -> %s addr=%d\n",
-                    cond.type, truthy, truthy ? "no-jump" : "jump", instr->operand.address_operand);
-            if (!truthy) {
-                vm->current_frame->instruction_pointer = instr->operand.address_operand;
+            if (!vm_value_is_truthy(cond)) {
+                if (vm->current_frame)
+                    vm->current_frame->instruction_pointer = instr->operand.address_operand;
+                else
+                    vm->instruction_pointer = instr->operand.address_operand;
             }
             vm_value_release(&cond);
             return 0;
         }
-        
+
         case OP_JUMP_IF_TRUE: {
             VMValue cond = vm_pop_value(vm);
             if (vm_value_is_truthy(cond)) {
-                vm->current_frame->instruction_pointer = instr->operand.address_operand;
+                if (vm->current_frame)
+                    vm->current_frame->instruction_pointer = instr->operand.address_operand;
+                else
+                    vm->instruction_pointer = instr->operand.address_operand;
             }
             vm_value_release(&cond);
             return 0;

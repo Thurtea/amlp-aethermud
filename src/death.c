@@ -178,6 +178,7 @@ int corpse_reclaim_for_player(PlayerSession *sess) {
             item->next = sess->character.inventory.items;
             sess->character.inventory.items = item;
             sess->character.inventory.item_count++;
+            sess->character.inventory.total_weight += item->weight;
             count++;
             item = next;
         }

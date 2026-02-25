@@ -19,9 +19,7 @@ void create() {
 
     void init() {
         ::init();
-        if (environment() == this_player()) {
-            add_action("cmd_orb", "orb");
-        }
+        // orb command logic moved to cmds/admin/orb.lpc
     }
 
     string format_idle(int secs) {

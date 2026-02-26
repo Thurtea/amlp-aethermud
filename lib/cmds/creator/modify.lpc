@@ -170,7 +170,7 @@ int show_object(string filepath, string name) {
         write("Error: Could not read " + filepath + "\n");
         return 1;
     }
-    write("\033[1m=== " + name + " ===\033[0m\n");
+    write("=== " + name + " ===\n");
     write("File: " + filepath + "\n\n");
     write(content);
     return 1;
@@ -236,7 +236,7 @@ int modify_short(string filepath, string value) {
 
     rm(filepath);
     write_file(filepath, content);
-    write("\033[1;32mUpdated:\033[0m short -> \"" + value + "\"\n");
+    write("Updated: short -> \"" + value + "\"\n");
     return 1;
 }
 
@@ -276,7 +276,7 @@ int modify_long(string filepath, string value) {
 
     rm(filepath);
     write_file(filepath, implode(result, "\n"));
-    write("\033[1;32mUpdated:\033[0m long description set.\n");
+    write("Updated: long description set.\n");
     return 1;
 }
 
@@ -308,13 +308,13 @@ int modify_race_level(string filepath, string value) {
             content = replace_line(content, "}",
                 "    set_race(\"" + race_val + "\");\n}");
         }
-        write("\033[1;32mUpdated:\033[0m race -> \"" + race_val + "\"\n");
+        write("Updated: race -> \"" + race_val + "\"\n");
     }
 
     if (level > 0) {
         content = replace_line(content, "set_level(",
             "    set_level(" + level + ");");
-        write("\033[1;32mUpdated:\033[0m level -> " + level + "\n");
+        write("Updated: level -> " + level + "\n");
     }
 
     rm(filepath);
@@ -337,7 +337,7 @@ int modify_level(string filepath, string value) {
 
     rm(filepath);
     write_file(filepath, content);
-    write("\033[1;32mUpdated:\033[0m level -> " + level + "\n");
+    write("Updated: level -> " + level + "\n");
     return 1;
 }
 
@@ -365,7 +365,7 @@ int modify_exit(string filepath, string value) {
         strsrch(content, "add_exit") != -1) {
         content = replace_line(content, "\"" + dir + "\"",
             exit_line);
-        write("\033[1;32mUpdated:\033[0m exit " + dir + " -> " + dest + "\n");
+        write("Updated: exit " + dir + " -> " + dest + "\n");
     } else {
         // Insert before closing brace
         string *lines = explode(content, "\n");
@@ -381,7 +381,7 @@ int modify_exit(string filepath, string value) {
             }
         }
         content = implode(result, "\n");
-        write("\033[1;32mAdded:\033[0m exit " + dir + " -> " + dest + "\n");
+        write("Added: exit " + dir + " -> " + dest + "\n");
     }
 
     rm(filepath);
@@ -407,13 +407,13 @@ int modify_damage(string filepath, string value) {
     if (dice && dice != "") {
         content = replace_line(content, "damage_dice",
             "    set_property(\"damage_dice\", \"" + dice + "\");");
-        write("\033[1;32mUpdated:\033[0m damage_dice -> \"" + dice + "\"\n");
+        write("Updated: damage_dice -> \"" + dice + "\"\n");
     }
 
     if (dtype && dtype != "") {
         content = replace_line(content, "damage_type",
             "    set_property(\"damage_type\", \"" + dtype + "\");");
-        write("\033[1;32mUpdated:\033[0m damage_type -> \"" + dtype + "\"\n");
+        write("Updated: damage_type -> \"" + dtype + "\"\n");
     }
 
     rm(filepath);
@@ -430,11 +430,11 @@ int modify_type(string filepath, string value) {
     if (strsrch(content, "weapon_type") != -1) {
         content = replace_line(content, "weapon_type",
             "    set_property(\"weapon_type\", \"" + value + "\");");
-        write("\033[1;32mUpdated:\033[0m weapon_type -> \"" + value + "\"\n");
+        write("Updated: weapon_type -> \"" + value + "\"\n");
     } else if (strsrch(content, "armor_type") != -1) {
         content = replace_line(content, "armor_type",
             "    set_property(\"armor_type\", \"" + value + "\");");
-        write("\033[1;32mUpdated:\033[0m armor_type -> \"" + value + "\"\n");
+        write("Updated: armor_type -> \"" + value + "\"\n");
     } else {
         write("No type property found in this object.\n");
         return 1;
@@ -472,7 +472,7 @@ int modify_stat(string filepath, string value) {
 
     rm(filepath);
     write_file(filepath, content);
-    write("\033[1;32mUpdated:\033[0m " + stat_name + " -> " + sv + "\n");
+    write("Updated: " + stat_name + " -> " + sv + "\n");
     return 1;
 }
 
@@ -515,7 +515,7 @@ int modify_id(string filepath, string value) {
 
     rm(filepath);
     write_file(filepath, content);
-    write("\033[1;32mUpdated:\033[0m ids -> " + implode(ids, ", ") + "\n");
+    write("Updated: ids -> " + implode(ids, ", ") + "\n");
     return 1;
 }
 
@@ -529,7 +529,7 @@ int modify_gender(string filepath, string value) {
 
     rm(filepath);
     write_file(filepath, content);
-    write("\033[1;32mUpdated:\033[0m gender -> \"" + value + "\"\n");
+    write("Updated: gender -> \"" + value + "\"\n");
     return 1;
 }
 
@@ -562,7 +562,7 @@ int modify_property(string filepath, string prop_name, string value) {
 
     rm(filepath);
     write_file(filepath, content);
-    write("\033[1;32mUpdated:\033[0m " + prop_name + " -> " + value + "\n");
+    write("Updated: " + prop_name + " -> " + value + "\n");
     return 1;
 }
 
@@ -583,12 +583,12 @@ int modify_mdc(string filepath, string value) {
 
     rm(filepath);
     write_file(filepath, content);
-    write("\033[1;32mUpdated:\033[0m MDC -> " + mdc + "\n");
+    write("Updated: MDC -> " + mdc + "\n");
     return 1;
 }
 
 int show_help() {
-    write("\033[1mQCS - Modify Object Properties\033[0m\n");
+    write("QCS - Modify Object Properties\n");
     write("==============================\n\n");
     write("Usage: modify <name> <property> <value>\n\n");
     write("Properties:\n");

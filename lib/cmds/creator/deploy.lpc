@@ -154,7 +154,7 @@ int deploy_to(object player, string filepath, string name, string location, stri
             room = load_object(filepath);
         };
         if (room) {
-            write("\033[1;32mRoom loaded:\033[0m " + filepath + "\n");
+            write("Room loaded: " + filepath + "\n");
             write("Use 'goto " + filepath + "' to visit it.\n");
         } else {
             write("Error: Failed to load room. Check for LPC errors.\n");
@@ -219,7 +219,7 @@ int do_deploy(string filepath, string name, object target_room, string obj_type)
     if (function_exists("query_short", clone))
         obj_desc = clone->query_short();
 
-    write("\033[1;32mDeployed:\033[0m " + obj_desc + " -> " + room_desc + "\n");
+    write("Deployed: " + obj_desc + " -> " + room_desc + "\n");
     write("Source: " + filepath + "\n");
 
     // Log deployment
@@ -263,7 +263,7 @@ int list_deployed(string filepath, string name) {
         return 1;
     }
 
-    write("\033[1mDeployed copies of " + name + ":\033[0m\n");
+    write("Deployed copies of " + name + ":\n");
     int count = 0;
     foreach (object clone in all_clones) {
         if (!clone) continue;
@@ -313,7 +313,7 @@ int remove_from_here(object player, string filepath, string name) {
     }
 
     if (removed > 0) {
-        write("\033[1;32mRemoved:\033[0m " + removed + " copy(s) of " + name + " from this room.\n");
+        write("Removed: " + removed + " copy(s) of " + name + " from this room.\n");
     } else {
         write("No copies of '" + name + "' found in this room.\n");
     }
@@ -321,7 +321,7 @@ int remove_from_here(object player, string filepath, string name) {
 }
 
 int show_help() {
-    write("\033[1mQCS - Deploy Objects\033[0m\n");
+    write("QCS - Deploy Objects\n");
     write("====================\n\n");
     write("Usage: deploy <name> <location>\n\n");
     write("Locations:\n");

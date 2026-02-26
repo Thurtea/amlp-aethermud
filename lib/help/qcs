@@ -1,0 +1,22 @@
+QCS - Quick Creation System
+
+The QCS (Quick Creation System) is an in-game tool for builders to create
+and manage rooms, NPCs, weapons, armor, and generic items within their
+wizard workspace. It provides simple commands to generate templates,
+edit them, and deploy copies into the game world.
+
+Commands:
+  qcs create <type> <name>
+  qcs modify <name> <field> <value>
+  qcs deploy <name> here
+  qcs deploy <name> <room>
+  qcs list
+
+Create: Generates a starter LPC template file in your workspace for the
+specified type (npc, room, weapon, armor, item).
+
+Modify: Edits fields within a created template (descriptions, stats,
+exits, damage, etc.) by updating the LPC file.
+
+Deploy: Loads or clones the template into the game world at the specified
+location or into your current room.

@@ -122,7 +122,7 @@ int main(string arg) {
         return 1;
     }
 
-    write("\033[1;32mCreated:\033[0m " + filepath + "\n");
+    write("Created: " + filepath + "\n");
     write("Type: " + type + "  Name: " + name + "\n");
     write("\nNext steps:\n");
     write("  modify " + name + " short \"a description\"\n");
@@ -249,7 +249,7 @@ string gen_item(string name) {
 }
 
 int show_help() {
-    write("\033[1mQCS - Quick Creation System\033[0m\n");
+    write("QCS - Quick Creation System\n");
     write("===========================\n\n");
     write("Usage: create <type> <name>\n\n");
     write("Types:\n");

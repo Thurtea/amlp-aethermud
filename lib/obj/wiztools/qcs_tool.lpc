@@ -88,20 +88,20 @@ int show_menu() {
         wiz_name = lower_case(player->query_name());
 
     write("\n");
-    write("\033[1;36m+===========================+\033[0m\n");
-    write("\033[1;36m|   QCS CREATOR TOOL        |\033[0m\n");
-    write("\033[1;36m+===========================+\033[0m\n");
-    write("\033[1m  1.\033[0m Create Room\n");
-    write("\033[1m  2.\033[0m Create NPC\n");
-    write("\033[1m  3.\033[0m Create Weapon\n");
-    write("\033[1m  4.\033[0m Create Armor\n");
-    write("\033[1m  5.\033[0m Create Item\n");
-    write("\033[1m  6.\033[0m List Area\n");
-    write("\033[1m  7.\033[0m Deploy Object\n");
-    write("\033[1m  8.\033[0m Modify Object\n");
-    write("\033[1m  9.\033[0m Help\n");
-    write("\033[1m  0.\033[0m Exit\n");
-    write("\033[1;36m+===========================+\033[0m\n");
+    write("+===========================+\n");
+    write("|   QCS CREATOR TOOL        |\n");
+    write("+===========================+\n");
+    write("  1. Create Room\n");
+    write("  2. Create NPC\n");
+    write("  3. Create Weapon\n");
+    write("  4. Create Armor\n");
+    write("  5. Create Item\n");
+    write("  6. List Area\n");
+    write("  7. Deploy Object\n");
+    write("  8. Modify Object\n");
+    write("  9. Help\n");
+    write("  0. Exit\n");
+    write("+===========================+\n");
 
     if (wiz_name != "") {
         write("  Workspace: /domains/wizard/" + wiz_name + "/area/\n");
@@ -112,7 +112,7 @@ int show_menu() {
 
 // Interactive create - prompt for name
 int do_create(string type) {
-    write("\n\033[1mCreate " + capitalize(type) + "\033[0m\n");
+    write("\nCreate " + capitalize(type) + "\n");
     write("Enter name (lowercase, underscores ok): qcs create " + type + " <name>\n");
     write("Example: qcs create " + type + " my_" + type + "\n");
     return 1;
@@ -181,7 +181,7 @@ int do_list() {
     string base = "/domains/wizard/" + wiz_name + "/area";
     string *types = ({ "room", "npc", "weapon", "armor", "item" });
 
-    write("\n\033[1m=== Your QCS Workspace ===\033[0m\n");
+    write("\n=== Your QCS Workspace ===\n");
     write("Base: " + base + "/\n\n");
 
     int total = 0;
@@ -190,7 +190,7 @@ int do_list() {
         string *files = get_dir(dir + "*.lpc");
 
         if (files && sizeof(files)) {
-            write("\033[1m" + capitalize(type) + "s:\033[0m\n");
+            write(capitalize(type) + "s:\n");
             foreach (string f in files) {
                 string name = f;
                 // Strip .lpc
@@ -213,7 +213,7 @@ int do_list() {
 }
 
 int do_deploy_menu() {
-    write("\n\033[1mDeploy Object\033[0m\n");
+    write("\nDeploy Object\n");
     write("Usage: qcs deploy <name> <location>\n\n");
     write("Options:\n");
     write("  qcs deploy <name> here     Deploy to current room\n");
@@ -225,7 +225,7 @@ int do_deploy_menu() {
 }
 
 int do_modify_menu() {
-    write("\n\033[1mModify Object\033[0m\n");
+    write("\nModify Object\n");
     write("Usage: qcs modify <name> <property> <value>\n\n");
     write("Properties:\n");
     write("  short <desc>           Set short description\n");
@@ -240,17 +240,17 @@ int do_modify_menu() {
 }
 
 int do_help() {
-    write("\n\033[1m=== QCS Creator Tool Help ===\033[0m\n\n");
+    write("\n=== QCS Creator Tool Help ===\n\n");
     write("The QCS (Quick Creation System) lets you build content\n");
     write("without hand-editing LPC files.\n\n");
-    write("\033[1mQuick Start:\033[0m\n");
+    write("Quick Start:\n");
     write("  qcs create npc goblin\n");
     write("  qcs modify goblin short \"a nasty goblin\"\n");
     write("  qcs modify goblin long \"Green skin, sharp teeth.\"\n");
     write("  qcs modify goblin race \"orc\" level 5\n");
     write("  qcs deploy goblin here\n\n");
-    write("\033[1mMenu:\033[0m Type 'qcs' to show the menu.\n");
-    write("\033[1mDirect:\033[0m Type 'qcs create/modify/deploy ...' for direct use.\n\n");
+    write("Menu: Type 'qcs' to show the menu.\n");
+    write("Direct: Type 'qcs create/modify/deploy ...' for direct use.\n\n");
     write("All files are saved in your workspace:\n");
     write("  /domains/wizard/YOURNAME/area/<type>/<name>.lpc\n\n");
     write("Type 'help qcs' for the full reference.\n");

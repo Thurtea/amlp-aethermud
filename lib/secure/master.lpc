@@ -262,7 +262,9 @@ void log_error(string file, string err) {
 
 void destruct_ob(object ob) {
     if(!mappingp(loaded_daemons) || !ob) return;
-    string *ks = keys(loaded_daemons); int i;
-    for(i = 0; i < sizeof(ks); i++)
+    string *ks = keys(loaded_daemons);
+    int i;
+    for(i = 0; i < sizeof(ks); i++) {
         if(loaded_daemons[ks[i]] == ob) map_delete(loaded_daemons, ks[i]);
+    }
 }

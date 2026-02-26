@@ -29,3 +29,50 @@ lib/cmds/eval.lpc,cmd,low,review-needed,Stub: eval not implemented
 lib/cmds/promote.lpc,cmd,low,review-needed,Stub: promote not implemented
 lib/saves/VampireTest.save,save,low,review-needed,Placeholder save file
 lib/saves/CyberKnightTest.save,save,low,review-needed,Placeholder save file
+lib/occs/xiticix_warrior.lpc,occ,high,review-needed,Auto-populated stub
+lib/occs/full_conversion_borg.lpc,occ,high,review-needed,Stub + review for borg mechanics
+lib/occs/psi_mystic.lpc,occ,high,review-needed,TODO:CONTENT combined effects
+lib/occs/warlock.lpc,occ,high,review-needed,Stub file
+lib/occs/necromancer.lpc,occ,high,review-needed,Stub file
+lib/occs/psi_healer.lpc,occ,high,review-needed,Stub + balance review
+lib/occs/undead_slayer.lpc,occ,high,review-needed,TODO:CONTENT vampire mechanics
+lib/occs/rogue_scholar.lpc,occ,high,review-needed,Stub file
+lib/occs/elemental_fusionist.lpc,occ,high,review-needed,Stub file
+lib/occs/line_walker.lpc,occ,high,review-needed,Stub file
+lib/occs/battle_magus.lpc,occ,high,review-needed,Stub file
+lib/occs/crazy.lpc,occ,high,review-needed,Stub file (conservative values)
+lib/occs/shifter.lpc,occ,high,review-needed,Stub file
+lib/occs/coaltition_grunt.lpc,occ,medium,review-needed,TODO:CONTENT loyalty mechanics
+lib/occs/cosmo_knight.lpc,occ,high,review-needed,Stub + balance note
+lib/occs/power_armor_pilot.lpc,occ,high,review-needed,Stub + balance note
+lib/occs/xiticix_worker.lpc,occ,high,review-needed,Auto-populated stub
+lib/occs/city_rat.lpc,occ,high,review-needed,Stub + balance note
+
+lib/races/dragon_hatchling.lpc,race,high,review-needed,Stub file
+lib/races/titan.lpc,race,high,review-needed,Placeholder; verify source values
+lib/races/ice_dragon.lpc,race,high,review-needed,Placeholder values
+lib/races/noli.lpc,race,high,review-needed,Placeholder
+
+lib/skills/wp_modern/wp_energy_rifle.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_rifle.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_explosives.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_pistol.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_heavy_md.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_smg.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_revolver.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_auto_pistol.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_shotgun.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+lib/skills/wp_modern/wp_energy_pistol.lpc,skill,medium,review-needed,TODO:CONTENT proficiency stub
+
+lib/psionics/healing/psychic_diagnosis.lpc,psionic,medium,review-needed,TODO: implement activate()
+lib/psionics/healing/restore_fatigue.lpc,psionic,medium,review-needed,TODO: implement activate()
+lib/psionics/healing/reduce_pain.lpc,psionic,medium,review-needed,TODO: implement activate()
+lib/psionics/healing/psychic_surgery.lpc,psionic,medium,review-needed,TODO: implement activate()
+lib/psionics/sensitive/detect_psionics.lpc,psionic,medium,review-needed,TODO: implement activate()
+lib/psionics/sensitive/sense_danger.lpc,psionic,medium,review-needed,TODO: implement activate()
+
+lib/wiz/admin_orb.lpc,wiz,medium,review-needed,Contains server-stats and shutdown/reboot TODOs
+lib/tools/generate_stubs.sh,tools,low,reference,Template used to auto-create many stubs
+lib/std/player.lpc,std,low,review-needed,Placeholder functions for compatibility
+lib/daemon/login.lpc,daemon,low,review-needed,Daemon stub - functionality in /clone/login.c
+

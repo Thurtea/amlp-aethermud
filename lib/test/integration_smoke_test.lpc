@@ -1,0 +1,102 @@
+// /lib/test/integration_smoke_test.lpc
+// Integration smoke test: chargen + basic race/OCC checks
+
+void create() { seteuid(getuid()); }
+
+int run_all() {
+    string out = "Integration smoke test - " + ctime(time()) + "\n";
+    object chargen = 0;
+
+    // Try loading daemon from common paths
+    catch { chargen = load_object("/daemon/chargen"); };
+    if (!chargen) {
+        catch { chargen = load_object("/lib/daemon/chargen"); };
+    }
+
+    if (!chargen) {
+        out += "Chargen daemon: FAILED to load.\n";
+        write_file("/tmp/integration_smoke_test.txt", out);
+        return 1;
+    }
+
+    out += "Chargen daemon: loaded\n";
+
+    // Roll stats
+    if (function_exists("roll_all_stats", chargen)) {
+        mapping stats = chargen->roll_all_stats();
+        if (!mapp(stats)) {
+            out += "roll_all_stats: returned non-mapping\n";
+        } else {
+            string *expected = ({"iq","me","ma","ps","pp","pe","pb","spd"});
+            int ok = 1;
+            foreach (string k in expected) {
+                if (!stats[k]) ok = 0;
+            }
+            out += "roll_all_stats: returned mapping - ";
+            out += ok ? "contains expected keys\n" : "MISSING expected keys\n";
+            out += "Sample: " + sprintf("IQ=%d ME=%d MA=%d PS=%d PP=%d PE=%d PB=%d SPD=%d\n",
+                stats["iq"], stats["me"], stats["ma"], stats["ps"],
+                stats["pp"], stats["pe"], stats["pb"], stats["spd"]);
+        }
+    } else {
+        out += "roll_all_stats(): NOT FOUND on chargen daemon\n";
+    }
+
+    // Get available races and try loading one
+    if (function_exists("get_available_races", chargen)) {
+        string *races = chargen->get_available_races();
+        if (!races || !sizeof(races)) {
+            out += "get_available_races: returned empty list\n";
+        } else {
+            out += "get_available_races: " + sizeof(races) + " entries\n";
+            string pick = races[0];
+            object r = 0;
+            catch { r = chargen->load_race(pick); };
+            if (!r) {
+                // try direct load
+                catch { r = load_object("/races/" + pick); };
+            }
+            if (!r) {
+                out += "race load (" + pick + "): FAILED\n";
+            } else {
+                out += "race load (" + pick + "): OK - ";
+                if (function_exists("query_race_name", r)) {
+                    out += (string)r->query_race_name() + "\n";
+                } else {
+                    out += "no query_race_name()\n";
+                }
+            }
+        }
+    } else {
+        out += "get_available_races(): NOT FOUND on chargen\n";
+    }
+
+    // Get available OCCs and try loading one
+    if (function_exists("get_available_occs", chargen)) {
+        string *occs = chargen->get_available_occs();
+        if (!occs || !sizeof(occs)) {
+            out += "get_available_occs: returned empty list\n";
+        } else {
+            out += "get_available_occs: " + sizeof(occs) + " entries\n";
+            string pick = occs[0];
+            object o = 0;
+            catch { o = chargen->load_occ(pick); };
+            if (!o) {
+                catch { o = load_object("/occs/" + pick); };
+            }
+            if (!o) {
+                out += "occ load (" + pick + "): FAILED\n";
+            } else {
+                out += "occ load (" + pick + "): OK - ";
+                if (function_exists("query_occ_name", o)) out += (string)o->query_occ_name() + "\n";
+                else out += "no query_occ_name()\n";
+            }
+        }
+    } else {
+        out += "get_available_occs(): NOT FOUND on chargen\n";
+    }
+
+    // Log summary to file
+    write_file("/tmp/integration_smoke_test.txt", out);
+    return 1;
+}

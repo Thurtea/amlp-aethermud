@@ -1,0 +1,31 @@
+file,category,priority,status,note
+lib/occs/rogue_scientist.lpc,occ,high,review-needed,Placeholder stub
+lib/occs/wilderness_scout.lpc,occ,high,review-needed,TODO: Review and expand
+lib/occs/mercenary.lpc,occ,high,review-needed,Stub file
+lib/occs/biomancer.lpc,occ,high,review-needed,Stub file
+lib/occs/mystic.lpc,occ,high,review-needed,Stub file
+lib/occs/stone_master.lpc,occ,high,review-needed,Stub file
+lib/occs/techno_wizard.lpc,occ,high,review-needed,Stub file
+lib/occs/psi_stalker.lpc,occ,high,review-needed,Auto-generated stub
+lib/occs/tattooed_man.lpc,occ,high,review-needed,TODO: tattoo mechanics
+lib/occs/pending.lpc,occ,high,keep,Minimal placeholder used by code
+lib/races/simvan.lpc,race,high,review-needed,Placeholder stub
+lib/races/dragon_hatchling.lpc,race,high,review-needed,Stub file
+lib/races/uteni.lpc,race,high,review-needed,Stub file
+lib/races/eandroth.lpc,race,high,review-needed,Stub file
+lib/races/noli.lpc,race,high,review-needed,Placeholder
+lib/races/trimadore.lpc,race,high,review-needed,Placeholder
+lib/races/fire_dragon.lpc,race,high,review-needed,Placeholder values
+lib/skills/rogue/streetwise.lpc,skill,medium,review-needed,TODO: implement perform()
+lib/skills/rogue/safecracking_rogue.lpc,skill,medium,review-needed,TODO: implement perform()
+lib/skills/rogue/disguise_rogue.lpc,skill,medium,review-needed,TODO: implement perform()
+lib/skills/rogue/pick_locks_rogue.lpc,skill,medium,review-needed,TODO: implement perform()
+lib/psionics/healing/increased_healing.lpc,psionic,medium,review-needed,TODO: power not implemented
+lib/psionics/physical/pyrokinesis.lpc,psionic,medium,review-needed,TODO: power not implemented
+lib/obj/corpse.lpc,obj,low,review-needed,TODO: call_out when driver supports
+lib/cmds/cd.lpc,cmd,low,review-needed,Stub: cd not implemented
+lib/cmds/clone.lpc,cmd,low,review-needed,Stub: clone not implemented
+lib/cmds/eval.lpc,cmd,low,review-needed,Stub: eval not implemented
+lib/cmds/promote.lpc,cmd,low,review-needed,Stub: promote not implemented
+lib/saves/VampireTest.save,save,low,review-needed,Placeholder save file
+lib/saves/CyberKnightTest.save,save,low,review-needed,Placeholder save file

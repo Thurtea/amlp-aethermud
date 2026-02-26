@@ -1,0 +1,73 @@
+// /lib/test/wiztool_smoke_test.lpc
+// Smoke-test for wiz-tool objects and command wrappers.
+
+void create() { seteuid(getuid()); }
+
+int run_tests() {
+    string *tools = ({
+        "/obj/wiztools/admin_orb",
+        "/obj/wiztools/admin_wand",
+        "/obj/wiztools/code_tool",
+        "/obj/wiztools/rp_tool",
+        "/obj/wiztools/crystal",
+        "/obj/wiztools/wiz_build",
+    });
+
+    string *wrappers = ({
+        "/cmds/build",
+        "/cmds/admin/call",
+        "/cmds/wand",
+        "/cmds/code",
+        "/cmds/crystal",
+        "/cmds/rp",
+        "/cmds/orb",
+    });
+
+    string out = "Wiztool smoke test - " + ctime(time()) + "\n";
+    object obj;
+
+    foreach (string t in tools) {
+        obj = 0;
+        catch { obj = load_object(t); };
+        if (!obj) {
+            out += t + ": FAILED to load\n";
+            continue;
+        }
+        out += t + ": loaded\n";
+        // Check for expected command handlers
+        if (t == "/obj/wiztools/admin_orb") {
+            out += "  cmd_orb: " + (function_exists("cmd_orb", obj) ? "OK" : "MISSING") + "\n";
+            out += "  do_call: " + (function_exists("do_call", obj) ? "OK" : "MISSING") + "\n";
+        }
+        if (t == "/obj/wiztools/admin_wand") {
+            out += "  cmd_wand: " + (function_exists("cmd_wand", obj) ? "OK" : "MISSING") + "\n";
+        }
+        if (t == "/obj/wiztools/code_tool") {
+            out += "  cmd_code: " + (function_exists("cmd_code", obj) ? "OK" : "MISSING") + "\n";
+        }
+        if (t == "/obj/wiztools/rp_tool") {
+            out += "  cmd_rp: " + (function_exists("cmd_rp", obj) ? "OK" : "MISSING") + "\n";
+        }
+        if (t == "/obj/wiztools/crystal") {
+            out += "  cmd_crystal: " + (function_exists("cmd_crystal", obj) ? "OK" : "MISSING") + "\n";
+        }
+        if (t == "/obj/wiztools/wiz_build") {
+            out += "  cmd_build: " + (function_exists("cmd_build", obj) ? "OK" : "MISSING") + "\n";
+        }
+    }
+
+    foreach (string w in wrappers) {
+        obj = 0;
+        catch { obj = load_object(w); };
+        if (!obj) {
+            out += w + ": FAILED to load\n";
+            continue;
+        }
+        out += w + ": loaded\n";
+        out += "  main(): " + (function_exists("main", obj) ? "OK" : "MISSING") + "\n";
+        out += "  query_privilege_required: " + (function_exists("query_privilege_required", obj) ? "OK" : "MISSING") + "\n";
+    }
+
+    write_file("/tmp/wiztool_smoke_test.txt", out);
+    return 1;
+}

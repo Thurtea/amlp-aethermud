@@ -1,0 +1,31 @@
+// /lib/races/werebear.lpc
+// Werebear - Shapeshifting ursine lycanthrope
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Werebear");
+    set_race_id("werebear");
+    set_race_plural("Werebears");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Werebears are lycanthropes that shift between human and bear forms.
+They combine human cunning with ursine ferocity when transformed."
+    );
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(68, 96);
+    set_weight_range(250, 900);
+    set_lifespan(200);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": 0, "ma": 0,
+        "ps": 6, "pp": 0, "pe": 3, "pb": -1, "spd": -1
+    ]));
+
+    set_natural_sdc(60);
+    add_racial_ability("shapechange_bear", 1);
+    add_racial_ability("regeneration_minor", 1);
+}

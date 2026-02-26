@@ -1,0 +1,10 @@
+SAY
+
+Usage: say <message>
+
+Speak aloud in the room. Everyone in the same room will see your message as
+someone speaking. Use this for local conversation or to interact with NPCs.
+For private messages use 'tell' or other communication channels.
+
+Examples:
+  say Hello everyone!

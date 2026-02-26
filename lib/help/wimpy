@@ -1,0 +1,10 @@
+WIMPY
+
+Usage: wimpy <percentage>
+
+Set an automatic threshold to attempt to flee or take defensive action when
+your health drops below the given percentage. Use 'wimpy 0' to disable the
+feature. Behavior depends on your skills and the environment.
+
+Examples:
+  wimpy 20

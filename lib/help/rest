@@ -1,0 +1,10 @@
+REST
+
+Usage: rest
+
+Take a short rest to recover health or energy according to server rules.
+Resting may make you vulnerable or unable to act. Use 'wake' or 'stand' to
+end resting state. Some areas or combat situations prevent safe resting.
+
+Examples:
+  rest

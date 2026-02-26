@@ -1,0 +1,32 @@
+// /lib/races/jotan.lpc
+// Jotan - Mountain giant folk (approximate)
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Jotan");
+    set_race_id("jotan");
+    set_race_plural("Jotan");
+    set_race_category(RACE_CAT_GIANT);
+
+    set_race_description(
+        "Jotan are mountain giants—tough, hardy, and slow. They dwell in high
+peaks and often work stone and metal with great skill."
+    );
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(96, 160);
+    set_weight_range(800, 2000);
+    set_lifespan(400);
+
+    set_stat_modifiers(([
+        "iq": -1, "me": 1, "ma": -1,
+        "ps": 6, "pp": 0, "pe": 4, "pb": -2, "spd": -2
+    ]));
+
+    set_natural_sdc(90);
+    add_racial_ability("stonecraft", 1);
+
+    // Approximate values; review against source.
+}

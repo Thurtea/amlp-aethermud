@@ -1,0 +1,11 @@
+ATTACK
+
+Usage: attack <target>
+
+Use this command to initiate an attack against a visible target in the same
+room. If you are wielding a weapon it will be used; otherwise you fight
+unarmed. Combat follows the game's real-time/tick rules and uses your
+skills and stats to determine success.
+
+If you succeed, you will enter active combat and enemy behavior may change.
+Use 'wield', 'unwield', 'dodge', and 'parry' to adjust tactics.

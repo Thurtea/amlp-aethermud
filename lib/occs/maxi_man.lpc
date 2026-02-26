@@ -1,0 +1,41 @@
+// /lib/occs/maxi_man.lpc
+// Maxi-Man - Heavy-hitter juicer archetype
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Maxi-Man");
+    set_occ_id("maxi_man");
+    set_occ_category(OCC_CAT_SPECIAL);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Maxi-Men are extreme juicer-enhanced warriors focused on raw
+physical power and endurance. They trade longevity for short-term
+combat supremacy."
+    );
+
+    set_stat_requirements(([ "ps": 13, "pe": 12 ]));
+    set_stat_bonuses(([ "ps": 4, "pe": 2 ]));
+
+    set_occ_skills(({ "unarmed_combat", "heavy_weapons", "intimidation", "endurance", "survival", "melee_combat" }));
+    set_occ_related_skills(({ "first_aid", "repair" }));
+    set_occ_skill_count(6);
+    set_elective_count(2);
+    set_secondary_count(6);
+
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+
+    set_base_sdc(80);
+    set_sdc_per_level(10);
+
+    set_standard_equipment(({ "/obj/clothing/reinforced_vest" }));
+    set_starting_credits(200, 1000);
+    set_starting_weapons(({ "/obj/weapons/heavy_club" }));
+    set_starting_armor(({ "/obj/armor/reinforced_armor" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(12);
+}

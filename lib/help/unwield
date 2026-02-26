@@ -1,0 +1,10 @@
+UNWIELD
+
+Usage: unwield <weapon>
+
+Remove a weapon from your wielded slot so it is no longer used in combat.
+The weapon remains in your inventory. Use this to switch weapons or to free
+your hands for other actions like climbing or casting.
+
+Examples:
+  unwield vibro-blade

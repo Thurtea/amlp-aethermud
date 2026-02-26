@@ -1,0 +1,10 @@
+DODGE
+
+Usage: dodge
+
+Attempt to avoid an incoming attack during combat. Success depends on your
+skills, agility, and timing. Use 'parry' or other defensive abilities as
+complements; some armors may reduce your dodge effectiveness.
+
+Examples:
+  dodge

@@ -377,7 +377,7 @@ void start_creation(object player) {
     string pname = player->query_name();
     
     player_creation[pname] = ([
-        "state": STATE_RACE,
+        "state": STATE_STATS_ROLL,
         "race": 0,
         "occ": 0,
         "stats": ([]),
@@ -385,8 +385,12 @@ void start_creation(object player) {
         "skills": ({}),
         "equipment": ({})
     ]);
-    
-    tell_object(player, "\n" + get_race_selection_menu());
+
+    /* Roll initial stats and present to player for accept/reroll/back */
+    mapping rolled = roll_all_stats();
+    player_creation[pname]["stats"] = rolled;
+    tell_object(player, "\n" + format_stats(rolled));
+    tell_object(player, "\nAccept these stats? (choose 'accept' to proceed, 'reroll' to roll again)\n");
 }
 
 // Get current creation state for a player

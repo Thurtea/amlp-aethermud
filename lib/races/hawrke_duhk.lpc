@@ -1,0 +1,33 @@
+// /lib/races/hawrke_duhk.lpc
+// Hawrke Duhk - Tribal warrior race (approximate entry)
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Hawrke Duhk");
+    set_race_id("hawrke_duhk");
+    set_race_plural("Hawrke Duhk");
+    set_race_category(RACE_CAT_HUMAN);
+
+    set_race_description(
+        "Hawrke Duhk are a hardy, tribal people known for martial skill and
+survival in harsh environments. They are disciplined and resourceful."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(60, 78);
+    set_weight_range(140, 220);
+    set_lifespan(80);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": 1, "ma": 0,
+        "ps": 2, "pp": 1, "pe": 1, "pb": 0, "spd": 0
+    ]));
+
+    set_natural_sdc(10);
+    add_racial_ability("tribal_training", 1);
+
+    set_psionic_potential(0);
+}

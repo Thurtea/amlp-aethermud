@@ -1,0 +1,37 @@
+// /lib/occs/pirate.lpc
+// Pirate - Sea rover and plunderer
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Pirate");
+    set_occ_id("pirate");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Pirates cruise the coasts and seas in search of plunder. They are
+adept at shipboard combat, navigation, and opportunistic looting."
+    );
+
+    set_stat_requirements(([ "ps": 9, "spd": 9 ]));
+    set_stat_bonuses(([ "ps": 1, "spd": 1 ]));
+
+    set_occ_skills(({ "navigation", "sailing", "boarding", "small_arms", "melee_combat", "barter" }));
+    set_occ_related_skills(({ "swim_expert", "repair" }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_base_sdc(25);
+    set_sdc_per_level(3);
+
+    set_standard_equipment(({ "/obj/clothing/pirate_coat", "/obj/kit/boarding_kit" }));
+    set_starting_credits(20, 200);
+    set_starting_weapons(({ "/obj/weapons/cutlass", "/obj/weapons/flintlock" }));
+    set_starting_armor(({ "/obj/armor/light_leather" }));
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+}

@@ -1,0 +1,35 @@
+// /lib/races/bearman.lpc
+// Bearman - Large humanoid ursine warrior
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Bearman");
+    set_race_id("bearman");
+    set_race_plural("Bearmen");
+    set_race_category(RACE_CAT_DEMIHUMAN);
+
+    set_race_description(
+        "Bearmen are stout, fur-covered humanoids with great strength and
+resilience. They are often fierce warriors or solitary hunters."
+    );
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(72, 96);
+    set_weight_range(300, 600);
+    set_lifespan(120);
+
+    set_stat_modifiers(([
+        "iq": -1, "me": 0, "ma": -1,
+        "ps": 5, "pp": 0, "pe": 4, "pb": -2, "spd": -1
+    ]));
+
+    set_natural_sdc(50);
+    add_racial_ability("claw_attack", 1);
+    add_racial_ability("bite_attack", 1);
+
+    set_psionic_potential(0);
+    set_magic_potential(0);
+}

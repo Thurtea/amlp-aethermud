@@ -1,0 +1,10 @@
+WIELD
+
+Usage: wield <weapon>
+
+Equip a weapon from your inventory in a suitable hand slot. Some weapons
+require specific proficiencies or two hands. Use 'unwield' to stop wielding
+an item. Wielding changes combat behavior and which attacks you can make.
+
+Examples:
+  wield vibro-blade

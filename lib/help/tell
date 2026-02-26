@@ -1,0 +1,10 @@
+TELL
+
+Usage: tell <player> <message>
+
+Send a private message directly to another player. The target must be
+online; messages to offline players will fail. Use 'reply' to respond to the
+last private message. Respect players' privacy and preferences.
+
+Examples:
+  tell kendra Are you at the tavern?

@@ -1,0 +1,37 @@
+// /lib/occs/professional_thief.lpc
+// Professional Thief - Master burglar and infiltrator
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Professional Thief");
+    set_occ_id("professional_thief");
+    set_occ_category(OCC_CAT_SPECIAL);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Professional Thieves are experts at burglary, infiltration, and
+high-stakes theft. They excel in stealth, lockpicking, and escape tactics."
+    );
+
+    set_stat_requirements(([ "spd": 11, "me": 10 ]));
+    set_stat_bonuses(([ "spd": 2 ]));
+
+    set_occ_skills(({ "stealth", "pick_locks", "disable_trap", "thievery", "acrobatics", "disguise" }));
+    set_occ_related_skills(({ "forgery", "barter" }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_base_sdc(20);
+    set_sdc_per_level(0);
+
+    set_standard_equipment(({ "/obj/tools/thief_tools", "/obj/clothing/dark_clothes" }));
+    set_starting_credits(50, 300);
+    set_starting_weapons(({ "/obj/weapons/knife", "/obj/weapons/dagger" }));
+    set_starting_armor(({ "/obj/armor/light_leather" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(4);
+}

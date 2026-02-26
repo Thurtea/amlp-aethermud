@@ -1,0 +1,10 @@
+STATS
+
+Usage: stats
+
+Display your character's primary attributes, resources (HP/SDC/PPE/ISP),
+skills, and other key information. Use this regularly to review progress and
+plan training or equipment changes.
+
+Examples:
+  stats

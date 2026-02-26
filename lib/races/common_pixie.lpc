@@ -1,0 +1,35 @@
+// /lib/races/common_pixie.lpc
+// Common Pixie - Tiny mischievous flyer
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Common Pixie");
+    set_race_id("common_pixie");
+    set_race_plural("Common Pixies");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Pixies are tiny winged folk, fond of mischief and trickery. They often
+live near ancient sites and enjoy playing pranks on travelers."
+    );
+
+    set_size_category(SIZE_TINY);
+    set_height_range(6, 18);
+    set_weight_range(1, 8);
+    set_lifespan(180);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": -1, "ma": 2,
+        "ps": -4, "pp": 4, "pe": -1, "pb": -3, "spd": 4
+    ]));
+
+    set_natural_sdc(2);
+    add_racial_ability("small_flight", 1);
+    add_racial_ability("pixie_dust", 1);
+
+    set_magic_potential(20);
+    set_psionic_potential(0);
+}

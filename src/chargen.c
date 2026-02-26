@@ -621,26 +621,13 @@ void chargen_create_admin(PlayerSession *sess) {
 }
 
 /* Init car generation */
-void chargen_init(PlayerSession *sess) {
+/* Helper: display first page of races */
+static void chargen_show_races(PlayerSession *sess) {
     if (!sess) return;
-    
-    sess->chargen_state = CHARGEN_RACE_SELECT;
-    sess->chargen_page = 0;
-    sess->chargen_temp_choice = 0;
-    
-    send_to_player(sess, "\n");
-    send_to_player(sess, "=========================================\n");
-    send_to_player(sess, "      CHARACTER CREATION SYSTEM\n");
-    send_to_player(sess, "        AetherMUD - 109 P.A.\n");
-    send_to_player(sess, "=========================================\n");
-    send_to_player(sess, "\n");
-    
-    /* Ensure races are scanned from disk */
     if (num_loaded_races == 0) race_loader_scan_races();
-
-    /* Display first page of races */
+    sess->chargen_page = 0;
     int total_pages = (num_loaded_races + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-    send_to_player(sess, "=== SELECT YOUR RACE (Page %d/%d) ===\n\n",
+    send_to_player(sess, "\n=== SELECT YOUR RACE (Page %d/%d) ===\n\n",
                    sess->chargen_page + 1, total_pages);
 
     int start = sess->chargen_page * ITEMS_PER_PAGE;
@@ -660,6 +647,27 @@ void chargen_init(PlayerSession *sess) {
         send_to_player(sess, "  Type 'n' for next page\n");
     }
     send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_races);
+}
+
+void chargen_init(PlayerSession *sess) {
+    if (!sess) return;
+
+    sess->chargen_state = CHARGEN_STATS_ROLL;
+    sess->chargen_page = 0;
+    sess->chargen_temp_choice = 0;
+
+    send_to_player(sess, "\n");
+    send_to_player(sess, "=========================================\n");
+    send_to_player(sess, "      CHARACTER CREATION SYSTEM\n");
+    send_to_player(sess, "        AetherMUD - 109 P.A.\n");
+    send_to_player(sess, "=========================================\n");
+    send_to_player(sess, "\n");
+
+    /* Roll initial stats and prompt for acceptance */
+    chargen_roll_stats(sess);
+    chargen_display_stats(sess);
+    sess->chargen_state = CHARGEN_STATS_CONFIRM;
+    send_to_player(sess, "\nAccept these stats? (yes/reroll/back): ");
 }
 
 /* Roll character stats */
@@ -1172,55 +1180,25 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             
         case CHARGEN_STATS_CONFIRM:
             if (strncasecmp(input, "back", 4) == 0 || strncasecmp(input, "b", 1) == 0) {
-                /* Go back to race selection */
+                /* Go back to race selection (if requested) */
                 if (ch->race) { free(ch->race); ch->race = NULL; }
                 if (ch->occ)  { free(ch->occ);  ch->occ  = NULL; }
                 sess->chargen_state = CHARGEN_RACE_SELECT;
                 sess->chargen_page = 0;
-                int total_pages2 = (num_loaded_races + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-                send_to_player(sess, "\n=== SELECT YOUR RACE (Page 1/%d) ===\n\n", total_pages2);
-                for (int i = 0; i < (num_loaded_races < ITEMS_PER_PAGE ? num_loaded_races : ITEMS_PER_PAGE); i++) {
-                    send_to_player(sess, "  %2d. %s - %s\n",
-                                  i + 1, loaded_races[i].name, loaded_races[i].desc);
-                }
-                send_to_player(sess, "\n");
-                if (num_loaded_races > ITEMS_PER_PAGE) send_to_player(sess, "  Type 'n' for next page\n");
-                send_to_player(sess, "\nEnter choice (1-%d): ", num_loaded_races);
+                chargen_show_races(sess);
                 break;
             }
             if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
-                /* Auto-assign OCC primary skills, except for dragon RCCs which use racial skills */
-                if (ch->occ && strcasestr(ch->occ, "Dragon Hatchling") != NULL) {
-                    send_to_player(sess, "\nAs a dragon, your racial abilities define your capabilities.\n");
-                } else if (ch->occ) {
-                    occ_assign_skills(sess, ch->occ);
-                    send_to_player(sess, "\nYour primary skills have been assigned based on your O.C.C.\n");
-                    skill_display_list(sess);
-
-                    /* Apply per-race flat skill bonus (if present). This mirrors
-                     * the behavior applied in occ_assign_skills(): add
-                     * race_skill_bonus to each skill percentage and clamp to 100.
-                     */
-                    for (int i = 0; i < MAX_PLAYER_SKILLS; i++) {
-                        if (sess->character.race && sess->character.race_skill_bonus > 0) {
-                            sess->character.skills[i].percentage += sess->character.race_skill_bonus;
-                            if (sess->character.skills[i].percentage > 100)
-                                sess->character.skills[i].percentage = 100;
-                        }
-                    }
-                } else {
-                    send_to_player(sess, "\nYou will receive skills through in-game training and progression.\n");
-                }
-
-                /* Transition to alignment selection */
-                sess->chargen_state = CHARGEN_ALIGNMENT_SELECT;
-                chargen_show_alignments(sess);
+                /* Proceed to race selection after accepting rolled stats */
+                sess->chargen_state = CHARGEN_RACE_SELECT;
+                sess->chargen_page = 0;
+                chargen_show_races(sess);
             } else if (strncasecmp(input, "reroll", 6) == 0 || strncasecmp(input, "r", 1) == 0) {
                 send_to_player(sess, "\nRerolling stats...\n");
                 chargen_roll_stats(sess);
                 chargen_display_stats(sess);
                 send_to_player(sess, "\n");
-                send_to_player(sess, "Accept these stats? (yes/reroll): ");
+                send_to_player(sess, "Accept these stats? (yes/reroll/back): ");
             } else {
                 send_to_player(sess, "Please answer 'yes', 'reroll', or 'back': ");
             }
@@ -1264,17 +1242,12 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         sess->current_room = zone_room;
                     }
 
-                        /* Secondary skills can be learned through in-game training */
-                        send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
+                    /* Secondary skills can be learned through in-game training */
+                    send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
 
-                        /* Now roll attributes (after starting zone selection) */
-                        send_to_player(sess, "\nRolling your attributes...\n");
-                        chargen_roll_stats(sess);
-                        chargen_display_stats(sess);
-
-                        sess->chargen_state = CHARGEN_STATS_CONFIRM;
-                        send_to_player(sess, "\n");
-                        send_to_player(sess, "Accept these stats? (yes/reroll/back): ");
+                    /* Proceed to alignment selection */
+                    sess->chargen_state = CHARGEN_ALIGNMENT_SELECT;
+                    chargen_show_alignments(sess);
                 } else {
                     send_to_player(sess, "Invalid choice. Enter 1-3: ");
                 }

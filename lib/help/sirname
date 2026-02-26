@@ -1,0 +1,11 @@
+SIRNAME
+
+Usage: sirname <request|status>
+
+Request or check the status of an honored or special surname (sirname)
+that confers roleplay flavor or title. Requests may require staff approval
+and review. Use this command to see pending requests or request a change.
+
+Examples:
+  sirname request "the Bold"
+  sirname status

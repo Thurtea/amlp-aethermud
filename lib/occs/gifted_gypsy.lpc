@@ -1,0 +1,43 @@
+// /lib/occs/gifted_gypsy.lpc
+// Gifted Gypsy - Charismatic performer with minor mystical talents
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Gifted Gypsy");
+    set_occ_id("gifted_gypsy");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Gifted Gypsies are traveling performers and mystics, combining
+music, storytelling and occasional minor magical talents to entertain and
+influence crowds."
+    );
+
+    set_stat_requirements(([ "pp": 10, "ma": 8 ]));
+    set_stat_bonuses(([ "pp": 1, "ma": 1 ]));
+
+    set_occ_skills(({ "performance", "barter", "language_american", "divination_basic", "stealth", "streetwise" }));
+    set_occ_related_skills(({ "music", "entertainment" }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_base_ppe(10);
+    set_ppe_per_level(2);
+    set_base_isp(0);
+    set_isp_per_level(0);
+
+    set_base_sdc(10);
+    set_sdc_per_level(0);
+
+    set_standard_equipment(({ "/obj/clothing/performers_robe", "/obj/instrument/lute" }));
+    set_starting_credits(20, 150);
+    set_starting_weapons(({ "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/robe" }));
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+}

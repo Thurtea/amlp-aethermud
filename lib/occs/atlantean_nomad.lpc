@@ -1,0 +1,43 @@
+// /lib/occs/atlantean_nomad.lpc
+// Atlantean Nomad - Traveler and trader from Atlantis
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Atlantean Nomad");
+    set_occ_id("atlantean_nomad");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Atlantean Nomads travel between dimensional markets and ruins,
+trading rare goods and surviving by wits and charm. They favor mobility
+and social skills over heavy combat training."
+    );
+
+    set_stat_requirements(([ "me": 9, "iq": 9 ]));
+    set_stat_bonuses(([ "me": 1, "spd": 1 ]));
+
+    set_occ_skills(({ "language_american", "barter", "diplomacy", "survival", "navigation", "perception" }));
+    set_occ_related_skills(({ "tradecraft", "lore", "driving" }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+
+    set_base_sdc(15);
+    set_sdc_per_level(0);
+
+    set_standard_equipment(({ "/obj/clothing/travel_coat", "/obj/kit/travel_pouch" }));
+    set_starting_credits(50, 300);
+    set_starting_weapons(({ "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/light_cloth" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(3);
+}

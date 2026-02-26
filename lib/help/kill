@@ -1,0 +1,10 @@
+KILL
+
+Usage: kill <target>
+
+An alias for 'attack' used to start hostile combat. Use this only when you
+intend to fight; attacking other players may have social or server rules
+implications. The game will mark you in combat and may prevent safe actions
+until the fight ends.
+
+If you are unsure, use non-violent options like 'talk' or 'flee'.

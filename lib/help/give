@@ -1,0 +1,10 @@
+GIVE
+
+Usage: give <item> to <player>
+
+Transfer an item from your inventory to another player in the same room.
+The recipient must be present and able to carry the item. Some NPCs or
+players may refuse items depending on settings.
+
+Examples:
+  give apple to hal

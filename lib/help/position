@@ -1,0 +1,11 @@
+POSITION
+
+Usage: position
+
+Shows your current body position (standing, sitting, resting, sleeping,
+etc.). Some actions require you to be in a particular position; movement
+and combat usually require standing. Use 'stand', 'sit', 'rest', or 'wake'
+to change position as appropriate.
+
+Examples:
+  position

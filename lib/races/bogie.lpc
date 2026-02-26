@@ -1,0 +1,35 @@
+// /lib/races/bogie.lpc
+// Bogie - Small mischievous fae creature
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Bogie");
+    set_race_id("bogie");
+    set_race_plural("Bogies");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Bogies are small, mischievous fae-like creatures that haunt
+old barns and ruins. They enjoy pranks and are tricky to catch."
+    );
+
+    set_size_category(SIZE_SMALL);
+    set_height_range(24, 40);
+    set_weight_range(20, 60);
+    set_lifespan(80);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": -1, "ma": 1,
+        "ps": -2, "pp": 2, "pe": -1, "pb": -1, "spd": 2
+    ]));
+
+    set_natural_sdc(5);
+    add_racial_ability("stealth", 1);
+    add_racial_ability("trickery", 1);
+
+    set_psionic_potential(0);
+    set_magic_potential(10);
+}

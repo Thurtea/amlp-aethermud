@@ -1,0 +1,35 @@
+// /lib/races/green_wood_faerie.lpc
+// Green Wood Faerie - Forest-aligned fae guardian
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Green Wood Faerie");
+    set_race_id("green_wood_faerie");
+    set_race_plural("Green Wood Faeries");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Green Wood Faeries are forest spirits tied to groves and living trees.
+They protect wildlife and defend sacred places with minor nature magics."
+    );
+
+    set_size_category(SIZE_SMALL);
+    set_height_range(12, 30);
+    set_weight_range(6, 30);
+    set_lifespan(200);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": 0, "ma": 2,
+        "ps": -2, "pp": 2, "pe": 1, "pb": 0, "spd": 1
+    ]));
+
+    set_natural_sdc(4);
+    add_racial_ability("nature_bond", 1);
+    add_racial_ability("camouflage", 1);
+
+    set_magic_potential(15);
+    set_psionic_potential(0);
+}

@@ -1,0 +1,10 @@
+PARRY
+
+Usage: parry
+
+Use your weapon or a defensive technique to block or deflect attacks in
+melee combat. Parry effectiveness depends on weapon type, skill level, and
+timing. Some weapons or unarmed styles may not support parry.
+
+Examples:
+  parry

@@ -1,0 +1,11 @@
+GET
+
+Usage: get <item> [from <container>]
+
+Pick up an item from the room or from an open container. If the item is
+in your inventory already, use other commands to manipulate it. Some items
+may be too heavy or restricted; containers must be open to retrieve items.
+
+Examples:
+  get sword
+  get coin from chest

@@ -1,0 +1,35 @@
+// /lib/races/nimro_fire_giant.lpc
+// Nimro Fire Giant - Massive fire-aligned giant
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Nimro Fire Giant");
+    set_race_id("nimro_fire_giant");
+    set_race_plural("Nimro Fire Giants");
+    set_race_category(RACE_CAT_GIANT);
+
+    set_race_description(
+        "Nimro Fire Giants dwell in volcanic regions, bearing great heat
+resistance and destructive strength. They are rare and feared."
+    );
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(96, 140);
+    set_weight_range(1200, 5000);
+    set_lifespan(350);
+
+    set_stat_modifiers(([
+        "iq": -2, "me": 0, "ma": -1,
+        "ps": 8, "pp": 0, "pe": 4, "pb": -3, "spd": -2
+    ]));
+
+    set_natural_sdc(100);
+    set_resistances(([
+        "fire_resistance": 80
+    ]));
+    add_racial_ability("fiery_breath", 1);
+
+    // Approximate values; please verify.
+}

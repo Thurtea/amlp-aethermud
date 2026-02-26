@@ -1,0 +1,31 @@
+// /lib/races/kankoran.lpc
+// Kankoran - Amphibious draconic/serpentine folk (approximate)
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Kankoran");
+    set_race_id("kankoran");
+    set_race_plural("Kankorans");
+    set_race_category(RACE_CAT_ALIEN);
+
+    set_race_description(
+        "Kankorans are serpentine or draconic humanoids adapted to wetlands
+and swamps. They are cunning and adept at ambush tactics."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(60, 84);
+    set_weight_range(120, 350);
+    set_lifespan(150);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": 0, "ma": 0,
+        "ps": 3, "pp": 1, "pe": 2, "pb": -1, "spd": 1
+    ]));
+
+    set_natural_sdc(30);
+    add_racial_ability("venom_resistance", 1);
+    add_racial_ability("swim_expert", 1);
+}

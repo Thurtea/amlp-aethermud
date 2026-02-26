@@ -1,0 +1,33 @@
+// /lib/races/titan.lpc
+// Titan - Colossal primeval being
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Titan");
+    set_race_id("titan");
+    set_race_plural("Titans");
+    set_race_category(RACE_CAT_GIANT);
+
+    set_race_description(
+        "Titans are rare, colossal beings of mythic power. They possess
+unmatched strength and a presence that reshapes the battlefield."
+    );
+
+    set_size_category(SIZE_GARGANTUAN);
+    set_height_range(300, 600);
+    set_weight_range(50000, 200000);
+    set_lifespan(2000);
+
+    set_stat_modifiers(([
+        "iq": 4, "me": 3, "ma": 1,
+        "ps": 12, "pp": 2, "pe": 6, "pb": 0, "spd": -2
+    ]));
+
+    set_mdc_creature(1);
+    set_natural_mdc(800);
+    add_racial_ability("colossal_strength", 1);
+
+    // Placeholder; verify with source materials.
+}

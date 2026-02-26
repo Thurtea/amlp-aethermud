@@ -1,0 +1,10 @@
+WORN
+
+Usage: worn
+
+Shows a list of armor and clothing you currently have equipped. This
+includes armor pieces, accessories, and any items occupying worn slots.
+Useful to check encumbrance and what will protect you in combat.
+
+Examples:
+  worn

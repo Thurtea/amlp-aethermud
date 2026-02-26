@@ -1,0 +1,38 @@
+// /lib/occs/smuggler.lpc
+// Smuggler - Transporter of illicit goods and black-market runner
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Smuggler");
+    set_occ_id("smuggler");
+    set_occ_category(OCC_CAT_SPECIAL);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Smugglers move contraband through borders and dangerous routes,
+balancing stealth, negotiation, and quick escapes. They favor vehicle
+operation and clandestine skills."
+    );
+
+    set_stat_requirements(([ "me": 10, "spd": 9 ]));
+    set_stat_bonuses(([ "me": 1 ]));
+
+    set_occ_skills(({ "smuggling", "stealth", "pilot_vehicle", "negotiation", "mechanical_repair", "navigation" }));
+    set_occ_related_skills(({ "barter", "forgery" }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_base_sdc(20);
+    set_sdc_per_level(2);
+
+    set_standard_equipment(({ "/obj/tools/smuggler_kit", "/obj/clothing/coveralls" }));
+    set_starting_credits(100, 700);
+    set_starting_weapons(({ "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/light_cloth" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(4);
+}

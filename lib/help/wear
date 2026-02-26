@@ -1,0 +1,11 @@
+WEAR
+
+Usage: wear <armor>
+
+Put on armor or clothing from your inventory. Wearing armor may improve
+your defensive statistics but can impose encumbrance or skill penalties.
+Use 'worn' to list what you are currently wearing and 'remove' to take it
+off (see specific item help for removal rules).
+
+Examples:
+  wear light vest

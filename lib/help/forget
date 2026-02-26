@@ -1,0 +1,10 @@
+FORGET
+
+Usage: forget <topic>
+
+Remove a memorized note, alias, or learned temporary information. Depending
+on what you forget, this action may not be reversible. Use carefully and
+check what the command will remove before confirming.
+
+Examples:
+  forget alias greeting

@@ -1,0 +1,33 @@
+// /lib/races/night_elves_faerie.lpc
+// Night Elves Faerie - Nocturnal elven fae
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Night Elves Faerie");
+    set_race_id("night_elves_faerie");
+    set_race_plural("Night Elves Faeries");
+    set_race_category(RACE_CAT_DEMIHUMAN);
+
+    set_race_description(
+        "Night Elves Faeries are graceful, nocturnal folk who favor shadowed
+forests and moonlit groves. They blend martial skill with subtle magics."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(56, 72);
+    set_weight_range(110, 160);
+    set_lifespan(350);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": 1, "ma": 1,
+        "ps": 0, "pp": 2, "pe": 1, "pb": 1, "spd": 2
+    ]));
+
+    set_natural_sdc(10);
+    add_racial_ability("night_vision", 1);
+    add_racial_ability("shadow_walk", 1);
+
+    set_magic_potential(10);
+}

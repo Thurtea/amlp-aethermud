@@ -1,0 +1,11 @@
+WHO
+
+Usage: who
+
+Shows a list of players currently connected to the server along with basic
+status information. This is useful to see who is online and whether staff
+are available. Some players may choose to hide or limit the information you
+see based on personal settings.
+
+Examples:
+  who

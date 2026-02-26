@@ -1,0 +1,38 @@
+// /lib/occs/sailor.lpc
+// Sailor - Ship crew and seafaring hand
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Sailor");
+    set_occ_id("sailor");
+    set_occ_category(OCC_CAT_ADVENTURER);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Sailors are experienced seafarers skilled in deck work, navigation,
+and shipboard combat. They make living on the waves and often have hard
+practical skills."
+    );
+
+    set_stat_requirements(([ "pe": 9, "ps": 9 ]));
+    set_stat_bonuses(([ "pe": 1, "ps": 1 ]));
+
+    set_occ_skills(({ "sailing", "navigation", "seamanship", "swim_expert", "ropework", "repair" }));
+    set_occ_related_skills(({ "barter", "boarding" }));
+    set_occ_skill_count(6);
+    set_elective_count(3);
+    set_secondary_count(6);
+
+    set_base_sdc(25);
+    set_sdc_per_level(3);
+
+    set_standard_equipment(({ "/obj/clothing/sail_clothes", "/obj/kit/seaman_kit" }));
+    set_starting_credits(20, 150);
+    set_starting_weapons(({ "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/light_leather" }));
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+}

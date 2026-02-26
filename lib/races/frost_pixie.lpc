@@ -1,0 +1,35 @@
+// /lib/races/frost_pixie.lpc
+// Frost Pixie - Icy variant of the common pixie
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Frost Pixie");
+    set_race_id("frost_pixie");
+    set_race_plural("Frost Pixies");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Frost Pixies are small, delicate fae who dwell in cold places. They
+use chilly magics and prefer winter-hidden glades."
+    );
+
+    set_size_category(SIZE_TINY);
+    set_height_range(6, 16);
+    set_weight_range(1, 6);
+    set_lifespan(150);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": -1, "ma": 2,
+        "ps": -4, "pp": 4, "pe": -1, "pb": -3, "spd": 3
+    ]));
+
+    set_natural_sdc(2);
+    add_racial_ability("cold_magic", 1);
+    add_racial_ability("frost_flight", 1);
+
+    set_magic_potential(18);
+    set_psionic_potential(0);
+}

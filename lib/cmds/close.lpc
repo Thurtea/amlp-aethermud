@@ -1,6 +1,6 @@
 #include <globals.h>
 inherit "/std/object";
-void create() { set_no_clean(1); }
+void create() { ::create(); set_no_clean(1); }
 int main(string str) {
     object player = this_player();
     object ob;

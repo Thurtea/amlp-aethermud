@@ -1,0 +1,32 @@
+// /lib/races/pogtal_dragon_slayer.lpc
+// Pogtal Dragon Slayer - Legendary human variant (approximate)
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Pogtal Dragon Slayer");
+    set_race_id("pogtal_dragon_slayer");
+    set_race_plural("Pogtal Dragon Slayers");
+    set_race_category(RACE_CAT_HUMAN);
+
+    set_race_description(
+        "Pogtal Dragon Slayers are decorated warriors famed for slaying
+dragons and other great beasts. They receive specialized training and rites."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(66, 82);
+    set_weight_range(150, 260);
+    set_lifespan(90);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": 1, "ma": 0,
+        "ps": 3, "pp": 2, "pe": 2, "pb": 0, "spd": 1
+    ]));
+
+    set_natural_sdc(10);
+    add_racial_ability("dragon_slayer_training", 1);
+
+    // Placeholder values; please verify against source material.
+}

@@ -1,0 +1,11 @@
+LANGUAGE
+
+Usage: language <learn|set> <language>
+
+Manage languages known by your character. Use 'language learn <name>' to
+learn or add a language (if mechanics allow), and 'language set <name>' to
+choose the currently spoken language. Knowing languages affects roleplay
+and some communication or skill checks.
+
+Examples:
+  language set american

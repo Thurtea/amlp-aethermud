@@ -1,0 +1,10 @@
+QUIT
+
+Usage: quit
+
+Log out of the game and return to the connection prompt. Make sure you
+have saved recently with 'save' before quitting. Quitting in combat may
+have consequences depending on server rules.
+
+Examples:
+  quit

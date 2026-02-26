@@ -1,0 +1,13 @@
+LOOK
+
+Usage: look [at|in] <object>
+
+Examine the room or an object. With no arguments 'look' shows the room
+description, exits, and visible objects. Use 'look at <obj>' for an object's
+description, or 'look in <container>' to view the interior and contents if
+the container is open or allows viewing.
+
+Examples:
+  look
+  look at statue
+  look in chest

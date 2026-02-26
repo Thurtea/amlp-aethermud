@@ -1,0 +1,35 @@
+// /lib/races/coyle.lpc
+// Coyle - Amphibious humanoid, resilient and territorial
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Coyle");
+    set_race_id("coyle");
+    set_race_plural("Coyles");
+    set_race_category(RACE_CAT_ALIEN);
+
+    set_race_description(
+        "Coyles are amphibious, scaled humanoids adapted to marshes and
+coastal ruins. They are sturdy, good swimmers, and often fiercely territorial."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(54, 78);
+    set_weight_range(140, 300);
+    set_lifespan(80);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": 0, "ma": -1,
+        "ps": 2, "pp": 1, "pe": 2, "pb": -1, "spd": 1
+    ]));
+
+    set_natural_sdc(25);
+    add_racial_ability("swim_expert", 1);
+    add_racial_ability("amphibious_breathing", 1);
+
+    set_psionic_potential(0);
+    set_magic_potential(0);
+}

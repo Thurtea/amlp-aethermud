@@ -1,0 +1,11 @@
+MOVEMENT
+
+Usage: <direction> (north, south, east, west, up, down, etc.)
+
+Move your character to adjacent rooms using available exits. Use full
+direction words or common abbreviations. Some exits may be locked or hidden
+and require special actions to access. Movement may trigger traps or events.
+
+Examples:
+  north
+  enter tunnel

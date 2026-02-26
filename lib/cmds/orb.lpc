@@ -6,7 +6,15 @@ int query_privilege_required() { return 2; }
 
 int main(string args) {
     object player = this_player();
-    if (!player) return 0;
+    if (!player) return 1;
+
+    /* Role check: admin/wizard required */
+    if (function_exists("query_privilege_level", player)) {
+        if ((int)player->query_privilege_level() < 1) {
+            write("You do not have permission to use that command.\n");
+            return 1;
+        }
+    }
 
     object tool;
     catch { tool = load_object("/obj/wiztools/admin_orb"); };
@@ -14,7 +22,11 @@ int main(string args) {
         write("Error: Could not load admin orb tool.\n");
         return 1;
     }
-    return tool->cmd_orb(args);
+
+    /* Delegate to the orb logic; ensure we always return 1 so the
+     * command daemon does not fall through to 'Unknown command'. */
+    catch { tool->cmd_orb(args); };
+    return 1;
 }
 
 string query_help() {

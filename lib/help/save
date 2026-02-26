@@ -1,0 +1,10 @@
+SAVE
+
+Usage: save
+
+Save your character to persistent storage. The server also auto-saves at
+certain points, but use 'save' to force an immediate save before logging
+off or after important changes. Saving may take a moment on busy servers.
+
+Examples:
+  save

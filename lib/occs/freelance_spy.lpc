@@ -1,0 +1,37 @@
+// /lib/occs/freelance_spy.lpc
+// Freelance Spy - Covert operative for hire
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Freelance Spy");
+    set_occ_id("freelance_spy");
+    set_occ_category(OCC_CAT_SPECIAL);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Freelance Spies operate in the shadowy underworld of information
+and influence. Skilled in stealth, surveillance, and social manipulation."
+    );
+
+    set_stat_requirements(([ "me": 10, "iq": 9 ]));
+    set_stat_bonuses(([ "me": 1, "iq": 1 ]));
+
+    set_occ_skills(({ "surveillance", "stealth", "disguise", "hacking", "lockpicking", "interrogation" }));
+    set_occ_related_skills(({ "barter", "language_american" }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_base_sdc(15);
+    set_sdc_per_level(0);
+
+    set_standard_equipment(({ "/obj/tools/spy_kit", "/obj/clothing/black_clothes" }));
+    set_starting_credits(100, 500);
+    set_starting_weapons(({ "/obj/weapons/silenced_pistol" }));
+    set_starting_armor(({ "/obj/armor/light_vest" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(3);
+}

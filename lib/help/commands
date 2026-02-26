@@ -1,0 +1,11 @@
+COMMANDS
+
+Usage: commands
+
+Show a list of commands available to your character based on level,
+permissions, and current game state. Use 'help <command>' for detailed
+information about a specific command.
+
+Examples:
+  commands
+  help attack

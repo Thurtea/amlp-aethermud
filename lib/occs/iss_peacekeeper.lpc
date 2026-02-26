@@ -1,0 +1,37 @@
+// /lib/occs/iss_peacekeeper.lpc
+// ISS Peacekeeper - Coaltion/ISS law enforcer
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("ISS Peacekeeper");
+    set_occ_id("iss_peacekeeper");
+    set_occ_category(OCC_CAT_MILITARY);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "ISS Peacekeepers enforce law across occupied territories and
+perform security duties. Trained in crowd control and urban tactics."
+    );
+
+    set_stat_requirements(([ "me": 10, "ps": 9 ]));
+    set_stat_bonuses(([ "me": 1, "ps": 1 ]));
+
+    set_occ_skills(({ "law_enforcement", "small_arms", "crowd_control", "investigation", "first_aid", "communications" }));
+    set_occ_related_skills(({ "tactics", "vehicle_operation" }));
+    set_occ_skill_count(6);
+    set_elective_count(3);
+    set_secondary_count(6);
+
+    set_base_sdc(40);
+    set_sdc_per_level(5);
+
+    set_standard_equipment(({ "/obj/clothing/iss_uniform", "/obj/kit/riot_kit" }));
+    set_starting_credits(100, 400);
+    set_starting_weapons(({ "/obj/weapons/service_rifle" }));
+    set_starting_armor(({ "/obj/armor/heavy_vest" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(4);
+}

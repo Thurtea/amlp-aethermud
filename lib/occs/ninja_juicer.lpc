@@ -1,0 +1,41 @@
+// /lib/occs/ninja_juicer.lpc
+// Ninja Juicer - Hybrid of ninja training and juicer enhancements
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("Ninja Juicer");
+    set_occ_id("ninja_juicer");
+    set_occ_category(OCC_CAT_SPECIAL);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "Ninja Juicers combine extreme physical augmentation with stealth
+and assassination training. Highly lethal and often short-lived due to
+their enhancements."
+    );
+
+    set_stat_requirements(([ "ps": 12, "spd": 11 ]));
+    set_stat_bonuses(([ "ps": 2, "spd": 2 ]));
+
+    set_occ_skills(({ "stealth", "ninjutsu", "unarmed_combat", "climbing", "assassination", "acrobatics" }));
+    set_occ_related_skills(({ "poisoncraft", "disguise" }));
+    set_occ_skill_count(6);
+    set_elective_count(3);
+    set_secondary_count(6);
+
+    set_base_ppe(0);
+    set_base_isp(0);
+
+    set_base_sdc(30);
+    set_sdc_per_level(5);
+
+    set_standard_equipment(({ "/obj/clothing/ninja_suit", "/obj/tools/juicer_kit" }));
+    set_starting_credits(100, 600);
+    set_starting_weapons(({ "/obj/weapons/shuriken", "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/light_stealth" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(8);
+}

@@ -1,0 +1,11 @@
+EXAMINE
+
+Usage: examine <object>
+
+Gives a more detailed description of an object than 'look at'. Useful for
+reading labels, inspecting gear, or finding hidden information about items.
+Some objects provide special 'examine' text while others simply show their
+long description.
+
+Examples:
+  examine mural

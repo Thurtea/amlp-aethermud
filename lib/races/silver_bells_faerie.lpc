@@ -1,0 +1,31 @@
+// /lib/races/silver_bells_faerie.lpc
+// Silver Bells Faerie - Ethereal bell-bearing fae
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Silver Bells Faerie");
+    set_race_id("silver_bells_faerie");
+    set_race_plural("Silver Bells Faeries");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Silver Bells Faeries are delicate, bell-bearing spirits associated
+with music, enchantment, and protective charms in glades and shrines."
+    );
+
+    set_size_category(SIZE_SMALL);
+    set_height_range(10, 28);
+    set_weight_range(3, 20);
+    set_lifespan(180);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": 0, "ma": 2,
+        "ps": -3, "pp": 2, "pe": 0, "pb": -2, "spd": 2
+    ]));
+
+    set_natural_sdc(3);
+    add_racial_ability("bell_charm", 1);
+    set_magic_potential(18);
+}

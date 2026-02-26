@@ -1,0 +1,35 @@
+// /lib/races/equinoid.lpc
+// Equinoid - Horse-like humanoid
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Equinoid");
+    set_race_id("equinoid");
+    set_race_plural("Equinoids");
+    set_race_category(RACE_CAT_DEMIHUMAN);
+
+    set_race_description(
+        "Equinoids are centaur-like people: powerful, swift, and well-suited
+to mounted combat and travel. They form strong tribal cultures."
+    );
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(72, 90);
+    set_weight_range(300, 700);
+    set_lifespan(100);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": 0, "ma": 0,
+        "ps": 4, "pp": 2, "pe": 3, "pb": -1, "spd": 2
+    ]));
+
+    set_natural_sdc(40);
+    add_racial_ability("charge_attack", 1);
+    add_racial_ability("mount_expert", 1);
+
+    set_psionic_potential(0);
+    set_magic_potential(0);
+}

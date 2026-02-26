@@ -1,0 +1,38 @@
+// /lib/occs/iss_specter.lpc
+// ISS Specter - Covert operative within ISS
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("ISS Specter");
+    set_occ_id("iss_specter");
+    set_occ_category(OCC_CAT_SPECIAL);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "ISS Specters are covert operatives tasked with clandestine
+operations in urban and deniable theaters. They specialize in stealth,
+espionage and targeted strike missions."
+    );
+
+    set_stat_requirements(([ "me": 11, "iq": 10 ]));
+    set_stat_bonuses(([ "me": 1, "iq": 1 ]));
+
+    set_occ_skills(({ "stealth", "surveillance", "small_arms", "hacking", "infiltration", "assassination" }));
+    set_occ_related_skills(({ "forgery", "disguise" }));
+    set_occ_skill_count(6);
+    set_elective_count(4);
+    set_secondary_count(6);
+
+    set_base_sdc(30);
+    set_sdc_per_level(5);
+
+    set_standard_equipment(({ "/obj/clothing/black_ops_suit", "/obj/tools/spy_kit" }));
+    set_starting_credits(150, 700);
+    set_starting_weapons(({ "/obj/weapons/silenced_pistol", "/obj/weapons/knife" }));
+    set_starting_armor(({ "/obj/armor/light_stealth" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(5);
+}

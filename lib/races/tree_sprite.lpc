@@ -1,0 +1,31 @@
+// /lib/races/tree_sprite.lpc
+// Tree Sprite - Tiny nature spirit tied to trees
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Tree Sprite");
+    set_race_id("tree_sprite");
+    set_race_plural("Tree Sprites");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Tree Sprites are small spirit-guardians born of ancient trees. They
+protect their groves and can meld with living wood to hide."
+    );
+
+    set_size_category(SIZE_TINY);
+    set_height_range(6, 20);
+    set_weight_range(2, 10);
+    set_lifespan(300);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": 1, "ma": 2,
+        "ps": -3, "pp": 1, "pe": 1, "pb": 0, "spd": 1
+    ]));
+
+    set_natural_sdc(6);
+    add_racial_ability("merge_with_tree", 1);
+    set_magic_potential(12);
+}

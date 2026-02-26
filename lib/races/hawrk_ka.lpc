@@ -1,0 +1,32 @@
+// /lib/races/hawrk_ka.lpc
+// Hawrk-Ka - Nomadic warrior caste (approximate entry)
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Hawrk-Ka");
+    set_race_id("hawrk_ka");
+    set_race_plural("Hawrk-Ka");
+    set_race_category(RACE_CAT_HUMAN);
+
+    set_race_description(
+        "Hawrk-Ka are a nomadic martial culture prized for swift raiding and
+horsemanship. They maintain strict codes of honor within their tribes."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(64, 82);
+    set_weight_range(150, 250);
+    set_lifespan(90);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": 0, "ma": 0,
+        "ps": 3, "pp": 2, "pe": 2, "pb": 0, "spd": 1
+    ]));
+
+    set_natural_sdc(10);
+    add_racial_ability("mounted_combat", 1);
+
+    set_psionic_potential(0);
+}

@@ -1,0 +1,37 @@
+// /lib/occs/ntset_protector.lpc
+// NTSET Protector - Guardian class for NTSET domains
+
+inherit "/std/occ";
+
+void create() {
+    ::create();
+    set_occ_name("NTSET Protector");
+    set_occ_id("ntset_protector");
+    set_occ_category(OCC_CAT_MILITARY);
+    set_alignment_requirement("any");
+
+    set_occ_description(
+        "NTSET Protectors serve as guardians of specialized domains,
+trained in defensive tactics and protective technologies."
+    );
+
+    set_stat_requirements(([ "ps": 10, "me": 9 ]));
+    set_stat_bonuses(([ "pe": 1, "ps": 1 ]));
+
+    set_occ_skills(({ "defense_tactics", "small_arms", "shield_use", "first_aid", "communications", "sensor_operation" }));
+    set_occ_related_skills(({ "engineering", "electronics" }));
+    set_occ_skill_count(6);
+    set_elective_count(3);
+    set_secondary_count(6);
+
+    set_base_sdc(50);
+    set_sdc_per_level(5);
+
+    set_standard_equipment(({ "/obj/clothing/guard_uniform", "/obj/kit/shield_unit" }));
+    set_starting_credits(150, 500);
+    set_starting_weapons(({ "/obj/weapons/assault_rifle" }));
+    set_starting_armor(({ "/obj/armor/heavy_shield" }));
+
+    set_cybernetics_allowed(1);
+    set_max_cybernetic_slots(5);
+}

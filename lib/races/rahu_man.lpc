@@ -1,0 +1,30 @@
+// /lib/races/rahu_man.lpc
+// Rahu Man - Humanoid with mystical heritage
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Rahu Man");
+    set_race_id("rahu_man");
+    set_race_plural("Rahu Men");
+    set_race_category(RACE_CAT_HUMAN);
+
+    set_race_description(
+        "Rahu Men are humans touched by older magics, often possessing
+minor mystical aptitudes and unusual traditions. They are adaptable."
+    );
+
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(60, 78);
+    set_weight_range(120, 240);
+    set_lifespan(90);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": 1, "ma": 0,
+        "ps": 0, "pp": 0, "pe": 1, "pb": 0, "spd": 0
+    ]));
+
+    set_magic_potential(10);
+    add_racial_ability("mystic_blood", 1);
+}

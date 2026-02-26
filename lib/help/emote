@@ -1,0 +1,10 @@
+EMOTE
+
+Usage: emote <action>
+
+Perform a local emote that describes an action you do; others in the room
+see the message formatted with your name. Emotes are useful for roleplay and
+social interaction. Keep emotes appropriate for the setting and players.
+
+Examples:
+  emote whistles a merry tune

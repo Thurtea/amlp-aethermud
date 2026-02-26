@@ -1,0 +1,11 @@
+DROP
+
+Usage: drop <item> [amount]
+
+Remove an item from your inventory and place it in the current room. For
+stackable items you may specify an amount to drop. Dropped items become
+visible to others and may be taken by players or NPCs.
+
+Examples:
+  drop coin 10
+  drop cloak

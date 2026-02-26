@@ -1,0 +1,31 @@
+// /lib/races/water_sprite.lpc
+// Water Sprite - Aquatic spirit of streams and pools
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Water Sprite");
+    set_race_id("water_sprite");
+    set_race_plural("Water Sprites");
+    set_race_category(RACE_CAT_SUPERNATURAL);
+
+    set_race_description(
+        "Water Sprites are small, fluid spirits that inhabit springs and
+pools. They command minor water magics and lure the unwary."
+    );
+
+    set_size_category(SIZE_TINY);
+    set_height_range(6, 20);
+    set_weight_range(2, 12);
+    set_lifespan(180);
+
+    set_stat_modifiers(([
+        "iq": 1, "me": -1, "ma": 2,
+        "ps": -3, "pp": 2, "pe": 0, "pb": -1, "spd": 2
+    ]));
+
+    set_natural_sdc(4);
+    add_racial_ability("water_affinity", 1);
+    set_magic_potential(14);
+}

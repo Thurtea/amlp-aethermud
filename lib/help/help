@@ -1,0 +1,11 @@
+HELP
+
+Usage: help [topic]
+
+Display help topics or detailed help for a specific command or subject.
+Use 'help commands' to get a list of commonly used commands. Help entries
+are brief introductions; consult manuals or staff for in-depth guidance.
+
+Examples:
+  help look
+  help commands

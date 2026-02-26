@@ -1,0 +1,50 @@
+// /lib/races/algor_frost_giant.lpc
+// Algor Frost Giant - Massive cold-elemental giant
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+
+    set_race_name("Algor Frost Giant");
+    set_race_id("algor_frost_giant");
+    set_race_plural("Algor Frost Giants");
+    set_race_category(RACE_CAT_GIANT);
+
+    set_race_description(
+        "Algor Frost Giants are enormous humanoids of ice and snow, living in\n"
+        "icy wastelands. They are slow but immensely strong and resistant to cold."
+    );
+
+    set_size_category(SIZE_LARGE);
+    set_height_range(96, 132);
+    set_weight_range(700, 1500);
+    set_lifespan(300);
+
+    set_stat_modifiers(([
+        "iq": -2,
+        "me": 0,
+        "ma": -2,
+        "ps": 6,
+        "pp": 0,
+        "pe": 4,
+        "pb": -3,
+        "spd": -2
+    ]));
+
+    set_natural_sdc(80);
+    set_mdc_creature(0);
+
+    set_resistances(([
+        "cold_resistance": 75
+    ]));
+
+    add_racial_ability("crushing_strength", 1);
+    add_racial_ability("cold_immunity", 1);
+
+    set_psionic_potential(0);
+    set_magic_potential(0);
+
+    // NOTE: Stat numbers are conservative approximations; please review against
+    // canonical Palladium Rifts values.
+}

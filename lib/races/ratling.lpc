@@ -1,0 +1,31 @@
+// /lib/races/ratling.lpc
+// Ratling - Small furtive humanoid
+
+inherit "/std/race";
+
+void create() {
+    ::create();
+    set_race_name("Ratling");
+    set_race_id("ratling");
+    set_race_plural("Ratligns");
+    set_race_category(RACE_CAT_DEMIHUMAN);
+
+    set_race_description(
+        "Ratligns are small, quick, and furtive humanoids adapted to
+urban warrens and ruined sewers. They are clever survivors."
+    );
+
+    set_size_category(SIZE_SMALL);
+    set_height_range(30, 44);
+    set_weight_range(30, 80);
+    set_lifespan(60);
+
+    set_stat_modifiers(([
+        "iq": 0, "me": -1, "ma": 0,
+        "ps": -2, "pp": 3, "pe": 0, "pb": -2, "spd": 2
+    ]));
+
+    set_natural_sdc(8);
+    add_racial_ability("stealth", 1);
+    add_racial_ability("squeak_alert", 1);
+}

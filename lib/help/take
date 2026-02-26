@@ -1,0 +1,10 @@
+TAKE
+
+Usage: take <item> from <person|container>
+
+Retrieve an item that another character or a container is holding. Use 'get'
+for objects on the ground or in open containers. Taking from other players
+may be restricted by rights or social rules.
+
+Examples:
+  take coin from merchant

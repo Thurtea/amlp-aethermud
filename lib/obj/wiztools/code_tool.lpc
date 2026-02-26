@@ -78,11 +78,11 @@ int cmd_check(string filepath) {
         return 1;
     }
 
-    write("\n\033[1;36m=== Syntax Check: " + filepath + " ===\033[0m\n\n");
+    write("\n=== Syntax Check: " + filepath + " ===\n\n");
 
     // Check if file exists
     if (file_size(filepath + ".lpc") <= 0 && file_size(filepath) <= 0) {
-        write("  \033[1;31m[ERROR]\033[0m File not found: " + filepath + "\n\n");
+        write("  [ERROR] File not found: " + filepath + "\n\n");
         return 1;
     }
 
@@ -94,7 +94,7 @@ int cmd_check(string filepath) {
     };
 
     if (obj) {
-        write("  \033[1;32m[OK]\033[0m File compiles successfully.\n");
+        write("  [OK] File compiles successfully.\n");
         write("  Object: " + file_name(obj) + "\n");
 
         // List functions
@@ -105,7 +105,7 @@ int cmd_check(string filepath) {
         if (function_exists("query_short", obj))
             write("  Short: " + obj->query_short() + "\n");
     } else {
-        write("  \033[1;31m[FAIL]\033[0m Compilation failed.\n");
+        write("  [FAIL] Compilation failed.\n");
         write("  Check the file for LPC syntax errors.\n");
     }
     write("\n");
@@ -133,7 +133,7 @@ int cmd_info(string target) {
         return 1;
     }
 
-    write("\n\033[1;36m=== Object Info ===\033[0m\n\n");
+    write("\n=== Object Info ===\n\n");
     write("  File: " + file_name(obj) + "\n");
     write("  Living: " + (living(obj) ? "yes" : "no") + "\n");
     write("  Interactive: " + (interactive(obj) ? "yes" : "no") + "\n");
@@ -195,7 +195,7 @@ int cmd_search(object player, string pattern) {
     }
 
     string *files = get_dir(cwd + pattern);
-    write("\n\033[1;36m=== Search: " + cwd + pattern + " ===\033[0m\n\n");
+    write("\n=== Search: " + cwd + pattern + " ===\n\n");
 
     if (files && sizeof(files)) {
         foreach (string f in files) {
@@ -216,7 +216,7 @@ int cmd_search(object player, string pattern) {
 }
 
 int cmd_memory() {
-    write("\n\033[1;36m=== System Status ===\033[0m\n\n");
+    write("\n=== System Status ===\n\n");
 
     // Online users
     object *all_users = users();
@@ -247,7 +247,7 @@ int cmd_children(string filepath) {
     }
 
     object *clones = children(filepath);
-    write("\n\033[1;36m=== Clones of " + filepath + " ===\033[0m\n\n");
+    write("\n=== Clones of " + filepath + " ===\n\n");
 
     if (!clones || !sizeof(clones)) {
         write("  No clones found.\n\n");
@@ -289,7 +289,7 @@ int cmd_trace(string filepath) {
         return 1;
     }
 
-    write("\n\033[1;36m=== Inheritance Trace ===\033[0m\n\n");
+    write("\n=== Inheritance Trace ===\n\n");
     write("  Object: " + file_name(obj) + "\n");
 
     // Check common base classes
@@ -328,7 +328,7 @@ int cmd_reload(string filepath) {
         return 1;
     }
 
-    write("\n\033[1;36m=== Reload: " + filepath + " ===\033[0m\n\n");
+    write("\n=== Reload: " + filepath + " ===\n\n");
 
     /* Delegate to the update command which handles LPC reload */
     object cmd;
@@ -345,16 +345,16 @@ int cmd_reload(string filepath) {
     object obj;
     catch { obj = load_object(filepath); };
     if (obj) {
-        write("  \033[1;32m[OK]\033[0m Loaded: " + filepath + "\n\n");
+        write("  [OK] Loaded: " + filepath + "\n\n");
     } else {
-        write("  \033[1;31m[FAIL]\033[0m Could not reload: " + filepath + "\n");
+        write("  [FAIL] Could not reload: " + filepath + "\n");
         write("  Check path and LPC syntax.\n\n");
     }
     return 1;
 }
 
 int cmd_list() {
-    write("\n\033[1;36m=== LPC Files in lib/ ===\033[0m\n\n");
+    write("\n=== LPC Files in lib/ ===\n\n");
 
     string *dirs = ({
         "/cmds/",
@@ -372,7 +372,7 @@ int cmd_list() {
         string *files = get_dir(dir + "*.lpc");
         int count = files ? sizeof(files) : 0;
         if (count > 0) {
-            write("  \033[1m" + dir + "\033[0m  (" + count + " files)\n");
+            write("  " + dir + "  (" + count + " files)\n");
             foreach (string f in files) {
                 write("    " + f + "\n");
             }
@@ -385,7 +385,7 @@ int cmd_list() {
 }
 
 int show_help() {
-    write("\n\033[1;36m=== Coding Tool ===\033[0m\n\n");
+    write("\n=== Coding Tool ===\n\n");
     write("Commands:\n");
     write("  code reload <file>     Reload/recompile a live LPC file\n");
     write("  code check <file>      Compile-check a file\n");

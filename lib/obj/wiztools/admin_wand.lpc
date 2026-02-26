@@ -271,9 +271,9 @@ int wand_peace() {
 
     /* Broadcast the peace aura to the room */
     tell_room(env,
-        "\n\033[1;34m" + player->query_cap_name() +
+        "\n" + player->query_cap_name() +
         " raises a crystal wand. A pulse of calming energy radiates outward.\n"
-        "All aggression drains from the room.\033[0m\n\n");
+        "All aggression drains from the room.\n\n");
 
     write("Peace aura activated. All NPCs in the room are now non-aggressive.\n");
     write("(Combat disengagement is handled by the combat system.)\n");

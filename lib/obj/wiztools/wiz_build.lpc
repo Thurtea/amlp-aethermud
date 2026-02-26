@@ -80,14 +80,14 @@ int cmd_area(object player) {
     string base = "/domains/wizard/" + wiz_name + "/area";
     string *types = ({ "room", "npc", "weapon", "armor", "item" });
 
-    write("\n\033[1;34m=== Domain Area: " + wiz_name + " ===\033[0m\n\n");
+    write("\n=== Domain Area: " + wiz_name + " ===\n\n");
 
     int total = 0;
     foreach (string type in types) {
         string dir = base + "/" + type + "/";
         string *files = get_dir(dir + "*.lpc");
         if (files && sizeof(files)) {
-            write("\033[1m" + capitalize(type) + "s (" + sizeof(files) + "):\033[0m\n");
+            write(capitalize(type) + "s (" + sizeof(files) + "):\n");
             foreach (string f in files) {
                 string name;
                 if (sscanf(f, "%s.lpc", name) != 1) name = f;
@@ -124,13 +124,13 @@ int cmd_rooms(object player) {
     }
 
     string *files = get_dir(domain_dir + "*.lpc");
-    write("\n\033[1;34m=== Rooms in " + domain_dir + " ===\033[0m\n\n");
+    write("\n=== Rooms in " + domain_dir + " ===\n\n");
     if (files && sizeof(files)) {
         foreach (string f in files) {
             string marker = "";
-            if (domain_dir + f == room_path + ".lpc" ||
+                if (domain_dir + f == room_path + ".lpc" ||
                 domain_dir + f == room_path) {
-                marker = " \033[1;33m<-- you are here\033[0m";
+                marker = " <-- you are here";
             }
             write("  " + f + marker + "\n");
         }
@@ -148,17 +148,17 @@ int cmd_exits(object player) {
         return 1;
     }
 
-    write("\n\033[1;34m=== Exits from " + (function_exists("query_short", room) ?
-          room->query_short() : "here") + " ===\033[0m\n\n");
+        write("\n=== Exits from " + (function_exists("query_short", room) ?
+            room->query_short() : "here") + " ===\n\n");
 
     if (function_exists("query_exits", room)) {
         mapping exits = room->query_exits();
         if (exits && sizeof(exits)) {
             foreach (string dir, string dest in exits) {
                 // Check if destination exists
-                string status = "\033[1;32m[OK]\033[0m";
+                string status = "[OK]";
                 if (file_size(dest + ".lpc") <= 0 && file_size(dest) <= 0) {
-                    status = "\033[1;31m[MISSING]\033[0m";
+                    status = "[MISSING]";
                 }
                 write("  " + dir + " -> " + dest + " " + status + "\n");
             }
@@ -210,7 +210,7 @@ int cmd_clone_room(object player, string source) {
     }
 
     write_file(dest, content);
-    write("\033[1;32mCloned:\033[0m " + source + " -> " + dest + "\n");
+    write("Cloned: " + source + " -> " + dest + "\n");
     write("Edit with: modify " + basename + " show\n");
     return 1;
 }
@@ -235,7 +235,7 @@ int cmd_link(object player, string rest) {
 
     if (function_exists("add_exit", room)) {
         room->add_exit(dir, dest);
-        write("\033[1;32mLinked:\033[0m " + dir + " -> " + dest + "\n");
+        write("Linked: " + dir + " -> " + dest + "\n");
         write("Note: This is runtime only. Edit the room file to make permanent.\n");
     } else {
         write("Room does not support add_exit().\n");
@@ -250,7 +250,7 @@ int cmd_audit(object player) {
         return 1;
     }
 
-    write("\n\033[1;34m=== Room Audit ===\033[0m\n\n");
+    write("\n=== Room Audit ===\n\n");
 
     string room_name = file_name(room);
     write("File: " + room_name + "\n\n");
@@ -262,10 +262,10 @@ int cmd_audit(object player) {
     if (function_exists("query_short", room))
         short_desc = room->query_short();
     if (!short_desc || short_desc == "" || short_desc == "a new room") {
-        write("  \033[1;31m[!]\033[0m Short description missing or default\n");
+        write("  [!] Short description missing or default\n");
         issues++;
     } else {
-        write("  \033[1;32m[OK]\033[0m Short: " + short_desc + "\n");
+        write("  [OK] Short: " + short_desc + "\n");
     }
 
     // Check long description
@@ -273,20 +273,20 @@ int cmd_audit(object player) {
     if (function_exists("query_long", room))
         long_desc = room->query_long();
     if (!long_desc || long_desc == "" || strlen(long_desc) < 20) {
-        write("  \033[1;31m[!]\033[0m Long description missing or too short\n");
+        write("  [!] Long description missing or too short\n");
         issues++;
     } else {
-        write("  \033[1;32m[OK]\033[0m Long description present (" + strlen(long_desc) + " chars)\n");
+        write("  [OK] Long description present (" + strlen(long_desc) + " chars)\n");
     }
 
     // Check exits
     if (function_exists("query_exits", room)) {
         mapping exits = room->query_exits();
         if (!exits || !sizeof(exits)) {
-            write("  \033[1;33m[?]\033[0m No exits defined (dead-end room)\n");
+            write("  [?] No exits defined (dead-end room)\n");
             issues++;
         } else {
-            write("  \033[1;32m[OK]\033[0m " + sizeof(exits) + " exit(s) defined\n");
+            write("  [OK] " + sizeof(exits) + " exit(s) defined\n");
         }
     }
 
@@ -295,14 +295,14 @@ int cmd_audit(object player) {
     if (function_exists("query_property", room))
         light = (int)room->query_property("light");
     if (light <= 0) {
-        write("  \033[1;33m[?]\033[0m No light property set (dark room)\n");
+        write("  [?] No light property set (dark room)\n");
         issues++;
     } else {
-        write("  \033[1;32m[OK]\033[0m Light level: " + light + "\n");
+        write("  [OK] Light level: " + light + "\n");
     }
 
     if (issues == 0) {
-        write("\n  \033[1;32mRoom passes audit!\033[0m\n");
+        write("\n  Room passes audit!\n");
     } else {
         write("\n  " + issues + " issue(s) found.\n");
     }
@@ -311,7 +311,7 @@ int cmd_audit(object player) {
 }
 
 int show_help() {
-    write("\n\033[1;34m=== Domain Build Tool ===\033[0m\n\n");
+    write("\n=== Domain Build Tool ===\n\n");
     write("Commands:\n");
     write("  build area        List your workspace files\n");
     write("  build rooms       List rooms in current domain dir\n");

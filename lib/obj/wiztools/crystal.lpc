@@ -64,7 +64,7 @@ int cmd_crystal(string args) {
 }
 
 int cmd_status() {
-    write("\n\033[1;36m=== Server Status ===\033[0m\n\n");
+    write("\n=== Server Status ===\n\n");
 
     // Online players
     object *all_users = users();
@@ -79,7 +79,7 @@ int cmd_status() {
         if (priv >= 1) staff_count++;
         else player_count++;
     }
-    write("  \033[1mConnections:\033[0m\n");
+    write("  Connections:\n");
     write("    Total online: " + total_players + "\n");
     write("    Players:      " + player_count + "\n");
     write("    Staff:        " + staff_count + "\n\n");
@@ -93,7 +93,7 @@ int cmd_status() {
     string *save_files  = get_dir("/save/players/*.dat");
     if (!save_files) save_files = get_dir("/save/players/*");
 
-    write("  \033[1mContent:\033[0m\n");
+    write("  Content:\n");
     write("    Races loaded:    " + (race_files  ? sizeof(race_files)  : 0) + "\n");
     write("    OCCs loaded:     " + (occ_files   ? sizeof(occ_files)   : 0) + "\n");
     write("    Commands:        " + (cmd_files   ? sizeof(cmd_files)   : 0) + " player");
@@ -102,13 +102,13 @@ int cmd_status() {
     write("    Saved players:   " + (save_files  ? sizeof(save_files)  : 0) + "\n\n");
 
     // Server time
-    write("  \033[1mServer time:\033[0m " + ctime(time()) + "\n\n");
+    write("  Server time: " + ctime(time()) + "\n\n");
 
     return 1;
 }
 
 int cmd_scan() {
-    write("\n\033[1;36m=== LPC File Scan ===\033[0m\n\n");
+    write("\n=== LPC File Scan ===\n\n");
 
     string *dirs = ({
         "/cmds/",
@@ -128,7 +128,7 @@ int cmd_scan() {
         string *files = get_dir(dir + "*.lpc");
         int count = files ? sizeof(files) : 0;
         if (count > 0) {
-            write("  \033[1m" + dir + "\033[0m  (" + count + " files)\n");
+            write("  " + dir + "  (" + count + " files)\n");
             foreach (string f in files) {
                 int sz = file_size(dir + f);
                 string sz_str;
@@ -147,7 +147,7 @@ int cmd_scan() {
 }
 
 int show_help() {
-    write("\n\033[1;36m=== Crystal Ball ===\033[0m\n\n");
+    write("\n=== Crystal Ball ===\n\n");
     write("Commands:\n");
     write("  crystal            Server status summary\n");
     write("  crystal status     Rooms, NPCs, players online\n");

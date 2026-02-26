@@ -339,7 +339,7 @@ int cmd_find(string name) {
 }
 
 int cmd_staff() {
-    write("\n\033[1;31m=== Staff Roster ===\033[0m\n\n");
+    write("\n=== Staff Roster ===\n\n");
 
     object *all_users = users();
     int found = 0;
@@ -374,7 +374,7 @@ int cmd_staff() {
 }
 
 int cmd_logs() {
-    write("\n\033[1;31m=== Recent Admin Logs ===\033[0m\n\n");
+    write("\n=== Recent Admin Logs ===\n\n");
 
     // Show last entries from admin log
     string content = read_file("/log/admin.log");
@@ -396,7 +396,7 @@ int cmd_logs() {
     // Show promotion log
     string promo_content = read_file("/log/promotions");
     if (promo_content && promo_content != "") {
-        write("\033[1mRecent Promotions:\033[0m\n");
+        write("Recent Promotions:\n");
         string *plines = explode(promo_content, "\n");
         int pstart = sizeof(plines) - 10;
         if (pstart < 0) pstart = 0;
@@ -411,7 +411,7 @@ int cmd_logs() {
     // Show OCC assignment log
     string occ_content = read_file("/log/wizard/occ_assignments.log");
     if (occ_content && occ_content != "") {
-        write("\033[1mRecent OCC Assignments:\033[0m\n");
+        write("Recent OCC Assignments:\n");
         string *olines = explode(occ_content, "\n");
         int ostart = sizeof(olines) - 10;
         if (ostart < 0) ostart = 0;
@@ -426,7 +426,7 @@ int cmd_logs() {
     // Show QCS deploy log
     string qcs_content = read_file("/log/wizard/qcs_deploy.log");
     if (qcs_content && qcs_content != "") {
-        write("\033[1mRecent QCS Deployments:\033[0m\n");
+        write("Recent QCS Deployments:\n");
         string *qlines = explode(qcs_content, "\n");
         int qstart = sizeof(qlines) - 10;
         if (qstart < 0) qstart = 0;
@@ -442,7 +442,7 @@ int cmd_logs() {
 }
 
 int cmd_uptime() {
-    write("\n\033[1;31m=== Server Uptime ===\033[0m\n\n");
+    write("\n=== Server Uptime ===\n\n");
     write("  Current time: " + ctime(time()) + "\n");
     write("  Epoch: " + time() + "\n\n");
 
@@ -452,11 +452,11 @@ int cmd_uptime() {
 }
 
 int cmd_pending() {
-    write("\n\033[1;31m=== Pending Requests ===\033[0m\n\n");
+    write("\n=== Pending Requests ===\n\n");
 
     // Players needing OCC assignment
     object *all_users = users();
-    write("\033[1mPlayers Awaiting OCC:\033[0m\n");
+    write("Players Awaiting OCC:\n");
     int occ_count = 0;
     foreach (object u in all_users) {
         if (!u) continue;
@@ -475,7 +475,7 @@ int cmd_pending() {
     if (occ_count == 0) write("  None.\n");
 
     // Sirname requests
-    write("\n\033[1mPending Sirname Requests:\033[0m\n");
+    write("\nPending Sirname Requests:\n");
     string sir_log = read_file("/log/wizard/sirname_requests.log");
     int sir_count = 0;
     if (sir_log && sir_log != "") {
@@ -489,7 +489,7 @@ int cmd_pending() {
     }
     if (sir_count == 0) write("  None.\n");
 
-    write("\n\033[1mActions:\033[0m\n");
+    write("\nActions:\n");
     write("  setocc <player> <occ>           Assign an OCC\n");
     write("  sirname <player> <title>        Grant a sirname\n\n");
     return 1;
@@ -542,7 +542,7 @@ int cmd_teleport(string name) {
 }
 
 int show_help() {
-    write("\n\033[1;31m=== Admin Orb ===\033[0m\n\n");
+    write("\n=== Admin Orb ===\n\n");
     write("Commands:\n");
     write("  orb status          Full system overview + zone counts\n");
     write("  orb players         All players with stats\n");

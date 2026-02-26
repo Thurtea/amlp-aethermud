@@ -72,7 +72,7 @@ int cmd_rp(string str) {
 int cmd_events() {
     string content = read_file("/log/rp_events.log");
 
-    write("\n\033[1;32m=== RP Event Calendar ===\033[0m\n\n");
+    write("\n=== RP Event Calendar ===\n\n");
 
     if (!content || content == "") {
         write("  No events scheduled.\n");
@@ -99,7 +99,7 @@ int cmd_addevent(object player, string desc) {
     string entry = ctime(time()) + " [" + wname + "] " + desc + "\n";
     write_file("/log/wizard/rp_events.log", entry);
 
-    write("\033[1;32mEvent added:\033[0m " + desc + "\n");
+    write("Event added: " + desc + "\n");
     return 1;
 }
 
@@ -172,7 +172,7 @@ int cmd_costume(string type) {
             return 1;
     }
 
-    write("\n\033[1;32m=== " + capitalize(type) + " Costume ===\033[0m\n\n");
+    write("\n=== " + capitalize(type) + " Costume ===\n\n");
     write(desc + "\n\n");
     write("Copy this description for your NPC:\n");
     write("  modify <npc> long \"" + desc + "\"\n\n");
@@ -190,9 +190,9 @@ int cmd_announce(object player, string msg) {
     if (function_exists("query_cap_name", player))
         wname = player->query_cap_name();
 
-    string announcement = "\n\033[1;35m=== RP Announcement ===\033[0m\n";
-    announcement += "\033[0;35m" + msg + "\033[0m\n";
-    announcement += "\033[1;35m======================\033[0m\n\n";
+    string announcement = "\n=== RP Announcement ===\n";
+    announcement += msg + "\n";
+    announcement += "======================\n\n";
 
     object *all_users = users();
     foreach (object u in all_users) {
@@ -220,14 +220,14 @@ int cmd_emoteall(object player, string msg) {
         return 1;
     }
 
-    string narrative = "\n\033[1;35m" + msg + "\033[0m\n\n";
+    string narrative = "\n" + msg + "\n\n";
     tell_room(room, narrative);
     write("Narrative emoted to room.\n");
     return 1;
 }
 
 int cmd_listskills() {
-    write("\n\033[1;32m=== Available Skills ===\033[0m\n\n");
+    write("\n=== Available Skills ===\n\n");
     write("Physical:\n");
     write("  Hand to Hand - Basic (ID 0) - Basic martial arts\n");
     write("  Acrobatics (ID 1) - Dodge, tumble, balance\n");
@@ -256,7 +256,7 @@ int cmd_listskills() {
 }
 
 int show_help() {
-    write("\n\033[1;32m=== Roleplay Tool ===\033[0m\n\n");
+    write("\n=== Roleplay Tool ===\n\n");
     write("Commands:\n");
     write("  rp events          View event calendar\n");
     write("  rp addevent <desc> Schedule a new event\n");

@@ -1390,6 +1390,82 @@ VMValue efun_find_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_null();
 }
 
+// ========== LPC Weapon/Armor Bridge Efuns ========== //
+
+VMValue efun_is_weapon(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_null();
+    obj_t *obj = (obj_t *)args[0].data.object_value;
+    if (!obj) return vm_value_create_null();
+    VMValue result = obj_call_method(vm, obj, "is_weapon", NULL, 0);
+    if (result.type == VALUE_INT && result.data.int_value == 1) return vm_value_create_int(1);
+    return vm_value_create_int(0);
+}
+
+VMValue efun_is_armor(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_null();
+    obj_t *obj = (obj_t *)args[0].data.object_value;
+    if (!obj) return vm_value_create_null();
+    VMValue result = obj_call_method(vm, obj, "is_armor", NULL, 0);
+    if (result.type == VALUE_INT && result.data.int_value == 1) return vm_value_create_int(1);
+    return vm_value_create_int(0);
+}
+
+VMValue efun_query_weapon_damage(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_null();
+    obj_t *weapon = (obj_t *)args[0].data.object_value;
+    if (!weapon) return vm_value_create_null();
+    VMValue is_weapon = obj_call_method(vm, weapon, "is_weapon", NULL, 0);
+    if (is_weapon.type != VALUE_INT || is_weapon.data.int_value != 1) return vm_value_create_null();
+    VMValue dice = obj_call_method(vm, weapon, "query_damage_dice", NULL, 0);
+    VMValue dtype = obj_call_method(vm, weapon, "query_damage_type", NULL, 0);
+    if (dice.type != VALUE_ARRAY || dtype.type != VALUE_STRING) return vm_value_create_null();
+    array_t *arr = dice.data.array_value;
+    if (!arr || array_length(arr) < 2) return vm_value_create_null();
+    VMValue num = array_get(arr, 0);
+    VMValue sides = array_get(arr, 1);
+    if (num.type != VALUE_INT || sides.type != VALUE_INT) return vm_value_create_null();
+    mapping_t *map = mapping_new(vm->gc);
+    mapping_set(map, "num", num);
+    mapping_set(map, "sides", sides);
+    mapping_set(map, "type", dtype);
+    VMValue out; out.type = VALUE_MAPPING; out.data.mapping_value = map;
+    return out;
+}
+
+VMValue efun_query_armor_rating(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_int(0);
+    obj_t *armor = (obj_t *)args[0].data.object_value;
+    if (!armor) return vm_value_create_int(0);
+    VMValue is_armor = obj_call_method(vm, armor, "is_armor", NULL, 0);
+    if (is_armor.type != VALUE_INT || is_armor.data.int_value != 1) return vm_value_create_int(0);
+    VMValue ar = obj_call_method(vm, armor, "query_armor_rating", NULL, 0);
+    if (ar.type != VALUE_INT) return vm_value_create_int(0);
+    return ar;
+}
+
+VMValue efun_query_armor_mdc(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 1 || args[0].type != VALUE_OBJECT) return vm_value_create_int(0);
+    obj_t *armor = (obj_t *)args[0].data.object_value;
+    if (!armor) return vm_value_create_int(0);
+    VMValue is_armor = obj_call_method(vm, armor, "is_armor", NULL, 0);
+    if (is_armor.type != VALUE_INT || is_armor.data.int_value != 1) return vm_value_create_int(0);
+    VMValue mdc = obj_call_method(vm, armor, "query_mdc", NULL, 0);
+    if (mdc.type != VALUE_INT) return vm_value_create_int(0);
+    return mdc;
+}
+
+VMValue efun_reduce_armor_mdc(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count != 2 || args[0].type != VALUE_OBJECT || args[1].type != VALUE_INT) return vm_value_create_int(0);
+    obj_t *armor = (obj_t *)args[0].data.object_value;
+    if (!armor) return vm_value_create_int(0);
+    VMValue is_armor = obj_call_method(vm, armor, "is_armor", NULL, 0);
+    if (is_armor.type != VALUE_INT || is_armor.data.int_value != 1) return vm_value_create_int(0);
+    VMValue argv[1]; argv[0] = args[1];
+    VMValue result = obj_call_method(vm, armor, "reduce_mdc", argv, 1);
+    if (result.type != VALUE_INT) return vm_value_create_int(0);
+    return result;
+}
+
 VMValue efun_call_other(VirtualMachine *vm, VMValue *args, int arg_count) {
     if (arg_count < 2) return vm_value_create_null();
 
@@ -2826,6 +2902,12 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "query_verb", efun_query_verb, 0, 0, "string query_verb()");
     efun_register(registry, "write", efun_write, 1, 1, "int write(mixed)");
     efun_register(registry, "printf", efun_printf, 1, -1, "int printf(string, ...)");
+    efun_register(registry, "is_weapon", efun_is_weapon, 1, 1, "int is_weapon(object)");
+    efun_register(registry, "is_armor", efun_is_armor, 1, 1, "int is_armor(object)");
+    efun_register(registry, "query_weapon_damage", efun_query_weapon_damage, 1, 1, "mapping query_weapon_damage(object)");
+    efun_register(registry, "query_armor_rating", efun_query_armor_rating, 1, 1, "int query_armor_rating(object)");
+    efun_register(registry, "query_armor_mdc", efun_query_armor_mdc, 1, 1, "int query_armor_mdc(object)");
+    efun_register(registry, "reduce_armor_mdc", efun_reduce_armor_mdc, 2, 2, "int reduce_armor_mdc(object, int)");
     count += 2;
 
     /* String search/replace */

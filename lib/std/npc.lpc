@@ -1,5 +1,5 @@
 /*
- * /lib/std/npc.lpc
+ * /home/thurtea/amlp-aethermud/lib/std/npc.lpc
  *
  * Base LPC NPC object.  All domain NPCs should inherit this.
  *
@@ -22,6 +22,23 @@
  */
 
 inherit "/std/living";
+
+string short_desc;
+int aggressive;
+
+void create() {
+    ::create();
+    short_desc = "";
+    aggressive = 0;
+}
+
+void set_short_desc(string desc) { short_desc = desc; }
+string query_short_desc() { return short_desc; }
+
+void set_aggressive(int flag) { aggressive = flag; }
+int query_aggressive() { return aggressive; }
+
+int is_npc() { return 1; }
 
 private string npc_template;
 private int    npc_level;

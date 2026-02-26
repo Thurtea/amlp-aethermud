@@ -1,25 +1,17 @@
-// std/container.c - Base object for containers and inventory
-// Inherits from std/object and adds container functionality
+// /home/thurtea/amlp-aethermud/lib/std/container.lpc
+inherit "/std/object";
 
-inherit "std/object.c";
-
+int max_capacity;
 object *inventory;
-int max_weight;
-int current_weight;
-int open_state;
-int is_open;
 
 void create() {
     ::create();
+    max_capacity = 20;
     inventory = ({});
-    max_weight = 1000;
-    current_weight = 0;
-    open_state = 0; /* default: closed */
-    is_open = 0;
 }
 
 void add_item(object item) {
-    inventory += ({ item });
+    if (!is_full()) inventory += ({ item });
 }
 
 void remove_item(object item) {
@@ -27,75 +19,17 @@ void remove_item(object item) {
 }
 
 object *query_inventory() {
-    return copy(inventory);
+    return inventory ? inventory : ({});
 }
 
-int query_max_weight() {
-    return max_weight;
+void set_max_capacity(int n) { max_capacity = n; }
+int query_max_capacity() { return max_capacity; }
+
+int is_full() {
+    return sizeof(query_inventory()) >= query_max_capacity();
 }
 
-void set_max_weight(int weight) {
-    max_weight = weight;
-}
-
-int query_current_weight() {
-    return current_weight;
-}
-
-// Return a nicely formatted listing of internal contents for "look in".
-string GetInternalDesc() {
-    object *inv = query_inventory();
-    if (!open_state) {
-        return "The container is closed.";
-    }
-
-    if (!inv || sizeof(inv) == 0) {
-        return "It is empty.";
-    }
-
-    string out = "";
-    foreach (object item : inv) {
-        string item_desc;
-        if (function_exists("query_short", item)) {
-            item_desc = item->query_short();
-        } else {
-            item_desc = "something";
-        }
-
-        if (!item_desc || item_desc == "") continue;
-
-        string lc = lower_case(item_desc);
-        string article = "";
-        if (startswith(lc, "a ") || startswith(lc, "an ") || startswith(lc, "the ")) {
-            article = "";
-        } else {
-            string first = lc[0..0];
-            if (member(({ 'a','e','i','o','u' }), first) != -1) {
-                article = "An";
-            } else {
-                article = "A";
-            }
-        }
-
-        string line;
-        if (article != "") {
-            line = article + " " + item_desc;
-        } else {
-            line = item_desc;
-        }
-        line = capitalize(line);
-        if (line[<1] != '.' && line[<1] != '!') line += ".";
-
-        out += "  " + line + "\n";
-    }
-
-    return out;
-}
-
-// inventory visibility now depends on open/closed state
-
-/* Open/close API */
-int query_open() { return open_state; }
+int is_container() { return 1; }
 
 void set_open(int x) { open_state = x ? 1 : 0; }
 

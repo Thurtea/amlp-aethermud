@@ -1,0 +1,30 @@
+// /home/thurtea/amlp-aethermud/lib/std/armor.lpc
+inherit "/std/item";
+
+string armor_type;
+int armor_rating;
+int mdc;
+
+void create() {
+    ::create();
+    armor_type = "";
+    armor_rating = 0;
+    mdc = 0;
+}
+
+void set_armor_type(string type) { armor_type = type; }
+string query_armor_type() { return armor_type; }
+
+void set_armor_rating(int ar) { armor_rating = ar; }
+int query_armor_rating() { return armor_rating; }
+
+void set_mdc(int val) { mdc = val; }
+int query_mdc() { return mdc; }
+
+int reduce_mdc(int amount) {
+    int absorbed = (amount > mdc) ? mdc : amount;
+    mdc -= absorbed;
+    return absorbed;
+}
+
+int is_armor() { return 1; }

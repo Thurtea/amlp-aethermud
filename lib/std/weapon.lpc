@@ -1,0 +1,29 @@
+// /home/thurtea/amlp-aethermud/lib/std/weapon.lpc
+inherit "/std/item";
+
+string weapon_type;
+int damage_num;
+int damage_sides;
+string damage_type;
+
+void create() {
+    ::create();
+    weapon_type = "";
+    damage_num = 1;
+    damage_sides = 6;
+    damage_type = "SDC";
+}
+
+void set_weapon_type(string type) { weapon_type = type; }
+string query_weapon_type() { return weapon_type; }
+
+void set_damage_dice(int num, int sides) {
+    damage_num = num;
+    damage_sides = sides;
+}
+int *query_damage_dice() { return ({ damage_num, damage_sides }); }
+
+void set_damage_type(string type) { damage_type = type; }
+string query_damage_type() { return damage_type; }
+
+int is_weapon() { return 1; }

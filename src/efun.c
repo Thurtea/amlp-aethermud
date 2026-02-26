@@ -1424,7 +1424,7 @@ VMValue efun_query_weapon_damage(VirtualMachine *vm, VMValue *args, int arg_coun
     VMValue num = array_get(arr, 0);
     VMValue sides = array_get(arr, 1);
     if (num.type != VALUE_INT || sides.type != VALUE_INT) return vm_value_create_null();
-    mapping_t *map = mapping_new(vm->gc);
+    mapping_t *map = mapping_new(vm->gc, 8);
     mapping_set(map, "num", num);
     mapping_set(map, "sides", sides);
     mapping_set(map, "type", dtype);

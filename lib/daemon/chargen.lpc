@@ -1009,7 +1009,7 @@ void finalize_character(object player) {
     string *race_skill_pkg = ({});
     if (race) {
         // Try query_starting_spells if implemented, otherwise query_property
-        if (functionp(race->query_starting_spells)) {
+        if (function_exists("query_starting_spells", race)) {
             race_spells = race->query_starting_spells();
         } else if (race->query_property("starting_spells")) {
             race_spells = race->query_property("starting_spells");
@@ -1036,8 +1036,8 @@ void finalize_character(object player) {
     string *occ_tattoos = ({});
     string *occ_skill_pkg = ({});
     if (occ) {
-        if (functionp(occ->query_starting_spells)) occ_spells = occ->query_starting_spells();
-        if (functionp(occ->query_occ_powers)) occ_psions = occ->query_occ_powers();
+        if (function_exists("query_starting_spells", occ)) occ_spells = occ->query_starting_spells();
+        if (function_exists("query_occ_powers", occ)) occ_psions = occ->query_occ_powers();
         if (occ->query_property("starting_tattoos")) occ_tattoos = occ->query_property("starting_tattoos");
         if (occ->query_property("starting_skill_package")) occ_skill_pkg = occ->query_property("starting_skill_package");
         // OCC max_tattoos

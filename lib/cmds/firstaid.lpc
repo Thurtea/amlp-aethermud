@@ -1,0 +1,110 @@
+/*
+ * /lib/cmds/firstaid.lpc — Apply first aid to yourself or a target
+ *
+ * Usage:
+ *   firstaid            Treat yourself
+ *   firstaid <target>   Treat a nearby player or NPC
+ *
+ * Requires the "first_aid" skill.  Rolls d100 vs your skill percentage.
+ * Success: heals 1d6 SDC on target.
+ * Cooldown: 60 seconds between uses.
+ */
+
+#define FIRST_AID_COOLDOWN 60
+#define SKILL_ID "first_aid"
+
+int main(string args) {
+    object player, target, skill_ob, skills_d;
+    int skill_pct, last_use, result;
+
+    player = this_player();
+
+    // Determine target
+    if (!args || args == "") {
+        target = player;
+    } else {
+        target = present(args, environment(player));
+        if (!target) {
+            write("You don't see '" + args + "' here.\n");
+            return 1;
+        }
+        if (!living(target)) {
+            write("You can't provide first aid to that.\n");
+            return 1;
+        }
+    }
+
+    // Require the skill
+    skill_pct = player->query_skill(SKILL_ID);
+    if (skill_pct <= 0) {
+        write("You don't know the First Aid skill.\n");
+        write("(First Aid is assigned with the Mercenary, Body Fixer, and other OCCs.)\n");
+        return 1;
+    }
+
+    // Cooldown guard
+    last_use = (int)player->query_property("last_firstaid");
+    if (last_use && (time() - last_use) < FIRST_AID_COOLDOWN) {
+        write("You need to rest before applying first aid again. ("
+              + (FIRST_AID_COOLDOWN - (time() - last_use)) + " seconds)\n");
+        return 1;
+    }
+
+    // Try to load the skill object for richer messages
+    catch { skill_ob = load_object("/skills/medical/first_aid"); };
+
+    if (skill_ob && function_exists("perform", skill_ob)) {
+        // Skill object handles the roll and messages
+        result = skill_ob->perform(player, args);
+    } else {
+        // Fallback: roll directly
+        int roll = random(100) + 1;
+        tell_object(player, "You attempt to provide first aid...\n");
+        if (roll >= 96) {
+            result = -1;
+        } else if (roll <= skill_pct) {
+            result = 1;
+        } else {
+            result = 0;
+        }
+        if (result == -1) tell_object(player, "You botch the treatment — critical failure!\n");
+        if (result == 0)  tell_object(player, "Your attempt doesn't help much.\n");
+        if (result == 1)  tell_object(player, "Your treatment stabilizes the wounds.\n");
+    }
+
+    // Record use time
+    player->set_property("last_firstaid", time());
+
+    // Apply healing on success
+    if (result == 1) {
+        int sdc_heal = (skill_ob && function_exists("query_sdc_heal", skill_ob))
+                       ? skill_ob->query_sdc_heal()
+                       : random(6) + 1;
+
+        if (target == player) {
+            player->heal_damage(sdc_heal, 0);
+            write("You patch yourself up — +" + sdc_heal + " SDC restored.\n");
+        } else {
+            target->heal_damage(sdc_heal, 0);
+            write("You treat " + target->query_cap_name() + " — +" + sdc_heal + " SDC restored.\n");
+            tell_object(target,
+                player->query_cap_name() + " patches you up — +" + sdc_heal + " SDC restored.\n");
+        }
+    }
+
+    return 1;
+}
+
+string query_help() {
+    return
+"FIRSTAID — Apply first aid to yourself or another\n\n"
+"Usage:\n"
+"  firstaid              Treat yourself\n"
+"  firstaid <target>     Treat someone nearby\n\n"
+"Requires the 'first_aid' skill.  Rolls d100 vs your skill percentage.\n"
+"  Success:          Heals 1d6 SDC\n"
+"  Failure:          No effect\n"
+"  Critical failure: Botched treatment\n\n"
+"Cooldown: " + FIRST_AID_COOLDOWN + " seconds between uses.\n\n"
+"First Aid is an OCC skill for Mercenary, Body Fixer, City Rat, and others.\n";
+}

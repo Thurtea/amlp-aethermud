@@ -154,6 +154,15 @@ void init_commands() {
     commands["save"]     = "cmds/save";
     commands["consider"] = "cmds/consider";
     commands["occs"] = "cmds/occs";
+
+    // Combat
+    commands["attack"]   = "cmds/attack";
+    commands["kill"]     = "cmds/kill";
+    commands["flee"]     = "cmds/flee";
+
+    // Skills (in-play use)
+    commands["firstaid"] = "cmds/firstaid";
+
     // Wiz-tool commands (privilege checked internally; item required)
     commands["orb"]      = "cmds/orb";      /* Admin orb — admin only (priv>=2) */
     commands["rp"]       = "cmds/rp";       /* RP tool — wizard+ (priv>=1) */

@@ -126,8 +126,6 @@ int cmd_giveskill(string args) {
     write_file("/domains/rp/logs/skill_grants.log", log_entry);
     return 1;
 }
-    return 1;
-}
 
 int rptool_ls(object player, string *args) {
     string base = "/domains/rp/";

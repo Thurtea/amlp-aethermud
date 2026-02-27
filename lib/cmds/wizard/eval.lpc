@@ -1,0 +1,74 @@
+// lib/cmds/wizard/eval.lpc
+// Wizard eval: load an LPC object (compile check) and optionally call a method.
+//
+// Usage:
+//   eval <lpc_path>              - load/recompile the file; report success or error
+//   eval <lpc_path>-><method>   - load file and call a zero-argument method; print result
+//
+// Examples:
+//   eval /lib/std/object
+//   eval /lib/daemon/skills->query_skill_list
+
+int query_privilege_required() { return 1; }
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (!args || args == "") {
+        write("Usage: eval <lpc_path>\n");
+        write("       eval <lpc_path>-><method>\n");
+        return 1;
+    }
+
+    string path = args;
+    string method = "";
+
+    // Split on -> separator
+    int arrow = strsrch(args, "->");
+    if (arrow >= 0) {
+        path   = substring(args, 0, arrow);
+        method = substring(args, arrow + 2);
+    }
+
+    // Strip trailing whitespace from path and method
+    while (strlen(path) > 0 && path[strlen(path)-1] == ' ')
+        path = substring(path, 0, strlen(path)-1);
+    while (strlen(method) > 0 && method[strlen(method)-1] == ' ')
+        method = substring(method, 0, strlen(method)-1);
+
+    object obj;
+    catch { obj = load_object(path); };
+
+    if (!obj) {
+        write("eval: Failed to load '" + path + "'\n");
+        return 1;
+    }
+
+    write("eval: Loaded " + path + "\n");
+
+    if (method != "") {
+        if (!function_exists(method, obj)) {
+            write("eval: No function '" + method + "' in " + path + "\n");
+            return 1;
+        }
+        mixed result;
+        catch { result = call_other(obj, method); };
+        write("eval: " + method + "() => " + (string)result + "\n");
+    }
+
+    return 1;
+}
+
+string query_help() {
+    return
+"EVAL - Load and optionally call a method on an LPC object\n\n"
+"Usage:\n"
+"  eval <lpc_path>             Load/recompile the object\n"
+"  eval <lpc_path>-><method>   Load and call a zero-arg method\n\n"
+"Examples:\n"
+"  eval /lib/daemon/skills\n"
+"  eval /lib/daemon/skills->query_skill_list\n"
+"  eval /lib/std/object\n\n"
+"Requires wizard or admin privileges.\n";
+}

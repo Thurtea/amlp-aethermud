@@ -108,7 +108,7 @@ void init_commands() {
     commands["buildtest"] = "cmds/admin/buildtest";
         commands["rp-wiz"] = "cmds/admin/rp_wiz";
         commands["rpwiz"] = "cmds/admin/rp_wiz";
-        commands["orb"] = "cmds/admin/orb";
+        commands["adminorb"] = "cmds/admin/orb";  /* alias — orb wrapper overrides below */
     // Wizard commands (check privilege internally)
     commands["setocc"] = "cmds/wizard/setocc";
     commands["wiztool"] = "cmds/admin/wiztool";
@@ -155,12 +155,14 @@ void init_commands() {
     commands["consider"] = "cmds/consider";
     commands["occs"] = "cmds/occs";
     // Wiz-tool commands (privilege checked internally; item required)
-    commands["orb"]     = "cmds/orb";      /* Admin orb — admin only (priv>=2) */
-    commands["rp"]      = "cmds/rp";       /* RP tool — wizard+ (priv>=1) */
-    commands["wand"]    = "cmds/wand";     /* Admin wand — admin only (priv>=2) */
-    commands["qcs"]     = "cmds/qcs";      /* QCS creator tool — wizard+ (priv>=1) */
-    commands["code"]    = "cmds/code";     /* Code tool — wizard+ (priv>=1) */
-    commands["crystal"] = "cmds/crystal";  /* Crystal ball — wizard+ (priv>=1) */
+    commands["orb"]      = "cmds/orb";      /* Admin orb — admin only (priv>=2) */
+    commands["rp"]       = "cmds/rp";       /* RP tool — wizard+ (priv>=1) */
+    commands["wand"]     = "cmds/wand";     /* Admin wand — admin only (priv>=2) */
+    commands["qcs"]      = "cmds/qcs";      /* QCS creator tool — wizard+ (priv>=1) */
+    commands["code"]     = "cmds/code";     /* Code tool — wizard+ (priv>=1) */
+    commands["codetool"] = "cmds/code";     /* alias for code */
+    commands["crystal"]  = "cmds/crystal";  /* Crystal ball — wizard+ (priv>=1) */
+    commands["dchat"]    = "cmds/dchat";    /* Domain/admin chat channel — wizard+ */
 }
 
 // Main command execution function

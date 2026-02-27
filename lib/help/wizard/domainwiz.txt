@@ -1,0 +1,55 @@
+=============================================================================
+                        DOMAIN WIZARD GUIDE
+=============================================================================
+
+Welcome to the Domain Wizard team. You oversee a domain of AetherMUD —
+managing its RP Wizards, approving content, and shaping your domain's
+identity. You are a builder and a manager.
+
+YOUR TOOLS
+----------
+You carry the QCS Tool (qcs_tool). Type: qcs help   for a command list.
+
+YOUR HOME DIRECTORY
+-------------------
+  /domains/<yourname>/
+
+You have full read/write access to your entire domain directory.
+Subdirectories you are expected to maintain:
+  rooms/     npcs/     objects/     wizards/     workrooms/
+
+YOUR PERMISSIONS
+----------------
+  - Read/write access to: /domains/<yourname>/
+  - Can review RP Wizard submissions within your domain
+  - Cannot access other domains or /lib/ directly
+  - Cannot use eval
+
+YOUR COMMANDS
+-------------
+  cd <path>         Navigate your domain directory
+  ls [path]         List contents
+  pwd               Current directory
+  qcs <command>     QCS Tool commands (see: qcs help)
+  help domainwiz    This file
+
+MANAGING RP WIZARDS
+-------------------
+RP Wizards under your domain submit work via: rp submit
+You review pending submissions with: qcs review
+Approve with: qcs approve <wizname>
+Reject with:  qcs reject <wizname> <reason>
+
+DOMAIN STRUCTURE GUIDELINES
+----------------------------
+Each domain should have:
+  - A central hub room (hub.lpc)
+  - A README.txt describing the domain theme
+  - An npcs/ folder for domain inhabitants
+  - A workrooms/ folder for wizard workrooms
+
+QUESTIONS?
+----------
+Contact an Admin in-game or use: tell <adminname> <message>
+
+=============================================================================

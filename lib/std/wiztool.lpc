@@ -85,11 +85,21 @@ int process_command(string verb, string args) {
 
 void cmd_cd(string dir) {
     if (!dir || dir == "") {
-        cwd = "/";
-        tell_object(owner, "Changed to root directory: /");
+        // Send to home directory instead of root
+        object perms = load_object("/secure/wiz_perms.lpc");
+        string home = perms ? perms->query_wiz_home(this_player()) : "/";
+        cwd = home;
+        tell_object(owner, "Changed to home directory: " + cwd);
         return;
     }
     
+    // Enforce path permissions
+    object perms = load_object("/secure/wiz_perms.lpc");
+    if (perms && !perms->check_wiz_perm(this_player(), resolve_path(dir))) {
+        tell_object(owner, "Permission denied: you do not have access to that path.\n");
+        return;
+    }
+
     string new_path = resolve_path(dir);
     
     // Check if directory exists
@@ -114,6 +124,13 @@ void cmd_ls(string dir) {
         path = cwd;
     } else {
         path = resolve_path(dir);
+    }
+
+    // Enforce path permissions
+    object perms = load_object("/secure/wiz_perms.lpc");
+    if (perms && !perms->check_wiz_perm(this_player(), path)) {
+        tell_object(owner, "Permission denied: you do not have access to that path.\n");
+        return;
     }
     
     if (file_size(path) == -1) {

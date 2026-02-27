@@ -1,0 +1,65 @@
+=============================================================================
+                        ADMIN WIZARD GUIDE
+=============================================================================
+
+You are an Administrator of AetherMUD. You have full access to all
+systems. Use this carefully. Your actions affect every player and wizard.
+
+YOUR TOOLS
+----------
+You carry the Admin Orb (admin_orb) and the Admin Wand (admin_wand).
+
+  orb <command>     Admin Orb commands (see: orb help)
+  wand <command>    Admin Wand commands (see: wand help)
+
+YOUR PERMISSIONS
+----------------
+  - Full read/write access to all directories
+  - Can promote and demote players and wizards
+  - Can assign and change wizard roles
+  - Can access /secure/, /src/, all domains
+  - Can use all wizard commands
+
+YOUR COMMANDS
+-------------
+  promote <player>           Promote a player to wizard rank
+  setrole <player> <role>    Assign a role: admin, domain, coding, rp
+  demote <player>            Return a wizard to player status
+  setocc <player> <occ>      Set a player's occupation
+  grantskill <player> <skill> Grant a skill to a player
+  orb <command>              Admin Orb (full admin toolkit)
+  wand <command>             Admin Wand (spells/psionics/healing)
+  eval <expr>                Evaluate LPC expressions
+  reload <file>              Reload any object
+  clone <file>               Clone any object
+  destruct <obj>             Destruct any object
+  update <file>              Update a loaded object
+  help adminwiz              This file
+
+WIZARD HIERARCHY
+----------------
+  admin     privilege 2 — full access, all tools
+  domain    privilege 1 — domain directory, qcs_tool
+  coding    privilege 1 — /lib/ and /domains/code/, code_tool
+  rp        privilege 1 — /domains/rp/<name>/, rp_tool
+
+PROMOTING A PLAYER
+------------------
+  1. promote <playername>          — elevates to wizard rank
+  2. setrole <playername> <role>   — assigns their role and wiztool
+  Player will receive notification and their wiztool automatically.
+
+DEMOTING A WIZARD
+-----------------
+  demote <playername>
+  This removes wizard privileges, detaches their wiztool, and resets
+  their privilege level to 0. Their player file is preserved.
+
+IMPORTANT RULES
+---------------
+  - Never share Admin credentials or tools with non-Admins
+  - Log significant actions (promotions, demotions, bans)
+  - Do not use eval in live areas without testing first
+  - Coordinate major lib changes with Code Wizards
+
+=============================================================================

@@ -54,6 +54,6 @@ string query_wiz_home(object player) {
     if (role == ROLE_ADMIN_WIZARD) return "/domains/admin/workroom.lpc";
     if (role == ROLE_DOMAIN_WIZARD) return "/domains/" + name + "/workroom.lpc";
     if (role == ROLE_CODE_WIZARD) return "/domains/code/workroom.lpc";
-    if (role == ROLE_RP_WIZARD) return "/domains/rp/workroom.lpc";
+    if (role == ROLE_RP_WIZARD) return "/domains/rp/" + name + "/workroom.lpc";
     return "/domains/start";
 }

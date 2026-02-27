@@ -1,0 +1,96 @@
+// /lib/cmds/admin/setrole.lpc
+// setrole — assign a wizard role to a promoted wizard
+// Admin-only command (privilege level 2)
+
+#include <mudlib.h>
+
+inherit "/std/cmd";
+
+int query_privilege_required() { return 2; }
+
+string query_help() {
+    return
+        "SYNTAX: setrole <player> <role>\n\n" +
+        "Assigns a wizard role to a promoted wizard.\n" +
+        "Valid roles: admin, domain, coding, rp\n\n" +
+        "The player must already be a wizard (privilege level >= 1).\n" +
+        "This command adjusts their role and reattaches the appropriate wiztool.\n\n" +
+        "Examples:\n" +
+        "  setrole kael domain\n" +
+        "  setrole lyra rp\n" +
+        "  setrole soren coding\n";
+}
+
+int main(string args) {
+    string target_name, role;
+    object target;
+
+    if (!args || sscanf(args, "%s %s", target_name, role) != 2) {
+        write("Usage: setrole <player> <role>\n");
+        write("Roles: admin, domain, coding, rp\n");
+        return 1;
+    }
+
+    target_name = lower_case(target_name);
+    role = lower_case(role);
+
+    // Validate role
+    if (role != "admin" && role != "domain" && role != "coding" && role != "rp") {
+        write("Invalid role '" + role + "'. Valid roles: admin, domain, coding, rp\n");
+        return 1;
+    }
+
+    // Find the target player
+    target = find_player(target_name);
+    if (!target) {
+        write("Player '" + target_name + "' is not online.\n");
+        return 1;
+    }
+
+    // Must already be a wizard
+    if (!function_exists("query_privilege_level", target) ||
+        target->query_privilege_level() < 1) {
+        write(capitalize(target_name) + " is not a wizard. Use promote first.\n");
+        return 1;
+    }
+
+    // Set the role
+    target->set_property("wizard_role", role);
+
+    // Adjust privilege level for admin role
+    if (role == "admin") {
+        target->set_privilege_level(2);
+    } else {
+        if (target->query_privilege_level() < 1) {
+            target->set_privilege_level(1);
+        }
+    }
+
+    // Detach old wiztool and attach the appropriate one
+    string tool_path;
+    switch(role) {
+        case "admin":   tool_path = "/obj/wiztools/admin_orb.lpc"; break;
+        case "domain":  tool_path = "/obj/wiztools/qcs_tool.lpc"; break;
+        case "coding":  tool_path = "/obj/wiztools/code_tool.lpc"; break;
+        case "rp":      tool_path = "/obj/wiztools/rp_tool.lpc"; break;
+    }
+
+    if (function_exists("attach_wiztool", target)) {
+        target->detach_wiztool();
+        target->attach_wiztool(clone_object(tool_path));
+    }
+
+    // Save the player
+    if (function_exists("save_player", target)) {
+        target->save_player();
+    }
+
+    write("Role '" + role + "' assigned to " + capitalize(target_name) + ".\n");
+    write("Wiztool updated: " + tool_path + "\n");
+    tell_object(target,
+        "\nYour wizard role has been updated to: " + upper_case(role) + "\n" +
+        "Type 'help " + role + "wiz' for information about your new tools and abilities.\n\n"
+    );
+
+    return 1;
+}

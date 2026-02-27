@@ -1,0 +1,58 @@
+=============================================================================
+                        CODE WIZARD GUIDE
+=============================================================================
+
+Welcome to the Code Wizard team. You work on the mudlib itself —
+writing and maintaining the systems that all other wizards depend on.
+This role carries significant responsibility. Be careful.
+
+YOUR TOOLS
+----------
+You carry the Code Tool (code_tool). Type: code help   for a command list.
+
+YOUR HOME DIRECTORY
+-------------------
+  /domains/code/
+
+You have read/write access to /lib/ and /domains/code/.
+You do NOT have write access to /secure/ or /src/.
+
+YOUR PERMISSIONS
+----------------
+  - Read/write: /lib/, /domains/code/
+  - Read-only:  /secure/ (read for reference only)
+  - No access:  /src/ (driver C sources — Admin only)
+  - Can use: eval, reload, clone, destruct, update
+
+YOUR COMMANDS
+-------------
+  cd <path>         Navigate allowed directories
+  ls [path]         List contents
+  pwd               Current directory
+  eval <expr>       Evaluate an LPC expression
+  reload <file>     Reload an LPC object
+  clone <file>      Clone an object
+  update <file>     Update a loaded object
+  destruct <obj>    Destruct an object
+  code <command>    Code Tool commands (see: code help)
+  help codewiz      This file
+
+CODING STANDARDS
+----------------
+  - All new std objects must inherit an appropriate /std/ base
+  - Never modify /secure/master.lpc without Admin approval
+  - Test changes in /domains/code/test/ before touching live lib files
+  - Document your changes — add a comment block at the top of any file
+    you modify with: date, your name, and what you changed
+
+DANGER ZONES
+------------
+  /secure/master.lpc    — controls all security; Admin approval required
+  /lib/daemon/          — core daemons; changes affect all players
+  /lib/std/player.lpc   — player object; extreme care required
+
+QUESTIONS?
+----------
+Contact an Admin in-game or use: tell <adminname> <message>
+
+=============================================================================

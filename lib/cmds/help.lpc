@@ -213,6 +213,8 @@ string display_name(string token) {
 /* Determine whether a topic is admin/wizard-only by checking wizard help
    locations and admin command help sources */
 int is_admin_topic(string topic) {
+    // Gate any topic with a file under lib/help/wizard/
+    if (file_size("lib/help/wizard/" + topic + ".txt") > 0) return 1;
     // Normalize token and check canonical admin list first
     string key = lower_case(replace_string(replace_string(topic, "-", ""), "_", ""));
     if (member_array(key, ADMIN_TOPICS) != -1) return 1;
@@ -268,7 +270,7 @@ int show_topic(string topic, int priv_level) {
     string norm = lower_case(replace_string(replace_string(topic, "-", ""), "_", ""));
 
     // Restrict admin topics for non-privileged players
-    if (member_array(norm, ADMIN_TOPICS) != -1 && priv_level < 1) {
+    if ((is_admin_topic(norm) || member_array(norm, ADMIN_TOPICS) != -1) && priv_level < 1) {
         write("That help topic is restricted to staff.\n");
         return 1;
     }

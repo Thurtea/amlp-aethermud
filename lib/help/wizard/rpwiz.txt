@@ -1,0 +1,48 @@
+=============================================================================
+                        ROLEPLAY WIZARD GUIDE
+=============================================================================
+
+Welcome to the Roleplay Wizard team. Your role is to create and maintain
+the narrative and social fabric of AetherMUD. You are a storyteller first.
+
+YOUR TOOLS
+----------
+You carry the RP Tool (rp_tool). This is your primary instrument for all
+RP Wizard tasks. Type: rp help   for a command list.
+
+YOUR HOME DIRECTORY
+-------------------
+  /domains/rp/<yourname>/
+
+You may navigate freely within this directory using cd and ls.
+All rooms, NPCs, and RP assets you create live here.
+
+YOUR PERMISSIONS
+----------------
+  - Read/write access to: /domains/rp/<yourname>/
+  - No access to: /lib/, /secure/, /src/, other wizard directories
+  - Cannot clone arbitrary objects
+  - Cannot use eval or reload
+
+YOUR COMMANDS
+-------------
+  cd <path>       Navigate your home directory
+  ls [path]       List directory contents
+  pwd             Show current directory
+  help rpwiz      This file
+  rp <command>    RP Tool commands (see: rp help)
+
+BUILDING BASICS
+---------------
+All rooms you create must inherit /std/room.lpc
+NPC objects must inherit /std/npc.lpc
+Place your files under /domains/rp/<yourname>/rooms/ and /npcs/
+
+When your area is ready for review, use: rp submit
+An Admin or Domain Wizard will review and approve your work.
+
+QUESTIONS?
+----------
+Contact a Domain Wizard or Admin in-game, or use: tell <adminname> <message>
+
+=============================================================================

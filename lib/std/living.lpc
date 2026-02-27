@@ -356,6 +356,19 @@ int take_damage(int amount, int damage_type) {
     return 0;
 }
 
+// receive_attack - intake path for NPC attacks on any living object.
+// Subclasses (npc.lpc) override take_damage() and die() so this
+// single implementation works correctly for both players and NPCs.
+int receive_attack(object attacker, int damage) {
+    int killed;
+    killed = take_damage(damage, 0);
+    if (killed) {
+        die(attacker);
+        return 1;
+    }
+    return 0;
+}
+
 // Phase 1, Step 4b: Heal damage function
 // heal_type: 0 = normal healing (HP+SDC), 1 = MDC repair
 void heal_damage(int amount, int heal_type) {

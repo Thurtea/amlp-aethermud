@@ -7,6 +7,8 @@
  *   - set_template() / query_template()  — template id string
  *   - die() override that notifies npc_daemon before destructing
  *   - on_spawn() hook for subclass initialization
+ *   - take_damage() / is_alive() override using npc_hp (not living.lpc hp)
+ *   - npc_heartbeat() for ongoing combat AI
  *
  * Usage (in a domain NPC file):
  *   inherit "/std/npc";
@@ -23,13 +25,26 @@
 
 inherit "/std/living";
 
+private string npc_template;
+private int    npc_level;
+private int    npc_hp;
+private int    npc_hp_max;
+private int    npc_aggro;    /* 1 = attacks players on sight */
+private string npc_position; /* position text shown in room look */
+
 string short_desc;
 int aggressive;
 
 void create() {
     ::create();
-    short_desc = "";
-    aggressive = 0;
+    npc_template = "generic_npc";
+    npc_level    = 1;
+    npc_hp       = 10;
+    npc_hp_max   = 10;
+    npc_aggro    = 0;
+    npc_position = "is standing here.";
+    short_desc   = "";
+    aggressive   = 0;
 }
 
 void set_short_desc(string desc) { short_desc = desc; }
@@ -40,27 +55,9 @@ int query_aggressive() { return aggressive; }
 
 int is_npc() { return 1; }
 
-private string npc_template;
-private int    npc_level;
-private int    npc_hp;
-private int    npc_hp_max;
-private int    npc_aggro;    /* 1 = attacks players on sight */
-private string npc_position; /* position text shown in room look */
-
-void create() {
-    npc_template = "generic_npc";
-    npc_level    = 1;
-    npc_hp       = 10;
-    npc_hp_max   = 10;
-    npc_aggro    = 0;
-    npc_position = "is standing here.";
-    ::create();
-}
-
 /* Called after the NPC is moved into its spawn room.  Override in subclasses
  * to run initialisation that requires a valid environment(). */
 void on_spawn() {
-    // Register combat AI heartbeat if not already
     call_out("npc_heartbeat", 2);
 }
 
@@ -72,10 +69,11 @@ string query_template()       { return npc_template; }
 void set_level(int l) { npc_level = l; }
 int  query_level()    { return npc_level; }
 
-/* ---- HP ---- */
-void set_hp(int h) { npc_hp = npc_hp_max = h; }
-int  query_hp()    { return npc_hp; }
-int  query_hp_max(){ return npc_hp_max; }
+/* ---- HP — use npc_hp as the source of truth ---- */
+void set_hp(int h)  { npc_hp = npc_hp_max = h; }
+int  query_hp()     { return npc_hp; }
+int  query_hp_max() { return npc_hp_max; }
+int  query_max_hp() { return npc_hp_max; }
 
 /* ---- Aggression ---- */
 void set_aggro(int a) { npc_aggro = a; }
@@ -85,9 +83,24 @@ int  query_aggro()    { return npc_aggro; }
 void   set_position_text(string p) { npc_position = p; }
 string query_position()            { return npc_position; }
 
+/* ---- Name: use short description for NPC display ---- */
+string query_name() { return query_short(); }
+
+/* ---- Health overrides — keep npc_hp in sync with living's combat ---- */
+
+/* Override is_alive() so living.lpc combat uses npc_hp */
+int is_alive() { return npc_hp > 0; }
+
+/* Override take_damage() so player attacks via apply_attack_damage() use npc_hp */
+int take_damage(int amount, int damage_type) {
+    if (amount <= 0) return 0;
+    npc_hp -= amount;
+    if (npc_hp < 0) npc_hp = 0;
+    return (npc_hp <= 0) ? 1 : 0;
+}
+
 /* ---- die() — notify npc_daemon then destruct ---- */
 void die(object killer) {
-    /* Award any XP / drop loot here in subclasses before calling ::die() */
     object env = environment(this_object());
     if (env) {
         tell_room(env, query_short() + " dies with a final groan.\n");
@@ -102,49 +115,36 @@ void die(object killer) {
     destruct(this_object());
 }
 
-
-// Called when this NPC is attacked
-int receive_attack(object attacker, int damage) {
-    npc_hp -= damage;
-    if (npc_hp <= 0) {
-        die(attacker);
-        return 1;
-    }
-    // Retaliate if alive
-    if (attacker && living(attacker)) {
-        retaliate(attacker);
-    }
-    return 0;
-}
-
-// Retaliate against attacker (simple AI)
+/* ---- Retaliate against an attacker (simple AI) ---- */
 void retaliate(object attacker) {
     if (!attacker || !environment() || !present(attacker, environment())) return;
-    // Attack back after 2 seconds
     call_out("npc_attack", 2, attacker);
 }
 
-// NPC attacks a target
+/* ---- NPC attacks a target ---- */
 void npc_attack(object target) {
     if (!target || !environment() || !present(target, environment())) return;
     if (npc_hp <= 0) return;
-    int dmg = random(6) + 1; // Default: 1d6
+
+    int dmg = random(6) + 1;  /* Default: 1d6 */
     tell_room(environment(), query_short() + " attacks " + target->query_name() + "!\n");
     tell_object(target, query_short() + " slashes at you!\n");
+
+    /* receive_attack is defined on all living objects (living.lpc) */
     target->receive_attack(this_object(), dmg);
 }
 
-// Heartbeat for ongoing combat (AI)
+/* ---- Heartbeat for ongoing combat AI ---- */
 void npc_heartbeat() {
     if (npc_hp <= 0) return;
-    object *attackers = filter(all_inventory(environment()), (: living($1) && $1->query_attack_target() == this_object() :));
+
+    /* Find anyone in the room who has this NPC as their combat target */
+    object *attackers = filter(all_inventory(environment()),
+        (: living($1) && $1->query_combat_target() == this_object() :));
+
     if (sizeof(attackers)) {
-        object target = attackers[0];
-        retaliate(target);
+        retaliate(attackers[0]);
     }
+
     call_out("npc_heartbeat", 2);
 }
-
-int query_hp()    { return npc_hp; }
-int query_max_hp(){ return npc_hp_max; }
-string query_name() { return query_short(); }

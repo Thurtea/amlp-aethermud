@@ -506,19 +506,23 @@ static void vm_negate(VirtualMachine *vm) {
 static void vm_comparison_op(VirtualMachine *vm, int op) {
     VMValue b = vm_pop_value(vm);
     VMValue a = vm_pop_value(vm);
-    /* Diagnostic: log LT comparisons to catch type mismatches during foreach */
-    if (op == 2) {
-        fprintf(stderr, "[VM OP_LT] a.type=%d b.type=%d", a.type, b.type);
-        if (a.type == VALUE_INT) fprintf(stderr, " a.int=%ld", a.data.int_value);
-        if (b.type == VALUE_INT) fprintf(stderr, " b.int=%ld", b.data.int_value);
-        if (a.type == VALUE_ARRAY) fprintf(stderr, " a.array_len=%zu", array_length((array_t*)a.data.array_value));
-        if (b.type == VALUE_ARRAY) fprintf(stderr, " b.array_len=%zu", array_length((array_t*)b.data.array_value));
-        fprintf(stderr, "\n");
+
+    /* String equality/inequality: use strcmp so content is compared */
+    if (op == 0 || op == 1) {
+        if (a.type == VALUE_STRING || b.type == VALUE_STRING) {
+            const char *a_str = (a.type == VALUE_STRING && a.data.string_value) ? a.data.string_value : "";
+            const char *b_str = (b.type == VALUE_STRING && b.data.string_value) ? b.data.string_value : "";
+            long result = (op == 0) ? (strcmp(a_str, b_str) == 0) : (strcmp(a_str, b_str) != 0);
+            vm_push_value(vm, vm_value_create_int(result));
+            vm_value_release(&a);
+            vm_value_release(&b);
+            return;
+        }
     }
-    
+
     double a_val = (a.type == VALUE_FLOAT) ? a.data.float_value : (double)a.data.int_value;
     double b_val = (b.type == VALUE_FLOAT) ? b.data.float_value : (double)b.data.int_value;
-    
+
     long result = 0;
     switch (op) {
         case 0: result = (a_val == b_val); break;
@@ -528,7 +532,7 @@ static void vm_comparison_op(VirtualMachine *vm, int op) {
         case 4: result = (a_val > b_val); break;
         case 5: result = (a_val >= b_val); break;
     }
-    
+
     vm_push_value(vm, vm_value_create_int(result));
     vm_value_release(&a);
     vm_value_release(&b);

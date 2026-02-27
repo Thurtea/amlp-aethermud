@@ -95,12 +95,12 @@ int main(string arg) {
     // --- Promotion to Wizard or Admin ---
     if (new_level > old_level && new_level >= PRIV_WIZARD) {
         // 1. Set default wizard role
-        string default_role = (new_level >= 2) ? "admin" : "roleplay";
+        string default_role = (new_level >= 2) ? "admin" : "rp";
         if (function_exists("set_property", target)) {
             target->set_property("wizard_role", default_role);
         }
         tell_object(user, "Default role set: " + default_role + "\n");
-        tell_object(user, "Change with: setrole " + target_name + " <domain|coding|roleplay|admin>\n");
+        tell_object(user, "Change with: setrole " + target_name + " <domain|coding|rp|admin>\n");
 
         // Broadcast staff announcement
         string promoter_name = "System";
@@ -245,7 +245,7 @@ void clone_wizkit(object target, int priv_level) {
     if (role == "coding") {
         wizkit += ({ "/obj/wiztools/code_tool" });
     }
-    if (role == "roleplay") {
+    if (role == "rp") {
         wizkit += ({ "/obj/wiztools/rp_tool" });
     }
 
@@ -311,7 +311,7 @@ string query_help() {
 "  1 = Wizard (builder access, basic admin tools)\n"
 "  2 = Admin (full system access)\n\n"
 "On promotion to Wizard/Admin:\n"
-"  - Default wizard role assigned (roleplay for wiz, admin for admin)\n"
+"  - Default wizard role assigned (rp for wiz, admin for admin)\n"
 "  - Personal workroom created at /domains/wizard/<name>/\n"
 "  - QCS workspace directories created (area/npc, area/room, etc.)\n"
 "  - Standard wizkit cloned to inventory\n"
@@ -323,7 +323,7 @@ string query_help() {
 "After promoting, use 'setrole <player> <role>' to assign their role:\n"
 "  domain    - World builder\n"
 "  coding    - Systems programmer\n"
-"  roleplay  - Event runner / RP facilitator\n"
+"  rp        - Event runner / RP facilitator\n"
 "  admin     - Administrator\n\n"
 "Examples:\n"
 "  promote thurtest 1          Grant Wizard privileges\n"

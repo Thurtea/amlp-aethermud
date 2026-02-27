@@ -2010,16 +2010,44 @@ VMValue efun_all_inventory(VirtualMachine *vm, VMValue *args, int arg_count) {
     return v;
 }
 
+VMValue efun_find_player(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count < 1 || args[0].type != VALUE_STRING) return vm_value_create_null();
+    const char *name = args[0].data.string_value;
+    if (!name || !name[0]) return vm_value_create_null();
+
+    extern PlayerSession *sessions[];
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        PlayerSession *s = sessions[i];
+        if (!s || !s->player_object || !s->username[0]) continue;
+        if (strcasecmp(s->username, name) == 0) {
+            VMValue v;
+            v.type = VALUE_OBJECT;
+            v.data.object_value = s->player_object;
+            return v;
+        }
+    }
+    return vm_value_create_null();
+}
+
 VMValue efun_users(VirtualMachine *vm, VMValue *args, int arg_count) {
     (void)args; (void)arg_count;
-    
+
     if (!vm || !vm->gc) return vm_value_create_null();
-    
-    /* Return array of all active player objects
-     * For now, return empty array - requires session tracking */
+
+    extern PlayerSession *sessions[];
     array_t *result = array_new(vm->gc, 8);
     if (!result) return vm_value_create_null();
-    
+
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        PlayerSession *s = sessions[i];
+        if (!s || !s->player_object) continue;
+        VMValue v;
+        v.type = VALUE_OBJECT;
+        v.data.object_value = s->player_object;
+        array_push(result, v);
+    }
+
     VMValue v;
     v.type = VALUE_ARRAY;
     v.data.array_value = result;
@@ -2896,6 +2924,8 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "load_object", efun_load_object, 1, 1, "object load_object(string)");
     efun_register(registry, "all_inventory", efun_all_inventory, 1, 1, "object* all_inventory(object)");
     efun_register(registry, "users", efun_users, 0, 0, "object* users()");
+    efun_register(registry, "find_player", efun_find_player, 1, 1, "object find_player(string)");
+    efun_register(registry, "find_living", efun_find_player, 1, 1, "object find_living(string)");
     efun_register(registry, "function_exists", efun_function_exists, 1, 2, "int function_exists(string, object)");
     efun_register(registry, "enable_commands", efun_enable_commands, 0, 0, "int enable_commands()");
     efun_register(registry, "add_action", efun_add_action, 2, 3, "int add_action(string, string)");

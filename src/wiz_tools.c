@@ -1194,15 +1194,24 @@ int assign_primary_skills(Character *player, const char *occ_name) {
  * Show all skills for an O.C.C. (for wizard reference)
  */
 void display_occ_skills(PlayerSession *sess, const char *occ_name) {
-    (void)sess; /* output not yet wired; see TODO in body */
+    if (!sess) return;
     OCCSkillConfig *config = get_occ_skill_config(occ_name);
 
     if (!config) {
+        send_to_player(sess, "No skill config found for OCC: %s\n", occ_name ? occ_name : "(null)");
         return;
     }
 
-    /* Output would be sent through the session/output system */
-    /* TODO: Implement output via session system */
+    send_to_player(sess, "\n=== Skills for %s ===\n\n", config->occ_name);
+    send_to_player(sess, "Primary Skills (%d):\n", config->primary_count);
+    for (int i = 0; i < config->primary_count; i++) {
+        WizSkillDef *s = &config->primary_skills[i];
+        if (!s->skill_name) continue;
+        send_to_player(sess, "  %-30s %d%%  (+%d/lvl)\n",
+                       s->skill_name, s->base_percent, s->level_bonus);
+    }
+    send_to_player(sess, "\nOCC-Related slots: %d  |  Secondary slots: %d\n\n",
+                   config->occ_related_max, config->secondary_max);
 }
 
 /* ============================================================================

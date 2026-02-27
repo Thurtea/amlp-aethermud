@@ -415,7 +415,9 @@ void free_session(PlayerSession *session) {
             }
         }
 
-        /* TODO: Call destruct on player object when object system ready */
+        /* Destruct and free the player's LPC object */
+        obj_destroy((obj_t *)session->player_object);
+        obj_free((obj_t *)session->player_object);
         session->player_object = NULL;
     }
     
@@ -1955,11 +1957,17 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             NULL
         };
         FILE *hf = NULL;
+        int hf_is_wizard = 0; /* 1 if found file is from a wizard-only directory */
         for (int di = 0; help_txt_dirs[di] && !hf; di++) {
             for (int vi = 0; variants[vi] && !hf; vi++) {
                 char hp[512];
                 snprintf(hp, sizeof(hp), "%s/%s.txt", help_txt_dirs[di], variants[vi]);
                 hf = fopen(hp, "r");
+                if (hf) {
+                    /* Mark as wizard-only if from wizard subdirectory */
+                    hf_is_wizard = (strstr(help_txt_dirs[di], "/wizard") != NULL ||
+                                    strstr(help_txt_dirs[di], "wizard/") != NULL);
+                }
                 /* If not found and this is lib/data/help, check its immediate subdirectories */
                 if (!hf && strcmp(help_txt_dirs[di], "lib/data/help") == 0) {
                     DIR *dh = opendir("lib/data/help");
@@ -1975,6 +1983,9 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                             char hp2[640];
                             snprintf(hp2, sizeof(hp2), "%s/%s.txt", sub, variants[vi]);
                             hf = fopen(hp2, "r");
+                            if (hf) {
+                                hf_is_wizard = (strstr(sub, "wizard") != NULL);
+                            }
                         }
                         closedir(dh);
                     }
@@ -1982,6 +1993,13 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             }
         }
         if (hf) {
+            /* Gate wizard-only help files to staff (privilege >= 1) */
+            if (hf_is_wizard && session->privilege_level < 1) {
+                fclose(hf);
+                send_to_player(session, "That help topic is restricted to staff.\r\n");
+                result.type = VALUE_NULL;
+                return result;
+            }
             send_to_player(session, "\r\n");
             char hline[256];
             while (fgets(hline, sizeof(hline), hf)) {
@@ -2722,7 +2740,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 if (sessions[i]->is_invisible && session->privilege_level < 1) continue;
                 if (strcmp(sessions[i]->wizard_role, "admin") == 0) admin_count++;
                 else if (strcmp(sessions[i]->wizard_role, "domain") == 0) domain_count++;
-                else if (strcmp(sessions[i]->wizard_role, "code") == 0) code_count++;
+                else if (strcmp(sessions[i]->wizard_role, "coding") == 0) code_count++;
                 else rp_count++;  /* Default to roleplay */
             }
         }
@@ -2754,7 +2772,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                     snprintf(role_tag, sizeof(role_tag), "\033[1;31m[Admin]\033[0m ");
                 else if (strcmp(role, "domain") == 0)
                     snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
-                else if (strcmp(role, "code") == 0)
+                else if (strcmp(role, "coding") == 0)
                     snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
                 else
                     snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
@@ -2805,7 +2823,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                     snprintf(role_tag, sizeof(role_tag), "\033[1;31m[Admin]\033[0m ");
                 else if (strcmp(role, "domain") == 0)
                     snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
-                else if (strcmp(role, "code") == 0)
+                else if (strcmp(role, "coding") == 0)
                     snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
                 else
                     snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
@@ -2912,7 +2930,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
             target->privilege_level = 1;
             if (target->wizard_role[0] == '\0') {
-                strncpy(target->wizard_role, "roleplay", sizeof(target->wizard_role));
+                strncpy(target->wizard_role, "rp", sizeof(target->wizard_role));
             }
             if (target->player_object) {
                 VMValue parg = vm_value_create_int(target->privilege_level);
@@ -3026,6 +3044,16 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
             target->privilege_level = 0;
             target->wizard_role[0] = '\0';
+            if (target->player_object) {
+                /* Directly update LPC object properties so query_privilege_level()
+                 * returns 0 immediately (bypass VM call dispatch) */
+                VMValue lv = vm_value_create_int(0);
+                obj_set_prop((obj_t *)target->player_object, "privilege_level", lv);
+                vm_value_release(&lv);
+                VMValue rv = vm_value_create_string("");
+                obj_set_prop((obj_t *)target->player_object, "wizard_role", rv);
+                vm_value_release(&rv);
+            }
 
             send_to_player(session, "You demote %s to Player.\n", target->username);
             send_to_player(target,
@@ -3106,6 +3134,14 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         tch->original_mdc_max = 0;
         target->privilege_level = 0;
         target->wizard_role[0] = '\0';
+        if (target->player_object) {
+            VMValue lv = vm_value_create_int(0);
+            obj_set_prop((obj_t *)target->player_object, "privilege_level", lv);
+            vm_value_release(&lv);
+            VMValue rv = vm_value_create_string("");
+            obj_set_prop((obj_t *)target->player_object, "wizard_role", rv);
+            vm_value_release(&rv);
+        }
 
         send_to_player(session, "You demote %s to Player.\n", target->username);
         send_to_player(target, "You have been demoted to Player. Race restored: %s\n",
@@ -3141,15 +3177,31 @@ VMValue execute_command(PlayerSession *session, const char *command) {
             return result;
         }
 
-        /* Validate role */
+        /* Validate role — accept canonical names and common aliases */
         for (int i = 0; role_name[i]; i++) role_name[i] = tolower((unsigned char)role_name[i]);
-        if (strcmp(role_name, "admin") != 0 && strcmp(role_name, "domain") != 0 &&
-            strcmp(role_name, "code") != 0 && strcmp(role_name, "roleplay") != 0) {
-            return vm_value_create_string("Valid roles: admin, domain, code, roleplay\r\n");
+        /* Normalise aliases to canonical names */
+        if (strcmp(role_name, "roleplay") == 0 || strcmp(role_name, "rp") == 0)
+            strncpy(role_name, "rp", sizeof(role_name) - 1);
+        else if (strcmp(role_name, "code") == 0 || strcmp(role_name, "coding") == 0)
+            strncpy(role_name, "coding", sizeof(role_name) - 1);
+        else if (strcmp(role_name, "admin") != 0 && strcmp(role_name, "domain") != 0) {
+            return vm_value_create_string("Valid roles: admin, domain, coding, rp\r\n");
         }
 
         strncpy(target->wizard_role, role_name, sizeof(target->wizard_role) - 1);
         target->wizard_role[sizeof(target->wizard_role) - 1] = '\0';
+
+        /* Also update the LPC player object's wizard_role property so LPC
+         * permission checks (wiz_perms.lpc) stay in sync with the C session. */
+        if (target->player_object) {
+            VMValue prop_args[2];
+            prop_args[0] = vm_value_create_string("wizard_role");
+            prop_args[1] = vm_value_create_string(role_name);
+            obj_call_method(global_vm, (obj_t *)target->player_object,
+                            "set_property", prop_args, 2);
+            vm_value_release(&prop_args[0]);
+            vm_value_release(&prop_args[1]);
+        }
 
         send_to_player(session, "Set %s's wizard role to: %s\n", target->username, role_name);
         send_to_player(target, "Your wizard role has been set to: %s\n", role_name);
@@ -4971,8 +5023,7 @@ more_room_source:
             return vm_value_create_string("Usage: password <old_password> <new_password>\r\n");
         }
 
-        /* TODO:SECURITY — verify_password is a stub; replace with bcrypt/argon2 */
-        /* Secure password verification and upgrade if needed */
+        /* Secure password verification with bcrypt (via password.c) and legacy upgrade */
         int pw_valid = 0;
         if (session->password_hash[0] == '\0') {
             pw_valid = 0;

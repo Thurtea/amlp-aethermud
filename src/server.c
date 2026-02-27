@@ -20,6 +20,50 @@
 /* External function to send text to player */
 extern void send_to_player(PlayerSession *session, const char *format, ...);
 
+/* Check whether a wizard session may access a given LPC path.
+ * path must start with '/' and uses LPC conventions (/lib/ = lib/ on disk).
+ * Returns 1 if permitted, 0 if denied. */
+static int check_wiz_path_perm(PlayerSession *sess, const char *path) {
+    if (!sess || !path) return 0;
+    if (sess->privilege_level >= 2) return 1;  /* Admin: full access */
+
+    const char *role = sess->wizard_role;
+    const char *name = sess->username;
+
+    if (strcmp(role, "admin") == 0) return 1;
+
+    if (strcmp(role, "coding") == 0) {
+        /* coding wizards: /lib/ and /domains/code/ */
+        if (strncmp(path, "/lib/", 5) == 0 || strcmp(path, "/lib") == 0) return 1;
+        if (strncmp(path, "/domains/code/", 14) == 0 || strcmp(path, "/domains/code") == 0) return 1;
+        return 0;
+    }
+
+    if (strcmp(role, "domain") == 0) {
+        /* domain wizard: /domains/<name>/ */
+        char allowed[128];
+        snprintf(allowed, sizeof(allowed), "/domains/%s/", name);
+        char allowed2[128];
+        snprintf(allowed2, sizeof(allowed2), "/domains/%s", name);
+        if (strncmp(path, allowed, strlen(allowed)) == 0) return 1;
+        if (strcmp(path, allowed2) == 0) return 1;
+        return 0;
+    }
+
+    if (strcmp(role, "rp") == 0) {
+        /* rp wizard: /domains/rp/<name>/ */
+        char allowed[128];
+        snprintf(allowed, sizeof(allowed), "/domains/rp/%s/", name);
+        char allowed2[128];
+        snprintf(allowed2, sizeof(allowed2), "/domains/rp/%s", name);
+        if (strncmp(path, allowed, strlen(allowed)) == 0) return 1;
+        if (strcmp(path, allowed2) == 0) return 1;
+        return 0;
+    }
+
+    return 0;
+}
+
 // Utility: convert "\033" to binary ESC (27) in LPC strings for ANSI color support
 void send_ansi(PlayerSession *session, const char *text) {
     char buf[4096];
@@ -170,12 +214,19 @@ int cmd_ls_filesystem(PlayerSession *session, const char *args) {
         snprintf(full_path, sizeof(full_path), "lib%s", path);
     }
     
+    /* Permission check */
+    if (session->privilege_level < 2 && !check_wiz_path_perm(session, path)) {
+        send_to_player(session, "Permission denied: your role (%s) does not allow access to %s\r\n",
+                       session->wizard_role[0] ? session->wizard_role : "none", path);
+        return 0;
+    }
+
     DIR *dir = opendir(full_path);
     if (!dir) {
         send_to_player(session, "Cannot open directory: %s\r\n", path);
         return 0;
     }
-    
+
     send_to_player(session, "Directory listing of %s:\r\n", path);
     
     struct dirent *entry;
@@ -282,13 +333,20 @@ int cmd_cd_filesystem(PlayerSession *session, const char *args) {
         send_to_player(session, "Directory does not exist: %s\r\n", new_dir);
         return 0;
     }
-    
+
+    /* Permission check (non-admin wizards have restricted paths) */
+    if (session->privilege_level < 2 && !check_wiz_path_perm(session, new_dir)) {
+        send_to_player(session, "Permission denied: your role (%s) does not allow access to %s\r\n",
+                       session->wizard_role[0] ? session->wizard_role : "none", new_dir);
+        return 0;
+    }
+
     /* Update current directory */
     if (session->current_dir) {
         free(session->current_dir);
     }
     session->current_dir = strdup(new_dir);
-    
+
     send_to_player(session, "Changed to: %s\r\n", new_dir);
     return 1;
 }

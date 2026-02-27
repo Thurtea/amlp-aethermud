@@ -18,5 +18,11 @@ int activate(string cmd, object player, string args) {
     }
     string *tokens = explode(args || "", " ");
     string subcmd = sizeof(tokens) > 0 ? tokens[0] : "";
-    // Not yet implemented.
+    switch (subcmd) {
         case "":
+            break;
+        default:
+            break;
+    }
+    return 1;
+}

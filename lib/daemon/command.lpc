@@ -172,7 +172,12 @@ int execute_command(object player, string input, int priv_level) {
     if (!player || !input || input == "") {
         return 0;
     }
-    
+
+    // Always derive privilege from the player object — caller may omit priv_level
+    if (function_exists("query_privilege_level", player)) {
+        priv_level = player->query_privilege_level();
+    }
+
     // Parse command into verb and arguments (strsrch avoids sscanf by-ref limitation)
     int _sp = strsrch(input, " ");
     if (_sp >= 0) {

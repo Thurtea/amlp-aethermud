@@ -1,0 +1,40 @@
+// lib/cmds/dchat.lpc
+// Domain chat — broadcast message to all online wizards and admins.
+// Usage: dchat <message>
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (player->query_privilege_level() < 1) {
+        write("dchat is for wizards and admins only.\n");
+        return 1;
+    }
+
+    if (!args || args == "") {
+        write("Usage: dchat <message>\n");
+        return 1;
+    }
+
+    string name = player->query_name();
+    string msg = "[dchat] " + name + ": " + args + "\n";
+
+    object *all = users();
+    foreach (object u in all) {
+        if (u->query_privilege_level() >= 1) {
+            tell_object(u, msg);
+        }
+    }
+    return 1;
+}
+
+string query_help() {
+    return
+"DCHAT - Domain chat channel\n\n"
+"Usage:\n"
+"  dchat <message>\n\n"
+"Broadcasts a message to all online wizards and admins.\n"
+"Requires wizard or admin privileges.\n\n"
+"Example:\n"
+"  dchat Server test starting now.\n";
+}

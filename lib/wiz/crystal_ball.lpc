@@ -1,1 +1,11 @@
-// Not yet implemented.
+// lib/wiz/crystal_ball.lpc
+// Crystal Ball - Wizard Tool (role: any wizard)
+// Stub: not yet implemented.
+
+inherit "/std/object";
+
+void create() {
+    set_name("crystal ball");
+    set_short("a crystal ball");
+    set_long("A cloudy crystal ball. Not yet implemented.");
+}

@@ -1,1 +1,11 @@
-// Not yet implemented.
+// lib/wiz/id_card.lpc
+// ID Card - Wizard Tool (role: any wizard)
+// Stub: not yet implemented.
+
+inherit "/std/object";
+
+void create() {
+    set_name("id card");
+    set_short("a wizard ID card");
+    set_long("An identification card for AetherMUD staff. Not yet implemented.");
+}

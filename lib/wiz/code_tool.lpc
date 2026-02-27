@@ -1,1 +1,11 @@
-// Not yet implemented.
+// lib/wiz/code_tool.lpc
+// Code Tool - Wizard Tool (role: code_wizard or admin_wizard)
+// Stub: not yet implemented.
+
+inherit "/std/object";
+
+void create() {
+    set_name("code tool");
+    set_short("a code wizard's tool");
+    set_long("A tool for code wizards. Not yet implemented.");
+}

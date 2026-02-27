@@ -1,21 +1,41 @@
-// Not yet implemented.
+// lib/wiz/admin_wand.lpc
+// Admin Wand - Wizard Tool (role: admin_wizard only)
+// Stub: wand sub-commands not yet implemented.
+
+inherit "/std/object";
+
+void create() {
+    set_name("admin wand");
+    set_short("a glowing admin wand");
+    set_long("A slender wand crackling with administrative energy. Not yet fully implemented.");
 }
+
+void init() {
+    if (environment() == this_player()) {
+        add_action("wand_slay", "wand");
+    }
+}
+
 int wand_slay(object player, string *args) {
     tell_object(player, "Slay command not yet implemented.\n");
     return 1;
 }
+
 int wand_promote(object player, string *args) {
     tell_object(player, "Promote command not yet implemented.\n");
     return 1;
 }
+
 int wand_setrole(object player, string *args) {
     tell_object(player, "Setrole command not yet implemented.\n");
     return 1;
 }
+
 int wand_heal(object player, string *args) {
     tell_object(player, "Heal command not yet implemented.\n");
     return 1;
 }
+
 int wand_goto(object player, string *args) {
     tell_object(player, "Goto command not yet implemented.\n");
     return 1;

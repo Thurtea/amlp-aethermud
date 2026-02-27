@@ -43,6 +43,14 @@ int main(string args) {
         return 1;
     }
 
+    // Respect no_attack flag (peaceful NPCs like Moxim)
+    if (function_exists("query_property", target)) {
+        if (target->query_property("no_attack")) {
+            write(target->query_cap_name() + " cannot be attacked.\n");
+            return 1;
+        }
+    }
+
     // Already in combat with this target?
     if (attacker->query_combat_target() == target) {
         write("You are already fighting " + target->query_cap_name() + "!\n");

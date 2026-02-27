@@ -7,5 +7,6 @@ inherit "/std/object";
 
 void create() {
     set_name("wizard staff");
-    // Not yet implemented.
+    set_short("a polished wizard staff");
     set_long("A staff for all wizard roles. Type 'staff' for menu.");
+}

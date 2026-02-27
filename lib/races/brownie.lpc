@@ -1,5 +1,5 @@
 // /lib/races/brownie.lpc
-// Brownie - Helpful household faerie
+// Brownie - Helpful household faerie spirits of the fae world
 
 inherit "/std/race";
 
@@ -9,27 +9,95 @@ void create() {
     set_race_name("Brownie");
     set_race_id("brownie");
     set_race_plural("Brownies");
-    set_race_category(RACE_CAT_SUPERNATURAL);
+    set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Brownies are small domestic faeries known for helping with chores when
-treated kindly. They favor quiet homes and hate being observed while working."
+        "Brownies are tiny, wizened faerie folk standing barely two feet tall, "
+        "with large amber eyes, pointed ears, and nimble clever fingers. "
+        "Traditionally bound to households and communities they choose to aid, "
+        "Brownies on Rifts Earth have adapted their domestic instincts to a far "
+        "more chaotic world. Their innate magic is subtle but surprisingly deep — "
+        "a Brownie who masters the arcane arts can reshape the battlefield with "
+        "illusions and manipulations no one expects from a two-foot creature. "
+        "They are rarely aggressive but can be fiercely protective of those "
+        "they have bonded with. Brownies despise iron and salt, which disrupt "
+        "their magical nature."
     );
 
     set_size_category(SIZE_SMALL);
-    set_height_range(18, 36);
-    set_weight_range(15, 45);
-    set_lifespan(120);
+    set_height_range(20, 28);
+    set_weight_range(15, 30);
+    set_lifespan(600);
+    set_body_types(({ "wiry", "slight" }));
 
     set_stat_modifiers(([
-        "iq": 0, "me": 1, "ma": 0,
-        "ps": -2, "pp": 1, "pe": 0, "pb": 0, "spd": 1
+        "iq":  4,
+        "me":  4,
+        "ma":  6,
+        "ps": -4,
+        "pp":  6,
+        "pe": -2,
+        "pb":  2,
+        "spd": 6
     ]));
 
-    set_natural_sdc(5);
-    add_racial_ability("domestic_help", 1);
-    add_racial_ability("invisibility_brief", 1);
+    set_combat_bonuses(([
+        "dodge":      3,
+        "initiative": 2
+    ]));
 
-    set_magic_potential(10);
+    set_natural_sdc(10);
+    set_mdc_creature(0);
+
+    set_resistances(([
+        "magic":  20,
+        "poison": 15
+    ]));
+    set_immunities(({ "faerie_charm", "sleep" }));
+    set_vulnerabilities(({ "iron", "salt" }));
+
+    add_racial_ability("invisibility", 2);
+    add_racial_ability("sense_evil", 1);
+    add_racial_ability("minor_telekinesis", 1);
+    add_racial_ability("faerie_sight", 1);
+    add_racial_ability("shrink", 1);
+
     set_psionic_potential(0);
+    set_magic_potential(40);
+
+    set_is_rcc(1);
+    set_can_have_occ(0);
+    set_rcc_description(
+        "Brownies are complete beings whose faerie nature replaces any OCC. "
+        "They rely on innate magic rather than training-based classes."
+    );
+
+    set_allowed_alignments(({
+        ALIGN_PRINCIPLED, ALIGN_SCRUPULOUS, ALIGN_UNPRINCIPLED, ALIGN_ANARCHIST
+    }));
+
+    set_starting_equipment(({
+        "/obj/item/herb_pouch"
+    }));
+    set_starting_credits(50);
+
+    set_default_factions(({ "faerie_court" }));
+    set_hostile_factions(({ "coalition_states" }));
+
+    set_culture("Faerie");
+    set_homeland("Faerie Realm / North American Wilderness");
+    set_languages(({ "faerie", "american" }));
+    set_primary_language("faerie");
+}
+
+int query_skill_bonus() {
+    return 10;
+}
+
+string* query_skill_restrictions() {
+    return ({ "heavy_weapons", "power_armor" });
+}
+
+int query_size_penalty() {
+    return -2;
 }

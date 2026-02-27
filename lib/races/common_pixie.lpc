@@ -1,5 +1,5 @@
 // /lib/races/common_pixie.lpc
-// Common Pixie - Tiny mischievous flyer
+// Common Pixie - Tiny mischievous fae tricksters
 
 inherit "/std/race";
 
@@ -9,27 +9,94 @@ void create() {
     set_race_name("Common Pixie");
     set_race_id("common_pixie");
     set_race_plural("Common Pixies");
-    set_race_category(RACE_CAT_SUPERNATURAL);
+    set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Pixies are tiny winged folk, fond of mischief and trickery. They often
-live near ancient sites and enjoy playing pranks on travelers."
+        "Common Pixies stand about a foot and a half tall, slightly larger "
+        "than faeries, with oversized pointed ears, bright mischievous eyes, "
+        "and translucent dragonfly-like wings. They are inveterate tricksters "
+        "who cannot resist playing pranks on anyone and everyone. On Rifts "
+        "Earth, Pixies have colonized urban ruins as readily as wild forests, "
+        "delighting in confusing Coalition patrols and leading bandits in "
+        "circles. Despite their irritating tendencies, Pixies are brave and "
+        "will fight tenaciously when cornered or when protecting those they "
+        "care for. Their innate magic leans toward illusion and confusion "
+        "rather than direct offense, making them tricky opponents."
     );
 
     set_size_category(SIZE_TINY);
-    set_height_range(6, 18);
-    set_weight_range(1, 8);
-    set_lifespan(180);
+    set_height_range(14, 20);
+    set_weight_range(8, 18);
+    set_lifespan(0);
+    set_body_types(({ "slight", "wiry" }));
 
     set_stat_modifiers(([
-        "iq": 1, "me": -1, "ma": 2,
-        "ps": -4, "pp": 4, "pe": -1, "pb": -3, "spd": 4
+        "iq":  4,
+        "me":  2,
+        "ma":  4,
+        "ps": -5,
+        "pp":  8,
+        "pe":  0,
+        "pb":  2,
+        "spd": 12
     ]));
 
-    set_natural_sdc(2);
-    add_racial_ability("small_flight", 1);
-    add_racial_ability("pixie_dust", 1);
+    set_combat_bonuses(([
+        "dodge":      4,
+        "initiative": 3,
+        "strike":     1
+    ]));
 
-    set_magic_potential(20);
+    set_natural_sdc(12);
+    set_mdc_creature(0);
+    set_natural_armor(8);
+
+    set_resistances(([
+        "magic":  20,
+        "poison": 15
+    ]));
+    set_immunities(({ "faerie_charm", "confusion" }));
+    set_vulnerabilities(({ "iron", "salt" }));
+
+    add_racial_ability("flight", 2);
+    add_racial_ability("invisibility", 2);
+    add_racial_ability("illusion", 2);
+    add_racial_ability("confusion_aura", 1);
+    add_racial_ability("faerie_sight", 1);
+    add_racial_ability("pocket_dimension", 1);
+
     set_psionic_potential(0);
+    set_magic_potential(35);
+
+    set_is_rcc(1);
+    set_can_have_occ(0);
+    set_rcc_description(
+        "Pixies are supernatural tricksters whose innate illusory magic "
+        "and fae nature define their capabilities."
+    );
+
+    set_allowed_alignments(({
+        ALIGN_UNPRINCIPLED, ALIGN_ANARCHIST, ALIGN_SCRUPULOUS, ALIGN_PRINCIPLED
+    }));
+
+    set_starting_equipment(({
+        "/obj/item/faerie_focus"
+    }));
+    set_starting_credits(30);
+
+    set_default_factions(({ "faerie_court" }));
+    set_hostile_factions(({ "coalition_states" }));
+
+    set_culture("Faerie");
+    set_homeland("Faerie Realm / North American Wilderness");
+    set_languages(({ "faerie", "american" }));
+    set_primary_language("faerie");
+}
+
+int query_skill_bonus() {
+    return 10;
+}
+
+int query_trickster_bonus() {
+    return 3;
 }

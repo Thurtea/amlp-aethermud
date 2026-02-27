@@ -1,5 +1,5 @@
 // /lib/races/green_wood_faerie.lpc
-// Green Wood Faerie - Forest-aligned fae guardian
+// Green Wood Faerie - Forest guardian spirit of the living woods
 
 inherit "/std/race";
 
@@ -9,27 +9,97 @@ void create() {
     set_race_name("Green Wood Faerie");
     set_race_id("green_wood_faerie");
     set_race_plural("Green Wood Faeries");
-    set_race_category(RACE_CAT_SUPERNATURAL);
+    set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Green Wood Faeries are forest spirits tied to groves and living trees.
-They protect wildlife and defend sacred places with minor nature magics."
+        "Green Wood Faeries are among the most common and yet most "
+        "reclusive of the faerie folk. Their skin is the colour of "
+        "bark and leaves, their hair woven with living vines. They "
+        "serve as guardians of ancient groves, sacred clearings, and "
+        "the wild places that technology has not yet consumed. On "
+        "Rifts Earth, Green Wood Faeries have become fierce defenders "
+        "of the recovering wilderness, warring openly against Coalition "
+        "patrols that attempt to clear forests for expansion. They wield "
+        "nature's own power — plant growth, root entanglement, and the "
+        "whispered voices of trees — as weapons. They are longer-lived "
+        "than most faerie folk and more deliberate in their thinking."
     );
 
     set_size_category(SIZE_SMALL);
-    set_height_range(12, 30);
-    set_weight_range(6, 30);
-    set_lifespan(200);
+    set_height_range(18, 30);
+    set_weight_range(20, 40);
+    set_lifespan(800);
+    set_body_types(({ "slight", "wiry" }));
 
     set_stat_modifiers(([
-        "iq": 1, "me": 0, "ma": 2,
-        "ps": -2, "pp": 2, "pe": 1, "pb": 0, "spd": 1
+        "iq":  2,
+        "me":  2,
+        "ma":  4,
+        "ps": -2,
+        "pp":  4,
+        "pe":  3,
+        "pb":  1,
+        "spd": 3
     ]));
 
-    set_natural_sdc(4);
-    add_racial_ability("nature_bond", 1);
-    add_racial_ability("camouflage", 1);
+    set_combat_bonuses(([
+        "dodge":      3,
+        "initiative": 1
+    ]));
 
-    set_magic_potential(15);
+    set_natural_sdc(15);
+    set_mdc_creature(0);
+    set_natural_armor(8);
+
+    set_resistances(([
+        "magic":  20,
+        "poison": 30,
+        "disease": 25
+    ]));
+    set_immunities(({ "faerie_charm", "plant_toxins" }));
+    set_vulnerabilities(({ "iron", "fire", "salt" }));
+
+    add_racial_ability("nature_bond", 2);
+    add_racial_ability("camouflage", 2);
+    add_racial_ability("speak_with_plants", 1);
+    add_racial_ability("plant_growth", 1);
+    add_racial_ability("faerie_sight", 1);
+    add_racial_ability("root_entangle", 1);
+
     set_psionic_potential(0);
+    set_magic_potential(30);
+
+    set_is_rcc(1);
+    set_can_have_occ(0);
+    set_rcc_description(
+        "Green Wood Faeries are nature spirits whose connection to "
+        "the living world defines their existence."
+    );
+
+    set_allowed_alignments(({
+        ALIGN_PRINCIPLED, ALIGN_SCRUPULOUS, ALIGN_UNPRINCIPLED,
+        ALIGN_ANARCHIST
+    }));
+
+    set_starting_equipment(({
+        "/obj/item/herb_pouch",
+        "/obj/weapon/wooden_staff"
+    }));
+    set_starting_credits(40);
+
+    set_default_factions(({ "faerie_court", "wilderness_alliance" }));
+    set_hostile_factions(({ "coalition_states" }));
+
+    set_culture("Faerie (Forest)");
+    set_homeland("North American Forests / Faerie Realm");
+    set_languages(({ "faerie", "druidic", "american" }));
+    set_primary_language("faerie");
+}
+
+int query_skill_bonus() {
+    return 10;
+}
+
+int query_nature_bonus() {
+    return 15;
 }

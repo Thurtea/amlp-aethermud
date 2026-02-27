@@ -18,7 +18,7 @@ int main(string arg) {
     string target_name, level_str;
     int new_level, user_level;
 
-    user = previous_object();
+    user = this_player();
     user_level = user->query_privilege_level();
 
     // Check if user has permission

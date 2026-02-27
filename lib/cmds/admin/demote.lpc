@@ -13,7 +13,7 @@ int main(string arg) {
     string target_name;
     int user_level, old_level;
     
-    user = previous_object();
+    user = this_player();
     user_level = user->query_privilege_level();
     
     // Check if user has permission - only Admins can demote

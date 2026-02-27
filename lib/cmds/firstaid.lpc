@@ -1,5 +1,5 @@
 /*
- * /lib/cmds/firstaid.lpc — Apply first aid to yourself or a target
+ * /lib/cmds/firstaid.lpc - Apply first aid to yourself or a target
  *
  * Usage:
  *   firstaid            Treat yourself
@@ -14,8 +14,9 @@
 #define SKILL_ID "first_aid"
 
 int main(string args) {
-    object player, target, skill_ob, skills_d;
-    int skill_pct, last_use, result;
+    object player, target, skill_ob;
+    int skill_pct, last_use, result, sdc_heal;
+    mixed prop;
 
     player = this_player();
 
@@ -42,8 +43,10 @@ int main(string args) {
         return 1;
     }
 
-    // Cooldown guard
-    last_use = (int)player->query_property("last_firstaid");
+    // Cooldown guard — avoid (int) cast; use mixed then assign
+    last_use = 0;
+    prop = player->query_property("last_firstaid");
+    if (prop) last_use = prop;
     if (last_use && (time() - last_use) < FIRST_AID_COOLDOWN) {
         write("You need to rest before applying first aid again. ("
               + (FIRST_AID_COOLDOWN - (time() - last_use)) + " seconds)\n");
@@ -54,11 +57,11 @@ int main(string args) {
     catch { skill_ob = load_object("/skills/medical/first_aid"); };
 
     if (skill_ob && function_exists("perform", skill_ob)) {
-        // Skill object handles the roll and messages
         result = skill_ob->perform(player, args);
     } else {
         // Fallback: roll directly
-        int roll = random(100) + 1;
+        int roll;
+        roll = random(100) + 1;
         tell_object(player, "You attempt to provide first aid...\n");
         if (roll >= 96) {
             result = -1;
@@ -67,7 +70,7 @@ int main(string args) {
         } else {
             result = 0;
         }
-        if (result == -1) tell_object(player, "You botch the treatment — critical failure!\n");
+        if (result == -1) tell_object(player, "You botch the treatment - critical failure!\n");
         if (result == 0)  tell_object(player, "Your attempt doesn't help much.\n");
         if (result == 1)  tell_object(player, "Your treatment stabilizes the wounds.\n");
     }
@@ -75,20 +78,22 @@ int main(string args) {
     // Record use time
     player->set_property("last_firstaid", time());
 
-    // Apply healing on success
+    // Apply healing on success — avoid ternary in declaration
     if (result == 1) {
-        int sdc_heal = (skill_ob && function_exists("query_sdc_heal", skill_ob))
-                       ? skill_ob->query_sdc_heal()
-                       : random(6) + 1;
+        if (skill_ob && function_exists("query_sdc_heal", skill_ob)) {
+            sdc_heal = skill_ob->query_sdc_heal();
+        } else {
+            sdc_heal = random(6) + 1;
+        }
 
         if (target == player) {
             player->heal_damage(sdc_heal, 0);
-            write("You patch yourself up — +" + sdc_heal + " SDC restored.\n");
+            write("You patch yourself up - +" + sdc_heal + " SDC restored.\n");
         } else {
             target->heal_damage(sdc_heal, 0);
-            write("You treat " + target->query_cap_name() + " — +" + sdc_heal + " SDC restored.\n");
+            write("You treat " + target->query_cap_name() + " - +" + sdc_heal + " SDC restored.\n");
             tell_object(target,
-                player->query_cap_name() + " patches you up — +" + sdc_heal + " SDC restored.\n");
+                player->query_cap_name() + " patches you up - +" + sdc_heal + " SDC restored.\n");
         }
     }
 
@@ -97,7 +102,7 @@ int main(string args) {
 
 string query_help() {
     return
-"FIRSTAID — Apply first aid to yourself or another\n\n"
+"FIRSTAID - Apply first aid to yourself or another\n\n"
 "Usage:\n"
 "  firstaid              Treat yourself\n"
 "  firstaid <target>     Treat someone nearby\n\n"
@@ -105,6 +110,6 @@ string query_help() {
 "  Success:          Heals 1d6 SDC\n"
 "  Failure:          No effect\n"
 "  Critical failure: Botched treatment\n\n"
-"Cooldown: " + FIRST_AID_COOLDOWN + " seconds between uses.\n\n"
+"Cooldown: 60 seconds between uses.\n\n"
 "First Aid is an OCC skill for Mercenary, Body Fixer, City Rat, and others.\n";
 }

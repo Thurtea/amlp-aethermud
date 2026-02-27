@@ -54,6 +54,27 @@ string *scars;            // Array of scar descriptions from deaths
 int universal_credits;    // Standard currency (UC)
 int black_market_credits; // Black market currency (BMC)
 
+// Palladium attribute stats (IQ, ME, MA, PS, PP, PE, PB, SPD)
+mapping palladium_stats;
+
+// Race/OCC identity
+string race_id;
+string occ_id;
+string occ_name_str;
+string race_article;
+
+// Psionics
+int isp;
+int max_isp;
+string psionic_category;
+string *psionic_powers;
+
+// Magic
+int ppe;
+int max_ppe;
+int spell_caster_level;
+string *spells_known;
+
 // Action registry for add_action/enable_commands
 private int commands_enabled;
 private mapping actions;  // Maps verb -> ({ function, flags })
@@ -925,20 +946,18 @@ string query_race_name() {
     return race_name ? race_name : "unknown";
 }
 
-// Query stats (basic default implementation)
-// Player.lpc may override this with actual character stats
+// Query stats — checks palladium_stats mapping first, then defaults
 int query_stat(string stat) {
-    // Return default stats for NPCs/basic living things
-    // Player.lpc should override this
-    stat = upper_case(stat);
-    
-    switch (stat) {
+    stat = lower_case(stat);
+    if (palladium_stats && palladium_stats[stat]) return palladium_stats[stat];
+    // Defaults for NPCs / anything without stored stats
+    switch (upper_case(stat)) {
         case "IQ": return 10;
         case "ME": return 10;
         case "MA": return 10;
-        case "PS": return 10 + (level / 2);  // Slightly stronger with level
-        case "PP": return 10 + (level / 2);  // Slightly more agile with level
-        case "PE": return 10 + (level / 2) ;  // More endurance with level
+        case "PS": return 10 + (level / 2);
+        case "PP": return 10 + (level / 2);
+        case "PE": return 10 + (level / 2);
         case "PB": return 10;
         case "SPD": return 10;
         default: return 10;
@@ -2063,3 +2082,150 @@ void set_primary_skill(string skill_id) {
 void set_secondary_skill(string skill_id) {
     // This can be expanded for more complex primary/secondary tracking
 }
+
+//=============================================================================
+// Palladium Stat Storage (set/query individual and all stats)
+//=============================================================================
+
+void set_stat(string stat, int val) {
+    if (!palladium_stats) palladium_stats = ([]);
+    palladium_stats[lower_case(stat)] = val;
+}
+
+void set_base_stat(string stat, int val) { set_stat(stat, val); }
+int  query_base_stat(string stat)        { return query_stat(stat); }
+
+mapping query_all_stats() {
+    if (!palladium_stats) palladium_stats = ([]);
+    return copy(palladium_stats);
+}
+
+void set_all_stats(mapping m) {
+    if (m) palladium_stats = copy(m);
+}
+
+//=============================================================================
+// Race / OCC identity
+//=============================================================================
+
+void   set_race_id(string id)     { race_id = id; }
+string query_race_id()            { return race_id ? race_id : ""; }
+
+/* set_race_name — alias that also keeps race_name in sync */
+void set_race_name(string n) { race_name = n; }
+string query_race_article() { return race_article ? race_article : "a"; }
+void set_race_article(string a) { race_article = a; }
+
+void   set_occ_id(string id) { occ_id = id; }
+string query_occ_id()        { return occ_id ? occ_id : ""; }
+
+/* set_occ — store display name and derive id */
+void set_occ(string n) {
+    occ_name_str = n;
+    if (n && n != "") {
+        occ_id = lower_case(replace_string(n, " ", "_"));
+    } else {
+        occ_id = "";
+    }
+}
+string query_occ() { return occ_name_str ? occ_name_str : ""; }
+
+//=============================================================================
+// Health add-helpers (used by occ.lpc level_up / apply_to_player)
+//=============================================================================
+
+void add_sdc(int n) {
+    if (n <= 0) return;
+    max_sdc += n;
+    sdc += n;
+}
+
+void add_max_hp(int n) {
+    if (n <= 0) return;
+    max_hp += n;
+    hp += n;
+}
+
+void add_mdc(int n) {
+    if (n <= 0) return;
+    max_mdc += n;
+    mdc += n;
+}
+
+//=============================================================================
+// Combat helpers
+//=============================================================================
+
+/* set_attacks_per_round — overrides the max_attacks used by combat_heartbeat */
+void set_attacks_per_round(int n) {
+    if (n > 0) max_attacks = n;
+}
+
+//=============================================================================
+// XP / Credits helpers expected by occ.lpc
+//=============================================================================
+
+void set_xp(int n) { experience = n; }
+void add_credits(int n) { add_universal_credits(n); }
+
+//=============================================================================
+// Language bulk setter
+//=============================================================================
+
+void set_languages(mapping m) {
+    if (m) languages = copy(m);
+}
+
+//=============================================================================
+// Psionics (ISP, category, powers)
+//=============================================================================
+
+int  query_isp()            { return isp; }
+void set_isp(int n)         { isp = n; }
+int  query_max_isp()        { return max_isp; }
+void set_max_isp(int n)     { max_isp = n; }
+void add_max_isp(int n)     { if (n > 0) max_isp += n; }
+
+string query_psionic_category() { return psionic_category ? psionic_category : "none"; }
+void   set_psionic_category(string c) { psionic_category = c; }
+
+string *query_psionic_powers() { return psionic_powers ? psionic_powers : ({}); }
+void    set_psionic_powers(string *p) { if (p) psionic_powers = copy(p); }
+void    add_psionic(string p) {
+    if (!psionic_powers) psionic_powers = ({});
+    if (p && member_array(p, psionic_powers) == -1) psionic_powers += ({ p });
+}
+void add_psionic_power(string p) { add_psionic(p); }
+void add_power(string p)         { add_psionic(p); }
+
+//=============================================================================
+// Magic (PPE, spells, caster level)
+//=============================================================================
+
+int  query_ppe()              { return ppe; }
+void set_ppe(int n)           { ppe = n; }
+int  query_max_ppe()          { return max_ppe; }
+void set_max_ppe(int n)       { max_ppe = n; }
+void add_max_ppe(int n)       { if (n > 0) max_ppe += n; }
+
+int  query_spell_caster_level()   { return spell_caster_level; }
+void set_spell_caster_level(int l){ spell_caster_level = l; }
+
+string *query_spells() { return spells_known ? spells_known : ({}); }
+void set_spells(string *s)  { if (s) spells_known = copy(s); }
+void add_spell(string s) {
+    if (!spells_known) spells_known = ({});
+    if (s && member_array(s, spells_known) == -1) spells_known += ({ s });
+}
+
+//=============================================================================
+// Stubs for occ.lpc apply_to_player() — no-ops prevent crashes
+//=============================================================================
+
+void set_hand_to_hand(string t)    { /* HTH type stored by C level */ }
+void grant_ability(string a, int l){ /* ability stored by C level  */ }
+void grant_power(string p, int l)  { /* power stored by C level    */ }
+void set_max_cybernetics(int n)    { /* stub */ }
+void set_cybernetics_allowed(int n){ /* stub */ }
+void add_cybernetic(string c)      { /* stub */ }
+void add_combat_bonus(string b, int v) { /* stub */ }

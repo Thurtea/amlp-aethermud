@@ -323,7 +323,7 @@ int program_loader_load(VirtualMachine *vm, Program *program) {
         
         /* Extract function bytecode from main bytecode */
         uint16_t func_offset = program->functions[i].offset;
-        if (func_offset >= program->bytecode_len) {
+        if (func_offset > program->bytecode_len) {
             fprintf(stderr, "[program_loader] Function %s offset %u beyond bytecode (%zu)\n",
                     program->functions[i].name, func_offset, program->bytecode_len);
             free(func->name);

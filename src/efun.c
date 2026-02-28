@@ -1293,6 +1293,11 @@ static ObjManager *get_global_obj_manager(void) {
     return mgr;
 }
 
+/* Forward declaration — defined later in this file */
+static void attach_program_methods(VirtualMachine *vm, obj_t *o,
+                                   Program *prog, const char *name_prefix,
+                                   int func_start, int func_end);
+
 VMValue efun_clone_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     if (arg_count != 1 || args[0].type != VALUE_STRING) return vm_value_create_null();
     const char *lpc_path = args[0].data.string_value;
@@ -1343,17 +1348,39 @@ VMValue efun_clone_object(VirtualMachine *vm, VMValue *args, int arg_count) {
     ObjManager *mgr = get_global_obj_manager();
     if (mgr) obj_manager_register(mgr, o);
 
-    /* Attach functions using exact range — avoids collision with other objects */
-    for (size_t fi = 0; fi < prog->function_count; fi++) {
-        const char *fname = prog->functions[fi].name;
-        if (!fname) continue;
-        for (int i = clone_func_end - 1; i >= clone_func_start; i--) {
-            if (vm->functions[i] && strcmp(vm->functions[i]->name, fname) == 0) {
-                obj_add_method(o, vm->functions[i]);
-                break;
+    /* Handle inheritance: load parent programs and attach their methods first
+     * (child methods attached later will override via backward search) */
+    {
+        const char *mudlib_co = getenv("AMLP_MUDLIB");
+        if (!mudlib_co || !*mudlib_co) mudlib_co = "./lib";
+        for (size_t ih = 0; ih < prog->inherit_count; ih++) {
+            const char *parent_path = prog->inherit_paths[ih];
+            char parent_fs_co[PATH_MAX];
+            const char *pp_raw = parent_path[0] == '/' ? parent_path + 1 : parent_path;
+            const char *pp_co = (strncmp(pp_raw, "lib/", 4) == 0) ? pp_raw + 4 : pp_raw;
+            size_t pplen = strlen(pp_co);
+            if (pplen > 4 && strcmp(pp_co + pplen - 4, ".lpc") == 0) {
+                snprintf(parent_fs_co, sizeof(parent_fs_co), "%s/%s", mudlib_co, pp_co);
+            } else {
+                snprintf(parent_fs_co, sizeof(parent_fs_co), "%s/%s.lpc", mudlib_co, pp_co);
+            }
+            Program *parent_prog = compiler_compile_file(parent_fs_co);
+            if (parent_prog) {
+                int par_start = (int)vm->function_count;
+                if (program_loader_load(vm, parent_prog) == 0) {
+                    int par_end = (int)vm->function_count;
+                    /* Attach with prefix (for ::method() super calls) */
+                    attach_program_methods(vm, o, parent_prog, "__parent__", par_start, par_end);
+                    /* Attach without prefix so inherited methods work via obj_get_method */
+                    attach_program_methods(vm, o, parent_prog, NULL, par_start, par_end);
+                }
+                program_free(parent_prog);
             }
         }
     }
+
+    /* Attach child functions using exact range — child methods override parents */
+    attach_program_methods(vm, o, prog, NULL, clone_func_start, clone_func_end);
 
     /* Call create() on object if present */
     obj_call_method(vm, o, "create", NULL, 0);
@@ -1802,8 +1829,10 @@ VMValue efun_load_object(VirtualMachine *vm, VMValue *args, int arg_count) {
             int parent_func_start = (int)vm->function_count;
             if (program_loader_load(vm, parent_prog) == 0) {
                 int parent_func_end = (int)vm->function_count;
-                /* Attach parent methods with __parent__ prefix using parent's range */
+                /* Attach parent methods: with prefix (for super calls) and without (for inheritance) */
                 attach_program_methods(vm, o, parent_prog, "__parent__",
+                                       parent_func_start, parent_func_end);
+                attach_program_methods(vm, o, parent_prog, NULL,
                                        parent_func_start, parent_func_end);
                 fprintf(stderr, "[Efun] load_object: attached parent '%s' methods\n",
                         parent_path);

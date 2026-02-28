@@ -581,6 +581,8 @@ void set_real_name(string new_name) {
 
 string query_real_name() {
     return real_name;
+}
+
 string query_race() {
     return race_name;
 }
@@ -933,12 +935,7 @@ string query_cap_name() {
         n = "someone";
     }
     
-    // Capitalize first letter
-    if (sizeof(n) > 0) {
-        return upper_case(n[0..0]) + n[1..];
-    }
-    
-    return n;
+    return capitalize(n);
 }
 
 // Get race name for query_race_name()
@@ -1305,8 +1302,10 @@ int calculate_damage() {
     
     // Roll damage
     damage = 0;
-    for (int i = 0; i < dice; i++) {
+    int roll_i = 0;
+    while (roll_i < dice) {
         damage += random(sides) + 1;
+        roll_i++;
     }
     
     // Add PS bonus for melee

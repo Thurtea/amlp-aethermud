@@ -15,7 +15,8 @@ int main(string args) {
         return 1;
     }
 
-    return tool->cmd_wand(args);
+    catch { tool->cmd_wand(args); };
+    return 1;
 }
 
 string query_help() {

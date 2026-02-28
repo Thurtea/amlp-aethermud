@@ -146,15 +146,17 @@ void cmd_ls(string dir) {
     }
     
     // Separate directories and files
-    for (i = 0; i < sizeof(files); i++) {
+    i = 0;
+    while (i < sizeof(files)) {
         string full_path = path + "/" + files[i];
         int size = file_size(full_path);
-        
+
         if (size == -2) {
             dirs += ({ files[i] + "/" });
         } else {
             regular_files += ({ files[i] });
         }
+        i++;
     }
     
     tell_object(owner, "Contents of " + path + ":");
@@ -163,7 +165,8 @@ void cmd_ls(string dir) {
     if (sizeof(dirs) > 0) {
         string line = "";
         col = 0;
-        for (i = 0; i < sizeof(dirs); i++) {
+        i = 0;
+        while (i < sizeof(dirs)) {
             string item = sprintf("%-20s", dirs[i]);
             if (col + 20 > term_width) {
                 tell_object(owner, line);
@@ -173,15 +176,17 @@ void cmd_ls(string dir) {
                 line += item;
                 col += 20;
             }
+            i++;
         }
         if (line != "") tell_object(owner, line);
     }
-    
+
     // Display regular files in horizontal format
     if (sizeof(regular_files) > 0) {
         string line = "";
         col = 0;
-        for (i = 0; i < sizeof(regular_files); i++) {
+        i = 0;
+        while (i < sizeof(regular_files)) {
             string item = sprintf("%-20s", regular_files[i]);
             if (col + 20 > term_width) {
                 tell_object(owner, line);
@@ -191,6 +196,7 @@ void cmd_ls(string dir) {
                 line += item;
                 col += 20;
             }
+            i++;
         }
         if (line != "") tell_object(owner, line);
     }
@@ -249,7 +255,8 @@ void cmd_more(string file) {
     tell_object(owner, "");
     
     // Display lines with page markers every lines_per_page lines
-    for (i = 0; i < total; i++) {
+    i = 0;
+    while (i < total) {
         tell_object(owner, lines[i]);
 
         if ((i + 1) % lines_per_page == 0 && i < total - 1) {
@@ -257,6 +264,7 @@ void cmd_more(string file) {
                 " (lines " + (i + 2) + "-" + min(i + 1 + lines_per_page, total) +
                 " of " + total + ") ---");
         }
+        i++;
     }
     
     tell_object(owner, "");
@@ -441,8 +449,10 @@ void cmd_objects() {
     tell_object(owner, "Loaded objects (" + sizeof(obs) + "):");
     tell_object(owner, "---");
     
-    for (i = 0; i < sizeof(obs); i++) {
+    i = 0;
+    while (i < sizeof(obs)) {
         tell_object(owner, "  " + file_name(obs[i]));
+        i++;
     }
 }
 
@@ -532,8 +542,12 @@ void cmd_errors() {
     start = total - 50;
     if (start < 0) start = 0;
 
-    for (int i = start; i < total; i++) {
-        tell_object(owner, lines[i]);
+    {
+        int wi = start;
+        while (wi < total) {
+            tell_object(owner, lines[wi]);
+            wi++;
+        }
     }
 
     tell_object(owner, "---");

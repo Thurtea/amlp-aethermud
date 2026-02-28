@@ -437,9 +437,13 @@ static ASTNode* parser_parse_postfix(Parser *parser) {
             int column = parser->current_token.column_number;
             parser_advance(parser);  /* consume '->' */
             
-            /* Expect method name */
+            /* Expect method name — allow keywords (die, create, etc.) as method names */
             Token method_name = parser->current_token;
-            parser_expect(parser, TOKEN_IDENTIFIER);
+            if (parser->current_token.type == TOKEN_KEYWORD) {
+                parser_advance(parser);  /* accept keyword as method name */
+            } else {
+                parser_expect(parser, TOKEN_IDENTIFIER);
+            }
             
             /* Check if followed by parentheses (method call) */
             if (parser_match(parser, TOKEN_LPAREN)) {

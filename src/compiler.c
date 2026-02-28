@@ -507,18 +507,32 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
 
         case NODE_ARRAY_ACCESS: {
             ArrayAccessNode *access = (ArrayAccessNode *)node->data;
-            if (access && access->array && access->index) {
+            if (access && access->array) {
                 // Emit array expression
                 compiler_codegen_expression(state, access->array);
-                // Emit index expression
-                compiler_codegen_expression(state, access->index);
-                
-                if (access->is_range && access->end_index) {
-                    // Range access: array[start..end]
-                    compiler_codegen_expression(state, access->end_index);
+
+                if (access->is_range) {
+                    // Range access: array[start..end], array[start..], array[..end], array[..]
+                    // Push start index (0 if omitted)
+                    if (access->index) {
+                        compiler_codegen_expression(state, access->index);
+                    } else {
+                        compiler_emit(state, OP_PUSH_INT, node->line);
+                        for (int _i = 0; _i < 8; _i++) compiler_emit_byte(state, 0);
+                    }
+                    // Push end index (-1 if omitted, meaning "to end")
+                    if (access->end_index) {
+                        compiler_codegen_expression(state, access->end_index);
+                    } else {
+                        compiler_emit(state, OP_PUSH_INT, node->line);
+                        long _neg1 = -1;
+                        for (int _i = 0; _i < 8; _i++)
+                            compiler_emit_byte(state, (_neg1 >> (_i * 8)) & 0xFF);
+                    }
                     compiler_emit(state, OP_SLICE_RANGE, node->line);
-                } else {
+                } else if (access->index) {
                     // Single index: array[index]
+                    compiler_codegen_expression(state, access->index);
                     compiler_emit(state, OP_INDEX_ARRAY, node->line);
                 }
             }

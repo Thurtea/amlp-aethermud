@@ -131,43 +131,64 @@ int wand_cast(string str) {
     }
 
     // Parse "spell at target" or just "spell"
-    if (sscanf(str, "%s at %s", spell_name, target_name) != 2) {
+    int _at = strsrch(str, " at ");
+    if (_at >= 0) {
+        spell_name = substring(str, 0, _at);
+        target_name = substring(str, _at + 4);
+    } else {
         spell_name = str;
         target_name = "";
     }
 
     write("\nThe crystal wand flares with brilliant light!\n");
 
+    object env = environment(player);
     if (target_name && target_name != "") {
-        // Find target in room
-        object env = environment(player);
+        // Find target in room, then among all users
         if (env) {
             target = present(lower_case(target_name), env);
+        }
+        if (!target) {
+            object *all_users = users();
+            int found_target = 0;
+            foreach (object u : all_users) {
+                if (!found_target && u &&
+                    lower_case(u->query_name()) == lower_case(target_name)) {
+                    target = u;
+                    found_target = 1;
+                }
+            }
         }
         if (target) {
             write("You point the wand at " + capitalize(target_name) +
                   " and cast " + capitalize(spell_name) + "!\n");
-            tell_room(environment(player),
-                      player->query_cap_name() + " points a crystal wand at " +
-                      capitalize(target_name) + " and unleashes " +
-                      capitalize(spell_name) + "!",
-                      ({ player }));
+            if (env) {
+                tell_room(env,
+                          player->query_cap_name() + " points a crystal wand at " +
+                          capitalize(target_name) + " and unleashes " +
+                          capitalize(spell_name) + "!",
+                          ({ player }));
+            }
         } else {
             write("You cast " + capitalize(spell_name) +
                   " toward " + capitalize(target_name) + "!\n");
-            tell_room(environment(player),
+            if (env) {
+                tell_room(env,
+                          player->query_cap_name() +
+                          " waves a crystal wand and casts " +
+                          capitalize(spell_name) + "!",
+                          ({ player }));
+            }
+        }
+    } else {
+        write("You channel " + capitalize(spell_name) + " through the wand!\n");
+        if (env) {
+            tell_room(env,
                       player->query_cap_name() +
                       " waves a crystal wand and casts " +
                       capitalize(spell_name) + "!",
                       ({ player }));
         }
-    } else {
-        write("You channel " + capitalize(spell_name) + " through the wand!\n");
-        tell_room(environment(player),
-                  player->query_cap_name() +
-                  " waves a crystal wand and casts " +
-                  capitalize(spell_name) + "!",
-                  ({ player }));
     }
 
     write("(No P.P.E. consumed - Admin wand)\n");
@@ -186,29 +207,38 @@ int wand_psi(string str) {
     }
 
     // Parse "power on target" or just "power"
-    if (sscanf(str, "%s on %s", power_name, target_name) != 2) {
+    int _on = strsrch(str, " on ");
+    if (_on >= 0) {
+        power_name = substring(str, 0, _on);
+        target_name = substring(str, _on + 4);
+    } else {
         power_name = str;
         target_name = "";
     }
 
     write("\nThe wand hums with psychic resonance!\n");
 
+    object penv = environment(player);
     if (target_name && target_name != "") {
         write("You focus " + capitalize(power_name) +
               " on " + capitalize(target_name) + " through the wand!\n");
-        tell_room(environment(player),
-                  player->query_cap_name() +
-                  "'s crystal wand pulses as " +
-                  player->query_subjective() + " uses " +
-                  capitalize(power_name) + " on " +
-                  capitalize(target_name) + ".",
-                  ({ player }));
+        if (penv) {
+            tell_room(penv,
+                      player->query_cap_name() +
+                      "'s crystal wand pulses as " +
+                      player->query_subjective() + " uses " +
+                      capitalize(power_name) + " on " +
+                      capitalize(target_name) + ".",
+                      ({ player }));
+        }
     } else {
         write("You activate " + capitalize(power_name) + " through the wand!\n");
-        tell_room(environment(player),
-                  player->query_cap_name() +
-                  "'s crystal wand pulses with psionic energy.",
-                  ({ player }));
+        if (penv) {
+            tell_room(penv,
+                      player->query_cap_name() +
+                      "'s crystal wand pulses with psionic energy.",
+                      ({ player }));
+        }
     }
 
     write("(No I.S.P. consumed - Admin wand)\n");
@@ -225,14 +255,25 @@ int wand_heal(string str) {
         return 1;
     }
 
-    // Find target
+    // Find target - first in room, then among all connected players
     object env = environment(player);
     if (env) {
         target = present(lower_case(str), env);
     }
+    if (!target) {
+        object *all_users = users();
+        int found_target = 0;
+        foreach (object u : all_users) {
+            if (!found_target && u &&
+                lower_case(u->query_name()) == lower_case(str)) {
+                target = u;
+                found_target = 1;
+            }
+        }
+    }
 
-    if (!target || !living(target)) {
-        write("Cannot find " + str + " here.\n");
+    if (!target) {
+        write("Cannot find " + str + " here or connected.\n");
         return 1;
     }
 
@@ -267,19 +308,21 @@ int wand_heal(string str) {
 
 int wand_peace() {
     object player = this_player();
-    object env = environment(player);
-    if (!env) {
-        write("You are not in a room.\n");
-        return 1;
-    }
 
-    /* Broadcast the peace aura to the room */
-    tell_room(env,
-        "\n" + player->query_cap_name() +
+    write("\n" + player->query_cap_name() +
         " raises a crystal wand. A pulse of calming energy radiates outward.\n" +
         "All aggression drains from the room.\n\n");
-
     write("Peace aura activated. All NPCs in the room are now non-aggressive.\n");
     write("(Combat disengagement is handled by the combat system.)\n");
+
+    /* Broadcast to room if we have an LPC room object */
+    object env = environment(player);
+    if (env) {
+        tell_room(env,
+            "\n" + player->query_cap_name() +
+            " raises a crystal wand. A pulse of calming energy radiates outward.\n" +
+            "All aggression drains from the room.\n\n",
+            ({ player }));
+    }
     return 1;
 }

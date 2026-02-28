@@ -1152,6 +1152,11 @@ Room* room_get_by_id(int id) {
 
 /* Get starting room */
 Room* room_get_start(void) {
+    /* Prefer the LPC-defined start room for player placement so mudlib
+     * authors can control the initial location. Fall back to the C
+     * bootstrap Void room if the LPC room fails to load. */
+    Room *r = room_get_by_path("/domains/start/village_center");
+    if (r) return r;
     return &world_rooms[0];
 }
 

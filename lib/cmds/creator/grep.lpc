@@ -42,7 +42,8 @@ int main(string args) {
     while (i < sizeof(parts) && parts[i][0] == '-') {
         string flags = parts[i];
         if (strlen(flags) > 1) {
-            for (int j = 1; j < strlen(flags); j++) {
+            int j = 1;
+            while (j < strlen(flags)) {
                 switch(flags[j]) {
                     case 'i': case_insensitive = 1; break;
                     case 'n': show_line_numbers = 1; break;
@@ -51,9 +52,10 @@ int main(string args) {
                         tell_object(player, "Unknown flag: -" + flags[j] + "\n");
                         return 1;
                 }
+                j += 1;
             }
         }
-        i++;
+        i += 1;
     }
     
     if (sizeof(parts) - i < 2) {
@@ -86,8 +88,8 @@ int main(string args) {
         }
         
         // Search each file
-        for (i = 0; i < sizeof(files); i++) {
-            string full_path = dir_part + files[i];
+        foreach (string fn in files) {
+            string full_path = dir_part + fn;
             if (file_size(full_path) > 0) {
                 match_count += grep_file(player, full_path, pattern, case_insensitive, show_line_numbers, sizeof(files) > 1);
             }
@@ -132,42 +134,44 @@ int main(string args) {
 // Search a single file for pattern
 int grep_file(object player, string filepath, string pattern, int case_insensitive, int show_line_numbers, int show_filename) {
     string content, *lines, search_pattern, line_text;
-    int i, matches = 0;
-    
+    int matches = 0;
+    int lineno = 0;
+
     // Read file
     content = read_file(filepath);
     if (!content) {
         return 0;
     }
-    
+
     lines = explode(content, "\n");
     search_pattern = case_insensitive ? lower_case(pattern) : pattern;
-    
+
     // Search each line
-    for (i = 0; i < sizeof(lines); i++) {
-        line_text = case_insensitive ? lower_case(lines[i]) : lines[i];
-        
+    while (lineno < sizeof(lines)) {
+        line_text = case_insensitive ? lower_case(lines[lineno]) : lines[lineno];
+
         if (strsrch(line_text, search_pattern) != -1) {
             string output = "";
-            
+
             // Add filename if searching multiple files
             if (show_filename) {
                 output += filepath + ":";
             }
-            
+
             // Add line number if requested
             if (show_line_numbers) {
-                output += sprintf("%d:", i + 1);
+                output += sprintf("%d:", lineno + 1);
             }
-            
+
             // Add the matching line
-            output += lines[i] + "\n";
-            
+            output += lines[lineno] + "\n";
+
             tell_object(player, output);
-            matches++;
+            matches += 1;
         }
+        lineno += 1;
     }
-    
+
     return matches;
 }
 

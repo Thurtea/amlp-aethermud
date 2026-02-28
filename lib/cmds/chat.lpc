@@ -7,7 +7,6 @@
 int main(string arg) {
     object user;
     object *players;
-    int i;
     string sender_name;
     
     user = previous_object();
@@ -21,11 +20,11 @@ int main(string arg) {
     players = users();
     
     // Send to all online players
-    for (i = 0; i < sizeof(players); i++) {
-        if (players[i] == user) {
-            tell_object(players[i], sprintf("[CHAT: %s] %s\n", sender_name, arg));
+    foreach (object p in players) {
+        if (p == user) {
+            tell_object(p, sprintf("[CHAT: %s] %s\n", sender_name, arg));
         } else {
-            tell_object(players[i], sprintf("\n[CHAT: %s] %s\n", sender_name, arg));
+            tell_object(p, sprintf("\n[CHAT: %s] %s\n", sender_name, arg));
         }
     }
     

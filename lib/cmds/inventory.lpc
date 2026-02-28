@@ -7,7 +7,7 @@
 int main(string arg) {
     object user;
     object *inv;
-    int i, total_weight;
+    int total_weight;
     string output;
     
     user = previous_object();
@@ -18,16 +18,16 @@ int main(string arg) {
     if (!inv || sizeof(inv) == 0) {
         output += "Your inventory is empty.\n";
     } else {
-        for (i = 0; i < sizeof(inv); i++) {
-            string name = inv[i]->query_short() || inv[i]->query_name() || "something";
-            int weight = inv[i]->query_weight() || 0;
-            
+        foreach (object item in inv) {
+            string name = item->query_short() || item->query_name() || "something";
+            int weight = item->query_weight() || 0;
+
             output += sprintf("  %s", name);
             if (weight > 0) {
                 output += sprintf(" (%d lbs)", weight);
             }
             output += "\n";
-            
+
             total_weight += weight;
         }
     }

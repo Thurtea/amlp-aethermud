@@ -63,13 +63,14 @@ int main(string arg) {
     }
 
     // Validate: letters and spaces only
-    int i;
-    for (i = 0; i < len; i++) {
+    int i = 0;
+    while (i < len) {
         int c = newtitle[i];
         if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' ')) {
             tell_object(user, "Sirname may only contain letters and spaces.\n");
             return 1;
         }
+        i += 1;
     }
 
     string pname = "Someone";

@@ -53,8 +53,7 @@ int main(string arg) {
     }
 
     string *names = ({});
-    for (int i = 0; i < sizeof(entries); i++) {
-        string n = entries[i];
+    foreach (string n in entries) {
         if (!show_all && n[0] == '.') continue;
         names += ({ n });
     }
@@ -65,44 +64,62 @@ int main(string arg) {
     int *mtimes = allocate(n);
     int *sizes = allocate(n);
     string *modes = allocate(n);
-    for (int i = 0; i < n; i++) {
-        string pname = join_path(resolved, names[i]);
-        sizes[i] = file_size(pname);
-        if (sizes[i] == -2) sizes[i] = 0;
-        mtimes[i] = file_mtime(pname) || -1;
-        modes[i] = file_mode(pname) || "----------";
+    {
+        int i = 0;
+        while (i < n) {
+            string pname = join_path(resolved, names[i]);
+            sizes[i] = file_size(pname);
+            if (sizes[i] == -2) sizes[i] = 0;
+            mtimes[i] = file_mtime(pname) || -1;
+            modes[i] = file_mode(pname) || "----------";
+            i += 1;
+        }
     }
 
     int *idx = allocate(n);
-    for (int i = 0; i < n; i++) idx[i] = i;
-    for (int i = 0; i < n; i++) {
-        for (int j = i+1; j < n; j++) {
-            int a = idx[i]; int b = idx[j];
-            int cmp;
-            if (t_sort) {
-                cmp = (mtimes[a] < mtimes[b]) ? 1 : ((mtimes[a] > mtimes[b]) ? -1 : 0);
-            } else {
-                cmp = (names[a] > names[b]) ? 1 : ((names[a] < names[b]) ? -1 : 0);
+    {
+        int i = 0;
+        while (i < n) { idx[i] = i; i += 1; }
+    }
+    {
+        int i = 0;
+        while (i < n) {
+            int j = i + 1;
+            while (j < n) {
+                int a = idx[i]; int b = idx[j];
+                int cmp;
+                if (t_sort) {
+                    cmp = (mtimes[a] < mtimes[b]) ? 1 : ((mtimes[a] > mtimes[b]) ? -1 : 0);
+                } else {
+                    cmp = (names[a] > names[b]) ? 1 : ((names[a] < names[b]) ? -1 : 0);
+                }
+                if (rev) cmp = -cmp;
+                if (cmp > 0) { int t = idx[i]; idx[i]=idx[j]; idx[j]=t; }
+                j += 1;
             }
-            if (rev) cmp = -cmp;
-            if (cmp > 0) { int t = idx[i]; idx[i]=idx[j]; idx[j]=t; }
+            i += 1;
         }
     }
 
     string *display = allocate(n);
-    for (int i = 0; i < n; i++) {
-        int k = idx[i];
-        string nm = names[k];
-        string full = join_path(resolved, nm);
-        if (file_size(full) == -2) nm += "/";
-        display[i] = nm;
+    {
+        int i = 0;
+        while (i < n) {
+            int k = idx[i];
+            string nm = names[k];
+            string full = join_path(resolved, nm);
+            if (file_size(full) == -2) nm += "/";
+            display[i] = nm;
+            i += 1;
+        }
     }
 
     int termw = query_terminal_width();
     if (!termw || termw < 20) termw = 80;
 
     if (longfmt) {
-        for (int i = 0; i < n; i++) {
+        int i = 0;
+        while (i < n) {
             int k = idx[i];
             string nm = names[k];
             string full = join_path(resolved, nm);
@@ -115,21 +132,25 @@ int main(string arg) {
             } else {
                 tell_object(player, sprintf("%s %6d  %s  %s\n", mode, fsize, timestr, nm));
             }
+            i += 1;
         }
         return 1;
     }
 
     if (onecol) {
-        for (int i = 0; i < n; i++) tell_object(player, display[i] + "\n");
+        int i = 0;
+        while (i < n) { tell_object(player, display[i] + "\n"); i += 1; }
         return 1;
     }
 
     object fmt = load_object("/secure/formatting");
     if (!fmt) {
         int cols = termw / 20; if (cols < 1) cols = 1;
-        for (int i = 0; i < n; i++) {
+        int i = 0;
+        while (i < n) {
             tell_object(player, display[i] + "\t");
-            if ((i+1) % cols == 0) tell_object(player, "\n");
+            if ((i + 1) % cols == 0) tell_object(player, "\n");
+            i += 1;
         }
         if (n % cols != 0) tell_object(player, "\n");
         return 1;

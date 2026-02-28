@@ -47,17 +47,18 @@ void load_all_spells() {
     }
     
     /* Load from level subdirectories */
-    for (int level = 1; level <= 15; level++) {
+    int level = 1;
+    while (level <= 15) {
         files = get_dir(SPELLS_DIR + "/level" + level + "/*.lpc");
         if (files) {
-            foreach (string file : files) {
+            foreach (string file in files) {
                 string path = SPELLS_DIR + "/level" + level + "/" + file;
                 object spell = load_object(path[0..<5]);
                 if (spell) {
                     string id = spell->query_spell_id();
                     int slevel = spell->query_spell_level();
                     spells[id] = spell;
-                    
+
                     if (!by_level[slevel]) {
                         by_level[slevel] = ({});
                     }
@@ -67,6 +68,7 @@ void load_all_spells() {
                 }
             }
         }
+        level += 1;
     }
     
     initialized = 1;
@@ -178,16 +180,18 @@ string format_spell_list(object living) {
         by_lvl[level] += ({ id });
     }
     
-    for (int level = 1; level <= 15; level++) {
+    int level = 1;
+    while (level <= 15) {
         if (by_lvl[level] && sizeof(by_lvl[level]) > 0) {
             result += "\n  Level " + level + ":\n";
-            foreach (string id : by_lvl[level]) {
+            foreach (string id in by_lvl[level]) {
                 object spell = spells[id];
                 string name = spell ? spell->query_spell_name() : id;
                 int cost = spell ? spell->query_ppe_cost() : 0;
                 result += sprintf("    %-25s (%d P.P.E.)\n", name, cost);
             }
         }
+        level += 1;
     }
     
     result += "=======================================================\n";

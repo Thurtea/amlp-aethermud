@@ -78,11 +78,13 @@ int meets_requirements(object living) {
     if (!living) return 0;
     if (sizeof(required_stats) == 0) return 1;
     
-    for (int i = 0; i < sizeof(required_stats); i++) {
+    int i = 0;
+    while (i < sizeof(required_stats)) {
         int actual = living->query_stat(required_stats[i]);
         if (actual < required_values[i]) {
             return 0;
         }
+        i += 1;
     }
     return 1;
 }

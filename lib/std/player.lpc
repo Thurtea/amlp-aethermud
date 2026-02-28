@@ -170,31 +170,163 @@ int is_wizard() { return privilege_level >= 1; }
 int is_admin() { return privilege_level >= 2; }
 int query_wizard_level() { return privilege_level; }  // For introduction system
 
-void set_privilege_level(int level) {
-    if (level < 0 || level > 2) return;
-    int old_level = privilege_level;
-    privilege_level = level;
-    switch(level) {
-        case 0:
-            title = "Player";
-            detach_wiztool();
-            break;
-        case 1:
-            title = "Wizard";
-            if (old_level != 1) {
-                tell_object(this_object(), "\n[SYSTEM] Promoted to Wizard level. Type 'wiztool' to load your tools.\n");
-            }
-            attach_wiztool();
-            break;
-        case 2:
-            title = "Admin";
-            if (old_level != 2) {
-                tell_object(this_object(), "\n[SYSTEM] Promoted to Admin level. Type 'wiztool' to load your tools.\n");
-            }
-            attach_wiztool();
-            break;
+// ---- Wiz-tool item helpers ----
+
+// Returns 1 for objects that are physical wiz-tool items.
+private int _is_wiztool_item(object obj) {
+    if (!obj) return 0;
+    if (function_exists("is_wiztool", obj) && obj->is_wiztool()) return 1;
+    return 0;
+}
+
+// Add a wiz-tool item to the LPC inventory array.
+void give_wiz_item(object obj) {
+    if (!obj) return;
+    if (!inventory) inventory = ({});
+    inventory += ({obj});
+}
+
+// Remove and destruct all wiz-tool items from LPC inventory.
+private void _clear_wiz_items() {
+    if (!inventory) return;
+    object *keep = ({});
+    foreach (object obj in inventory) {
+        if (_is_wiztool_item(obj)) {
+            catch { destruct(obj); };
+        } else {
+            keep += ({obj});
+        }
+    }
+    inventory = keep;
+}
+
+// Return the subset of LPC inventory that are wiz-tool items.
+// Called by COMMAND_D to iterate tools.
+object *query_wiz_tools() {
+    object *tools = ({});
+    if (!inventory) return tools;
+    foreach (object obj in inventory) {
+        if (_is_wiztool_item(obj))
+            tools += ({obj});
+    }
+    return tools;
+}
+
+// Create workroom LPC file on disk if it does not exist.
+// Returns the LPC path to the workroom.
+private string _ensure_workroom(string lower_nm) {
+    string wdir  = "/domains/wizard/" + lower_nm;
+    string wpath = wdir + "/workroom.lpc";
+    if (file_exists(wpath)) return wpath;
+    // Create directory (may already exist)
+    mkdir(wdir);
+    // Generate workroom source with static set_short/set_long so the C room
+    // text-scraper captures a real description on first load.
+    string dn = capitalize(lower_nm);
+    string content =
+        "// Auto-generated workroom for " + lower_nm + "\n"
+        + "inherit \"/std/workroom_template\";\n\n"
+        + "void create() {\n"
+        + "    ::create();\n"
+        + "    set_owner(\"" + lower_nm + "\");\n"
+        + "    set_short(\"" + dn + "'s workroom\");\n"
+        + "    set_long(\"The private workroom of " + dn + ". "
+        + "Bookshelves line the walls. An exit leads back to the world.\\n\");\n"
+        + "    add_exit(\"out\", \"/domains/start/village_center\");\n"
+        + "}\n";
+    write_file(wpath, content, 0);
+    return wpath;
+}
+
+// ---- Promotion / demotion ----
+
+void set_privilege_level(int lv) {
+    if (lv < 0 || lv > 2) return;
+    int old_lv = privilege_level;
+    privilege_level = lv;
+
+    // Update title
+    switch (lv) {
+        case 0: title = "Player"; break;
+        case 1: title = "Wizard"; break;
+        case 2: title = "Admin";  break;
     }
     set_short(name + " the " + title);
+
+    // Guard: if name not yet set, just record title (called during early init)
+    if (!name || name == "" || name == "player") {
+        if (lv >= 1) attach_wiztool();
+        return;
+    }
+
+    // No actual rank change (e.g. login sync of saved privilege) — just re-attach tool
+    if (lv == old_lv) {
+        if (lv >= 1) attach_wiztool();
+        return;
+    }
+
+    // ---- Rank actually changed ----
+
+    // 1. Remove existing physical wiz-tool items
+    _clear_wiz_items();
+
+    // 2. Demotion to Player
+    if (lv == 0) {
+        detach_wiztool();
+        object dest;
+        catch { dest = load_object("/domains/start/village_center"); };
+        if (dest) move_player(dest);
+        tell_object(this_object(),
+            "\n[SYSTEM] You have been demoted to Player. Your wiz-tools have been removed.\n");
+        object *plist = users();
+        string dmsg = "[Server] " + name + " has been demoted to Player.\n";
+        foreach (object p in plist) {
+            if (p && p != this_object())
+                tell_object(p, dmsg);
+        }
+        return;
+    }
+
+    // 3. Promotion — attach monolithic wiztool (handles ls/cd/cat/eval etc.)
+    attach_wiztool();
+
+    // 4. Clone and give physical wiz-tool items for new rank
+    //    Rank 1 (Wizard): id_card, code_tool
+    //    Rank 2 (Admin):  above + crystal_ball, wizard_staff, admin_wand, admin_orb
+    string *tool_paths = ({"/wiz/id_card", "/wiz/code_tool"});
+    if (lv >= 2)
+        tool_paths += ({"/wiz/crystal_ball", "/wiz/wizard_staff",
+                        "/wiz/admin_wand",   "/wiz/admin_orb"});
+    foreach (string tp in tool_paths) {
+        object tool;
+        catch { tool = clone_object(tp); };
+        if (tool) give_wiz_item(tool);
+    }
+
+    // 5. Ensure workroom exists on disk
+    string lower_nm = lower_case(name);
+    string wpath = _ensure_workroom(lower_nm);
+
+    // 6. Teleport to workroom (LPC environment; C room updated separately)
+    object wroom;
+    catch { wroom = load_object(wpath); };
+    if (wroom) {
+        move_player(wroom);
+        tell_object(this_object(), "You are transported to your workroom.\n");
+    }
+
+    // 7. Set working directory
+    working_directory = "/domains/wizard/" + lower_nm;
+
+    // 8. Announce promotion to all players
+    string rank_name = (lv == 2) ? "Admin" : "Wizard";
+    tell_object(this_object(), "\n[SYSTEM] You have been promoted to " + rank_name + "!\n");
+    object *plist = users();
+    string amsg = "[Server] " + name + " has been promoted to " + rank_name + "!\n";
+    foreach (object p in plist) {
+        if (p && p != this_object())
+            tell_object(p, amsg);
+    }
 }
 
 string query_privilege_title() { return title; }

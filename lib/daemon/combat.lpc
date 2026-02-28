@@ -279,23 +279,25 @@ void perform_round_attacks(int combat_id, object attacker) {
     mapping combat = active_combats[combat_id];
     int attacks_per_round = attacker->query_attacks_per_round();
     
-    for (int i = 0; i < attacks_per_round; i++) {
+    int i = 0;
+    while (i < attacks_per_round) {
         if (!attacker || !attacker->is_alive()) break;
-        
+
         object target = attacker->query_combat_target();
         if (!target || !target->is_alive()) break;
-        
+
         // Perform one attack
         perform_single_attack(combat_id, attacker, target);
-        
+
         // Mark attack used
-        combat["attacks_used"][attacker]++;
-        
+        combat["attacks_used"][attacker] += 1;
+
         // Small delay between attacks for dramatic effect
         if (i < attacks_per_round - 1) {
             call_out("continue_attacks", 1, combat_id, attacker, attacks_per_round - i - 1);
             break;  // Continue in callout
         }
+        i += 1;
     }
 }
 

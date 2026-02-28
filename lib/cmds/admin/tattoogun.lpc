@@ -68,9 +68,11 @@ int main(string args) {
         write("\nValid Body Locations:\n");
         write("====================\n");
         write("  ");
-        for (int i = 0; i < sizeof(valid_locations); i++) {
+        int i = 0;
+        while (i < sizeof(valid_locations)) {
             write(valid_locations[i]);
             if (i < sizeof(valid_locations) - 1) write(", ");
+            i += 1;
         }
         write("\n");
         

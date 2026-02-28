@@ -90,12 +90,14 @@ string *ADMIN_TOPICS = ({
 // Display topics array in N-column format (width = col_width * per_row).
 void write_columns(string *topics, int per_row, int col_width) {
     int count = sizeof(topics);
-    for (int i = 0; i < count; i++) {
+    int i = 0;
+    while (i < count) {
         string t = topics[i];
         // Pad/truncate to col_width
         while (strlen(t) < col_width) t += " ";
         write("  " + t[0..(col_width - 1)]);
         if ((i + 1) % per_row == 0 || i == count - 1) write("\n");
+        i += 1;
     }
 }
 
@@ -204,8 +206,10 @@ string display_name(string token) {
     s = replace_string(s, "_", " ");
     s = replace_string(s, "-", " ");
     string *words = explode(s, " ");
-    for (int i = 0; i < sizeof(words); i++) {
+    int i = 0;
+    while (i < sizeof(words)) {
         words[i] = capitalize(words[i]);
+        i += 1;
     }
     return implode(words, " ");
 }

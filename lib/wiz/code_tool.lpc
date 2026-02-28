@@ -1,11 +1,81 @@
 // lib/wiz/code_tool.lpc
-// Code Tool - Wizard Tool (role: code_wizard or admin_wizard)
-// Stub: not yet implemented.
+// Code Tool — wizard rank 1+
+// Grants: update (reload LPC file), errors (tail last 20 lines of debug log)
 
 inherit "/std/object";
 
 void create() {
     set_name("code tool");
     set_short("a code wizard's tool");
-    set_long("A tool for code wizards. Not yet implemented.");
+    set_long(
+        "A sleek flat slate etched with scrolling code glyphs. "
+        "Grants 'update' and 'errors' commands while carried.\n"
+    );
+    set_weight(0);
+    set_value(0);
+}
+
+int is_wiztool() { return 1; }
+
+int try_command(string verb, string args) {
+    switch (verb) {
+        case "update": return cmd_update(args);
+        case "errors": return cmd_errors(args);
+    }
+    return 0;
+}
+
+int cmd_update(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: update <lpc_path>\n");
+        return 1;
+    }
+    string path = args;
+    // Strip .lpc extension if present — load_object expects bare path
+    int plen = strlen(path);
+    if (plen > 4 && path[plen-4..plen-1] == ".lpc")
+        path = path[0..plen-5];
+    // Destruct existing instance if loaded
+    object old = find_object(path);
+    if (old) {
+        destruct(old);
+        tell_object(this_player(), "Destructed: " + path + "\n");
+    }
+    // Reload
+    object fresh;
+    catch { fresh = load_object(path); };
+    if (fresh) {
+        tell_object(this_player(), "Reloaded: " + path + "\n");
+    } else {
+        tell_object(this_player(), "Failed to reload: " + path + " — check errors\n");
+    }
+    return 1;
+}
+
+int cmd_errors(string args) {
+    // Try the debug log first, fall back to errors log
+    string log_path = "/log/debug_priv.log";
+    string content = read_file(log_path, 0, 0);
+    if (!content || content == "") {
+        log_path = "/log/errors.log";
+        content = read_file(log_path, 0, 0);
+    }
+    if (!content || content == "") {
+        tell_object(this_player(), "No error log found.\n");
+        return 1;
+    }
+    string *lines = explode(content, "\n");
+    int total = sizeof(lines);
+    int show = 20;
+    int start = total - show;
+    if (start < 0) start = 0;
+    tell_object(this_player(), "-- " + log_path + " (last " + (total - start) + " of " + total + " lines) --\n");
+    int i = start;
+    while (i < total) {
+        if (lines[i] && lines[i] != "")
+            tell_object(this_player(), lines[i] + "\n");
+        i += 1;
+    }
+    tell_object(this_player(), "-- end --\n");
+    return 1;
 }

@@ -48,11 +48,11 @@ int main(string arg) {
     
     // Let others in room know something was whispered (but not what)
     object *inv = all_inventory(room);
-    for (int i = 0; i < sizeof(inv); i++) {
-        if (inv[i] != user && inv[i] != target && living(inv[i])) {
-            string whisperer_seen = user->query_introduction_name(inv[i]);
-            string target_seen = target->query_introduction_name(inv[i]);
-            tell_object(inv[i], sprintf("%s whispers something to %s.\n",
+    foreach (object ob in inv) {
+        if (ob != user && ob != target && living(ob)) {
+            string whisperer_seen = user->query_introduction_name(ob);
+            string target_seen = target->query_introduction_name(ob);
+            tell_object(ob, sprintf("%s whispers something to %s.\n",
                 whisperer_seen, target_seen));
         }
     }

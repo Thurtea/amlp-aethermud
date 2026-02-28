@@ -14,7 +14,6 @@ int main(string arg) {
     object *inv;
     object room, user, lang_d;
     string speaker_lang;
-    int i;
     
     user = previous_object();
     if (!arg || arg == "") {
@@ -40,26 +39,26 @@ int main(string arg) {
     
     /* Tell everyone in the room */
     inv = all_inventory(room);
-    for (i = 0; i < sizeof(inv); i++) {
-        if (inv[i] != user && living(inv[i])) {
+    foreach (object listener in inv) {
+        if (listener != user && living(listener)) {
             /* Get what name the listener sees */
-            string speaker_name = user->query_introduction_name(inv[i]);
-            
+            string speaker_name = user->query_introduction_name(listener);
+
             /* Garble text based on listener's comprehension */
             string heard_text = arg;
             string lang_note = "";
-            
+
             if (lang_d) {
                 heard_text = lang_d->garble_for_listener(
-                    user, inv[i], speaker_lang, arg);
-                
+                    user, listener, speaker_lang, arg);
+
                 /* Add language indicator for non-American */
                 if (speaker_lang != "american") {
                     lang_note = " (in " + speaker_lang + ")";
                 }
             }
-            
-            tell_object(inv[i], 
+
+            tell_object(listener,
                 speaker_name + " says" + lang_note + ": " + heard_text + "\n");
         }
     }

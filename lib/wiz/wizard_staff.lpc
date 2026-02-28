@@ -1,12 +1,76 @@
 // lib/wiz/wizard_staff.lpc
-// Wizard Staff - Universal shortcut launcher (any wiz role)
-
-#include "/secure/wiz_perms.lpc"
+// Wizard Staff — wizard rank 2+
+// Grants: force (make target execute a command), invis/vis (toggle visibility)
 
 inherit "/std/object";
 
 void create() {
     set_name("wizard staff");
     set_short("a polished wizard staff");
-    set_long("A staff for all wizard roles. Type 'staff' for menu.");
+    set_long(
+        "A gnarled staff crackling with latent energy. "
+        "Grants 'force', 'invis', and 'vis' commands while carried.\n"
+    );
+    set_weight(0);
+    set_value(0);
+}
+
+int is_wiztool() { return 1; }
+
+int try_command(string verb, string args) {
+    switch (verb) {
+        case "force": return cmd_force(args);
+        case "invis": return cmd_invis(args);
+        case "vis":   return cmd_vis(args);
+    }
+    return 0;
+}
+
+int cmd_force(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: force <player> <command>\n");
+        return 1;
+    }
+    int sp = strsrch(args, " ");
+    if (sp < 0) {
+        tell_object(this_player(), "Usage: force <player> <command>\n");
+        return 1;
+    }
+    string pname = args[0..sp-1];
+    string cmd   = args[sp+1..strlen(args)-1];
+    if (!cmd || cmd == "") {
+        tell_object(this_player(), "Usage: force <player> <command>\n");
+        return 1;
+    }
+    object target = find_player(lower_case(pname));
+    if (!target) {
+        tell_object(this_player(), "Player '" + pname + "' is not online.\n");
+        return 1;
+    }
+    // Cannot force someone of equal or higher privilege
+    if (target->query_privilege_level() >= this_player()->query_privilege_level()) {
+        tell_object(this_player(), "You cannot force someone of equal or higher rank.\n");
+        return 1;
+    }
+    tell_object(this_player(), "You force " + target->query_name() + ": " + cmd + "\n");
+    if (function_exists("force_me", target)) {
+        target->force_me(cmd);
+    }
+    return 1;
+}
+
+int cmd_invis(string args) {
+    if (function_exists("set_property", this_player())) {
+        this_player()->set_property("invisible", 1);
+    }
+    tell_object(this_player(), "You fade from view.\n");
+    return 1;
+}
+
+int cmd_vis(string args) {
+    if (function_exists("set_property", this_player())) {
+        this_player()->set_property("invisible", 0);
+    }
+    tell_object(this_player(), "You become visible again.\n");
+    return 1;
 }

@@ -7,7 +7,7 @@
 int main(string arg) {
     object *all_users, *wizards, *players;
     object user;
-    int i, total_players;
+    int total_players;
     string output, population;
 
     user = previous_object();
@@ -16,14 +16,14 @@ int main(string arg) {
     players = ({});
 
     // Separate wizards from players
-    for (i = 0; i < sizeof(all_users); i++) {
-        if (!all_users[i]) continue;
-        if (!all_users[i]->query_name()) continue;
+    foreach (object u in all_users) {
+        if (!u) continue;
+        if (!u->query_name()) continue;
 
-        if (all_users[i]->query_privilege_level() >= 1) {
-            wizards += ({ all_users[i] });
+        if (u->query_privilege_level() >= 1) {
+            wizards += ({ u });
         } else {
-            players += ({ all_users[i] });
+            players += ({ u });
         }
     }
 
@@ -71,16 +71,16 @@ int main(string arg) {
         output += "Wizards Online:\n";
         output += "------------------------------------\n";
 
-        for (i = 0; i < sizeof(wizards); i++) {
-            string wiz_name = wizards[i]->query_name();
-            string wiz_title = wizards[i]->query_title() || "";
-            int idle_time = wizards[i]->query_idle();
-            object wiz_env = environment(wizards[i]);
+        foreach (object wiz in wizards) {
+            string wiz_name = wiz->query_name();
+            string wiz_title = wiz->query_title() || "";
+            int idle_time = wiz->query_idle();
+            object wiz_env = environment(wiz);
             string wiz_loc = wiz_env && function_exists("query_short", wiz_env) ? wiz_env->query_short() : (wiz_env ? file_name(wiz_env) : "Unknown");
 
             string rank = "[WIZARD]";
-            if (wizards[i]->query_privilege_level() >= 5) rank = "[ADMIN]";
-            else if (wizards[i]->query_privilege_level() >= 3) rank = "[SENIOR WIZ]";
+            if (wiz->query_privilege_level() >= 5) rank = "[ADMIN]";
+            else if (wiz->query_privilege_level() >= 3) rank = "[SENIOR WIZ]";
 
             // Put role before name; align name by visible chars (strip colour tokens)
             string display_name = capitalize(wiz_name) + ((idle_time > 120) ? " (idle)" : "");
@@ -99,11 +99,11 @@ int main(string arg) {
         output += "Players Online:\n";
         output += "----------------\n";
 
-        for (i = 0; i < sizeof(players); i++) {
-            string p_name = players[i]->query_name();
-            string p_title = players[i]->query_title() || "";
-            int p_idle = players[i]->query_idle();
-            object p_env = environment(players[i]);
+        foreach (object pl in players) {
+            string p_name = pl->query_name();
+            string p_title = pl->query_title() || "";
+            int p_idle = pl->query_idle();
+            object p_env = environment(pl);
             string p_loc = p_env && function_exists("query_short", p_env) ? p_env->query_short() : (p_env ? file_name(p_env) : "Unknown");
 
             string display_name = capitalize(p_name) + ((p_idle > 120) ? " (idle)" : "");

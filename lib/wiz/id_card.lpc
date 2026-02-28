@@ -1,11 +1,112 @@
 // lib/wiz/id_card.lpc
-// ID Card - Wizard Tool (role: any wizard)
-// Stub: not yet implemented.
+// ID Card — wizard rank 1+
+// Grants: identify (full stats of target), finger (player info + last login)
 
 inherit "/std/object";
 
 void create() {
     set_name("id card");
     set_short("a wizard ID card");
-    set_long("An identification card for AetherMUD staff. Not yet implemented.");
+    set_long(
+        "An official AetherMUD staff identification card. "
+        "Grants 'identify' and 'finger' commands while carried.\n"
+    );
+    set_weight(0);
+    set_value(0);
+}
+
+int is_wiztool() { return 1; }
+
+// Entry point called by COMMAND_D inventory scan.
+int try_command(string verb, string args) {
+    switch (verb) {
+        case "identify": return cmd_identify(args);
+        case "finger":   return cmd_finger(args);
+    }
+    return 0;
+}
+
+int cmd_identify(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: identify <player|object>\n");
+        return 1;
+    }
+    // Try as online player first
+    object target = find_player(lower_case(args));
+    if (target) {
+        string occ = (function_exists("query_occ_id", target) &&
+                      target->query_occ_id() && target->query_occ_id() != "unknown")
+                     ? target->query_occ_id() : "Pending";
+        string out = "+-- IDENTIFY: " + target->query_name() + " ---\n";
+        out += sprintf("  Race: %-20s  OCC: %s\n", target->query_race_name(), occ);
+        out += sprintf("  Level: %-4d  Privilege: %d\n",
+            target->query_level(), target->query_privilege_level());
+        out += sprintf("  HP: %d/%d   SDC: %d/%d   MDC: %d/%d\n",
+            target->query_hp(),  target->query_max_hp(),
+            target->query_sdc(), target->query_max_sdc(),
+            target->query_mdc(), target->query_max_mdc());
+        out += sprintf("  IQ:%-3d ME:%-3d MA:%-3d PS:%-3d PP:%-3d PE:%-3d PB:%-3d SPD:%-3d\n",
+            target->query_stat("iq"), target->query_stat("me"),
+            target->query_stat("ma"), target->query_stat("ps"),
+            target->query_stat("pp"), target->query_stat("pe"),
+            target->query_stat("pb"), target->query_stat("spd"));
+        out += sprintf("  ISP: %d/%d   PPE: %d/%d\n",
+            target->query_isp(), target->query_max_isp(),
+            target->query_ppe(), target->query_max_ppe());
+        if (function_exists("query_alignment", target))
+            out += sprintf("  Alignment: %s\n", target->query_alignment());
+        out += sprintf("  Location: %s\n", file_name(environment(target)) || "(unknown)");
+        out += "+---\n";
+        tell_object(this_player(), out);
+        return 1;
+    }
+    // Try as object in room or inventory
+    object room = environment(this_player());
+    if (room) {
+        object *inv = all_inventory(room);
+        foreach (object ob in inv) {
+            if (!ob) continue;
+            if (function_exists("id", ob) && ob->id(args)) {
+                string out = "+-- IDENTIFY: " + args + " ---\n";
+                if (function_exists("query_short", ob))
+                    out += "  Short: " + ob->query_short() + "\n";
+                if (function_exists("query_value", ob))
+                    out += "  Value: " + ob->query_value() + " credits\n";
+                if (function_exists("query_weight", ob))
+                    out += "  Weight: " + ob->query_weight() + " kg\n";
+                out += "  Object: " + file_name(ob) + "\n";
+                out += "+---\n";
+                tell_object(this_player(), out);
+                return 1;
+            }
+        }
+    }
+    tell_object(this_player(), "Cannot find '" + args + "'.\n");
+    return 1;
+}
+
+int cmd_finger(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: finger <player>\n");
+        return 1;
+    }
+    object target = find_player(lower_case(args));
+    if (!target) {
+        tell_object(this_player(), "Player '" + args + "' is not online.\n");
+        return 1;
+    }
+    string occ = (function_exists("query_occ_id", target) &&
+                  target->query_occ_id() && target->query_occ_id() != "unknown")
+                 ? target->query_occ_id() : "Pending";
+    string out = "+-- FINGER: " + target->query_name() + " ---\n";
+    out += sprintf("  Title: %-20s  Privilege: %d\n",
+        target->query_privilege_title(), target->query_privilege_level());
+    out += sprintf("  Race: %-20s  OCC: %s\n", target->query_race_name(), occ);
+    out += sprintf("  Idle: %d seconds\n", query_idle(target));
+    if (function_exists("query_login_time", target))
+        out += sprintf("  Connected: %d seconds\n", time() - target->query_login_time());
+    out += sprintf("  Location: %s\n", file_name(environment(target)) || "(unknown)");
+    out += "+---\n";
+    tell_object(this_player(), out);
+    return 1;
 }

@@ -1,0 +1,35 @@
+// /lib/single/e_clip.lpc
+// E-Clip - Standard energy clip for E-weapons
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("e-clip");
+    set_id("eclip");
+    set_id_alt("clip");
+    set_short("an E-clip");
+    set_long(
+        "A standard energy clip (E-clip) containing enough power cells for "
+        "30 shots in most energy weapons. The clip's charge indicator shows "
+        "it is fully loaded. Compatible with most Coalition and standard "
+        "E-weapons including laser pistols and ion blasters.\n"
+    );
+
+    set_type("ammo");
+    set_property("ammo_type", "energy");
+    set_property("shots", 30);
+    set_property("max_shots", 30);
+    set_property("is_eclip", 1);
+
+    set_weight(0);
+    set_value(500);
+}
+
+int query_shots() { return query_property("shots"); }
+int is_eclip() { return query_property("is_eclip"); }
+
+void use_shot() {
+    int shots = query_property("shots");
+    if (shots > 0) set_property("shots", shots - 1);
+}

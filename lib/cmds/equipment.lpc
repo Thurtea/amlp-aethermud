@@ -23,7 +23,7 @@ int main(string arg) {
     object user;
     mapping equipped;
     string output;
-    int i, count;
+    int i = 0; int count = 0;
     
     user = previous_object();
     
@@ -37,7 +37,7 @@ int main(string arg) {
     if (!equipped || sizeof(equipped) == 0) {
         output += "You have nothing equipped.\n";
     } else {
-        for (i = 0; i < sizeof(slots); i++) {
+        while (i < sizeof(slots)) {
             string slot = slots[i];
             string display = slot_names[i];
             object item = equipped[slot];
@@ -73,12 +73,13 @@ int main(string arg) {
                     }
                 }
                 
-                count++;
+                count += 1;
             } else {
                 output += "<empty>";
             }
-            
+
             output += "\n";
+            i += 1;
         }
     }
     

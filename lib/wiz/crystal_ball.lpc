@@ -1,11 +1,79 @@
 // lib/wiz/crystal_ball.lpc
-// Crystal Ball - Wizard Tool (role: any wizard)
-// Stub: not yet implemented.
+// Crystal Ball — wizard rank 2+
+// Grants: goto (teleport self to player or room path), trans (bring target here)
 
 inherit "/std/object";
 
 void create() {
     set_name("crystal ball");
-    set_short("a crystal ball");
-    set_long("A cloudy crystal ball. Not yet implemented.");
+    set_short("a smoky crystal ball");
+    set_long(
+        "A flawless sphere of smoky quartz. "
+        "Grants 'goto' and 'trans' commands while carried.\n"
+    );
+    set_weight(0);
+    set_value(0);
+}
+
+int is_wiztool() { return 1; }
+
+int try_command(string verb, string args) {
+    switch (verb) {
+        case "goto":  return cmd_goto(args);
+        case "trans": return cmd_trans(args);
+    }
+    return 0;
+}
+
+int cmd_goto(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: goto <player_name|room_path>\n");
+        return 1;
+    }
+    // Try as online player first
+    object target = find_player(lower_case(args));
+    if (target) {
+        object dest = environment(target);
+        if (!dest) {
+            tell_object(this_player(), "Cannot locate " + target->query_name() + ".\n");
+            return 1;
+        }
+        tell_object(target, this_player()->query_name() + " appears in a shimmer of light.\n");
+        this_player()->move_player(dest);
+        tell_object(this_player(), "You shimmer into existence near " + target->query_name() + ".\n");
+        return 1;
+    }
+    // Try as room path
+    object room;
+    catch { room = load_object(args); };
+    if (!room) {
+        tell_object(this_player(), "Cannot find player or room: " + args + "\n");
+        return 1;
+    }
+    this_player()->move_player(room);
+    tell_object(this_player(), "You teleport to: " + args + "\n");
+    return 1;
+}
+
+int cmd_trans(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: trans <player_name>\n");
+        return 1;
+    }
+    object target = find_player(lower_case(args));
+    if (!target) {
+        tell_object(this_player(), "Player '" + args + "' is not online.\n");
+        return 1;
+    }
+    object here = environment(this_player());
+    if (!here) {
+        tell_object(this_player(), "You have no location to bring them to.\n");
+        return 1;
+    }
+    tell_object(target, "A force seizes you and pulls you through the void...\n");
+    target->move_player(here);
+    string loc = function_exists("query_short", here) ? here->query_short() : "your location";
+    tell_object(this_player(), target->query_name() + " materializes before you.\n");
+    tell_object(target, "You find yourself in " + loc + ".\n");
+    return 1;
 }

@@ -496,10 +496,12 @@ string* query_base_abilities() {
 string* query_current_abilities() {
     string* abilities = base_abilities ? copy(base_abilities) : ({});
     
-    for (int lvl = 1; lvl <= current_level; lvl++) {
+    int lvl = 1;
+    while (lvl <= current_level) {
         if (occ_abilities && occ_abilities[lvl]) {
             abilities += occ_abilities[lvl];
         }
+        lvl += 1;
     }
     
     return abilities;
@@ -1097,9 +1099,11 @@ string get_xp_progress() {
     int percent = (current_xp * 100) / next_xp;
     int filled = percent / 5;
     string bar = "[";
-    for (int i = 0; i < 20; i++) {
+    int i = 0;
+    while (i < 20) {
         if (i < filled) bar += "=";
         else bar += " ";
+        i += 1;
     }
     bar += "] " + percent + "%";
     progress += bar + "\n";

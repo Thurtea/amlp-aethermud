@@ -49,9 +49,10 @@ int cmd_eval(string arg) {
     } else if (arrayp(result)) {
         write("Result: Array of " + sizeof(result) + " elements\n");
         if (sizeof(result) > 0 && sizeof(result) <= 10) {
-            int i;
-            for (i = 0; i < sizeof(result); i++) {
+            int i = 0;
+            while (i < sizeof(result)) {
                 write("  [" + i + "]: " + sprintf("%O", result[i]) + "\n");
+                i += 1;
             }
         }
     } else if (mappingp(result)) {

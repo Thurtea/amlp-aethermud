@@ -1,0 +1,40 @@
+// /lib/single/light_plate_armor.lpc
+// Light Plate Armor - Standard MDC body protection
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("light plate armor");
+    set_id("armor");
+    set_id_alt("plate");
+    set_short("light mega-damage plate armor");
+    set_long(
+        "A suit of light combat plate armor constructed from mega-damage ceramics "
+        "and reinforced polymers. Rated at 70 M.D.C., it offers excellent protection "
+        "without sacrificing mobility. Standard gear for mercenaries and adventurers "
+        "who cannot afford heavier environmental armor.\n"
+    );
+
+    set_type("armor");
+    set_property("armor_type", "body");
+    set_property("armor_rating", 70);
+    set_property("is_mdc_armor", 1);
+    set_property("max_durability", 70);
+    set_property("current_durability", 70);
+
+    set_weight(20);
+    set_value(25000);
+}
+
+int query_armor_rating() { return query_property("armor_rating"); }
+int is_armor_broken() {
+    return query_property("current_durability") <= 0;
+}
+
+void damage_armor(int damage) {
+    int current = query_property("current_durability");
+    current -= damage;
+    if (current < 0) current = 0;
+    set_property("current_durability", current);
+}

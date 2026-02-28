@@ -116,7 +116,8 @@ int calculate_percentage(object living, int level) {
     
     /* Add bonuses from related skills */
     if (living && sizeof(related_skills) > 0) {
-        for (int i = 0; i < sizeof(related_skills); i++) {
+        int i = 0;
+        while (i < sizeof(related_skills)) {
             if (living->has_skill(related_skills[i])) {
                 if (i < sizeof(related_bonuses)) {
                     pct += related_bonuses[i];
@@ -124,6 +125,7 @@ int calculate_percentage(object living, int level) {
                     pct += 5;  /* Default +5% if no bonus specified */
                 }
             }
+            i += 1;
         }
     }
     

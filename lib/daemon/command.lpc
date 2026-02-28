@@ -201,7 +201,20 @@ int execute_command(object player, string input, int priv_level) {
     
     verb = lower_case(verb);
     
-    // Priority 1: Check wiztool (for wizards/admins)
+    // Priority 0: Physical wiz-tool items carried in inventory.
+    // Each tool exposes try_command(verb, args) -> 1 if handled, 0 to pass.
+    if (function_exists("query_wiz_tools", player)) {
+        object *tools = player->query_wiz_tools();
+        foreach (object tool in tools) {
+            if (!tool) continue;
+            if (function_exists("try_command", tool)) {
+                int tres = tool->try_command(verb, args);
+                if (tres) return 1;
+            }
+        }
+    }
+
+    // Priority 1: Monolithic wiztool (handles ls/cd/cat/eval/update/goto etc.)
     wiztool = player->query_wiztool();
     if (wiztool) {
         result = wiztool->process_command(verb, args);

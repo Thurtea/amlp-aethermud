@@ -97,16 +97,18 @@ string garble_text(string text, int comprehension) {
     string result = "";
     int len = strlen(text);
     
-    for (int i = 0; i < len; i++) {
+    int i = 0;
+    while (i < len) {
         string ch = text[i..i];
-        
+
         /* Preserve spaces and punctuation */
-        if (ch == " " || ch == "." || ch == "," || ch == "!" || 
+        if (ch == " " || ch == "." || ch == "," || ch == "!" ||
             ch == "?" || ch == "'" || ch == "-") {
             result += ch;
+            i += 1;
             continue;
         }
-        
+
         /* Roll to keep character based on comprehension */
         if (random(100) < comprehension) {
             result += ch;
@@ -114,6 +116,7 @@ string garble_text(string text, int comprehension) {
             /* Replace with similar-sounding character */
             result += garble_character(ch);
         }
+        i += 1;
     }
     
     return result;
@@ -126,9 +129,10 @@ string garble_complete(string text) {
     string result = "";
     int len = strlen(text);
     
-    for (int i = 0; i < len; i++) {
+    int i = 0;
+    while (i < len) {
         string ch = text[i..i];
-        
+
         /* Preserve spaces */
         if (ch == " ") {
             result += " ";
@@ -137,6 +141,7 @@ string garble_complete(string text) {
         } else {
             result += "#";
         }
+        i += 1;
     }
     
     return result;

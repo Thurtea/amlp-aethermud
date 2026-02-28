@@ -69,16 +69,18 @@ int main(string arg) {
     }
     
     // Check for valid characters (letters, hyphens, apostrophes only)
-    for (int i = 0; i < len; i++) {
+    int i = 0;
+    while (i < len) {
         int c = new_surname[i];
-        
+
         // Allow a-z, A-Z, hyphen, apostrophe, space
-        if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && 
+        if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') &&
             c != '-' && c != '\'' && c != ' ') {
             tell_object(user, "Surnames can only contain letters, hyphens, apostrophes, and spaces.\n");
             tell_object(user, sprintf("Invalid character: '%c'\n", c));
             return 1;
         }
+        i += 1;
     }
     
     // Capitalize first letter

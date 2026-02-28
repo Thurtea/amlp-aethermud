@@ -1,115 +1,196 @@
 // lib/wiz/admin_orb.lpc
-// Admin Orb - Wizard Tool (role: admin_wizard only)
-
-// Removed unused include for wiz_perms; orb uses call_other for role checks
+// Admin Orb — admin rank 2 only
+// Grants: mudstats (uptime + player count), purge (delete player save file)
 
 inherit "/std/object";
 
 void create() {
     set_name("admin orb");
-    set_short("admin orb");
-    set_long("A swirling sphere of dark energy. Gazing into it reveals every soul on the server and their current state.");
-    set_weight(1);
+    set_short("a pulsing admin orb");
+    set_long(
+        "A swirling sphere of dark energy that hovers at eye level when released. "
+        "Grants 'mudstats' and 'purge' commands while carried.\n"
+    );
+    set_weight(0);
     set_value(0);
 }
 
-void init() {
-    ::init();
-    // orb command logic moved to cmds/admin/orb.lpc
+int is_wiztool() { return 1; }
+
+// All orb commands require privilege 2 (admin).
+int try_command(string verb, string args) {
+    if (!this_player() || this_player()->query_privilege_level() < 2) return 0;
+    switch (verb) {
+        case "mudstats":          return cmd_mudstats(args);
+        case "purge":             return cmd_purge(args);
+        case "setup_test_chars":  return cmd_setup_test_chars(args);
+    }
+    return 0;
 }
 
-string format_idle(int secs) {
-    if (secs < 60) return sprintf("%ds", secs);
-    if (secs < 3600) return sprintf("%dm %ds", secs/60, secs%60);
-    return sprintf("%dh %dm", secs/3600, (secs%3600)/60);
+string _fmt_idle(int secs) {
+    if (secs < 60)   return sprintf("%ds", secs);
+    if (secs < 3600) return sprintf("%dm%ds", secs / 60, secs % 60);
+    return sprintf("%dh%dm", secs / 3600, (secs % 3600) / 60);
 }
 
-string role_name(int role) {
-    switch(role) {
-        case 4: return "Admin";
-        case 3: return "Domain Wizard";
-        case 2: return "Code Wizard";
-        case 1: return "RP Wizard";
-        default: return "Mortal";
+int cmd_mudstats(string args) {
+    object *plist = users();
+    int total   = sizeof(plist);
+    int staff   = 0;
+    foreach (object p in plist) {
+        if (p && p->query_privilege_level() >= 1) staff += 1;
     }
-}
-
-int cmd_orb(string args) {
-    if (!this_player() || this_player()->query_wiz_role() < 4) {
-        write("You need the Admin Orb to access this.\n");
-        return 1;
-    }
-    if (environment() != this_player()) {
-        write("You need the Admin Orb to access this.\n");
-        return 1;
-    }
-    object *players = users();
-    if (!args || args == "" || args == "who") {
-        string out = "+------------------------------------------------------------------------+\n";
-        out += "|                      SERVER: FULL PLAYER LIST                          |\n";
-        out += "+------------------------------------------------------------------------+\n";
-        out += "| Name           Role          Location                      Idle        |\n";
-        foreach(object player : players) {
-            string pname = player->query_name();
-            string prole = role_name(player->query_wiz_role());
-            string ploc = file_name(environment(player));
-            string pidle = format_idle(query_idle(player));
-            out += sprintf("| %-13s %-13s %-28s %-10s |\n", pname, prole, ploc, pidle);
+    string out = "+-- MUD STATUS ---\n";
+    out += sprintf("  Players online : %d  (%d staff)\n", total, staff);
+    out += sprintf("  Server time    : %s", ctime(time()));
+    out += "+---\n";
+    tell_object(this_player(), out);
+    if (total > 0) {
+        string list = "+-- WHO ---\n";
+        list += sprintf("  %-14s %-8s %-6s\n", "Name", "Rank", "Idle");
+        foreach (object p in plist) {
+            if (!p) continue;
+            string rank = (p->query_privilege_level() >= 2) ? "Admin" :
+                          (p->query_privilege_level() == 1) ? "Wizard" : "Player";
+            list += sprintf("  %-14s %-8s %-6s\n",
+                p->query_name(), rank, _fmt_idle(query_idle(p)));
         }
-        out += "+------------------------------------------------------------------------+\n";
-        out += sprintf("| Total: %d online                                                        |\n", sizeof(players));
-        out += "+------------------------------------------------------------------------+\n";
-        write(out);
+        list += "+---\n";
+        tell_object(this_player(), list);
+    }
+    return 1;
+}
+
+int cmd_purge(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: purge <player_name>\n");
         return 1;
     }
-    // Single player detail
-    object target = find_player(args);
-    if (!target) {
-        write("Player '" + args + "' is not online.\n");
+    string pname = lower_case(args);
+    // Refuse to purge active sessions
+    if (find_player(pname)) {
+        tell_object(this_player(),
+            "Cannot purge an active player. Boot them first.\n");
         return 1;
     }
-    string out = "+------------------------------------------------------------------------+\n";
-    out += sprintf("| Player: %-63s|\n", target->query_name());
-    out += sprintf("| Race: %-12s OCC: %-9s Level: %-3d Align: %-15s|\n",
-        target->query_race_name(),
-        (target->query_occ_id() && target->query_occ_id() != "unknown") ? target->query_occ_id() : "Pending",
-        target->query_level(),
-        target->query_alignment());
-    out += sprintf("| Location: %-56s|\n", file_name(environment(target)));
-    out += sprintf("| Idle: %-12s Connected: %-15s|\n",
-        format_idle(query_idle(target)),
-        format_idle(time() - target->query_login_time()));
-    out += sprintf("| Role: %-13s (%d) Lives: %d/%d      HP: %d/%d   SDC: %d/%d             |\n",
-        role_name(target->query_wiz_role()),
-        target->query_wiz_role(),
-        target->query_lives(), target->query_max_lives(),
-        target->query_hp(), target->query_max_hp(),
-        target->query_sdc(), target->query_max_sdc());
-    out += "+------------------------------------------------------------------------+\n";
-    write(out);
+    // Try capitalized name first (save files use original capitalisation)
+    string path = "/save/players/" + capitalize(pname) + ".dat";
+    if (file_size(path) <= 0)
+        path = "/save/players/" + pname + ".dat";
+    if (file_size(path) <= 0) {
+        tell_object(this_player(), "No save file found for '" + args + "'.\n");
+        return 1;
+    }
+    if (rm(path)) {
+        tell_object(this_player(), "Purged save file: " + path + "\n");
+    } else {
+        tell_object(this_player(), "Failed to remove: " + path + "\n");
+    }
     return 1;
 }
 
-int orb_teleport(object player) {
-    // TODO: Implement teleport/summon logic
-    return 1;
+// -----------------------------------------------------------------------
+// setup_test_chars — configure level-15 test characters while online.
+// Usage: setup_test_chars [player_name]
+//   No args  — set up all test_* players currently logged in.
+//   With arg — target a specific player by name.
+// -----------------------------------------------------------------------
+
+private void _give_item(object player, string path) {
+    object item;
+    catch { item = clone_object(path); };
+    if (item) catch { move_object(item, player); };
 }
 
-int orb_stats(object player) {
-    string msg = "Server stats: (stub)\n";
-    // TODO: Implement real stats
-    tell_object(player, msg);
-    return 1;
+private void _setup_one_test_char(object p) {
+    object tp = this_player();
+    string nm = lower_case(p->query_name());
+
+    // Level 15 for all test chars
+    if (function_exists("set_level", p)) p->set_level(15);
+
+    // Baseline stats
+    if (function_exists("set_stat", p)) {
+        p->set_stat("iq",  16);
+        p->set_stat("me",  15);
+        p->set_stat("ma",  14);
+        p->set_stat("ps",  18);
+        p->set_stat("pp",  17);
+        p->set_stat("pe",  16);
+        p->set_stat("pb",  12);
+        p->set_stat("spd", 14);
+    }
+
+    if (nm == "test_ck") {
+        _give_item(p, "/single/light_plate_armor");
+        _give_item(p, "/single/vibro_sword");
+        _give_item(p, "/single/laser_pistol");
+        _give_item(p, "/single/e_clip");
+        tell_object(p,
+            "\n[SETUP] Configured as test_ck: Human Cyber-Knight, Level 15.\n"
+            "Inventory: light plate armor, vibro-sword, laser pistol, e-clip.\n");
+        tell_object(tp, "Configured " + p->query_name() + " as Cyber-Knight (L15).\n");
+
+    } else if (nm == "test_sunaj") {
+        _give_item(p, "/single/shadow_armor");
+        _give_item(p, "/single/vibro_knife");
+        _give_item(p, "/single/laser_pistol");
+        _give_item(p, "/single/darkness_grenade");
+        _give_item(p, "/single/e_clip");
+        tell_object(p,
+            "\n[SETUP] Configured as test_sunaj: Atlantean Sunaj Assassin, Level 15.\n"
+            "Inventory: shadow armor, vibro-knife, laser pistol, darkness grenade, e-clip.\n");
+        tell_object(tp, "Configured " + p->query_name() + " as Sunaj Assassin (L15).\n");
+
+    } else if (nm == "test_dragon") {
+        if (function_exists("set_stat", p)) {
+            p->set_stat("ps",  30);
+            p->set_stat("pe",  28);
+            p->set_stat("spd", 22);
+        }
+        tell_object(p,
+            "\n[SETUP] Configured as test_dragon: Great Horned Dragon, Level 15.\n"
+            "No gear — natural MDC armor and attacks apply.\n");
+        tell_object(tp, "Configured " + p->query_name() + " as Great Horned Dragon (L15).\n");
+
+    } else {
+        tell_object(tp,
+            "Note: '" + p->query_name() + "' is not a recognised test character "
+            "(expected test_ck / test_sunaj / test_dragon). Level set to 15, no gear given.\n");
+    }
 }
 
-int orb_shutdown(object player) {
-    tell_object(player, "Shutdown initiated.\n");
-    // TODO: Implement shutdown logic
-    return 1;
-}
+int cmd_setup_test_chars(string args) {
+    object tp = this_player();
+    object *plist = ({});
 
-int orb_reboot(object player) {
-    tell_object(player, "Reboot initiated.\n");
-    // TODO: Implement reboot logic
+    if (args && args != "") {
+        object target = find_player(lower_case(args));
+        if (!target) {
+            tell_object(tp, "Player '" + args + "' is not online.\n");
+            return 1;
+        }
+        plist = ({ target });
+    } else {
+        object *all = users();
+        foreach (object u in all) {
+            if (!u) continue;
+            string nm = lower_case(u->query_name());
+            if (strsrch(nm, "test_") == 0) plist += ({ u });
+        }
+        if (sizeof(plist) == 0) {
+            tell_object(tp,
+                "No test_* players are currently online.\n"
+                "Log in as test_ck, test_sunaj, or test_dragon first.\n");
+            return 1;
+        }
+    }
+
+    tell_object(tp, "Setting up " + sizeof(plist) + " test character(s)...\n");
+    foreach (object p in plist) {
+        if (p) _setup_one_test_char(p);
+    }
+    tell_object(tp, "Done.\n");
     return 1;
 }

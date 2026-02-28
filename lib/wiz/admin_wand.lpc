@@ -1,42 +1,89 @@
 // lib/wiz/admin_wand.lpc
-// Admin Wand - Wizard Tool (role: admin_wizard only)
-// Stub: wand sub-commands not yet implemented.
+// Admin Wand — admin rank 2 only
+// Grants: promote (set_privilege_level on target), demote (set to 0), shutdown
 
 inherit "/std/object";
 
 void create() {
     set_name("admin wand");
     set_short("a glowing admin wand");
-    set_long("A slender wand crackling with administrative energy. Not yet fully implemented.");
+    set_long(
+        "A slender wand tipped with a shard of enchanted crystal. "
+        "Grants 'promote', 'demote', and 'shutdown' commands while carried.\n"
+    );
+    set_weight(0);
+    set_value(0);
 }
 
-void init() {
-    if (environment() == this_player()) {
-        add_action("wand_slay", "wand");
+int is_wiztool() { return 1; }
+
+// All wand commands require privilege 2 (admin).
+int try_command(string verb, string args) {
+    if (!this_player() || this_player()->query_privilege_level() < 2) return 0;
+    switch (verb) {
+        case "promote":  return cmd_promote(args);
+        case "demote":   return cmd_demote(args);
+        case "shutdown": return cmd_shutdown(args);
     }
+    return 0;
 }
 
-int wand_slay(object player, string *args) {
-    tell_object(player, "Slay command not yet implemented.\n");
+int cmd_promote(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(),
+            "Usage: promote <player> <level>\n"
+            "  Levels: 0=Player  1=Wizard  2=Admin\n");
+        return 1;
+    }
+    int sp = strsrch(args, " ");
+    if (sp < 0) {
+        tell_object(this_player(), "Usage: promote <player> <level>\n");
+        return 1;
+    }
+    string pname   = args[0..sp-1];
+    int new_level  = to_int(args[sp+1..strlen(args)-1]);
+    if (new_level < 0 || new_level > 2) {
+        tell_object(this_player(), "Level must be 0 (Player), 1 (Wizard), or 2 (Admin).\n");
+        return 1;
+    }
+    object target = find_player(lower_case(pname));
+    if (!target) {
+        tell_object(this_player(), "Player '" + pname + "' is not online.\n");
+        return 1;
+    }
+    string rank = (new_level == 2) ? "Admin" : (new_level == 1) ? "Wizard" : "Player";
+    target->set_privilege_level(new_level);
+    tell_object(this_player(), "Promoted " + target->query_name() + " to " + rank + ".\n");
     return 1;
 }
 
-int wand_promote(object player, string *args) {
-    tell_object(player, "Promote command not yet implemented.\n");
+int cmd_demote(string args) {
+    if (!args || args == "") {
+        tell_object(this_player(), "Usage: demote <player>\n");
+        return 1;
+    }
+    object target = find_player(lower_case(args));
+    if (!target) {
+        tell_object(this_player(), "Player '" + args + "' is not online.\n");
+        return 1;
+    }
+    if (target->query_privilege_level() == 0) {
+        tell_object(this_player(), target->query_name() + " is already a Player.\n");
+        return 1;
+    }
+    target->set_privilege_level(0);
+    tell_object(this_player(), "Demoted " + target->query_name() + " to Player.\n");
     return 1;
 }
 
-int wand_setrole(object player, string *args) {
-    tell_object(player, "Setrole command not yet implemented.\n");
-    return 1;
-}
-
-int wand_heal(object player, string *args) {
-    tell_object(player, "Heal command not yet implemented.\n");
-    return 1;
-}
-
-int wand_goto(object player, string *args) {
-    tell_object(player, "Goto command not yet implemented.\n");
+int cmd_shutdown(string args) {
+    object *plist = users();
+    string msg = "[Server] Admin " + this_player()->query_name()
+                 + " is shutting down the server. Goodbye.\n";
+    foreach (object p in plist) {
+        if (p) tell_object(p, msg);
+    }
+    tell_object(this_player(), "Shutdown initiated.\n");
+    call_other(master(), "shutdown", 0);
     return 1;
 }

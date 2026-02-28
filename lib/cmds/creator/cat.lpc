@@ -9,7 +9,7 @@
 int main(string args) {
     object player = previous_object();
     string resolved, *lines;
-    int i;
+    int i = 0;
     
     if (!args || args == "") {
         tell_object(player, "Syntax: cat <file_path>\n");
@@ -45,8 +45,9 @@ int main(string args) {
     // Display file with line numbers
     tell_object(player, "+-- " + resolved + "\n");
     
-    for (i = 0; i < sizeof(lines); i++) {
+    while (i < sizeof(lines)) {
         tell_object(player, sprintf("%4d: %s\n", i + 1, lines[i]));
+        i += 1;
     }
     
     tell_object(player, "+-- " + sprintf("%d lines\n", sizeof(lines)));

@@ -56,8 +56,8 @@ string capitalize(str) {
 }
 
 string repeat_str(s, n) {
-    string r = ""; int i;
-    for(i = 0; i < n; i++) r += s;
+    string r = ""; int i = 0;
+    while(i < n) { r += s; i += 1; }
     return r;
 }
 
@@ -121,11 +121,11 @@ string resolve_path(base, path) {
     string full;
     if(path[0] == '/') { full = path; }
     else { if(base[strlen(base)-1] != '/') base += "/"; full = base + path; }
-    string *parts = explode(full, "/"), *out = ({}); int i;
-    for(i = 0; i < sizeof(parts); i++) {
-        if(parts[i]=="" || parts[i]==".") continue;
-        if(parts[i]=="..") { if(sizeof(out)) out = out[0..(sizeof(out)-2)]; }
-        else out += ({ parts[i] });
+    string *parts = explode(full, "/"), *out = ({});
+    foreach(string part in parts) {
+        if(part=="" || part==".") continue;
+        if(part=="..") { if(sizeof(out)) out = out[0..(sizeof(out)-2)]; }
+        else out += ({ part });
     }
     return "/" + implode(out, "/");
 }
@@ -172,24 +172,24 @@ string obj_short(ob) {
 }
 
 object find_ob(str, env) {
-    object *inv; int i;
+    object *inv;
     if(!objectp(env) || !stringp(str) || str == "") return 0;
     inv = all_inventory(env);
-    for(i = 0; i < sizeof(inv); i++) {
-        if(inv[i] && function_exists("id", inv[i]) && inv[i]->id(str))
-            return inv[i];
+    foreach(object ob in inv) {
+        if(ob && function_exists("id", ob) && ob->id(str))
+            return ob;
     }
     return 0;
 }
 
 object find_living_here(name, env) {
-    object *inv; int i;
+    object *inv;
     if(!objectp(env) || !stringp(name)) return 0;
     inv = all_inventory(env);
-    for(i = 0; i < sizeof(inv); i++) {
-        if(inv[i] && living(inv[i]) && function_exists("query_name", inv[i])) {
-            if(lower_case((string)inv[i]->query_name()) == lower_case(name))
-                return inv[i];
+    foreach(object ob in inv) {
+        if(ob && living(ob) && function_exists("query_name", ob)) {
+            if(lower_case((string)ob->query_name()) == lower_case(name))
+                return ob;
         }
     }
     return 0;
@@ -215,18 +215,18 @@ string vis_name(ob, viewer) {
 // actor is excluded (they see "You ..." separately).
 
 void tell_room_vis(room, actor, format, exclude) {
-    object *inv; int i;
+    object *inv;
     if(!objectp(room) || !stringp(format)) return;
     if(!arrayp(exclude)) exclude = ({});
     inv = all_inventory(room);
-    for(i = 0; i < sizeof(inv); i++) {
-        if(!inv[i] || !living(inv[i])) continue;
-        if(member_array(inv[i], exclude) != -1) continue;
-        string aname = capitalize(vis_name(actor, inv[i]));
+    foreach(object ob in inv) {
+        if(!ob || !living(ob)) continue;
+        if(member_array(ob, exclude) != -1) continue;
+        string aname = capitalize(vis_name(actor, ob));
         string msg = format;
         int idx = strsrch(msg, "%s");
         if(idx >= 0) msg = substr(msg, 0, idx) + aname + substr(msg, idx+2, strlen(msg) - (idx+2));
-        tell_object(inv[i], msg);
+        tell_object(ob, msg);
     }
 }
 
@@ -235,21 +235,21 @@ void tell_room_vis(room, actor, format, exclude) {
 // ============================================================
 
 void tell_room(room, msg, exclude) {
-    object *inv; int i;
+    object *inv;
     if(!objectp(room) || !stringp(msg)) return;
     if(!arrayp(exclude)) exclude = ({});
     inv = all_inventory(room);
-    for(i = 0; i < sizeof(inv); i++) {
-        if(inv[i] && living(inv[i]) && member_array(inv[i], exclude) == -1)
-            tell_object(inv[i], msg);
+    foreach(object ob in inv) {
+        if(ob && living(ob) && member_array(ob, exclude) == -1)
+            tell_object(ob, msg);
     }
 }
 
 void shout_all(msg) {
-    object *us = users(); int i;
+    object *us = users();
     if(!arrayp(us)) return;
-    for(i = 0; i < sizeof(us); i++)
-        if(us[i] && living(us[i])) tell_object(us[i], msg);
+    foreach(object u in us)
+        if(u && living(u)) tell_object(u, msg);
 }
 
 // ============================================================
@@ -308,22 +308,24 @@ string format_duration(seconds) {
 
 string lower_case(str) {
     if(!str) return "";
-    int i; string out = "";
-    for(i = 0; i < strlen(str); i++) {
+    int i = 0; string out = "";
+    while(i < strlen(str)) {
         int c = str[i];
         if(c >= 65 && c <= 90) out += sprintf("%c", c + 32);
         else out += sprintf("%c", c);
+        i += 1;
     }
     return out;
 }
 
 string upper_case(str) {
     if(!str) return "";
-    int i; string out = "";
-    for(i = 0; i < strlen(str); i++) {
+    int i = 0; string out = "";
+    while(i < strlen(str)) {
         int c = str[i];
         if(c >= 97 && c <= 122) out += sprintf("%c", c - 32);
         else out += sprintf("%c", c);
+        i += 1;
     }
     return out;
 }
@@ -333,10 +335,12 @@ string upper_case(str) {
 // ============================================================
 
 int member_array(item, arr) {
-    int i;
+    int i = 0;
     if(!arr) return -1;
-    for(i = 0; i < sizeof(arr); i++)
+    while(i < sizeof(arr)) {
         if(arr[i] == item) return i;
+        i += 1;
+    }
     return -1;
 }
 

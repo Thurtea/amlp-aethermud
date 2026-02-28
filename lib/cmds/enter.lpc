@@ -7,30 +7,29 @@ inherit LIB_DAEMON;
 
 int cmd_enter(string args) {
     object *obs, vehicle;
-    int i;
-    
+
     if (!args || args == "") {
         write("Enter what?");
         return 1;
     }
-    
+
     // Look for vehicles in the room
     obs = all_inventory(environment(this_player()));
-    
-    for (i = 0; i < sizeof(obs); i++) {
+
+    foreach (object ob in obs) {
         string *ids;
-        
-        if (!obs[i]) continue;
-        if (obs[i] == this_player()) continue;
-        
+
+        if (!ob) continue;
+        if (ob == this_player()) continue;
+
         // Check if the object has vehicle capability
-        if (!function_exists("enter_vehicle", obs[i])) continue;
-        
-        ids = obs[i]->query_id();
+        if (!function_exists("enter_vehicle", ob)) continue;
+
+        ids = ob->query_id();
         if (!ids) continue;
-        
+
         if (member_array(args, ids) != -1) {
-            vehicle = obs[i];
+            vehicle = ob;
             break;
         }
     }

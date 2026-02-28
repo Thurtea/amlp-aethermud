@@ -11,9 +11,8 @@ int main(string str) {
             tell_object(player, "You are not in a group.\n");
         } else {
             tell_object(player, "Your group:\n");
-            int i;
-            for(i = 0; i < sizeof(grp); i++)
-                tell_object(player, "  " + capitalize(vis_name(grp[i], player)) + "\n");
+            foreach(mixed gm in grp)
+                tell_object(player, "  " + capitalize(vis_name(gm, player)) + "\n");
         }
         return 1;
     }

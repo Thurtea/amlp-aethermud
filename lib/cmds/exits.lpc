@@ -8,7 +8,6 @@ int main(string arg) {
     object user, room;
     string *exits;
     string output;
-    int i;
     
     user = previous_object();
     room = user->query_environment();
@@ -27,15 +26,14 @@ int main(string arg) {
     
     output = "\nObvious exits:\n";
     
-    for (i = 0; i < sizeof(exits); i++) {
-        string dir = exits[i];
+    foreach (string dir in exits) {
         object dest = room->query_exit(dir);
         string dest_name = "unknown";
-        
+
         if (dest) {
             dest_name = dest->query_short() || dest->query_name() || "somewhere";
         }
-        
+
         output += sprintf("  %-10s - %s\n", capitalize(dir), dest_name);
     }
     

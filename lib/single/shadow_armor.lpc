@@ -1,0 +1,44 @@
+// /lib/single/shadow_armor.lpc
+// Shadow Armor - Stealth-enhanced MDC suit for Sunaj assassins
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("shadow armor");
+    set_id("armor");
+    set_id_alt("shadow");
+    set_short("a suit of shadow armor");
+    set_long(
+        "A suit of specially treated mega-damage body armor favored by Sunaj "
+        "assassins. The matte-black composite surface absorbs ambient light, "
+        "making the wearer nearly invisible in shadow. Rated at 50 M.D.C., "
+        "it sacrifices some protection for superior stealth and flexibility. "
+        "Arcane runes woven into the lining enhance tattoo-magic resonance.\n"
+    );
+
+    set_type("armor");
+    set_property("armor_type", "body");
+    set_property("armor_rating", 50);
+    set_property("is_mdc_armor", 1);
+    set_property("max_durability", 50);
+    set_property("current_durability", 50);
+    set_property("stealth_bonus", 20);    // +20% prowl in shadow
+    set_property("shadow_enhanced", 1);
+
+    set_weight(12);
+    set_value(30000);
+}
+
+int query_armor_rating() { return query_property("armor_rating"); }
+int query_stealth_bonus() { return query_property("stealth_bonus"); }
+int is_armor_broken() {
+    return query_property("current_durability") <= 0;
+}
+
+void damage_armor(int damage) {
+    int current = query_property("current_durability");
+    current -= damage;
+    if (current < 0) current = 0;
+    set_property("current_durability", current);
+}

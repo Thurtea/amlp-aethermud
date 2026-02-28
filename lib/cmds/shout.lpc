@@ -14,7 +14,6 @@ int main(string arg) {
     object user, room;
     object *nearby_rooms, *inv;
     string *exits;
-    int i, j;
     
     user = previous_object();
     room = user->query_environment();
@@ -31,10 +30,10 @@ int main(string arg) {
     
     // Shout in current room with identity-aware names
     inv = all_inventory(room);
-    for (i = 0; i < sizeof(inv); i++) {
-        if (inv[i] != user && living(inv[i])) {
-            string shouter_name = user->query_introduction_name(inv[i]);
-            tell_object(inv[i], sprintf("%s shouts: %s\n",
+    foreach (object ob in inv) {
+        if (ob != user && living(ob)) {
+            string shouter_name = user->query_introduction_name(ob);
+            tell_object(ob, sprintf("%s shouts: %s\n",
                 shouter_name, arg));
         }
     }
@@ -55,9 +54,9 @@ int main(string arg) {
         // Tell people in adjacent rooms they hear a shout
         foreach (object nearby in nearby_rooms) {
             inv = all_inventory(nearby);
-            for (i = 0; i < sizeof(inv); i++) {
-                if (living(inv[i])) {
-                    tell_object(inv[i], sprintf("You hear someone shout from nearby: %s\n", arg));
+            foreach (object ob in inv) {
+                if (living(ob)) {
+                    tell_object(ob, sprintf("You hear someone shout from nearby: %s\n", arg));
                 }
             }
         }

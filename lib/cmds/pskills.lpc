@@ -6,7 +6,7 @@ int main(string str) {
     mapping skills;
     string *names;
     string occ_name;
-    int i;
+    int i = 0;
 
     player = this_player();
     if (!player) return 0;
@@ -33,10 +33,12 @@ int main(string str) {
     write("=== Primary Skills (O.C.C.: " + occ_name + ") ===\n");
 
     names = sort_array(keys(skills), 1);
-    for (i = 0; i < sizeof(names); i++) {
+    i = 0;
+    while (i < sizeof(names)) {
         string display = capitalize(replace_string(names[i], "_", " "));
         int pct = intp(skills[names[i]]) ? skills[names[i]] : 0;
         write(sprintf("  %-35s %3d%%\n", display, pct));
+        i += 1;
     }
 
     return 1;

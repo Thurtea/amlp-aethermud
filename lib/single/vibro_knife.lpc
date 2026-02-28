@@ -1,0 +1,36 @@
+// /lib/single/vibro_knife.lpc
+// Vibro-Knife - Compact Mega-Damage melee weapon
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+    set_name("vibro knife");
+    set_id("knife");
+    set_id_alt("vibro");
+    set_short("a vibro-knife");
+    set_long(
+        "A compact vibro-knife favored by assassins and special operatives. "
+        "The short vibrating blade deals mega-damage despite its modest size. "
+        "Easy to conceal inside a boot or sleeve, it is a preferred close-quarters "
+        "weapon of Sunaj agents across the Megaverse.\n"
+    );
+
+    set_type("weapon");
+    set_property("weapon_type", "knife");
+    set_property("damage", "1d6");
+    set_property("damage_dice", 1);
+    set_property("damage_sides", 6);
+    set_property("damage_bonus", 0);
+    set_property("is_mdc_weapon", 1);
+    set_property("strike_bonus", 2);
+    set_property("concealable", 1);
+
+    set_weight(1);
+    set_value(6000);
+}
+
+int is_mdc_weapon() { return query_property("is_mdc_weapon"); }
+int query_damage_dice() { return query_property("damage_dice"); }
+int query_damage_sides() { return query_property("damage_sides"); }
+int query_strike_bonus() { return query_property("strike_bonus"); }

@@ -1,10 +1,21 @@
 // /cmds/cd.lpc
-// Change working directory
+// Change working directory — delegates to wiztool (privilege >= 1 only)
 
 int main(string args) {
     object player = this_player();
     if (!player) return 0;
-    // Stub: directory change logic not implemented
-    write("Stub: cd command. Directory change not implemented.\n");
+
+    if (player->query_privilege_level() < 1) {
+        write("You can't do that.\n");
+        return 1;
+    }
+
+    object wt = player->query_wiztool();
+    if (!wt) {
+        write("No wiztool available. Ask an admin to re-attach it.\n");
+        return 1;
+    }
+
+    wt->process_command("cd", args);
     return 1;
 }

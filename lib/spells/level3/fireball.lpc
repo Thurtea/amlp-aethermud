@@ -74,12 +74,23 @@ int cast(object caster, object target, string args) {
     if (function_exists("take_damage", target)) {
         target->take_damage(damage, 0); // 0 = SDC damage
     }
-    
-    write("Your fireball inflicts " + damage + " damage to " + 
-          target->query_cap_name() + "!");
-    
+
+    // Severity based on damage vs target's max HP (no numeric output)
+    int max_hp = 0;
+    if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+    if (max_hp <= 0) max_hp = 100;
+    int pct = (damage * 100) / max_hp;
+    string sev;
+    if (pct <= 5) sev = "barely singes";
+    else if (pct <= 15) sev = "singes";
+    else if (pct <= 30) sev = "blasts";
+    else if (pct <= 50) sev = "devastates";
+    else sev = "obliterates";
+
+    write("Your fireball " + sev + " " + target->query_cap_name() + "!");
+
     tell_object(target,
-                "The fireball hits you for " + damage + " damage!");
+                "The fireball " + sev + " you!");
     
     tell_room(environment(target),
               "The fireball explodes in a burst of flame and heat!",

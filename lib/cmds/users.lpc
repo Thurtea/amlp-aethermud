@@ -1,10 +1,57 @@
 // /cmds/users.lpc
-// Show detailed user list
+// List all connected players (available to everyone)
 
 int main(string args) {
     object player = this_player();
     if (!player) return 0;
-    // Stub: user listing logic not implemented
-    write("Stub: users command. User listing not implemented.\n");
+
+    object *all_users = users();
+    int count = sizeof(all_users);
+    int priv = player->query_privilege_level();
+
+    write("\n=== Connected Players ===\n\n");
+
+    if (!all_users || count == 0) {
+        write("  (nobody connected)\n\n");
+        return 1;
+    }
+
+    foreach (object u in all_users) {
+        if (!u) continue;
+
+        string uname = "";
+        string uloc = "";
+        string urole = "";
+        int upriv = 0;
+
+        if (function_exists("query_cap_name", u))
+            uname = u->query_cap_name();
+        if (!uname || uname == "") uname = "Unknown";
+
+        if (function_exists("query_privilege_level", u))
+            upriv = u->query_privilege_level();
+
+        // Role/title prefix shown to all
+        string prefix = "";
+        if (upriv >= 2) prefix = "\033[1;31m[Admin]\033[0m ";
+        else if (upriv >= 1) prefix = "\033[1;34m[Wiz]\033[0m ";
+
+        // Wizards+ see location
+        if (priv >= 1) {
+            object env = environment(u);
+            if (env && function_exists("query_short", env))
+                uloc = " - " + env->query_short();
+        }
+
+        // Wizards+ see role
+        if (priv >= 1 && function_exists("query_property", u)) {
+            string role = u->query_property("wizard_role");
+            if (role && role != "") urole = " (" + role + ")";
+        }
+
+        write("  " + prefix + uname + uloc + urole + "\n");
+    }
+
+    write("\n  Total: " + count + " player" + (count == 1 ? "" : "s") + " online.\n\n");
     return 1;
 }

@@ -8,9 +8,17 @@ private string cwd;          // Current working directory
 private object owner;        // The wizard who owns this tool
 private int trace_level;     // Debug trace level
 
+// Editor state
+private string ed_file;      // Currently-open file path (0 = none)
+private string *ed_lines;    // Lines of the open file
+private int ed_dirty;        // Unsaved changes flag
+
 void create() {
     cwd = "/";
     trace_level = 0;
+    ed_file = 0;
+    ed_lines = ({});
+    ed_dirty = 0;
 }
 
 // Attach wiztool to a player
@@ -40,7 +48,7 @@ object query_owner() {
 // Main command processor
 int process_command(string verb, string args) {
     if (!owner) return 0;
-    
+
     // Check if this is a wiztool command
     switch(verb) {
         // Filesystem commands
@@ -55,29 +63,29 @@ int process_command(string verb, string args) {
         case "find":    cmd_find(args); return 1;
         case "head":    cmd_head(args); return 1;
         case "tail":    cmd_tail(args); return 1;
-        
+
         // Object commands
         case "clone":   cmd_clone(args); return 1;
         case "dest":    cmd_dest(args); return 1;
         case "update":  cmd_update(args); return 1;
         case "load":    cmd_load(args); return 1;
         case "objects": cmd_objects(); return 1;
-        
+
         // Development commands
         case "eval":    cmd_eval(args); return 1;
         case "call":    cmd_call(args); return 1;
         case "ed":      cmd_ed(args); return 1;
         case "trace":   cmd_trace(args); return 1;
         case "errors":  cmd_errors(); return 1;
-        
+
         // Wiztool meta commands
         case "wiz":     cmd_wiz(args); return 1;
         case "wiztool": cmd_wiz(args); return 1;
-        
+
         // Movement helpers (with absolute paths)
         case "goto":    cmd_goto(args); return 1;
     }
-    
+
     return 0; // Not a wiztool command
 }
 
@@ -92,7 +100,7 @@ void cmd_cd(string dir) {
         tell_object(owner, "Changed to home directory: " + cwd);
         return;
     }
-    
+
     // Enforce path permissions
     object perms = load_object("/secure/wiz_perms.lpc");
     if (perms && !perms->check_wiz_perm(this_player(), resolve_path(dir))) {
@@ -101,13 +109,13 @@ void cmd_cd(string dir) {
     }
 
     string new_path = resolve_path(dir);
-    
+
     // Check if directory exists
     if (file_size(new_path) != -2) {
         tell_object(owner, "Directory not found: " + new_path);
         return;
     }
-    
+
     cwd = new_path;
     tell_object(owner, "Changed directory to: " + cwd);
 }
@@ -119,7 +127,7 @@ void cmd_ls(string dir) {
     string *regular_files = ({});
     int i, col, max_width = 20;
     int term_width = 78; // Standard terminal width
-    
+
     if (!dir || dir == "") {
         path = cwd;
     } else {
@@ -132,19 +140,19 @@ void cmd_ls(string dir) {
         tell_object(owner, "Permission denied: you do not have access to that path.\n");
         return;
     }
-    
+
     if (file_size(path) == -1) {
         tell_object(owner, "Not found: " + path);
         return;
     }
-    
+
     files = get_dir(path + "/*");
-    
+
     if (!files || sizeof(files) == 0) {
         tell_object(owner, "Empty directory: " + path);
         return;
     }
-    
+
     // Separate directories and files
     i = 0;
     while (i < sizeof(files)) {
@@ -158,9 +166,9 @@ void cmd_ls(string dir) {
         }
         i++;
     }
-    
+
     tell_object(owner, "Contents of " + path + ":");
-    
+
     // Display directories first in horizontal format
     if (sizeof(dirs) > 0) {
         string line = "";
@@ -200,7 +208,7 @@ void cmd_ls(string dir) {
         }
         if (line != "") tell_object(owner, line);
     }
-    
+
     tell_object(owner, sprintf("\nTotal: %d directories, %d files", sizeof(dirs), sizeof(regular_files)));
 }
 
@@ -213,17 +221,17 @@ void cmd_cat(string file) {
         tell_object(owner, "Usage: cat <filename>");
         return;
     }
-    
+
     string path = resolve_path(file);
     string content;
-    
+
     content = read_file(path);
-    
+
     if (!content) {
         tell_object(owner, "Cannot read file: " + path);
         return;
     }
-    
+
     tell_object(owner, "=== " + path + " ===");
     tell_object(owner, content);
     tell_object(owner, "=== End of file ===");
@@ -234,26 +242,26 @@ void cmd_more(string file) {
         tell_object(owner, "Usage: more <filename>");
         return;
     }
-    
+
     string path = resolve_path(file);
     string content;
     string *lines;
     int i, total, start, end, lines_per_page;
-    
+
     content = read_file(path);
-    
+
     if (!content) {
         tell_object(owner, "Cannot read file: " + path);
         return;
     }
-    
+
     lines = explode(content, "\n");
     total = sizeof(lines);
     lines_per_page = 20;  // Show 20 lines per screen
-    
+
     tell_object(owner, "=== " + path + " (" + total + " lines) ===");
     tell_object(owner, "");
-    
+
     // Display lines with page markers every lines_per_page lines
     i = 0;
     while (i < total) {
@@ -266,7 +274,7 @@ void cmd_more(string file) {
         }
         i++;
     }
-    
+
     tell_object(owner, "");
     tell_object(owner, "=== End of file ===");
 }
@@ -276,9 +284,9 @@ void cmd_mkdir(string dir) {
         tell_object(owner, "Usage: mkdir <directory>");
         return;
     }
-    
+
     string path = resolve_path(dir);
-    
+
     if (mkdir(path)) {
         tell_object(owner, "Created directory: " + path);
     } else {
@@ -291,9 +299,9 @@ void cmd_rm(string file) {
         tell_object(owner, "Usage: rm <filename>");
         return;
     }
-    
+
     string path = resolve_path(file);
-    
+
     if (rm(path)) {
         tell_object(owner, "Removed: " + path);
     } else {
@@ -301,22 +309,165 @@ void cmd_rm(string file) {
     }
 }
 
+// === GREP / FIND / HEAD / TAIL ===
+
+private int name_matches(string pattern, string name) {
+    if (!pattern || pattern == "" || pattern == "*") return 1;
+    int plen = strlen(pattern);
+    int nlen = strlen(name);
+    int lead  = (plen > 0 && pattern[0] == '*') ? 1 : 0;
+    int trail = (plen > 1 && pattern[plen - 1] == '*') ? 1 : 0;
+    if (lead + trail >= plen) return 1;   // pattern is all stars
+    string core = pattern[lead .. plen - 1 - trail];
+    int clen = strlen(core);
+    if (clen == 0) return 1;
+    if (lead && trail) return strsrch(name, core) >= 0;
+    if (lead) {
+        // suffix match: name must end with core
+        if (nlen < clen) return 0;
+        return name[nlen - clen ..] == core;
+    }
+    if (trail) {
+        // prefix match: name must start with core
+        if (nlen < clen) return 0;
+        return name[0 .. clen - 1] == core;
+    }
+    return name == pattern;
+}
+
+private int grep_path(string path, string pattern, int ci, int nums) {
+    string content = read_file(path);
+    if (!content) return 0;
+    string *lines = explode(content, "\n");
+    int matches = 0;
+    int i = 0;
+    while (i < sizeof(lines)) {
+        string line = lines[i];
+        string check_line = ci ? lower_case(line) : line;
+        string check_pat  = ci ? lower_case(pattern) : pattern;
+        if (strsrch(check_line, check_pat) >= 0) {
+            if (nums) {
+                tell_object(owner, path + ":" + (i + 1) + ":" + line);
+            } else {
+                tell_object(owner, path + ":" + line);
+            }
+            matches += 1;
+        }
+        i += 1;
+    }
+    return matches;
+}
+
+private int grep_dir(string path, string pattern, int ci, int nums) {
+    string *files = get_dir(path + "/*");
+    if (!files) return 0;
+    int total = 0;
+    int i = 0;
+    while (i < sizeof(files)) {
+        string full = path + "/" + files[i];
+        int sz = file_size(full);
+        if (sz == -2) {
+            total += grep_dir(full, pattern, ci, nums);
+        } else {
+            total += grep_path(full, pattern, ci, nums);
+        }
+        i += 1;
+    }
+    return total;
+}
+
 void cmd_grep(string args) {
     if (!args || args == "") {
-        tell_object(owner, "Usage: grep [options] <pattern> <path>");
-        tell_object(owner, "Options: -i (case-insensitive), -n (line numbers), -r (recursive)");
+        tell_object(owner, "Usage: grep [-i] [-n] [-r] <pattern> <path>");
+        tell_object(owner, "Options: -i (case-insensitive)  -n (line numbers)  -r (recursive)");
         return;
     }
-    return call_other("/lib/cmds/creator/grep", "main", args);
+
+    int ci = 0, nums = 0, recursive = 0;
+    string *parts = explode(args, " ");
+    string *rest = ({});
+    int i = 0;
+    while (i < sizeof(parts)) {
+        if (parts[i] == "-i") ci = 1;
+        else if (parts[i] == "-n") nums = 1;
+        else if (parts[i] == "-r") recursive = 1;
+        else rest += ({ parts[i] });
+        i += 1;
+    }
+    if (sizeof(rest) < 2) {
+        tell_object(owner, "Usage: grep [-i] [-n] [-r] <pattern> <path>");
+        return;
+    }
+    string pattern = rest[0];
+    string path = resolve_path(rest[1]);
+
+    int matches = 0;
+    int sz = file_size(path);
+    if (sz == -2) {
+        if (!recursive) {
+            tell_object(owner, path + ": is a directory (use -r for recursive search)");
+            return;
+        }
+        matches = grep_dir(path, pattern, ci, nums);
+    } else if (sz >= 0) {
+        matches = grep_path(path, pattern, ci, nums);
+    } else {
+        tell_object(owner, "No such file or directory: " + path);
+        return;
+    }
+    tell_object(owner, matches + " match" + (matches == 1 ? "" : "es") + " found.");
+}
+
+private int do_find(string path, string name_pat, string type_filter) {
+    if (file_size(path) != -2) return 0;
+    string *files = get_dir(path + "/*");
+    if (!files) return 0;
+    int count = 0;
+    int i = 0;
+    while (i < sizeof(files)) {
+        string full = path + "/" + files[i];
+        int sz = file_size(full);
+        int is_dir = (sz == -2);
+        int ok = 1;
+        if (name_pat != "" && !name_matches(name_pat, files[i])) ok = 0;
+        if (type_filter == "f" && is_dir) ok = 0;
+        if (type_filter == "d" && !is_dir) ok = 0;
+        if (ok) {
+            tell_object(owner, full);
+            count += 1;
+        }
+        if (is_dir) count += do_find(full, name_pat, type_filter);
+        i += 1;
+    }
+    return count;
 }
 
 void cmd_find(string args) {
     if (!args || args == "") {
-        tell_object(owner, "Usage: find <directory> [options]");
-        tell_object(owner, "Options: -name <pattern>, -type f|d");
+        tell_object(owner, "Usage: find <dir> [-name <pattern>] [-type f|d]");
         return;
     }
-    return call_other("/lib/cmds/creator/find", "main", args);
+    string *parts = explode(args, " ");
+    string search_dir = resolve_path(parts[0]);
+    string name_pat = "";
+    string type_filter = "";
+    int i = 1;
+    while (i < sizeof(parts)) {
+        if (parts[i] == "-name" && i + 1 < sizeof(parts)) {
+            i += 1;
+            name_pat = parts[i];
+        } else if (parts[i] == "-type" && i + 1 < sizeof(parts)) {
+            i += 1;
+            type_filter = parts[i];
+        }
+        i += 1;
+    }
+    if (file_size(search_dir) != -2) {
+        tell_object(owner, "Not a directory: " + search_dir);
+        return;
+    }
+    int count = do_find(search_dir, name_pat, type_filter);
+    tell_object(owner, count + " item" + (count == 1 ? "" : "s") + " found.");
 }
 
 void cmd_head(string args) {
@@ -324,15 +475,78 @@ void cmd_head(string args) {
         tell_object(owner, "Usage: head [-n <lines>] <file>");
         return;
     }
-    return call_other("/lib/cmds/creator/head", "main", args);
+    int num_lines = 10;
+    string *parts = explode(args, " ");
+    string *rest = ({});
+    int i = 0;
+    while (i < sizeof(parts)) {
+        if (parts[i] == "-n" && i + 1 < sizeof(parts)) {
+            i += 1;
+            num_lines = to_int(parts[i]);
+        } else {
+            rest += ({ parts[i] });
+        }
+        i += 1;
+    }
+    if (sizeof(rest) == 0) {
+        tell_object(owner, "Usage: head [-n <lines>] <file>");
+        return;
+    }
+    string filepath = resolve_path(rest[0]);
+    string content = read_file(filepath);
+    if (!content) {
+        tell_object(owner, "Cannot read: " + filepath);
+        return;
+    }
+    string *lines = explode(content, "\n");
+    int total = sizeof(lines);
+    int end = (num_lines < total) ? num_lines : total;
+    tell_object(owner, "==> " + filepath + " <==");
+    i = 0;
+    while (i < end) {
+        tell_object(owner, lines[i]);
+        i += 1;
+    }
 }
 
 void cmd_tail(string args) {
     if (!args || args == "") {
-        tell_object(owner, "Usage: tail [-n <lines>] [-f] <file>");
+        tell_object(owner, "Usage: tail [-n <lines>] <file>");
         return;
     }
-    return call_other("/lib/cmds/creator/tail", "main", args);
+    int num_lines = 10;
+    string *parts = explode(args, " ");
+    string *rest = ({});
+    int i = 0;
+    while (i < sizeof(parts)) {
+        if (parts[i] == "-n" && i + 1 < sizeof(parts)) {
+            i += 1;
+            num_lines = to_int(parts[i]);
+        } else {
+            rest += ({ parts[i] });
+        }
+        i += 1;
+    }
+    if (sizeof(rest) == 0) {
+        tell_object(owner, "Usage: tail [-n <lines>] <file>");
+        return;
+    }
+    string filepath = resolve_path(rest[0]);
+    string content = read_file(filepath);
+    if (!content) {
+        tell_object(owner, "Cannot read: " + filepath);
+        return;
+    }
+    string *lines = explode(content, "\n");
+    int total = sizeof(lines);
+    int start = total - num_lines;
+    if (start < 0) start = 0;
+    tell_object(owner, "==> " + filepath + " <==");
+    i = start;
+    while (i < total) {
+        tell_object(owner, lines[i]);
+        i += 1;
+    }
 }
 
 // === OBJECT COMMANDS ===
@@ -342,25 +556,25 @@ void cmd_clone(string file) {
         tell_object(owner, "Usage: clone <object_file>");
         return;
     }
-    
+
     string path = resolve_path(file);
     object obj;
-    
+
     // Remove .c extension if present
     if (path[strlen(path)-2..] == ".c") {
         path = path[0..strlen(path)-3];
     }
-    
+
     catch {
         obj = clone_object(path);
     };
-    
+
     if (!obj) {
         tell_object(owner, "Failed to clone: " + path);
         tell_object(owner, "Check 'errors' for compilation issues.");
         return;
     }
-    
+
     // Move object to player's inventory
     if (obj->move(owner)) {
         tell_object(owner, "Cloned: " + file_name(obj));
@@ -374,22 +588,22 @@ void cmd_dest(string target) {
         tell_object(owner, "Usage: dest <object>");
         return;
     }
-    
+
     object obj;
-    
+
     // Try to find object by name in inventory or environment
     obj = present(target, owner);
     if (!obj) {
         obj = present(target, environment(owner));
     }
-    
+
     if (!obj) {
         tell_object(owner, "Object not found: " + target);
         return;
     }
-    
+
     string name = file_name(obj);
-    
+
     if (destruct(obj)) {
         tell_object(owner, "Destructed: " + name);
     } else {
@@ -402,14 +616,14 @@ void cmd_update(string file) {
         tell_object(owner, "Usage: update <object_file>");
         return;
     }
-    
+
     string path = resolve_path(file);
-    
+
     // Remove .c extension
     if (path[strlen(path)-2..] == ".c") {
         path = path[0..strlen(path)-3];
     }
-    
+
     if (destruct(load_object(path))) {
         tell_object(owner, "Updated: " + path);
     } else {
@@ -422,19 +636,19 @@ void cmd_load(string file) {
         tell_object(owner, "Usage: load <object_file>");
         return;
     }
-    
+
     string path = resolve_path(file);
     object obj;
-    
+
     // Remove .c extension
     if (path[strlen(path)-2..] == ".c") {
         path = path[0..strlen(path)-3];
     }
-    
+
     catch {
         obj = load_object(path);
     };
-    
+
     if (obj) {
         tell_object(owner, "Loaded: " + file_name(obj));
     } else {
@@ -445,10 +659,10 @@ void cmd_load(string file) {
 void cmd_objects() {
     object *obs = objects();
     int i;
-    
+
     tell_object(owner, "Loaded objects (" + sizeof(obs) + "):");
     tell_object(owner, "---");
-    
+
     i = 0;
     while (i < sizeof(obs)) {
         tell_object(owner, "  " + file_name(obs[i]));
@@ -463,13 +677,13 @@ void cmd_eval(string code) {
         tell_object(owner, "Usage: eval <lpc_expression>");
         return;
     }
-    
+
     mixed result;
-    
+
     catch {
         result = evaluate(code);
     };
-    
+
     tell_object(owner, "Result: " + dump_value(result));
 }
 
@@ -478,36 +692,288 @@ void cmd_call(string args) {
         tell_object(owner, "Usage: call <object> <function> [args]");
         return;
     }
-    
+
     // Parse: object function args
     string obj_name, func_name, func_args;
     object obj;
     mixed result;
-    
+
     if (sscanf(args, "%s %s %s", obj_name, func_name, func_args) < 2) {
         tell_object(owner, "Usage: call <object> <function> [args]");
         return;
     }
-    
+
     // Find object
     obj = find_object(resolve_path(obj_name));
-    
+
     if (!obj) {
         tell_object(owner, "Object not found: " + obj_name);
         return;
     }
-    
+
     // Call function
     catch {
         result = call_other(obj, func_name, func_args);
     };
-    
+
     tell_object(owner, "Result: " + dump_value(result));
 }
 
-void cmd_ed(string file) {
-    tell_object(owner, "Ed editor not yet implemented.");
-    tell_object(owner, "Edit files externally and use 'update' to reload.");
+// === ED LINE EDITOR ===
+//
+// Usage:
+//   ed <filename>        open file for editing (shows content)
+//   ed l                 list all lines with numbers
+//   ed p <n>             print line n
+//   ed p <n>,<m>         print lines n through m
+//   ed a <text>          append text as new line at end
+//   ed i <n> <text>      insert text before line n
+//   ed d <n>             delete line n
+//   ed w                 write (save) file to disk
+//   ed q                 quit editor (warns if unsaved changes)
+//   ed q!                force quit without saving
+//   ed wq                save and quit
+
+private void ed_show_status() {
+    if (ed_file) {
+        tell_object(owner, "Editing: " + ed_file + " (" +
+            sizeof(ed_lines) + " lines)" + (ed_dirty ? " [modified]" : ""));
+    } else {
+        tell_object(owner, "No file open.");
+    }
+}
+
+private void ed_do_list() {
+    if (!ed_file) {
+        tell_object(owner, "No file open. Use: ed <filename>");
+        return;
+    }
+    string ndirty = ed_dirty ? " [modified]" : "";
+    tell_object(owner, "+-- " + ed_file + ndirty);
+    if (sizeof(ed_lines) == 0) {
+        tell_object(owner, "  [empty file]");
+    } else {
+        int i = 0;
+        while (i < sizeof(ed_lines)) {
+            tell_object(owner, sprintf("%4d  %s", i + 1, ed_lines[i]));
+            i += 1;
+        }
+    }
+    tell_object(owner, "+-- " + sizeof(ed_lines) + " line" +
+        (sizeof(ed_lines) == 1 ? "" : "s"));
+}
+
+private void ed_do_print(string args) {
+    if (!ed_file) {
+        tell_object(owner, "No file open. Use: ed <filename>");
+        return;
+    }
+    if (!args || args == "") {
+        ed_do_list();
+        return;
+    }
+    int n1, n2;
+    if (sscanf(args, "%d,%d", n1, n2) == 2) {
+        n1 -= 1; n2 -= 1;
+    } else if (sscanf(args, "%d", n1) == 1) {
+        n1 -= 1; n2 = n1;
+    } else {
+        tell_object(owner, "Usage: ed p <n>  or  ed p <n>,<m>");
+        return;
+    }
+    if (n1 < 0) n1 = 0;
+    if (n2 >= sizeof(ed_lines)) n2 = sizeof(ed_lines) - 1;
+    if (n1 > n2 || sizeof(ed_lines) == 0) {
+        tell_object(owner, "Line out of range (1-" + sizeof(ed_lines) + ")");
+        return;
+    }
+    int i = n1;
+    while (i <= n2) {
+        tell_object(owner, sprintf("%4d  %s", i + 1, ed_lines[i]));
+        i += 1;
+    }
+}
+
+private void ed_do_append(string text) {
+    if (!ed_file) {
+        tell_object(owner, "No file open. Use: ed <filename>");
+        return;
+    }
+    if (!text || text == "") {
+        tell_object(owner, "Usage: ed a <text to append>");
+        return;
+    }
+    ed_lines += ({ text });
+    ed_dirty = 1;
+    tell_object(owner, sprintf("%4d  %s", sizeof(ed_lines), text));
+}
+
+private void ed_do_insert(string args) {
+    if (!ed_file) {
+        tell_object(owner, "No file open. Use: ed <filename>");
+        return;
+    }
+    int n;
+    string text;
+    if (!args || sscanf(args, "%d %s", n, text) < 2 || !text || text == "") {
+        tell_object(owner, "Usage: ed i <n> <text to insert before line n>");
+        return;
+    }
+    int idx = n - 1;
+    if (idx < 0) idx = 0;
+    if (idx > sizeof(ed_lines)) idx = sizeof(ed_lines);
+    string *before = (idx > 0) ? ed_lines[0 .. idx - 1] : ({});
+    string *after  = (idx < sizeof(ed_lines)) ? ed_lines[idx .. sizeof(ed_lines) - 1] : ({});
+    ed_lines = before + ({ text }) + after;
+    ed_dirty = 1;
+    tell_object(owner, "Inserted at line " + (idx + 1) + ": " + text);
+}
+
+private void ed_do_delete(string args) {
+    if (!ed_file) {
+        tell_object(owner, "No file open. Use: ed <filename>");
+        return;
+    }
+    int n;
+    if (!args || sscanf(args, "%d", n) < 1) {
+        tell_object(owner, "Usage: ed d <n>");
+        return;
+    }
+    int idx = n - 1;
+    if (idx < 0 || idx >= sizeof(ed_lines)) {
+        tell_object(owner, "Line out of range (1-" + sizeof(ed_lines) + ")");
+        return;
+    }
+    string deleted = ed_lines[idx];
+    string *before = (idx > 0) ? ed_lines[0 .. idx - 1] : ({});
+    string *after  = (idx + 1 < sizeof(ed_lines)) ? ed_lines[idx + 1 .. sizeof(ed_lines) - 1] : ({});
+    ed_lines = before + after;
+    ed_dirty = 1;
+    tell_object(owner, "Deleted line " + n + ": " + deleted);
+}
+
+private void ed_do_write() {
+    if (!ed_file) {
+        tell_object(owner, "No file open.");
+        return;
+    }
+    string content = implode(ed_lines, "\n") + "\n";
+    // write_file appends — remove first to overwrite
+    rm(ed_file);
+    if (write_file(ed_file, content)) {
+        ed_dirty = 0;
+        tell_object(owner, "\"" + ed_file + "\" written, " +
+            sizeof(ed_lines) + " line" + (sizeof(ed_lines) == 1 ? "" : "s") + ".");
+    } else {
+        tell_object(owner, "Error writing: " + ed_file);
+    }
+}
+
+private void ed_do_quit(int force) {
+    if (!ed_file) {
+        tell_object(owner, "No file open.");
+        return;
+    }
+    if (ed_dirty && !force) {
+        tell_object(owner, "File has unsaved changes. Use 'ed wq' to save and quit, or 'ed q!' to force quit.");
+        return;
+    }
+    tell_object(owner, "\"" + ed_file + "\" closed" + (ed_dirty ? " (changes discarded)" : "") + ".");
+    ed_file = 0;
+    ed_lines = ({});
+    ed_dirty = 0;
+}
+
+private void ed_open(string filename) {
+    // Warn about unsaved changes in currently-open file
+    if (ed_file && ed_dirty) {
+        tell_object(owner, "Warning: discarding unsaved changes to " + ed_file);
+    }
+    string path = resolve_path(filename);
+    string content = read_file(path);
+    if (content) {
+        ed_lines = explode(content, "\n");
+        // Strip trailing empty element from trailing newline
+        if (sizeof(ed_lines) > 0 && ed_lines[sizeof(ed_lines) - 1] == "") {
+            ed_lines = ed_lines[0 .. sizeof(ed_lines) - 2];
+        }
+        tell_object(owner, "\"" + path + "\" " + sizeof(ed_lines) +
+            " line" + (sizeof(ed_lines) == 1 ? "" : "s") + ".");
+    } else {
+        ed_lines = ({});
+        tell_object(owner, "\"" + path + "\" [new file]");
+    }
+    ed_file = path;
+    ed_dirty = 0;
+    ed_do_list();
+}
+
+void cmd_ed(string args) {
+    if (!args || args == "") {
+        // No args: show status or help
+        if (ed_file) {
+            ed_show_status();
+            tell_object(owner, "Ed: l  p<n>  p<n>,<m>  a<text>  i<n><text>  d<n>  w  q  q!  wq");
+        } else {
+            tell_object(owner, "Usage: ed <filename>");
+            tell_object(owner, "Ed: l  p <n>  p <n>,<m>  a <text>  i <n> <text>  d <n>  w  q  q!  wq");
+        }
+        return;
+    }
+
+    // Find first space to split subcmd from rest
+    int sp = strsrch(args, " ");
+    string subcmd, subargs;
+    if (sp >= 0) {
+        subcmd = args[0 .. sp - 1];
+        subargs = args[sp + 1 ..];
+    } else {
+        subcmd = args;
+        subargs = "";
+    }
+
+    // Dispatch editor subcommands
+    if (subcmd == "l" || subcmd == "list" || subcmd == "show") {
+        ed_do_list();
+        return;
+    }
+    if (subcmd == "p" || subcmd == "print") {
+        ed_do_print(subargs);
+        return;
+    }
+    if (subcmd == "a" || subcmd == "append") {
+        ed_do_append(subargs);
+        return;
+    }
+    if (subcmd == "i" || subcmd == "insert") {
+        ed_do_insert(subargs);
+        return;
+    }
+    if (subcmd == "d" || subcmd == "delete") {
+        ed_do_delete(subargs);
+        return;
+    }
+    if (subcmd == "w" || subcmd == "write") {
+        ed_do_write();
+        return;
+    }
+    if (subcmd == "wq") {
+        ed_do_write();
+        if (!ed_dirty) ed_do_quit(1);
+        return;
+    }
+    if (subcmd == "q") {
+        ed_do_quit(0);
+        return;
+    }
+    if (subcmd == "q!") {
+        ed_do_quit(1);
+        return;
+    }
+
+    // Not a subcommand - treat as filename
+    // Rebuild full argument (subcmd + subargs) since subargs may be missing
+    ed_open(args);
 }
 
 void cmd_trace(string args) {
@@ -515,7 +981,7 @@ void cmd_trace(string args) {
         tell_object(owner, "Trace level: " + trace_level);
         return;
     }
-    
+
     int level = to_int(args);
     trace_level = level;
     tell_object(owner, "Trace level set to: " + level);
@@ -561,19 +1027,19 @@ void cmd_goto(string dest) {
         tell_object(owner, "Usage: goto <room_path>");
         return;
     }
-    
+
     object room;
     string path = resolve_path(dest);
-    
+
     catch {
         room = load_object(path);
     };
-    
+
     if (!room) {
         tell_object(owner, "Room not found: " + path);
         return;
     }
-    
+
     if (owner->move(room)) {
         tell_object(owner, "Teleported to: " + path);
         owner->force_me("look");
@@ -587,42 +1053,55 @@ void cmd_wiz(string args) {
         show_help();
         return;
     }
-    
+
     tell_object(owner, "Unknown wiztool command: " + args);
 }
 
 void show_help() {
     tell_object(owner, "\n=== Wiztool Commands ===\n");
-    
+
     tell_object(owner, "Filesystem:");
-    tell_object(owner, "  cd <dir>         - Change directory");
-    tell_object(owner, "  ls [dir]         - List directory contents");
-    tell_object(owner, "  pwd              - Show current directory");
-    tell_object(owner, "  cat <file>       - Display file contents");
-    tell_object(owner, "  more <file>      - Display file with pagination");
-    tell_object(owner, "  mkdir <dir>      - Create directory");
-    tell_object(owner, "  rm <file>        - Remove file");
-    tell_object(owner, "  grep <pat> <path> - Search files for pattern");
-    tell_object(owner, "  find <dir> -name  - Find files by name");
-    tell_object(owner, "  head [-n N] <file> - Show first N lines");
-    tell_object(owner, "  tail [-n N] <file> - Show last N lines");
-    
+    tell_object(owner, "  cd <dir>              - Change directory");
+    tell_object(owner, "  ls [dir]              - List directory contents");
+    tell_object(owner, "  pwd                   - Show current directory");
+    tell_object(owner, "  cat <file>            - Display file contents");
+    tell_object(owner, "  more <file>           - Display file with pagination");
+    tell_object(owner, "  mkdir <dir>           - Create directory");
+    tell_object(owner, "  rm <file>             - Remove file");
+    tell_object(owner, "  grep [-i][-n][-r] <pat> <path> - Search files");
+    tell_object(owner, "  find <dir> [-name <pat>] [-type f|d] - Find files");
+    tell_object(owner, "  head [-n N] <file>    - Show first N lines (default 10)");
+    tell_object(owner, "  tail [-n N] <file>    - Show last N lines (default 10)");
+
+    tell_object(owner, "\nEditor (ed):");
+    tell_object(owner, "  ed <file>             - Open file for editing");
+    tell_object(owner, "  ed l                  - List all lines with numbers");
+    tell_object(owner, "  ed p <n>              - Print line n");
+    tell_object(owner, "  ed p <n>,<m>          - Print lines n through m");
+    tell_object(owner, "  ed a <text>           - Append text as new line");
+    tell_object(owner, "  ed i <n> <text>       - Insert text before line n");
+    tell_object(owner, "  ed d <n>              - Delete line n");
+    tell_object(owner, "  ed w                  - Write (save) file");
+    tell_object(owner, "  ed q                  - Quit (warns if unsaved)");
+    tell_object(owner, "  ed q!                 - Force quit without saving");
+    tell_object(owner, "  ed wq                 - Save and quit");
+
     tell_object(owner, "\nObjects:");
-    tell_object(owner, "  clone <file>     - Clone an object");
-    tell_object(owner, "  dest <object>    - Destruct an object");
-    tell_object(owner, "  update <file>    - Reload an object");
-    tell_object(owner, "  load <file>      - Load an object");
-    tell_object(owner, "  objects          - List all loaded objects");
-    
+    tell_object(owner, "  clone <file>          - Clone an object");
+    tell_object(owner, "  dest <object>         - Destruct an object");
+    tell_object(owner, "  update <file>         - Reload an object");
+    tell_object(owner, "  load <file>           - Load an object");
+    tell_object(owner, "  objects               - List all loaded objects");
+
     tell_object(owner, "\nDevelopment:");
-    tell_object(owner, "  eval <code>      - Evaluate LPC expression");
-    tell_object(owner, "  call <obj> <fn>  - Call function on object");
-    tell_object(owner, "  trace <level>    - Set trace level");
-    tell_object(owner, "  errors           - Show recent errors");
-    
+    tell_object(owner, "  eval <code>           - Evaluate LPC expression");
+    tell_object(owner, "  call <obj> <fn>       - Call function on object");
+    tell_object(owner, "  trace <level>         - Set trace level");
+    tell_object(owner, "  errors                - Show recent errors");
+
     tell_object(owner, "\nNavigation:");
-    tell_object(owner, "  goto <room>      - Teleport to room");
-    
+    tell_object(owner, "  goto <room>           - Teleport to room");
+
     tell_object(owner, "");
 }
 
@@ -631,12 +1110,12 @@ void show_help() {
 // Resolve a path relative to current working directory
 private string resolve_path(string path) {
     if (!path || path == "") return cwd;
-    
+
     // Absolute path
     if (path[0] == '/') {
         return path;
     }
-    
+
     // Relative path
     if (cwd == "/") {
         return "/" + path;

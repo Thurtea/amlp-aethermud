@@ -386,13 +386,21 @@ void perform_single_attack(int combat_id, object attacker, object defender) {
     
     string def_name_for_att = defender->query_introduction_name(attacker);
     string att_name_for_def = attacker->query_introduction_name(defender);
-    
+
+    int max_hp = 0;
+    if (function_exists("query_max_hp", defender)) max_hp = defender->query_max_hp();
+    if (max_hp <= 0) max_hp = 100;
+
+    string sev_att = combat_severity_phrase(damage, max_hp, "att");
+    string sev_def = combat_severity_phrase(damage, max_hp, "def");
+    string sev_obs = combat_severity_phrase(damage, max_hp, "obs");
+
     broadcast_combat_identity(combat_id, attacker, defender,
-        "You " + verb + " " + def_name_for_att + " for %^RED%^" + damage + " damage!\n",
-        "" + att_name_for_def + " " + verb + " you for %^RED%^" + damage + " damage!\n",
-        "$ATTACKER " + verb + " $DEFENDER for %^RED%^" + damage + " damage!\n"
+        "You " + verb + " " + def_name_for_att + ", " + sev_att + ".\n",
+        att_name_for_def + " " + verb + " you, " + sev_def + ".\n",
+        "$ATTACKER " + verb + " $DEFENDER, " + sev_obs + ".\n"
     );
-    
+
     // Apply damage
     int killed = defender->take_damage(damage, damage_type);
     
@@ -414,12 +422,12 @@ void perform_critical_hit(int combat_id, object attacker, object defender, strin
     string att_name_for_def = attacker->query_introduction_name(defender);
     
     broadcast_combat_identity(combat_id, attacker, defender,
-        "" + critical_msg + " You " + verb + " " + def_name_for_att + 
-        " %^RED%^DEVASTATINGLY for %^RED%^" + damage + " damage!\n",
-        "" + critical_msg + " " + att_name_for_def + " " + verb + " you " +
-        "%^RED%^DEVASTATINGLY for %^RED%^" + damage + " damage!\n",
-        "" + critical_msg + " $ATTACKER " + verb + " $DEFENDER " +
-        "%^RED%^DEVASTATINGLY for %^RED%^" + damage + " damage!\n"
+        "%^RED%^" + critical_msg + "%^RESET%^ You " + verb + " " + def_name_for_att +
+        ", maiming them viciously!\n",
+        "%^RED%^" + critical_msg + "%^RESET%^ " + att_name_for_def + " " + verb +
+        " you, maiming you viciously!\n",
+        "%^RED%^" + critical_msg + "%^RESET%^ $ATTACKER " + verb +
+        " $DEFENDER, maiming $DEFENDER viciously!\n"
     );
     
     // Apply damage
@@ -507,6 +515,68 @@ int auto_defend(int combat_id, object defender, int attack_total) {
     }
     
     return DEF_FAILED;
+}
+
+// =============================================================================
+// SEVERITY DESCRIPTIONS (no numeric damage ever shown to players)
+// =============================================================================
+
+// Returns a severity phrase based on damage as a percentage of target's max HP.
+// perspective: "att" (attacker sees "them/their"), "def" (defender sees "you/your"),
+//              "obs" (observers see "$DEFENDER")
+string combat_severity_phrase(int damage, int max_hp, string perspective) {
+    if (max_hp <= 0) max_hp = 1;
+    int pct = (damage * 100) / max_hp;
+
+    string them, their;
+    if (perspective == "def") { them = "you"; their = "your"; }
+    else if (perspective == "obs") { them = "$DEFENDER"; their = "$DEFENDER's"; }
+    else { them = "them"; their = "their"; }
+
+    if (pct == 0) return "but misses";
+
+    if (pct <= 5) {
+        string *phrases = ({
+            "barely grazing " + them,
+            "glancing off " + their + " armor",
+            "scratching " + them + " lightly"
+        });
+        return phrases[random(sizeof(phrases))];
+    }
+
+    if (pct <= 15) {
+        string *phrases = ({
+            "nicking " + them,
+            "catching " + them + " across the arm",
+            "clipping " + them
+        });
+        return phrases[random(sizeof(phrases))];
+    }
+
+    if (pct <= 30) {
+        string *phrases = ({
+            "striking " + them + " solidly",
+            "landing a solid blow on " + them,
+            "connecting with a hard hit"
+        });
+        return phrases[random(sizeof(phrases))];
+    }
+
+    if (pct <= 50) {
+        string *phrases = ({
+            "wounding " + them + " badly",
+            "cutting deep into " + them,
+            "driving the attack into " + them
+        });
+        return phrases[random(sizeof(phrases))];
+    }
+
+    string *phrases = ({
+        "maiming " + them + " severely",
+        "devastating " + them,
+        "tearing into " + them + " viciously"
+    });
+    return phrases[random(sizeof(phrases))];
 }
 
 // =============================================================================

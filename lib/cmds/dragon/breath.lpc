@@ -85,10 +85,22 @@ int cmd_breath(string str) {
     // Deduct ISP cost
     this_player()->add_isp(-cost_isp);
     
+    // Severity phrase (no numeric damage)
+    int max_hp = 0;
+    if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+    if (max_hp <= 0) max_hp = 100;
+    int pct = (damage * 100) / max_hp;
+    string sev;
+    if (pct <= 5) sev = "barely singes";
+    else if (pct <= 15) sev = "singes";
+    else if (pct <= 30) sev = "blasts";
+    else if (pct <= 50) sev = "devastates";
+    else sev = "obliterates";
+
     // Display messages
-    write("You unleash a devastating blast of plasma breath at " + 
+    write("You unleash a devastating blast of plasma breath at " +
           target->query_cap_name() + "!");
-    write("Your plasma breath deals " + damage + " mega-damage!");
+    write("Your plasma breath " + sev + " " + target->query_cap_name() + "!");
     
     msg = this_player()->query_cap_name() + 
           " opens their massive jaws and unleashes a roaring blast of superheated " +

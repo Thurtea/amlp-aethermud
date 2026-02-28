@@ -1,10 +1,6 @@
 // /cmds/promote.lpc
-// Promote/demote player
+// Redirect to the canonical promote implementation in cmds/admin/
 
 int main(string args) {
-    object player = this_player();
-    if (!player) return 0;
-    // Stub: promotion/demotion logic not implemented
-    write("Stub: promote command. Promotion/demotion not implemented.\n");
-    return 1;
+    return call_other("/lib/cmds/admin/promote", "main", args);
 }

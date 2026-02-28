@@ -1,10 +1,46 @@
 // /cmds/goto.lpc
-// Teleport to a room
+// Teleport to a player name or room path (privilege >= 1 only)
 
 int main(string args) {
     object player = this_player();
     if (!player) return 0;
-    // Stub: teleport logic not implemented
-    write("Stub: goto command. Teleport not implemented.\n");
+
+    if (player->query_privilege_level() < 1) {
+        write("You can't do that.\n");
+        return 1;
+    }
+
+    if (!args || args == "") {
+        write("Usage: goto <player_name|room_path>\n");
+        write("Examples:\n");
+        write("  goto thurtea\n");
+        write("  goto /domains/new_camelot/town_square\n");
+        return 1;
+    }
+
+    // Try to find a player by that name first
+    object target = find_player(lower_case(args));
+    if (target && target != player) {
+        object dest = environment(target);
+        if (!dest) {
+            write("Cannot locate " + capitalize(args) + " (no environment).\n");
+            return 1;
+        }
+        tell_object(player, "You teleport to " + capitalize(args) + ".\n");
+        tell_room(environment(player), player->query_cap_name() + " vanishes in a flash of light.\n", ({ player }));
+        move_object(player, dest);
+        tell_room(dest, player->query_cap_name() + " appears in a flash of light.\n", ({ player }));
+        player->force_me("look");
+        return 1;
+    }
+
+    // Otherwise treat as a room path and delegate to wiztool
+    object wt = player->query_wiztool();
+    if (!wt) {
+        write("No wiztool available. Ask an admin to re-attach it.\n");
+        return 1;
+    }
+
+    wt->process_command("goto", args);
     return 1;
 }

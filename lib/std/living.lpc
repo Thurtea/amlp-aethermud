@@ -1239,13 +1239,12 @@ int perform_attack(object target) {
     
     // Check if hit
     if (total < target_number) {
-        tell_object(this_object(), 
-                    "You swing at " + target->query_cap_name() + " but miss! " +
-                    "(Rolled " + roll + "+" + strike_bonus + "=" + total + " vs " + target_number + ")\n");
+        tell_object(this_object(),
+                    "You swing at " + target->query_cap_name() + " but miss.\n");
         tell_object(target,
-                    query_cap_name() + " swings at you but misses!\n");
+                    query_cap_name() + " swings at you but misses.\n");
         tell_room(environment(this_object()),
-                  query_cap_name() + " swings at " + target->query_cap_name() + " but misses!\n",
+                  query_cap_name() + " swings at " + target->query_cap_name() + " but misses.\n",
                   ({ this_object(), target }));
         return 1;
     }
@@ -1324,25 +1323,51 @@ void apply_attack_damage(object target, int damage, int is_critical) {
     attacker_name = query_cap_name();
     string target_name;
     target_name = target->query_cap_name();
-    
+
+    // Compute severity for descriptive messages (no numbers)
+    int max_hp = 0;
+    if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+    if (max_hp <= 0) max_hp = 100;
+    int pct = (damage * 100) / max_hp;
+
+    string sev_att, sev_def, sev_room;
+    if (pct == 0) {
+        sev_att = "but miss"; sev_def = "but misses"; sev_room = "but misses";
+    } else if (pct <= 5) {
+        sev_att = "barely grazing them"; sev_def = "barely grazing you";
+        sev_room = "barely grazing " + target_name;
+    } else if (pct <= 15) {
+        sev_att = "nicking them"; sev_def = "nicking you";
+        sev_room = "nicking " + target_name;
+    } else if (pct <= 30) {
+        sev_att = "striking them solidly"; sev_def = "striking you solidly";
+        sev_room = "striking " + target_name + " solidly";
+    } else if (pct <= 50) {
+        sev_att = "wounding them badly"; sev_def = "wounding you badly";
+        sev_room = "wounding " + target_name + " badly";
+    } else {
+        sev_att = "maiming them severely"; sev_def = "maiming you severely";
+        sev_room = "maiming " + target_name + " severely";
+    }
+
     if (is_critical) {
         tell_object(this_object(),
-                    "CRITICAL HIT! You strike " + 
-                    target_name + " for " + damage + " damage!\n");
+                    "%^RED%^CRITICAL HIT!%^RESET%^ You strike " + target_name +
+                    ", " + sev_att + "!\n");
         tell_object(target,
-                    "CRITICAL HIT! " +
-                    attacker_name + " strikes you for " + damage + " damage!\n");
+                    "%^RED%^CRITICAL HIT!%^RESET%^ " + attacker_name +
+                    " strikes you, " + sev_def + "!\n");
         tell_room(environment(this_object()),
-                  "CRITICAL HIT! " +
-                  attacker_name + " strikes " + target_name + " for " + damage + " damage!\n",
+                  "%^RED%^CRITICAL HIT!%^RESET%^ " + attacker_name +
+                  " strikes " + sev_room + "!\n",
                   ({ this_object(), target }));
     } else {
         tell_object(this_object(),
-                    "You strike " + target_name + " for " + damage + " damage!\n");
+                    "You strike " + target_name + ", " + sev_att + ".\n");
         tell_object(target,
-                    attacker_name + " strikes you for " + damage + " damage!\n");
+                    attacker_name + " strikes you, " + sev_def + ".\n");
         tell_room(environment(this_object()),
-                  attacker_name + " strikes " + target_name + " for " + damage + " damage!\n",
+                  attacker_name + " strikes " + sev_room + ".\n",
                   ({ this_object(), target }));
     }
     

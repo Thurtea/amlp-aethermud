@@ -70,17 +70,28 @@ int apply_effect(object caster, object target) {
     /* For now, convert to SDC since MDC is Phase 4 (1 MDC = 100 SDC) */
     int sdc_damage = damage * 100;
     
+    /* Severity phrase (no numeric damage) */
+    int max_hp = 0;
+    if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+    if (max_hp <= 0) max_hp = 100;
+    int pct = (sdc_damage * 100) / max_hp;
+    string sev;
+    if (pct <= 5) sev = "barely singes";
+    else if (pct <= 15) sev = "singes";
+    else if (pct <= 30) sev = "blasts";
+    else if (pct <= 50) sev = "devastates";
+    else sev = "obliterates";
+
     /* Display messages */
     tell_object(caster,
         "You raise your hand to the sky and summon lightning!\n" +
-        "A massive bolt of electricity CRACKS from your fingertips!\n" +
-        "Damage: " + damage + " MD (" + sdc_damage + " SDC)\n");
-    
+        "A massive bolt of electricity CRACKS from your fingertips, " +
+        sev + " " + target->query_cap_name() + "!\n");
+
     tell_object(target,
         caster->query_cap_name() +
         " points at you and lightning EXPLODES from their hand!\n" +
-        "The bolt strikes you with devastating force!\n" +
-        "You take " + damage + " MD (" + sdc_damage + " SDC) electrical damage!\n");
+        "The bolt " + sev + " you with devastating electrical force!\n");
     
     /* Tell room */
     object env = environment(caster);

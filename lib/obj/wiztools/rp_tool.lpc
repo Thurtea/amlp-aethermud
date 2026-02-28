@@ -70,7 +70,7 @@ int cmd_rp(string str) {
 }
 
 int cmd_events() {
-    string content = read_file("lib/log/wizard/rp_events.log");
+    string content = read_file("/log/wizard/rp_events.log");
 
     write("\n=== RP Event Calendar ===\n\n");
 
@@ -97,7 +97,7 @@ int cmd_addevent(object player, string desc) {
         wname = player->query_cap_name();
 
     string entry = ctime(time()) + " [" + wname + "] " + desc + "\n";
-    write_file("lib/log/wizard/rp_events.log", entry);
+    write_file("/log/wizard/rp_events.log", entry);
 
     write("Event added: " + desc + "\n");
     return 1;
@@ -202,7 +202,7 @@ int cmd_announce(object player, string msg) {
     write("Announcement sent to " + sizeof(all_users) + " player(s).\n");
 
     // Log it
-    write_file("lib/log/wizard/rp_events.log",
+    write_file("/log/wizard/rp_events.log",
                ctime(time()) + " [ANNOUNCE by " + wname + "] " + msg + "\n");
     return 1;
 }

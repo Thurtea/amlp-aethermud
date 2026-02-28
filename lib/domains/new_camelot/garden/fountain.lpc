@@ -12,8 +12,7 @@ void create() {
     );
 
     add_exit("north", "/domains/new_camelot/garden/north_path_1");
-    // NOTE: Connect to the town (C bootstrap 'New Camelot - Town Square') from the C side.
-    // See integration instructions in docs or modify src/room.c to link room id 4 to this LPC room.
+    add_exit("south", "/domains/new_camelot/connect/connector_south");
 
     set_property("light", 2);
 }

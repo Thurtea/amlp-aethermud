@@ -931,6 +931,23 @@ void room_init_world(void) {
     /* Actual room data loaded on-demand from lib/domains/new_camelot/ */
     /* ============================================================ */
     init_room(4, "New Camelot - Town Square", "", -1, -1, -1, -1, -1, -1);
+    /* Wire room 4 flex exits to match town_square.lpc so rift-travel arrivals
+     * can navigate. Mirror every add_exit() in town_square.lpc. */
+    {
+        Room *r4 = &world_rooms[4];
+        r4->flex_exits = calloc(5, sizeof(RoomExit));
+        r4->flex_exits[0].direction    = strdup("north");
+        r4->flex_exits[0].target_path  = strdup("/domains/new_camelot/tavern");
+        r4->flex_exits[1].direction    = strdup("east");
+        r4->flex_exits[1].target_path  = strdup("/domains/new_camelot/training_grounds");
+        r4->flex_exits[2].direction    = strdup("west");
+        r4->flex_exits[2].target_path  = strdup("/domains/new_camelot/blacksmith_forge");
+        r4->flex_exits[3].direction    = strdup("southeast");
+        r4->flex_exits[3].target_path  = strdup("/domains/new_camelot/gate");
+        r4->flex_exits[4].direction    = strdup("south");
+        r4->flex_exits[4].target_path  = strdup("/domains/new_camelot/connect/connector_south");
+        r4->num_flex_exits = 5;
+    }
     init_room(5, "The Silver Unicorn Tavern", "", -1, -1, -1, -1, -1, -1);
     init_room(6, "Training Grounds", "", -1, -1, -1, -1, -1, -1);
     init_room(7, "Blacksmith's Forge", "", -1, -1, -1, -1, -1, -1);

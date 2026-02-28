@@ -16,6 +16,18 @@
 extern void send_to_player(PlayerSession *sess, const char *format, ...);
 extern void send_prompt(PlayerSession *session);
 
+// Severity descriptor based on damage as % of target's max HP (no numbers shown)
+static const char *combat_severity(int damage, int max_hp) {
+    if (max_hp <= 0) max_hp = 1;
+    int pct = (damage * 100) / max_hp;
+    if (pct == 0) return "misses";
+    if (pct <= 5)  return "barely grazes";
+    if (pct <= 15) return "nicks";
+    if (pct <= 30) return "strikes solidly";
+    if (pct <= 50) return "wounds badly";
+    return "devastates";
+}
+
 // Forward declarations
 extern void cmd_move(PlayerSession *sess, const char *direction);
 extern PlayerSession *sessions[];
@@ -833,13 +845,14 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
         return result; // Stop combat loop after death
     }
 
-    /* Combat hit messages */
+    /* Combat hit messages — descriptive, no numeric damage */
     {
-        int remaining_hp = defender->character->hp;
+        int max_hp = defender->character ? (defender->character->max_hp + defender->character->max_sdc) : 100;
+        const char *sev = combat_severity(result.damage, max_hp);
         char msg_att[128], msg_def[128], msg_room[128];
-        snprintf(msg_att, sizeof(msg_att), "You hit %s for %d damage! (%d HP remaining)\n", defender->name, result.damage, remaining_hp);
-        snprintf(msg_def, sizeof(msg_def), "%s hits you for %d damage!\n", attacker->name, result.damage);
-        snprintf(msg_room, sizeof(msg_room), "%s hits %s!\n", attacker->name, defender->name);
+        snprintf(msg_att, sizeof(msg_att), "You %s %s.\n", sev, defender->name);
+        snprintf(msg_def, sizeof(msg_def), "%s %s you.\n", attacker->name, sev);
+        snprintf(msg_room, sizeof(msg_room), "%s %s %s.\n", attacker->name, sev, defender->name);
         combat_send_to_participant(attacker, msg_att);
         combat_send_to_participant(defender, msg_def);
         room_broadcast(attacker->session && attacker->session->current_room ? attacker->session->current_room : NULL, msg_room, NULL);
@@ -878,11 +891,11 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
     }
 
     if (total_strike < target_number) {
-        char msg[256];
-        snprintf(msg, sizeof(msg), "%s shoots at %s but misses! (%d+%d=%d vs %d)\n",
-                 attacker->name, defender->name, attack_roll, strike_bonus, total_strike, target_number);
-        combat_send_to_participant(attacker, msg);
-        combat_send_to_participant(defender, msg);
+        char msg_att[128], msg_def[128];
+        snprintf(msg_att, sizeof(msg_att), "You shoot at %s but miss.\n", defender->name);
+        snprintf(msg_def, sizeof(msg_def), "%s shoots at you but misses.\n", attacker->name);
+        combat_send_to_participant(attacker, msg_att);
+        combat_send_to_participant(defender, msg_def);
         return result;
     }
 
@@ -915,29 +928,18 @@ DamageResult combat_attack_ranged(CombatParticipant *attacker, CombatParticipant
         return result; // Stop combat loop after death
     }
 
-    /* Descriptive ranged messages */
+    /* Descriptive ranged messages — no numeric damage */
     {
-        int max_pool = defender->character->max_hp + defender->character->max_sdc + (defender->character->max_mdc * 100);
+        int max_pool = defender->character->max_hp + defender->character->max_sdc;
         if (max_pool <= 0) max_pool = 1;
-        int pct = (result.damage * 100) / max_pool;
-        const char *severity = "mildly";
-        if (pct <= 10) severity = "mildly";
-        else if (pct <= 30) severity = "lightly";
-        else if (pct <= 60) severity = "severely";
-        else severity = result.is_critical ? "critically" : "devastates";
-
-        const char *verb = "grazes";
-        if (attacker->character && attacker->character->equipment.weapon_primary) {
-            Item *w = attacker->character->equipment.weapon_primary;
-            if (w->weapon_type == WEAPON_ENERGY) verb = "grazes";
-            else verb = "hits";
-        }
-
-        char bufmsg[256];
-        snprintf(bufmsg, sizeof(bufmsg), "%s %s %s %s!\n",
-                 attacker->name, verb, defender->name, severity);
-        combat_send_to_participant(attacker, bufmsg);
-        combat_send_to_participant(defender, bufmsg);
+        const char *sev = combat_severity(result.damage, max_pool);
+        char msg_att[128], msg_def[128], msg_room[128];
+        snprintf(msg_att, sizeof(msg_att), "You fire at %s, %s.\n", defender->name, sev);
+        snprintf(msg_def, sizeof(msg_def), "%s fires at you, %s.\n", attacker->name, sev);
+        snprintf(msg_room, sizeof(msg_room), "%s fires at %s, %s.\n", attacker->name, defender->name, sev);
+        combat_send_to_participant(attacker, msg_att);
+        combat_send_to_participant(defender, msg_def);
+        room_broadcast(attacker->session && attacker->session->current_room ? attacker->session->current_room : NULL, msg_room, NULL);
     }
 
     return result;

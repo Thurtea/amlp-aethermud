@@ -5,10 +5,12 @@ void create() {
     set_short("A narrow lane south of Town Square");
     set_long(
         "A short cobbled lane that leads away from the bustle of the town square.\n"
-        "To the north lies the town square; a worn path continues west toward quieter streets."
+        "To the north lies the town square. A worn path continues west toward quieter streets.\n"
+        "South, beyond the lane's end, the smell of roses drifts from a hidden garden."
     );
 
     add_exit("north", "/domains/new_camelot/town_square");
     add_exit("west", "/domains/new_camelot/connect/connector_west_1");
+    add_exit("south", "/domains/new_camelot/garden/fountain");
     set_property("light", 2);
 }

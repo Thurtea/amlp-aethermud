@@ -16,6 +16,18 @@ extern PlayerSession *sessions[];
 /* Forward declaration */
 void send_to_player(PlayerSession *session, const char *format, ...);
 
+/* Severity phrase for spell damage — no numeric output */
+static const char *magic_severity(int damage, int max_pool) {
+    if (max_pool <= 0) max_pool = 1;
+    int pct = (damage * 100) / max_pool;
+    if (pct == 0) return "fizzles against";
+    if (pct <= 5)  return "barely singes";
+    if (pct <= 15) return "singes";
+    if (pct <= 30) return "blasts";
+    if (pct <= 50) return "devastates";
+    return "obliterates";
+}
+
 /* =============== MAGIC SPELLS DATABASE =============== */
 
 MagicSpell MAGIC_SPELLS[35] = {
@@ -822,12 +834,14 @@ void magic_apply_effect(PlayerSession *caster, PlayerSession *target,
                 }
                 target_ch->mdc -= damage;
                 if (target_ch->mdc < 0) target_ch->mdc = 0;
-                send_to_player(caster,
-                    "Your %s blasts %s for %d M.D.C.!\n",
-                    spell->name, target_name, damage);
-                send_to_player(target,
-                    "%s's %s hits you for %d M.D.C.!\n",
-                    caster->username, spell->name, damage);
+                {
+                    int max_pool = target_ch->max_mdc > 0 ? target_ch->max_mdc : 1;
+                    const char *sev = magic_severity(damage, max_pool);
+                    send_to_player(caster, "Your %s %s %s!\n",
+                        spell->name, sev, target_name);
+                    send_to_player(target, "%s's %s %s you!\n",
+                        caster->username, spell->name, sev);
+                }
             } else {
                 /* MDC spell vs SDC creature: x100 conversion */
                 int sdc_damage = damage * 100;
@@ -851,12 +865,15 @@ void magic_apply_effect(PlayerSession *caster, PlayerSession *target,
                     target_ch->hp -= sdc_damage;
                     if (target_ch->hp < 0) target_ch->hp = 0;
                 }
-                send_to_player(caster,
-                    "Your %s devastates %s for %d M.D. (%d S.D.C. equivalent)!\n",
-                    spell->name, target_name, damage, damage * 100);
-                send_to_player(target,
-                    "%s's %s devastates you for %d M.D.!\n",
-                    caster->username, spell->name, damage);
+                {
+                    int max_pool = target_ch->max_sdc + target_ch->max_hp;
+                    if (max_pool <= 0) max_pool = 1;
+                    const char *sev = magic_severity(damage * 100, max_pool);
+                    send_to_player(caster, "Your %s %s %s!\n",
+                        spell->name, sev, target_name);
+                    send_to_player(target, "%s's %s %s you!\n",
+                        caster->username, spell->name, sev);
+                }
             }
         } else {
             /* SDC damage */
@@ -880,12 +897,15 @@ void magic_apply_effect(PlayerSession *caster, PlayerSession *target,
                 target_ch->hp -= remaining;
                 if (target_ch->hp < 0) target_ch->hp = 0;
             }
-            send_to_player(caster,
-                "Your %s hits %s for %d S.D.C.!\n",
-                spell->name, target_name, damage);
-            send_to_player(target,
-                "%s's %s hits you for %d S.D.C.!\n",
-                caster->username, spell->name, damage);
+            {
+                int max_pool = target_ch->max_sdc + target_ch->max_hp;
+                if (max_pool <= 0) max_pool = 1;
+                const char *sev = magic_severity(damage, max_pool);
+                send_to_player(caster, "Your %s %s %s!\n",
+                    spell->name, sev, target_name);
+                send_to_player(target, "%s's %s %s you!\n",
+                    caster->username, spell->name, sev);
+            }
         }
 
         /* Check for death */
@@ -971,8 +991,12 @@ void magic_apply_effect_npc(PlayerSession *caster, NPC *target, MagicSpell *spel
             target_ch->hp -= remaining;
             if (target_ch->hp < 0) target_ch->hp = 0;
         }
-        send_to_player(caster, "Your %s hits %s for %d damage!\n",
-                       spell->name, display, damage);
+        {
+            int max_pool = target_ch->max_sdc + target_ch->max_hp;
+            if (max_pool <= 0) max_pool = 1;
+            const char *sev = magic_severity(damage, max_pool);
+            send_to_player(caster, "Your %s %s %s!\n", spell->name, sev, display);
+        }
     }
 
     /* Check for death */

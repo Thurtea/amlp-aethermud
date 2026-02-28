@@ -65,10 +65,22 @@ int cast_spell(object caster, mixed target, string args) {
         _di += 1;
     }
     
+    // Severity phrase (no numeric damage)
+    int max_hp = 0;
+    if (function_exists("query_max_hp", victim)) max_hp = victim->query_max_hp();
+    if (max_hp <= 0) max_hp = 100;
+    int pct = (damage * 100) / max_hp;
+    string sev;
+    if (pct <= 5) sev = "barely singes";
+    else if (pct <= 15) sev = "singes";
+    else if (pct <= 30) sev = "blasts";
+    else if (pct <= 50) sev = "devastates";
+    else sev = "obliterates";
+
     tell_object(caster, "You hurl a crackling bolt of energy at " + victim->query_cap_name() + "!");
-    tell_object(victim, 
-        "A crackling bolt of energy from " + caster->query_cap_name() + " strikes you for " + 
-        damage + " M.D. damage!");
+    tell_object(victim,
+        "A crackling bolt of energy from " + caster->query_cap_name() +
+        " " + sev + " you!");
     tell_room(environment(caster),
         caster->query_cap_name() + " hurls a crackling bolt of energy at " + 
         victim->query_cap_name() + "!",

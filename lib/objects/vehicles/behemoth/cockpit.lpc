@@ -76,12 +76,12 @@ int do_scan(string args) {
     contents = all_inventory(exterior);
     output += "Detected objects:\n";
     
-    for (i = 0; i < sizeof(contents); i++) {
-        if (contents[i] != vehicle) {
-            if (living(contents[i])) {
-                output += "  [LIFEFORM] " + contents[i]->query_cap_name() + "\n";
+    foreach (object item in contents) {
+        if (item != vehicle) {
+            if (living(item)) {
+                output += "  [LIFEFORM] " + item->query_cap_name() + "\n";
             } else {
-                output += "  [OBJECT] " + contents[i]->query_short() + "\n";
+                output += "  [OBJECT] " + item->query_short() + "\n";
             }
         }
     }

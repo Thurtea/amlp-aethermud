@@ -72,11 +72,11 @@ int do_target(string args) {
     
     contents = all_inventory(exterior);
     
-    for (i = 0; i < sizeof(contents); i++) {
-        if (contents[i] != vehicle) {
-            string *ids = contents[i]->query_id();
+    foreach (object item in contents) {
+        if (item != vehicle) {
+            string *ids = item->query_id();
             if (ids && member_array(args, ids) != -1) {
-                target = contents[i];
+                target = item;
                 break;
             }
         }

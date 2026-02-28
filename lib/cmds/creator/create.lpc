@@ -61,12 +61,14 @@ int main(string arg) {
         write("Name must be 1-30 characters.\n");
         return 1;
     }
-    for (i = 0; i < len; i++) {
+    i = 0;
+    while (i < len) {
         int c = name[i];
         if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')) {
             write("Name may only contain lowercase letters, numbers, and underscores.\n");
             return 1;
         }
+        i += 1;
     }
 
     // Validate type

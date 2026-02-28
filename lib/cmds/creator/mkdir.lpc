@@ -97,8 +97,8 @@ int mkdir_recursive(object player, string path) {
     }
     
     // Create each directory level
-    for (i = 0; i < sizeof(parts); i++) {
-        current_path += "/" + parts[i];
+    foreach (string part in parts) {
+        current_path += "/" + part;
         
         int fsize = file_size(current_path);
         if (fsize == -1) {

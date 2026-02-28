@@ -183,8 +183,8 @@ int grep_recursive(object player, string dir, string pattern, int case_insensiti
     entries = get_dir(dir + "/*");
     if (!entries) return 0;
     
-    for (i = 0; i < sizeof(entries); i++) {
-        string full_path = dir + "/" + entries[i];
+    foreach (string entry in entries) {
+        string full_path = dir + "/" + entry;
         int fsize = file_size(full_path);
         
         if (fsize == -2) {

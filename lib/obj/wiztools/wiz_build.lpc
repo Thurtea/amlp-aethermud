@@ -114,8 +114,10 @@ int cmd_rooms(object player) {
     string domain_dir;
     int last_slash = -1;
     int i;
-    for (i = strlen(room_path) - 1; i >= 0; i--) {
+    i = strlen(room_path) - 1;
+    while (i >= 0) {
         if (room_path[i] == '/') { last_slash = i; break; }
+        i -= 1;
     }
     if (last_slash > 0) {
         domain_dir = room_path[0..last_slash];
@@ -194,8 +196,10 @@ int cmd_clone_room(object player, string source) {
     // Extract filename
     string basename;
     int idx;
-    for (idx = strlen(source) - 1; idx >= 0; idx--) {
+    idx = strlen(source) - 1;
+    while (idx >= 0) {
         if (source[idx] == '/') break;
+        idx -= 1;
     }
     basename = source[idx+1..];
     if (sscanf(basename, "%s.lpc", basename) != 1) {

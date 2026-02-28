@@ -119,16 +119,17 @@ void list_inventory() {
     if (sizeof(item_list) == 0) {
         output += "  (Shop is currently empty)\n";
     } else {
-        for (i = 0; i < sizeof(item_list); i++) {
+        i = 0;
+        while (i < sizeof(item_list)) {
             item_path = item_list[i];
             item_obj = load_object(item_path);
-            
-            if (!item_obj) continue;
-            
+
+            if (!item_obj) { i += 1; continue; }
+
             stock = inventory[item_path];
             price_uc = prices_uc[item_path];
             price_bmc = prices_bmc[item_path];
-            
+
             output += "  [" + (i+1) + "] " + item_obj->query_short();
             
             if (stock == -1) {
@@ -156,9 +157,10 @@ void list_inventory() {
             }
             
             output += "\n";
+            i += 1;
         }
     }
-    
+
     output += "\nUse 'buy <item name>' or 'buy <number>' to purchase.\n";
     output += "Use 'sell <item name>' to sell items to the shop.\n";
     output += "========================================================================\n\n";
@@ -183,8 +185,7 @@ string find_item(string search) {
     }
     
     // Search by name
-    for (i = 0; i < sizeof(item_list); i++) {
-        item_path = item_list[i];
+    foreach (string item_path in item_list) {
         item_obj = load_object(item_path);
         
         if (!item_obj) continue;

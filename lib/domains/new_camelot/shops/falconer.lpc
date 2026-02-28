@@ -234,8 +234,8 @@ int _try_trade_eclips(object player, object *inv) {
               ({ player }));
 
     // Remove 10 E-Clips
-    for (i = 0; i < 10; i++) {
-        destruct(clips[i]);
+    foreach (object clip in clips) {
+        destruct(clip);
     }
 
     _give_egg(player, "hawk", 3);

@@ -49,9 +49,12 @@ int cast(object caster, object target, string args) {
     
     // Roll 4d6 damage
     damage = 0;
-    for (i = 0; i < 4; i++) {
+    int _di;
+    _di = 0;
+    while (_di < 4) {
         dice_roll = random(6) + 1;
         damage += dice_roll;
+        _di += 1;
     }
     
     // Visual effects

@@ -206,13 +206,15 @@ string replace_line(string content, string pattern, string new_line) {
         string *final = ({});
         int inserted = 0;
         int i;
-        for (i = sizeof(result) - 1; i >= 0; i--) {
+        i = sizeof(result) - 1;
+        while (i >= 0) {
             if (!inserted && strsrch(result[i], "}") != -1) {
                 final = ({ new_line }) + ({ result[i] }) + final;
                 inserted = 1;
             } else {
                 final = ({ result[i] }) + final;
             }
+            i -= 1;
         }
         if (inserted) result = final;
         else result += ({ new_line });
@@ -372,13 +374,15 @@ int modify_exit(string filepath, string value) {
         string *result = ({});
         int inserted = 0;
         int i;
-        for (i = sizeof(lines) - 1; i >= 0; i--) {
+        i = sizeof(lines) - 1;
+        while (i >= 0) {
             if (!inserted && strsrch(lines[i], "}") != -1) {
                 result = ({ exit_line, lines[i] }) + result;
                 inserted = 1;
             } else {
                 result = ({ lines[i] }) + result;
             }
+            i -= 1;
         }
         content = implode(result, "\n");
         write("Added: exit " + dir + " -> " + dest + "\n");
@@ -505,9 +509,11 @@ int modify_id(string filepath, string value) {
 
     string id_str = "    set_id(({ ";
     int i;
-    for (i = 0; i < sizeof(ids); i++) {
+    i = 0;
+    while (i < sizeof(ids)) {
         if (i > 0) id_str += ", ";
         id_str += "\"" + ids[i] + "\"";
+        i += 1;
     }
     id_str += " }));";
 
@@ -546,9 +552,11 @@ int modify_property(string filepath, string prop_name, string value) {
     // Determine if value is numeric or string
     int is_num = 1;
     int i;
-    for (i = 0; i < strlen(value); i++) {
+    i = 0;
+    while (i < strlen(value)) {
         int c = value[i];
         if (!((c >= '0' && c <= '9') || c == '-')) { is_num = 0; break; }
+        i += 1;
     }
 
     string new_line;

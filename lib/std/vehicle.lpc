@@ -318,16 +318,16 @@ void vehicle_destroyed() {
     // Eject all occupants
     occupants = all_inventory(this_object());
     
-    for (i = 0; i < sizeof(occupants); i++) {
-        if (living(occupants[i])) {
-            occupants[i]->receive_message("The vehicle explodes! You're thrown clear!");
-            
+    foreach (object occ in occupants) {
+        if (living(occ)) {
+            occ->receive_message("The vehicle explodes! You're thrown clear!");
+
             // Damage occupants
-            occupants[i]->add_hp(-random(50) - 20);
-            
+            occ->add_hp(-random(50) - 20);
+
             // Move them out
             if (environment()) {
-                move_object(occupants[i], environment());
+                move_object(occ, environment());
             }
         }
     }

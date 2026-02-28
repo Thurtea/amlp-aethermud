@@ -205,9 +205,9 @@ void heart_beat() {
         if (!consume_fuel()) {
             // Out of fuel - announce to crew
             crew = all_inventory(this_object());
-            for (i = 0; i < sizeof(crew); i++) {
-                if (living(crew[i])) {
-                    tell_object(crew[i], "The engine sputters and dies! Out of fuel!");
+            foreach (object member in crew) {
+                if (living(member)) {
+                    tell_object(member, "The engine sputters and dies! Out of fuel!");
                 }
             }
         }

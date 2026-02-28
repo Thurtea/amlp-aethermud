@@ -105,8 +105,10 @@ int main(string args) {
     }
     
     // Show last N lines
-    for (i = start_line; i < sizeof(lines); i++) {
+    i = start_line;
+    while (i < sizeof(lines)) {
         tell_object(player, lines[i] + "\n");
+        i += 1;
     }
     
     // Follow mode note

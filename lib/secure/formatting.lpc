@@ -14,26 +14,37 @@ string format_columns(string *items, int term_width) {
 
     // Find longest item
     int maxlen = 0;
-    for (int i = 0; i < n; i++) {
+    int i;
+    i = 0;
+    while (i < n) {
         int l = strlen(items[i] || "");
         if (l > maxlen) maxlen = l;
+        i += 1;
     }
     int colw = maxlen + 2; // padding
     int cols = term_width / colw;
     if (cols < 1) cols = 1;
 
+    int rows_count = (n + cols - 1) / cols;
     string out = "";
-    for (int r = 0; r < ((n + cols - 1) / cols); r++) {
+    int r;
+    r = 0;
+    while (r < rows_count) {
         string line = "";
-        for (int c = 0; c < cols; c++) {
-            int idx = c * ((n + cols - 1) / cols) + r;
-            if (idx >= n) continue;
-            string it = items[idx] || "";
-            int pad = colw - strlen(it);
-            if (pad < 1) pad = 1;
-            line += it + repeat_string(" ", pad);
+        int c;
+        c = 0;
+        while (c < cols) {
+            int idx = c * rows_count + r;
+            if (idx < n) {
+                string it = items[idx] || "";
+                int pad = colw - strlen(it);
+                if (pad < 1) pad = 1;
+                line += it + repeat_string(" ", pad);
+            }
+            c += 1;
         }
         out += line + "\n";
+        r += 1;
     }
     return out;
 }
@@ -46,14 +57,17 @@ string wrap_text(string text, int width, int indent) {
     string out = "";
     string word = "";
     int col = 0;
-    for (int i = 0; i < strlen(text); i++) {
-        char ch = text[i];
+    int i;
+    i = 0;
+    while (i < strlen(text)) {
+        int ch = text[i];
         if (ch == '\n') {
             out += "\n";
             col = 0;
+            i += 1;
             continue;
         }
-        if (isspace(ch)) {
+        if (ch == ' ' || ch == '\t') {
             if (strlen(word)) {
                 if (col + strlen(word) + 1 > width) {
                     out += "\n" + repeat_string(" ", indent) + word;
@@ -65,9 +79,11 @@ string wrap_text(string text, int width, int indent) {
                 }
                 word = "";
             }
+            i += 1;
             continue;
         }
-        word += ch;
+        word += text[i..i];
+        i += 1;
     }
     if (strlen(word)) {
         if (col + strlen(word) + 1 > width) out += "\n" + repeat_string(" ", indent) + word;
@@ -81,31 +97,51 @@ string format_table(string *headers, mixed *rows, int term_width) {
     if (!headers) return "";
     int cols = sizeof(headers);
     int *widths = allocate(cols);
-    for (int i = 0; i < cols; i++) widths[i] = strlen(headers[i] || "");
-    for (int r = 0; r < sizeof(rows); r++) {
+    int c;
+    c = 0;
+    while (c < cols) {
+        widths[c] = strlen(headers[c] || "");
+        c += 1;
+    }
+    int r;
+    r = 0;
+    while (r < sizeof(rows)) {
         string *row = rows[r];
-        for (int c = 0; c < cols; c++) {
+        c = 0;
+        while (c < cols) {
             int l = strlen(row[c] || "");
             if (l > widths[c]) widths[c] = l;
+            c += 1;
         }
+        r += 1;
     }
     string out = "";
     // header
-    for (int c = 0; c < cols; c++) {
+    c = 0;
+    while (c < cols) {
         out += headers[c] + repeat_string(" ", widths[c] - strlen(headers[c] || "") + 2);
+        c += 1;
     }
     out += "\n";
     // separator
-    for (int c = 0; c < cols; c++) out += repeat_string("-", widths[c] + 2);
+    c = 0;
+    while (c < cols) {
+        out += repeat_string("-", widths[c] + 2);
+        c += 1;
+    }
     out += "\n";
     // rows
-    for (int r = 0; r < sizeof(rows); r++) {
+    r = 0;
+    while (r < sizeof(rows)) {
         string *row = rows[r];
-        for (int c = 0; c < cols; c++) {
+        c = 0;
+        while (c < cols) {
             string cell = row[c] || "";
             out += cell + repeat_string(" ", widths[c] - strlen(cell) + 2);
+            c += 1;
         }
         out += "\n";
+        r += 1;
     }
     return out;
 }
@@ -134,6 +170,11 @@ string truncate_string(string str, int max_width) {
 /* helper: repeat a single-character string n times */
 string repeat_string(string s, int n) {
     string out = "";
-    for (int i = 0; i < n; i++) out += s;
+    int i;
+    i = 0;
+    while (i < n) {
+        out += s;
+        i += 1;
+    }
     return out;
 }

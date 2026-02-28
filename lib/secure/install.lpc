@@ -156,13 +156,16 @@ void get_name(string name) {
     }
     
     // Check alphanumeric
-    for (int i = 0; i < strlen(name); i++) {
-        int c = name[i];
+    int _ci;
+    _ci = 0;
+    while (_ci < strlen(name)) {
+        int c = name[_ci];
         if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))) {
             write("\nUsername must contain only lowercase letters and numbers.\n");
             input_name();
             return;
         }
+        _ci += 1;
     }
     
     // Reserved names check

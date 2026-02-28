@@ -1,18 +1,31 @@
 // master.c - Master object for AMLP driver
 // This is the first object loaded by the driver and handles system-level operations
 
+mapping security_levels;
+
 void create() {
     // Initialize the master object
+    // Record startup in the server log
+    write_file("lib/log/server.log", "[Master] Master object loaded.\n", 1);
+
+    // Ensure security mapping exists
+    if (!security_levels) security_levels = ([ ]);
 }
 
 // Called when a new object is compiled
-void compile_object(string file) {
-    // Pre-compilation hook
+void compile_object(string path) {
+    // Log compile events for debugging but do not block compilation
+    if (path) {
+        write_file("lib/log/debug_priv.log", sprintf("[COMPILE] %s\n", path), 1);
+    }
+    return 0;
 }
 
 // Called to handle runtime errors
 void log_error(string file, string message) {
-    // Error logging
+    if (!file) file = "<unknown>";
+    if (!message) message = "<no message>";
+    write_file("lib/log/debug_priv.log", sprintf("[ERROR] %s: %s\n", file, message), 1);
 }
 
 // Returns the simul_efun object path
@@ -20,8 +33,8 @@ string epilog(string file) {
     return "/secure/simul_efun";
 }
 
-// Allow players to save their own files
-int valid_write(string file, object caller, string func) {
+// Allow players to save their own files and allow select driver writes
+int valid_write(string path, object caller, string func) {
     string caller_name, fname;
 
     if (!caller) return 0;
@@ -29,15 +42,35 @@ int valid_write(string file, object caller, string func) {
     caller_name = (string)caller->query_name();
     if (!caller_name || caller_name == "") return 0;
 
-    // Check /save/players/<name>.o
-    if (sscanf(file, "/save/players/%s.o", fname) == 1) {
+    // Allow player save under /save/players/<name>.o or lib/save/players/<name>.o
+    if (sscanf(path, "/save/players/%s.o", fname) == 1) {
+        if (lower_case(fname) == lower_case(caller_name)) return 1;
+    }
+    if (sscanf(path, "lib/save/players/%s.o", fname) == 1) {
         if (lower_case(fname) == lower_case(caller_name)) return 1;
     }
 
-    // Check lib/save/players/<name>.o (possible relative path)
-    if (sscanf(file, "lib/save/players/%s.o", fname) == 1) {
-        if (lower_case(fname) == lower_case(caller_name)) return 1;
-    }
+    // Allow driver/daemon writes under lib/log/, lib/save/, lib/players/, lib/data/
+    if (strsrch(path, "/lib/log/") == 0 || strsrch(path, "lib/log/") == 0) return 1;
+    if (strsrch(path, "/lib/save/") == 0 || strsrch(path, "lib/save/") == 0) return 1;
+    if (strsrch(path, "/lib/players/") == 0 || strsrch(path, "lib/players/") == 0) return 1;
+    if (strsrch(path, "/lib/data/") == 0 || strsrch(path, "lib/data/") == 0) return 1;
 
+    return 0;
+}
+
+// Allow all reads for now
+int valid_read(string path, object who, string func) {
+    return 1;
+
+}
+
+// Allow destruct - return 0 (do not block)
+int destruct_ob(object ob) {
+    return 0;
+}
+
+// Allow move or destruct decisions - return 0
+int move_or_destruct(object ob) {
     return 0;
 }

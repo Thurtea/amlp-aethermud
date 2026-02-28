@@ -5555,9 +5555,11 @@ void process_login_state(PlayerSession *session, const char *input) {
                     "");  /* Password hash not needed for existing players */
                 
                 if (!session->player_object) {
-                    fprintf(stderr, "[Server] WARNING: Failed to create LPC player object for %s\n",
-                            session->username);
-                    /* Continue anyway - C commands will still work */
+                    /* Inform the player and disconnect gracefully */
+                    send_to_player(session, "[Server] Login failed: could not create player instance. Try again.\n");
+                    session->state = STATE_DISCONNECTING;
+                    /* Do not continue initializing this session */
+                    break;
                 }
 
                 /* Sync C privilege level to LPC player object */

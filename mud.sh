@@ -95,6 +95,17 @@ start_server() {
     fi
 
     mkdir -p "$(dirname "$LOG_FILE")"
+    # Dead Souls style: archive existing runtime logs to boot files before starting.
+    LOG_DIR="$(dirname "$LOG_FILE")"
+    for name in server wizard debug_priv; do
+        src="$LOG_DIR/${name}.log"
+        boot="$LOG_DIR/${name}.boot"
+        if [ -f "$src" ]; then
+            cat "$src" >> "$boot" 2>/dev/null || true
+            rm -f "$src" || true
+        fi
+    done
+
     echo "[*] Starting AMLP-MUD server on port $DEFAULT_PORT..."
     WS_PORT=$((DEFAULT_PORT + 1))
     nohup "$SERVER_BIN" "$DEFAULT_PORT" "$WS_PORT" "lib/secure/master.lpc" >> "$LOG_FILE" 2>&1 &
@@ -246,6 +257,42 @@ tail_log() {
     fi
 }
 
+# Rotate log files when they exceed a line count threshold (default 40k lines).
+rotate_logs() {
+    echo "[*] Rotating logs..."
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    LINE_LIMIT=40000
+
+    LOG_DIR="$MUDLIB_DIR/lib/log"
+    mkdir -p "$LOG_DIR"
+
+    for name in server wizard debug_priv; do
+        path="$LOG_DIR/${name}.log"
+        if [ -f "$path" ]; then
+            lines=$(wc -l < "$path" 2>/dev/null || echo 0)
+            if [ "$lines" -ge "$LINE_LIMIT" ]; then
+                dest="$path.$TIMESTAMP"
+                mv "$path" "$dest"
+                # create a fresh empty log file for the daemon
+                touch "$path"
+                echo "[✓] Rotated ${name}.log (was ${lines} lines)"
+
+                # Prune old archives, keep only 10 newest for this log name
+                archives=$(ls -1t "$LOG_DIR/${name}.log."* 2>/dev/null || true)
+                if [ -n "$archives" ]; then
+                    # list archives one-per-line, skip first 10, remove the rest
+                    to_delete=$(echo "$archives" | tail -n +11)
+                    if [ -n "$to_delete" ]; then
+                        echo "$to_delete" | xargs -r rm -f --
+                    fi
+                fi
+            fi
+        fi
+    done
+
+    echo "[*] Log rotation complete"
+}
+
 # --- SECTION 3: DATA MANAGEMENT COMMANDS ---
 
 wipe_players() {
@@ -352,6 +399,9 @@ case "$1" in
     log|tail)
         tail_log
         ;;
+    rotate-logs)
+        rotate_logs
+        ;;
     # Data management
     wipe-players)
         wipe_players
@@ -384,6 +434,7 @@ case "$1" in
         echo "  restart           - Restart the MUD server"
         echo "  status            - Check if server is running"
         echo "  log|tail          - Tail the server log"
+        echo "  rotate-logs       - Rotate server, wizard, and debug_priv logs"
         echo ""
         echo "Data management:"
         echo "  wipe-players      - Delete player saves"

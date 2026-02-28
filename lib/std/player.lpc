@@ -962,6 +962,35 @@ void restore_data(mapping data) {
     }
 }
 
+// Persist player data to disk
+int save_player() {
+    if (!name || name == "" || name == "player") return 0;
+    string path = "/lib/save/" + lower_case(name) + ".o";
+    mapping data = save_data();
+    if (!data) return 0;
+    // Serialize using driver save_object efun if available, else write_file
+    if (function_exists("save_object")) {
+        return save_object(path);
+    }
+    // Fallback: write JSON-like mapping using write_file
+    string out = "";
+    foreach (string k, mixed v in data) {
+        out += k + " " + (stringp(v) ? "\"" + v + "\"" : (string)v) + "\n";
+    }
+    return write_file(path, out, 0);
+}
+
+// Load player data from disk
+int load_player(string player_name) {
+    if (!player_name || player_name == "") return 0;
+    string path = "/lib/save/" + lower_case(player_name) + ".o";
+    if (!file_exists(path)) return 0;
+    if (function_exists("restore_object")) {
+        return restore_object(path);
+    }
+    return 0;
+}
+
 //=============================================================================
 // Prompt Customization System
 //=============================================================================

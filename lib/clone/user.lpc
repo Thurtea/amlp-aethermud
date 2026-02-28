@@ -84,6 +84,17 @@ int query_wizard_level() {
     return wizard_level;
 }
 
+/* Bridge for C driver and command daemon privilege checking.
+ * C driver calls set_privilege_level(n) on login/promote;
+ * command.lpc calls query_privilege_level() to gate commands. */
+void set_privilege_level(int level) {
+    wizard_level = level;
+}
+
+int query_privilege_level() {
+    return wizard_level;
+}
+
 string query_title() {
     switch(wizard_level) {
         case ADMIN_LEVEL:

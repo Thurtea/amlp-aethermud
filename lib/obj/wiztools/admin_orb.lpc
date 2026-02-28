@@ -88,7 +88,11 @@ int cmd_orb(string str) {
     if (!str || str == "") return show_help();
 
     string subcmd, rest;
-    if (sscanf(str, "%s %s", subcmd, rest) != 2) {
+    int _sp = strsrch(str, " ");
+    if (_sp >= 0) {
+        subcmd = substring(str, 0, _sp);
+        rest = substring(str, _sp + 1);
+    } else {
         subcmd = str;
         rest = "";
     }

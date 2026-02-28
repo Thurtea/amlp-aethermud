@@ -116,53 +116,53 @@ int cmd_costume(string type) {
 
     switch (type) {
         case "merchant":
-            desc = "A portly figure in fine silk robes with jingling coin pouches\n"
-                   "at their belt. Gold rings adorn every finger and a shrewd\n"
+            desc = "A portly figure in fine silk robes with jingling coin pouches\n" +
+                   "at their belt. Gold rings adorn every finger and a shrewd\n" +
                    "gleam lights their eyes.";
             break;
         case "guard":
-            desc = "A stern guard in polished chainmail, a halberd resting on\n"
-                   "one shoulder. Their eyes constantly scan the surroundings\n"
+            desc = "A stern guard in polished chainmail, a halberd resting on\n" +
+                   "one shoulder. Their eyes constantly scan the surroundings\n" +
                    "with professional vigilance.";
             break;
         case "noble":
-            desc = "An aristocratic figure in velvet and ermine, carrying\n"
-                   "themselves with practiced dignity. A signet ring gleams\n"
+            desc = "An aristocratic figure in velvet and ermine, carrying\n" +
+                   "themselves with practiced dignity. A signet ring gleams\n" +
                    "on their left hand.";
             break;
         case "mystic":
-            desc = "A mysterious figure in flowing robes covered in arcane\n"
-                   "symbols. Their eyes glow with faint eldritch light and\n"
+            desc = "A mysterious figure in flowing robes covered in arcane\n" +
+                   "symbols. Their eyes glow with faint eldritch light and\n" +
                    "the air crackles around them.";
             break;
         case "beggar":
-            desc = "A ragged figure in torn clothing, hunched and dirty.\n"
-                   "They clutch a dented tin cup and peer up with watery\n"
+            desc = "A ragged figure in torn clothing, hunched and dirty.\n" +
+                   "They clutch a dented tin cup and peer up with watery\n" +
                    "but surprisingly alert eyes.";
             break;
         case "soldier":
-            desc = "A battle-hardened soldier in Coalition Dead Boy armor,\n"
-                   "energy rifle slung across their back. Scars crisscross\n"
+            desc = "A battle-hardened soldier in Coalition Dead Boy armor,\n" +
+                   "energy rifle slung across their back. Scars crisscross\n" +
                    "their face and hands.";
             break;
         case "scholar":
-            desc = "A bookish figure with ink-stained fingers and spectacles\n"
-                   "perched on their nose. Scrolls and books overflow from\n"
+            desc = "A bookish figure with ink-stained fingers and spectacles\n" +
+                   "perched on their nose. Scrolls and books overflow from\n" +
                    "a battered leather satchel.";
             break;
         case "bard":
-            desc = "A charismatic performer in colorful motley, carrying\n"
-                   "a lute and wearing a jaunty feathered cap. Their smile\n"
+            desc = "A charismatic performer in colorful motley, carrying\n" +
+                   "a lute and wearing a jaunty feathered cap. Their smile\n" +
                    "is infectious.";
             break;
         case "thief":
-            desc = "A nondescript figure in dark, practical clothing. They\n"
-                   "move with catlike grace and their eyes dart constantly,\n"
+            desc = "A nondescript figure in dark, practical clothing. They\n" +
+                   "move with catlike grace and their eyes dart constantly,\n" +
                    "cataloguing exits and valuables.";
             break;
         case "priest":
-            desc = "A solemn figure in ecclesiastical robes bearing a holy\n"
-                   "symbol. An aura of calm surrounds them, and their voice\n"
+            desc = "A solemn figure in ecclesiastical robes bearing a holy\n" +
+                   "symbol. An aura of calm surrounds them, and their voice\n" +
                    "carries quiet authority.";
             break;
         default:

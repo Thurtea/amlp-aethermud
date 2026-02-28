@@ -63,6 +63,10 @@ typedef struct {
         int index;   /* slot index = param_count + declaration_order */
     } locals[256];
     int local_count;  /* number of declared locals in current function */
+
+    /* Break target patching (for switch/loop break statements) */
+    int pending_breaks[64];     /* bytecode offsets of pending break OP_JUMP placeholders */
+    int pending_break_count;
 } compiler_state_t;
 
 /**
@@ -393,31 +397,56 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
         case NODE_FUNCTION_CALL: {
             FunctionCallNode *call = (FunctionCallNode *)node->data;
             if (call && call->function_name) {
-                // Emit arguments first
-                for (int i = 0; i < call->argument_count; i++) {
-                    compiler_codegen_expression(state, call->arguments[i]);
-                }
-
-                // Build the function name: prefix with "__parent__" for ::method() calls
-                char emit_name[256];
-                if (call->is_parent_call) {
-                    snprintf(emit_name, sizeof(emit_name), "__parent__%s",
-                             call->function_name);
+                if (call->object != NULL) {
+                    /* Method call: obj->method(args)
+                     * Stack layout for OP_CALL_METHOD: [obj] [method_str] [arg0..argN]
+                     * OP_CALL_METHOD pops args in reverse, then method_str, then obj */
+                    // Push object expression
+                    compiler_codegen_expression(state, call->object);
+                    // Push method name as a string value
+                    size_t mlen = strlen(call->function_name);
+                    compiler_emit(state, OP_PUSH_STRING, node->line);
+                    compiler_emit_byte(state, (uint8_t)(mlen & 0xFF));
+                    compiler_emit_byte(state, (uint8_t)((mlen >> 8) & 0xFF));
+                    for (size_t i = 0; i < mlen; i++) {
+                        compiler_emit_byte(state, (unsigned char)call->function_name[i]);
+                    }
+                    // Push arguments in order
+                    for (int i = 0; i < call->argument_count; i++) {
+                        compiler_codegen_expression(state, call->arguments[i]);
+                    }
+                    // Emit OP_CALL_METHOD with arg_count as uint16 (little-endian)
+                    compiler_emit(state, OP_CALL_METHOD, node->line);
+                    compiler_emit_byte(state, (uint8_t)(call->argument_count & 0xFF));
+                    compiler_emit_byte(state, (uint8_t)((call->argument_count >> 8) & 0xFF));
                 } else {
-                    snprintf(emit_name, sizeof(emit_name), "%s",
-                             call->function_name);
-                }
+                    // Regular function call (no object): emit OP_CALL
+                    // Emit arguments first
+                    for (int i = 0; i < call->argument_count; i++) {
+                        compiler_codegen_expression(state, call->arguments[i]);
+                    }
 
-                size_t len = strlen(emit_name);
+                    // Build the function name: prefix with "__parent__" for ::method() calls
+                    char emit_name[256];
+                    if (call->is_parent_call) {
+                        snprintf(emit_name, sizeof(emit_name), "__parent__%s",
+                                 call->function_name);
+                    } else {
+                        snprintf(emit_name, sizeof(emit_name), "%s",
+                                 call->function_name);
+                    }
 
-                // Emit call instruction
-                compiler_emit(state, OP_CALL, node->line);
-                compiler_emit_byte(state, call->argument_count & 0xFF);
+                    size_t len = strlen(emit_name);
 
-                // Function name length and bytes
-                compiler_emit_byte(state, len & 0xFF);
-                for (size_t i = 0; i < len; i++) {
-                    compiler_emit_byte(state, (unsigned char)emit_name[i]);
+                    // Emit call instruction
+                    compiler_emit(state, OP_CALL, node->line);
+                    compiler_emit_byte(state, call->argument_count & 0xFF);
+
+                    // Function name length and bytes
+                    compiler_emit_byte(state, len & 0xFF);
+                    for (size_t i = 0; i < len; i++) {
+                        compiler_emit_byte(state, (unsigned char)emit_name[i]);
+                    }
                 }
             }
             break;
@@ -605,6 +634,17 @@ static void compiler_codegen_expression(compiler_state_t *state, ASTNode *node) 
                 int end_target = state->bytecode_len;
                 state->bytecode[jump_end_addr + 1] = end_target & 0xFF;
                 state->bytecode[jump_end_addr + 2] = (end_target >> 8) & 0xFF;
+            } else {
+                compiler_emit(state, OP_PUSH_NULL, node->line);
+            }
+            break;
+        }
+
+        case NODE_CAST: {
+            /* Type casts are advisory in LPC — just emit the inner expression. */
+            CastNode *cast_node = (CastNode *)node->data;
+            if (cast_node && cast_node->expression) {
+                compiler_codegen_expression(state, cast_node->expression);
             } else {
                 compiler_emit(state, OP_PUSH_NULL, node->line);
             }
@@ -847,6 +887,105 @@ static void compiler_codegen_statement(compiler_state_t *state, ASTNode *node) {
                 state->bytecode[jump_false_addr + 1] = loop_end & 0xFF;
                 state->bytecode[jump_false_addr + 2] = (loop_end >> 8) & 0xFF;
             }
+            break;
+        }
+
+        case NODE_SWITCH_STATEMENT: {
+            SwitchStatementNode *sw = (SwitchStatementNode *)node->data;
+            if (!sw || !sw->expression) break;
+
+            /* Evaluate switch expression, store in a temp local */
+            compiler_codegen_expression(state, sw->expression);
+            int tmp_slot = compiler_add_local(state, "__switch_tmp__");
+            compiler_emit(state, OP_STORE_LOCAL, node->line);
+            compiler_emit_byte(state, tmp_slot & 0xFF);
+            compiler_emit_byte(state, (tmp_slot >> 8) & 0xFF);
+
+            /* Save outer break context and reset for this switch */
+            int saved_break_count = state->pending_break_count;
+            state->pending_break_count = 0;
+
+            /* Track end-of-case jumps separately (end_jumps are the implicit
+             * fall-through-prevention jumps emitted after each non-default case body) */
+            int end_jumps[64];
+            int end_jump_count = 0;
+
+            /* Find default case */
+            ASTNode *default_case = NULL;
+            for (int i = 0; i < sw->case_count; i++) {
+                if (!sw->cases[i]) continue;
+                CaseLabelNode *cl = (CaseLabelNode *)sw->cases[i]->data;
+                if (cl && cl->is_default) { default_case = sw->cases[i]; break; }
+            }
+
+            /* Emit each non-default case as: compare → jump_if_false_to_next → body → jump_to_end */
+            for (int i = 0; i < sw->case_count; i++) {
+                if (!sw->cases[i]) continue;
+                CaseLabelNode *cl = (CaseLabelNode *)sw->cases[i]->data;
+                if (!cl || cl->is_default) continue;
+
+                /* Load switch value and compare */
+                compiler_emit(state, OP_LOAD_LOCAL, node->line);
+                compiler_emit_byte(state, tmp_slot & 0xFF);
+                compiler_emit_byte(state, (tmp_slot >> 8) & 0xFF);
+                compiler_codegen_expression(state, cl->value);
+                compiler_emit(state, OP_EQ, node->line);
+
+                /* Jump past case body if not equal */
+                int skip_addr = state->bytecode_len;
+                compiler_emit(state, OP_JUMP_IF_FALSE, node->line);
+                compiler_emit_byte(state, 0);
+                compiler_emit_byte(state, 0);
+
+                /* Emit case body */
+                for (int j = 0; j < cl->statement_count; j++)
+                    compiler_codegen_statement(state, cl->statements[j]);
+
+                /* Jump to end of switch (prevents fall-through) */
+                if (end_jump_count < 64) end_jumps[end_jump_count++] = state->bytecode_len;
+                compiler_emit(state, OP_JUMP, node->line);
+                compiler_emit_byte(state, 0);
+                compiler_emit_byte(state, 0);
+
+                /* Patch skip to here */
+                int here = state->bytecode_len;
+                state->bytecode[skip_addr + 1] = here & 0xFF;
+                state->bytecode[skip_addr + 2] = (here >> 8) & 0xFF;
+            }
+
+            /* Emit default body */
+            if (default_case) {
+                CaseLabelNode *cl = (CaseLabelNode *)default_case->data;
+                if (cl) {
+                    for (int j = 0; j < cl->statement_count; j++)
+                        compiler_codegen_statement(state, cl->statements[j]);
+                }
+            }
+
+            /* Patch all end-of-case jumps and pending breaks to end of switch */
+            int end_addr = state->bytecode_len;
+            for (int i = 0; i < end_jump_count; i++) {
+                state->bytecode[end_jumps[i] + 1] = end_addr & 0xFF;
+                state->bytecode[end_jumps[i] + 2] = (end_addr >> 8) & 0xFF;
+            }
+            for (int i = 0; i < state->pending_break_count; i++) {
+                state->bytecode[state->pending_breaks[i] + 1] = end_addr & 0xFF;
+                state->bytecode[state->pending_breaks[i] + 2] = (end_addr >> 8) & 0xFF;
+            }
+
+            /* Restore outer break context */
+            state->pending_break_count = saved_break_count;
+            break;
+        }
+
+        case NODE_BREAK_STATEMENT: {
+            /* Emit a forward jump placeholder; the enclosing switch/loop patches it */
+            if (state->pending_break_count < 64) {
+                state->pending_breaks[state->pending_break_count++] = state->bytecode_len;
+            }
+            compiler_emit(state, OP_JUMP, node->line);
+            compiler_emit_byte(state, 0);
+            compiler_emit_byte(state, 0);
             break;
         }
 

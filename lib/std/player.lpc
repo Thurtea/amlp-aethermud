@@ -162,7 +162,9 @@ void on_level_up() {
 }
 
 // Privilege system
-int query_privilege_level() { return privilege_level; }
+int query_privilege_level() {
+    return privilege_level;
+}
 int is_player() { return privilege_level == 0; }
 int is_wizard() { return privilege_level >= 1; }
 int is_admin() { return privilege_level >= 2; }

@@ -153,19 +153,18 @@ VMValue obj_get_prop(obj_t *obj, const char *prop_name) {
     if (!obj || !prop_name) {
         return vm_value_create_null();
     }
-    
+
     /* Search this object */
     ObjProperty *prop = find_property(obj, prop_name);
     if (prop) {
         return prop->value;
     }
-    
+
     /* Search prototype chain */
     if (obj->proto) {
         return obj_get_prop(obj->proto, prop_name);
     }
-    
-    /* Not found */
+
     return vm_value_create_null();
 }
 
@@ -291,9 +290,10 @@ VMValue obj_call_method(VirtualMachine *vm, obj_t *obj, const char *method_name,
         return vm_value_create_null();
     }
     
-    /* Verify argument count */
-    if (arg_count != method->param_count) {
-        DEBUG_LOG_OBJ("Method '%s' expects %d arguments, got %d",
+    /* Verify argument count — allow fewer args than params (LPC default-arg pattern).
+     * Missing trailing params stay VALUE_UNINITIALIZED (treated as 0/null by the VM). */
+    if (arg_count > method->param_count) {
+        DEBUG_LOG_OBJ("Method '%s' expects %d arguments, got %d (too many)",
                 method_name, method->param_count, arg_count);
         return vm_value_create_null();
     }

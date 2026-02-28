@@ -396,26 +396,21 @@ void free_session(PlayerSession *session) {
     }
 
     if (session->player_object) {
-        /* Persist a minimal savefile on disconnect as a temporary measure
-         * until the VM-backed LPC objects are fully implemented. This
-         * creates lib/save/players/<name>.o with basic info so the mudlib
-         * can detect a savefile exists. */
-        if (session->username[0]) {
-            char path[512];
-            snprintf(path, sizeof(path), "lib/save/players/%s.o", session->username);
-            FILE *f = fopen(path, "w");
-            if (f) {
-                fprintf(f, "# AMLP minimal save file\n");
-                fprintf(f, "name:%s\n", session->username);
-                fprintf(f, "priv:%d\n", session->privilege_level);
-                fclose(f);
-                fprintf(stderr, "[Server] Wrote minimal savefile: %s\n", path);
-            } else {
-                fprintf(stderr, "[Server] WARNING: failed to write savefile %s\n", path);
-            }
+        /* Persist character data on abrupt disconnect (graceful quit already
+         * saves before reaching here; this catches network drops and crashes). */
+        if (session->state == STATE_PLAYING && session->username[0]) {
+            save_character(session);
         }
 
-        /* Destruct and free the player's LPC object */
+        /* Call LPC remove() to let the object clean itself up:
+         * detaches wiztool, removes from environment, etc. */
+        if (global_vm) {
+            VMValue rv = obj_call_method(global_vm, (obj_t *)session->player_object,
+                                         "remove", NULL, 0);
+            vm_value_release(&rv);
+        }
+
+        /* C-level destruction: mark destroyed and free all memory */
         obj_destroy((obj_t *)session->player_object);
         obj_free((obj_t *)session->player_object);
         session->player_object = NULL;
@@ -794,11 +789,23 @@ static int cmd_exits(PlayerSession *session, const char *arg) {
         has_exit = 1;
     }
     
+    /* Also list flexible (named) exits used by LPC rooms */
+    for (int i = 0; i < room->num_flex_exits; i++) {
+        if (room->flex_exits[i].direction) {
+            char dir[64];
+            strncpy(dir, room->flex_exits[i].direction, sizeof(dir) - 1);
+            dir[sizeof(dir) - 1] = '\0';
+            dir[0] = (char)toupper((unsigned char)dir[0]);
+            send_to_player(session, "  %s\n", dir);
+            has_exit = 1;
+        }
+    }
+
     if (!has_exit) {
         send_to_player(session, "  None.\n");
     }
     send_to_player(session, "\n");
-    
+
     return 1;
 }
 
@@ -3201,10 +3208,40 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                             "set_property", prop_args, 2);
             vm_value_release(&prop_args[0]);
             vm_value_release(&prop_args[1]);
+
+            /* Swap wiztool: detach old tool, clone and attach role-specific tool */
+            const char *tool_path = NULL;
+            if (strcmp(role_name, "admin") == 0)
+                tool_path = "/obj/wiztools/admin_orb.lpc";
+            else if (strcmp(role_name, "domain") == 0)
+                tool_path = "/obj/wiztools/qcs_tool.lpc";
+            else if (strcmp(role_name, "coding") == 0)
+                tool_path = "/obj/wiztools/code_tool.lpc";
+            else if (strcmp(role_name, "rp") == 0)
+                tool_path = "/obj/wiztools/rp_tool.lpc";
+
+            if (tool_path && global_vm) {
+                /* Detach old wiztool */
+                obj_call_method(global_vm, (obj_t *)target->player_object,
+                                "detach_wiztool", NULL, 0);
+                /* Clone new role-specific wiztool */
+                VMValue tp_val = vm_value_create_string(tool_path);
+                VMValue new_tool = efun_clone_object(global_vm, &tp_val, 1);
+                vm_value_release(&tp_val);
+                if (new_tool.type == VALUE_OBJECT && new_tool.data.object_value) {
+                    obj_call_method(global_vm, (obj_t *)target->player_object,
+                                    "attach_wiztool", &new_tool, 1);
+                    send_to_player(session, "Wiztool updated: %s\n", tool_path);
+                } else {
+                    send_to_player(session, "[WARN] Could not clone wiztool: %s\n", tool_path);
+                }
+                /* new_tool is now owned by the player object — do not release */
+            }
         }
 
         send_to_player(session, "Set %s's wizard role to: %s\n", target->username, role_name);
-        send_to_player(target, "Your wizard role has been set to: %s\n", role_name);
+        send_to_player(target, "Your wizard role has been set to: %s\nType 'help %swiz' for role-specific commands.\n",
+                       role_name, role_name);
 
         result.type = VALUE_NULL;
         return result;
@@ -5672,8 +5709,9 @@ void process_login_state(PlayerSession *session, const char *input) {
                        session->username);
                 if (session->player_object) {
                     VMValue parg = vm_value_create_int(session->privilege_level);
-                    obj_call_method(global_vm, session->player_object,
+                    VMValue r = obj_call_method(global_vm, session->player_object,
                         "set_privilege_level", &parg, 1);
+                    vm_value_release(&r);
                     vm_value_release(&parg);
                 }
                 chargen_create_admin(session);

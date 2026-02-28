@@ -57,7 +57,11 @@ int cmd_wand(string str) {
         return 1;
     }
 
-    if (sscanf(str, "%s %s", subcmd, rest) != 2) {
+    int _sp = strsrch(str, " ");
+    if (_sp >= 0) {
+        subcmd = substring(str, 0, _sp);
+        rest = substring(str, _sp + 1);
+    } else {
         subcmd = str;
         rest = "";
     }
@@ -272,7 +276,7 @@ int wand_peace() {
     /* Broadcast the peace aura to the room */
     tell_room(env,
         "\n" + player->query_cap_name() +
-        " raises a crystal wand. A pulse of calming energy radiates outward.\n"
+        " raises a crystal wand. A pulse of calming energy radiates outward.\n" +
         "All aggression drains from the room.\n\n");
 
     write("Peace aura activated. All NPCs in the room are now non-aggressive.\n");

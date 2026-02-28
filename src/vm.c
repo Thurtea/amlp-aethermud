@@ -1199,18 +1199,31 @@ static int vm_execute_instruction(VirtualMachine *vm, VMInstruction *instr) {
                 return -1;
             }
 
-            if (obj_val.type != VALUE_OBJECT || !obj_val.data.object_value) {
-                DEBUG_LOG_VM("OP_CALL_METHOD: invalid object reference");
+            obj_t *target = NULL;
+            if (obj_val.type == VALUE_OBJECT && obj_val.data.object_value) {
+                target = (obj_t *)obj_val.data.object_value;
+            } else if (obj_val.type == VALUE_STRING && obj_val.data.string_value) {
+                /* String path: find or load the object */
+                VMValue path_v = vm_value_create_string(obj_val.data.string_value);
+                VMValue loaded = efun_load_object(vm, &path_v, 1);
+                vm_value_release(&path_v);
+                if (loaded.type == VALUE_OBJECT && loaded.data.object_value) {
+                    target = (obj_t *)loaded.data.object_value;
+                }
+                /* loaded is owned by ObjManager singleton — do not release */
+            }
+            vm_value_free(&obj_val);
+
+            if (!target) {
+                DEBUG_LOG_VM("OP_CALL_METHOD: could not resolve object");
                 vm_value_free(&method_val);
                 for (int i = 0; i < arg_count; i++) {
                     vm_value_free(&args[i]);
                 }
                 if (args != args_buffer) free(args);
                 vm_push_value(vm, vm_value_create_null());
-                return -1;
+                return 0;  /* non-fatal: push null and continue */
             }
-
-            obj_t *target = (obj_t *)obj_val.data.object_value;
             const char *method_name = method_val.data.string_value;
 
             VMValue result = obj_call_method(vm, target, method_name, args, arg_count);
@@ -1268,7 +1281,9 @@ int vm_call_function(VirtualMachine *vm, int function_index, int arg_count) {
     if (!vm || function_index < 0 || function_index >= vm->function_count) return -1;
 
     VMFunction *func = vm->functions[function_index];
-    if (!func || arg_count != func->param_count) return -1;
+    /* Allow fewer args than params (missing params stay VALUE_UNINITIALIZED/0).
+     * Passing too many args is still an error to catch mis-matched calls. */
+    if (!func || arg_count > func->param_count) return -1;
 
     if (call_depth >= VM_MAX_CALL_DEPTH) {
         fprintf(stderr, "[VM] Call depth limit %d exceeded in '%s' -- aborting (infinite recursion?)\n",

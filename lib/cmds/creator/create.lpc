@@ -151,8 +151,7 @@ void ensure_directory(string path) {
 
 string gen_npc(string name) {
     string display = replace_string(name, "_", " ");
-    return
-"// " + name + ".lpc - QCS Generated NPC\n"
+    return "// " + name + ".lpc - QCS Generated NPC\n"
 "// Created: " + ctime(time()) + "\n\n"
 "inherit \"/std/qcs/npc\";\n\n"
 "void create() {\n"
@@ -177,8 +176,7 @@ string gen_npc(string name) {
 
 string gen_weapon(string name) {
     string display = replace_string(name, "_", " ");
-    return
-"// " + name + ".lpc - QCS Generated Weapon\n"
+    return "// " + name + ".lpc - QCS Generated Weapon\n"
 "// Created: " + ctime(time()) + "\n\n"
 "inherit \"/std/qcs/weapon\";\n\n"
 "void create() {\n"
@@ -197,8 +195,7 @@ string gen_weapon(string name) {
 
 string gen_armor(string name) {
     string display = replace_string(name, "_", " ");
-    return
-"// " + name + ".lpc - QCS Generated Armor\n"
+    return "// " + name + ".lpc - QCS Generated Armor\n"
 "// Created: " + ctime(time()) + "\n\n"
 "inherit \"/std/qcs/armor\";\n\n"
 "void create() {\n"
@@ -218,8 +215,7 @@ string gen_armor(string name) {
 
 string gen_room(string name) {
     string display = replace_string(name, "_", " ");
-    return
-"// " + name + ".lpc - QCS Generated Room\n"
+    return "// " + name + ".lpc - QCS Generated Room\n"
 "// Created: " + ctime(time()) + "\n\n"
 "inherit \"/std/qcs/room\";\n\n"
 "void create() {\n"
@@ -236,8 +232,7 @@ string gen_room(string name) {
 
 string gen_item(string name) {
     string display = replace_string(name, "_", " ");
-    return
-"// " + name + ".lpc - QCS Generated Item\n"
+    return "// " + name + ".lpc - QCS Generated Item\n"
 "// Created: " + ctime(time()) + "\n\n"
 "inherit \"/std/qcs/item\";\n\n"
 "void create() {\n"

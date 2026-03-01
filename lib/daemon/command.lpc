@@ -91,6 +91,10 @@ void init_commands() {
     commands["description"] = "cmds/description";
     commands["selectocc"] = "cmds/selectocc";
     commands["hatch"] = "cmds/hatch";       // Falconry: hatch a hawk egg
+    commands["clan"] = "cmds/clan";         // Clan initiation (e.g. clan aerihman)
+    commands["tattoo"] = "cmds/tattoo";     // Wizard: apply tattoo to player
+    commands["tattoos"] = "cmds/tattoos";   // Player: list own tattoos
+    commands["activate"] = "cmds/activate"; // Activate a tattoo power
     // Social/introduction
     commands["introduce"] = "cmds/introduce";
     commands["greet"] = "cmds/introduce";  // Alias for introduce

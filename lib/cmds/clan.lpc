@@ -1,0 +1,147 @@
+// /lib/cmds/clan.lpc
+// Clan initiation command
+//
+// Usage: clan aerihman
+//
+// Only True Atlanteans may initiate. Triggers the full Clan Aerihman
+// initiation: Sunaj Assassin OCC, four ritual tattoos, shadow armour,
+// vibro-knives, darkness grenades, e-clip, and the clan property.
+
+int do_aerihman_initiation(object player);
+
+int main(string arg) {
+    object player;
+    string race, clan;
+
+    player = this_player();
+    if (!player) return 0;
+
+    if (!arg || arg == "") {
+        write("Usage: clan <clan_name>\n");
+        write("Available clan: aerihman\n");
+        return 1;
+    }
+
+    arg = lower_case(arg);
+
+    if (arg != "aerihman") {
+        write("Unknown clan: " + arg + "\n");
+        write("The only known clan initiation path is: clan aerihman\n");
+        return 1;
+    }
+
+    // Race check
+    race = "";
+    if (function_exists("query_race", player))
+        race = lower_case(player->query_race());
+
+    if (race != "atlantean" && race != "true_atlantean") {
+        write("You are not of Atlantean blood. Clan Aerihman does not accept outsiders.\n");
+        return 1;
+    }
+
+    // Clan membership check
+    clan = "";
+    if (function_exists("query_property", player))
+        clan = player->query_property("clan");
+    if (!clan) clan = "";
+
+    if (clan != "" && clan != "0") {
+        write("You are already bound to a clan. The oath cannot be taken twice.\n");
+        return 1;
+    }
+
+    return do_aerihman_initiation(player);
+}
+
+int do_aerihman_initiation(object player) {
+    object item;
+    int i;
+
+    // Apply the Sunaj Assassin OCC
+    if (function_exists("set_occ", player))
+        player->set_occ("sunaj_assassin");
+    if (function_exists("set_occ_id", player))
+        player->set_occ_id("sunaj_assassin");
+
+    // Clone and give gear (all wrapped in catch in case item files are not yet present)
+    catch {
+        item = clone_object("/lib/objects/armor/shadow_armor");
+        if (item) item->move(player);
+    };
+
+    i = 0;
+    while (i < 2) {
+        catch {
+            item = clone_object("/lib/objects/weapons/vibro_knife");
+            if (item) item->move(player);
+        };
+        i++;
+    }
+
+    i = 0;
+    while (i < 3) {
+        catch {
+            item = clone_object("/lib/objects/weapons/darkness_grenade");
+            if (item) item->move(player);
+        };
+        i++;
+    }
+
+    catch {
+        item = clone_object("/lib/objects/weapons/e_clip");
+        if (item) item->move(player);
+    };
+
+    // Inscribe the four ritual tattoos
+    if (function_exists("add_tattoo", player)) {
+        player->add_tattoo("flaming_sword",     "chest");
+        player->add_tattoo("chains",             "right_arm");
+        player->add_tattoo("eyes_of_knowledge",  "forehead");
+        player->add_tattoo("sword",              "left_arm");
+    }
+
+    // Update tattoo count property
+    if (function_exists("query_property", player)) {
+        int current_count;
+        current_count = player->query_property("current_tattoos") || 0;
+        player->set_property("current_tattoos", current_count + 4);
+        player->set_property("max_tattoos", 18);
+    }
+
+    // Set clan membership
+    player->set_property("clan", "aerihman");
+    player->set_property("clan_name", "Clan Aerihman");
+
+    // Apply OCC skills if OCC file is available
+    catch {
+        object occ_obj;
+        occ_obj = load_object("/occs/sunaj_assassin");
+        if (occ_obj && function_exists("apply_to_player", occ_obj))
+            occ_obj->apply_to_player(player);
+    };
+
+    // Save character
+    if (function_exists("save_player", player))
+        player->save_player();
+
+    // Initiation message
+    write("\n");
+    write("The shadows in the room grow thick and heavy.\n");
+    write("A cold wind passes through walls that should hold it.\n");
+    write("A disembodied voice speaks once, low and without inflection:\n\n");
+    write("   'The blood of Atlantis recognises its own.'\n\n");
+    write("Pain flares across your body as four tattoos burn themselves\n");
+    write("into your flesh - flaming sword across your chest, chains\n");
+    write("coiled around your right arm, eyes of knowledge branded on\n");
+    write("your forehead, a sword etched down your left arm.\n\n");
+    write("You are Sunaj. You are Clan Aerihman.\n");
+    write("The shadows retreat. The room is still.\n\n");
+    write("OCC granted: Sunaj Assassin\n");
+    write("Tattoos inscribed: flaming_sword (chest), chains (right_arm),\n");
+    write("                   eyes_of_knowledge (forehead), sword (left_arm)\n");
+    write("Gear provided: shadow armor, 2x vibro-knife, 3x darkness grenade, e-clip\n\n");
+    write("Type 'score' to see your updated character. Type 'tattoos' to see your markings.\n\n");
+
+    return 1;
+}

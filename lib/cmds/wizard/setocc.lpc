@@ -158,24 +158,15 @@ int main(string arg) {
         return 1;
     }
 
-    // Check Sunaj restriction
+    // Check Sunaj restriction - race only; clan initiation is triggered automatically below
     if (occ_name == "sunaj_assassin") {
         string race;
         race = "";
         if (function_exists("query_race", target))
             race = lower_case(target->query_race());
-        string clan;
-        clan = "";
-        if (function_exists("query_property", target))
-            clan = target->query_property("clan");
 
         if (strsrch(race, "atlantean") == -1) {
             write("Sunaj Assassin requires Atlantean race.\n");
-            return 1;
-        }
-        if (!clan || strsrch(lower_case(clan), "aerihman") == -1) {
-            write("Sunaj Assassin requires Clan Aerihman membership.\n");
-            write("Player must first: clan aerihman\n");
             return 1;
         }
     }
@@ -299,6 +290,29 @@ int main(string arg) {
                 occ_display + " O.C.C.!\n");
     tell_object(target, "Type 'score' to see your updated character sheet.\n");
     tell_object(target, "Type 'pskills' to see your primary skills.\n\n");
+
+    // Auto-trigger Clan Aerihman initiation for Atlantean Sunaj assignments
+    if (occ_name == "sunaj_assassin") {
+        string tgt_race;
+        tgt_race = "";
+        if (function_exists("query_race", target))
+            tgt_race = lower_case(target->query_race());
+
+        string existing_clan;
+        existing_clan = "";
+        if (function_exists("query_property", target))
+            existing_clan = target->query_property("clan") || "";
+
+        if (strsrch(tgt_race, "atlantean") != -1 &&
+                (existing_clan == "" || existing_clan == "0")) {
+            write("Triggering Clan Aerihman initiation for " + tname + "...\n");
+            object clan_cmd;
+            catch { clan_cmd = load_object("/cmds/clan"); };
+            if (clan_cmd && function_exists("do_aerihman_initiation", clan_cmd)) {
+                clan_cmd->do_aerihman_initiation(target);
+            }
+        }
+    }
 
     // Log
     catch {

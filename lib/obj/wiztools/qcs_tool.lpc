@@ -48,16 +48,16 @@ int cmd_qcs(string str) {
     // Direct subcommands
     str = lower_case(str);
 
-    if (str == "1" || str == "room")    return do_create("room");
-    if (str == "2" || str == "npc")     return do_create("npc");
-    if (str == "3" || str == "weapon")  return do_create("weapon");
-    if (str == "4" || str == "armor")   return do_create("armor");
-    if (str == "5" || str == "item")    return do_create("item");
-    if (str == "6" || str == "list")    return do_list();
-    if (str == "7" || str == "deploy")  return do_deploy_menu();
-    if (str == "8" || str == "modify")  return do_modify_menu();
-    if (str == "9" || str == "help")    return do_help();
-    if (str == "0" || str == "exit" || str == "quit") {
+    if (to_int(str) == 1 || str == "room")    return do_create("room");
+    if (to_int(str) == 2 || str == "npc")     return do_create("npc");
+    if (to_int(str) == 3 || str == "weapon")  return do_create("weapon");
+    if (to_int(str) == 4 || str == "armor")   return do_create("armor");
+    if (to_int(str) == 5 || str == "item")    return do_create("item");
+    if (to_int(str) == 6 || str == "list")    return do_list();
+    if (to_int(str) == 7 || str == "deploy")  return do_deploy_menu();
+    if (to_int(str) == 8 || str == "modify")  return do_modify_menu();
+    if (to_int(str) == 9 || str == "help")    return do_help();
+    if (to_int(str) == 0 || str == "exit" || str == "quit") {
         write("QCS tool deactivated.\n");
         return 1;
     }

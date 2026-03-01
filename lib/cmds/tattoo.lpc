@@ -1,0 +1,188 @@
+// /lib/cmds/tattoo.lpc
+// Wizard command to inscribe a magical tattoo on a player.
+//
+// Usage: tattoo <player> <tattoo_name> <location>
+//
+// Requires: privilege >= 1, tattoo gun in inventory
+// Valid locations: chest, back, right_arm, left_arm, right_leg, left_leg,
+//                  forehead, neck, shoulders, abdomen, hands, feet
+
+string *VALID_LOCATIONS = ({
+    "chest", "back", "right_arm", "left_arm",
+    "right_leg", "left_leg", "forehead", "neck",
+    "shoulders", "abdomen", "hands", "feet"
+});
+
+// Canonical known tattoo names (informational - not enforced at load time)
+string *KNOWN_TATTOOS = ({
+    "flaming_sword", "dragon", "shield", "chains", "eyes_of_knowledge",
+    "sword", "phoenix", "cross", "fist", "lightning_bolt",
+    "angel", "skull", "rose", "serpent", "sunaj_mark",
+    "rifts_gate", "eye_of_atlantis", "hawk", "armor_of_ithan",
+    "globe_of_daylight", "fingers_of_wind", "invisibility"
+});
+
+int main(string arg) {
+    object player, target, gun;
+    string player_name, tattoo_name, location;
+    object *inv;
+    int priv, i, found_gun, is_valid_loc;
+    string targ_race;
+
+    player = this_player();
+    if (!player) return 0;
+
+    // Privilege check
+    priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+
+    if (priv < 1) {
+        write("This command requires wizard privileges.\n");
+        return 1;
+    }
+
+    // Parse: tattoo <player> <name> <location>
+    if (!arg || arg == "") {
+        write("Usage: tattoo <player> <tattoo_name> <location>\n");
+        write("Valid locations: " + implode(VALID_LOCATIONS, ", ") + "\n");
+        return 1;
+    }
+
+    string rest1, rest2;
+    if (sscanf(arg, "%s %s %s", player_name, tattoo_name, location) != 3) {
+        write("Usage: tattoo <player> <tattoo_name> <location>\n");
+        write("Example: tattoo theron flaming_sword chest\n");
+        return 1;
+    }
+
+    player_name = lower_case(player_name);
+    tattoo_name = lower_case(tattoo_name);
+    location    = lower_case(location);
+
+    // Tattoo gun inventory check
+    inv = all_inventory(player);
+    found_gun = 0;
+    i = 0;
+    while (i < sizeof(inv)) {
+        if (inv[i] && function_exists("query_property", inv[i])) {
+            if (inv[i]->query_property("is_tattoo_gun")) {
+                found_gun = 1;
+                gun = inv[i];
+                break;
+            }
+        }
+        i++;
+    }
+
+    if (!found_gun) {
+        write("You need to be holding a tattoo gun to inscribe tattoos.\n");
+        write("Obtain one from an admin: tattoogun\n");
+        return 1;
+    }
+
+    // Location validation
+    is_valid_loc = 0;
+    i = 0;
+    while (i < sizeof(VALID_LOCATIONS)) {
+        if (VALID_LOCATIONS[i] == location) { is_valid_loc = 1; break; }
+        i++;
+    }
+
+    if (!is_valid_loc) {
+        write("Invalid location: " + location + "\n");
+        write("Valid locations: " + implode(VALID_LOCATIONS, ", ") + "\n");
+        return 1;
+    }
+
+    // Find target player (must be online)
+    target = find_player(player_name);
+    if (!target) target = find_living(player_name);
+    if (!target || !interactive(target)) {
+        write("Player '" + player_name + "' is not online.\n");
+        return 1;
+    }
+
+    if (target == player) {
+        write("You cannot inscribe tattoos on yourself.\n");
+        return 1;
+    }
+
+    // Race check on target (soft warning, not hard block)
+    targ_race = "";
+    if (function_exists("query_race", target))
+        targ_race = lower_case(target->query_race());
+
+    if (targ_race != "atlantean" && targ_race != "true_atlantean") {
+        write("Warning: " + capitalize(player_name) +
+              " is not Atlantean. Non-Atlantean tattoos may have no effect.\n");
+        write("Proceeding anyway as this is a wizard override.\n");
+    }
+
+    // Check for duplicate tattoo
+    mapping existing;
+    existing = ([ ]);
+    if (function_exists("query_tattoos", target))
+        existing = target->query_tattoos() || ([ ]);
+
+    if (existing[tattoo_name]) {
+        write(capitalize(player_name) + " already has the " +
+              tattoo_name + " tattoo.\n");
+        return 1;
+    }
+
+    // Apply tattoo
+    if (function_exists("add_tattoo", target))
+        target->add_tattoo(tattoo_name, location);
+
+    // Update tattoo count
+    if (function_exists("query_property", target)) {
+        int cnt;
+        cnt = target->query_property("current_tattoos") || 0;
+        target->set_property("current_tattoos", cnt + 1);
+    }
+
+    // Save
+    if (function_exists("save_player", target))
+        target->save_player();
+
+    // Three-party messaging
+    string loc_display;
+    loc_display = implode(explode(location, "_"), " ");
+    string tat_display;
+    tat_display = implode(explode(tattoo_name, "_"), " ");
+
+    write("You inscribe the " + tat_display + " tattoo on " +
+          capitalize(player_name) + "'s " + loc_display + ".\n");
+
+    tell_object(target,
+        capitalize(player->query_name()) +
+        " inscribes the " + tat_display + " tattoo onto your " +
+        loc_display + ".\n" +
+        "The mark glows briefly with stored PPE, then settles into your skin.\n");
+
+    object room;
+    string wiz_name;
+    wiz_name = function_exists("query_name", player) ? player->query_name() : "A wizard";
+    string targ_name;
+    targ_name = function_exists("query_name", target) ? target->query_name() : "someone";
+
+    room = environment(player);
+    if (room && function_exists("tell_room", room)) {
+        room->tell_room(
+            capitalize(wiz_name) + " inscribes a glowing " + tat_display +
+            " tattoo onto " + capitalize(targ_name) + "'s " + loc_display + ".\n",
+            ({ player, target })
+        );
+    }
+
+    // Log
+    catch {
+        write_file("/log/wizard/tattoo_grants.log",
+                   ctime(time()) + " " + capitalize(wiz_name) +
+                   " inscribed '" + tattoo_name + "' (" + location + ") on " +
+                   capitalize(targ_name) + "\n");
+    };
+
+    return 1;
+}

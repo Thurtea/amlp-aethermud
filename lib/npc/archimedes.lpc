@@ -9,7 +9,8 @@ private string *topics_asked;
 
 private string *CORE_TOPICS = ({
     "wiz-tools", "ranks", "workroom", "commands",
-    "chargen", "spells", "combat", "rifts"
+    "chargen", "spells", "combat", "rifts",
+    "blood", "psionics", "tattoos", "falconry", "clans"
 });
 
 void create() {
@@ -134,11 +135,71 @@ private string topic_response(string topic) {
                 "The Coalition States enforce an iron order in the East. "
                 "And adventurers like your players stand in the middle of all of it.'\n";
 
+        case "blood":
+        case "blood pools":
+        case "vampires":
+            return
+                "Archimedes flicks one talon toward the floor with quiet gravity.\n"
+                "'Blood pools appear when a living creature dies in the world,' he says. "
+                "'They persist for ten minutes before congealing and fading. "
+                "Vampiric creatures and certain psionic OCCs can drain them for HP and ISP. "
+                "Each pool holds three sips - enough for one hungry predator. "
+                "Administrators can observe blood trail behaviour using stat on any blood pool object.'\n";
+
+        case "psionics":
+        case "psionic":
+        case "isp":
+            return
+                "Archimedes taps the side of his head with one talon.\n"
+                "'Psionics draw on Inner Strength Points, ISP,' he explains. "
+                "'There are four categories: Physical, Sensitive, Healing, and Super. "
+                "ISP regenerates over time or through rest. "
+                "The psi command lists known powers and their costs. "
+                "Staff can grant psionic powers to players using grantskill combined with the psionic category flag.'\n";
+
+        case "tattoos":
+        case "tattoo":
+        case "tattoo magic":
+        case "atlantean tattoos":
+            return
+                "Archimedes spreads one wing and traces an arc in the air.\n"
+                "'Tattoo magic is the exclusive art of the Atlanteans,' he says. "
+                "'Each magical tattoo is inscribed with PPE and can be activated to produce powerful effects. "
+                "The tattoos command lets a player see their current tattoos and body locations. "
+                "Wizards with a tattoo gun item can inscribe tattoos using: tattoo <player> <name> <location>. "
+                "Activate a tattoo in play with: activate <tattoo_name>.'\n";
+
+        case "falconry":
+        case "hawk":
+        case "falcon":
+        case "falconer":
+            return
+                "Archimedes puffs up with what might be professional pride.\n"
+                "'Falconry is the ancient bond between trainer and bird,' he says. "
+                "'A player with the falconry skill can hatch a hawk egg and bond with the companion. "
+                "The hawk obeys spoken commands - hawk stay, hawk fly, hawk follow me, hawk eat corpse. "
+                "Success depends on a falconry skill roll. "
+                "The hawk status command shows its current health and state.'\n";
+
+        case "clans":
+        case "clan":
+        case "clan aerihman":
+        case "aerihman":
+        case "sunaj":
+            return
+                "Archimedes lowers his voice to a near-whisper.\n"
+                "'Clan Aerihman is the ancient and feared Atlantean assassin brotherhood,' he says. "
+                "'A True Atlantean may type clan aerihman to begin initiation - assuming they are of the blood. "
+                "Initiation grants the Sunaj Assassin OCC, four ritual tattoos, shadow armour, and clan gear. "
+                "The clan property is permanently set on the character. "
+                "Staff can observe initiation using stat on the player object.'\n";
+
         default:
             return
                 "Archimedes tilts his head.\n"
                 "'I do not know about that particular topic,' he admits. 'Try asking about: "
-                "wiz-tools, ranks, workroom, commands, chargen, spells, combat, or rifts.'\n";
+                "wiz-tools, ranks, workroom, commands, chargen, spells, combat, rifts, "
+                "blood, psionics, tattoos, falconry, or clans.'\n";
     }
 }
 

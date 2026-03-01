@@ -1,0 +1,32 @@
+// /lib/obj/tattoo_gun.lpc
+// Tattoo Gun - Wizard holdable item for inscribing Atlantean magical tattoos.
+// Only wizards (privilege >= 1) can use this item.
+// Required inventory item for the 'tattoo' command.
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+
+    set_name("tattoo gun");
+    set_id(({ "tattoo gun", "arcane tattoo gun", "gun", "tattooing instrument" }));
+    set_short("a tattoo gun");
+    set_long(
+        "A sleek arcane instrument roughly the size of a large pen, its casing\n" +
+        "etched with Atlantean glyphs that seem to shift as you watch them. The\n" +
+        "needle tip glows faintly with stored PPE, ready to trace magical patterns\n" +
+        "into willing flesh. This is no ordinary tool.\n"
+    );
+
+    set_weight(1);
+    set_value(0);
+
+    set_property("is_tattoo_gun", 1);
+    set_property("no_drop", 1);
+    set_property("no_steal", 1);
+    set_property("wizard_tool", 1);
+}
+
+int query_privilege_required() { return 1; }
+
+int is_wiztool() { return 1; }

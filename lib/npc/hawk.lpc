@@ -1,0 +1,261 @@
+// /lib/npc/hawk.lpc
+// Red-tailed hawk NPC companion
+//
+// Owner property tracks who this hawk belongs to.
+// Health drops 5 per hour (hunger). Eating a corpse restores 30 HP.
+// Obeys SAY commands from owner IF owner has falconry skill.
+// Skill roll: random(100)+1 vs query_skill_percentage("falconry")
+//
+// Commands (owner says):
+//   hawk stay        -- perch, stop following
+//   hawk fly         -- take flight, stop following
+//   hawk follow me   -- follow owner between rooms
+//   hawk eat corpse  -- find first corpse in room, eat it, restore 30 HP
+//   hawk status      -- report health, hunger state, current behaviour
+
+inherit "/std/living";
+
+private string owner_name;
+private int is_following;
+private int is_flying;
+private int is_perched;
+
+void create() {
+    ::create();
+
+    owner_name   = "";
+    is_following = 0;
+    is_flying    = 0;
+    is_perched   = 1;
+
+    set_name("hawk");
+    set_id(({ "hawk", "red-tailed hawk", "red tailed hawk", "bird", "raptor" }));
+    set_short("a red-tailed hawk");
+    set_long(
+        "A compact red-tailed hawk perches with alert dignity. Its russet tail\n" +
+        "fans slightly as it shifts its weight, talons gripping with unconscious\n" +
+        "strength. A thin jess band circles one leg. The amber eyes follow your\n" +
+        "movement with predatory patience.\n"
+    );
+
+    set_gender("neuter");
+    set_race("animal");
+    set_level(3);
+
+    set_max_hp(100);
+    set_hp(100);
+
+    set_property("no_attack", 1);
+    set_property("is_hawk_npc", 1);
+
+    // Hunger: drop 5 HP per hour
+    call_out("hunger_tick", 3600);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_say_hook", "say");
+    add_action("cmd_say_hook", "'");
+}
+
+// Called by driver when a living being says something in the room
+int cmd_say_hook(string str) {
+    // We hook 'say' to listen for commands; return 0 to not consume the action
+    return 0;
+}
+
+// Override catch_tell to listen for hawk commands from the owner
+void catch_tell(string msg) {
+    string speaker_name, text, cmd;
+    object room, speaker;
+    int i;
+
+    // Extract speaker name: messages arrive as "Name says: text\n"
+    // or "Name says 'text'\n" depending on the say format used.
+    // We look for any variation.
+    if (sscanf(msg, "%s says: %s", speaker_name, text) != 2) {
+        if (sscanf(msg, "%s says '%s'", speaker_name, text) != 2) {
+            return;
+        }
+    }
+
+    speaker_name = lower_case(speaker_name);
+
+    // Only respond to owner
+    if (owner_name == "" || speaker_name != lower_case(owner_name)) return;
+
+    // Find the speaking object to do the skill roll
+    room = environment(this_object());
+    if (!room) return;
+
+    speaker = 0;
+    object *living_here;
+    living_here = all_inventory(room);
+    i = 0;
+    while (i < sizeof(living_here)) {
+        if (living_here[i] && function_exists("query_name", living_here[i])) {
+            if (lower_case(living_here[i]->query_name()) == speaker_name) {
+                speaker = living_here[i];
+                break;
+            }
+        }
+        i++;
+    }
+
+    if (!speaker) return;
+
+    // Strip surrounding whitespace and lowercase
+    text = lower_case(text);
+    // Remove trailing punctuation/newline
+    while (strlen(text) > 0 &&
+           (text[strlen(text)-1] == '\n' || text[strlen(text)-1] == '.' ||
+            text[strlen(text)-1] == '!' || text[strlen(text)-1] == '\'')) {
+        text = text[0..strlen(text)-2];
+    }
+
+    // Must start with "hawk"
+    if (text == "hawk" || strsrch(text, "hawk ") != 0) return;
+
+    cmd = substring(text, 5);  // strip "hawk "
+
+    // Falconry skill roll
+    int skill_pct, roll;
+    skill_pct = 0;
+    if (function_exists("query_skill_percentage", speaker))
+        skill_pct = speaker->query_skill_percentage("falconry");
+
+    roll = random(100) + 1;
+
+    if (roll > skill_pct) {
+        tell_object(speaker,
+            "The hawk ruffles its feathers and ignores you.\n");
+        return;
+    }
+
+    // Execute command
+    if (cmd == "stay") {
+        is_following = 0;
+        is_perched   = 1;
+        is_flying    = 0;
+        tell_object(speaker, "The hawk settles its wings and perches.\n");
+        return;
+    }
+
+    if (cmd == "fly") {
+        is_following = 0;
+        is_flying    = 1;
+        is_perched   = 0;
+        tell_object(speaker, "The hawk spreads its wings and takes flight.\n");
+        return;
+    }
+
+    if (cmd == "follow me") {
+        is_following = 1;
+        is_flying    = 0;
+        is_perched   = 0;
+        tell_object(speaker, "The hawk fixes its eyes on you, ready to follow.\n");
+        return;
+    }
+
+    if (cmd == "eat corpse") {
+        do_eat_corpse(speaker);
+        return;
+    }
+
+    if (cmd == "status") {
+        do_status(speaker);
+        return;
+    }
+
+    tell_object(speaker,
+        "The hawk tilts its head - it does not understand that command.\n");
+}
+
+// Eat the first corpse in the room
+void do_eat_corpse(object owner) {
+    object room, *inv, corpse;
+    int i;
+
+    room = environment(this_object());
+    if (!room) return;
+
+    inv = all_inventory(room);
+    corpse = 0;
+    i = 0;
+    while (i < sizeof(inv)) {
+        if (inv[i] && function_exists("query_property", inv[i])) {
+            if (inv[i]->query_property("is_corpse") ||
+                inv[i]->id("corpse")) {
+                corpse = inv[i];
+                break;
+            }
+        }
+        i++;
+    }
+
+    if (!corpse) {
+        tell_object(owner, "The hawk searches the area but finds no corpse to eat.\n");
+        return;
+    }
+
+    int restored;
+    restored = 30;
+    int cur_hp;
+    cur_hp = query_hp();
+    int new_hp;
+    new_hp = cur_hp + restored;
+    if (new_hp > query_max_hp()) new_hp = query_max_hp();
+    set_hp(new_hp);
+
+    string corpse_name;
+    corpse_name = "corpse";
+    if (function_exists("query_short", corpse))
+        corpse_name = corpse->query_short();
+
+    catch { destruct(corpse); };
+
+    tell_object(owner,
+        "The hawk drops onto " + corpse_name + " and feeds quickly, then\n" +
+        "returns to its perch, looking satisfied. (+" + restored + " HP)\n");
+}
+
+// Report hawk status
+void do_status(object owner) {
+    string state;
+    if (is_following) state = "following you";
+    else if (is_flying) state = "circling overhead";
+    else state = "perched";
+
+    int hp, max;
+    hp  = query_hp();
+    max = query_max_hp();
+
+    string hunger;
+    if (hp > 80)       hunger = "well-fed";
+    else if (hp > 50)  hunger = "hungry";
+    else if (hp > 20)  hunger = "very hungry";
+    else               hunger = "starving";
+
+    tell_object(owner,
+        "Hawk status: " + state + "\n" +
+        "  Health: " + hp + "/" + max + " (" + hunger + ")\n" +
+        "  Owner: " + owner_name + "\n");
+}
+
+// Periodic hunger: lose 5 HP per hour
+void hunger_tick() {
+    int cur;
+    cur = query_hp();
+    if (cur > 5) {
+        set_hp(cur - 5);
+    } else {
+        set_hp(1);
+    }
+    call_out("hunger_tick", 3600);
+}
+
+// Owner accessors
+void set_owner(string name) { owner_name = name; }
+string query_owner() { return owner_name; }
+
+int query_following() { return is_following; }

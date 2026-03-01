@@ -137,6 +137,36 @@ int apply_effect(object user, object target) {
 }
 
 /*
+ * Generate help text formatted to match standard helpfile style.
+ * Used by the help command when a player types: help <power_id>
+ */
+string query_help() {
+    string range_str, duration_str;
+
+    switch (range_type) {
+        case 0:  range_str = "Self"; break;
+        case 1:  range_str = "Touch"; break;
+        case 2:  range_str = base_range + " feet"; break;
+        default: range_str = "Unknown"; break;
+    }
+
+    switch (duration_type) {
+        case 0:  duration_str = "Instant"; break;
+        case 1:  duration_str = base_duration + " minute(s)"; break;
+        case 2:  duration_str = base_duration + " melee round(s)"; break;
+        default: duration_str = "Unknown"; break;
+    }
+
+    return upper_case(power_name) + "\n\n" +
+           "Category: " + capitalize(power_category) + "\n" +
+           "ISP Cost: " + isp_cost + "\n" +
+           "Range:    " + range_str + "\n" +
+           "Duration: " + duration_str + "\n\n" +
+           power_desc + "\n\n" +
+           "Usage: psi " + power_id + "\n";
+}
+
+/*
  * Get descriptive text for the power
  */
 string query_info() {

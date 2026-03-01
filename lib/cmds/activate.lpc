@@ -1,0 +1,60 @@
+// /lib/cmds/activate.lpc
+// Activate a magical tattoo power
+//
+// Usage: activate <tattoo_name>
+//
+// Loads /lib/tattoos/<name>.lpc and calls ob->activate(this_player()).
+// If the file does not exist, a graceful message is shown.
+
+int main(string arg) {
+    object player, tattoo_obj;
+    string tattoo_name, tattoo_path;
+    mapping owned_tattoos;
+
+    player = this_player();
+    if (!player) return 0;
+
+    if (!arg || arg == "") {
+        write("Usage: activate <tattoo_name>\n");
+        write("Example: activate flaming_sword\n");
+        write("Use 'tattoos' to see your current tattoos.\n");
+        return 1;
+    }
+
+    tattoo_name = lower_case(arg);
+
+    // Verify the player has this tattoo
+    owned_tattoos = ([ ]);
+    if (function_exists("query_tattoos", player))
+        owned_tattoos = player->query_tattoos() || ([ ]);
+
+    if (!owned_tattoos[tattoo_name]) {
+        write("You do not have the " +
+              implode(explode(tattoo_name, "_"), " ") + " tattoo.\n");
+        write("Use 'tattoos' to see your current tattoos.\n");
+        return 1;
+    }
+
+    // Try to load the tattoo power file
+    tattoo_path = "/lib/tattoos/" + tattoo_name;
+    tattoo_obj = 0;
+
+    catch {
+        tattoo_obj = load_object(tattoo_path);
+    };
+
+    if (!tattoo_obj) {
+        write("The " + implode(explode(tattoo_name, "_"), " ") +
+              " tattoo pulses faintly but its power is not yet implemented.\n");
+        return 1;
+    }
+
+    if (!function_exists("activate", tattoo_obj)) {
+        write("The " + implode(explode(tattoo_name, "_"), " ") +
+              " tattoo has no activation effect defined.\n");
+        return 1;
+    }
+
+    // Activate
+    return tattoo_obj->activate(player);
+}

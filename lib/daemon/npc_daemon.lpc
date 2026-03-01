@@ -2,6 +2,7 @@ mapping npc_templates;
 
 void create() {
     npc_templates = ([]);
+    register_npc("hawk", "/lib/npc/hawk", "");
 }
 
 void register_npc(string id, string npc_path, string room_path) {

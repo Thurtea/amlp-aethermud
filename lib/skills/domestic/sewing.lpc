@@ -10,7 +10,7 @@ void create() {
     set_skill_id("sewing");
     set_skill_name("Sewing");
     set_skill_desc(
-        "TODO:CONTENT — Sew, mend, and tailor clothing and fabric items."
+        "TODO:CONTENT - Sew, mend, and tailor clothing and fabric items."
     );
     set_skill_category("domestic");
 

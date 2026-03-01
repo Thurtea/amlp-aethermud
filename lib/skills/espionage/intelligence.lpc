@@ -10,7 +10,7 @@ void create() {
     set_skill_id("intelligence");
     set_skill_name("Intelligence");
     set_skill_desc(
-        "TODO:CONTENT — Gather, analyze, and evaluate information about enemies."
+        "TODO:CONTENT - Gather, analyze, and evaluate information about enemies."
     );
     set_skill_category("espionage");
 

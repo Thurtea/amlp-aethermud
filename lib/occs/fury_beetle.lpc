@@ -17,7 +17,7 @@ void create() {
         "light vehicles, and a dangerous temperament when threatened. They are " +
         "occasionally tamed and used as mounts or pack animals by wilderness " +
         "tribes. As a player character race, they represent rare individuals with " +
-        "unusual intelligence — perhaps touched by dimensional energy or " +
+        "unusual intelligence - perhaps touched by dimensional energy or " +
         "the result of magical experimentation."
     );
 
@@ -73,7 +73,7 @@ void create() {
     set_special_training("none");
 
     set_background(
-        "Fury Beetles as player characters are extraordinary individuals — " +
+        "Fury Beetles as player characters are extraordinary individuals - " +
         "perhaps touched by rift energy, the result of magical experimentation, " +
         "or simply ancient enough to have developed unusual sapience."
     );

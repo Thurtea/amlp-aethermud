@@ -11,14 +11,14 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Maxi-Men are the extreme end of juicer enhancement — warriors who " +
+        "Maxi-Men are the extreme end of juicer enhancement - warriors who " +
         "have undergone even more radical augmentation than standard juicers, " +
         "pushing their physical capabilities to levels that break conventional " +
         "biology. They are faster, stronger, and more durable than any ordinary " +
         "human, capable of feats that seem superhuman even by Rifts standards. " +
         "The cost is devastating: Maxi-Men burn out their body even faster than " +
         "standard juicers, and most are dead within five years of augmentation. " +
-        "They know it and choose it anyway — life at maximum intensity."
+        "They know it and choose it anyway - life at maximum intensity."
     );
 
     set_stat_requirements(([ "ps": 13, "pe": 12 ]));

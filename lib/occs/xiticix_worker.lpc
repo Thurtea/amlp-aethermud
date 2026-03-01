@@ -18,7 +18,7 @@ void create() {
         "hive-sense, and surprising strength for their size. Workers who " +
         "separate from the hive (usually due to rift displacement or hive " +
         "destruction) may develop individual identity and find their own way " +
-        "in the world — a disorienting but liberating experience."
+        "in the world - a disorienting but liberating experience."
     );
 
     set_stat_requirements(([ ]));

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("detect_concealment");
     set_skill_name("Detect Concealment");
     set_skill_desc(
-        "TODO:CONTENT — Find hidden people, objects, and passages."
+        "TODO:CONTENT - Find hidden people, objects, and passages."
     );
     set_skill_category("military");
 

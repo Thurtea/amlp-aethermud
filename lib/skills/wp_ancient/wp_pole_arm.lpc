@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_pole_arm");
     set_skill_name("W.P. Pole Arm");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with spears, halberds, and pole weapons."
+        "TODO:CONTENT - Proficiency with spears, halberds, and pole weapons."
     );
     set_skill_category("wp_ancient");
 

@@ -11,7 +11,7 @@ void create() {
     set_spell_desc(
         "Animates a recently deceased corpse into an obedient undead " +
         "servant. The animated dead is a mindless construct that " +
-        "follows simple commands from the caster — attack, guard, " +
+        "follows simple commands from the caster - attack, guard, " +
         "stop, follow. It retains no memory or personality from life. " +
         "The animated corpse is resilient to many forms of magic but " +
         "vulnerable to fire, energy attacks, and turning. It persists " +
@@ -80,7 +80,7 @@ int apply_effect(object caster, object target) {
         if (ob != caster && living(ob)) {
             tell_object(ob,
                 "The air turns cold as " + caster->query_cap_name() +
-                " speaks dark words — a corpse lurches to its feet!\n");
+                " speaks dark words - a corpse lurches to its feet!\n");
         }
     }
 

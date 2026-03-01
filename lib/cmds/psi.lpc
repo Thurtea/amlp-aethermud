@@ -1,0 +1,183 @@
+/*
+ * /lib/cmds/psi.lpc - Activate psionic powers
+ *
+ * Usage:
+ *   psi                           - List your psionic powers
+ *   psi <power>                   - Use a power (on self)
+ *   psi <power> <target>          - Use a power on a target
+ *   psi telepathy <person> <msg>  - Send a mental message
+ *   psi info <power>              - Get info about a power
+ */
+
+#define PSI_DAEMON "/daemon/psionics"
+
+int main(string args) {
+    object psi_d = find_object(PSI_DAEMON);
+    if (!psi_d) {
+        psi_d = load_object(PSI_DAEMON);
+    }
+
+    /* Check if character is a psionics user */
+    string psi_cat = this_player()->query_psionic_category();
+    if (!psi_cat || psi_cat == "" || psi_cat == "none") {
+        write("You have no psionic abilities.\n");
+        return 1;
+    }
+
+    if (!args || args == "") {
+        /* List powers */
+        if (psi_d) {
+            write(psi_d->format_power_list(this_player()));
+        } else {
+            string *my_powers = this_player()->query_psionic_powers();
+            write("Your Psionic Powers:\n");
+            foreach (string id : my_powers) {
+                write("  " + id + "\n");
+            }
+            write("I.S.P.: " + this_player()->query_isp() + "/" +
+                  this_player()->query_max_isp() + "\n");
+        }
+        return 1;
+    }
+
+    /* Check for info request */
+    if (sizeof(args) > 5 && args[0..4] == "info ") {
+        string power_id = lower_case(args[5..]);
+        if (psi_d) {
+            object power = psi_d->query_power(power_id);
+            if (power) {
+                write("Power: " + power->query_power_name() + "\n");
+                write("Category: " + capitalize(power->query_power_category()) + "\n");
+                write("I.S.P. Cost: " + power->query_isp_cost() + "\n");
+                write(power->query_power_desc() + "\n");
+            } else {
+                write("Unknown power: " + power_id + "\n");
+            }
+        } else {
+            write("Psionics daemon not available.\n");
+        }
+        return 1;
+    }
+
+    /* Telepathy special case: psi telepathy <person> <message> */
+    if (sizeof(args) > 10 && args[0..8] == "telepathy") {
+        string rest = args[10..];
+        string person_name, message;
+        if (sscanf(rest, "%s %s", person_name, message) == 2) {
+            /* Find the target */
+            object target = find_player(person_name);
+            if (!target)
+                target = present(lower_case(person_name), environment(this_player()));
+            if (!target) {
+                write("You cannot sense " + person_name + " nearby.\n");
+                return 1;
+            }
+
+            /* Check ISP */
+            object power = psi_d ? psi_d->query_power("telepathy") : 0;
+            int cost = power ? power->query_isp_cost() : 4;
+            if (this_player()->query_isp() < cost) {
+                write("You don't have enough I.S.P. You need " + cost +
+                      " but only have " + this_player()->query_isp() + ".\n");
+                return 1;
+            }
+
+            /* Check if target has mind block */
+            if (target->query_property("mind_block_active")) {
+                write("Your telepathic message bounces off a mental barrier!\n");
+                tell_object(target,
+                    "You feel a telepathic probe deflected by your mind block.\n");
+                return 1;
+            }
+
+            /* Deduct ISP and send message */
+            this_player()->add_isp(-cost);
+            tell_object(target,
+                "** Telepathic message from " + this_player()->query_cap_name() +
+                " ** " + message + "\n");
+            write("You send a telepathic message to " +
+                target->query_cap_name() + ".\n");
+            return 1;
+        }
+    }
+
+    /* Parse power and optional target */
+    string power_id, target_name;
+    object target;
+
+    if (sscanf(args, "%s %s", power_id, target_name) != 2) {
+        power_id = args;
+        target_name = "";
+    }
+
+    power_id = lower_case(replace_string(power_id, " ", "_"));
+
+    /* Check if player has this power */
+    if (!this_player()->has_psionic_power(power_id)) {
+        write("You don't have that psionic power.\n");
+        return 1;
+    }
+
+    /* Check ISP */
+    if (psi_d) {
+        object power = psi_d->query_power(power_id);
+        if (power) {
+            int cost = power->query_isp_cost();
+            if (this_player()->query_isp() < cost) {
+                write("You don't have enough I.S.P. You need " + cost +
+                      " but only have " + this_player()->query_isp() + ".\n");
+                return 1;
+            }
+        }
+    }
+
+    /* Find target if specified */
+    if (target_name && target_name != "") {
+        object env = environment(this_player());
+        if (env) {
+            target = present(target_name, env);
+            if (!target) {
+                object *inv = all_inventory(env);
+                foreach (object ob : inv) {
+                    if (living(ob) && ob != this_player()) {
+                        string race = ob->query_race ? ob->query_race() : "";
+                        if (race && lower_case(race) == lower_case(target_name)) {
+                            target = ob;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (!target) {
+            write("You don't see '" + target_name + "' here.\n");
+            return 1;
+        }
+    } else {
+        target = this_player();
+    }
+
+    /* Activate the power */
+    if (psi_d) {
+        psi_d->activate_power(power_id, this_player(), target);
+    } else {
+        write("Psionics daemon not available.\n");
+    }
+
+    return 1;
+}
+
+string query_help() {
+    return
+"PSI - Activate psionic powers\n\n"
+"Usage:\n"
+"  psi                             List your powers and I.S.P.\n"
+"  psi <power>                     Use a power (on yourself by default)\n"
+"  psi <power> <target>            Use a power on a target\n"
+"  psi telepathy <person> <msg>    Send a mental message to someone\n"
+"  psi info <power>                Get detailed info about a power\n\n"
+"Psionic powers cost I.S.P. (Inner Strength Points) to activate.\n"
+"I.S.P. regenerates through meditation and rest.\n\n"
+"Psionic categories: Sensitive, Physical, Healing, Super.\n"
+"Your category determines which powers you can learn.\n";
+}

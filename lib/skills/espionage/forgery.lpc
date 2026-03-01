@@ -10,7 +10,7 @@ void create() {
     set_skill_id("forgery");
     set_skill_name("Forgery");
     set_skill_desc(
-        "TODO:CONTENT — Create convincing counterfeit documents and ID."
+        "TODO:CONTENT - Create convincing counterfeit documents and ID."
     );
     set_skill_category("espionage");
 

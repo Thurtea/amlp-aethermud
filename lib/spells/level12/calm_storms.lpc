@@ -1,0 +1,71 @@
+// /lib/spells/level12/calm_storms.lpc
+// Calm Storms - Level 12 Weather Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("calm_storms");
+    set_spell_name("Calm Storms");
+    set_spell_desc(
+        "The mage calms a raging storm with a simple invocation, slowing "
+        "downpours to light rain, reducing wind speed by half, shrinking "
+        "ocean waves, and lightening stormy skies. Effective against both "
+        "natural and magically-induced storms. As a ritual, the effect is "
+        "even more powerful: turning a torrential rain into a drizzle, "
+        "reducing winds to a gentle breeze, and dispersing a tornado. "
+        "Area affected: 1 mile per level of the caster. "
+        "Duration: 1 hour per level."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(200);
+
+    set_duration_type(1);   // per level
+    set_base_duration(60);  // 60 min base (1 hour)
+
+    set_range_type(4);        // area
+    set_base_range(5280);     // 1 mile in feet
+
+    set_incantation("Venti cessate, tempestas quiesce, pax caelo redeat!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_min = level * 60;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    env->set_property("storm_calmed", 1);
+    env->set_property("weather_override", "clear");
+
+    tell_object(caster,
+        "You speak the words of calming and raise your arms to the sky. "
+        "The storm around you begins to relent - the howling winds die down, "
+        "the rain softens to a drizzle, and the dark clouds thin.\n"
+        "The storm is calmed for " + duration_min + " minutes.\n");
+
+    tell_room(env,
+        "The raging storm suddenly abates as " + caster->query_cap_name() +
+        " speaks words of power. Wind and rain diminish to near nothing.\n",
+        ({ caster }));
+
+    call_out("end_calm_storms", duration_min * 60, caster, env);
+    return 1;
+}
+
+void end_calm_storms(object caster, object env) {
+    if (!env) return;
+    env->remove_property("storm_calmed");
+    env->remove_property("weather_override");
+    if (caster) tell_object(caster, "The Calm Storms spell has ended.\n");
+    if (env) tell_room(env, "The weather returns to normal.\n", ({ }));
+}

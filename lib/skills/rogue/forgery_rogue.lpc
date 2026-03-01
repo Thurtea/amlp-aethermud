@@ -10,7 +10,7 @@ void create() {
     set_skill_id("forgery_rogue");
     set_skill_name("Forgery (Rogue)");
     set_skill_desc(
-        "TODO:CONTENT — Create fake documents, IDs, and currency."
+        "TODO:CONTENT - Create fake documents, IDs, and currency."
     );
     set_skill_category("rogue");
 

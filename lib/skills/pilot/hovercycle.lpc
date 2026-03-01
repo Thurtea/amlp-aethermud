@@ -10,7 +10,7 @@ void create() {
     set_skill_id("hovercycle");
     set_skill_name("Pilot: Hovercycle");
     set_skill_desc(
-        "TODO:CONTENT — Operate single-person hovercycles and skycycles."
+        "TODO:CONTENT - Operate single-person hovercycles and skycycles."
     );
     set_skill_category("pilot");
 

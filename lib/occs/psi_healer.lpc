@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Psi-Healers are among the most valued and beloved psionics — " +
+        "Psi-Healers are among the most valued and beloved psionics - " +
         "practitioners who have focused their abilities entirely on the repair " +
         "of damaged bodies and minds. Where other psychics project power outward " +
         "in destructive or manipulative ways, Psi-Healers direct it inward " +
@@ -81,7 +81,7 @@ void create() {
     set_special_training("psionic healing arts");
 
     set_background(
-        "Psi-Healers usually discover their gift during a medical crisis — " +
+        "Psi-Healers usually discover their gift during a medical crisis - " +
         "someone dying in front of them, and a desperate instinct to help that " +
         "manifests as real healing power. They spend the rest of their lives " +
         "developing and applying it. Few can resist a call for help."

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("trap_detection");
     set_skill_name("Trap/Mine Detection");
     set_skill_desc(
-        "TODO:CONTENT — Locate and identify traps and buried mines."
+        "TODO:CONTENT - Locate and identify traps and buried mines."
     );
     set_skill_category("military");
 

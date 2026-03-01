@@ -33,7 +33,7 @@ int apply_effect(object user, object target) {
     if (!user) return 0;
     if (target && living(target) && target != user &&
         environment(user) == environment(target)) {
-        // Offensive use — minor fire damage
+        // Offensive use - minor fire damage
         int damage = random(6) + 1;
         int max_hp = 0;
         if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
@@ -54,7 +54,7 @@ int apply_effect(object user, object target) {
             ({ user, target }));
         target->take_damage(damage, 0);
     } else {
-        // Utility use — light fires, warmth, illumination
+        // Utility use - light fires, warmth, illumination
         tell_object(user, "You extend a thread of pyrokinetic focus. "
             "A small flame blooms in your palm, perfectly controlled "
             "and dancing at your mental command.\n");

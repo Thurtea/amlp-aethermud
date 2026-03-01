@@ -1,0 +1,92 @@
+// /lib/spells/level13/super_healing.lpc
+// Super Healing - Level 13 Restoration Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("super_healing");
+    set_spell_name("Super Healing");
+    set_spell_desc(
+        "A powerful healing spell that restores 4d6 SDC and 2d6 Hit Points "
+        "and also counteracts poison, disease, and blindness. Unlike the "
+        "lower-level Heal Wounds, Super Healing also cleanses magical afflictions "
+        "of level 8 and below. It cannot restore lost limbs or reverse death "
+        "but can bring a character back from the brink of death if they still "
+        "have any HP remaining. The target must be touched. Cannot be cast on "
+        "the undead or mechanical constructs."
+    );
+
+    set_spell_level(13);
+    set_ppe_cost(220);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(1);
+    set_base_range(0);
+
+    set_incantation("Corpus sana, vita retorna!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (!target) target = caster;
+
+    if (!living(target)) {
+        tell_object(caster, "Super Healing only works on living beings.\n");
+        return 0;
+    }
+
+    // Heal SDC: 4d6
+    int sdc_healed = random(6)+1 + random(6)+1 + random(6)+1 + random(6)+1;
+    // Heal HP: 2d6
+    int hp_healed = random(6)+1 + random(6)+1;
+
+    if (function_exists("heal_damage", target)) {
+        target->heal_damage(sdc_healed, 0);
+    } else if (function_exists("add_hp", target)) {
+        target->add_hp(hp_healed + sdc_healed);
+    }
+
+    // Cleanse afflictions
+    target->remove_property("poisoned");
+    target->remove_property("diseased");
+    target->remove_property("blinded");
+    target->remove_property("luck_cursed");
+    target->remove_property("phobia_cursed");
+
+    tell_object(caster,
+        "Brilliant golden light pours from your hands into " +
+        target->query_cap_name() + "!\n"
+        "SDC restored: " + sdc_healed + "\n"
+        "HP restored: " + hp_healed + "\n"
+        "All active afflictions cleansed.\n");
+
+    if (caster != target) {
+        tell_object(target,
+            caster->query_cap_name() +
+            " channels powerful healing energy into you!\n"
+            "You feel wounds knit, pain fade, and toxins dissolve.\n"
+            "SDC: +" + sdc_healed + "  HP: +" + hp_healed + "\n");
+    }
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob))
+                tell_object(ob,
+                    "Brilliant healing light emanates from " +
+                    caster->query_cap_name() +
+                    " as they channel Super Healing!\n");
+        }
+    }
+
+    return 1;
+}

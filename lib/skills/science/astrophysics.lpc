@@ -10,7 +10,7 @@ void create() {
     set_skill_id("astrophysics");
     set_skill_name("Astrophysics");
     set_skill_desc(
-        "TODO:CONTENT — Advanced study of stars, galaxies, and cosmic phenomena."
+        "TODO:CONTENT - Advanced study of stars, galaxies, and cosmic phenomena."
     );
     set_skill_category("science");
 

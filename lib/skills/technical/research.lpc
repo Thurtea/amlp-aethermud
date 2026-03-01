@@ -10,7 +10,7 @@ void create() {
     set_skill_id("research");
     set_skill_name("Research");
     set_skill_desc(
-        "TODO:CONTENT — Gather information from libraries, databases, and archives."
+        "TODO:CONTENT - Gather information from libraries, databases, and archives."
     );
     set_skill_category("technical");
 

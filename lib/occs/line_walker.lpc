@@ -80,8 +80,8 @@ void create() {
 
     set_background(
         "Line Walkers learned magic by following the power, not by studying " +
-        "it. Most were drawn to ley lines from a young age — feeling the " +
-        "vibration of dimensional energy that others could not detect — and " +
+        "it. Most were drawn to ley lines from a young age - feeling the " +
+        "vibration of dimensional energy that others could not detect - and " +
         "taught themselves to use it through years of wandering. They know " +
         "every ley line in their territory the way a sailor knows currents."
     );

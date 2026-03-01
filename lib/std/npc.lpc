@@ -4,7 +4,7 @@
  * Base LPC NPC object.  All domain NPCs should inherit this.
  *
  * Provides:
- *   - set_template() / query_template()  — template id string
+ *   - set_template() / query_template()  - template id string
  *   - die() override that notifies npc_daemon before destructing
  *   - on_spawn() hook for subclass initialization
  *   - take_damage() / is_alive() override using npc_hp (not living.lpc hp)
@@ -69,7 +69,7 @@ string query_template()       { return npc_template; }
 void set_level(int l) { npc_level = l; }
 int  query_level()    { return npc_level; }
 
-/* ---- HP — use npc_hp as the source of truth ---- */
+/* ---- HP - use npc_hp as the source of truth ---- */
 void set_hp(int h)  { npc_hp = npc_hp_max = h; }
 int  query_hp()     { return npc_hp; }
 int  query_hp_max() { return npc_hp_max; }
@@ -86,7 +86,7 @@ string query_position()            { return npc_position; }
 /* ---- Name: use short description for NPC display ---- */
 string query_name() { return query_short(); }
 
-/* ---- Health overrides — keep npc_hp in sync with living's combat ---- */
+/* ---- Health overrides - keep npc_hp in sync with living's combat ---- */
 
 /* Override is_alive() so living.lpc combat uses npc_hp */
 int is_alive() { return npc_hp > 0; }
@@ -99,7 +99,7 @@ int take_damage(int amount, int damage_type) {
     return (npc_hp <= 0) ? 1 : 0;
 }
 
-/* ---- die() — notify npc_daemon then destruct ---- */
+/* ---- die() - notify npc_daemon then destruct ---- */
 void die(object killer) {
     object env = environment(this_object());
     if (env) {

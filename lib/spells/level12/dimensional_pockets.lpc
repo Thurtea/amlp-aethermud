@@ -1,0 +1,76 @@
+// /lib/spells/level12/dimensional_pockets.lpc
+// Dimensional Pockets - Level 12 Utility Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("dimensional_pockets");
+    set_spell_name("Dimensional Pockets");
+    set_spell_desc(
+        "The mage creates up to eight invisible pockets in the dimensional fabric, "
+        "each capable of holding one cubic foot of material (roughly the size of "
+        "a backpack). Items stored in dimensional pockets are removed from normal "
+        "space entirely and cannot be detected or stolen. The caster can access "
+        "any pocket with a thought and retrieve items instantly. The pockets "
+        "persist for 24 hours, after which any stored items are expelled onto "
+        "the ground. The mage can dismiss the pockets early at will."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(140);
+
+    set_duration_type(0);
+    set_base_duration(86400);
+
+    set_range_type(0);
+    set_base_range(0);
+
+    set_incantation("Spatium inter mundi, receptaculum meum!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(5);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("dim_pockets_active")) {
+        tell_object(caster, "You already have dimensional pockets active!\n");
+        return 0;
+    }
+
+    caster->set_property("dim_pockets_active", 1);
+    caster->set_property("dim_pockets_count", 8);
+    caster->set_property("dim_pockets_items", ({ }));
+
+    tell_object(caster,
+        "You tear eight small voids in the fabric of reality around you. "
+        "Eight dimensional pockets spring into existence, invisible and "
+        "imperceptible to anyone else. Each can hold up to one cubic foot "
+        "of material. They will last 24 hours or until dismissed.\n"
+        "Use 'pocket store <item>' and 'pocket retrieve <item>' to interact.\n");
+
+    call_out("end_dimensional_pockets", 86400, caster);
+    return 1;
+}
+
+void end_dimensional_pockets(object caster) {
+    if (!caster) return;
+
+    mixed *stored = caster->query_property("dim_pockets_items");
+    caster->remove_property("dim_pockets_active");
+    caster->remove_property("dim_pockets_count");
+    caster->remove_property("dim_pockets_items");
+
+    tell_object(caster, "Your dimensional pockets collapse! Stored items fall to the ground.\n");
+
+    if (stored && sizeof(stored) > 0) {
+        object env = environment(caster);
+        foreach (mixed ob : stored) {
+            if (ob && objectp(ob)) move_object(ob, env ? env : caster);
+        }
+    }
+}

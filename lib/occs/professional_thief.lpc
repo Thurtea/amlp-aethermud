@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Professional Thieves are among the best in the business — master " +
+        "Professional Thieves are among the best in the business - master " +
         "burglars, infiltrators, and high-stakes criminals who have turned " +
         "theft into an art form. They plan their jobs meticulously, exploit " +
         "every security weakness, and vanish before anyone realizes anything " +
@@ -85,7 +85,7 @@ void create() {
     set_special_training("infiltration");
 
     set_background(
-        "Professional Thieves come from all backgrounds — orphans who learned " +
+        "Professional Thieves come from all backgrounds - orphans who learned " +
         "to survive, trained agents gone rogue, or simply gifted individuals " +
         "who discovered they had a talent for taking things. Many operate in " +
         "major cities; some specialize in particular types of targets."

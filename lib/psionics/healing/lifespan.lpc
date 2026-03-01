@@ -14,7 +14,7 @@ void create() {
         "their life force and gauge how much natural life remains. This power "
         "reveals whether someone is young and full of life, middle-aged, elderly, "
         "or near the natural end of their days. It does not predict death by "
-        "violence or accident — only the natural lifespan.\n\n"
+        "violence or accident - only the natural lifespan.\n\n"
         "Range: Touch\n"
         "ISP Cost: 50 points\n"
         "Duration: Instant"
@@ -51,7 +51,7 @@ int apply_effect(object user, object target) {
     } else if (vitality_pct > 50) {
         reading = "In the prime of life, perhaps years or decades remaining.";
     } else if (vitality_pct > 25) {
-        reading = "Life force diminished — years, but perhaps not many, remain.";
+        reading = "Life force diminished - years, but perhaps not many, remain.";
     } else {
         reading = "The life thread is frail. This being is close to their natural end.";
     }

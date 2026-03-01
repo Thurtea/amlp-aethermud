@@ -10,7 +10,7 @@ void create() {
     set_skill_id("automotive_mechanics");
     set_skill_name("Automotive Mechanics");
     set_skill_desc(
-        "TODO:CONTENT — Repair and maintain ground vehicles."
+        "TODO:CONTENT - Repair and maintain ground vehicles."
     );
     set_skill_category("mechanical");
 

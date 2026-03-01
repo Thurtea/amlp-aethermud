@@ -10,7 +10,7 @@ void create() {
     set_power_id("pyrokinesis_major");
     set_power_name("Pyrokinesis: Major");
     set_power_desc(
-        "The psychic's mastery of fire reaches its apex — they can generate and " +
+        "The psychic's mastery of fire reaches its apex - they can generate and " +
         "direct massive quantities of psychic flame capable of creating large " +
         "fireballs, sustained walls of fire, or columns of superheated plasma. " +
         "The flames are real fire that burns structures and ignites flammable " +

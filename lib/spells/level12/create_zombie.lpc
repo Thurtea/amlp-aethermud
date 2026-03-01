@@ -1,0 +1,69 @@
+// /lib/spells/level12/create_zombie.lpc
+// Create Zombie - Level 12 Necromancy Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("create_zombie");
+    set_spell_name("Create Zombie");
+    set_spell_desc(
+        "A necromantic invocation that transforms a fresh corpse into an "
+        "undead zombie servant. The zombie is more intelligent than a mummy "
+        "and can speak, read simple text, perform simple tasks, and follow "
+        "complex instructions. Like all undead, the zombie feels no pain "
+        "and fears nothing. Bullets, blades, and clubs do NO damage. Mental "
+        "assaults, magic charms, illusions, sleep, curses, sickness, and "
+        "paralysis are ineffective. However, the zombie is vulnerable to "
+        "magical energy attacks, normal fire, and silver weapons. "
+        "Duration: Exists until destroyed."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(250);
+
+    set_duration_type(0);  // permanent
+    set_base_duration(0);
+
+    set_range_type(1);  // touch
+    set_base_range(1);
+
+    set_incantation("Surge mortuus! Voluntati meae obedi et ambula!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ "fresh corpse" }));
+    set_casting_time(8);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    tell_object(caster,
+        "You speak words of dark power over the corpse, channeling necromantic "
+        "energies into lifeless flesh. The body twitches, then rises stiffly "
+        "to its feet. Its eyes open - blank and obedient. "
+        "The zombie awaits your command.\n");
+
+    object env = environment(caster);
+    if (env) {
+        tell_room(env,
+            caster->query_cap_name() +
+            " speaks dark words over a corpse. It rises jerkily as a zombie!\n",
+            ({ caster }));
+    }
+
+    // Clone a zombie servant NPC
+    object zombie;
+    catch { zombie = clone_object("/npc/undead/zombie"); };
+    if (zombie) {
+        zombie->set_property("zombie_owner", caster->query_name());
+        if (env) move_object(zombie, env);
+    } else {
+        tell_object(caster,
+            "The necromantic ritual succeeds but the zombie has no physical "
+            "form to inhabit here.\n");
+    }
+
+    return 1;
+}

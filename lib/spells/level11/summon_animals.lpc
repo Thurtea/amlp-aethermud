@@ -70,7 +70,7 @@ int apply_effect(object caster, object target) {
             ob->set_property("summoned_master", caster);
             controlled += 1;
             tell_object(ob,
-                "An overwhelming compulsion seizes you — you must obey!\n");
+                "An overwhelming compulsion seizes you - you must obey!\n");
         }
     }
 

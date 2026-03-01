@@ -10,7 +10,7 @@ void create() {
     set_skill_id("read_sensory_equipment");
     set_skill_name("Read Sensory Equipment");
     set_skill_desc(
-        "TODO:CONTENT — Interpret data from radar, sonar, and sensors."
+        "TODO:CONTENT - Interpret data from radar, sonar, and sensors."
     );
     set_skill_category("pilot_related");
 

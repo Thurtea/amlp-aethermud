@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Necromancers are practitioners of the darkest and most feared school " +
-        "of magic — the manipulation of death, undead, and life-force itself. " +
+        "of magic - the manipulation of death, undead, and life-force itself. " +
         "They can animate corpses, communicate with spirits, drain the life " +
         "from living beings, and call on the power of death in its rawest form. " +
         "Many are shunned even by other magic users; some achieve positions of " +

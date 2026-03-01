@@ -10,7 +10,7 @@ void create() {
     set_skill_id("surveillance_systems");
     set_skill_name("Surveillance Systems (Technical)");
     set_skill_desc(
-        "TODO:CONTENT — Install and monitor electronic surveillance systems."
+        "TODO:CONTENT - Install and monitor electronic surveillance systems."
     );
     set_skill_category("technical");
 

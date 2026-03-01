@@ -10,7 +10,7 @@ void create() {
     set_skill_id("locksmith");
     set_skill_name("Locksmith");
     set_skill_desc(
-        "TODO:CONTENT — Install, repair, and bypass mechanical locks."
+        "TODO:CONTENT - Install, repair, and bypass mechanical locks."
     );
     set_skill_category("mechanical");
 

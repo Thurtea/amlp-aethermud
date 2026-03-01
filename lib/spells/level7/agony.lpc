@@ -81,7 +81,7 @@ int apply_effect(object caster, object target) {
 
     tell_object(target,
         "INTENSE AGONY OVERWHELMS YOU!\n" +
-        "Every nerve in your body screams — you cannot act!\n");
+        "Every nerve in your body screams - you cannot act!\n");
 
     object env = environment(caster);
     if (env) {

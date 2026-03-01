@@ -10,7 +10,7 @@ void create() {
     set_skill_id("cryptography");
     set_skill_name("Cryptography");
     set_skill_desc(
-        "TODO:CONTENT — Encode and decode encrypted messages and data."
+        "TODO:CONTENT - Encode and decode encrypted messages and data."
     );
     set_skill_category("technical");
 

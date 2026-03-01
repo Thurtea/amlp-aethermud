@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_explosives");
     set_skill_name("W.P. Explosives");
     set_skill_desc(
-        "TODO:CONTENT — Use and throw explosive grenades and bombs accurately."
+        "TODO:CONTENT - Use and throw explosive grenades and bombs accurately."
     );
     set_skill_category("wp_modern");
 

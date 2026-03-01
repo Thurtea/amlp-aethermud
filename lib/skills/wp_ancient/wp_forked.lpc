@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_forked");
     set_skill_name("W.P. Forked Weapons");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with tridents, pitchforks, and forked weapons."
+        "TODO:CONTENT - Proficiency with tridents, pitchforks, and forked weapons."
     );
     set_skill_category("wp_ancient");
 

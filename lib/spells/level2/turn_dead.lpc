@@ -1,0 +1,101 @@
+// /lib/spells/level2/turn_dead.lpc
+// Turn Dead - Level 2 Necromantic Counter Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("turn_dead");
+    set_spell_name("Turn Dead");
+    set_spell_desc(
+        "The mage channels a burst of positive life energy to repel or disrupt "
+        "lesser undead. Simple undead (zombies, skeletons) are instantly destroyed "
+        "on a failed save. More powerful undead (vampires, mummies, spectres) take "
+        "6d6 SDC damage and must save vs magic or flee for 1d6 melee rounds. "
+        "Undead of extreme supernatural power resist the effect and have a bonus "
+        "to their save. The effect radiates 30 feet from the caster. Living beings "
+        "are unaffected."
+    );
+
+    set_spell_level(2);
+    set_ppe_cost(6);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(3);
+    set_base_range(30);
+
+    set_incantation("Lux vitae, mors mortuorum!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(3);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    tell_object(caster,
+        "You release a pulse of pure life energy!\n"
+        "Brilliant white light blazes outward from your position in all directions!\n");
+
+    object env = environment(caster);
+    if (!env) return 1;
+
+    int affected = 0;
+    foreach (object ob : all_inventory(env)) {
+        if (ob == caster || !living(ob)) continue;
+
+        int is_undead = ob->query_property("undead") || ob->query_property("is_undead");
+        if (!is_undead) continue;
+
+        affected++;
+        int power = ob->query_property("undead_power") ? ob->query_property("undead_power") : 1;
+
+        if (power <= 2) {
+            // Simple undead: destroyed
+            tell_object(ob, "The wave of pure life energy tears you apart!\n");
+            tell_object(caster,
+                ob->query_cap_name() + " crumbles to dust, destroyed by the Turn Dead!\n");
+            object *room_others = all_inventory(env);
+            foreach (object oth : room_others) {
+                if (oth != caster && oth != ob && living(oth))
+                    tell_object(oth, ob->query_cap_name() + " crumbles to dust!\n");
+            }
+            destruct(ob);
+        } else {
+            // Powerful undead: damage + possible flee
+            int damage = random(6)+1 + random(6)+1 + random(6)+1 +
+                         random(6)+1 + random(6)+1 + random(6)+1;
+            tell_object(ob,
+                "The blast of life energy sears you! " + damage + " damage!\n");
+            if (function_exists("take_damage", ob)) ob->take_damage(damage, 0);
+            else if (function_exists("add_hp", ob)) ob->add_hp(-damage);
+
+            int save = random(20) + 1;
+            if (save < 14) {
+                ob->set_property("fleeing", 1);
+                int flee_time = (random(6) + 1) * 15;
+                call_out("end_turn_flee", flee_time, ob);
+                tell_object(ob, "You flee from the overwhelming life energy!\n");
+                tell_object(caster, ob->query_cap_name() + " flees in terror!\n");
+            } else {
+                tell_object(caster,
+                    ob->query_cap_name() + " resists the compulsion to flee!\n");
+            }
+        }
+    }
+
+    if (affected == 0)
+        tell_object(caster, "The Turn Dead finds no undead in range to affect.\n");
+
+    return 1;
+}
+
+void end_turn_flee(object ob) {
+    if (!ob) return;
+    ob->remove_property("fleeing");
+    if (living(ob)) tell_object(ob, "The overwhelming compulsion to flee fades.\n");
+}

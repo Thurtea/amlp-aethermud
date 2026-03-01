@@ -10,7 +10,7 @@ void create() {
     set_skill_id("demolitions");
     set_skill_name("Demolitions");
     set_skill_desc(
-        "TODO:CONTENT — Place and detonate explosives safely and effectively."
+        "TODO:CONTENT - Place and detonate explosives safely and effectively."
     );
     set_skill_category("military");
 

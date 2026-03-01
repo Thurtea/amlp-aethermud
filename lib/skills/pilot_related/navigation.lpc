@@ -10,7 +10,7 @@ void create() {
     set_skill_id("navigation");
     set_skill_name("Navigation");
     set_skill_desc(
-        "TODO:CONTENT — Determine position and plot courses using maps and instruments."
+        "TODO:CONTENT - Determine position and plot courses using maps and instruments."
     );
     set_skill_category("pilot_related");
 

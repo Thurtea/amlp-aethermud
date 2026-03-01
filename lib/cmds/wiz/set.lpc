@@ -1,5 +1,5 @@
 // lib/cmds/wiz/set.lpc
-// Standalone set command — delegates to admin wand
+// Standalone set command - delegates to admin wand
 
 #include "/secure/wiz_perms.lpc"
 

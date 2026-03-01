@@ -40,7 +40,7 @@ int apply_effect(object user, object target) {
             if (function_exists("query_isp", nearby[i])) isp = nearby[i]->query_isp();
             if (isp > 0) {
                 detections += "  " + nearby[i]->query_cap_name() +
-                    " — psionic signature detected";
+                    " - psionic signature detected";
                 if (isp > 100) detections += " (extremely powerful)";
                 else if (isp > 50) detections += " (strong)";
                 else if (isp > 20) detections += " (moderate)";

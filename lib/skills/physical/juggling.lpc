@@ -10,7 +10,7 @@ void create() {
     set_skill_id("juggling");
     set_skill_name("Juggling");
     set_skill_desc(
-        "TODO:CONTENT — Keep multiple objects in the air; distraction and performance skill."
+        "TODO:CONTENT - Keep multiple objects in the air; distraction and performance skill."
     );
     set_skill_category("physical");
 

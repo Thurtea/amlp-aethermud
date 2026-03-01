@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Bursters are pyrokinetics of extraordinary power — psionics who can " +
+        "Bursters are pyrokinetics of extraordinary power - psionics who can " +
         "generate, control, and project fire directly from their mental energy. " +
         "Unlike the minor pyrokinesis power available to some sensitives, a " +
         "Burster's fire comes from a deep wellspring of raw psionic fury that " +
@@ -79,7 +79,7 @@ void create() {
 
     set_background(
         "Bursters discover their power during moments of intense emotional " +
-        "distress — their fire manifestation is directly linked to their " +
+        "distress - their fire manifestation is directly linked to their " +
         "emotional state until trained. Many have accidentally burned people " +
         "they cared for before learning control. This shapes them profoundly."
     );

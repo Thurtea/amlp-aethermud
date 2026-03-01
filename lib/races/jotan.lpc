@@ -11,7 +11,7 @@ void create() {
     set_race_category(RACE_CAT_GIANT);
 
     set_race_description(
-        "Jotan are mountain giants—tough, hardy, and slow. They dwell in high
+        "Jotan are mountain giants-tough, hardy, and slow. They dwell in high
 peaks and often work stone and metal with great skill."
     );
 

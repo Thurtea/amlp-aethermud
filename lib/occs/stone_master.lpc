@@ -13,8 +13,8 @@ void create() {
     set_occ_description(
         "Stone Masters are warriors deeply attuned to earth and stone, combining " +
         "exceptional physical toughness with a spiritual connection to the earth " +
-        "element. They are not magic users in the traditional sense — their " +
-        "attunement is instinctive rather than studied — but they can draw on " +
+        "element. They are not magic users in the traditional sense - their " +
+        "attunement is instinctive rather than studied - but they can draw on " +
         "the solidity and endurance of stone to protect themselves and their " +
         "allies. Stone Masters are among the most durable fighters anywhere, " +
         "their bodies hardened by elemental conditioning to resist blows that " +
@@ -81,7 +81,7 @@ void create() {
 
     set_background(
         "Stone Masters develop their earth attunement through years of living " +
-        "close to the land — mining communities, stonecutters, or warriors who " +
+        "close to the land - mining communities, stonecutters, or warriors who " +
         "survived extreme conditions and emerged changed. Their gift is not " +
         "granted; it is grown from experience."
     );

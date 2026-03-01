@@ -10,7 +10,7 @@ void create() {
     set_skill_id("language_lore");
     set_skill_name("Language/Lore");
     set_skill_desc(
-        "TODO:CONTENT — Academic study of language structure and etymology."
+        "TODO:CONTENT - Academic study of language structure and etymology."
     );
     set_skill_category("technical");
 

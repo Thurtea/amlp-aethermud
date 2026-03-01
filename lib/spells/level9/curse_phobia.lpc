@@ -10,7 +10,7 @@ void create() {
     set_spell_name("Curse: Phobia");
     set_spell_desc(
         "Imposes an intense, irrational phobia on the target. The " +
-        "caster selects a specific fear — crowds, darkness, fire, " +
+        "caster selects a specific fear - crowds, darkness, fire, " +
         "water, heights, enclosed spaces, or a specific creature type. " +
         "The victim suffers severe phobic reactions whenever they " +
         "encounter the chosen stimulus: panic, loss of actions, " +
@@ -64,7 +64,7 @@ int apply_effect(object caster, object target) {
             tell_object(caster,
                 target->query_cap_name() + " resists the Phobia Curse!\n");
             tell_object(target,
-                "You feel an irrational dread try to take root in your mind — " +
+                "You feel an irrational dread try to take root in your mind - " +
                 "but you force it out!\n");
             return 1;
         }
@@ -88,7 +88,7 @@ int apply_effect(object caster, object target) {
     tell_object(target,
         "A terrible, irrational fear FLOODS your mind!\n" +
         "You are overwhelmed by dread of " + phobias + "!\n" +
-        "The phobia is beyond reason — you cannot fight it!\n");
+        "The phobia is beyond reason - you cannot fight it!\n");
 
     object env = environment(caster);
     if (env) {

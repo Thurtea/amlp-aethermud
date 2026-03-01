@@ -117,6 +117,21 @@ int main(string args) {
         target = this_player();  /* Default to self */
     }
     
+    /* Echo incantation to room before casting */
+    if (spells_d) {
+        object spell_obj = spells_d->query_spell(spell_id);
+        if (spell_obj) {
+            string incantation = spell_obj->query_incantation();
+            if (incantation && incantation != "") {
+                object room = environment(this_player());
+                if (room)
+                    tell_room(room,
+                        this_player()->query_cap_name() + " intones: \"" +
+                        incantation + "\"\n", ({ }));
+            }
+        }
+    }
+
     /* Cast the spell */
     int result;
     if (spells_d) {

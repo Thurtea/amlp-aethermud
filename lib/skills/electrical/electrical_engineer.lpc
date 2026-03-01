@@ -10,7 +10,7 @@ void create() {
     set_skill_id("electrical_engineer");
     set_skill_name("Electrical Engineer");
     set_skill_desc(
-        "TODO:CONTENT — Design and build complex electrical systems."
+        "TODO:CONTENT - Design and build complex electrical systems."
     );
     set_skill_category("electrical");
 

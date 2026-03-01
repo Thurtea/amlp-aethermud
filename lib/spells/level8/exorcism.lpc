@@ -51,14 +51,14 @@ int apply_effect(object caster, object target) {
     int has_entity = target->query_property("entity_controlling");
 
     if (!possessed && !has_entity) {
-        /* Still useful — provides protection bonus */
+        /* Still useful - provides protection bonus */
         tell_object(caster,
             target->query_cap_name() + " does not appear possessed, " +
             "but you perform the exorcism anyway for protection.\n");
         target->set_property("exorcism_protected", 1);
         tell_object(target,
             caster->query_cap_name() +
-            " performs an exorcism — you feel protected from possession!\n");
+            " performs an exorcism - you feel protected from possession!\n");
         call_out("end_exorcism_protection", 86400, target);
         return 1;
     }
@@ -74,7 +74,7 @@ int apply_effect(object caster, object target) {
             "The possessing entity resists the exorcism!\n" +
             "It clings to its host with terrible strength.\n");
         tell_object(target,
-            "Something inside you strains against the exorcism — " +
+            "Something inside you strains against the exorcism - " +
             "and holds on!\n");
         return 1;
     }
@@ -89,7 +89,7 @@ int apply_effect(object caster, object target) {
 
     tell_object(target,
         "Something rips free of your mind with a shriek!\n" +
-        "You are yourself again — free and protected!\n");
+        "You are yourself again - free and protected!\n");
 
     object env = environment(caster);
     if (env) {

@@ -13,8 +13,8 @@ void create() {
         "The psychic opens their mind to the vast flows of magical energy that " +
         "course through the world. Ley lines become visible as glowing rivers " +
         "of light stretching to the horizon, nexus points blaze like suns where " +
-        "lines intersect, and dimensional anomalies — rifts, thin spots, and " +
-        "magic-dead zones — register as distortions or voids in the flow. The " +
+        "lines intersect, and dimensional anomalies - rifts, thin spots, and " +
+        "magic-dead zones - register as distortions or voids in the flow. The " +
         "psychic can gauge the strength of ley lines and estimate the power " +
         "available at nearby nexus points. This awareness is crucial for magic " +
         "users who wish to draw on environmental energy.\n\n" +
@@ -42,19 +42,19 @@ int apply_effect(object user, object target) {
     }
     if (nexus) {
         tell_object(user, "You open your awareness to the magical currents of " +
-            "the world — and a blazing nexus point detonates in your perception " +
+            "the world - and a blazing nexus point detonates in your perception " +
             "right here. Ley lines converge from multiple directions in a " +
             "thundering confluence of raw magical energy. The power here is " +
             "immense.\n");
     } else if (ley_line) {
         tell_object(user, "A broad river of magical energy flows through this " +
-            "location — a ley line, powerful and steady. You can feel its " +
+            "location - a ley line, powerful and steady. You can feel its " +
             "current as clearly as a river beneath your feet. Other lines " +
             "are visible in the distance.\n");
     } else {
         tell_object(user, "You open your perception to the ley line network. " +
             "No lines run directly through this location, but you can sense " +
-            "their presence in the distance — currents of magical energy flowing " +
+            "their presence in the distance - currents of magical energy flowing " +
             "through the world like veins through living flesh.\n");
     }
     return 1;

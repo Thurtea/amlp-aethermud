@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Elemental Fusionists are among the most versatile magic users in " +
-        "existence — practitioners who have mastered not one element but the " +
+        "existence - practitioners who have mastered not one element but the " +
         "art of combining elemental forces to produce effects that neither " +
         "element could create alone. Fire and water become steam and fog. " +
         "Earth and air become sandstorms and whirlwinds. The combinations are " +

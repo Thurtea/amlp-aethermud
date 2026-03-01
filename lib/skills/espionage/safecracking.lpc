@@ -10,7 +10,7 @@ void create() {
     set_skill_id("safecracking");
     set_skill_name("Safecracking");
     set_skill_desc(
-        "TODO:CONTENT — Open combination and electronic safes without the code."
+        "TODO:CONTENT - Open combination and electronic safes without the code."
     );
     set_skill_category("espionage");
 

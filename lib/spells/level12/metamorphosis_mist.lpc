@@ -1,0 +1,88 @@
+// /lib/spells/level12/metamorphosis_mist.lpc
+// Metamorphosis: Mist - Level 12 Transformation Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("metamorphosis_mist");
+    set_spell_name("Metamorphosis: Mist");
+    set_spell_desc(
+        "The most powerful of the metamorph magics. The mage transforms "
+        "into a semi-transparent mist. In mist form: no physical or energy "
+        "attacks can harm the caster, no locked door can stop passage through "
+        "cracks and keyholes, and the caster moves at a speed of 14 with "
+        "80% prowl skill. The caster can hear and see normally but cannot "
+        "communicate or cast magic while in mist form. "
+        "Duration: 20 minutes per level of experience."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(250);
+
+    set_duration_type(1);
+    set_base_duration(20);
+
+    set_range_type(0);  // self
+    set_base_range(0);
+
+    set_incantation("Corpus liquescit, nebula ego sum!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("mist_form")) {
+        // Toggle off
+        caster->remove_property("mist_form");
+        caster->remove_property("invulnerable");
+        tell_object(caster,
+            "The mist swirls and condenses back into your physical form.\n");
+        object env = environment(caster);
+        if (env)
+            tell_room(env,
+                "The mist nearby suddenly condenses, reforming into " +
+                caster->query_cap_name() + ".\n", ({ caster }));
+        return 1;
+    }
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_secs = level * 1200; // 20 min/level
+
+    caster->set_property("mist_form", 1);
+    caster->set_property("invulnerable", 1);
+
+    tell_object(caster,
+        "Your body dissolves into a semi-transparent mist! You drift free "
+        "of physical constraints. You can slip through any crack or keyhole. "
+        "No weapon or energy attack can touch you in this form.\n"
+        "You cannot speak or cast spells while in mist form.\n"
+        "Duration: " + (level * 20) + " minutes.\n");
+
+    object env = environment(caster);
+    if (env)
+        tell_room(env,
+            caster->query_cap_name() + "'s body dissolves into a drifting "
+            "semi-transparent mist!\n", ({ caster }));
+
+    call_out("end_mist_form", duration_secs, caster);
+    return 1;
+}
+
+void end_mist_form(object caster) {
+    if (!caster || !caster->query_property("mist_form")) return;
+    caster->remove_property("mist_form");
+    caster->remove_property("invulnerable");
+    tell_object(caster,
+        "Your Metamorphosis: Mist spell ends. You condense back to physical form.\n");
+    object env = environment(caster);
+    if (env)
+        tell_room(env,
+            "The drifting mist condenses back into " +
+            caster->query_cap_name() + ".\n", ({ caster }));
+}

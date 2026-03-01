@@ -85,7 +85,7 @@ void end_globe_of_silence(object env, object caster) {
     foreach (object ob : all_inventory(env)) {
         if (living(ob)) {
             tell_object(ob,
-                "The unnatural silence lifts — sound returns to the area.\n");
+                "The unnatural silence lifts - sound returns to the area.\n");
         }
     }
 }

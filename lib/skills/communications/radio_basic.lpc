@@ -10,7 +10,7 @@ void create() {
     set_skill_id("radio_basic");
     set_skill_name("Radio: Basic");
     set_skill_desc(
-        "TODO:CONTENT — Operate basic radio equipment for voice communication."
+        "TODO:CONTENT - Operate basic radio equipment for voice communication."
     );
     set_skill_category("communications");
 

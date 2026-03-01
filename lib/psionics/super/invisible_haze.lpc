@@ -12,8 +12,8 @@ void create() {
     set_power_desc(
         "The psychic projects a psychic distortion field around their body that " +
         "bends light and scrambles perception, making them extremely difficult " +
-        "to see. They are not fully invisible — close inspection or See the " +
-        "Invisible reveals a shimmering outline — but at a distance they are " +
+        "to see. They are not fully invisible - close inspection or See the " +
+        "Invisible reveals a shimmering outline - but at a distance they are " +
         "effectively transparent. The haze moves with the psychic and requires " +
         "no concentration to maintain once activated. Attacks against the psychic " +
         "suffer significant penalties as attackers struggle to fix them in their " +

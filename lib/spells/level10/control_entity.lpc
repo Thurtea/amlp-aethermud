@@ -10,7 +10,7 @@ void create() {
     set_spell_name("Control Entity");
     set_spell_desc(
         "Enables the caster to seize control of supernatural entities " +
-        "without summoning them — when encountered in the wild, this " +
+        "without summoning them - when encountered in the wild, this " +
         "magic can dominate them. The caster can control two entities " +
         "per level of experience simultaneously. All varieties of " +
         "entities are susceptible. Each entity receives a standard " +
@@ -81,7 +81,7 @@ int apply_effect(object caster, object target) {
             tell_object(caster,
                 target->query_cap_name() + " resists your Control Entity!\n");
             tell_object(target,
-                "Magical chains attempt to bind your will — but you break free!\n");
+                "Magical chains attempt to bind your will - but you break free!\n");
             return 1;
         }
     }
@@ -107,7 +107,7 @@ int apply_effect(object caster, object target) {
             if (ob != caster && ob != target && living(ob)) {
                 tell_object(ob,
                     target->query_cap_name() +
-                    " goes still — controlled by " +
+                    " goes still - controlled by " +
                     caster->query_cap_name() + "!\n");
             }
         }
@@ -125,5 +125,5 @@ void end_control_entity(object target) {
     target->remove_property("entity_controller");
 
     tell_object(target,
-        "The magical control over you SHATTERS! You are free — and furious!\n");
+        "The magical control over you SHATTERS! You are free - and furious!\n");
 }

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("military_etiquette");
     set_skill_name("Military Etiquette");
     set_skill_desc(
-        "TODO:CONTENT — Know proper military protocols, ranks, and customs."
+        "TODO:CONTENT - Know proper military protocols, ranks, and customs."
     );
     set_skill_category("military");
 

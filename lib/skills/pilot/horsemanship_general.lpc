@@ -10,7 +10,7 @@ void create() {
     set_skill_id("horsemanship_general");
     set_skill_name("Horsemanship: General");
     set_skill_desc(
-        "TODO:CONTENT — Ride and care for horses and common riding animals."
+        "TODO:CONTENT - Ride and care for horses and common riding animals."
     );
     set_skill_category("pilot");
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("astronomy");
     set_skill_name("Astronomy & Navigation");
     set_skill_desc(
-        "TODO:CONTENT — Study of stars and celestial navigation."
+        "TODO:CONTENT - Study of stars and celestial navigation."
     );
     set_skill_category("science");
 

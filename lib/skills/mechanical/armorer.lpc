@@ -10,7 +10,7 @@ void create() {
     set_skill_id("armorer");
     set_skill_name("Armorer");
     set_skill_desc(
-        "TODO:CONTENT — Repair, modify, and create conventional weapons and armor."
+        "TODO:CONTENT - Repair, modify, and create conventional weapons and armor."
     );
     set_skill_category("mechanical");
 

@@ -1,0 +1,24 @@
+// /lib/secure/first_connect.lpc
+// Tracks whether first-boot admin onboarding has run.
+// Flag is saved to /save/first_boot.o so it persists across restarts.
+
+#include <globals.h>
+
+private int first_boot_done;
+
+void create() {
+    first_boot_done = 0;
+    restore_object("/save/first_boot");
+}
+
+// Returns 1 if onboarding has NOT yet run (i.e. first boot is needed).
+// Returns 0 once it has been completed.
+int query_first_boot() {
+    return !first_boot_done;
+}
+
+// Call once, immediately before showing the orientation room.
+void mark_first_boot_done() {
+    first_boot_done = 1;
+    save_object("/save/first_boot");
+}

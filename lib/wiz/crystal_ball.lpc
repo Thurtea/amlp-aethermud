@@ -1,5 +1,5 @@
 // lib/wiz/crystal_ball.lpc
-// Crystal Ball — wizard rank 2+
+// Crystal Ball - wizard rank 2+
 // Grants: goto (teleport self to player or room path), trans (bring target here)
 
 inherit "/std/object";

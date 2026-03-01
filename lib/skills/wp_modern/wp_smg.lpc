@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_smg");
     set_skill_name("W.P. Sub-Machine Gun");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with submachine guns and machine pistols."
+        "TODO:CONTENT - Proficiency with submachine guns and machine pistols."
     );
     set_skill_category("wp_modern");
 

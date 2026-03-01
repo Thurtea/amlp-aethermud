@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_revolver");
     set_skill_name("W.P. Revolver");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with revolver-action handguns."
+        "TODO:CONTENT - Proficiency with revolver-action handguns."
     );
     set_skill_category("wp_modern");
 

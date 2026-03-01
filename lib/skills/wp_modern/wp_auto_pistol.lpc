@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_auto_pistol");
     set_skill_name("W.P. Semi & Fully Automatic Handguns");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with semi and fully automatic pistols."
+        "TODO:CONTENT - Proficiency with semi and fully automatic pistols."
     );
     set_skill_category("wp_modern");
 

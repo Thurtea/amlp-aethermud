@@ -10,7 +10,13 @@ void create() {
     set_power_id("mind_bolt");
     set_power_name("Mind Bolt");
     set_power_desc(
-        "TODO:CONTENT — Fire a bolt of psychic energy that damages the target directly."
+        "The psychic generates a visible bolt of concentrated mental energy and hurls it "
+        "at a target. The bolt inflicts mega-damage to mega-damage structures and SDC damage "
+        "to conventional beings. Damage scales with the psychic's level: 1D6 SDC at levels "
+        "1-5, 2D6 SDC at levels 6-10, 3D6 SDC at levels 11+. The bolt can strike any "
+        "visible target within 100 feet and is considered a ranged attack; normal strike "
+        "bonuses apply. It bypasses physical armor (SDC only, not MDC armor) but can be "
+        "blocked by Mind Block or similar psionic defenses. I.S.P. cost 3-6 per bolt."
     );
     set_power_category("super");
 

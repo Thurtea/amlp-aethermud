@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_axe");
     set_skill_name("W.P. Axe");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with axes and hatchets in combat."
+        "TODO:CONTENT - Proficiency with axes and hatchets in combat."
     );
     set_skill_category("wp_ancient");
 

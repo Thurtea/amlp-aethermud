@@ -1,0 +1,88 @@
+// /lib/spells/level14/close_rift.lpc
+// Close Rift - Level 14 Dimensional Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("close_rift");
+    set_spell_name("Close Rift");
+    set_spell_desc(
+        "The master of magic can close a dimensional rift by sheer force of "
+        "will. However, the monumental effort permanently drains the mage of "
+        "two PPE points from their permanent base, whether successful or not. "
+        "The rift has an automatic save vs magic due to its mystic nature "
+        "(standard save to resist). A Close Rift Ritual increases odds for "
+        "success (save difficulty 16). On success the rift instantly vanishes. "
+        "On failure the rift is unaffected but the 2 PPE are lost forever. "
+        "PPE cost: 200 (minimum). Range: 100 feet."
+    );
+
+    set_spell_level(14);
+    set_ppe_cost(200);
+
+    set_duration_type(0);  // instant
+    set_base_duration(0);
+
+    set_range_type(2);  // short range
+    set_base_range(100);
+
+    set_incantation("Claudo te, rift! Per voluntatem meam, in nil redeas!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(6);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    // Permanently drain 2 PPE from the caster's base
+    int current_ppe = caster->query_max_ppe() ? caster->query_max_ppe() : 100;
+    caster->set_max_ppe(current_ppe - 2);
+    caster->set_property("total_ppe_drain_close_rift",
+        (caster->query_property("total_ppe_drain_close_rift") || 0) + 2);
+
+    object env = environment(caster);
+
+    // Check if there's an active rift in this room
+    if (!env || !env->query_property("rift_active")) {
+        tell_object(caster,
+            "You channel the invocation but there is no active rift here to close. "
+            "The effort still permanently drains 2 PPE from your base reserves.\n");
+        return 1;
+    }
+
+    // Rift save vs. close (standard difficulty)
+    int rift_saves = (random(20) + 1) >= 12; // Standard difficulty
+
+    if (!rift_saves) {
+        // Success - rift closed
+        env->remove_property("rift_active");
+        env->remove_property("rift_destination");
+
+        tell_object(caster,
+            "Your will crashes against the rift like a hammer blow. It shudders, "
+            "contracts, and collapses into nothing with a thunderclap of displaced air. "
+            "The rift is closed! (2 PPE permanently lost)\n");
+
+        tell_room(env,
+            caster->query_cap_name() +
+            " screams an invocation and the rift shudders and collapses inward "
+            "with a thunderclap!\n",
+            ({ caster }));
+    } else {
+        // Failure - rift resists
+        tell_object(caster,
+            "You channel everything you have into closing the rift but it holds firm. "
+            "The attempt fails. (2 PPE permanently lost)\n");
+
+        tell_room(env,
+            caster->query_cap_name() +
+            " strains to close the rift but it resists and holds open!\n",
+            ({ caster }));
+    }
+
+    return 1;
+}

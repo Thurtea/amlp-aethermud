@@ -10,7 +10,7 @@ void create() {
     set_skill_id("boxing");
     set_skill_name("Boxing");
     set_skill_desc(
-        "TODO:CONTENT — Trained bare-fist fighting; grants extra attacks and damage."
+        "TODO:CONTENT - Trained bare-fist fighting; grants extra attacks and damage."
     );
     set_skill_category("physical");
 

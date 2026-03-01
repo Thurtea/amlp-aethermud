@@ -19,7 +19,7 @@ void create() {
         " details when available."
     );
     
-    // NOTE: Conservative physical defaults — review and refine.
+    // NOTE: Conservative physical defaults - review and refine.
     set_size_category(SIZE_SMALL);
     set_height_range(48, 60);
     set_weight_range(90, 140);

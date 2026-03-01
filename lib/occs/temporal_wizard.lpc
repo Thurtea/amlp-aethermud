@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Temporal Wizards are among the rarest and most enigmatic magic users " +
-        "on Rifts Earth — practitioners of chronomancy, the art of manipulating " +
+        "on Rifts Earth - practitioners of chronomancy, the art of manipulating " +
         "time. They can slow or accelerate time for themselves or others, see " +
         "glimpses of past events, temporarily suspend animation, and in the most " +
         "advanced applications, take brief steps outside the timestream entirely. " +

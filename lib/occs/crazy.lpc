@@ -13,7 +13,7 @@ void create() {
     set_occ_description(
         "Crazies have undergone experimental brain augmentation that enhances " +
         "cognitive processing, reflexes, and sensory acuity far beyond normal " +
-        "human limits — at the cost of psychological stability. The procedures " +
+        "human limits - at the cost of psychological stability. The procedures " +
         "implant various brain stimulators and enhancement chips that provide " +
         "superhuman speed of thought and reaction, but the side effects are " +
         "well-documented: hallucinations, obsessive behaviors, paranoia, " +
@@ -82,7 +82,7 @@ void create() {
 
     set_background(
         "Crazies signed up for experimental augmentation programs, often " +
-        "voluntarily — drawn by the promise of superhuman capabilities or " +
+        "voluntarily - drawn by the promise of superhuman capabilities or " +
         "desperate enough to try anything. The psychological consequences were " +
         "disclosed in the fine print, which most did not read carefully. " +
         "Most do not regret it. That's part of the condition."

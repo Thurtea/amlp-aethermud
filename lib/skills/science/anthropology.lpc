@@ -10,7 +10,7 @@ void create() {
     set_skill_id("anthropology");
     set_skill_name("Anthropology");
     set_skill_desc(
-        "TODO:CONTENT — Study of human and humanoid cultures and societies."
+        "TODO:CONTENT - Study of human and humanoid cultures and societies."
     );
     set_skill_category("science");
 

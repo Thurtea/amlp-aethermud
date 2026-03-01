@@ -10,7 +10,7 @@ void create() {
     set_skill_id("photography");
     set_skill_name("Photography");
     set_skill_desc(
-        "TODO:CONTENT — Take and develop photographs; technical documentation."
+        "TODO:CONTENT - Take and develop photographs; technical documentation."
     );
     set_skill_category("technical");
 

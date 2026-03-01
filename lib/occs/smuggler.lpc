@@ -13,7 +13,7 @@ void create() {
     set_occ_description(
         "Smugglers are the lifeblood of Rifts Earth's black market economy. " +
         "They move contraband through checkpoints and across borders that " +
-        "conventional traders cannot cross — weapons into contested zones, " +
+        "conventional traders cannot cross - weapons into contested zones, " +
         "D-bee refugees out of CS territory, magical artifacts to buyers who " +
         "cannot ask questions, technology where it is prohibited. They rely on " +
         "vehicle skill, fast thinking, social contacts, and the ability to " +

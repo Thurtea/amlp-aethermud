@@ -83,7 +83,7 @@ void create() {
         "Forgers come from artisan families, failed bureaucrats, intelligence " +
         "washouts, or simply brilliant individuals who discovered their gift " +
         "for reproduction. Most are meticulous to the point of obsession. " +
-        "They rarely fight — they never need to be where the danger is."
+        "They rarely fight - they never need to be where the danger is."
     );
     set_organizations(({ "Black Market", "resistance movements", "spy networks" }));
     set_enemies(({ "CS document verification", "ISS" }));

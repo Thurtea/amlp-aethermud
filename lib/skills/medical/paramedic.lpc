@@ -10,7 +10,7 @@ void create() {
     set_skill_id("paramedic");
     set_skill_name("Paramedic");
     set_skill_desc(
-        "TODO:CONTENT — Provide emergency medical treatment in the field."
+        "TODO:CONTENT - Provide emergency medical treatment in the field."
     );
     set_skill_category("medical");
 

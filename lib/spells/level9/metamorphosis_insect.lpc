@@ -9,7 +9,7 @@ void create() {
     set_spell_id("metamorphosis_insect");
     set_spell_name("Metamorphosis: Insect");
     set_spell_desc(
-        "Transforms the caster into an insect form — spider, beetle, " +
+        "Transforms the caster into an insect form - spider, beetle, " +
         "fly, or similar. The caster retains I.Q., memory, and Hit " +
         "Points, but loses the ability to speak, cast spells, or use " +
         "human skills while transformed. Insect abilities include " +
@@ -59,7 +59,7 @@ int apply_effect(object caster, object target) {
     tell_object(caster,
         "Your body SHRINKS and RESHAPES!\n" +
         "You become a " + insect_form + "!\n" +
-        "Your senses change — the world is now vast around you.\n" +
+        "Your senses change - the world is now vast around you.\n" +
         "You retain your mind but cannot speak or cast spells.\n" +
         "Duration: " + (duration / 60) + " minutes.\n");
 
@@ -93,7 +93,7 @@ void end_metamorphosis_insect(object caster) {
 
     tell_object(caster,
         "Your body expands and reshapes back to normal!\n" +
-        "The " + old_form + " form fades — you are yourself again.\n");
+        "The " + old_form + " form fades - you are yourself again.\n");
 
     object env = environment(caster);
     if (env) {

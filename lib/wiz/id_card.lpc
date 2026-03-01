@@ -1,5 +1,5 @@
 // lib/wiz/id_card.lpc
-// ID Card — wizard rank 1+
+// ID Card - wizard rank 1+
 // Grants: identify (full stats of target), finger (player info + last login)
 
 inherit "/std/object";

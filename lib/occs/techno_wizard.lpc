@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Techno-Wizards are the engineers of the magical world — practitioners " +
+        "Techno-Wizards are the engineers of the magical world - practitioners " +
         "who have mastered the art of fusing arcane magic with mundane technology. " +
         "They create magical devices, enchant weapons and armor, build machines " +
         "that run on PPE instead of fuel, and construct wonders that neither a " +
@@ -82,8 +82,8 @@ void create() {
     set_background(
         "Techno-Wizards emerged from the unique conditions of Rifts Earth, where " +
         "ancient technology and potent magic coexist. Most discovered the " +
-        "possibility through accident — a magical device interacting with " +
-        "technology in unexpected ways — and pursued it obsessively."
+        "possibility through accident - a magical device interacting with " +
+        "technology in unexpected ways - and pursued it obsessively."
     );
     set_organizations(({ "Techno-Wizard guilds", "Coalition tech-captured programs" }));
     set_enemies(({ "CS anti-magic forces", "those who steal TW designs" }));

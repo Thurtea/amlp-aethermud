@@ -10,7 +10,7 @@ void create() {
     set_skill_id("electrical_engineering_sci");
     set_skill_name("Electrical Engineering (Science)");
     set_skill_desc(
-        "TODO:CONTENT — Design advanced electrical and electronic systems."
+        "TODO:CONTENT - Design advanced electrical and electronic systems."
     );
     set_skill_category("science");
 

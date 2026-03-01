@@ -12,13 +12,13 @@ void create() {
 
     set_occ_description(
         "Cosmo-Knights are among the most powerful individuals in the " +
-        "megaverse — chosen champions who have been imbued with cosmic " +
+        "megaverse - chosen champions who have been imbued with cosmic " +
         "energy by forces beyond ordinary comprehension. Their bodies radiate " +
         "stellar power; they can survive in space, fly under their own power, " +
         "project cosmic energy blasts, and endure damage that would vaporize " +
         "lesser beings. They are warriors sworn to protect the innocent and " +
         "oppose forces of destruction wherever they manifest. Their power is " +
-        "not unlimited — they can be killed — but they are profoundly difficult " +
+        "not unlimited - they can be killed - but they are profoundly difficult " +
         "to stop. Even a Cosmo-Knight acting alone can change the outcome of a war."
     );
 
@@ -80,7 +80,7 @@ void create() {
     set_special_training("cosmic combat");
 
     set_background(
-        "Cosmo-Knights were chosen by cosmic forces — the how and why varies " +
+        "Cosmo-Knights were chosen by cosmic forces - the how and why varies " +
         "between individuals. Some were heroes before their imbuing; others were " +
         "ordinary people. All carry the weight of what they now are and the " +
         "responsibilities that come with power that dwarfs most opposition."

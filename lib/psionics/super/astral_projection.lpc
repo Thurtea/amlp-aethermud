@@ -14,8 +14,8 @@ void create() {
         "launching it into the astral plane as a shimmering silver form. The " +
         "astral body can move at incredible speed, passing through walls and " +
         "solid matter, invisible to those without See the Invisible or similar " +
-        "powers. The physical body remains motionless and vulnerable — in a " +
-        "death-like stupor — until the psychic returns. In astral form the " +
+        "powers. The physical body remains motionless and vulnerable - in a " +
+        "death-like stupor - until the psychic returns. In astral form the " +
         "psychic can observe events, scout ahead, or interact with other astral " +
         "entities and spirits. Returning to the body is instantaneous upon " +
         "willing it, or automatic if the body is threatened.\n\n" +
@@ -46,7 +46,7 @@ int apply_effect(object user, object target) {
         tell_object(user, "You feel yourself rise, silver and weightless, " +
             "separating from your motionless body below. The physical world " +
             "becomes translucent as you enter the astral plane. You can observe " +
-            "and travel freely — your body remains behind, vulnerable but alive.\n");
+            "and travel freely - your body remains behind, vulnerable but alive.\n");
         tell_room(environment(user),
             user->query_cap_name() + " slumps motionless, breathing so shallowly " +
             "as to appear nearly dead.\n",

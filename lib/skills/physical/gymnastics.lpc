@@ -10,7 +10,7 @@ void create() {
     set_skill_id("gymnastics");
     set_skill_name("Gymnastics");
     set_skill_desc(
-        "TODO:CONTENT — Advanced tumbling, balance, and body control."
+        "TODO:CONTENT - Advanced tumbling, balance, and body control."
     );
     set_skill_category("physical");
 

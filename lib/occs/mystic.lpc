@@ -11,14 +11,14 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Mystics are unique among magical practitioners — where wizards study " +
+        "Mystics are unique among magical practitioners - where wizards study " +
         "formulae and psionics train their minds, Mystics simply feel magic and " +
         "psionic energy flowing through the world and learn to work with it " +
         "intuitively. They are naturally attuned to both magical and psionic " +
         "frequencies without formal training in either, giving them a modest " +
         "range of both magical spells and psionic abilities. What they lack in " +
-        "depth — dedicated wizards and psionics exceed them in their specialties " +
-        "— they make up for in flexibility and the uncanny nature of their gifts. " +
+        "depth - dedicated wizards and psionics exceed them in their specialties " +
+        "- they make up for in flexibility and the uncanny nature of their gifts. " +
         "They sense things others cannot and sometimes know things they should not."
     );
 
@@ -82,8 +82,8 @@ void create() {
 
     set_background(
         "Mystics did not choose their gift so much as discover it already " +
-        "present. Most noticed from childhood that they could sense things — " +
-        "emotions, presences, impending events — that others could not. " +
+        "present. Most noticed from childhood that they could sense things - " +
+        "emotions, presences, impending events - that others could not. " +
         "Over time they found they could do more than sense them."
     );
     set_organizations(({ "mystic communities", "independent wanderers" }));

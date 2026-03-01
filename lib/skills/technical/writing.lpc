@@ -10,7 +10,7 @@ void create() {
     set_skill_id("writing");
     set_skill_name("Writing (Technical)");
     set_skill_desc(
-        "TODO:CONTENT — Write clear technical documents and reports."
+        "TODO:CONTENT - Write clear technical documents and reports."
     );
     set_skill_category("technical");
 

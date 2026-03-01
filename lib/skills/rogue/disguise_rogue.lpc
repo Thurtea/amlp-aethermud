@@ -10,7 +10,7 @@ void create() {
     set_skill_id("disguise_rogue");
     set_skill_name("Disguise (Rogue)");
     set_skill_desc(
-        "TODO:CONTENT — Alter appearance to pass as someone else."
+        "TODO:CONTENT - Alter appearance to pass as someone else."
     );
     set_skill_category("rogue");
 

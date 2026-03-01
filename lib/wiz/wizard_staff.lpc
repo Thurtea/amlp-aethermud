@@ -1,5 +1,5 @@
 // lib/wiz/wizard_staff.lpc
-// Wizard Staff — wizard rank 2+
+// Wizard Staff - wizard rank 2+
 // Grants: force (make target execute a command), invis/vis (toggle visibility)
 
 inherit "/std/object";

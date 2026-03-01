@@ -10,7 +10,7 @@ void create() {
     set_skill_id("robot_electronics");
     set_skill_name("Robot Electronics");
     set_skill_desc(
-        "TODO:CONTENT — Work on the electronic systems of robots and bionics."
+        "TODO:CONTENT - Work on the electronic systems of robots and bionics."
     );
     set_skill_category("electrical");
 

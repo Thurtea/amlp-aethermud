@@ -1,12 +1,12 @@
 /*
  * /lib/obj/corpse.lpc
  *
- * Player corpse object — created by death.c (C layer) and mirrored here for
+ * Player corpse object - created by death.c (C layer) and mirrored here for
  * future use when the LPC object system drives corpse creation directly.
  *
  * Properties set by the C layer via item_create_from_lpc() or by LPC clone():
- *   corpse_of   — player name (string)
- *   contents    — mapping of item name → item object
+ *   corpse_of   - player name (string)
+ *   contents    - mapping of item name → item object
  *
  * Decay: after DECAY_SECONDS the corpse removes itself from the room.
  * TODO: wire call_out() once the C driver exposes it to LPC.
@@ -32,6 +32,17 @@ void set_corpse_of(string player_name) {
     set_long("The lifeless body of " + player_name + " lies here.\n");
     set_name("corpse of " + player_name);
     set_id(({"corpse", "body", "corpse of " + player_name, player_name}));
+
+    /* Spawn a blood pool in the same room */
+    object room = environment(this_object());
+    if (room) {
+        object pool;
+        catch { pool = clone_object("/obj/blood_pool"); };
+        if (pool) {
+            pool->set_blood_source(player_name);
+            move_object(pool, room);
+        }
+    }
     /* TODO: call_out("decay", DECAY_SECONDS); */
 }
 

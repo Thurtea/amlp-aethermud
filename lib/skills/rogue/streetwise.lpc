@@ -10,7 +10,7 @@ void create() {
     set_skill_id("streetwise");
     set_skill_name("Streetwise");
     set_skill_desc(
-        "TODO:CONTENT — Know the criminal underworld, black market, and street culture."
+        "TODO:CONTENT - Know the criminal underworld, black market, and street culture."
     );
     set_skill_category("rogue");
 

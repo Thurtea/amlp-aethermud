@@ -10,7 +10,7 @@ void create() {
     set_skill_id("military_basic");
     set_skill_name("Pilot: Military (Basic)");
     set_skill_desc(
-        "TODO:CONTENT — Operate basic military ground vehicles."
+        "TODO:CONTENT - Operate basic military ground vehicles."
     );
     set_skill_category("pilot");
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("recognize_weapon_quality");
     set_skill_name("Recognize Weapon Quality");
     set_skill_desc(
-        "TODO:CONTENT — Assess the quality, condition, and value of weapons."
+        "TODO:CONTENT - Assess the quality, condition, and value of weapons."
     );
     set_skill_category("military");
 

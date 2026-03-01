@@ -10,7 +10,7 @@ void create() {
     set_skill_id("escape_artist");
     set_skill_name("Escape Artist");
     set_skill_desc(
-        "TODO:CONTENT — Escape from bonds, handcuffs, ropes, and confined spaces."
+        "TODO:CONTENT - Escape from bonds, handcuffs, ropes, and confined spaces."
     );
     set_skill_category("espionage");
 

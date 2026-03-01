@@ -1,5 +1,5 @@
 // lib/cmds/wiz/eval.lpc
-// Standalone eval command — admin_wizard only
+// Standalone eval command - admin_wizard only
 
 #include "/secure/wiz_perms.lpc"
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("helicopter");
     set_skill_name("Pilot: Helicopter");
     set_skill_desc(
-        "TODO:CONTENT — Fly conventional helicopters and rotary-wing aircraft."
+        "TODO:CONTENT - Fly conventional helicopters and rotary-wing aircraft."
     );
     set_skill_category("pilot");
 

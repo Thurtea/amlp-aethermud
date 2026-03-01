@@ -81,6 +81,9 @@ void init_commands() {
     commands["skills"] = "cmds/skills";
     commands["languages"] = "cmds/languages";
     commands["cast"] = "cmds/cast";
+    commands["drink"] = "cmds/drink";
+    commands["psi"] = "cmds/psi";
+    commands["telepathy"] = "cmds/telepathy";  // Direct alias: telepathy <person> <msg>
     commands["surname"] = "cmds/surname";  // Phase 5, Step 4
     commands["sirname"] = "cmds/sirname";
     commands["pskills"] = "cmds/pskills";
@@ -108,7 +111,7 @@ void init_commands() {
     commands["buildtest"] = "cmds/admin/buildtest";
         commands["rp-wiz"] = "cmds/admin/rp_wiz";
         commands["rpwiz"] = "cmds/admin/rp_wiz";
-        commands["adminorb"] = "cmds/admin/orb";  /* alias — orb wrapper overrides below */
+        commands["adminorb"] = "cmds/admin/orb";  /* alias - orb wrapper overrides below */
     // Wizard commands (check privilege internally)
     commands["setocc"] = "cmds/wizard/setocc";
     commands["wiztool"] = "cmds/admin/wiztool";
@@ -164,14 +167,14 @@ void init_commands() {
     commands["firstaid"] = "cmds/firstaid";
 
     // Wiz-tool commands (privilege checked internally; item required)
-    commands["orb"]      = "cmds/orb";      /* Admin orb — admin only (priv>=2) */
-    commands["rp"]       = "cmds/rp";       /* RP tool — wizard+ (priv>=1) */
-    commands["wand"]     = "cmds/wand";     /* Admin wand — admin only (priv>=2) */
-    commands["qcs"]      = "cmds/qcs";      /* QCS creator tool — wizard+ (priv>=1) */
-    commands["code"]     = "cmds/code";     /* Code tool — wizard+ (priv>=1) */
+    commands["orb"]      = "cmds/orb";      /* Admin orb - admin only (priv>=2) */
+    commands["rp"]       = "cmds/rp";       /* RP tool - wizard+ (priv>=1) */
+    commands["wand"]     = "cmds/wand";     /* Admin wand - admin only (priv>=2) */
+    commands["qcs"]      = "cmds/qcs";      /* QCS creator tool - wizard+ (priv>=1) */
+    commands["code"]     = "cmds/code";     /* Code tool - wizard+ (priv>=1) */
     commands["codetool"] = "cmds/code";     /* alias for code */
-    commands["crystal"]  = "cmds/crystal";  /* Crystal ball — wizard+ (priv>=1) */
-    commands["dchat"]    = "cmds/dchat";    /* Domain/admin chat channel — wizard+ */
+    commands["crystal"]  = "cmds/crystal";  /* Crystal ball - wizard+ (priv>=1) */
+    commands["dchat"]    = "cmds/dchat";    /* Domain/admin chat channel - wizard+ */
 }
 
 // Main command execution function
@@ -184,7 +187,7 @@ int execute_command(object player, string input, int priv_level) {
         return 0;
     }
 
-    // Always derive privilege from the player object — caller may omit priv_level
+    // Always derive privilege from the player object - caller may omit priv_level
     if (function_exists("query_privilege_level", player)) {
         priv_level = player->query_privilege_level();
     }
@@ -260,7 +263,7 @@ private int execute_global_command(object player, string path, string verb, stri
     object cmd;
     int result;
 
-    // Ensure absolute path — VM requires leading slash
+    // Ensure absolute path - VM requires leading slash
     string abs_path = (path[0] == '/') ? path : "/" + path;
 
     // Try to load the command object

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("radio_scramblers");
     set_skill_name("Radio: Scramblers");
     set_skill_desc(
-        "TODO:CONTENT — Use scrambled military radio frequencies."
+        "TODO:CONTENT - Use scrambled military radio frequencies."
     );
     set_skill_category("communications");
 

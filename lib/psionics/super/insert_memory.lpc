@@ -14,7 +14,7 @@ void create() {
         "a target's mind as if it were a real experience. The fabricated memory " +
         "integrates with genuine memories and is indistinguishable from the real " +
         "thing without psychic analysis. The memory can be anything the psychic " +
-        "imagines — a conversation, an event, a face, an instruction. Targets " +
+        "imagines - a conversation, an event, a face, an instruction. Targets " +
         "that fail a Mental Endurance save of 16 or higher have no awareness of " +
         "the intrusion. Those that succeed feel a momentary confusion but cannot " +
         "identify the source. The memory is permanent without psychic removal.\n\n" +
@@ -59,6 +59,6 @@ int apply_effect(object user, object target) {
         "recollections. The fabrication settles into place, indistinguishable " +
         "from truth.\n");
     tell_object(target, "A vivid memory surfaces naturally in your mind " +
-        "— you are certain it is real.\n");
+        "- you are certain it is real.\n");
     return 1;
 }

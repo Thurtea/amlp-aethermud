@@ -10,7 +10,7 @@ void create() {
     set_skill_id("tv_video");
     set_skill_name("TV/Video");
     set_skill_desc(
-        "TODO:CONTENT — Operate television cameras, video recorders, and broadcast equipment."
+        "TODO:CONTENT - Operate television cameras, video recorders, and broadcast equipment."
     );
     set_skill_category("communications");
 

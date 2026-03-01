@@ -33,8 +33,8 @@ int apply_effect(object user, object target) {
     if (!user) return 0;
     user->set_property("telemechanics_active", 1);
     tell_object(user, "You place your hands on the nearest mechanical surface "
-        "and open your mind. A rush of mechanical knowledge floods in — "
-        "gears, circuits, power flows, stress points — all crystal clear. "
+        "and open your mind. A rush of mechanical knowledge floods in - "
+        "gears, circuits, power flows, stress points - all crystal clear. "
         "You understand this machine as if you built it yourself.\n");
     tell_room(environment(user),
         user->query_cap_name() + " presses hands against a surface and goes "

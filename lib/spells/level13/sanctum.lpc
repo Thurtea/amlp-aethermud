@@ -1,0 +1,68 @@
+// /lib/spells/level13/sanctum.lpc
+// Sanctum - Level 13 Protection Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("sanctum");
+    set_spell_name("Sanctum");
+    set_spell_desc(
+        "The mage invokes a sanctum to protect a room up to 30 x 30 feet, "
+        "shielding it from mystic disturbance. While inside the sanctum: "
+        "the mage cannot be found by the Locate spell, cannot be seen by "
+        "second sight, and cannot be affected by bonding magic. Animated "
+        "dead and lesser undead cannot enter. Lesser monsters must save vs "
+        "magic to enter. Greater beings and humans are not impeded. "
+        "Can be created up to 200 miles away from the caster. "
+        "Duration: Lifetime of the mage or until canceled."
+    );
+
+    set_spell_level(13);
+    set_ppe_cost(390);
+
+    set_duration_type(0);  // permanent
+    set_base_duration(0);
+
+    set_range_type(4);     // can affect a distant room
+    set_base_range(200);   // miles (abstracted)
+
+    set_incantation("Hunc locum sanctifico! Malum arceo, pax et protectio hic maneat!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(8);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    if (env->query_property("sanctum_active")) {
+        tell_object(caster, "This room is already a sanctum.\n");
+        return 0;
+    }
+
+    env->set_property("sanctum_active", 1);
+    env->set_property("sanctum_owner", caster->query_name());
+    env->set_property("locate_blocked", 1);
+    env->set_property("undead_barred", 1);
+
+    tell_object(caster,
+        "You invoke the sanctum ritual, weaving wards into the very walls. "
+        "The room hums with protective energy. This place is now shielded from "
+        "scrying, detection, and the undead.\n"
+        "Effects: Immune to Locate, immune to second sight scrying, "
+        "undead and lesser monsters barred from entry.\n"
+        "Duration: Permanent until canceled.\n");
+
+    tell_room(env,
+        "The room shivers with released magic as " + caster->query_cap_name() +
+        " completes a warding ritual. The walls seem to breathe with protective energy.\n",
+        ({ caster }));
+
+    return 1;
+}

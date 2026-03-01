@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_sword");
     set_skill_name("W.P. Sword");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with swords of all types."
+        "TODO:CONTENT - Proficiency with swords of all types."
     );
     set_skill_category("wp_ancient");
 

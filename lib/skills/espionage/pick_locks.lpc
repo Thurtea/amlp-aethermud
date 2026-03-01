@@ -10,7 +10,7 @@ void create() {
     set_skill_id("pick_locks");
     set_skill_name("Pick Locks");
     set_skill_desc(
-        "TODO:CONTENT — Open locks without the proper key."
+        "TODO:CONTENT - Open locks without the proper key."
     );
     set_skill_category("espionage");
 

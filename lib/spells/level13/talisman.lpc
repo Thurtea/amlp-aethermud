@@ -1,0 +1,66 @@
+// /lib/spells/level13/talisman.lpc
+// Talisman - Level 13 Magic Item Creation Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("talisman");
+    set_spell_name("Talisman");
+    set_spell_desc(
+        "A talisman is an ordinary object empowered with a single magic spell. "
+        "The object cannot be larger than two feet in any dimension. The mage "
+        "may imbue it with any one spell from levels one through eight. "
+        "The talisman can cast that spell three times total. After all three "
+        "charges are used, the item is drained of magic. The original creator "
+        "can recharge it at a cost of 50 PPE plus the cost of the stored spell. "
+        "PPE cost: 500 + PPE cost of the stored spell."
+    );
+
+    set_spell_level(13);
+    set_ppe_cost(500);
+
+    set_duration_type(0);  // permanent
+    set_base_duration(0);
+
+    set_range_type(1);  // touch
+    set_base_range(1);
+
+    set_incantation("Hunc obiectum incanto! Virtutes magicae in eo maneant!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ "small object (max 2 feet)", "any spell focus for stored spell" }));
+    set_casting_time(12);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    // The talisman object itself is the target (held or focused on)
+    object item = target ? target : caster;
+
+    tell_object(caster,
+        "You focus your will on the object, channeling 500 PPE into it while "
+        "invoking the talisman ritual. The object glows briefly with stored "
+        "magical potential. It has been imbued with 3 charges of your chosen spell.\n"
+        "The item now functions as a talisman. It can be used by anyone "
+        "to cast the stored spell three times before the charges run dry.\n");
+
+    if (target && target != caster) {
+        item->set_property("talisman_charges", 3);
+        item->set_property("talisman_creator", caster->query_name());
+        item->set_property("talisman_active", 1);
+    }
+
+    object env = environment(caster);
+    if (env) {
+        tell_room(env,
+            caster->query_cap_name() +
+            " completes a ritual, empowering an object with stored magic! "
+            "It now functions as a talisman.\n",
+            ({ caster }));
+    }
+
+    return 1;
+}

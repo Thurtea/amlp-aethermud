@@ -10,7 +10,15 @@ void create() {
     set_power_id("bio_manipulation");
     set_power_name("Bio-Manipulation");
     set_power_desc(
-        "TODO:CONTENT — Remotely manipulate the biological processes of another being."
+        "One of the most feared and versatile psionic powers, Bio-Manipulation allows the "
+        "psychic to psionically alter the biological functions of a living target at range. "
+        "Specific applications include: Blind (10 ISP) - temporarily blinds the target; "
+        "Deafen (6 ISP) - shuts down hearing; Mute (6 ISP) - prevents speech; "
+        "Stun (8 ISP) - disorients for 2D4 melees; Pain (6 ISP) - causes intense pain, "
+        "-3 to all actions; Paralysis (20 ISP) - full physical paralysis; "
+        "Coma (22 ISP) - induces unconsciousness; Death (50 ISP, rare). "
+        "Range 60 ft; duration 2 minutes per level (instant for Coma/Death). "
+        "Targets resist with a save vs psionics."
     );
     set_power_category("super");
 

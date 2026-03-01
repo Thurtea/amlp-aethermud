@@ -10,7 +10,7 @@ void create() {
     set_skill_id("language");
     set_skill_name("Language");
     set_skill_desc(
-        "TODO:CONTENT — Speak and understand a specific language fluently."
+        "TODO:CONTENT - Speak and understand a specific language fluently."
     );
     set_skill_category("communications");
 

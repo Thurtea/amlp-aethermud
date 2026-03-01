@@ -1,5 +1,5 @@
 // /lib/cmds/admin/setrole.lpc
-// setrole — assign a wizard role to a promoted wizard
+// setrole - assign a wizard role to a promoted wizard
 // Admin-only command (privilege level 2)
 
 #include <mudlib.h>

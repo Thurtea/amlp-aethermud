@@ -10,7 +10,7 @@ void create() {
     set_skill_id("pick_pockets");
     set_skill_name("Pick Pockets");
     set_skill_desc(
-        "TODO:CONTENT — Remove items from a person without their knowledge."
+        "TODO:CONTENT - Remove items from a person without their knowledge."
     );
     set_skill_category("espionage");
 

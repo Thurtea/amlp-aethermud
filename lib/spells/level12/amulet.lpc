@@ -1,0 +1,60 @@
+// /lib/spells/level12/amulet.lpc
+// Amulet - Level 12 Protection Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("amulet");
+    set_spell_name("Amulet");
+    set_spell_desc(
+        "A potent invocation that instills a medallion or charm with mystic "
+        "properties. The amulet must be made of purified metal or semiprecious stone. "
+        "A Charm amulet grants +1 to save vs magic and psychic attacks. "
+        "An Amulet of Protection Against Sickness grants +6 to saving throws. "
+        "An Amulet Against Insanity grants +4 to save vs insanity. "
+        "An Amulet Against the Supernatural grants +2 vs horror factor. "
+        "The amulet exists as long as the medallion is not destroyed."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(290);
+
+    set_duration_type(0); // permanent
+    set_base_duration(0);
+
+    set_range_type(1); // touch
+    set_base_range(1);
+
+    set_incantation("Ex materia pura, custodem aeternum formo!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ "purified metal medallion" }));
+    set_casting_time(10);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    tell_object(caster,
+        "Mystic energies flow from your hands into the medallion. "
+        "The metal glows briefly with inner light, then settles into a warm "
+        "hum. The amulet is complete - it will protect its wearer from "
+        "magical and supernatural forces.\n"
+        "Amulet effect: +1 to save vs magic/psychic attacks.\n");
+
+    object env = environment(caster);
+    if (env) {
+        tell_room(env, caster->query_cap_name() +
+            " completes a ritual, imbuing a medallion with protective magic.\n",
+            ({ caster }));
+    }
+
+    if (target && target != caster)
+        target->set_property("amulet_save_bonus", 1);
+    else
+        caster->set_property("amulet_save_bonus", 1);
+
+    return 1;
+}

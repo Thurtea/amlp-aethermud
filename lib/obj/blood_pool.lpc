@@ -1,0 +1,153 @@
+/*
+ * /lib/obj/blood_pool.lpc
+ *
+ * A pool of blood left behind by a fresh corpse.
+ * Vampires and blood-drinking creatures can drink from it.
+ * Congeals and disappears after a few minutes.
+ *
+ * Properties:
+ *   blood_source   - name of the creature the blood came from
+ *   blood_type     - "human", "d-bee", "monster", "animal", etc.
+ *   has_blood      - 1 while blood remains, 0 once drained/dried
+ *   blood_sips     - number of sips remaining
+ */
+
+inherit "/std/object";
+
+#define CONGEALS_SECONDS 600    /* 10 minutes until dried */
+#define SIPS_PER_POOL    3      /* drinks available before pool is empty */
+#define ISP_FROM_BLOOD   4      /* ISP restored per sip for vampires */
+#define HP_FROM_BLOOD    6      /* HP restored per sip for vampires */
+
+private string blood_source;
+private string blood_type;
+private int sips_remaining;
+
+void create() {
+    ::create();
+
+    set_name("blood pool");
+    set_id(({"blood", "pool", "blood pool", "pool of blood"}));
+    set_short("a pool of blood");
+    set_long(
+        "A dark, spreading pool of blood glistens here. It is still fresh.\n"
+    );
+    set_weight(0);
+    set_value(0);
+    set_property("is_blood_pool", 1);
+    set_property("has_blood", 1);
+
+    blood_source = "someone";
+    blood_type = "human";
+    sips_remaining = SIPS_PER_POOL;
+
+    call_out("dry_up", CONGEALS_SECONDS);
+}
+
+void set_blood_source(string src) {
+    blood_source = src;
+    set_short("a pool of blood from " + blood_source);
+    set_long(
+        "A dark, spreading pool of blood from " + blood_source +
+        " glistens here. It is still fresh.\n"
+    );
+    set_id(({"blood", "pool", "blood pool", "pool of blood",
+             "blood from " + blood_source}));
+}
+
+void set_blood_type(string btype) {
+    blood_type = btype;
+}
+
+string query_blood_source() { return blood_source; }
+string query_blood_type()   { return blood_type; }
+int    query_sips()         { return sips_remaining; }
+
+/*
+ * drink_blood(drinker) -- called by the drink command or NPC AI.
+ * Returns 1 on success, 0 on failure.
+ */
+int drink_blood(object drinker) {
+    if (!drinker) return 0;
+    if (sips_remaining <= 0) {
+        tell_object(drinker, "The pool of blood has already been drained dry.\n");
+        return 0;
+    }
+    if (!drinker->query_property("drinks_blood") &&
+        !drinker->query_property("vampire")       &&
+        !drinker->query_property("blood_drinker")) {
+        tell_object(drinker, "You have no desire to drink from a pool of blood.\n");
+        return 0;
+    }
+
+    sips_remaining--;
+
+    object room = environment(this_object());
+
+    /* Breathing room message */
+    if (room) {
+        tell_room(room,
+            drinker->query_cap_name() + " drops to one knee and drinks greedily from the pool of blood!\n",
+            ({drinker}));
+    }
+    tell_object(drinker,
+        "You lower yourself to the blood pool and drink. The warm blood slides down your throat.\n");
+
+    /* Restore HP and ISP for vampires/blood-drinkers */
+    int hp_gain = HP_FROM_BLOOD;
+    int isp_gain = ISP_FROM_BLOOD;
+
+    if (function_exists("query_max_hp", drinker)) {
+        int new_hp = drinker->query_hp() + hp_gain;
+        if (new_hp > drinker->query_max_hp()) new_hp = drinker->query_max_hp();
+        drinker->set_hp(new_hp);
+        tell_object(drinker, "You regain " + hp_gain + " hit points from the blood.\n");
+    }
+    if (function_exists("query_isp", drinker) && drinker->query_psionic_category() != "none") {
+        drinker->add_isp(isp_gain);
+        tell_object(drinker, "The blood replenishes " + isp_gain + " I.S.P.\n");
+    }
+
+    /* Remove or update pool */
+    if (sips_remaining <= 0) {
+        set_property("has_blood", 0);
+        if (room)
+            tell_room(room, "The pool of blood has been completely drained.\n", ({}));
+        destruct(this_object());
+    } else {
+        set_short("a partially drained pool of blood");
+        set_long(
+            "A dark pool of blood from " + blood_source +
+            " still remains here, though some has already been drunk.\n"
+        );
+    }
+
+    return 1;
+}
+
+/* Called when the blood dries up naturally */
+void dry_up() {
+    object room = environment(this_object());
+    if (room)
+        tell_room(room,
+            "The pool of blood from " + blood_source + " has dried and darkened.\n",
+            ({}));
+    destruct(this_object());
+}
+
+void init() {
+    ::init();
+    add_action("cmd_drink", "drink");
+}
+
+int cmd_drink(string str) {
+    if (!str) return 0;
+    string sl = lower_case(str);
+    if (sl != "blood" && sl != "pool" && sl != "blood pool" &&
+        sl != "pool of blood" && strsrch(sl, "blood") == -1) return 0;
+    return drink_blood(this_player());
+}
+
+string query_help() {
+    return "A pool of fresh blood. Type: drink blood -- if you're the type who does that sort of thing.\n";
+}

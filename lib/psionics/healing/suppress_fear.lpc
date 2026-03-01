@@ -15,7 +15,7 @@ void create() {
         "face of terrifying supernatural entities or horrific situations. "
         "Panic, phobias triggered by the Horror Factor of monsters, and "
         "fear-based magic effects are all neutralized. The power does not "
-        "make the target reckless — they simply remain calm.\n\n"
+        "make the target reckless - they simply remain calm.\n\n"
         "Range: 30 feet\n"
         "ISP Cost: 8 points\n"
         "Duration: 5 minutes per level"

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("submersible");
     set_skill_name("Pilot: Submersible");
     set_skill_desc(
-        "TODO:CONTENT — Operate submersible vessels underwater."
+        "TODO:CONTENT - Operate submersible vessels underwater."
     );
     set_skill_category("pilot");
 

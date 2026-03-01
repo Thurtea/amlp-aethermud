@@ -1,5 +1,5 @@
 // /lib/cmds/admin/demote.lpc
-// demote — return a wizard to player status
+// demote - return a wizard to player status
 // Admin-only command (privilege level 2)
 
 #include <mudlib.h>

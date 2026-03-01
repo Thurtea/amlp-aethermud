@@ -10,7 +10,7 @@ void create() {
     set_skill_id("boat_sail");
     set_skill_name("Pilot: Boat (Sail)");
     set_skill_desc(
-        "TODO:CONTENT — Operate sail-powered watercraft."
+        "TODO:CONTENT - Operate sail-powered watercraft."
     );
     set_skill_category("pilot");
 

@@ -11,7 +11,7 @@ void create() {
     set_power_name("Telepathy: Superior");
     set_power_desc(
         "The most powerful form of telepathy, allowing the psychic to reach " +
-        "beyond surface thoughts into the subconscious — reading memories, " +
+        "beyond surface thoughts into the subconscious - reading memories, " +
         "skills, knowledge, and deeply held beliefs that the target may not " +
         "even be consciously aware of. The psychic can simultaneously broadcast " +
         "to and receive from multiple targets within range, and can plant " +
@@ -50,16 +50,16 @@ int apply_effect(object user, object target) {
         tell_object(user, target->query_cap_name() +
             "'s mental defenses repel your probe.\n");
         tell_object(target, "An intrusive presence claws at the edge of your " +
-            "mind — you slam the door shut.\n");
+            "mind - you slam the door shut.\n");
         return 0;
     }
     user->set_property("superior_telepathy_target", target->query_name());
     target->set_property("being_probed", 1);
     tell_object(user, "You dive deep into " + target->query_cap_name() +
-        "'s mind — past surface thoughts, past recent memories, into the " +
+        "'s mind - past surface thoughts, past recent memories, into the " +
         "layered substrate of their subconscious. Everything they know, " +
         "everything they have experienced, is open to you.\n");
-    tell_object(target, "An odd sense of exposure washes over you — a feeling " +
+    tell_object(target, "An odd sense of exposure washes over you - a feeling " +
         "of being transparent, like glass. You cannot identify why.\n");
     return 1;
 }

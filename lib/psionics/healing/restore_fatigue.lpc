@@ -46,7 +46,7 @@ int apply_effect(object user, object target) {
         target->query_cap_name() + ". Exhaustion melts away from them.\n");
     if (target != user) {
         tell_object(target, "A warm rush of energy flows through you. " +
-            "Your exhaustion vanishes completely — you feel fully rested.\n");
+            "Your exhaustion vanishes completely - you feel fully rested.\n");
     }
     tell_room(environment(user),
         target->query_cap_name() + " straightens up, looking completely refreshed.\n",

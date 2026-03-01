@@ -10,7 +10,7 @@ void create() {
     set_skill_id("cook");
     set_skill_name("Cook");
     set_skill_desc(
-        "TODO:CONTENT — Prepare edible and tasty meals from available ingredients."
+        "TODO:CONTENT - Prepare edible and tasty meals from available ingredients."
     );
     set_skill_category("domestic");
 

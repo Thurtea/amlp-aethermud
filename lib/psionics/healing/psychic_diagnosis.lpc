@@ -47,7 +47,7 @@ int apply_effect(object user, object target) {
     int pct = (cur * 100) / max;
     string condition;
     if (pct >= 95) {
-        condition = "in perfect health — no injuries or ailments detected.";
+        condition = "in perfect health - no injuries or ailments detected.";
     } else if (pct >= 75) {
         condition = "lightly injured with minor wounds and bruising. No serious condition.";
     } else if (pct >= 50) {

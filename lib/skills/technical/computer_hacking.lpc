@@ -10,7 +10,7 @@ void create() {
     set_skill_id("computer_hacking");
     set_skill_name("Computer Hacking");
     set_skill_desc(
-        "TODO:CONTENT — Bypass computer security and access restricted systems."
+        "TODO:CONTENT - Bypass computer security and access restricted systems."
     );
     set_skill_category("technical");
 

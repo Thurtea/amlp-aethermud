@@ -10,7 +10,7 @@ void create() {
     set_skill_id("aircraft_mechanics");
     set_skill_name("Aircraft Mechanics");
     set_skill_desc(
-        "TODO:CONTENT — Repair and maintain conventional aircraft."
+        "TODO:CONTENT - Repair and maintain conventional aircraft."
     );
     set_skill_category("mechanical");
 

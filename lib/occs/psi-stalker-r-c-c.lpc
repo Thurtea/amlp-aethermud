@@ -13,7 +13,7 @@ void create() {
     set_occ_description(
         "The Psi-Stalker is a mutant predator whose powerful psychic sensitivity " +
         "allows them to detect, track, and feed on psychic and magical energies. " +
-        "They are driven by an instinctive hunger for PPE — the life-force energy " +
+        "They are driven by an instinctive hunger for PPE - the life-force energy " +
         "radiated by practitioners of magic and strong psionics. In the wild, " +
         "Psi-Stalkers hunt these beings relentlessly. Some are trained by " +
         "organizations like the Coalition States to serve as elite anti-psionic " +
@@ -79,8 +79,8 @@ void create() {
     set_background(
         "Psi-Stalkers exist at the intersection of predator and psychic, driven " +
         "by hunger that ordinary food cannot satisfy. Those who find purpose " +
-        "beyond simple predation — working as trackers, bounty hunters, or " +
-        "mercenaries — often achieve a measure of peace with their nature."
+        "beyond simple predation - working as trackers, bounty hunters, or " +
+        "mercenaries - often achieve a measure of peace with their nature."
     );
     set_organizations(({ "CS military tracker units", "freelance bounty hunters" }));
     set_enemies(({ "magic practitioners", "Federation of Magic" }));

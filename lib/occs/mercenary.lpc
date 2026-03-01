@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Mercenaries are professional soldiers who sell their combat skills " +
-        "to the highest bidder — no ideology, no allegiance beyond the current " +
+        "to the highest bidder - no ideology, no allegiance beyond the current " +
         "contract. They are not mere thugs: the best mercenaries are highly " +
         "trained, tactically sophisticated fighters with a professional's " +
         "understanding of equipment, small unit tactics, and the economics of " +
@@ -79,7 +79,7 @@ void create() {
     set_special_training("military combat operations");
 
     set_background(
-        "Mercenaries come from military backgrounds of every kind — ex-CS " +
+        "Mercenaries come from military backgrounds of every kind - ex-CS " +
         "grunts, discharged soldiers, trained fighters who found no country " +
         "worth dying for and decided to monetize their skills instead. Most " +
         "have a personal code of some kind; the truly honorless ones don't " +

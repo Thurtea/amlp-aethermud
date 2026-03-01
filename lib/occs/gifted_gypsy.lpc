@@ -11,11 +11,11 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Gifted Gypsies are the traveling performers and mystics of Rifts Earth — " +
+        "Gifted Gypsies are the traveling performers and mystics of Rifts Earth - " +
         "fortune tellers, musicians, storytellers, and minor magic users who " +
         "wander from settlement to settlement trading entertainment and small " +
         "magical services for food and shelter. Their magical gifts are genuine " +
-        "but modest — minor divination, charms, and warding — and their real " +
+        "but modest - minor divination, charms, and warding - and their real " +
         "power lies in their extraordinary social skill and ability to read " +
         "people. In a world of violence, a Gifted Gypsy survives on charisma, " +
         "adaptability, and knowing when to run."

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("xenobiology");
     set_skill_name("Xenobiology");
     set_skill_desc(
-        "TODO:CONTENT — Study of alien and supernatural lifeforms."
+        "TODO:CONTENT - Study of alien and supernatural lifeforms."
     );
     set_skill_category("science");
 

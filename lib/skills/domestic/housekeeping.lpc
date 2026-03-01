@@ -10,7 +10,7 @@ void create() {
     set_skill_id("housekeeping");
     set_skill_name("Housekeeping");
     set_skill_desc(
-        "TODO:CONTENT — Maintain a clean, organized living environment."
+        "TODO:CONTENT - Maintain a clean, organized living environment."
     );
     set_skill_category("domestic");
 

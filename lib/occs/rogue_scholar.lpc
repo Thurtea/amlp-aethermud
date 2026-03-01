@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Rogue Scholars are independent academics who have rejected or been " +
-        "expelled from formal institutions — often because their research " +
+        "expelled from formal institutions - often because their research " +
         "crossed into forbidden territory, or because they refused to stop " +
         "asking inconvenient questions. They are the most broadly educated " +
         "characters in Rifts, speaking multiple languages, versed in history " +
@@ -80,7 +80,7 @@ void create() {
     set_special_training("multiple academic disciplines");
 
     set_background(
-        "Rogue Scholars left institutions for any number of reasons — censorship, " +
+        "Rogue Scholars left institutions for any number of reasons - censorship, " +
         "dangerous research, exile, or simple wanderlust. Many carry incomplete " +
         "dissertations in their pack. Most have seen more of the world than any " +
         "tenured professor safely ensconced in a university."

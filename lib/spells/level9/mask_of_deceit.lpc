@@ -12,7 +12,7 @@ void create() {
         "Alters the caster's physical appearance to resemble any " +
         "specific person or general type of individual. Height, " +
         "weight, facial features, voice, and even scent can be " +
-        "changed. The disguise is a true illusion — it affects all " +
+        "changed. The disguise is a true illusion - it affects all " +
         "senses including touch. Casual inspection will not reveal " +
         "the disguise. Close scrutiny (detect magic, see aura, or " +
         "psionics) may penetrate it. The caster retains all their " +

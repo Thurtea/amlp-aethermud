@@ -1,0 +1,113 @@
+// /lib/spells/level13/mental_blast.lpc
+// Mental Blast - Level 13 Psychic-Magic Hybrid Attack
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("mental_blast");
+    set_spell_name("Mental Blast");
+    set_spell_desc(
+        "Unlike most magic that manifests physically, the Mental Blast is a "
+        "direct psychic assault delivered through magical means. A bolt of "
+        "invisible psionic-magical energy strikes the target's mind and nervous "
+        "system simultaneously. It bypasses all physical armor but can be blocked "
+        "by a mind block or psi-shield. On a failed save vs magic, the target "
+        "takes 6d6 SDC and is stunned for 1d4 melee rounds. On a successful save "
+        "the target takes half damage only. Supernatural beings of extreme evil "
+        "are immune. Robots and androids are unaffected."
+    );
+
+    set_spell_level(13);
+    set_ppe_cost(210);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(2);
+    set_base_range(60);
+
+    set_incantation("Mens dissolvatur, cerebrum fractum!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(3);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (!target) {
+        tell_object(caster, "Direct the Mental Blast at a target!\n");
+        return 0;
+    }
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "The Mental Blast requires a living mind to strike!\n");
+        return 0;
+    }
+
+    if (target->query_property("mind_block")) {
+        tell_object(caster,
+            target->query_cap_name() +
+            " has a mind block active! Your psychic assault rebounds harmlessly.\n");
+        tell_object(target,
+            "An invisible psychic assault hammers your mind block and dissolves.\n");
+        return 1;
+    }
+
+    if (target->query_property("psi_shield_active")) {
+        tell_object(caster, "The mental blast is partially absorbed by a psi-shield!\n");
+    }
+
+    // d20 save check (simplified)
+    int save = random(20) + 1;
+    int saved = (save >= 14);
+
+    int dice = random(6)+1 + random(6)+1 + random(6)+1 + random(6)+1 + random(6)+1 + random(6)+1;
+    int damage = saved ? (dice / 2) : dice;
+
+    tell_object(caster,
+        "You unleash an invisible bolt of psychic-magical force!\n"
+        "It strikes " + target->query_cap_name() + " in the mind - "
+        + damage + " SDC damage!\n");
+
+    tell_object(target,
+        "A wave of psychic force tears through your mind like a thunderclap! "
+        + damage + " SDC damage!\n");
+
+    if (!saved) {
+        target->set_property("stunned", 1);
+        int stun_rounds = random(4) + 1;
+        call_out("end_mental_blast_stun", stun_rounds * 15, target);
+        tell_object(target, "You are stunned!\n");
+    }
+
+    // Apply damage
+    if (function_exists("take_damage", target)) target->take_damage(damage, 0);
+    else if (function_exists("add_hp", target)) target->add_hp(-damage);
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob))
+                tell_object(ob,
+                    target->query_cap_name() +
+                    " staggers as an invisible force smashes into their mind!\n");
+        }
+    }
+
+    return 1;
+}
+
+void end_mental_blast_stun(object target) {
+    if (!target) return;
+    target->remove_property("stunned");
+    tell_object(target, "Your head clears. The stunning effect of the mental blast fades.\n");
+}

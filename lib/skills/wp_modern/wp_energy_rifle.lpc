@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_energy_rifle");
     set_skill_name("W.P. Energy Rifle");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with laser rifles and energy long-arms."
+        "TODO:CONTENT - Proficiency with laser rifles and energy long-arms."
     );
     set_skill_category("wp_modern");
 

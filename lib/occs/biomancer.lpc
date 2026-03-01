@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Biomancers are sorcerers who specialize in the magic of living things — " +
+        "Biomancers are sorcerers who specialize in the magic of living things - " +
         "manipulating biological processes at the fundamental level to heal, " +
         "harm, or transform. They can accelerate healing, poison with magical " +
         "toxins, reshape flesh, and grow living armor or weapons from organic " +

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("athletics");
     set_skill_name("Athletics (General)");
     set_skill_desc(
-        "TODO:CONTENT — General athletic ability; grants bonuses to multiple physical actions."
+        "TODO:CONTENT - General athletic ability; grants bonuses to multiple physical actions."
     );
     set_skill_category("physical");
 
@@ -40,7 +40,7 @@ int perform(object user, string args) {
     int roll = random(100) + 1;
     tell_object(user, "You attempt an athletic maneuver...\n");
     if (roll >= 96) {
-        tell_object(user, "You stumble badly — critical failure!\n");
+        tell_object(user, "You stumble badly - critical failure!\n");
         return -1;
     }
     if (roll <= pct) {

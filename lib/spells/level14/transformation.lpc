@@ -1,0 +1,99 @@
+// /lib/spells/level14/transformation.lpc
+// Transformation - Level 14 Dark Metamorphosis Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("transformation");
+    set_spell_name("Transformation");
+    set_spell_desc(
+        "Transformation is a powerful dark spell that transforms a human "
+        "being into a grisly, demonic monster. The target fails to save at "
+        "-3. Once transformed, the creature is a mindless slave of the mage. "
+        "The monster has no memory of its human life, retains no skills, "
+        "knowledge, or attributes. It obeys the mage without question - "
+        "except that principled, scrupulous, and unprincipled subjects will "
+        "not kill or harm a child or beloved close friend/loved one. "
+        "PPE cost: 2000. Saving throw: Standard -3. "
+        "Duration: 3 days per level."
+    );
+
+    set_spell_level(14);
+    set_ppe_cost(2000);
+
+    set_duration_type(1);
+    set_base_duration(4320);  // 3 days in minutes
+
+    set_range_type(1);  // touch
+    set_base_range(1);
+
+    set_incantation("Transmutaris forma tua in monstrum! Per voluntatem meam, transcende!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(6);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster || !target) return 0;
+    if (target == caster) {
+        tell_object(caster, "You cannot transform yourself with this spell.\n");
+        return 0;
+    }
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_secs = level * 259200;  // 3 days per level
+
+    // Save vs magic at -3 penalty
+    int me_bonus = target->query_me() ? target->query_me() : 0;
+    int save_roll = (random(20) + 1) + me_bonus - 3;
+    if (save_roll >= 15) {
+        tell_object(caster,
+            target->query_cap_name() + " resists the Transformation!\n");
+        tell_object(target,
+            "Dark magic washes over you but you resist the terrible transformation!\n");
+        return 0;
+    }
+
+    // Transform succeeds
+    target->set_property("transformed_monster", 1);
+    target->set_property("transformation_master", caster->query_name());
+    target->set_property("transformation_expires", time() + duration_secs);
+
+    tell_object(caster,
+        target->query_cap_name() + " writhes and screams as the transformation "
+        "takes hold! Flesh tears and reshapes into something monstrous. "
+        "The creature that was " + target->query_name() +
+        " now kneels before you, mindlessly obedient.\n"
+        "Duration: " + (level * 3) + " days.\n");
+
+    tell_object(target,
+        "Agony erupts through you as dark magic reshapes your body! "
+        "Your thoughts dissolve. Your memories fade to nothing. "
+        "There is only the mage's will now...\n");
+
+    object env = environment(caster);
+    if (env) {
+        tell_room(env,
+            target->query_cap_name() + " screams and twists as terrible dark "
+            "magic warps them into a demonic monstrosity!\n",
+            ({ caster, target }));
+    }
+
+    call_out("end_transformation", duration_secs, caster, target);
+    return 1;
+}
+
+void end_transformation(object caster, object target) {
+    if (!target) return;
+    target->remove_property("transformed_monster");
+    target->remove_property("transformation_master");
+    target->remove_property("transformation_expires");
+    tell_object(target,
+        "Your body agonizingly reshapes back to its original form. "
+        "Memories and self flood back as the Transformation ends.\n");
+    if (caster) tell_object(caster,
+        "The Transformation on " + target->query_name() + " has expired.\n");
+}

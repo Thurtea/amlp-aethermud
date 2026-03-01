@@ -10,7 +10,7 @@ void create() {
     set_skill_id("combat_driving");
     set_skill_name("Combat Driving");
     set_skill_desc(
-        "TODO:CONTENT — Drive vehicles at high speed in combat situations."
+        "TODO:CONTENT - Drive vehicles at high speed in combat situations."
     );
     set_skill_category("military");
 

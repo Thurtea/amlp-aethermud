@@ -10,7 +10,7 @@ void create() {
     set_power_id("remote_sensing");
     set_power_name("Remote Sensing");
     set_power_desc(
-        "The psychic projects their senses — sight, hearing, and smell — "
+        "The psychic projects their senses - sight, hearing, and smell - "
         "to a distant location they have previously visited or can visualize "
         "clearly. The psychic's body remains still while their senses operate "
         "remotely. They can observe events, read signs, and perceive details "

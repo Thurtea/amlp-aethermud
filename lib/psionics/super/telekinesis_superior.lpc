@@ -10,7 +10,7 @@ void create() {
     set_power_id("telekinesis_superior");
     set_power_name("Telekinesis: Superior");
     set_power_desc(
-        "The pinnacle of telekinetic ability — the psychic can lift and move " +
+        "The pinnacle of telekinetic ability - the psychic can lift and move " +
         "objects of enormous mass with their mind alone. Vehicles, boulders, " +
         "structural walls, and other massive objects respond to their telekinetic " +
         "grip. Objects can be moved with precision or hurled as devastating " +
@@ -49,7 +49,7 @@ int apply_effect(object user, object target) {
             sev + " it into " + target->query_cap_name() +
             " with world-shaking force!\n");
         tell_object(target, "Something of enormous weight is hurled at you " +
-            "telekinetically — a concussive, catastrophic impact!\n");
+            "telekinetically - a concussive, catastrophic impact!\n");
         tell_room(environment(user),
             user->query_cap_name() + " gestures and something massive lurches " +
             "through the air toward " + target->query_cap_name() + "!\n",
@@ -58,7 +58,7 @@ int apply_effect(object user, object target) {
         target->set_property("prone", 1);
     } else {
         tell_object(user, "Your telekinesis stretches outward, capable of " +
-            "gripping objects of enormous mass — vehicles, boulders, walls. " +
+            "gripping objects of enormous mass - vehicles, boulders, walls. " +
             "The power is yours to direct.\n");
     }
     return 1;

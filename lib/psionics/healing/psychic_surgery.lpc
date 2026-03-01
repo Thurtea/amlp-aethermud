@@ -10,7 +10,15 @@ void create() {
     set_power_id("psychic_surgery");
     set_power_name("Psychic Surgery");
     set_power_desc(
-        "TODO:CONTENT — Perform complex surgery through pure psychic power."
+        "The psychic healer can perform complex medical procedures without instruments, "
+        "using psionic power to guide molecular and cellular activity. Applications include: "
+        "removing bullets, shrapnel, foreign objects, and tumors without cutting; setting "
+        "and healing broken bones (requires 2 sessions); treating serious infections; "
+        "counteracting the effects of some poisons and drugs; and removing psychic "
+        "abnormalities or aberrations. Each procedure takes 30-90 minutes of concentration "
+        "and physical contact. The patient must remain still. Heals 2D6 SDC and 1D6 hit "
+        "points per session and can neutralize ongoing damaging conditions. "
+        "I.S.P. cost 14; touch range; special duration."
     );
     set_power_category("healing");
 

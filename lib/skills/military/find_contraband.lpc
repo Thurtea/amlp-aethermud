@@ -10,7 +10,7 @@ void create() {
     set_skill_id("find_contraband");
     set_skill_name("Find Contraband");
     set_skill_desc(
-        "TODO:CONTENT — Search people and areas for hidden illegal items."
+        "TODO:CONTENT - Search people and areas for hidden illegal items."
     );
     set_skill_category("military");
 

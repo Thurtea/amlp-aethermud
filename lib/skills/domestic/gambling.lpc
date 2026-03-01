@@ -10,7 +10,7 @@ void create() {
     set_skill_id("gambling");
     set_skill_name("Gambling");
     set_skill_desc(
-        "TODO:CONTENT — Play cards, dice, and other games of chance."
+        "TODO:CONTENT - Play cards, dice, and other games of chance."
     );
     set_skill_category("domestic");
 

@@ -43,7 +43,7 @@ int main(string args) {
         return 1;
     }
 
-    // Cooldown guard — avoid (int) cast; use mixed then assign
+    // Cooldown guard - avoid (int) cast; use mixed then assign
     last_use = 0;
     prop = player->query_property("last_firstaid");
     if (prop) last_use = prop;
@@ -78,7 +78,7 @@ int main(string args) {
     // Record use time
     player->set_property("last_firstaid", time());
 
-    // Apply healing on success — avoid ternary in declaration
+    // Apply healing on success - avoid ternary in declaration
     if (result == 1) {
         if (skill_ob && function_exists("query_sdc_heal", skill_ob)) {
             sdc_heal = skill_ob->query_sdc_heal();

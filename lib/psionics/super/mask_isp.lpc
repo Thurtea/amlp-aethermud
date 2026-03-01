@@ -14,7 +14,7 @@ void create() {
         "ISP level and psionic nature from any form of detection. To Detect " +
         "Psionics or similar powers they appear as a non-psionic individual " +
         "with no detectable ISP. Aura reading shows only ordinary emotions and " +
-        "health. The mask is seamless — even experienced psychics cannot " +
+        "health. The mask is seamless - even experienced psychics cannot " +
         "penetrate it without extraordinary means. The power requires only " +
         "minimal ISP to initiate and then sustains itself automatically while " +
         "the psychic maintains the low-level focus.\n\n" +
@@ -40,7 +40,7 @@ int apply_effect(object user, object target) {
         user->set_property("isp_masked", 1);
         tell_object(user, "You fold your psionic aura inward, wrapping it in " +
             "layer after layer of subtle suppression. To any scanner or " +
-            "sensitive, you now appear entirely mundane — no ISP, no powers, " +
+            "sensitive, you now appear entirely mundane - no ISP, no powers, " +
             "just an ordinary person.\n");
     }
     return 1;

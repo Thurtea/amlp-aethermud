@@ -10,7 +10,7 @@ void create() {
     set_skill_id("pick_locks_rogue");
     set_skill_name("Pick Locks (Rogue)");
     set_skill_desc(
-        "TODO:CONTENT — Open mechanical and electronic locks."
+        "TODO:CONTENT - Open mechanical and electronic locks."
     );
     set_skill_category("rogue");
 

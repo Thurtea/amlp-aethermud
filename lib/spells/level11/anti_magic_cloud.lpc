@@ -58,7 +58,7 @@ int apply_effect(object caster, object target) {
     tell_object(caster,
         "You unleash the Anti-Magic Cloud!\n" +
         "A massive dark grey-brown cloud rolls through the area!\n" +
-        "All magic in the area is NEGATED — except yours.\n");
+        "All magic in the area is NEGATED - except yours.\n");
 
     foreach (object ob : all_inventory(env)) {
         if (ob != caster && living(ob)) {
@@ -90,7 +90,7 @@ void end_anti_magic_cloud(object env, object caster) {
         if (living(ob)) {
             ob->remove_property("magic_suppressed");
             tell_object(ob,
-                "The grey cloud disperses — you feel your magical " +
+                "The grey cloud disperses - you feel your magical " +
                 "abilities return!\n");
         }
     }

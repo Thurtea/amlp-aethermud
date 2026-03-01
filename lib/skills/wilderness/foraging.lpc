@@ -10,7 +10,7 @@ void create() {
     set_skill_id("foraging");
     set_skill_name("Foraging");
     set_skill_desc(
-        "TODO:CONTENT — Find edible plants, berries, and mushrooms in the wild."
+        "TODO:CONTENT - Find edible plants, berries, and mushrooms in the wild."
     );
     set_skill_category("wilderness");
 

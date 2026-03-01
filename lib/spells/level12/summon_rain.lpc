@@ -1,0 +1,69 @@
+// /lib/spells/level12/summon_rain.lpc
+// Summon and Control Rain - Level 12 Weather Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("summon_rain");
+    set_spell_name("Summon and Control Rain");
+    set_spell_desc(
+        "The sorcerer conjures a rainstorm from thin air. The rain can be "
+        "controlled as a drizzle, light rain, or heavy downpour. "
+        "One mile per level of experience is affected by the rain. "
+        "A heavy storm reduces visibility and slows travel. "
+        "The caster can control the intensity freely while the spell lasts. "
+        "Duration: 1 hour per level."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(200);
+
+    set_duration_type(1);
+    set_base_duration(60);  // 60 min base
+
+    set_range_type(4);
+    set_base_range(5280);
+
+    set_incantation("Nimbos voco, aqua cadam ex caelo meo iussu!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_min = level * 60;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    env->set_property("summoned_rain", 1);
+    env->set_property("weather_override", "rain");
+
+    tell_object(caster,
+        "You raise your hands and intone the weather invocation. Dark clouds "
+        "roll in from nowhere and rain begins to fall at your command. "
+        "You may control the intensity - from a light drizzle to a downpour.\n"
+        "Duration: " + duration_min + " minutes.\n");
+
+    tell_room(env,
+        "Clouds gather overhead as " + caster->query_cap_name() +
+        " intones a weather invocation. Rain begins to fall.\n",
+        ({ caster }));
+
+    call_out("end_summon_rain", duration_min * 60, caster, env);
+    return 1;
+}
+
+void end_summon_rain(object caster, object env) {
+    if (!env) return;
+    env->remove_property("summoned_rain");
+    env->remove_property("weather_override");
+    if (caster) tell_object(caster, "The Summon Rain spell ends. The clouds disperse.\n");
+    if (env) tell_room(env, "The summoned rain ceases and clouds clear.\n", ({ }));
+}

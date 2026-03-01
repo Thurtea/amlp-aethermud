@@ -10,7 +10,7 @@ void create() {
     set_skill_id("computer_programming");
     set_skill_name("Computer Programming");
     set_skill_desc(
-        "TODO:CONTENT — Write and debug computer programs."
+        "TODO:CONTENT - Write and debug computer programs."
     );
     set_skill_category("technical");
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("weapons_engineer");
     set_skill_name("Weapons Engineer");
     set_skill_desc(
-        "TODO:CONTENT — Design, build, and modify weapons systems."
+        "TODO:CONTENT - Design, build, and modify weapons systems."
     );
     set_skill_category("mechanical");
 

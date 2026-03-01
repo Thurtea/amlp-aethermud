@@ -12,8 +12,8 @@ void create() {
 
     set_occ_description(
         "Atlantean Slaves are those unfortunate enough to have been captured by " +
-        "the Splugorth or other slavers and forced into bondage. Despite — or " +
-        "because of — the brutal conditions, they develop extraordinary physical " +
+        "the Splugorth or other slavers and forced into bondage. Despite - or " +
+        "because of - the brutal conditions, they develop extraordinary physical " +
         "resilience and a ferocious will to survive. Those who escape carry " +
         "the scars of captivity alongside hard-won practical knowledge: how to " +
         "endure, how to find weaknesses in their captors, and how to strike back " +

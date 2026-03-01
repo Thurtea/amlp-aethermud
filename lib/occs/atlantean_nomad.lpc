@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Atlantean Nomads are the wandering traders and explorers of the True " +
-        "Atlantean people — those who live by moving between dimensions, worlds, " +
+        "Atlantean people - those who live by moving between dimensions, worlds, " +
         "and markets, carrying rare goods and ancient knowledge across dimensional " +
         "boundaries. They are highly educated, broadly skilled, and possess " +
         "the Atlantean blessing of supernatural longevity. A Nomad may have " +

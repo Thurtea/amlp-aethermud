@@ -47,13 +47,13 @@ int apply_effect(object user, object target) {
     }
     if (hostile_count > 1) {
         tell_object(user, "A sharp premonition sets your nerves on edge. " +
-            "Multiple hostile presences are nearby — danger is close.\n");
+            "Multiple hostile presences are nearby - danger is close.\n");
     } else if (hostile_count > 0) {
         tell_object(user, "An uneasy feeling crawls across your skin. " +
             "You sense a hostile presence nearby.\n");
     } else {
         tell_object(user, "You extend your danger sense outward. The immediate " +
-            "area feels clear — no imminent threats detected. Your senses " +
+            "area feels clear - no imminent threats detected. Your senses " +
             "remain primed for the duration.\n");
     }
     return 1;

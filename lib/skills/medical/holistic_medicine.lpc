@@ -10,7 +10,7 @@ void create() {
     set_skill_id("holistic_medicine");
     set_skill_name("Holistic Medicine");
     set_skill_desc(
-        "TODO:CONTENT — Treat illness and injury using herbal and natural remedies."
+        "TODO:CONTENT - Treat illness and injury using herbal and natural remedies."
     );
     set_skill_category("medical");
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("parachuting");
     set_skill_name("Parachuting");
     set_skill_desc(
-        "TODO:CONTENT — Jump from aircraft and land safely using a parachute."
+        "TODO:CONTENT - Jump from aircraft and land safely using a parachute."
     );
     set_skill_category("military");
 

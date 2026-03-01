@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_blunt");
     set_skill_name("W.P. Blunt");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with clubs, maces, and blunt weapons."
+        "TODO:CONTENT - Proficiency with clubs, maces, and blunt weapons."
     );
     set_skill_category("wp_ancient");
 

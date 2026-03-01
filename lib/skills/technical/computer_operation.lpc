@@ -10,7 +10,7 @@ void create() {
     set_skill_id("computer_operation");
     set_skill_name("Computer Operation");
     set_skill_desc(
-        "TODO:CONTENT — Use computers for common tasks and software."
+        "TODO:CONTENT - Use computers for common tasks and software."
     );
     set_skill_category("technical");
 

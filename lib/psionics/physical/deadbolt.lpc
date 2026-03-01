@@ -33,7 +33,7 @@ int apply_effect(object user, object target) {
     // Apply to nearest exit/door or report effect
     tell_object(user, "You reach out with your mind, seizing the nearest "
         "exit with invisible telekinetic force. A faint vibration in the "
-        "air confirms the mental lock is in place — nothing is getting "
+        "air confirms the mental lock is in place - nothing is getting "
         "through while you maintain your concentration.\n");
     tell_room(environment(user),
         user->query_cap_name() + " gestures sharply. There is a sharp THUNK "

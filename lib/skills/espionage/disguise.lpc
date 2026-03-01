@@ -10,7 +10,7 @@ void create() {
     set_skill_id("disguise");
     set_skill_name("Disguise");
     set_skill_desc(
-        "TODO:CONTENT — Alter appearance to pass as a different person."
+        "TODO:CONTENT - Alter appearance to pass as a different person."
     );
     set_skill_category("espionage");
 

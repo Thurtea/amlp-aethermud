@@ -10,7 +10,7 @@ void create() {
     set_skill_id("mechanical_engineer");
     set_skill_name("Mechanical Engineer");
     set_skill_desc(
-        "TODO:CONTENT — Design and build complex mechanical systems."
+        "TODO:CONTENT - Design and build complex mechanical systems."
     );
     set_skill_category("mechanical");
 

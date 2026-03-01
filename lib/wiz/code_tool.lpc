@@ -1,5 +1,5 @@
 // lib/wiz/code_tool.lpc
-// Code Tool — wizard rank 1+
+// Code Tool - wizard rank 1+
 // Grants: update (reload LPC file), errors (tail last 20 lines of debug log)
 
 inherit "/std/object";
@@ -31,7 +31,7 @@ int cmd_update(string args) {
         return 1;
     }
     string path = args;
-    // Strip .lpc extension if present — load_object expects bare path
+    // Strip .lpc extension if present - load_object expects bare path
     int plen = strlen(path);
     if (plen > 4 && path[plen-4..plen-1] == ".lpc")
         path = path[0..plen-5];
@@ -47,7 +47,7 @@ int cmd_update(string args) {
     if (fresh) {
         tell_object(this_player(), "Reloaded: " + path + "\n");
     } else {
-        tell_object(this_player(), "Failed to reload: " + path + " — check errors\n");
+        tell_object(this_player(), "Failed to reload: " + path + " - check errors\n");
     }
     return 1;
 }

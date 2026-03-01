@@ -13,7 +13,7 @@ void create() {
         "invocation into paper, creating a magic scroll. The scroll " +
         "contains one spell (chosen at casting time) and can be read " +
         "aloud by anyone literate in the language to trigger the " +
-        "spell — no magical training required. The words disappear " +
+        "spell - no magical training required. The words disappear " +
         "the moment the scroll is read aloud. The caster must be " +
         "literate and must know the spell being inscribed. P.P.E. " +
         "cost of Create Magic Scroll plus the spell's own P.P.E. " +

@@ -57,7 +57,7 @@ int main(string args) {
         return 1;
     }
 
-    // Set combat target — this starts the player's combat heartbeat
+    // Set combat target - this starts the player's combat heartbeat
     attacker->set_combat_target(target);
 
     // Perform the first attack immediately so there's instant feedback
@@ -73,6 +73,6 @@ string query_help() {
 "  attack <target>    Attack a creature or character\n"
 "  kill <target>      Alias for attack\n\n"
 "Combat begins immediately and continues automatically every 3 seconds.\n"
-"The NPC will retaliate — watch your health!\n\n"
+"The NPC will retaliate - watch your health!\n\n"
 "Related commands: FLEE, SCORE (shows health)\n";
 }

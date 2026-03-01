@@ -10,7 +10,7 @@ void create() {
     set_skill_id("basic_mechanics");
     set_skill_name("Basic Mechanics");
     set_skill_desc(
-        "TODO:CONTENT — Perform basic mechanical repairs and maintenance."
+        "TODO:CONTENT - Perform basic mechanical repairs and maintenance."
     );
     set_skill_category("mechanical");
 

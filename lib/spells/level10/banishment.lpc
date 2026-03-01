@@ -69,7 +69,7 @@ int apply_effect(object caster, object target) {
         if (resisted) {
             resisted_count += 1;
             tell_object(ob,
-                "You feel the Banishment attempt — but your will holds!\n");
+                "You feel the Banishment attempt - but your will holds!\n");
         } else {
             banished_count += 1;
             tell_object(ob,

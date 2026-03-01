@@ -10,7 +10,7 @@ void create() {
     set_skill_id("field_surgery");
     set_skill_name("Field Surgery");
     set_skill_desc(
-        "TODO:CONTENT — Perform surgery under battlefield conditions."
+        "TODO:CONTENT - Perform surgery under battlefield conditions."
     );
     set_skill_category("medical");
 

@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Robot Pilots are the operators of giant robotic combat vehicles — " +
+        "Robot Pilots are the operators of giant robotic combat vehicles - " +
         "walking tanks that stride across battlefields dealing and absorbing " +
         "staggering amounts of MDC damage. Unlike Power Armor Pilots who wear " +
         "their vehicles, Robot Pilots control massive external machines from " +

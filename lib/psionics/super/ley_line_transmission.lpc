@@ -10,8 +10,8 @@ void create() {
     set_power_id("ley_line_transmission");
     set_power_name("Ley Line Transmission");
     set_power_desc(
-        "The psychic taps into the vast network of ley lines — the rivers of " +
-        "magical energy that crisscross the world — to transmit a psionic " +
+        "The psychic taps into the vast network of ley lines - the rivers of " +
+        "magical energy that crisscross the world - to transmit a psionic " +
         "message to any recipient the psychic knows well enough to recognize " +
         "mentally, regardless of distance. The message is received as a clear " +
         "voice in the target's mind. The target cannot be forced to respond, " +
@@ -40,8 +40,8 @@ int apply_effect(object user, object target) {
         tell_object(user, "You reach into the ley line currents and extend " +
             "your consciousness outward. Your message carries across the " +
             "network of power lines that span the world.\n");
-        tell_object(target, "A distant voice — clear as a bell despite the " +
-            "miles between you — speaks directly into your mind. " +
+        tell_object(target, "A distant voice - clear as a bell despite the " +
+            "miles between you - speaks directly into your mind. " +
             user->query_cap_name() + " transmits to you via ley line.\n");
     } else {
         tell_object(user, "You tap into the ley line network and project your " +

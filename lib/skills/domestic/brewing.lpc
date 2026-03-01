@@ -10,7 +10,7 @@ void create() {
     set_skill_id("brewing");
     set_skill_name("Brewing");
     set_skill_desc(
-        "TODO:CONTENT — Brew beer, spirits, and other fermented beverages."
+        "TODO:CONTENT - Brew beer, spirits, and other fermented beverages."
     );
     set_skill_category("domestic");
 

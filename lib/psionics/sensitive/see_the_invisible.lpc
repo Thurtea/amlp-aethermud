@@ -40,7 +40,7 @@ int apply_effect(object user, object target) {
             if (function_exists("query_property", nearby[i]) &&
                 nearby[i]->query_property("invisible")) {
                 found += "  " + nearby[i]->query_cap_name() +
-                    " — a faint shimmering outline\n";
+                    " - a faint shimmering outline\n";
             }
         }
         i += 1;

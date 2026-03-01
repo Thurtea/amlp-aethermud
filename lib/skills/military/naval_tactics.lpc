@@ -10,7 +10,7 @@ void create() {
     set_skill_id("naval_tactics");
     set_skill_name("Naval Tactics");
     set_skill_desc(
-        "TODO:CONTENT — Understand and apply naval combat and maneuvering doctrine."
+        "TODO:CONTENT - Understand and apply naval combat and maneuvering doctrine."
     );
     set_skill_category("military");
 

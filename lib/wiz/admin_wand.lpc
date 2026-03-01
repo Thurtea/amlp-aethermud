@@ -1,5 +1,5 @@
 // lib/wiz/admin_wand.lpc
-// Admin Wand — admin rank 2 only
+// Admin Wand - admin rank 2 only
 // Grants: promote (set_privilege_level on target), demote (set to 0), shutdown
 
 inherit "/std/object";

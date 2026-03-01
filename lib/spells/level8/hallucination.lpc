@@ -11,7 +11,7 @@ void create() {
     set_spell_desc(
         "Implants a vivid, personalized illusion or delusion in a " +
         "single target's mind. Only the victim experiences the " +
-        "hallucination — all others perceive reality normally. The " +
+        "hallucination - all others perceive reality normally. The " +
         "hallucination is tailored to exploit the victim's fears or " +
         "desires, making it extremely convincing. The victim suffers " +
         "severe penalties to combat actions as they react to things " +
@@ -73,9 +73,9 @@ int apply_effect(object caster, object target) {
         target->set_property("hallucination_minor", 1);
         tell_object(caster,
             target->query_cap_name() +
-            " partially resists — minor visual distortions only!\n");
+            " partially resists - minor visual distortions only!\n");
         tell_object(target,
-            "You feel a strange distortion cross your vision — brief " +
+            "You feel a strange distortion cross your vision - brief " +
             "flickering shapes that quickly fade.\n");
         call_out("end_hallucination", 30, target);
         return 1;

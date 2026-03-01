@@ -12,7 +12,7 @@ void create() {
     set_power_desc(
         "The most invasive of mental powers, Mind Wipe allows the psychic to " +
         "reach into a target's mind and surgically excise all memories of a " +
-        "specific person, place, or event. The deletion is total and permanent — " +
+        "specific person, place, or event. The deletion is total and permanent - " +
         "the target has no awareness that anything is missing and cannot be " +
         "reminded of the wiped content by normal means. The scope is limited to " +
         "a single defined subject per use. A Mental Endurance save of 18 or " +
@@ -50,13 +50,13 @@ int apply_effect(object user, object target) {
         tell_object(user, target->query_cap_name() +
             " struggles against the intrusion and repels your attempt.\n");
         tell_object(target, "Something vast and invasive grapples with your " +
-            "mind. You feel it reach in — and then throw it out.\n");
+            "mind. You feel it reach in - and then throw it out.\n");
         return 0;
     }
     target->set_property("mind_wiped", 1);
     tell_object(user, "You descend into " + target->query_cap_name() +
         "'s deepest memories and carefully excise the targeted recollections. " +
-        "Every thread, every associated feeling — gone. The deletion is seamless. " +
+        "Every thread, every associated feeling - gone. The deletion is seamless. " +
         "They will never know what they have lost.\n");
     tell_object(target, "You blink. What were you thinking about just now? " +
         "The thought is gone.\n");

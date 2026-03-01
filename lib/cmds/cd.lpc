@@ -1,5 +1,5 @@
 // /cmds/cd.lpc
-// Change working directory — delegates to wiztool (privilege >= 1 only)
+// Change working directory - delegates to wiztool (privilege >= 1 only)
 
 int main(string args) {
     object player = this_player();

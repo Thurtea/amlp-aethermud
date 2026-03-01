@@ -208,7 +208,7 @@ void create() {
         "and the ways of silent death have forged you into a weapon. The order's "
         "existence is denied by all True Atlantean clans, and you operate in absolute "
         "secrecy. Your missions serve the hidden agendas of powerful Atlantean "
-        "factions, and failure is not an option — the order does not forgive."
+        "factions, and failure is not an option - the order does not forgive."
     );
     set_organizations(({ "sunaj_order" }));
     set_enemies(({ "splugorth", "coalition_states", "anyone_who_discovers_the_order" }));

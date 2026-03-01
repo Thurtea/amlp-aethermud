@@ -10,7 +10,7 @@ void create() {
     set_skill_id("medical_science");
     set_skill_name("Medical Science (Research)");
     set_skill_desc(
-        "TODO:CONTENT — Research and understand medical literature and journals."
+        "TODO:CONTENT - Research and understand medical literature and journals."
     );
     set_skill_category("science");
 

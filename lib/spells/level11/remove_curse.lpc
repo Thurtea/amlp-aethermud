@@ -14,7 +14,7 @@ void create() {
         "save threshold: the spell version provides +5 to the roll, " +
         "and ritual version provides +10. A successful roll means the " +
         "curse is instantly removed. A failed roll means the curse " +
-        "persists but no harm is done — the spell can be attempted " +
+        "persists but no harm is done - the spell can be attempted " +
         "again. This spell can remove phobias, luck curses, and " +
         "other magical afflictions placed by spells."
     );
@@ -71,7 +71,7 @@ int apply_effect(object caster, object target) {
             "You attempt to remove the curse, but the magic eludes you!\n" +
             "The curse holds. Try again.\n");
         tell_object(target,
-            caster->query_cap_name() + " attempts to remove your curse — " +
+            caster->query_cap_name() + " attempts to remove your curse - " +
             "but it clings on.\n");
         return 1;
     }

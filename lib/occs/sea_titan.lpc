@@ -11,12 +11,12 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Sea Titans are the great warriors of the deep ocean — massive, " +
+        "Sea Titans are the great warriors of the deep ocean - massive, " +
         "extraordinarily powerful beings from the aquatic civilizations that " +
         "flourish in Earth's rifts-altered seas. They possess enormous physical " +
         "strength, can breathe water as easily as air, withstand crushing depths, " +
         "and move through water with unnatural speed. On land they are somewhat " +
-        "slower but no less dangerous — their physical power remains staggering. " +
+        "slower but no less dangerous - their physical power remains staggering. " +
         "Sea Titans who venture onto land do so for reasons of great personal " +
         "importance, or because their ocean territory has been irrevocably changed."
     );
@@ -81,7 +81,7 @@ void create() {
     set_background(
         "Sea Titans come from the great aquatic kingdoms that developed after " +
         "the Coming of the Rifts dramatically altered Earth's oceans. Their " +
-        "world is as complex and political as anything on the surface — they " +
+        "world is as complex and political as anything on the surface - they " +
         "bring the weight of that world with them."
     );
     set_organizations(({ "aquatic kingdoms", "ocean raiding clans" }));

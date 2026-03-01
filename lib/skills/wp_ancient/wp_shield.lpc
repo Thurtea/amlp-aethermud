@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_shield");
     set_skill_name("W.P. Shield");
     set_skill_desc(
-        "TODO:CONTENT — Use shields effectively for blocking and as weapons."
+        "TODO:CONTENT - Use shields effectively for blocking and as weapons."
     );
     set_skill_category("wp_ancient");
 

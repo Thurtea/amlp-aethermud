@@ -10,7 +10,7 @@ void create() {
     set_skill_id("mountain_man");
     set_skill_name("Mountain Man");
     set_skill_desc(
-        "TODO:CONTENT — Survive in extreme mountain environments."
+        "TODO:CONTENT - Survive in extreme mountain environments."
     );
     set_skill_category("wilderness");
 

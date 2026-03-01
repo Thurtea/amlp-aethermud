@@ -10,7 +10,7 @@ void create() {
     set_skill_id("dance");
     set_skill_name("Dance");
     set_skill_desc(
-        "TODO:CONTENT — Perform various styles of formal and informal dancing."
+        "TODO:CONTENT - Perform various styles of formal and informal dancing."
     );
     set_skill_category("domestic");
 

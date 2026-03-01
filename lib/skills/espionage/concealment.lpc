@@ -10,7 +10,7 @@ void create() {
     set_skill_id("concealment");
     set_skill_name("Concealment");
     set_skill_desc(
-        "TODO:CONTENT — Hide objects and people from detection."
+        "TODO:CONTENT - Hide objects and people from detection."
     );
     set_skill_category("espionage");
 

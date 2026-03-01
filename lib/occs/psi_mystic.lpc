@@ -158,5 +158,5 @@ void create() {
 
 /* Psi-Mystics gain less per level than specialists but have both pools */
 int query_psi_magic_synergy() {
-    return 1;  /* TODO:CONTENT — combined effects */
+    return 1;  /* TODO:CONTENT - combined effects */
 }

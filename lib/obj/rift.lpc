@@ -65,7 +65,7 @@ int cmd_enter(string what) {
     }
 
     if (!dest_ob) {
-        tell_room(environment(this_object()), "The rift rejects you — the destination fails to hold.\n");
+        tell_room(environment(this_object()), "The rift rejects you - the destination fails to hold.\n");
         return 1;
     }
 

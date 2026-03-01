@@ -59,7 +59,7 @@ int apply_effect(object user, object target) {
         target->query_cap_name() + ". Their mind is an open book, and yours " +
         "to them. The bond hums with shared awareness.\n");
     tell_object(target, user->query_cap_name() +
-        "'s presence blossoms in your mind — warm and immediate. " +
+        "'s presence blossoms in your mind - warm and immediate. " +
         "A deep psychic link connects you.\n");
     return 1;
 }

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("fishing_wild");
     set_skill_name("Fishing (Wilderness)");
     set_skill_desc(
-        "TODO:CONTENT — Catch fish by hand, spear, or improvised rod."
+        "TODO:CONTENT - Catch fish by hand, spear, or improvised rod."
     );
     set_skill_category("wilderness");
 

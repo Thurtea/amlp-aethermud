@@ -1,4 +1,4 @@
-// Universal ATM Card — credits access object
+// Universal ATM Card - credits access object
 // Every player receives one at character creation.
 
 inherit "/std/object";

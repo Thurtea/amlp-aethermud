@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Battle Magi are the rarest and most feared warriors in the Federation " +
-        "of Magic — spellcasters trained to fight in the thick of melee, casting " +
+        "of Magic - spellcasters trained to fight in the thick of melee, casting " +
         "spells while engaged in hand-to-hand combat. They sacrifice the raw " +
         "magical power of dedicated spellcasters for combat capability, but " +
         "the combination is devastating. A Battle Magus can cast an energy blast " +
@@ -83,7 +83,7 @@ void create() {
 
     set_background(
         "Battle Magi are created by the Federation of Magic's military training " +
-        "programs — wizards who survived the brutal selection process that " +
+        "programs - wizards who survived the brutal selection process that " +
         "combines magical study with the most demanding physical combat training. " +
         "Most are fiercely loyal to the Federation."
     );

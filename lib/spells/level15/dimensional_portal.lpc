@@ -1,0 +1,102 @@
+// /lib/spells/level15/dimensional_portal.lpc
+// Dimensional Portal - Level 15 Dimensional Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("dimensional_portal");
+    set_spell_name("Dimensional Portal");
+    set_spell_desc(
+        "The most powerful dimensional magic: the invocation opens a two-way "
+        "door to another dimension. The mage can open a door to a specific "
+        "known world or randomly to an unknown dimension. This is the only "
+        "known means by which a greater being can enter this dimension. "
+        "Once the portal closes, the only way back is to open another. "
+        "One of the real dangers is that something unwanted may slip through. "
+        "As a spell: 30 seconds (2 melees) per level. "
+        "As a ritual: 1 minute (4 melees) per level. "
+        "PPE cost: 1000."
+    );
+
+    set_spell_level(15);
+    set_ppe_cost(1000);
+
+    set_duration_type(1);
+    set_base_duration(1);  // 1 melee round base, scaled by level
+
+    set_range_type(2);
+    set_base_range(10);
+
+    set_incantation("Ianua inter mundos aperta sit! Per abyssum transeamus - per portam!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(8);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_secs = level * 30;  // 30 seconds per level
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    env->set_property("dimensional_portal_active", 1);
+    env->set_property("portal_caster", caster->query_name());
+    env->set_property("rift_active", 1);
+
+    // Determine destination
+    string destination = "an unknown dimension";
+    if (target && objectp(target)) {
+        destination = environment(target) ? object_name(environment(target)) : "unknown";
+    }
+
+    tell_object(caster,
+        "You channel all 1000 PPE into the dimensional invocation. "
+        "The air tears open before you in a shimmering oval of iridescent light - "
+        "a two-way portal to another dimension! "
+        "WARNING: Greater beings may enter through this portal. "
+        "Something may always slip through before it closes.\n"
+        "Duration: " + (level * 30) + " seconds.\n");
+
+    tell_room(env,
+        "The air screams and tears open as " + caster->query_cap_name() +
+        " invokes the Dimensional Portal! A shimmering oval of reality-bending "
+        "light burns in the air - a gateway to another dimension!\n",
+        ({ caster }));
+
+    // There's always a risk of something slipping through
+    int something_slips = (random(100) < 20);  // 20% chance
+    if (something_slips) {
+        call_out("slip_through", 5, caster, env);
+    }
+
+    call_out("close_dimensional_portal", duration_secs, caster, env);
+    return 1;
+}
+
+void slip_through(object caster, object env) {
+    if (!env || !env->query_property("dimensional_portal_active")) return;
+    tell_room(env,
+        "Something slips through the portal before you can act! "
+        "A glimmer of alien energy materializes at the portal's edge...\n",
+        ({ }));
+    if (caster) tell_object(caster,
+        "Something came through the dimensional portal!\n");
+}
+
+void close_dimensional_portal(object caster, object env) {
+    if (!env) return;
+    env->remove_property("dimensional_portal_active");
+    env->remove_property("portal_caster");
+    env->remove_property("rift_active");
+    if (caster) tell_object(caster,
+        "The Dimensional Portal collapses. The way between worlds is sealed.\n");
+    if (env) tell_room(env,
+        "The dimensional portal shivers and collapses inward with a thunderclap "
+        "of imploding air!\n", ({ }));
+}

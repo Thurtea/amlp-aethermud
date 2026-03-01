@@ -10,7 +10,7 @@ void create() {
     set_skill_id("outdoorsmanship");
     set_skill_name("Outdoorsmanship");
     set_skill_desc(
-        "TODO:CONTENT — General knowledge of outdoor survival and nature lore."
+        "TODO:CONTENT - General knowledge of outdoor survival and nature lore."
     );
     set_skill_category("wilderness");
 

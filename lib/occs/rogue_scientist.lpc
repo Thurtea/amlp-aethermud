@@ -81,7 +81,7 @@ void create() {
     set_special_training("experimental science");
 
     set_background(
-        "Rogue Scientists left institutions for a variety of reasons — expelled " +
+        "Rogue Scientists left institutions for a variety of reasons - expelled " +
         "for dangerous research, defected from CS science programs, or simply " +
         "could not accept the constraints placed on their work. Most carry " +
         "half-finished projects in their head at all times."

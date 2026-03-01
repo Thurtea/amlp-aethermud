@@ -14,7 +14,7 @@ void create() {
         "invisible fist that strikes the target at a distance. The punch "
         "is as solid as a physical blow, staggering the target and capable "
         "of breaking bone if aimed correctly. Unlike telekinesis, this is "
-        "an instantaneous strike rather than sustained force — fast, precise, "
+        "an instantaneous strike rather than sustained force - fast, precise, "
         "and difficult to dodge.\n\n"
         "Range: 30 feet\n"
         "ISP Cost: 6 points\n"

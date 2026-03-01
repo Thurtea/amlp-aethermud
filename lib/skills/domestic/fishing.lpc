@@ -10,7 +10,7 @@ void create() {
     set_skill_id("fishing");
     set_skill_name("Fishing");
     set_skill_desc(
-        "TODO:CONTENT — Catch fish using rod, net, or trap."
+        "TODO:CONTENT - Catch fish using rod, net, or trap."
     );
     set_skill_category("domestic");
 

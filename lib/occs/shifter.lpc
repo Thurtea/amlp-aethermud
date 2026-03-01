@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Shifters are sorcerers who specialize in dimensional magic — the " +
+        "Shifters are sorcerers who specialize in dimensional magic - the " +
         "art of opening rifts, summoning beings from other dimensions, and " +
         "binding those summoned to their will. They are among the most " +
         "dangerous magic users on Rifts Earth, possessing the ability to call " +
@@ -81,7 +81,7 @@ void create() {
     set_special_training("dimensional summoning");
 
     set_background(
-        "Shifters are drawn to their art by the pull of the rifts themselves — " +
+        "Shifters are drawn to their art by the pull of the rifts themselves - " +
         "they can feel the dimensional energies more keenly than most and are " +
         "compelled to understand and control them. Some are self-taught; others " +
         "studied under dangerous masters."

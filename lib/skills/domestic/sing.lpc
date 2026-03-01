@@ -10,7 +10,7 @@ void create() {
     set_skill_id("sing");
     set_skill_name("Sing");
     set_skill_desc(
-        "TODO:CONTENT — Perform songs with voice; entertainer skill."
+        "TODO:CONTENT - Perform songs with voice; entertainer skill."
     );
     set_skill_category("domestic");
 

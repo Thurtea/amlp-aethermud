@@ -38,7 +38,7 @@ void create() {
         "spd": 10,
     ]));
 
-    // M.D.C. creature — 350 base at hatchling, +25 per level
+    // M.D.C. creature - 350 base at hatchling, +25 per level
     set_base_mdc(350);
     set_mdc_bonus_per_level(25);
     set_mdc_creature(1);

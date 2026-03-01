@@ -1,0 +1,77 @@
+// /lib/spells/level13/summon_lesser_being.lpc
+// Summon Lesser Being - Level 13 Summoning Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("summon_lesser_being");
+    set_spell_name("Summon Lesser Being");
+    set_spell_desc(
+        "An impressive ritual that plucks a supernatural lesser being from "
+        "its native dimension and places it before the mystic. A specific "
+        "lesser monster can be designated, or a random creature is called. "
+        "The supernatural being is automatically under the mage's control "
+        "and will obey without question - except it will not commit suicide "
+        "and may not fight to the death. The being can be returned to its "
+        "dimension at any time before duration ends. After expiration the "
+        "mage loses control. Duration: 24 hours per level."
+    );
+
+    set_spell_level(13);
+    set_ppe_cost(425);
+
+    set_duration_type(1);
+    set_base_duration(1440);  // 24 hours in minutes
+
+    set_range_type(4);
+    set_base_range(10);
+
+    set_incantation("Per potentiam meam, ex umbris advenias, creatura! Ad iussa mea!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(10);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_hrs = level * 24;
+
+    tell_object(caster,
+        "Dimensional energies swirl as you complete the ritual. The fabric "
+        "of space tears open and a supernatural lesser being materializes "
+        "before you. It regards you with alien eyes, then bows in submission "
+        "to your power.\n"
+        "Duration: " + duration_hrs + " hours.\n");
+
+    object env = environment(caster);
+    if (env) {
+        tell_room(env,
+            "A rift tears in the air near " + caster->query_cap_name() +
+            "! A supernatural creature steps through and bows in submission "
+            "to the mage.\n",
+            ({ caster }));
+    }
+
+    object being;
+    catch { being = clone_object("/npc/supernatural/lesser_being"); };
+    if (being) {
+        being->set_property("controlled_by", caster->query_name());
+        being->set_property("control_expires", time() + (duration_hrs * 3600));
+        if (env) move_object(being, env);
+        call_out("lesser_being_control_expires", duration_hrs * 3600, being, caster);
+    }
+
+    return 1;
+}
+
+void lesser_being_control_expires(object being, object caster) {
+    if (!being) return;
+    if (caster) tell_object(caster,
+        "Your control over the summoned lesser being has expired.\n");
+    if (being) being->remove_property("controlled_by");
+}

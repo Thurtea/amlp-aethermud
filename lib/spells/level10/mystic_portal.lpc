@@ -14,7 +14,7 @@ void create() {
         "through solid walls (providing a 12-foot passage per caster " +
         "level) or teleport individuals to another location known to " +
         "the caster within 100 feet per level. The portal appears " +
-        "as a shimmering oval of light on a vertical surface — " +
+        "as a shimmering oval of light on a vertical surface - " +
         "looking into it shows the destination. The portal provides " +
         "only one-way passage and lasts 4 melee rounds per level."
     );
@@ -56,7 +56,7 @@ int apply_effect(object caster, object target) {
 
     tell_object(caster,
         "You tear open a Mystic Portal!\n" +
-        "A shimmering oval of light appears in the air — " +
+        "A shimmering oval of light appears in the air - " +
         "you can see your destination through it.\n" +
         "The portal is one-way and will last " + (duration) + " seconds.\n");
 

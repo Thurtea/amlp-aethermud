@@ -10,8 +10,8 @@ void create() {
     set_power_id("total_recall");
     set_power_name("Total Recall");
     set_power_desc(
-        "The psychic perfectly records a moment of sensory experience — " +
-        "everything seen, heard, smelled, or felt in the past few minutes — " +
+        "The psychic perfectly records a moment of sensory experience - " +
+        "everything seen, heard, smelled, or felt in the past few minutes - " +
         "storing it with absolute fidelity in long-term memory. Unlike normal " +
         "memory which fades and distorts, these recorded impressions remain " +
         "crystal clear and accessible indefinitely. The psychic can replay a " +
@@ -37,8 +37,8 @@ int apply_effect(object user, object target) {
     recall_count += 1;
     user->set_property("total_recall_count", recall_count);
     tell_object(user, "You focus your mind, burning this moment into permanent " +
-        "memory with crystalline clarity. Every detail — sights, sounds, smells, " +
-        "the exact words spoken — is recorded with absolute fidelity. You will " +
+        "memory with crystalline clarity. Every detail - sights, sounds, smells, " +
+        "the exact words spoken - is recorded with absolute fidelity. You will " +
         "remember this perfectly, always.\n");
     tell_room(environment(user),
         user->query_cap_name() + " pauses for a moment, eyes slightly unfocused, " +

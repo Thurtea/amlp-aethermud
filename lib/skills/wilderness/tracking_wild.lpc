@@ -10,7 +10,7 @@ void create() {
     set_skill_id("tracking_wild");
     set_skill_name("Tracking (Wilderness)");
     set_skill_desc(
-        "TODO:CONTENT — Follow the trail of animals and people through wild terrain."
+        "TODO:CONTENT - Follow the trail of animals and people through wild terrain."
     );
     set_skill_category("wilderness");
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("forensics");
     set_skill_name("Forensics");
     set_skill_desc(
-        "TODO:CONTENT — Analyze crime scenes and physical evidence."
+        "TODO:CONTENT - Analyze crime scenes and physical evidence."
     );
     set_skill_category("medical");
 

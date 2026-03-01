@@ -53,7 +53,7 @@ int apply_effect(object user, object target) {
     else if (pct <= 15) sev = "jolts";
     else if (pct <= 30) sev = "blasts";
     else sev = "detonates through";
-    tell_object(user, "Lightning erupts from your hands — a crackling bolt " +
+    tell_object(user, "Lightning erupts from your hands - a crackling bolt " +
         sev + " " + target->query_cap_name() + " with thunderous force!\n");
     tell_object(target, "A massive bolt of psychic lightning slams into you " +
         "with bone-rattling force!\n");

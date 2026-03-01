@@ -238,6 +238,72 @@ private string _ensure_workroom(string lower_nm) {
     return wpath;
 }
 
+// ---- First-boot orientation helper ----
+
+// Called internally from set_privilege_level() when first-boot onboarding fires.
+private void _do_first_boot_orientation() {
+    // Create the workroom on disk now so Archimedes can teleport there.
+    string lower_nm = lower_case(name);
+    _ensure_workroom(lower_nm);
+    working_directory = "/domains/wizard/" + lower_nm;
+
+    // Teleport player to orientation room.
+    object orient;
+    catch { orient = load_object("/domains/start/orientation"); };
+    if (orient) move_player(orient);
+
+    // Print welcome banner.
+    tell_object(this_object(),
+        "\n============================================================\n"
+        " WELCOME TO AETHERMUD\n"
+        " You have been promoted. First-boot orientation begins.\n"
+        "\n"
+        " Staff Ranks:\n"
+        "   0 = Player     - Standard player\n"
+        "   1 = Builder    - Creator / Coder\n"
+        "   2 = Wizard     - Full staff\n"
+        "   3 = Admin      - Server authority\n"
+        "\n"
+        " Type: talk archimedes   to begin orientation.\n"
+        "============================================================\n\n");
+
+    // Clone Archimedes into the orientation room.
+    if (orient) {
+        object owl;
+        catch { owl = clone_object("/npc/archimedes"); };
+        if (owl) move_object(owl, orient);
+    }
+}
+
+// Called by Archimedes (or any trusted code) after orientation completes.
+// Gives physical wiz-tools and teleports the player to their workroom.
+void complete_promotion() {
+    int lv = privilege_level;
+    string lower_nm = lower_case(name);
+
+    // Give physical wiz-tool items.
+    string *tool_paths = ({"/wiz/id_card", "/wiz/code_tool"});
+    if (lv >= 2)
+        tool_paths += ({"/wiz/crystal_ball", "/wiz/wizard_staff",
+                        "/wiz/admin_wand",   "/wiz/admin_orb"});
+    foreach (string tp in tool_paths) {
+        object tool;
+        catch { tool = clone_object(tp); };
+        if (tool) give_wiz_item(tool);
+    }
+
+    // Ensure workroom exists and teleport there.
+    string wpath = _ensure_workroom(lower_nm);
+    object wroom;
+    catch { wroom = load_object(wpath); };
+    if (wroom) {
+        move_player(wroom);
+        tell_object(this_object(), "You are transported to your workroom.\n");
+    }
+
+    working_directory = "/domains/wizard/" + lower_nm;
+}
+
 // ---- Promotion / demotion ----
 
 void set_privilege_level(int lv) {
@@ -259,7 +325,7 @@ void set_privilege_level(int lv) {
         return;
     }
 
-    // No actual rank change (e.g. login sync of saved privilege) — just re-attach tool
+    // No actual rank change (e.g. login sync of saved privilege) - just re-attach tool
     if (lv == old_lv) {
         if (lv >= 1) attach_wiztool();
         return;
@@ -287,8 +353,31 @@ void set_privilege_level(int lv) {
         return;
     }
 
-    // 3. Promotion — attach monolithic wiztool (handles ls/cd/cat/eval etc.)
+    // 3. Promotion - attach monolithic wiztool (handles ls/cd/cat/eval etc.)
     attach_wiztool();
+
+    // 3b. Check for first-boot onboarding (admin-level promotions only).
+    //     If the server has never had an admin before, redirect to orientation
+    //     instead of going straight to workroom.
+    if (lv >= 2) {
+        object fc;
+        catch { fc = load_object("/secure/first_connect"); };
+        if (fc && fc->query_first_boot()) {
+            fc->mark_first_boot_done();
+            _do_first_boot_orientation();
+            // Skip steps 4-7; complete_promotion() is called by Archimedes.
+            // Fall through to step 8 (global announce) below.
+            string rank_name_fb = (lv == 2) ? "Admin" : "Wizard";
+            tell_object(this_object(),
+                "\n[SYSTEM] You have been promoted to " + rank_name_fb + "!\n");
+            object *plist_fb = users();
+            string amsg_fb = "[Server] " + name + " has been promoted to " + rank_name_fb + "!\n";
+            foreach (object p in plist_fb) {
+                if (p && p != this_object()) tell_object(p, amsg_fb);
+            }
+            return;
+        }
+    }
 
     // 4. Clone and give physical wiz-tool items for new rank
     //    Rank 1 (Wizard): id_card, code_tool

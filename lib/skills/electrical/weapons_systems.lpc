@@ -10,7 +10,7 @@ void create() {
     set_skill_id("weapons_systems");
     set_skill_name("Weapons Systems");
     set_skill_desc(
-        "TODO:CONTENT — Operate and maintain advanced weapons control systems."
+        "TODO:CONTENT - Operate and maintain advanced weapons control systems."
     );
     set_skill_category("electrical");
 

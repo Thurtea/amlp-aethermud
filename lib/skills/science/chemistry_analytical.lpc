@@ -10,7 +10,7 @@ void create() {
     set_skill_id("chemistry_analytical");
     set_skill_name("Chemistry: Analytical");
     set_skill_desc(
-        "TODO:CONTENT — Advanced chemical analysis and forensic chemistry."
+        "TODO:CONTENT - Advanced chemical analysis and forensic chemistry."
     );
     set_skill_category("science");
 

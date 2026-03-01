@@ -10,7 +10,7 @@ void create() {
     set_skill_id("archaeology");
     set_skill_name("Archaeology");
     set_skill_desc(
-        "TODO:CONTENT — Study and excavation of ancient sites and artifacts."
+        "TODO:CONTENT - Study and excavation of ancient sites and artifacts."
     );
     set_skill_category("science");
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("camouflage");
     set_skill_name("Camouflage");
     set_skill_desc(
-        "TODO:CONTENT — Conceal personnel, vehicles, and equipment from observation."
+        "TODO:CONTENT - Conceal personnel, vehicles, and equipment from observation."
     );
     set_skill_category("military");
 

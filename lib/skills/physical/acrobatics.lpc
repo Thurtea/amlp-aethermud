@@ -10,7 +10,7 @@ void create() {
     set_skill_id("acrobatics");
     set_skill_name("Acrobatics");
     set_skill_desc(
-        "TODO:CONTENT — Perform flips, rolls, and gymnastic movements in combat."
+        "TODO:CONTENT - Perform flips, rolls, and gymnastic movements in combat."
     );
     set_skill_category("physical");
 

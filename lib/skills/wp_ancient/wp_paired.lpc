@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_paired");
     set_skill_name("W.P. Paired Weapons");
     set_skill_desc(
-        "TODO:CONTENT — Fight with two weapons simultaneously without penalty."
+        "TODO:CONTENT - Fight with two weapons simultaneously without penalty."
     );
     set_skill_category("wp_ancient");
 

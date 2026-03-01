@@ -10,7 +10,7 @@ void create() {
     set_skill_id("computer_repair");
     set_skill_name("Computer Repair");
     set_skill_desc(
-        "TODO:CONTENT — Diagnose and repair computer hardware faults."
+        "TODO:CONTENT - Diagnose and repair computer hardware faults."
     );
     set_skill_category("electrical");
 

@@ -64,7 +64,7 @@ int apply_effect(object caster, object target) {
             tell_object(caster,
                 target->query_cap_name() + " resists the Luck Curse!\n");
             tell_object(target,
-                "You feel a dark weight attempt to settle on you — but it slides off!\n");
+                "You feel a dark weight attempt to settle on you - but it slides off!\n");
             return 1;
         }
     }
@@ -83,7 +83,7 @@ int apply_effect(object caster, object target) {
 
     tell_object(target,
         "A dark, suffocating curse settles over you!\n" +
-        "You feel your luck drain away — everything will go wrong.\n");
+        "You feel your luck drain away - everything will go wrong.\n");
 
     object env = environment(caster);
     if (env) {

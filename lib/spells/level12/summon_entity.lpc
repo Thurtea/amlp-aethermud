@@ -1,0 +1,84 @@
+// /lib/spells/level12/summon_entity.lpc
+// Summon and Control Entity - Level 12 Summoning Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("summon_entity");
+    set_spell_name("Summon and Control Entity");
+    set_spell_desc(
+        "An impressive ritual that plucks an entity from its native dimension "
+        "and magically teleports it before the conjurer. The alien being is "
+        "automatically under the mage's control and will obey without question. "
+        "The entity can be used for manual labor, protection, or assault. "
+        "A specific entity type may be designated, or a random one is called. "
+        "The supernatural creature can be returned to its own dimension at "
+        "any time before the duration expires. After duration, the mage "
+        "loses control and the entity may act independently. "
+        "Duration: 24 hours per level."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(250);
+
+    set_duration_type(1);
+    set_base_duration(1440); // 24 hours in minutes
+
+    set_range_type(4);  // area/local
+    set_base_range(10);
+
+    set_incantation("Ex profundo aetheris, ad voluntatem meam adveni, entitas!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(8);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_hrs = level * 24;
+
+    tell_object(caster,
+        "The air shimmers and tears as dimensional energies respond to your "
+        "invocation. A rift opens briefly and an entity steps through, "
+        "fixing you with an unreadable gaze before bowing its head in "
+        "submission. The entity is bound to your will.\n"
+        "Duration: " + duration_hrs + " hours.\n");
+
+    object env = environment(caster);
+    if (env) {
+        tell_room(env,
+            "A rift tears open the air near " + caster->query_cap_name() +
+            "! A strange entity steps through and bows its head in submission.\n",
+            ({ caster }));
+    }
+
+    caster->set_property("bound_entity_duration",
+        time() + (duration_hrs * 3600));
+
+    // Attempt to clone an entity NPC
+    object entity;
+    catch { entity = clone_object("/npc/entities/minor_entity"); };
+    if (entity) {
+        entity->set_property("controlled_by", caster->query_name());
+        entity->set_property("control_expires", time() + (duration_hrs * 3600));
+        if (env) move_object(entity, env);
+        call_out("entity_control_expires", duration_hrs * 3600, entity, caster);
+    }
+
+    return 1;
+}
+
+void entity_control_expires(object entity, object caster) {
+    if (!entity) return;
+    if (caster) tell_object(caster,
+        "Your control over the summoned entity has expired. It acts freely now.\n");
+    if (entity) {
+        entity->remove_property("controlled_by");
+        entity->remove_property("control_expires");
+    }
+}

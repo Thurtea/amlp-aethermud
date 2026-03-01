@@ -858,7 +858,7 @@ private void ed_do_write() {
         return;
     }
     string content = implode(ed_lines, "\n") + "\n";
-    // write_file appends — remove first to overwrite
+    // write_file appends - remove first to overwrite
     rm(ed_file);
     if (write_file(ed_file, content)) {
         ed_dirty = 0;

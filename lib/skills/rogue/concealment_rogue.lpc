@@ -10,7 +10,7 @@ void create() {
     set_skill_id("concealment_rogue");
     set_skill_name("Concealment (Rogue)");
     set_skill_desc(
-        "TODO:CONTENT — Hide small items on one's person or in a room."
+        "TODO:CONTENT - Hide small items on one's person or in a room."
     );
     set_skill_category("rogue");
 

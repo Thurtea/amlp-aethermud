@@ -12,7 +12,7 @@ void create() {
     set_power_desc(
         "The psychic broadcasts a hypnotic compulsion that washes over every " +
         "living mind in the area simultaneously. Targets that fail a Mental " +
-        "Endurance save fall into a pliable trance state — standing still, " +
+        "Endurance save fall into a pliable trance state - standing still, " +
         "staring blankly, and following simple one-sentence instructions from " +
         "the psychic. The trance is broken by physical pain, loud noises, or " +
         "the psychic ending it. Particularly strong-willed individuals (ME 16+) " +

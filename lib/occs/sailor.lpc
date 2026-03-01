@@ -13,7 +13,7 @@ void create() {
     set_occ_description(
         "Sailors are the backbone of maritime commerce, exploration, and " +
         "warfare on Rifts Earth's vast waterways and coastal regions. They " +
-        "are experienced deck hands who understand the sea in all its moods — " +
+        "are experienced deck hands who understand the sea in all its moods - " +
         "navigating by stars, reading weather, handling rigging, and fighting " +
         "in the close quarters of shipboard combat. Sailors may serve legitimate " +
         "merchant fleets, naval forces, or fall into piracy. A skilled sailor " +

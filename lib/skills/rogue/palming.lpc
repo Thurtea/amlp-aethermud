@@ -10,7 +10,7 @@ void create() {
     set_skill_id("palming");
     set_skill_name("Palming");
     set_skill_desc(
-        "TODO:CONTENT — Conceal small objects in the hand; stage magic and theft."
+        "TODO:CONTENT - Conceal small objects in the hand; stage magic and theft."
     );
     set_skill_category("rogue");
 

@@ -1,7 +1,7 @@
 /*
  * /lib/domains/new_camelot/npc/guard.lpc
  *
- * New Camelot town guard — example NPC using /std/npc as a base.
+ * New Camelot town guard - example NPC using /std/npc as a base.
  *
  * Registered in new_camelot/town_square.lpc via:
  *   npc_daemon->register_npc(clone_object("/domains/new_camelot/npc/guard"),
@@ -34,7 +34,7 @@ void create() {
 }
 
 void on_spawn() {
-    /* Called after moving into the room — could greet players */
+    /* Called after moving into the room - could greet players */
 }
 
 /* Guards respond to 'talk guard' or 'say' with a brief line */

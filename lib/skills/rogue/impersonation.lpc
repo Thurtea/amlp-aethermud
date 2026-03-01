@@ -10,7 +10,7 @@ void create() {
     set_skill_id("impersonation");
     set_skill_name("Impersonation");
     set_skill_desc(
-        "TODO:CONTENT — Convincingly pretend to be a specific person."
+        "TODO:CONTENT - Convincingly pretend to be a specific person."
     );
     set_skill_category("rogue");
 

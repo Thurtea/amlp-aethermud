@@ -10,7 +10,7 @@ void create() {
     set_power_id("ectoplasm");
     set_power_name("Ectoplasm");
     set_power_desc(
-        "The psychic extrudes ectoplasm — a semi-physical psychic substance — "
+        "The psychic extrudes ectoplasm - a semi-physical psychic substance - "
         "from their body, using it to manipulate objects, plug leaks, create "
         "crude seals, or form simple shapes. The pale, sticky material is "
         "real enough to be touched and has the consistency of thick gelatin. "
@@ -32,7 +32,7 @@ int apply_effect(object user, object target) {
     if (!user) return 0;
     user->set_property("ectoplasm_active", 1);
     tell_object(user, "A pale, luminescent substance begins oozing from your "
-        "hands — ectoplasm, psychic matter made semi-real. You can use it "
+        "hands - ectoplasm, psychic matter made semi-real. You can use it "
         "to grip, plug, seal, or shape things within arm's reach.\n");
     tell_room(environment(user),
         user->query_cap_name() + "'s hands are covered in a glowing, "

@@ -15,11 +15,11 @@ void create() {
     
     set_race_description(
         "Prometheans are innovators and tinkerers with a talent for technology"
-        " and limited techno-magic. This stub is conservative — please refine"
+        " and limited techno-magic. This stub is conservative - please refine"
         " using source material."
     );
     
-    // NOTE: Conservative physical defaults — review and refine.
+    // NOTE: Conservative physical defaults - review and refine.
     set_size_category(SIZE_MEDIUM);
     set_height_range(60, 72);
     set_weight_range(120, 200);

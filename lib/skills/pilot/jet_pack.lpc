@@ -10,7 +10,7 @@ void create() {
     set_skill_id("jet_pack");
     set_skill_name("Pilot: Jet Pack");
     set_skill_desc(
-        "TODO:CONTENT — Operate personal jet packs and thruster packs."
+        "TODO:CONTENT - Operate personal jet packs and thruster packs."
     );
     set_skill_category("pilot");
 

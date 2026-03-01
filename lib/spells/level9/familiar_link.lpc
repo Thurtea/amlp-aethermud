@@ -11,8 +11,8 @@ void create() {
     set_spell_desc(
         "Creates a permanent telepathic and empathic bond between the " +
         "caster and a small animal familiar. The caster gains sensory " +
-        "access to the familiar — sight, hearing, smell, taste, and " +
-        "touch — at will. The familiar becomes completely docile and " +
+        "access to the familiar - sight, hearing, smell, taste, and " +
+        "touch - at will. The familiar becomes completely docile and " +
         "obedient. While the link exists the caster gains +6 Hit " +
         "Points from the life-force connection. If the familiar is " +
         "killed, the caster loses 10 HP and may suffer shock for " +
@@ -58,7 +58,7 @@ int apply_effect(object caster, object target) {
     }
 
     if (!familiar) {
-        /* Allow self-cast for flavor — describe finding a familiar */
+        /* Allow self-cast for flavor - describe finding a familiar */
         tell_object(caster,
             "You complete the Familiar Link ritual.\n" +
             "The bond awaits a suitable animal companion.\n" +

@@ -9,14 +9,14 @@ void create() {
     set_spell_id("summon_shadow_beast");
     set_spell_name("Summon Shadow Beast");
     set_spell_desc(
-        "Summons a creature from another dimension — a massive Shadow " +
+        "Summons a creature from another dimension - a massive Shadow " +
         "Beast standing 9 to 12 feet tall with razor-sharp claws and " +
         "fangs. The Shadow Beast can merge completely into any shadow, " +
         "becoming undetectable. It obeys the caster's commands but " +
         "has a 15 percent chance of refusing to return to its " +
         "dimension when dismissed. The beast attacks with devastating " +
         "force and can track prey by scent across great distances. " +
-        "Summoning a Shadow Beast is not without risk — if it escapes " +
+        "Summoning a Shadow Beast is not without risk - if it escapes " +
         "control it becomes a free predator."
     );
 
@@ -55,7 +55,7 @@ int apply_effect(object caster, object target) {
         "You tear open a rift to the shadow dimension!\n" +
         "From the darkness steps a massive, terrifying Shadow Beast!\n" +
         "It stands nine feet tall, darkness pooling around its claws.\n" +
-        "The beast turns its blank face toward you — and waits.\n" +
+        "The beast turns its blank face toward you - and waits.\n" +
         "It is under your command for now.\n");
 
     foreach (object ob : all_inventory(env)) {
@@ -63,7 +63,7 @@ int apply_effect(object caster, object target) {
             tell_object(ob,
                 "Darkness SURGES as " + caster->query_cap_name() +
                 " tears open a portal!\n" +
-                "A massive Shadow Beast steps through — nine feet of " +
+                "A massive Shadow Beast steps through - nine feet of " +
                 "shadow and claws!\n" +
                 "Save vs horror factor or flee in terror!\n");
         }

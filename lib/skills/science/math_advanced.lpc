@@ -10,7 +10,7 @@ void create() {
     set_skill_id("math_advanced");
     set_skill_name("Mathematics: Advanced");
     set_skill_desc(
-        "TODO:CONTENT — Calculus, statistics, and advanced mathematics."
+        "TODO:CONTENT - Calculus, statistics, and advanced mathematics."
     );
     set_skill_category("science");
 

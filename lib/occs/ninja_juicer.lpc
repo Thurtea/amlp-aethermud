@@ -17,7 +17,7 @@ void create() {
         "speed, precision, and silence. They can move faster than the eye can " +
         "follow, strike pressure points with augmented accuracy, and disappear " +
         "into shadow between attacks. The juicer augmentation accelerates the " +
-        "same burnout timeline as any juicer — Ninja Juicers burn brilliantly " +
+        "same burnout timeline as any juicer - Ninja Juicers burn brilliantly " +
         "and briefly, making every assignment potentially their last."
     );
 

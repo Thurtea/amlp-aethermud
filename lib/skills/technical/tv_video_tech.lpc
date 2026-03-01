@@ -10,7 +10,7 @@ void create() {
     set_skill_id("tv_video_tech");
     set_skill_name("TV and Video (Technical)");
     set_skill_desc(
-        "TODO:CONTENT — Operate broadcast TV equipment and video production."
+        "TODO:CONTENT - Operate broadcast TV equipment and video production."
     );
     set_skill_category("technical");
 

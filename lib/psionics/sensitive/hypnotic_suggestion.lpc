@@ -13,7 +13,7 @@ void create() {
         "The psychic plants a single, simple command or suggestion directly "
         "into a target's mind, which the target then feels compelled to follow "
         "as if it were their own idea. The suggestion must be believable and "
-        "achievable — the psychic cannot command someone to harm themselves "
+        "achievable - the psychic cannot command someone to harm themselves "
         "or do something completely contrary to their nature. A Mental Endurance "
         "saving throw of 12 or higher allows the target to resist.\n\n"
         "Range: 30 feet\n"
@@ -59,7 +59,7 @@ int apply_effect(object user, object target) {
     target->set_property("hypnotic_suggestion", 1);
     tell_object(user, "You meet " + target->query_cap_name() + "'s gaze and "
         "slip the suggestion into their mind. They accept it as their own thought.\n");
-    tell_object(target, "An idea occurs to you quite naturally — you feel "
+    tell_object(target, "An idea occurs to you quite naturally - you feel "
         "compelled to act on it.\n");
     return 1;
 }

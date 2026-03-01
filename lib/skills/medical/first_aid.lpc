@@ -49,7 +49,7 @@ int perform(object user, string args) {
     int roll = random(100) + 1;
     tell_object(user, "You attempt to provide first aid...\n");
     if (roll >= 96) {
-        tell_object(user, "You botch the treatment — critical failure!\n");
+        tell_object(user, "You botch the treatment - critical failure!\n");
         return -1;
     }
     if (roll <= pct) {

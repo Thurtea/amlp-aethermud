@@ -10,7 +10,7 @@ void create() {
     set_skill_id("telephone_operation");
     set_skill_name("Telephone Operation");
     set_skill_desc(
-        "TODO:CONTENT — Operate and tap telephone/comm systems."
+        "TODO:CONTENT - Operate and tap telephone/comm systems."
     );
     set_skill_category("communications");
 

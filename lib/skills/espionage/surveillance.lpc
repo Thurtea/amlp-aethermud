@@ -10,7 +10,7 @@ void create() {
     set_skill_id("surveillance");
     set_skill_name("Surveillance Systems");
     set_skill_desc(
-        "TODO:CONTENT — Set up and operate surveillance cameras and sensors."
+        "TODO:CONTENT - Set up and operate surveillance cameras and sensors."
     );
     set_skill_category("espionage");
 

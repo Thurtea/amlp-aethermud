@@ -1,0 +1,92 @@
+// /lib/spells/level12/time_hole.lpc
+// Time Hole - Level 12 Temporal Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("time_hole");
+    set_spell_name("Time Hole");
+    set_spell_desc(
+        "The mage teleports himself and his possessions into a stasis field "
+        "in a limbo-like dimension - a white void. Within the time hole, the "
+        "wizard controls a 20-foot area per level of experience and cannot go "
+        "beyond it. The mage can effectively disappear for days or weeks, "
+        "undetectable and unreachable. This is how men of magic recover from "
+        "physical damage or restore exhausted PPE reserves in safety. "
+        "The mage can end the effect at will by willing himself to return. "
+        "Duration: Indefinite until the mage chooses to leave."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(210);
+
+    set_duration_type(0);  // indefinite
+    set_base_duration(0);
+
+    set_range_type(0);  // self
+    set_base_range(0);
+
+    set_incantation("Tempus siste! In limbo me recipio, donec redeam!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("time_hole_active")) {
+        // Return from time hole
+        caster->remove_property("time_hole_active");
+        caster->remove_property("in_limbo");
+
+        // Return to saved location or default start
+        string return_path = caster->query_property("time_hole_return");
+        if (!return_path) return_path = "/domains/start/village_center";
+        caster->remove_property("time_hole_return");
+
+        object dest;
+        catch { dest = load_object(return_path); };
+        if (!dest) catch { dest = load_object("/domains/start/village_center"); };
+        if (dest) caster->move_player(dest);
+
+        tell_object(caster,
+            "You will yourself back to reality. The white void fades and the "
+            "world snaps back into focus around you.\n");
+        return 1;
+    }
+
+    // Save current location
+    object env = environment(caster);
+    if (env) caster->set_property("time_hole_return", object_name(env));
+
+    caster->set_property("time_hole_active", 1);
+    caster->set_property("in_limbo", 1);
+
+    // Move to a limbo room if it exists
+    object limbo;
+    catch { limbo = load_object("/domains/special/time_hole_limbo"); };
+    if (limbo) {
+        caster->move_player(limbo);
+    } else {
+        if (env)
+            tell_room(env,
+                caster->query_cap_name() + " vanishes into a shimmering void!\n",
+                ({ caster }));
+    }
+
+    tell_object(caster,
+        "The world dissolves around you. You stand in a featureless white void - "
+        "a pocket between moments. Time passes, but you are untouchable here.\n"
+        "You may recover and rest safely. Cast 'time hole' again to return.\n");
+
+    if (env)
+        tell_room(env,
+            caster->query_cap_name() + " utters a word and vanishes into thin air!\n",
+            ({ caster }));
+
+    return 1;
+}

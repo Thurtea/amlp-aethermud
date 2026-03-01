@@ -10,7 +10,7 @@ void create() {
     set_skill_id("tracking");
     set_skill_name("Tracking");
     set_skill_desc(
-        "TODO:CONTENT — Follow the trail of humans or animals through any terrain."
+        "TODO:CONTENT - Follow the trail of humans or animals through any terrain."
     );
     set_skill_category("espionage");
 

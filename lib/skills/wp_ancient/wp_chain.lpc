@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_chain");
     set_skill_name("W.P. Chain/Flail");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with chains, flails, and morning stars."
+        "TODO:CONTENT - Proficiency with chains, flails, and morning stars."
     );
     set_skill_category("wp_ancient");
 

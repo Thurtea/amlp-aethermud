@@ -10,7 +10,7 @@ void create() {
     set_skill_id("running");
     set_skill_name("Running");
     set_skill_desc(
-        "TODO:CONTENT — Trained endurance running; increases Speed and Endurance."
+        "TODO:CONTENT - Trained endurance running; increases Speed and Endurance."
     );
     set_skill_category("physical");
 

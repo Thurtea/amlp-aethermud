@@ -10,7 +10,7 @@ void create() {
     set_skill_id("math_basic");
     set_skill_name("Mathematics: Basic");
     set_skill_desc(
-        "TODO:CONTENT — Arithmetic, fractions, and basic algebra."
+        "TODO:CONTENT - Arithmetic, fractions, and basic algebra."
     );
     set_skill_category("science");
 

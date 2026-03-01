@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_heavy_md");
     set_skill_name("W.P. Heavy Mega-Damage Weapons");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with heavy MD weapons; rockets and rail guns."
+        "TODO:CONTENT - Proficiency with heavy MD weapons; rockets and rail guns."
     );
     set_skill_category("wp_modern");
 

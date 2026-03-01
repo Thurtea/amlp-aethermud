@@ -10,7 +10,7 @@ void create() {
     set_skill_id("skin_hides");
     set_skill_name("Skin & Prepare Animal Hides");
     set_skill_desc(
-        "TODO:CONTENT — Skin animals and prepare furs and leather."
+        "TODO:CONTENT - Skin animals and prepare furs and leather."
     );
     set_skill_category("wilderness");
 

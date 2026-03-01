@@ -1,5 +1,5 @@
 // lib/cmds/dchat.lpc
-// Domain chat — broadcast message to all online wizards and admins.
+// Domain chat - broadcast message to all online wizards and admins.
 // Usage: dchat <message>
 
 int main(string args) {

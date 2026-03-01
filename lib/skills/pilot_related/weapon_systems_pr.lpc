@@ -10,7 +10,7 @@ void create() {
     set_skill_id("weapon_systems_pr");
     set_skill_name("Weapon Systems");
     set_skill_desc(
-        "TODO:CONTENT — Aim and fire vehicle-mounted weapon systems."
+        "TODO:CONTENT - Aim and fire vehicle-mounted weapon systems."
     );
     set_skill_category("pilot_related");
 

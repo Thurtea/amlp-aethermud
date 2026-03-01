@@ -10,7 +10,7 @@ void create() {
     set_skill_id("chemistry");
     set_skill_name("Chemistry");
     set_skill_desc(
-        "TODO:CONTENT — Study and application of chemical reactions and compounds."
+        "TODO:CONTENT - Study and application of chemical reactions and compounds."
     );
     set_skill_category("science");
 

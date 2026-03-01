@@ -10,7 +10,7 @@ void create() {
     set_skill_id("sniper");
     set_skill_name("Sniper");
     set_skill_desc(
-        "TODO:CONTENT — Advanced ranged combat from concealment; grants bonus to aimed shots."
+        "TODO:CONTENT - Advanced ranged combat from concealment; grants bonus to aimed shots."
     );
     set_skill_category("espionage");
 

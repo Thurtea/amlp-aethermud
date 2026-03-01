@@ -1,0 +1,84 @@
+/*
+ * /lib/cmds/telepathy.lpc - Direct telepathic message command
+ *
+ * Usage:
+ *   telepathy <person> <message>  - Send a mental message
+ *
+ * Equivalent to: psi telepathy <person> <message>
+ * Requires the telepathy psionic power.
+ */
+
+#define PSI_DAEMON "/daemon/psionics"
+
+int main(string args) {
+    object psi_d = find_object(PSI_DAEMON);
+    if (!psi_d) {
+        psi_d = load_object(PSI_DAEMON);
+    }
+
+    /* Must have telepathy power */
+    if (!this_player()->has_psionic_power("telepathy")) {
+        write("You don't have the telepathy power.\n");
+        return 1;
+    }
+
+    if (!args || args == "") {
+        write("Syntax: telepathy <person> <message>\n");
+        return 1;
+    }
+
+    string person_name, message;
+    if (sscanf(args, "%s %s", person_name, message) != 2) {
+        write("Syntax: telepathy <person> <message>\n");
+        return 1;
+    }
+
+    /* Find target */
+    object target = find_player(person_name);
+    if (!target)
+        target = present(lower_case(person_name), environment(this_player()));
+    if (!target) {
+        write("You cannot sense " + person_name + " nearby.\n");
+        return 1;
+    }
+
+    /* Check ISP */
+    int cost = 4;
+    if (psi_d) {
+        object power = psi_d->query_power("telepathy");
+        if (power) cost = power->query_isp_cost();
+    }
+    if (this_player()->query_isp() < cost) {
+        write("You don't have enough I.S.P. You need " + cost +
+              " but only have " + this_player()->query_isp() + ".\n");
+        return 1;
+    }
+
+    /* Check if target has mind block */
+    if (target->query_property("mind_block_active")) {
+        write("Your telepathic message bounces off a mental barrier!\n");
+        tell_object(target,
+            "You feel a telepathic probe deflected by your mind block.\n");
+        return 1;
+    }
+
+    /* Deduct ISP and send message */
+    this_player()->add_isp(-cost);
+    tell_object(target,
+        "** Telepathic message from " + this_player()->query_cap_name() +
+        " ** " + message + "\n");
+    write("You send a telepathic message to " + target->query_cap_name() + ".\n");
+
+    return 1;
+}
+
+string query_help() {
+    return
+"TELEPATHY - Send a mental message\n\n"
+"Usage:\n"
+"  telepathy <person> <message>    Send a telepathic message\n\n"
+"Requires the Telepathy psionic power.\n"
+"Uses I.S.P. (Inner Strength Points).\n\n"
+"Also available as: psi telepathy <person> <message>\n"
+"To read surface thoughts: psi telepathy <target>\n";
+}

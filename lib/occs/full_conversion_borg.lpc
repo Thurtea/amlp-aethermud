@@ -12,10 +12,10 @@ void create() {
 
     set_occ_description(
         "Full Conversion Borgs have undergone the most radical cybernetic " +
-        "procedure available — complete replacement of the biological body with " +
+        "procedure available - complete replacement of the biological body with " +
         "a robotic frame, retaining only the brain and spinal cord as organic " +
-        "components. The result is a being of extraordinary physical power — " +
-        "MDC bodies, built-in weapons systems, and superhuman strength — who " +
+        "components. The result is a being of extraordinary physical power - " +
+        "MDC bodies, built-in weapons systems, and superhuman strength - who " +
         "nonetheless retains full human consciousness and personality. The " +
         "psychological adjustment is profound and never complete. Borgs must " +
         "come to terms with a body that cannot feel warmth, cannot eat, and " +

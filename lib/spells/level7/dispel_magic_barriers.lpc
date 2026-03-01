@@ -12,9 +12,9 @@ void create() {
         "Negates or destroys magical barriers, protective wards, " +
         "energy fields, force walls, and similar magical constructs " +
         "within range. The target barrier receives a standard save " +
-        "vs the dispel attempt — active barrier magic cast by higher " +
+        "vs the dispel attempt - active barrier magic cast by higher " +
         "level casters may resist. This spell cannot negate ongoing " +
-        "combat spells or personal protective magic directly — only " +
+        "combat spells or personal protective magic directly - only " +
         "stationary barriers and ward constructs. On success, the " +
         "barrier dissolves instantly."
     );

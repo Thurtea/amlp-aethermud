@@ -1,5 +1,5 @@
 // lib/cmds/wiz/giveskill.lpc
-// Standalone giveskill command — delegates to RP skill tool
+// Standalone giveskill command - delegates to RP skill tool
 
 #include "/secure/wiz_perms.lpc"
 

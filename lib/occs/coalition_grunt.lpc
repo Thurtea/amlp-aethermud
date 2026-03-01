@@ -17,7 +17,7 @@ void create() {
 
     set_occ_description(
         "Coalition Grunts are the standard infantry soldiers of the Coalition "
-        "States — the most powerful human military on Rifts Earth. They are "
+        "States - the most powerful human military on Rifts Earth. They are "
         "trained to use dead boy armor and CS military weapons, follow orders "
         "without question, and hold an intense distrust of magic and the "
         "supernatural. Coalition Grunts are indoctrinated from an early age "

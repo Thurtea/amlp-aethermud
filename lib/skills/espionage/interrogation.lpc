@@ -10,7 +10,7 @@ void create() {
     set_skill_id("interrogation");
     set_skill_name("Interrogation");
     set_skill_desc(
-        "TODO:CONTENT — Extract information from unwilling subjects."
+        "TODO:CONTENT - Extract information from unwilling subjects."
     );
     set_skill_category("espionage");
 

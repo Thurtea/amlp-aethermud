@@ -13,7 +13,7 @@ void create() {
     set_occ_description(
         "Freelance Spies operate in the shadowy underworld of information " +
         "and influence on Rifts Earth. These covert operatives hire their " +
-        "considerable skills to the highest bidder — governments, corporations, " +
+        "considerable skills to the highest bidder - governments, corporations, " +
         "criminal syndicates, or resistance movements. They are masters of " +
         "surveillance, disguise, and social manipulation, able to slip into " +
         "secure facilities and vanish before anyone knows they were there. " +

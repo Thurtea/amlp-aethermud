@@ -1,0 +1,81 @@
+// /lib/spells/level12/phantom_image.lpc
+// Phantom Image - Level 12 Illusion Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("phantom_image");
+    set_spell_name("Phantom Image");
+    set_spell_desc(
+        "The mage creates a fully convincing illusion of any person, creature, "
+        "or object up to 20 feet tall. Unlike lesser illusions, the Phantom "
+        "Image can move, speak in simple phrases, and react to stimuli in a "
+        "convincing manner. Observers must make a save vs magic at -2 to see "
+        "through the illusion. The image has no physical substance and cannot "
+        "cause real harm, but the mage can direct its actions and have it "
+        "deliver messages, issue threats, or draw attention. Lasts 4 minutes "
+        "per level or until the caster breaks concentration."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(130);
+
+    set_duration_type(2);
+    set_base_duration(4);
+
+    set_range_type(2);
+    set_base_range(30);
+
+    set_incantation("Imago manifesta, corpus sine forma!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(3);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_secs = level * 240;
+
+    // Mark caster as maintaining a phantom image
+    caster->set_property("phantom_image_active", 1);
+
+    tell_object(caster,
+        "You weave light and shadow into a convincing phantom. A fully "
+        "realized image springs into existence nearby, under your mental "
+        "direction. It can move, speak, and react as you will.\n"
+        "Duration: " + (level * 4) + " minutes\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && living(ob)) {
+                tell_object(ob,
+                    "A realistic-looking figure materializes nearby! "
+                    "It looks startlingly real.\n");
+            }
+        }
+    }
+
+    call_out("end_phantom_image", duration_secs, caster);
+    return 1;
+}
+
+void end_phantom_image(object caster) {
+    if (!caster) return;
+    caster->remove_property("phantom_image_active");
+    tell_object(caster, "Your Phantom Image fades and is gone.\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && living(ob))
+                tell_object(ob,
+                    "The figure that had seemed so real nearby dissolves into nothing.\n");
+        }
+    }
+}

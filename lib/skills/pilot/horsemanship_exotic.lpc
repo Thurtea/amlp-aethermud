@@ -10,7 +10,7 @@ void create() {
     set_skill_id("horsemanship_exotic");
     set_skill_name("Horsemanship: Exotic");
     set_skill_desc(
-        "TODO:CONTENT — Ride exotic and unusual mounts including monsters."
+        "TODO:CONTENT - Ride exotic and unusual mounts including monsters."
     );
     set_skill_category("pilot");
 

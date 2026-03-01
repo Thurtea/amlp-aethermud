@@ -10,7 +10,7 @@ void create() {
     set_skill_id("medical_doctor");
     set_skill_name("Medical Doctor");
     set_skill_desc(
-        "TODO:CONTENT — Diagnose and treat injuries and diseases with advanced medicine."
+        "TODO:CONTENT - Diagnose and treat injuries and diseases with advanced medicine."
     );
     set_skill_category("medical");
 

@@ -3,7 +3,7 @@
 //
 // Cyber-Docs are highly trained surgeons and engineers specializing in
 // cybernetic and bionic augmentation. They install, repair, and maintain
-// cybernetics and bionics — and can fight if cornered.
+// cybernetics and bionics - and can fight if cornered.
 
 inherit "/std/occ";
 
@@ -19,7 +19,7 @@ void create() {
         "Cyber-Docs are the surgeons and engineers of Rifts Earth's cybernetic "
         "age. They specialize in the installation, maintenance, and repair of "
         "cybernetic implants and bionic limb replacements. A good Cyber-Doc "
-        "is worth their weight in credits — they can restore a soldier's "
+        "is worth their weight in credits - they can restore a soldier's "
         "lost limb, enhance a warrior's natural abilities with cybernetics, "
         "or upgrade aging equipment. Many Cyber-Docs work in Body-Chop-Shops "
         "performing illegal augmentations, while others operate as independent "
@@ -156,7 +156,7 @@ void create() {
     set_property("surgery_bonus", 20);           /* +20% to all surgical procedures */
 
     set_background(
-        "Cyber-Docs come from a variety of backgrounds — some trained at "
+        "Cyber-Docs come from a variety of backgrounds - some trained at "
         "Coalition hospitals, others in free city medical schools, some "
         "are self-taught tinkerers who grew up in chop-shops. What unites "
         "them is a fascination with the interface between flesh and machine "

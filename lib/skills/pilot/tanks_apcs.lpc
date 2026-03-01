@@ -10,7 +10,7 @@ void create() {
     set_skill_id("tanks_apcs");
     set_skill_name("Pilot: Tanks & APCs");
     set_skill_desc(
-        "TODO:CONTENT — Operate armored fighting vehicles and APCs."
+        "TODO:CONTENT - Operate armored fighting vehicles and APCs."
     );
     set_skill_category("pilot");
 

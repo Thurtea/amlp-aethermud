@@ -1,0 +1,56 @@
+/*
+ * /lib/cmds/drink.lpc - Drink command
+ *
+ * Usage:
+ *   drink <object>    - Drink from a drinkable object in the room or inventory
+ *
+ * Handles blood pools for vampires/blood-drinkers.
+ * Can be extended for potions, water, etc.
+ */
+
+int main(string args) {
+    if (!args || args == "") {
+        write("Drink what?\n");
+        return 1;
+    }
+
+    string target = lower_case(args);
+    object env = environment(this_player());
+
+    /* Search room first, then inventory */
+    object ob = present(target, env);
+    if (!ob) ob = present(target, this_player());
+
+    if (!ob) {
+        write("You don't see '" + args + "' here.\n");
+        return 1;
+    }
+
+    /* Blood pool */
+    if (ob->query_property("is_blood_pool")) {
+        return ob->drink_blood(this_player());
+    }
+
+    /* Generic drinkable item */
+    if (function_exists("drink", ob)) {
+        return ob->drink(this_player());
+    }
+
+    /* Consumable with hp/isp/ppe restore */
+    if (function_exists("consume", ob)) {
+        return ob->consume(this_player());
+    }
+
+    write("You can't drink that.\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"DRINK - Consume a liquid\n\n"
+"Usage:\n"
+"  drink <object>    Drink from the named object\n\n"
+"Examples:\n"
+"  drink blood       Drink from a pool of blood (vampires)\n"
+"  drink potion      Consume a healing potion\n";
+}

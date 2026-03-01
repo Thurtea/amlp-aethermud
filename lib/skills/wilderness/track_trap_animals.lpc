@@ -10,7 +10,7 @@ void create() {
     set_skill_id("track_trap_animals");
     set_skill_name("Track & Trap Animals");
     set_skill_desc(
-        "TODO:CONTENT — Set snares and traps to catch animals."
+        "TODO:CONTENT - Set snares and traps to catch animals."
     );
     set_skill_category("wilderness");
 

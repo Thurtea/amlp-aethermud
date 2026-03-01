@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_rifle");
     set_skill_name("W.P. Rifle");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with conventional rifles and carbines."
+        "TODO:CONTENT - Proficiency with conventional rifles and carbines."
     );
     set_skill_category("wp_modern");
 

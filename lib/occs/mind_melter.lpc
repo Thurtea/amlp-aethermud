@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Mind Melters are the most powerful psionic beings on Rifts Earth — " +
+        "Mind Melters are the most powerful psionic beings on Rifts Earth - " +
         "humans born with an extraordinary concentration of psionic potential " +
         "that far exceeds any other natural psychic. Where other psychics have " +
         "a few abilities, Mind Melters have many; where others are limited in " +
@@ -83,7 +83,7 @@ void create() {
 
     set_background(
         "Mind Melters are born, not made. The condition is congenital, usually " +
-        "manifesting in childhood as uncontrolled psionic events — objects " +
+        "manifesting in childhood as uncontrolled psionic events - objects " +
         "moving, thoughts being read, emotions being felt before they're " +
         "expressed. With training the power becomes controllable. Without it, " +
         "the power controls them. Either outcome makes them dangerous."

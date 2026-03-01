@@ -10,7 +10,7 @@ void create() {
     set_skill_id("detect_ambush");
     set_skill_name("Detect Ambush");
     set_skill_desc(
-        "TODO:CONTENT — Spot signs of an impending ambush before it occurs."
+        "TODO:CONTENT - Spot signs of an impending ambush before it occurs."
     );
     set_skill_category("military");
 

@@ -10,7 +10,7 @@ void create() {
     set_skill_id("sign_language");
     set_skill_name("American Sign Language");
     set_skill_desc(
-        "TODO:CONTENT — Communicate silently using hand signs."
+        "TODO:CONTENT - Communicate silently using hand signs."
     );
     set_skill_category("communications");
 

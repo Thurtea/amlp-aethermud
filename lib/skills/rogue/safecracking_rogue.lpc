@@ -10,7 +10,7 @@ void create() {
     set_skill_id("safecracking_rogue");
     set_skill_name("Safecracking (Rogue)");
     set_skill_desc(
-        "TODO:CONTENT — Open safes without the combination."
+        "TODO:CONTENT - Open safes without the combination."
     );
     set_skill_category("rogue");
 

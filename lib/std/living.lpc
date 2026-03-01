@@ -943,7 +943,7 @@ string query_race_name() {
     return race_name ? race_name : "unknown";
 }
 
-// Query stats — checks palladium_stats mapping first, then defaults
+// Query stats - checks palladium_stats mapping first, then defaults
 int query_stat(string stat) {
     stat = lower_case(stat);
     if (palladium_stats && palladium_stats[stat]) return palladium_stats[stat];
@@ -2135,7 +2135,7 @@ void set_all_stats(mapping m) {
 void   set_race_id(string id)     { race_id = id; }
 string query_race_id()            { return race_id ? race_id : ""; }
 
-/* set_race_name — alias that also keeps race_name in sync */
+/* set_race_name - alias that also keeps race_name in sync */
 void set_race_name(string n) { race_name = n; }
 string query_race_article() { return race_article ? race_article : "a"; }
 void set_race_article(string a) { race_article = a; }
@@ -2143,7 +2143,7 @@ void set_race_article(string a) { race_article = a; }
 void   set_occ_id(string id) { occ_id = id; }
 string query_occ_id()        { return occ_id ? occ_id : ""; }
 
-/* set_occ — store display name and derive id */
+/* set_occ - store display name and derive id */
 void set_occ(string n) {
     occ_name_str = n;
     if (n && n != "") {
@@ -2180,7 +2180,7 @@ void add_mdc(int n) {
 // Combat helpers
 //=============================================================================
 
-/* set_attacks_per_round — overrides the max_attacks used by combat_heartbeat */
+/* set_attacks_per_round - overrides the max_attacks used by combat_heartbeat */
 void set_attacks_per_round(int n) {
     if (n > 0) max_attacks = n;
 }
@@ -2206,6 +2206,7 @@ void set_languages(mapping m) {
 
 int  query_isp()            { return isp; }
 void set_isp(int n)         { isp = n; }
+void add_isp(int n)         { isp += n; if (isp < 0) isp = 0; if (isp > max_isp) isp = max_isp; }
 int  query_max_isp()        { return max_isp; }
 void set_max_isp(int n)     { max_isp = n; }
 void add_max_isp(int n)     { if (n > 0) max_isp += n; }
@@ -2221,6 +2222,9 @@ void    add_psionic(string p) {
 }
 void add_psionic_power(string p) { add_psionic(p); }
 void add_power(string p)         { add_psionic(p); }
+int  has_psionic_power(string p) { return psionic_powers && member_array(p, psionic_powers) != -1; }
+int  knows_power(string p)       { return has_psionic_power(p); }
+void use_isp(int cost)           { isp -= cost; if (isp < 0) isp = 0; }
 
 //=============================================================================
 // Magic (PPE, spells, caster level)
@@ -2231,6 +2235,8 @@ void set_ppe(int n)           { ppe = n; }
 int  query_max_ppe()          { return max_ppe; }
 void set_max_ppe(int n)       { max_ppe = n; }
 void add_max_ppe(int n)       { if (n > 0) max_ppe += n; }
+void add_ppe(int n)           { ppe += n; if (ppe < 0) ppe = 0; if (ppe > max_ppe) ppe = max_ppe; }
+void use_ppe(int cost)        { ppe -= cost; if (ppe < 0) ppe = 0; }
 
 int  query_spell_caster_level()   { return spell_caster_level; }
 void set_spell_caster_level(int l){ spell_caster_level = l; }
@@ -2241,9 +2247,10 @@ void add_spell(string s) {
     if (!spells_known) spells_known = ({});
     if (s && member_array(s, spells_known) == -1) spells_known += ({ s });
 }
+int  knows_spell(string s) { return spells_known && member_array(s, spells_known) != -1; }
 
 //=============================================================================
-// Stubs for occ.lpc apply_to_player() — no-ops prevent crashes
+// Stubs for occ.lpc apply_to_player() - no-ops prevent crashes
 //=============================================================================
 
 void set_hand_to_hand(string t)    { /* HTH type stored by C level */ }

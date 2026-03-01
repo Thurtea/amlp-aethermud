@@ -1,5 +1,5 @@
 // lib/wiz/admin_orb.lpc
-// Admin Orb — admin rank 2 only
+// Admin Orb - admin rank 2 only
 // Grants: mudstats (uptime + player count), purge (delete player save file)
 
 inherit "/std/object";
@@ -91,10 +91,10 @@ int cmd_purge(string args) {
 }
 
 // -----------------------------------------------------------------------
-// setup_test_chars — configure level-15 test characters while online.
+// setup_test_chars - configure level-15 test characters while online.
 // Usage: setup_test_chars [player_name]
-//   No args  — set up all test_* players currently logged in.
-//   With arg — target a specific player by name.
+//   No args  - set up all test_* players currently logged in.
+//   With arg - target a specific player by name.
 // -----------------------------------------------------------------------
 
 private void _give_item(object player, string path) {
@@ -151,7 +151,7 @@ private void _setup_one_test_char(object p) {
         }
         tell_object(p,
             "\n[SETUP] Configured as test_dragon: Great Horned Dragon, Level 15.\n"
-            "No gear — natural MDC armor and attacks apply.\n");
+            "No gear - natural MDC armor and attacks apply.\n");
         tell_object(tp, "Configured " + p->query_name() + " as Great Horned Dragon (L15).\n");
 
     } else {

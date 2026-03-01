@@ -12,13 +12,13 @@ void create() {
 
     set_occ_description(
         "Power Armor Pilots are elite warriors trained to operate powered " +
-        "exoskeletal battle armor — MDC war machines that transform their " +
+        "exoskeletal battle armor - MDC war machines that transform their " +
         "occupants into one-person armies. A properly equipped Power Armor " +
         "Pilot in a SAMAS suit or Glitter Boy frame is a match for small " +
         "military units, capable of surviving incredible punishment while " +
         "dealing devastating firepower. The training to pilot these systems " +
         "is demanding and specialized. PA Pilots understand the systems of " +
-        "their armor intimately — not just how to fight in it, but how to " +
+        "their armor intimately - not just how to fight in it, but how to " +
         "maintain and repair it in the field."
     );
 

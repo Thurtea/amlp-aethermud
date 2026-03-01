@@ -10,7 +10,7 @@ void create() {
     set_skill_id("motorcycles");
     set_skill_name("Pilot: Motorcycle");
     set_skill_desc(
-        "TODO:CONTENT — Ride and maneuver motorcycles and trikes at speed."
+        "TODO:CONTENT - Ride and maneuver motorcycles and trikes at speed."
     );
     set_skill_category("pilot");
 

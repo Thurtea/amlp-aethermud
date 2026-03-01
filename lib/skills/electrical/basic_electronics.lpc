@@ -10,7 +10,7 @@ void create() {
     set_skill_id("basic_electronics");
     set_skill_name("Basic Electronics");
     set_skill_desc(
-        "TODO:CONTENT — Understand, repair, and build basic electronic circuits."
+        "TODO:CONTENT - Understand, repair, and build basic electronic circuits."
     );
     set_skill_category("electrical");
 

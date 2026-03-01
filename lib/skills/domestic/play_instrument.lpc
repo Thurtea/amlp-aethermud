@@ -10,7 +10,7 @@ void create() {
     set_skill_id("play_instrument");
     set_skill_name("Play Musical Instrument");
     set_skill_desc(
-        "TODO:CONTENT — Play a specific musical instrument."
+        "TODO:CONTENT - Play a specific musical instrument."
     );
     set_skill_category("domestic");
 

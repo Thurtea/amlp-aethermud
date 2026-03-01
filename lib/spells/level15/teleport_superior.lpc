@@ -1,0 +1,106 @@
+// /lib/spells/level15/teleport_superior.lpc
+// Teleport: Superior - Level 15 Teleportation Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("teleport_superior");
+    set_spell_name("Teleport: Superior");
+    set_spell_desc(
+        "The arcanist instantly transports himself and up to 1000 lbs per "
+        "level of experience, hundreds of miles away. The mage must have a "
+        "mental picture of the destination. Chances of success by familiarity: "
+        "Familiar location or visible destination: 99%. Place seen a few times "
+        "(2-6 visits): 85%. Place seen only in a photo: 80%. Never visited but "
+        "described in detail: 58%. Known only by name or brief description: 20%. "
+        "Failed teleports may result in appearing at the wrong location, "
+        "fall damage, or instant death if teleporting into solid matter. "
+        "Range: 300 miles per level. PPE cost: 600."
+    );
+
+    set_spell_level(15);
+    set_ppe_cost(600);
+
+    set_duration_type(0);  // instant
+    set_base_duration(0);
+
+    set_range_type(2);
+    set_base_range(300);  // 300 miles per level (abstracted)
+
+    set_incantation("In aliud loci me transfero - per spatium et tempus transeo!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    object dest_obj = target;
+
+    // Determine success chance
+    int success_pct = 85;  // Default: place seen a few times
+    string familiarity = "familiar";
+
+    if (!dest_obj) {
+        // No specific target - teleporting to working directory or home
+        string wdir = caster->query_working_directory();
+        if (wdir) {
+            catch { dest_obj = load_object(wdir); };
+            familiarity = "familiar workroom";
+            success_pct = 99;
+        }
+    }
+
+    // Roll for success
+    int roll = random(100) + 1;
+
+    if (roll > success_pct) {
+        // Failure: wrong location or damage
+        int fail_type = random(3);
+        if (fail_type == 0) {
+            // Wrong location - teleport to random nearby area
+            tell_object(caster,
+                "The teleport goes wrong! You appear somewhere unexpected.\n");
+            object wrong_dest;
+            catch { wrong_dest = load_object("/domains/start/village_center"); };
+            if (wrong_dest) caster->move_player(wrong_dest);
+        } else if (fail_type == 1) {
+            // Fall damage
+            int dmg = (random(6)+1) + (random(6)+1) + (random(6)+1);
+            tell_object(caster,
+                "The teleport is disrupted! You materialize 10 feet above the ground "
+                "and fall for " + dmg + " SDC damage!\n");
+            caster->take_damage(dmg, "fall");
+            object fail_dest;
+            catch { fail_dest = load_object("/domains/start/village_center"); };
+            if (fail_dest) caster->move_player(fail_dest);
+        } else {
+            tell_object(caster,
+                "The teleport fails entirely! You remain where you are.\n");
+        }
+        return 1;
+    }
+
+    // Success
+    if (dest_obj) {
+        caster->move_player(dest_obj);
+        tell_object(caster,
+            "Space folds around you and you vanish in an instant! "
+            "The world snaps back into being around you at your destination.\n");
+
+        object env = environment(caster);
+        if (env) {
+            tell_room(env, caster->query_cap_name() + " teleports in!\n",
+                ({ caster }));
+        }
+    } else {
+        tell_object(caster,
+            "The teleport fails - no valid destination found.\n");
+    }
+
+    return 1;
+}

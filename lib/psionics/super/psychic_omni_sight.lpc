@@ -11,7 +11,7 @@ void create() {
     set_power_name("Psychic Omni-Sight");
     set_power_desc(
         "The psychic expands their visual perception to encompass a full " +
-        "spherical field of vision — seeing in every direction simultaneously " +
+        "spherical field of vision - seeing in every direction simultaneously " +
         "without blind spots. Flanking attacks, ambushes from behind, and " +
         "attacks from above or below are all perceived as clearly as frontal " +
         "attacks. The psychic cannot be surprised while this power is active. " +
@@ -38,14 +38,14 @@ int apply_effect(object user, object target) {
             "forward-facing sight.\n");
     } else {
         user->set_property("omni_sight", 1);
-        tell_object(user, "Your perception expands dramatically — you can " +
+        tell_object(user, "Your perception expands dramatically - you can " +
             "simultaneously see in every direction. Walls, floors, and ceilings " +
             "are visible without turning your head. Every corner of the room " +
             "is present in your awareness at once. No one can surprise you " +
             "while this lasts.\n");
         tell_room(environment(user),
             user->query_cap_name() + "'s eyes take on a strange, unfocused " +
-            "quality — seeing something beyond normal sight.\n",
+            "quality - seeing something beyond normal sight.\n",
             ({ user }));
     }
     return 1;

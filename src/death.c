@@ -17,6 +17,7 @@
 
 typedef struct {
     Item  *corpse;
+    Item  *blood_pool;   /* optional blood pool left by this corpse */
     Room  *room;
     time_t expires;
 } CorpseDecayEntry;
@@ -98,9 +99,25 @@ void create_player_corpse(PlayerSession *sess) {
         snprintf(msg, sizeof(msg), "%s collapses and their body falls lifeless.\n", sess->username);
         room_broadcast(room, msg, sess);
 
+        /* Create a blood pool item in the same room */
+        Item *pool = (Item *)calloc(1, sizeof(Item));
+        if (pool) {
+            char pool_name[96];
+            snprintf(pool_name, sizeof(pool_name), "a pool of blood from %s", sess->username);
+            pool->id = -2;
+            pool->name = strdup(pool_name);
+            pool->description = strdup("A dark, spreading pool of blood glistens here. It is still fresh.");
+            pool->type = ITEM_MISC;
+            pool->weight = 0;
+            pool->lpc_path = strdup("/obj/blood_pool");
+            pool->next = NULL;
+            room_add_item(room, pool);
+        }
+
         for (int i = 0; i < MAX_ACTIVE_CORPSES; i++) {
             if (!corpse_registry[i].corpse) {
                 corpse_registry[i].corpse = corpse;
+                corpse_registry[i].blood_pool = pool;
                 corpse_registry[i].room = room;
                 corpse_registry[i].expires = time(NULL) + CORPSE_DECAY_SECS;
                 break;
@@ -137,6 +154,16 @@ void corpse_tick(void) {
         free(e->corpse->name);
         free(e->corpse->description);
         free(e->corpse);
+
+        /* Also remove the blood pool if it is still present */
+        if (e->blood_pool) {
+            if (e->room) room_remove_item(e->room, e->blood_pool);
+            free(e->blood_pool->name);
+            free(e->blood_pool->description);
+            if (e->blood_pool->lpc_path) free(e->blood_pool->lpc_path);
+            free(e->blood_pool);
+            e->blood_pool = NULL;
+        }
 
         e->corpse = NULL;
         e->room = NULL;
@@ -175,6 +202,7 @@ int corpse_reclaim_for_player(PlayerSession *sess) {
         free(e->corpse);
 
         e->corpse = NULL;
+        e->blood_pool = NULL;
         e->room = NULL;
         e->expires = 0;
 

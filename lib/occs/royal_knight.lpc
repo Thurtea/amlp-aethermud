@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Royal Knights are the elite warriors of the kingdoms and city-states " +
-        "that persist on Rifts Earth — sworn champions bound by oaths of " +
+        "that persist on Rifts Earth - sworn champions bound by oaths of " +
         "fealty, honor codes, and the ancient traditions of knighthood. They " +
         "are trained from youth in heavy combat, mounted tactics, and the " +
         "codes of chivalry that govern their behavior even in the most savage " +

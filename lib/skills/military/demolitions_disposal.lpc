@@ -10,7 +10,7 @@ void create() {
     set_skill_id("demolitions_disposal");
     set_skill_name("Demolitions Disposal");
     set_skill_desc(
-        "TODO:CONTENT — Locate and safely disarm explosive devices."
+        "TODO:CONTENT - Locate and safely disarm explosive devices."
     );
     set_skill_category("military");
 

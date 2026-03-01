@@ -77,7 +77,7 @@ int apply_effect(object caster, object target) {
             tell_object(caster,
                 target->query_cap_name() + " resists the Constrain Being spell!\n");
             tell_object(target,
-                "You feel magical bonds attempt to hold you — but you break free!\n");
+                "You feel magical bonds attempt to hold you - but you break free!\n");
             return 1;
         }
     }

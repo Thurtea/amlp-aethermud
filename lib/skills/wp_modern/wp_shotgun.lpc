@@ -10,7 +10,7 @@ void create() {
     set_skill_id("wp_shotgun");
     set_skill_name("W.P. Shotgun");
     set_skill_desc(
-        "TODO:CONTENT — Proficiency with shotguns and scatter-shot weapons."
+        "TODO:CONTENT - Proficiency with shotguns and scatter-shot weapons."
     );
     set_skill_category("wp_modern");
 

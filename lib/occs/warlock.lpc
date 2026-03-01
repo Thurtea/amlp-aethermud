@@ -12,7 +12,7 @@ void create() {
 
     set_occ_description(
         "Warlocks are elemental magic practitioners who form pacts with powerful " +
-        "elemental beings — spirits of fire, earth, water, and air — to access " +
+        "elemental beings - spirits of fire, earth, water, and air - to access " +
         "magical power. Unlike traditional wizards who study arcane formulae, " +
         "Warlocks channel elemental energy directly through their pact, giving " +
         "them more raw power in their chosen element but less versatility. A " +
@@ -80,7 +80,7 @@ void create() {
 
     set_background(
         "Warlocks made their pacts at a moment of great need or profound " +
-        "revelation — a near-death experience in a volcanic eruption, a " +
+        "revelation - a near-death experience in a volcanic eruption, a " +
         "childhood spent beside the sea, or a deliberate ritual seeking " +
         "elemental power. The pact changes them over time."
     );

@@ -11,7 +11,7 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "City Rats are the survivors and opportunists of urban Rifts Earth — " +
+        "City Rats are the survivors and opportunists of urban Rifts Earth - " +
         "born to the streets, they navigate the social and physical geography " +
         "of cities with instinctive skill. They know every back alley, " +
         "every corrupt cop, every black market fence, and every place to hide " +
@@ -82,7 +82,7 @@ void create() {
 
     set_background(
         "City Rats grew up in the streets of any of Rifts Earth's major cities " +
-        "— Coalition cities, independent Burbs, or frontier towns. They are " +
+        "- Coalition cities, independent Burbs, or frontier towns. They are " +
         "survivors first, defined by adaptability rather than any particular " +
         "skill or loyalty."
     );

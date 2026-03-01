@@ -68,7 +68,7 @@ string *dedup(string *arr) {
     return out;
 }
 
-// Canonical topic lists (no separators) — exact names required by policy.
+// Canonical topic lists (no separators) - exact names required by policy.
 string *PLAYER_TOPICS = ({
     "armorofithan","calllightning","combat","commands","communication",
     "credits","cyberknight","death","description","dragonhatchling",
@@ -237,7 +237,7 @@ int is_admin_topic(string topic) {
 }
 
 // -------------------------------------------------------------------------
-// CHANGE 1 — Show all topics (dynamic index)
+// CHANGE 1 - Show all topics (dynamic index)
 // -------------------------------------------------------------------------
 
 int show_all_topics(int priv_level) {

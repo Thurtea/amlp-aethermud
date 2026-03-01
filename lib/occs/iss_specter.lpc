@@ -85,7 +85,7 @@ void create() {
     set_background(
         "ISS Specters are selected from top Peacekeeper and military graduates " +
         "and subjected to additional psychological conditioning. They know where " +
-        "the bodies are buried — often literally — and their loyalty to the CS " +
+        "the bodies are buried - often literally - and their loyalty to the CS " +
         "is typically absolute. Defectors are extremely rare and do not survive long."
     );
     set_organizations(({ "Coalition States ISS Black Division" }));

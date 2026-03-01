@@ -1,0 +1,97 @@
+// /lib/spells/level12/aura_of_death.lpc
+// Aura of Death - Level 12 Curse Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("aura_of_death");
+    set_spell_name("Aura of Death");
+    set_spell_desc(
+        "The mage wraps themselves in a cloak of death energy, a visible black "
+        "corona that radiates pure supernatural dread. All living beings within "
+        "20 feet must roll a save vs magic or suffer a -2 to all combat rolls "
+        "as the aura saps their will and fills them with mortal terror. "
+        "Undead and supernatural evil beings are unaffected; good-aligned "
+        "supernatural beings take additional penalties. The aura lasts 2 minutes "
+        "per level of the caster. Humans and D-Bees struck with awe save at -3."
+    );
+
+    set_spell_level(12);
+    set_ppe_cost(160);
+
+    set_duration_type(1);
+    set_base_duration(2);
+
+    set_range_type(3);
+    set_base_range(20);
+
+    set_incantation("Mortis obscura, timor omnibus!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("aura_of_death_active")) {
+        caster->remove_property("aura_of_death_active");
+        tell_object(caster, "You release the Aura of Death. The dark corona fades.\n");
+        object env = environment(caster);
+        if (env) {
+            foreach (object ob : all_inventory(env)) {
+                if (ob != caster && living(ob))
+                    tell_object(ob,
+                        "The oppressive aura of death surrounding " +
+                        caster->query_cap_name() + " dissipates.\n");
+            }
+        }
+        return 1;
+    }
+
+    int level = caster->query_level() ? caster->query_level() : 1;
+    int duration_secs = level * 120;
+
+    caster->set_property("aura_of_death_active", 1);
+
+    tell_object(caster,
+        "Black energies coalesce around you, forming a visible corona of "
+        "death. You can feel it radiating fear into all nearby.\n"
+        "Duration: " + (level * 2) + " minutes\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && living(ob)) {
+                tell_object(ob,
+                    "A corona of black death energy erupts around " +
+                    caster->query_cap_name() + "! "
+                    "Primal dread seizes your soul!\n");
+                ob->set_property("aura_of_death_penalty", 2);
+            }
+        }
+    }
+
+    call_out("end_aura_of_death", duration_secs, caster);
+    return 1;
+}
+
+void end_aura_of_death(object caster) {
+    if (!caster) return;
+    caster->remove_property("aura_of_death_active");
+    tell_object(caster, "Your Aura of Death fades.\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && living(ob)) {
+                ob->remove_property("aura_of_death_penalty");
+                tell_object(ob, "The aura of death surrounding " +
+                    caster->query_cap_name() + " fades. You feel relief.\n");
+            }
+        }
+    }
+}

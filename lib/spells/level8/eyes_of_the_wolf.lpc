@@ -1,0 +1,112 @@
+// /lib/spells/level8/eyes_of_the_wolf.lpc
+// Eyes of the Wolf - Level 8 Enhancement Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("eyes_of_the_wolf");
+    set_spell_name("Eyes of the Wolf");
+    set_spell_desc(
+        "Grants the target exceptional nocturnal senses: nightvision " +
+        "out to 60 feet, the ability to see the invisible 75% of the " +
+        "time, enhanced smell, and dramatically improved tracking " +
+        "ability. The target also gains a +2 bonus to perception " +
+        "checks, a +15% bonus to tracking skills, and +10% to prowl. " +
+        "The eyes of the target take on a faint amber glow while the " +
+        "spell is active, and the subject may become disoriented by " +
+        "sudden bright lights during the duration."
+    );
+
+    set_spell_level(8);
+    set_ppe_cost(25);
+
+    set_duration_type(2);
+    set_base_duration(1);
+
+    set_range_type(1);
+    set_base_range(0);
+
+    set_incantation("Oculi lupi, sensus acuti, nox ut dies!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (!target) target = caster;
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "You can only enhance living beings!\n");
+        return 0;
+    }
+
+    if (target->query_property("eyes_of_wolf_active")) {
+        tell_object(caster,
+            "Eyes of the Wolf is already active on " +
+            target->query_cap_name() + "!\n");
+        return 0;
+    }
+
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    int duration = caster_level * 30;
+
+    target->set_property("eyes_of_wolf_active", 1);
+    target->set_property("see_invisible", 1);
+    target->set_property("nightvision", 60);
+    target->set_property("enhanced_tracking", 1);
+
+    if (caster == target) {
+        tell_object(caster,
+            "Your eyes blaze with amber light!\n" +
+            "Your vision cuts through darkness like day. You can " +
+            "see the invisible, smell trails others cannot, and " +
+            "track with the keenness of a predator.\n");
+    } else {
+        tell_object(caster,
+            "The Eyes of the Wolf spell takes hold on " +
+            target->query_cap_name() + "!\n");
+        tell_object(target,
+            caster->query_cap_name() +
+            " grants you the senses of the wolf!\n" +
+            "Your eyes blaze with amber light. Darkness becomes " +
+            "daylight. Your sense of smell sharpens dramatically.\n");
+    }
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    target->query_cap_name() +
+                    "'s eyes glow with an amber predator's light.\n");
+            }
+        }
+    }
+
+    call_out("end_eyes_of_wolf", duration, target);
+
+    return 1;
+}
+
+void end_eyes_of_wolf(object target) {
+    if (!target) return;
+
+    target->remove_property("eyes_of_wolf_active");
+    target->remove_property("see_invisible");
+    target->remove_property("nightvision");
+    target->remove_property("enhanced_tracking");
+
+    tell_object(target,
+        "The Eyes of the Wolf fades. Your senses return to normal.\n");
+}

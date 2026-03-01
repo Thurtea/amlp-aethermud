@@ -1,0 +1,127 @@
+// /lib/spells/level11/remove_curse.lpc
+// Remove Curse - Level 11 Utility Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("remove_curse");
+    set_spell_name("Remove Curse");
+    set_spell_desc(
+        "The mage attempts to remove any type of curse afflicting the " +
+        "target. Success is determined by a d20 roll against the " +
+        "save threshold: the spell version provides +5 to the roll, " +
+        "and ritual version provides +10. A successful roll means the " +
+        "curse is instantly removed. A failed roll means the curse " +
+        "persists but no harm is done — the spell can be attempted " +
+        "again. This spell can remove phobias, luck curses, and " +
+        "other magical afflictions placed by spells."
+    );
+
+    set_spell_level(11);
+    set_ppe_cost(140);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(1);
+    set_base_range(10);
+
+    set_incantation("Maledictum solvere, libertatem restituere!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (!target) target = caster;
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "You can only uncurse living beings!\n");
+        return 0;
+    }
+
+    /* Check for curses on target */
+    int luck_curse = target->query_property("luck_cursed");
+    int phobia = target->query_property("phobia_cursed");
+    int generic = target->query_property("cursed");
+    int possessed = target->query_property("possessed");
+
+    if (!luck_curse && !phobia && !generic && !possessed) {
+        tell_object(caster,
+            target->query_cap_name() + " does not appear to be cursed.\n");
+        return 0;
+    }
+
+    /* d20 + 5 vs threshold of 12 */
+    int roll = random(20) + 1 + 5;
+    int success = (roll >= 12);
+
+    if (!success) {
+        tell_object(caster,
+            "You attempt to remove the curse, but the magic eludes you!\n" +
+            "The curse holds. Try again.\n");
+        tell_object(target,
+            caster->query_cap_name() + " attempts to remove your curse — " +
+            "but it clings on.\n");
+        return 1;
+    }
+
+    /* Remove all curses */
+    string removed = "";
+
+    if (luck_curse) {
+        target->remove_property("luck_cursed");
+        target->remove_property("luck_curse_penalty");
+        target->remove_property("luck_curse_caster");
+        removed += "Luck Curse ";
+    }
+    if (phobia) {
+        string ptype = target->query_property("phobia_type");
+        target->remove_property("phobia_cursed");
+        target->remove_property("phobia_type");
+        target->remove_property("phobia_penalty");
+        removed += "Phobia";
+        if (ptype) removed += " (" + ptype + ") ";
+    }
+    if (generic) {
+        target->remove_property("cursed");
+        removed += "Curse ";
+    }
+    if (possessed) {
+        target->remove_property("possessed");
+        removed += "Possession ";
+    }
+
+    tell_object(caster,
+        "The Remove Curse succeeds!\n" +
+        "Removed from " + target->query_cap_name() + ": " + removed + "\n");
+
+    if (caster != target) {
+        tell_object(target,
+            caster->query_cap_name() + " removes your curse!\n" +
+            "You feel the dark weight lift: " + removed + "\n");
+    }
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    "Golden light flares around " + target->query_cap_name() +
+                    " as a curse is broken!\n");
+            }
+        }
+    }
+
+    return 1;
+}

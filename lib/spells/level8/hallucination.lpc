@@ -1,0 +1,137 @@
+// /lib/spells/level8/hallucination.lpc
+// Hallucination - Level 8 Illusion Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("hallucination");
+    set_spell_name("Hallucination");
+    set_spell_desc(
+        "Implants a vivid, personalized illusion or delusion in a " +
+        "single target's mind. Only the victim experiences the " +
+        "hallucination — all others perceive reality normally. The " +
+        "hallucination is tailored to exploit the victim's fears or " +
+        "desires, making it extremely convincing. The victim suffers " +
+        "severe penalties to combat actions as they react to things " +
+        "that are not there. A successful save vs magic reduces the " +
+        "effect to minor visual distortions. The spell requires touch " +
+        "or close proximity to implant."
+    );
+
+    set_spell_level(8);
+    set_ppe_cost(30);
+
+    set_duration_type(2);
+    set_base_duration(3);
+
+    set_range_type(1);
+    set_base_range(3);
+
+    set_incantation("Mente capta, visionem falsam vide!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster || !target) return 0;
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "You can only target living beings!\n");
+        return 0;
+    }
+
+    if (target == caster) {
+        tell_object(caster, "You cannot hallucinate yourself!\n");
+        return 0;
+    }
+
+    if (target->query_property("hallucination_active")) {
+        tell_object(caster, target->query_cap_name() + " is already hallucinating!\n");
+        return 0;
+    }
+
+    /* Standard save vs magic */
+    int saved = 0;
+    if (function_exists("saving_throw", target)) {
+        if (target->saving_throw("spell")) saved = 1;
+    }
+
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    int duration = caster_level * 180;
+
+    if (saved) {
+        target->set_property("hallucination_minor", 1);
+        tell_object(caster,
+            target->query_cap_name() +
+            " partially resists — minor visual distortions only!\n");
+        tell_object(target,
+            "You feel a strange distortion cross your vision — brief " +
+            "flickering shapes that quickly fade.\n");
+        call_out("end_hallucination", 30, target);
+        return 1;
+    }
+
+    target->set_property("hallucination_active", 1);
+    target->set_property("hallucination_penalty", 4);
+
+    string visions = ({ "hordes of insects crawling from the walls",
+                         "the faces of people you have wronged",
+                         "the floor dissolving into an abyss",
+                         "enemies surrounding you on all sides",
+                         "fire consuming everything around you" })[random(5)];
+
+    tell_object(caster,
+        "The Hallucination spell seizes " + target->query_cap_name() +
+        "'s mind!\n");
+
+    tell_object(target,
+        "REALITY TWISTS AND BREAKS APART!\n" +
+        "You see " + visions + "!\n" +
+        "You cannot distinguish what is real!\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    target->query_cap_name() +
+                    " reacts wildly to things that are not there!\n");
+            }
+        }
+    }
+
+    call_out("end_hallucination", duration, target);
+
+    return 1;
+}
+
+void end_hallucination(object target) {
+    if (!target) return;
+
+    target->remove_property("hallucination_active");
+    target->remove_property("hallucination_minor");
+    target->remove_property("hallucination_penalty");
+
+    tell_object(target,
+        "Reality snaps back into focus. The hallucinations fade.\n");
+
+    object env = environment(target);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != target && living(ob)) {
+                tell_object(ob,
+                    target->query_cap_name() + " shakes their head, eyes clearing.\n");
+            }
+        }
+    }
+}

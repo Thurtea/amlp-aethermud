@@ -1,0 +1,114 @@
+// /lib/spells/level4/sustain.lpc
+// Sustain - Level 4 Utility Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("sustain");
+    set_spell_name("Sustain");
+    set_spell_desc(
+        "Sustains the vital functions of the target, halting the " +
+        "progression of poisons, toxins, and ongoing harmful effects " +
+        "while active. The spell slows metabolism dramatically, " +
+        "reducing the need for food, water, and air to near zero. " +
+        "The target can function in hostile environments and resist " +
+        "deterioration from ongoing damage sources. The spell does " +
+        "not heal existing damage, but prevents further deterioration."
+    );
+
+    set_spell_level(4);
+    set_ppe_cost(10);
+
+    set_duration_type(2);
+    set_base_duration(2);
+
+    set_range_type(1);
+    set_base_range(0);
+
+    set_incantation("Corpus sustine, vitam conserva!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (!target) target = caster;
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "You can only sustain living beings!\n");
+        return 0;
+    }
+
+    if (target->query_property("sustain_active")) {
+        tell_object(caster, "Sustain is already active on " +
+            target->query_cap_name() + "!\n");
+        return 0;
+    }
+
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    int duration = caster_level * 120;
+
+    target->set_property("sustain_active", 1);
+    target->set_property("sustain_poison_blocked", 1);
+    target->set_property("sustain_needs_blocked", 1);
+
+    if (target->query_property("poisoned")) {
+        target->set_property("poison_halted", 1);
+        tell_object(target,
+            "The magical energy halts the poison spreading through you!\n");
+    }
+
+    if (caster == target) {
+        tell_object(caster,
+            "You feel a warm magical energy flow through your body.\n" +
+            "Your vital functions are sustained by magic!\n" +
+            "Toxins are halted, and your need for food, water and air " +
+            "is suppressed.\n");
+    } else {
+        tell_object(caster,
+            "You channel sustaining energy into " +
+            target->query_cap_name() + ".\n");
+        tell_object(target,
+            caster->query_cap_name() +
+            " channels sustaining magical energy into you!\n" +
+            "Your body is sustained by magic.\n");
+    }
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    "A soft golden glow surrounds " +
+                    target->query_cap_name() + " briefly.\n");
+            }
+        }
+    }
+
+    call_out("end_sustain", duration, target);
+
+    return 1;
+}
+
+void end_sustain(object target) {
+    if (!target) return;
+
+    target->remove_property("sustain_active");
+    target->remove_property("sustain_poison_blocked");
+    target->remove_property("sustain_needs_blocked");
+    target->remove_property("poison_halted");
+
+    tell_object(target,
+        "The Sustain spell fades. Your body returns to normal functions.\n");
+}

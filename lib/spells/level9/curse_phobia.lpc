@@ -1,0 +1,118 @@
+// /lib/spells/level9/curse_phobia.lpc
+// Curse: Phobia - Level 9 Curse Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("curse_phobia");
+    set_spell_name("Curse: Phobia");
+    set_spell_desc(
+        "Imposes an intense, irrational phobia on the target. The " +
+        "caster selects a specific fear — crowds, darkness, fire, " +
+        "water, heights, enclosed spaces, or a specific creature type. " +
+        "The victim suffers severe phobic reactions whenever they " +
+        "encounter the chosen stimulus: panic, loss of actions, " +
+        "inability to approach the stimulus, and penalties to all " +
+        "actions while in proximity. The curse lasts 24 hours per " +
+        "caster level and can only be fully cured by Remove Curse."
+    );
+
+    set_spell_level(9);
+    set_ppe_cost(40);
+
+    set_duration_type(2);
+    set_base_duration(60);
+
+    set_range_type(1);
+    set_base_range(20);
+
+    set_incantation("Timor irrationalis, mentem invade, fuge semper!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster || !target) return 0;
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "You can only curse living beings!\n");
+        return 0;
+    }
+
+    if (target == caster) {
+        tell_object(caster, "You cannot curse yourself with a phobia!\n");
+        return 0;
+    }
+
+    if (target->query_property("phobia_cursed")) {
+        tell_object(caster, target->query_cap_name() + " already has a phobia curse!\n");
+        return 0;
+    }
+
+    /* Standard save vs magic */
+    if (function_exists("saving_throw", target)) {
+        if (target->saving_throw("spell")) {
+            tell_object(caster,
+                target->query_cap_name() + " resists the Phobia Curse!\n");
+            tell_object(target,
+                "You feel an irrational dread try to take root in your mind — " +
+                "but you force it out!\n");
+            return 1;
+        }
+    }
+
+    string phobias = ({ "fire", "darkness", "enclosed spaces", "crowds",
+                         "heights", "water", "the undead" })[random(7)];
+
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    int duration = caster_level * 86400;
+
+    target->set_property("phobia_cursed", 1);
+    target->set_property("phobia_type", phobias);
+    target->set_property("phobia_penalty", 4);
+
+    tell_object(caster,
+        "The Phobia Curse takes hold!\n" +
+        target->query_cap_name() + " now fears " + phobias + "!\n");
+
+    tell_object(target,
+        "A terrible, irrational fear FLOODS your mind!\n" +
+        "You are overwhelmed by dread of " + phobias + "!\n" +
+        "The phobia is beyond reason — you cannot fight it!\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    target->query_cap_name() +
+                    " goes pale as a dark curse takes hold.\n");
+            }
+        }
+    }
+
+    call_out("end_phobia_curse", duration, target);
+
+    return 1;
+}
+
+void end_phobia_curse(object target) {
+    if (!target) return;
+
+    target->remove_property("phobia_cursed");
+    target->remove_property("phobia_type");
+    target->remove_property("phobia_penalty");
+
+    tell_object(target,
+        "The phobia curse fades. The irrational fear loosens its grip.\n");
+}

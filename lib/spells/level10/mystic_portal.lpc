@@ -1,0 +1,93 @@
+// /lib/spells/level10/mystic_portal.lpc
+// Mystic Portal - Level 10 Dimensional Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("mystic_portal");
+    set_spell_name("Mystic Portal");
+    set_spell_desc(
+        "Creates a dimensional rift in the fabric of space, opening " +
+        "a one-way portal passage. The portal can be used to pass " +
+        "through solid walls (providing a 12-foot passage per caster " +
+        "level) or teleport individuals to another location known to " +
+        "the caster within 100 feet per level. The portal appears " +
+        "as a shimmering oval of light on a vertical surface — " +
+        "looking into it shows the destination. The portal provides " +
+        "only one-way passage and lasts 4 melee rounds per level."
+    );
+
+    set_spell_level(10);
+    set_ppe_cost(60);
+
+    set_duration_type(2);
+    set_base_duration(1);
+
+    set_range_type(2);
+    set_base_range(20);
+
+    set_incantation("Spatium disrumpe, portam aperi, transire permitte!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    if (env->query_property("mystic_portal_active")) {
+        tell_object(caster,
+            "A Mystic Portal is already open here!\n");
+        return 0;
+    }
+
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    int duration = caster_level * 15;
+
+    env->set_property("mystic_portal_active", 1);
+    env->set_property("mystic_portal_caster", caster);
+
+    tell_object(caster,
+        "You tear open a Mystic Portal!\n" +
+        "A shimmering oval of light appears in the air — " +
+        "you can see your destination through it.\n" +
+        "The portal is one-way and will last " + (duration) + " seconds.\n");
+
+    foreach (object ob : all_inventory(env)) {
+        if (ob != caster && living(ob)) {
+            tell_object(ob,
+                "A shimmering oval portal tears open in midair near " +
+                caster->query_cap_name() + "!\n" +
+                "You can see another location through its surface!\n");
+        }
+    }
+
+    call_out("close_mystic_portal", duration, env, caster);
+
+    return 1;
+}
+
+void close_mystic_portal(object env, object caster) {
+    if (!env) return;
+
+    env->remove_property("mystic_portal_active");
+    env->remove_property("mystic_portal_caster");
+
+    if (caster) {
+        tell_object(caster, "The Mystic Portal closes.\n");
+    }
+
+    foreach (object ob : all_inventory(env)) {
+        if (living(ob)) {
+            tell_object(ob,
+                "The shimmering portal collapses and vanishes.\n");
+        }
+    }
+}

@@ -1,0 +1,117 @@
+// /lib/spells/level8/exorcism.lpc
+// Exorcism - Level 8 Supernatural Control Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("exorcism");
+    set_spell_name("Exorcism");
+    set_spell_desc(
+        "Forces a possessing supernatural intelligence to relinquish " +
+        "control of a host body and return to wherever it came from. " +
+        "The possessing entity receives a standard save vs magic; " +
+        "failure means it is expelled immediately. Exorcism also " +
+        "provides the target a +5 bonus to saves vs possession and " +
+        "magic for 24 hours after a successful casting. The caster " +
+        "must be within 30 feet of the possessed target."
+    );
+
+    set_spell_level(8);
+    set_ppe_cost(30);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(2);
+    set_base_range(30);
+
+    set_incantation("Spiritus malus, exi! In nomine lucis, discede!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster || !target) return 0;
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "You can only target living beings!\n");
+        return 0;
+    }
+
+    int possessed = target->query_property("possessed");
+    int has_entity = target->query_property("entity_controlling");
+
+    if (!possessed && !has_entity) {
+        /* Still useful — provides protection bonus */
+        tell_object(caster,
+            target->query_cap_name() + " does not appear possessed, " +
+            "but you perform the exorcism anyway for protection.\n");
+        target->set_property("exorcism_protected", 1);
+        tell_object(target,
+            caster->query_cap_name() +
+            " performs an exorcism — you feel protected from possession!\n");
+        call_out("end_exorcism_protection", 86400, target);
+        return 1;
+    }
+
+    /* Roll against the possessing entity */
+    int expelled = 1;
+    if (function_exists("saving_throw", target)) {
+        if (target->saving_throw("exorcism")) expelled = 0;
+    }
+
+    if (!expelled) {
+        tell_object(caster,
+            "The possessing entity resists the exorcism!\n" +
+            "It clings to its host with terrible strength.\n");
+        tell_object(target,
+            "Something inside you strains against the exorcism — " +
+            "and holds on!\n");
+        return 1;
+    }
+
+    target->remove_property("possessed");
+    target->remove_property("entity_controlling");
+    target->set_property("exorcism_protected", 1);
+
+    tell_object(caster,
+        "The possessing entity is EXPELLED!\n" +
+        target->query_cap_name() + " is freed!\n");
+
+    tell_object(target,
+        "Something rips free of your mind with a shriek!\n" +
+        "You are yourself again — free and protected!\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    "A shriek fills the air as " +
+                    caster->query_cap_name() +
+                    "'s exorcism tears something unseen from " +
+                    target->query_cap_name() + "!\n");
+            }
+        }
+    }
+
+    call_out("end_exorcism_protection", 86400, target);
+
+    return 1;
+}
+
+void end_exorcism_protection(object target) {
+    if (!target) return;
+    target->remove_property("exorcism_protected");
+    tell_object(target,
+        "The protective blessing of the Exorcism fades.\n");
+}

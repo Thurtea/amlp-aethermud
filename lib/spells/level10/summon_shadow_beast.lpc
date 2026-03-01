@@ -1,0 +1,98 @@
+// /lib/spells/level10/summon_shadow_beast.lpc
+// Summon Shadow Beast - Level 10 Summoning Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("summon_shadow_beast");
+    set_spell_name("Summon Shadow Beast");
+    set_spell_desc(
+        "Summons a creature from another dimension — a massive Shadow " +
+        "Beast standing 9 to 12 feet tall with razor-sharp claws and " +
+        "fangs. The Shadow Beast can merge completely into any shadow, " +
+        "becoming undetectable. It obeys the caster's commands but " +
+        "has a 15 percent chance of refusing to return to its " +
+        "dimension when dismissed. The beast attacks with devastating " +
+        "force and can track prey by scent across great distances. " +
+        "Summoning a Shadow Beast is not without risk — if it escapes " +
+        "control it becomes a free predator."
+    );
+
+    set_spell_level(10);
+    set_ppe_cost(140);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(0);
+    set_base_range(0);
+
+    set_incantation("Bestia umbrae, ex tenebris veni, mihi servi!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(8);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("shadow_beast_active")) {
+        tell_object(caster,
+            "You already have a Shadow Beast under your command!\n");
+        return 0;
+    }
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    caster->set_property("shadow_beast_active", 1);
+    caster->set_property("shadow_beast_summoned_at", time());
+
+    tell_object(caster,
+        "You tear open a rift to the shadow dimension!\n" +
+        "From the darkness steps a massive, terrifying Shadow Beast!\n" +
+        "It stands nine feet tall, darkness pooling around its claws.\n" +
+        "The beast turns its blank face toward you — and waits.\n" +
+        "It is under your command for now.\n");
+
+    foreach (object ob : all_inventory(env)) {
+        if (ob != caster && living(ob)) {
+            tell_object(ob,
+                "Darkness SURGES as " + caster->query_cap_name() +
+                " tears open a portal!\n" +
+                "A massive Shadow Beast steps through — nine feet of " +
+                "shadow and claws!\n" +
+                "Save vs horror factor or flee in terror!\n");
+        }
+    }
+
+    /* 15% chance the beast is unruly */
+    if (random(100) < 15) {
+        call_out("shadow_beast_escape", 300, caster, env);
+    }
+
+    return 1;
+}
+
+void shadow_beast_escape(object caster, object env) {
+    if (!caster) return;
+
+    caster->remove_property("shadow_beast_active");
+
+    tell_object(caster,
+        "WARNING: The Shadow Beast refuses to obey!\n" +
+        "It has broken free of your control and is now on a rampage!\n");
+
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && living(ob)) {
+                tell_object(ob,
+                    "The Shadow Beast throws off its magical bonds with a ROAR!\n" +
+                    "It is now free and extremely dangerous!\n");
+            }
+        }
+    }
+}

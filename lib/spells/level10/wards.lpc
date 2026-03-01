@@ -1,0 +1,65 @@
+// /lib/spells/level10/wards.lpc
+// Wards - Level 10 Trap/Protection Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("wards");
+    set_spell_name("Wards");
+    set_spell_desc(
+        "Creates mystic symbols on surfaces that act as magical traps " +
+        "or protections. The ward is physically drawn on a surface " +
+        "and charged with magical energy; the invocation creates two " +
+        "wards simultaneously. Ward types include: Alarm (alerts " +
+        "caster), Fear (panic on trigger), Fire Bolt (6d6 damage), " +
+        "Paralysis, Sleep, and Agony. After triggering, the ward " +
+        "disappears. Wards last 150 years per level if undisturbed. " +
+        "The ward triggers on any being that touches or passes through " +
+        "the warded area without the caster's protection word."
+    );
+
+    set_spell_level(10);
+    set_ppe_cost(90);
+
+    set_duration_type(1);
+    set_base_duration(0);
+
+    set_range_type(1);
+    set_base_range(0);
+
+    set_incantation("Signum magicum scribe, vim accipe, custodi!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(8);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    if (env->query_property("ward_active")) {
+        tell_object(caster,
+            "There is already a Ward active in this location!\n");
+        return 0;
+    }
+
+    string ward_type = "fire_bolt";
+
+    env->set_property("ward_active", 1);
+    env->set_property("ward_type", ward_type);
+    env->set_property("ward_caster", caster);
+    env->set_property("ward_level", caster->query_spell_caster_level());
+
+    tell_object(caster,
+        "You inscribe mystic Ward symbols in the area!\n" +
+        "Two Wards (Fire Bolt type) are now active here.\n" +
+        "They will trigger on any unauthorized being that passes through.\n" +
+        "The Wards will last until triggered or many years hence.\n");
+
+    return 1;
+}

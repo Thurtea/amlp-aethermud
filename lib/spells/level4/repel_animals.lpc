@@ -1,0 +1,88 @@
+// /lib/spells/level4/repel_animals.lpc
+// Repel Animals - Level 4 Utility Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("repel_animals");
+    set_spell_name("Repel Animals");
+    set_spell_desc(
+        "Creates an invisible aura of magical repulsion around the " +
+        "caster that causes animals and non-sapient creatures to avoid " +
+        "or flee the area. Normal predators become skittish and refuse " +
+        "to approach. Guard animals become confused and back away. The " +
+        "effect does not work against humanoids, D-Bees with animal " +
+        "intelligence, or summoned/controlled creatures. Useful for " +
+        "wilderness travel and avoiding animal-based hazards."
+    );
+
+    set_spell_level(4);
+    set_ppe_cost(7);
+
+    set_duration_type(2);
+    set_base_duration(5);
+
+    set_range_type(0);
+    set_base_range(0);
+
+    set_incantation("Bestiae recedite, timorem sentite!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("repel_animals_active")) {
+        tell_object(caster, "Repel Animals is already active!\n");
+        return 0;
+    }
+
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    int duration = caster_level * 300;
+
+    caster->set_property("repel_animals_active", 1);
+
+    tell_object(caster,
+        "You weave an aura of magical repulsion!\n" +
+        "Animals and non-sapient creatures will flee your presence.\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && living(ob)) {
+                string race = "";
+                if (function_exists("query_race", ob)) race = ob->query_race();
+                int is_animal = ob->query_property("is_animal");
+                if (is_animal) {
+                    tell_object(ob,
+                        "An overwhelming sense of dread fills you!\n" +
+                        "You feel compelled to flee!\n");
+                    ob->set_property("animal_fleeing", 1);
+                } else if (ob != caster) {
+                    tell_object(ob,
+                        "A subtle aura of repulsion emanates from " +
+                        caster->query_cap_name() + ".\n");
+                }
+            }
+        }
+    }
+
+    call_out("end_repel_animals", duration, caster);
+
+    return 1;
+}
+
+void end_repel_animals(object caster) {
+    if (!caster) return;
+
+    caster->remove_property("repel_animals_active");
+
+    tell_object(caster,
+        "Your animal repulsion aura fades.\n");
+}

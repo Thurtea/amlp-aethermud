@@ -1,0 +1,111 @@
+// /lib/spells/level7/dispel_magic_barriers.lpc
+// Dispel Magic Barriers - Level 7 Counter-Magic Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("dispel_magic_barriers");
+    set_spell_name("Dispel Magic Barriers");
+    set_spell_desc(
+        "Negates or destroys magical barriers, protective wards, " +
+        "energy fields, force walls, and similar magical constructs " +
+        "within range. The target barrier receives a standard save " +
+        "vs the dispel attempt — active barrier magic cast by higher " +
+        "level casters may resist. This spell cannot negate ongoing " +
+        "combat spells or personal protective magic directly — only " +
+        "stationary barriers and ward constructs. On success, the " +
+        "barrier dissolves instantly."
+    );
+
+    set_spell_level(7);
+    set_ppe_cost(20);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(2);
+    set_base_range(100);
+
+    set_incantation("Magica dissolve, clausum aperi!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    /* Check for barriers in the room or on target */
+    int found = 0;
+    string removed = "";
+
+    if (env->query_property("globe_of_silence")) {
+        env->remove_property("globe_of_silence");
+        env->remove_property("globe_of_silence_caster");
+        removed += "Globe of Silence ";
+        found = 1;
+        foreach (object ob : all_inventory(env)) {
+            if (living(ob)) {
+                tell_object(ob,
+                    "The Globe of Silence shatters and sound returns!\n");
+            }
+        }
+    }
+
+    if (env->query_property("protection_circle")) {
+        env->remove_property("protection_circle");
+        removed += "Protection Circle ";
+        found = 1;
+    }
+
+    if (target && target != caster) {
+        if (target->query_property("energy_field_active")) {
+            target->remove_property("energy_field_active");
+            target->remove_property("energy_field_sdc");
+            removed += "Energy Field ";
+            found = 1;
+            tell_object(target,
+                "Your energy field is dispelled!\n");
+        }
+        if (target->query_property("armor_of_ithan")) {
+            target->remove_property("armor_of_ithan");
+            target->remove_property("armor_of_ithan_sdc");
+            removed += "Armor of Ithan ";
+            found = 1;
+            tell_object(target,
+                "Your Armor of Ithan is dispelled!\n");
+        }
+        if (target->query_property("magic_shield_active")) {
+            target->remove_property("magic_shield_active");
+            target->remove_property("magic_shield_bonus");
+            removed += "Magic Shield ";
+            found = 1;
+            tell_object(target,
+                "Your Magic Shield is dispelled!\n");
+        }
+    }
+
+    if (found) {
+        tell_object(caster,
+            "You shatter the magical construct!\n" +
+            "Dispelled: " + removed + "\n");
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && living(ob)) {
+                tell_object(ob,
+                    caster->query_cap_name() +
+                    " dispels a magical barrier!\n");
+            }
+        }
+    } else {
+        tell_object(caster,
+            "You find no magical barriers here to dispel.\n");
+    }
+
+    return 1;
+}

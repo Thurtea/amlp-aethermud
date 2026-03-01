@@ -1,0 +1,98 @@
+// /lib/spells/level4/fire_bolt.lpc
+// Fire Bolt - Level 4 Combat Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("fire_bolt");
+    set_spell_name("Fire Bolt");
+    set_spell_desc(
+        "A focused bolt of magical flame launched at a single target. " +
+        "The bolt travels at high speed and strikes with concentrated " +
+        "fire damage, capable of igniting flammable materials on contact. " +
+        "More precise than a Fireball and costing less P.P.E., the Fire " +
+        "Bolt is a reliable offensive tool for the battlefield mage."
+    );
+
+    set_spell_level(4);
+    set_ppe_cost(7);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(2);
+    set_base_range(60);
+
+    set_incantation("Ignis vola, hostem feri!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(2);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster || !target) return 0;
+
+    if (environment(caster) != environment(target)) {
+        tell_object(caster, "Your target is not here!\n");
+        return 0;
+    }
+
+    if (!living(target)) {
+        tell_object(caster, "You can only target living beings!\n");
+        return 0;
+    }
+
+    if (target == caster) {
+        tell_object(caster, "You cannot cast Fire Bolt on yourself!\n");
+        return 0;
+    }
+
+    /* Roll 2d6 damage */
+    int damage = random(6) + 1 + random(6) + 1;
+
+    /* Severity phrase */
+    int max_hp = 0;
+    if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+    if (max_hp <= 0) max_hp = 50;
+    int pct = (damage * 100) / max_hp;
+    string sev;
+    if (pct <= 5) sev = "barely singes";
+    else if (pct <= 15) sev = "singes";
+    else if (pct <= 30) sev = "blasts";
+    else if (pct <= 50) sev = "devastates";
+    else sev = "obliterates";
+
+    tell_object(caster,
+        "You conjure a bolt of focused flame and hurl it!\n" +
+        "Your fire bolt " + sev + " " + target->query_cap_name() + "!\n");
+
+    tell_object(target,
+        caster->query_cap_name() + " hurls a bolt of flame at you!\n" +
+        "The fire bolt " + sev + " you!\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob != target && living(ob)) {
+                tell_object(ob,
+                    caster->query_cap_name() +
+                    " hurls a bolt of fire that " + sev + " " +
+                    target->query_cap_name() + "!\n");
+            }
+        }
+    }
+
+    if (function_exists("take_damage", target)) {
+        target->take_damage(damage, 0);
+    }
+
+    object combat_daemon = load_object("/daemon/combat");
+    if (combat_daemon && !target->query_property("in_combat")) {
+        combat_daemon->start_combat(caster, target);
+    }
+
+    return 1;
+}

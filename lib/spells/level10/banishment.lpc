@@ -1,0 +1,101 @@
+// /lib/spells/level10/banishment.lpc
+// Banishment - Level 10 Supernatural Banishment Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("banishment");
+    set_spell_name("Banishment");
+    set_spell_desc(
+        "Forces lesser supernatural beings to leave the immediate " +
+        "area and return to their home dimension. The magic affects " +
+        "one lesser supernatural being per experience level within " +
+        "a 600-foot radius. Each targeted being receives a standard " +
+        "save vs magic; success means they are unaffected. Banished " +
+        "creatures cannot return for a minimum of two weeks per " +
+        "level of the caster. Greater supernatural beings are immune " +
+        "to this spell. A ritual version of Banishment has a higher " +
+        "save threshold (16) for the affected beings."
+    );
+
+    set_spell_level(10);
+    set_ppe_cost(65);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(2);
+    set_base_range(100);
+
+    set_incantation("Ens alienum, discede! Ad originem tuam redi!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    int banished_count = 0;
+    int resisted_count = 0;
+
+    foreach (object ob : all_inventory(env)) {
+        if (ob == caster) continue;
+        if (!living(ob)) continue;
+
+        int is_supernatural = ob->query_property("supernatural");
+        int is_lesser = ob->query_property("lesser_being");
+        string race_check = "";
+        if (function_exists("query_race", ob)) race_check = ob->query_race();
+
+        int qualifies = is_supernatural || is_lesser ||
+                        race_check == "demon" || race_check == "entity" ||
+                        race_check == "deevil" || race_check == "ghost";
+
+        if (!qualifies) continue;
+
+        /* Each being rolls save vs magic */
+        int resisted = 0;
+        if (function_exists("saving_throw", ob)) {
+            if (ob->saving_throw("spell")) resisted = 1;
+        }
+
+        if (resisted) {
+            resisted_count += 1;
+            tell_object(ob,
+                "You feel the Banishment attempt — but your will holds!\n");
+        } else {
+            banished_count += 1;
+            tell_object(ob,
+                "TREMENDOUS FORCE seizes you and tears you from this world!\n" +
+                "You are BANISHED!\n");
+            ob->set_property("banished", 1);
+            ob->set_property("banished_until", time() + (caster->query_level() * 1209600));
+        }
+    }
+
+    if (banished_count > 0 || resisted_count > 0) {
+        tell_object(caster,
+            "The Banishment invocation thunders through the area!\n" +
+            "Banished: " + banished_count + " beings.\n" +
+            "Resisted: " + resisted_count + " beings.\n");
+        foreach (object ob2 : all_inventory(env)) {
+            if (ob2 != caster && living(ob2)) {
+                tell_object(ob2,
+                    "Supernatural beings are RIPPED from the area by " +
+                    caster->query_cap_name() + "'s Banishment!\n");
+            }
+        }
+    } else {
+        tell_object(caster,
+            "There are no lesser supernatural beings here to banish.\n");
+    }
+
+    return 1;
+}

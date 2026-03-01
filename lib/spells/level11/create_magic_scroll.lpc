@@ -1,0 +1,85 @@
+// /lib/spells/level11/create_magic_scroll.lpc
+// Create Magic Scroll - Level 11 Utility Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("create_magic_scroll");
+    set_spell_name("Create Magic Scroll");
+    set_spell_desc(
+        "Enables the caster to transfer mystic energy and a spell " +
+        "invocation into paper, creating a magic scroll. The scroll " +
+        "contains one spell (chosen at casting time) and can be read " +
+        "aloud by anyone literate in the language to trigger the " +
+        "spell — no magical training required. The words disappear " +
+        "the moment the scroll is read aloud. The caster must be " +
+        "literate and must know the spell being inscribed. P.P.E. " +
+        "cost of Create Magic Scroll plus the spell's own P.P.E. " +
+        "cost are both expended at creation time."
+    );
+
+    set_spell_level(11);
+    set_ppe_cost(100);
+
+    set_duration_type(0);
+    set_base_duration(0);
+
+    set_range_type(0);
+    set_base_range(0);
+
+    set_incantation("Verba magica in chartam transferre, vim conservare!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(16);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    /* Check that caster has paper/writing materials */
+    int has_paper = 0;
+    foreach (object ob : all_inventory(caster)) {
+        if (ob->query_property("paper") || ob->query_property("parchment") ||
+            ob->query_property("scroll_blank")) {
+            has_paper = 1;
+            break;
+        }
+    }
+
+    if (!has_paper) {
+        tell_object(caster,
+            "You need paper or parchment to create a magic scroll!\n");
+        return 0;
+    }
+
+    /* Create the scroll item conceptually */
+    caster->set_property("created_scroll", 1);
+    caster->set_property("scroll_spell", "fireball");
+
+    tell_object(caster,
+        "You inscribe the spell with glowing magical runes!\n" +
+        "The P.P.E. flows into the parchment, and the words of power " +
+        "shimmer on the page.\n" +
+        "A magic scroll has been created. Anyone who reads it aloud " +
+        "will trigger the spell.\n");
+
+    object env2 = environment(caster);
+    if (env2) {
+        foreach (object ob : all_inventory(env2)) {
+            if (ob != caster && living(ob)) {
+                tell_object(ob,
+                    caster->query_cap_name() +
+                    " inscribes glowing runes onto parchment, " +
+                    "creating a magic scroll.\n");
+            }
+        }
+    }
+
+    return 1;
+}

@@ -1,0 +1,96 @@
+// /lib/spells/level9/familiar_link.lpc
+// Familiar Link - Level 9 Bonding Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("familiar_link");
+    set_spell_name("Familiar Link");
+    set_spell_desc(
+        "Creates a permanent telepathic and empathic bond between the " +
+        "caster and a small animal familiar. The caster gains sensory " +
+        "access to the familiar — sight, hearing, smell, taste, and " +
+        "touch — at will. The familiar becomes completely docile and " +
+        "obedient. While the link exists the caster gains +6 Hit " +
+        "Points from the life-force connection. If the familiar is " +
+        "killed, the caster loses 10 HP and may suffer shock for " +
+        "1-6 hours. The bond is indefinite unless severed."
+    );
+
+    set_spell_level(9);
+    set_ppe_cost(55);
+
+    set_duration_type(1);
+    set_base_duration(0);
+
+    set_range_type(1);
+    set_base_range(0);
+
+    set_incantation("Anima ad animam, sensus partiri, vinculo aeterno!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(8);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("familiar_link_active")) {
+        tell_object(caster,
+            "You already have a familiar link! You can only bond with " +
+            "one familiar at a time.\n");
+        return 0;
+    }
+
+    /* Look for a small animal in the room */
+    object familiar = 0;
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (ob != caster && ob->query_property("is_animal") && living(ob)) {
+                familiar = ob;
+                break;
+            }
+        }
+    }
+
+    if (!familiar) {
+        /* Allow self-cast for flavor — describe finding a familiar */
+        tell_object(caster,
+            "You complete the Familiar Link ritual.\n" +
+            "The bond awaits a suitable animal companion.\n" +
+            "Find a small animal and the link will activate.\n");
+        caster->set_property("familiar_link_pending", 1);
+        return 1;
+    }
+
+    caster->set_property("familiar_link_active", 1);
+    caster->set_property("familiar_object", familiar);
+    familiar->set_property("is_familiar", 1);
+    familiar->set_property("familiar_master", caster);
+
+    string fname = "the animal";
+    if (function_exists("query_name", familiar)) fname = familiar->query_name();
+
+    tell_object(caster,
+        "The Familiar Link surges into place!\n" +
+        "You bond deeply with " + fname + ".\n" +
+        "You can now share its senses at will. You feel +6 Hit Points " +
+        "from the life-force connection.\n");
+
+    object env2 = environment(caster);
+    if (env2) {
+        foreach (object ob : all_inventory(env2)) {
+            if (ob != caster && ob != familiar && living(ob)) {
+                tell_object(ob,
+                    "A golden thread of magical energy weaves between " +
+                    caster->query_cap_name() + " and " + fname + ".\n");
+            }
+        }
+    }
+
+    return 1;
+}

@@ -1,0 +1,108 @@
+// /lib/spells/level11/summon_animals.lpc
+// Summon and Control Animals - Level 11 Summoning Spell
+
+inherit "/std/spell";
+
+void create() {
+    ::create();
+
+    set_spell_id("summon_animals");
+    set_spell_name("Summon and Control Animals");
+    set_spell_desc(
+        "The caster can summon and command any type of animal within " +
+        "600 feet. Tiny animals (frogs, mice): 40 per level. Medium " +
+        "animals (dogs, cats up to 30 lbs): 8 per level. Large " +
+        "animals (horses): 6 per level. Exotic animals including " +
+        "non-indigenous species: 1 per level. Any animal entering " +
+        "the caster's 600-foot range must save vs magic or obey the " +
+        "mage. Animals with a successful save are unaffected. Familiars " +
+        "are never influenced. The animals will obey for 5 hours per " +
+        "level of experience."
+    );
+
+    set_spell_level(11);
+    set_ppe_cost(125);
+
+    set_duration_type(2);
+    set_base_duration(300);
+
+    set_range_type(2);
+    set_base_range(600);
+
+    set_incantation("Animalia veni, obedite, mihi servite!");
+    set_requires_verbal(1);
+    set_requires_somatic(1);
+    set_components(({ }));
+    set_casting_time(4);
+}
+
+int apply_effect(object caster, object target) {
+    if (!caster) return 0;
+
+    if (caster->query_property("animal_control_active")) {
+        tell_object(caster, "You already have animals under your command!\n");
+        return 0;
+    }
+
+    object env = environment(caster);
+    if (!env) return 0;
+
+    int caster_level = caster->query_spell_caster_level();
+    if (caster_level < 1) caster_level = 1;
+    int duration = caster_level * 18000;
+
+    caster->set_property("animal_control_active", 1);
+    caster->set_property("animals_controlled", 0);
+
+    int controlled = 0;
+    foreach (object ob : all_inventory(env)) {
+        if (!living(ob) || ob == caster) continue;
+        if (!ob->query_property("is_animal")) continue;
+        if (ob->query_property("is_familiar")) continue;
+
+        int resisted = 0;
+        if (function_exists("saving_throw", ob)) {
+            if (ob->saving_throw("spell")) resisted = 1;
+        }
+
+        if (!resisted) {
+            ob->set_property("summoned_by_mage", 1);
+            ob->set_property("summoned_master", caster);
+            controlled += 1;
+            tell_object(ob,
+                "An overwhelming compulsion seizes you — you must obey!\n");
+        }
+    }
+
+    caster->set_property("animals_controlled", controlled);
+
+    tell_object(caster,
+        "You invoke the Summon Animals ritual!\n" +
+        "Animals in the area feel compelled to serve you.\n" +
+        "Currently controlling: " + controlled + " animals.\n" +
+        "Additional animals entering the area may be affected.\n");
+
+    call_out("end_animal_control", duration, caster);
+
+    return 1;
+}
+
+void end_animal_control(object caster) {
+    if (!caster) return;
+
+    caster->remove_property("animal_control_active");
+    caster->remove_property("animals_controlled");
+
+    tell_object(caster,
+        "The Summon Animals spell expires. The animals are free.\n");
+
+    object env = environment(caster);
+    if (env) {
+        foreach (object ob : all_inventory(env)) {
+            if (living(ob) && ob->query_property("summoned_by_mage")) {
+                ob->remove_property("summoned_by_mage");
+                ob->remove_property("summoned_master");
+            }
+        }
+    }
+}

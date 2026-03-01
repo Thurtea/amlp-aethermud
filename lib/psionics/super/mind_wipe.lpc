@@ -1,28 +1,64 @@
 /*
  * /lib/psionics/super/mind_wipe.lpc - Mind Wipe
+ * Permanently erase all memories of a specific person or event.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("mind_wipe");
     set_power_name("Mind Wipe");
     set_power_desc(
-        "TODO:CONTENT — Permanently erase all memories of a specific person or event."
+        "The most invasive of mental powers, Mind Wipe allows the psychic to " +
+        "reach into a target's mind and surgically excise all memories of a " +
+        "specific person, place, or event. The deletion is total and permanent — " +
+        "the target has no awareness that anything is missing and cannot be " +
+        "reminded of the wiped content by normal means. The scope is limited to " +
+        "a single defined subject per use. A Mental Endurance save of 18 or " +
+        "higher allows resistance. Psychic analysis can reveal the wipe " +
+        "afterward, but not restore the lost memories.\n\n" +
+        "Range: 30 feet\n" +
+        "ISP Cost: 30 points\n" +
+        "Duration: Permanent"
     );
     set_power_category("super");
-
     set_isp_cost(30);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(30);        /* feet */
+    set_range_type(2);
+    set_base_range(30);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "You need a target for mind wipe.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living target.\n");
+        return 0;
+    }
+    int me = 0;
+    if (function_exists("query_stat", target)) me = target->query_stat("me");
+    int roll = random(20) + 1 + me;
+    if (roll >= 18) {
+        tell_object(user, target->query_cap_name() +
+            " struggles against the intrusion and repels your attempt.\n");
+        tell_object(target, "Something vast and invasive grapples with your " +
+            "mind. You feel it reach in — and then throw it out.\n");
+        return 0;
+    }
+    target->set_property("mind_wiped", 1);
+    tell_object(user, "You descend into " + target->query_cap_name() +
+        "'s deepest memories and carefully excise the targeted recollections. " +
+        "Every thread, every associated feeling — gone. The deletion is seamless. " +
+        "They will never know what they have lost.\n");
+    tell_object(target, "You blink. What were you thinking about just now? " +
+        "The thought is gone.\n");
     return 1;
 }

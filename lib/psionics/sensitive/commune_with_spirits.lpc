@@ -1,28 +1,61 @@
 /*
  * /lib/psionics/sensitive/commune_with_spirits.lpc - Commune with Spirits
+ * Make contact with spirits, ghosts, and entities in the area.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("commune_with_spirits");
     set_power_name("Commune with Spirits");
     set_power_desc(
-        "TODO:CONTENT — Make contact with spirits, ghosts, and entities in the area."
+        "The psychic opens their mind to the spirit world, making contact "
+        "with any ghosts, spirits, or disembodied entities that linger in "
+        "the area. Communications are limited to the spirit's ability to "
+        "convey information — some are eloquent, others can only convey "
+        "strong emotions or impressions. Spirits of the recently dead may "
+        "know what happened to them, while ancient spirits know the history "
+        "of a location.\n\n"
+        "Range: Area (50 feet)\n"
+        "ISP Cost: 6 points\n"
+        "Duration: Instant contact"
     );
     set_power_category("sensitive");
-
     set_isp_cost(6);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(50);        /* feet */
+    set_range_type(2);
+    set_base_range(50);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    // Check for any supernatural entities in area
+    object env = environment(user);
+    object *nearby = all_inventory(env);
+    int found_spirit = 0;
+    int i = 0;
+    while (i < sizeof(nearby)) {
+        if (function_exists("query_property", nearby[i]) &&
+            nearby[i]->query_property("spirit")) {
+            found_spirit = 1;
+        }
+        i += 1;
+    }
+    if (found_spirit) {
+        tell_object(user, "You open your mind and a chill fills you as "
+            "spirit consciousness brushes against yours. Impressions, "
+            "fragments of memory, and wordless emotion flood your senses.\n");
+    } else {
+        tell_object(user, "You extend your consciousness into the spirit world. "
+            "The area feels quiet — no strong spirit presences detected. "
+            "There may be faint echoes of the past, but no spirits are "
+            "actively present.\n");
+    }
+    tell_room(env,
+        user->query_cap_name() + " goes still, eyes unfocused, clearly "
+        "communing with something unseen.\n",
+        ({ user }));
     return 1;
 }

@@ -1,74 +1,90 @@
 // /lib/occs/line_walker.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Line Walker O.C.C. - Ley line-attuned wandering mage
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Line Walker");
     set_occ_id("line_walker");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "An explorer of dimensional boundaries and liminal spaces. Conservative
-defaults for perception, stealth and niche abilities; review for lore."
+        "Line Walkers are wandering practitioners of magic who travel the ley " +
+        "lines of Rifts Earth, drawing power from the dimensional energy that " +
+        "flows through them. Less bookish than their Ley Line Walker cousins, " +
+        "Line Walkers favor mobility and practical spell use over deep arcane " +
+        "scholarship. They can sense and follow ley lines across great distances, " +
+        "draw extra PPE at nexus points, and have developed a traveler's " +
+        "versatility that keeps them alive in hostile territory. A Line Walker " +
+        "is rarely caught off-guard and rarely without resources."
     );
-    
-    set_stat_requirements(([
-        "me": 10,
-        "spd": 9
-    ]));
-    
-    set_stat_bonuses(([
-        "me": 1,
-        "spd": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "me": 10, "iq": 9, "pe": 8 ]));
+    set_stat_bonuses(([ "me": 1, "spd": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
+        "lore_general",
+        "wilderness_survival",
+        "land_navigation",
         "perception",
-        "stealth",
-        "lore_dimensional",
-        "navigation",
-        "survival"
+        "first_aid"
     }));
-    
-    set_occ_related_skills(({ "arcana", "investigation" }));
+    set_occ_related_skills(({
+        "lore_spirits", "ritual_magic", "herbalism",
+        "tracking"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Line Walkers may have minor psionic or mystical attunement
-    set_base_ppe(10);
-    set_ppe_per_level(1);
-    set_base_isp(5);
-    set_isp_per_level(1);
-    set_magic_type("mystic");
-    set_psionic_type("minor");
-    
-    // HP/SDC
+
+    set_base_ppe(25);
+    set_ppe_per_level(5);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("ley_line");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/traveler_cloak", "/obj/item/line_charm" }));
-    set_starting_credits(40, 200);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/light_cloth" }));
-    
-    // Race restrictions
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/traveler_cloak",
+        "/obj/item/ritual_pouch"
+    }));
+    set_starting_credits(50, 250);
+    set_starting_weapons(({ "/obj/weapon/dagger" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
+
     set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+    set_max_cybernetic_slots(3);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "ley_line_sense", "ley_line_draw", "nexus_attunement" }));
+    set_vehicle_type("any");
+    set_special_training("ley line travel and practical magic");
+
+    set_background(
+        "Line Walkers learned magic by following the power, not by studying " +
+        "it. Most were drawn to ley lines from a young age — feeling the " +
+        "vibration of dimensional energy that others could not detect — and " +
+        "taught themselves to use it through years of wandering. They know " +
+        "every ley line in their territory the way a sailor knows currents."
+    );
+    set_organizations(({ "independent wanderers", "traveling merchant convoys" }));
+    set_enemies(({ "Coalition anti-magic forces", "those who control ley lines" }));
 }

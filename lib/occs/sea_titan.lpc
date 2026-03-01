@@ -1,75 +1,89 @@
 // /lib/occs/sea_titan.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Sea Titan O.C.C. - Massive aquatic warrior of the deep oceans
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Sea Titan");
     set_occ_id("sea_titan");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A massive aquatic behemoth or mariner specialist adapted to sea
-operations. Conservative defaults for aquatic skills and strength; please
-review with canonical sources."
+        "Sea Titans are the great warriors of the deep ocean — massive, " +
+        "extraordinarily powerful beings from the aquatic civilizations that " +
+        "flourish in Earth's rifts-altered seas. They possess enormous physical " +
+        "strength, can breathe water as easily as air, withstand crushing depths, " +
+        "and move through water with unnatural speed. On land they are somewhat " +
+        "slower but no less dangerous — their physical power remains staggering. " +
+        "Sea Titans who venture onto land do so for reasons of great personal " +
+        "importance, or because their ocean territory has been irrevocably changed."
     );
-    
-    set_stat_requirements(([
-        "str": 12,
-        "pe": 11
-    ]));
-    
-    set_stat_bonuses(([
-        "str": 3,
-        "pe": 1
-    ]));
-    
-    // Combat configuration
-    set_base_attacks(2);
+
+    set_stat_requirements(([ "ps": 12, "pe": 11 ]));
+    set_stat_bonuses(([ "ps": 4, "pe": 2 ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(3);
     set_attacks_per_level(1, 3);
-    set_hand_to_hand_type("basic");
-    
+    set_hand_to_hand_type("expert");
+
     set_occ_skills(({
         "language_american",
         "swimming",
-        "navigation_sea",
-        "heavy_weapons",
-        "endurance",
-        "diving"
+        "navigation",
+        "underwater_operations",
+        "hand_to_hand_combat",
+        "first_aid"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "diving", "cartography_ocean", "pilot_watercraft",
+        "fishing", "wilderness_survival"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+
     set_base_ppe(0);
     set_ppe_per_level(0);
     set_base_isp(0);
     set_isp_per_level(0);
     set_magic_type("none");
     set_psionic_type("none");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/wet_suit", "/obj/item/sea_emblem" }));
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(80);
+    set_sdc_per_level(10);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/sea_armor",
+        "/obj/item/sea_emblem"
+    }));
     set_starting_credits(100, 400);
-    set_starting_weapons(({ "/obj/weapons/trident" }));
-    set_starting_armor(({ "/obj/armor/reinforced_scale" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/trident" }));
+    set_starting_armor(({ "/obj/armor/sea_scale" }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "aquatic_breathing", "deep_diving", "sea_sense" }));
+    set_vehicle_type("watercraft");
+    set_special_training("aquatic warfare");
+
+    set_background(
+        "Sea Titans come from the great aquatic kingdoms that developed after " +
+        "the Coming of the Rifts dramatically altered Earth's oceans. Their " +
+        "world is as complex and political as anything on the surface — they " +
+        "bring the weight of that world with them."
+    );
+    set_organizations(({ "aquatic kingdoms", "ocean raiding clans" }));
+    set_enemies(({ "ocean pollution sources", "Splugorth aquatic forces" }));
 }

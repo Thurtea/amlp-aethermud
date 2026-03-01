@@ -1,74 +1,90 @@
 // /lib/occs/rogue_scholar.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Rogue Scholar O.C.C. - Independent researcher and information broker
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Rogue Scholar");
     set_occ_id("rogue_scholar");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "An independent researcher and information broker. Conservative defaults
-for research, languages and covert tradecraft included; review for detail."
+        "Rogue Scholars are independent academics who have rejected or been " +
+        "expelled from formal institutions — often because their research " +
+        "crossed into forbidden territory, or because they refused to stop " +
+        "asking inconvenient questions. They are the most broadly educated " +
+        "characters in Rifts, speaking multiple languages, versed in history " +
+        "and lore, and possessed of a driving curiosity that gets them into " +
+        "places they probably shouldn't be. Many work as information brokers, " +
+        "translators, or advisors to groups who value knowledge over credentials."
     );
-    
-    set_stat_requirements(([
-        "iq": 11,
-        "me": 9
-    ]));
-    
-    set_stat_bonuses(([
-        "iq": 2,
-        "me": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "iq": 11, "me": 9 ]));
+    set_stat_bonuses(([ "iq": 2, "me": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
-    set_attacks_per_level(1, 3);
+    set_attacks_per_level(1, 4);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
-        "research_methods",
         "history",
-        "linguistics",
-        "stealth",
-        "investigation"
+        "lore_general",
+        "research",
+        "literacy",
+        "first_aid"
     }));
-    
-    set_occ_related_skills(({ "lore", "archaeology" }));
+    set_occ_related_skills(({
+        "language_dragonese", "language_spanish", "archeology",
+        "computer_operation", "photography", "cartography"
+    }));
     set_occ_skill_count(6);
-    set_elective_count(4);
-    set_secondary_count(6);
-    
-    // Rogue Scholars often have minor mystical or psionic insight
+    set_elective_count(5);
+    set_secondary_count(8);
+
     set_base_ppe(5);
     set_ppe_per_level(1);
     set_base_isp(0);
     set_isp_per_level(0);
-    set_magic_type("scholar" );
+    set_magic_type("scholar");
     set_psionic_type("minor");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/academic_coat", "/obj/item/notebook" }));
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(15);
+    set_sdc_per_level(1);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/academic_coat",
+        "/obj/item/notebook",
+        "/obj/item/reference_library"
+    }));
     set_starting_credits(30, 150);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/knife" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
+
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "vast_knowledge", "information_network" }));
+    set_vehicle_type("any");
+    set_special_training("multiple academic disciplines");
+
+    set_background(
+        "Rogue Scholars left institutions for any number of reasons — censorship, " +
+        "dangerous research, exile, or simple wanderlust. Many carry incomplete " +
+        "dissertations in their pack. Most have seen more of the world than any " +
+        "tenured professor safely ensconced in a university."
+    );
+    set_organizations(({ "independent scholars", "information networks" }));
+    set_enemies(({ "CS academic censors", "organizations whose secrets they know" }));
 }

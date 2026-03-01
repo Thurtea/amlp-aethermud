@@ -1,81 +1,91 @@
 // /lib/occs/mystic.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// Source: archived-md/ttrpg-references.json ID: a-mystic-drurd-tar-from-her-home-in-england, both-the-stone-and-iron-golems-are-mystical-mega-damage-creatures
-// Generated: 2026-02-12
-// TODO: Review and expand with gameplay balance
-//
-// This is a stub file. Implement the full OCC details.
+// Mystic O.C.C. - Intuitive practitioner of magic and psionics
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Mystic");
     set_occ_id("mystic");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A spiritual practitioner skilled in rites, healing, and subtle
-energies. Conservative defaults for mystical abilities, PPE and supportive
-skills are provided; review against lore."
+        "Mystics are unique among magical practitioners — where wizards study " +
+        "formulae and psionics train their minds, Mystics simply feel magic and " +
+        "psionic energy flowing through the world and learn to work with it " +
+        "intuitively. They are naturally attuned to both magical and psionic " +
+        "frequencies without formal training in either, giving them a modest " +
+        "range of both magical spells and psionic abilities. What they lack in " +
+        "depth — dedicated wizards and psionics exceed them in their specialties " +
+        "— they make up for in flexibility and the uncanny nature of their gifts. " +
+        "They sense things others cannot and sometimes know things they should not."
     );
-    
-    set_stat_requirements(([
-        "iq": 10,
-        "ps": 9
-    ]));
-    
-    set_stat_bonuses(([
-        "ps": 2,
-        "me": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "iq": 10, "me": 10 ]));
+    set_stat_bonuses(([ "me": 2, "iq": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
-        "ritual_magic",
+        "meditation_combined",
+        "lore_general",
         "herbalism",
-        "psionics_support",
-        "diplomacy",
+        "first_aid",
         "perception"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "divination", "lore_spirits", "diplomacy",
+        "ritual_magic"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Mystic core: supportive PPE and minor psionics
+
     set_base_ppe(25);
-    set_ppe_per_level(2);
-    set_base_isp(0);
-    set_isp_per_level(0);
+    set_ppe_per_level(3);
+    set_base_isp(20);
+    set_isp_per_level(3);
     set_magic_type("mystic");
     set_psionic_type("minor");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/mystic_robes", "/obj/item/lesser_focus" }));
-    set_starting_credits(40, 200);
-    set_starting_weapons(({ "/obj/weapons/dagger" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
 
-    set_special_powers(({ "aura_heal", "detect_essence" }));
-    
-    // Race restrictions
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(20);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/mystic_robes",
+        "/obj/item/focus_crystal",
+        "/obj/item/ritual_pouch"
+    }));
+    set_starting_credits(40, 200);
+    set_starting_weapons(({ "/obj/weapon/dagger" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "aura_sense", "dual_attunement", "spirit_communion" }));
+    set_vehicle_type("none");
+    set_special_training("intuitive magic and psionics");
+
+    set_background(
+        "Mystics did not choose their gift so much as discover it already " +
+        "present. Most noticed from childhood that they could sense things — " +
+        "emotions, presences, impending events — that others could not. " +
+        "Over time they found they could do more than sense them."
+    );
+    set_organizations(({ "mystic communities", "independent wanderers" }));
+    set_enemies(({ "CS anti-magic forces", "those who fear the unexplained" }));
 }

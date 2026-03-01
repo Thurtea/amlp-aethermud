@@ -1,28 +1,57 @@
 /*
  * /lib/psionics/super/empathy_superior.lpc - Empathy Superior
+ * Full emotion sharing and broadcast; affect entire area's emotional state.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("empathy_superior");
     set_power_name("Empathy Superior");
     set_power_desc(
-        "TODO:CONTENT — Full emotion sharing and broadcast; affect entire area's emotional state."
+        "The psychic's empathic sense is elevated to a powerful broadcast " +
+        "capability. Not only can they read the emotions of everyone in the area " +
+        "simultaneously, they can project emotional states that all nearby people " +
+        "feel as their own. A wave of calm can end a brawl; a surge of courage " +
+        "can steel panicking allies; a flood of dread can scatter enemies. The " +
+        "effect is subtle — targets feel the emotion as natural, not imposed, " +
+        "making it very difficult to resist. Only those with strong mental " +
+        "protection will notice the external influence.\n\n" +
+        "Range: 100 feet\n" +
+        "ISP Cost: 10 points\n" +
+        "Duration: 5 minutes per level"
     );
     set_power_category("super");
-
     set_isp_cost(10);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(5);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(100);        /* feet */
+    set_range_type(2);
+    set_base_range(100);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    user->set_property("empathy_broadcast", 1);
+    object env = environment(user);
+    object *nearby = all_inventory(env);
+    int affected = 0;
+    int i = 0;
+    while (i < sizeof(nearby)) {
+        if (nearby[i] != user && living(nearby[i])) {
+            if (function_exists("set_property", nearby[i])) {
+                nearby[i]->set_property("empathy_influenced", 1);
+                affected += 1;
+            }
+        }
+        i += 1;
+    }
+    tell_object(user, "You expand your empathic field outward like a tide, " +
+        "reading and touching the emotions of every mind nearby. " +
+        affected + " people in the area are within your emotional reach.\n");
+    tell_room(env,
+        "The emotional atmosphere of the area subtly shifts as " +
+        user->query_cap_name() + " extends their empathic presence.\n",
+        ({ user }));
     return 1;
 }

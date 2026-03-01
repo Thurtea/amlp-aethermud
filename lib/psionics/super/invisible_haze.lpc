@@ -1,28 +1,53 @@
 /*
  * /lib/psionics/super/invisible_haze.lpc - Invisible Haze
+ * Surround oneself with a distortion field that makes the psychic hard to see.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("invisible_haze");
     set_power_name("Invisible Haze");
     set_power_desc(
-        "TODO:CONTENT — Surround oneself with a distortion field that makes the psychic hard to see."
+        "The psychic projects a psychic distortion field around their body that " +
+        "bends light and scrambles perception, making them extremely difficult " +
+        "to see. They are not fully invisible — close inspection or See the " +
+        "Invisible reveals a shimmering outline — but at a distance they are " +
+        "effectively transparent. The haze moves with the psychic and requires " +
+        "no concentration to maintain once activated. Attacks against the psychic " +
+        "suffer significant penalties as attackers struggle to fix them in their " +
+        "vision. The psychic can see and act normally while the haze is active.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 10 points\n" +
+        "Duration: 2 minutes per level"
     );
     set_power_category("super");
-
     set_isp_cost(10);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(2);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (user->query_property("invisible_haze")) {
+        user->set_property("invisible_haze", 0);
+        tell_object(user, "The distortion field collapses. You become fully " +
+            "visible once more.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " shimmers into full visibility.\n",
+            ({ user }));
+    } else {
+        user->set_property("invisible_haze", 1);
+        tell_object(user, "A shimmering distortion radiates from your skin as " +
+            "light bends around you. You become a barely-visible haze, " +
+            "nearly impossible to target at range.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " shimmers and seems to blur, becoming " +
+            "almost impossible to focus on.\n",
+            ({ user }));
+    }
     return 1;
 }

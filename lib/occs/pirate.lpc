@@ -1,5 +1,5 @@
 // /lib/occs/pirate.lpc
-// Pirate - Sea rover and plunderer
+// Pirate O.C.C. - Sea rover and plunderer
 
 inherit "/std/occ";
 
@@ -11,27 +11,82 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Pirates cruise the coasts and seas in search of plunder. They are
-adept at shipboard combat, navigation, and opportunistic looting."
+        "Pirates are the scourge and legend of Rifts Earth's waterways, lakes, " +
+        "and coastal regions. They cruise the seas in search of plunder, " +
+        "supplementing opportunistic looting with smuggling, mercenary work, " +
+        "and the occasional legitimate contract when treasure runs thin. " +
+        "Pirates are adept at shipboard combat, navigation, and the chaotic " +
+        "violence of boarding actions. They come from all races and backgrounds " +
+        "but share a love of freedom, profit, and the open water. Many fly " +
+        "no flag but their own."
     );
 
-    set_stat_requirements(([ "ps": 9, "spd": 9 ]));
+    set_stat_requirements(([ "ps": 9, "spd": 9, "pe": 9 ]));
     set_stat_bonuses(([ "ps": 1, "spd": 1 ]));
 
-    set_occ_skills(({ "navigation", "sailing", "boarding", "small_arms", "melee_combat", "barter" }));
-    set_occ_related_skills(({ "swim_expert", "repair" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "navigation",
+        "pilot_watercraft",
+        "small_arms",
+        "hand_to_hand_combat",
+        "barter"
+    }));
+    set_occ_related_skills(({
+        "swimming", "rope_works", "first_aid",
+        "intimidation", "gambling", "smuggling", "cartography"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
 
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(25);
     set_sdc_per_level(3);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "/obj/clothing/pirate_coat", "/obj/kit/boarding_kit" }));
+    set_standard_equipment(({
+        "/obj/clothing/seacoat",
+        "/obj/item/spyglass",
+        "/obj/item/rope"
+    }));
     set_starting_credits(20, 200);
-    set_starting_weapons(({ "/obj/weapons/cutlass", "/obj/weapons/flintlock" }));
+    set_starting_weapons(({
+        "/obj/weapon/cutlass",
+        "/obj/weapon/flintlock_pistol"
+    }));
     set_starting_armor(({ "/obj/armor/light_leather" }));
 
-    set_cybernetics_allowed(0);
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
+
+    set_cybernetics_allowed(1);
     set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "sea_legs", "boarding_expertise" }));
+    set_vehicle_type("watercraft");
+    set_special_training("maritime combat");
+
+    set_background(
+        "Pirates come from failed settlements, coastal communities, or simply " +
+        "from anyone who found the sea more welcoming than the land. Rifts " +
+        "Earth's chaos has made piracy a viable and sometimes necessary career."
+    );
+    set_organizations(({ "Pirate Clans", "Black Market" }));
+    set_enemies(({ "Navy patrols", "Merchant guilds" }));
 }

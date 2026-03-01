@@ -1,5 +1,5 @@
 // /lib/occs/atlantean_slave.lpc
-// Atlantean Slave - Enslaved worker with survival skills
+// Atlantean Slave O.C.C. - Enslaved survivor with hard-won survival skills
 
 inherit "/std/occ";
 
@@ -11,28 +11,79 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Atlantean Slaves are survivors of captivity and hardship.
-They gain practical skills useful for survival and maintenance, often
-trading freedom for basic equipment."
+        "Atlantean Slaves are those unfortunate enough to have been captured by " +
+        "the Splugorth or other slavers and forced into bondage. Despite — or " +
+        "because of — the brutal conditions, they develop extraordinary physical " +
+        "resilience and a ferocious will to survive. Those who escape carry " +
+        "the scars of captivity alongside hard-won practical knowledge: how to " +
+        "endure, how to find weaknesses in their captors, and how to strike back " +
+        "when the moment comes. They begin with little but make far more of it " +
+        "than most would believe possible."
     );
 
     set_stat_requirements(([ "pe": 8, "ps": 8 ]));
-    set_stat_bonuses(([ "pe": 1 ]));
+    set_stat_bonuses(([ "pe": 2, "ps": 1, "me": 1 ]));
 
-    set_occ_skills(({ "language_american", "repair", "survival", "unarmed_combat", "manual_labor", "endurance" }));
-    set_occ_related_skills(({ "stealth", "barter" }));
-    set_occ_skill_count(6);
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "first_aid",
+        "hand_to_hand_combat",
+        "prowl",
+        "wilderness_survival",
+        "general_repair"
+    }));
+    set_occ_related_skills(({
+        "barter", "climbing", "swimming",
+        "detect_concealment", "escape_artist"
+    }));
+    set_occ_skill_count(5);
     set_elective_count(3);
     set_secondary_count(6);
 
-    set_base_sdc(15);
-    set_sdc_per_level(0);
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
 
-    set_standard_equipment(({ "/obj/clothing/rough_shirt" }));
-    set_starting_credits(0, 20);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/cloth" }));
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(20);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/rough_clothes",
+        "/obj/item/small_satchel"
+    }));
+    set_starting_credits(0, 30);
+    set_starting_weapons(({ "/obj/weapon/improvised_knife" }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ "atlantean" }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(0);
     set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "survivor_resilience" }));
+    set_vehicle_type("none");
+    set_special_training("none");
+
+    set_background(
+        "Atlanteans captured by the Splugorth work the mines, arenas, and " +
+        "estates of Atlantis. Those who escape have endured horrors that would " +
+        "break most beings and emerged harder for the experience. Freedom means " +
+        "everything to them, and most channel their ordeal into burning purpose."
+    );
+    set_organizations(({ "Free Atlanteans", "resistance networks" }));
+    set_enemies(({ "Splugorth", "slavers", "Minions of Splugorth" }));
 }

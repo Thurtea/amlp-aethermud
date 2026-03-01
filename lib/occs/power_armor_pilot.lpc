@@ -1,78 +1,91 @@
 // /lib/occs/power_armor_pilot.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// Source: archived-md/ttrpg-references.json ID: at-second-level-the-psychic-can-select-a-total-of-three-powers-from, coalition-samas-power-armor-in-action, glitter-boy-pilot-helmet, armored-head-instrumentation
-// Generated: 2026-02-12
-// TODO: Review and expand with gameplay balance
-//
-// This is a stub file. Implement the full OCC details.
+// Power Armor Pilot O.C.C. - Trained operator of powered exoskeletal armor
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Power Armor Pilot");
     set_occ_id("power_armor_pilot");
-    set_occ_category(OCC_CAT_ADVENTURER);
+    set_occ_category(OCC_CAT_MILITARY);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A pilot trained to operate powered armor and mechanized suits.
-Conservative defaults for tech and piloting skills; please validate."
+        "Power Armor Pilots are elite warriors trained to operate powered " +
+        "exoskeletal battle armor — MDC war machines that transform their " +
+        "occupants into one-person armies. A properly equipped Power Armor " +
+        "Pilot in a SAMAS suit or Glitter Boy frame is a match for small " +
+        "military units, capable of surviving incredible punishment while " +
+        "dealing devastating firepower. The training to pilot these systems " +
+        "is demanding and specialized. PA Pilots understand the systems of " +
+        "their armor intimately — not just how to fight in it, but how to " +
+        "maintain and repair it in the field."
     );
-    
-    set_stat_requirements(([
-        "iq": 10,
-        "ps": 9
-    ]));
-    
-    set_stat_bonuses(([
-        "me": 1,
-        "ps": 1
-    ]));
-    
-    // Combat configuration
-    set_base_attacks(2);
+
+    set_stat_requirements(([ "iq": 10, "ps": 9, "pe": 9 ]));
+    set_stat_bonuses(([ "me": 1, "ps": 1, "iq": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(4);
     set_attacks_per_level(1, 3);
-    set_hand_to_hand_type("basic");
-    
+    set_hand_to_hand_type("expert");
+
     set_occ_skills(({
         "language_american",
-        "power_armor",
-        "vehicle_piloting",
+        "pilot_power_armor",
+        "small_arms",
         "electronics",
-        "repair",
-        "small_arms"
+        "mechanical_repair",
+        "first_aid"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "tactics", "radio_basic", "sensor_operation",
+        "pilot_aircraft_basic"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
-    set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+    set_secondary_count(5);
+
     set_base_ppe(0);
     set_ppe_per_level(0);
     set_base_isp(0);
     set_isp_per_level(0);
     set_magic_type("none");
     set_psionic_type("none");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/pilot_suit", "/obj/item/servo_interface" }));
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(25);
+    set_sdc_per_level(3);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/pilot_suit",
+        "/obj/item/neural_interface",
+        "/obj/item/field_kit"
+    }));
     set_starting_credits(200, 800);
-    set_starting_weapons(({ "/obj/weapons/sidearm" }));
-    set_starting_armor(({ "/obj/armor/power_armor_frame" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/sidearm" }));
+    set_starting_armor(({ "/obj/armor/power_armor" }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
+
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "armor_bonding", "combat_systems_mastery" }));
+    set_vehicle_type("power_armor");
+    set_special_training("power armor operations");
+
+    set_background(
+        "Power Armor Pilots come from military backgrounds, mercenary companies, " +
+        "or wealthy families that could fund the expensive training. The best " +
+        "develop an almost intuitive bond with their armor, moving as naturally " +
+        "in it as in their own skin."
+    );
+    set_organizations(({ "CS military", "mercenary companies", "Glitter Boy legacy units" }));
+    set_enemies(({ "anti-technology raiders", "those who want their armor" }));
 }

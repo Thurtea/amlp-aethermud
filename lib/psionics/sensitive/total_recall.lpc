@@ -1,28 +1,48 @@
 /*
  * /lib/psionics/sensitive/total_recall.lpc - Total Recall
+ * Perfectly memorize and recall any information seen or heard.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("total_recall");
     set_power_name("Total Recall");
     set_power_desc(
-        "TODO:CONTENT — Perfectly memorize and recall any information seen or heard."
+        "The psychic perfectly records a moment of sensory experience — " +
+        "everything seen, heard, smelled, or felt in the past few minutes — " +
+        "storing it with absolute fidelity in long-term memory. Unlike normal " +
+        "memory which fades and distorts, these recorded impressions remain " +
+        "crystal clear and accessible indefinitely. The psychic can replay a " +
+        "conversation word for word, reproduce a map sketched on a napkin, or " +
+        "recall the exact layout of a room seen only briefly. This power is " +
+        "especially valuable for gathering intelligence.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 2 points\n" +
+        "Duration: Permanent (memory stored)"
     );
     set_power_category("sensitive");
-
     set_isp_cost(2);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    int recall_count = user->query_property("total_recall_count");
+    if (!recall_count) recall_count = 0;
+    recall_count += 1;
+    user->set_property("total_recall_count", recall_count);
+    tell_object(user, "You focus your mind, burning this moment into permanent " +
+        "memory with crystalline clarity. Every detail — sights, sounds, smells, " +
+        "the exact words spoken — is recorded with absolute fidelity. You will " +
+        "remember this perfectly, always.\n");
+    tell_room(environment(user),
+        user->query_cap_name() + " pauses for a moment, eyes slightly unfocused, " +
+        "then blinks back to full awareness.\n",
+        ({ user }));
     return 1;
 }

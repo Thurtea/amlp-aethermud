@@ -1,77 +1,91 @@
 // /lib/occs/rogue_scientist.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Rogue Scientist O.C.C. - Independent researcher and experimental inventor
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Rogue Scientist");
     set_occ_id("rogue_scientist");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A fringe scientist who applies experimental knowledge outside
-traditional institutions. Conservative defaults applied; review for
-accuracy against canonical sources."
+        "Rogue Scientists are independent researchers who operate outside " +
+        "institutional constraints, pursuing experiments that formal science " +
+        "has deemed too dangerous, too unlikely, or too ethically questionable " +
+        "to fund. On Rifts Earth, they study dimensional anomalies, magical " +
+        "physics, alien technologies, and the impossible intersections of " +
+        "pre-Rifts knowledge with the current world. They are inventors, " +
+        "salvagers, and obsessive problem-solvers who have abandoned the " +
+        "safety of academic respectability for the freedom to follow their " +
+        "curiosity wherever it leads."
     );
-    
-    // NOTE: Conservative stat requirements — adjust if needed.
-    set_stat_requirements(([
-        "iq": 10
-    ]));
-    
-    set_stat_bonuses(([
-        "iq": 1,
-        "me": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "iq": 11, "me": 9 ]));
+    set_stat_bonuses(([ "iq": 2, "me": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
-    set_attacks_per_level(1, 3);
+    set_attacks_per_level(1, 4);
     set_hand_to_hand_type("basic");
-    
-    // Conservative skill set — human review recommended.
+
     set_occ_skills(({
         "language_american",
-        "science_basic",
-        "repair",
+        "mathematics_advanced",
+        "physics",
         "electronics",
-        "research_methods",
+        "mechanical_repair",
         "first_aid"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "chemistry", "computer_operation", "research",
+        "salvage", "lore_rifts"
+    }));
     set_occ_skill_count(6);
-    set_elective_count(4);
-    set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+    set_elective_count(5);
+    set_secondary_count(7);
+
     set_base_ppe(0);
     set_ppe_per_level(0);
     set_base_isp(0);
     set_isp_per_level(0);
     set_magic_type("none");
     set_psionic_type("none");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    // Conservative starting gear
-    set_standard_equipment(({ "/obj/clothing/lab_coat", "/obj/toolkit/basic_kit" }));
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(15);
+    set_sdc_per_level(1);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/lab_coat",
+        "/obj/tools/scientific_kit",
+        "/obj/item/data_recorder"
+    }));
     set_starting_credits(50, 250);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
+    set_starting_weapons(({ "/obj/weapon/knife" }));
     set_starting_armor(({ "/obj/armor/light_vest" }));
-    
-    // Race restrictions
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
+
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "improvised_invention", "technical_knowledge" }));
+    set_vehicle_type("any");
+    set_special_training("experimental science");
+
+    set_background(
+        "Rogue Scientists left institutions for a variety of reasons — expelled " +
+        "for dangerous research, defected from CS science programs, or simply " +
+        "could not accept the constraints placed on their work. Most carry " +
+        "half-finished projects in their head at all times."
+    );
+    set_organizations(({ "independent researcher networks" }));
+    set_enemies(({ "CS science corps", "institutions they embarrassed" }));
 }

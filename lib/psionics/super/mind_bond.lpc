@@ -1,28 +1,65 @@
 /*
  * /lib/psionics/super/mind_bond.lpc - Mind Bond
+ * Form a temporary psychic link with another person.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("mind_bond");
     set_power_name("Mind Bond");
     set_power_desc(
-        "TODO:CONTENT — Form a temporary psychic link with another person."
+        "The psychic forms a deep mental link with a consenting or successfully " +
+        "mind-probed target, creating a two-way telepathic channel. Both parties " +
+        "can share thoughts, emotions, and sensory information at will during " +
+        "the bond's duration. The bond enables instantaneous communication " +
+        "regardless of distance between the bonded parties, and both can sense " +
+        "the other's general emotional state even without actively broadcasting. " +
+        "Non-consenting targets may resist with a Mental Endurance save of 14. " +
+        "Either party can break the bond voluntarily at any time.\n\n" +
+        "Range: 30 feet (to establish)\n" +
+        "ISP Cost: 10 points\n" +
+        "Duration: 10 minutes per level"
     );
     set_power_category("super");
-
     set_isp_cost(10);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(10);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(30);        /* feet */
+    set_range_type(2);
+    set_base_range(30);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target || target == user) {
+        tell_object(user, "You need another person to form a mind bond with.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living target.\n");
+        return 0;
+    }
+    int me = 0;
+    if (function_exists("query_stat", target)) me = target->query_stat("me");
+    int roll = random(20) + 1 + me;
+    if (roll >= 14 && !target->query_property("consenting")) {
+        tell_object(user, target->query_cap_name() +
+            " resists the mental link.\n");
+        tell_object(target, "You feel a probing touch against your mind and " +
+            "instinctively close it off.\n");
+        return 0;
+    }
+    user->set_property("mind_bonded_with", target->query_name());
+    target->set_property("mind_bonded_with", user->query_name());
+    tell_object(user, "A bridge of pure thought forms between you and " +
+        target->query_cap_name() + ". Their mind is an open book, and yours " +
+        "to them. The bond hums with shared awareness.\n");
+    tell_object(target, user->query_cap_name() +
+        "'s presence blossoms in your mind — warm and immediate. " +
+        "A deep psychic link connects you.\n");
     return 1;
 }

@@ -1,28 +1,56 @@
 /*
  * /lib/psionics/super/astral_projection.lpc - Astral Projection
+ * Separate the psychic consciousness from the body to travel astrally.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("astral_projection");
     set_power_name("Astral Projection");
     set_power_desc(
-        "TODO:CONTENT — Separate the psychic consciousness from the body to travel astrally."
+        "The psychic separates their consciousness from their physical body, " +
+        "launching it into the astral plane as a shimmering silver form. The " +
+        "astral body can move at incredible speed, passing through walls and " +
+        "solid matter, invisible to those without See the Invisible or similar " +
+        "powers. The physical body remains motionless and vulnerable — in a " +
+        "death-like stupor — until the psychic returns. In astral form the " +
+        "psychic can observe events, scout ahead, or interact with other astral " +
+        "entities and spirits. Returning to the body is instantaneous upon " +
+        "willing it, or automatic if the body is threatened.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 8 points\n" +
+        "Duration: 5 minutes per level"
     );
     set_power_category("super");
-
     set_isp_cost(8);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(5);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (user->query_property("astral_projecting")) {
+        user->set_property("astral_projecting", 0);
+        tell_object(user, "You rush back into your body with a sharp gasp. " +
+            "The weight of flesh and bone settles around you as you return " +
+            "fully to the physical world.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " draws a sharp breath, eyes opening suddenly.\n",
+            ({ user }));
+    } else {
+        user->set_property("astral_projecting", 1);
+        tell_object(user, "You feel yourself rise, silver and weightless, " +
+            "separating from your motionless body below. The physical world " +
+            "becomes translucent as you enter the astral plane. You can observe " +
+            "and travel freely — your body remains behind, vulnerable but alive.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " slumps motionless, breathing so shallowly " +
+            "as to appear nearly dead.\n",
+            ({ user }));
+    }
     return 1;
 }

@@ -1,28 +1,65 @@
 /*
  * /lib/psionics/sensitive/hypnotic_suggestion.lpc - Hypnotic Suggestion
+ * Plant a simple suggestion in a target's mind.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("hypnotic_suggestion");
     set_power_name("Hypnotic Suggestion");
     set_power_desc(
-        "TODO:CONTENT — Plant a simple post-hypnotic suggestion in a willing or dazed target."
+        "The psychic plants a single, simple command or suggestion directly "
+        "into a target's mind, which the target then feels compelled to follow "
+        "as if it were their own idea. The suggestion must be believable and "
+        "achievable — the psychic cannot command someone to harm themselves "
+        "or do something completely contrary to their nature. A Mental Endurance "
+        "saving throw of 12 or higher allows the target to resist.\n\n"
+        "Range: 30 feet\n"
+        "ISP Cost: 6 points\n"
+        "Duration: 1 minute per level (then forgotten)"
     );
     set_power_category("sensitive");
-
     set_isp_cost(6);
-    set_duration_type(2);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(2);
     set_base_duration(1);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(30);        /* feet */
+    set_range_type(2);
+    set_base_range(30);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "You need a target to hypnotically suggest.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (target == user) {
+        tell_object(user, "You cannot hypnotically suggest yourself.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living target.\n");
+        return 0;
+    }
+    // ME save vs 12
+    int target_me = 0;
+    if (function_exists("query_stat", target)) target_me = target->query_stat("me");
+    int roll = random(20) + 1 + target_me;
+    if (roll >= 12) {
+        tell_object(user, target->query_cap_name() + " shakes their head slightly, "
+            "resisting your suggestion.\n");
+        tell_object(target, "A strange thought seems to cross your mind, "
+            "but you push it aside.\n");
+        return 0;
+    }
+    target->set_property("hypnotic_suggestion", 1);
+    tell_object(user, "You meet " + target->query_cap_name() + "'s gaze and "
+        "slip the suggestion into their mind. They accept it as their own thought.\n");
+    tell_object(target, "An idea occurs to you quite naturally — you feel "
+        "compelled to act on it.\n");
     return 1;
 }

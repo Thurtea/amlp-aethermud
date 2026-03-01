@@ -1,74 +1,89 @@
 // /lib/occs/warlock.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Warlock O.C.C. - Elemental magic practitioner
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Warlock");
     set_occ_id("warlock");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A practitioner of dark or pact-based magics. Conservative starter
-values applied; please validate against lore before committing."
+        "Warlocks are elemental magic practitioners who form pacts with powerful " +
+        "elemental beings — spirits of fire, earth, water, and air — to access " +
+        "magical power. Unlike traditional wizards who study arcane formulae, " +
+        "Warlocks channel elemental energy directly through their pact, giving " +
+        "them more raw power in their chosen element but less versatility. A " +
+        "Fire Warlock can call flames that would melt steel; an Earth Warlock " +
+        "can reshape terrain. Their pact demands regular tribute to their " +
+        "elemental patron and comes with a distinct personality shift over time " +
+        "toward their element's nature."
     );
-    
-    set_stat_requirements(([
-        "iq": 10,
-        "ps": 10
-    ]));
-    
-    set_stat_bonuses(([
-        "iq": 1,
-        "ps": 2
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "iq": 10, "me": 10 ]));
+    set_stat_bonuses(([ "iq": 1, "me": 2 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
         "spellcraft",
-        "occult_lore",
+        "lore_elemental",
         "ritual_magic",
-        "diplomacy",
-        "intimidation"
+        "elemental_control",
+        "meditation_magic"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "alchemy", "lore_spirits", "natural_philosophy"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
-    set_base_ppe(0);
-    set_ppe_per_level(0);
+
+    set_base_ppe(40);
+    set_ppe_per_level(6);
     set_base_isp(0);
     set_isp_per_level(0);
-    set_magic_type("none");
+    set_magic_type("elemental");
     set_psionic_type("none");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/ceremonial_robe", "/obj/item/lesser_talisman" }));
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(25);
+    set_sdc_per_level(3);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/elemental_robe",
+        "/obj/item/elemental_focus"
+    }));
     set_starting_credits(30, 200);
-    set_starting_weapons(({ "/obj/weapons/dagger" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/dagger" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "elemental_pact", "elemental_attunement" }));
+    set_vehicle_type("none");
+    set_special_training("elemental magic");
+
+    set_background(
+        "Warlocks made their pacts at a moment of great need or profound " +
+        "revelation — a near-death experience in a volcanic eruption, a " +
+        "childhood spent beside the sea, or a deliberate ritual seeking " +
+        "elemental power. The pact changes them over time."
+    );
+    set_organizations(({ "Elemental cults", "Federation of Magic" }));
+    set_enemies(({ "CS anti-magic forces", "those who would break elemental balance" }));
 }

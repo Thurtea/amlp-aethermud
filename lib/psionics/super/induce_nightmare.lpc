@@ -1,28 +1,64 @@
 /*
  * /lib/psionics/super/induce_nightmare.lpc - Induce Nightmare
+ * Plant a recurring terrifying nightmare in a sleeping target.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("induce_nightmare");
     set_power_name("Induce Nightmare");
     set_power_desc(
-        "TODO:CONTENT — Plant a recurring terrifying nightmare in a sleeping target."
+        "The psychic reaches into a sleeping or tranced target's mind and " +
+        "plants a vivid, horrifying nightmare tailored to the victim's deepest " +
+        "fears. The nightmare recurs every time the target sleeps for the " +
+        "duration of the effect. Victims wake exhausted and shaken, suffering " +
+        "penalties to combat and concentration. The nightmare can be designed " +
+        "to deliver a specific message or simply to terrorize. Targets may " +
+        "resist with a Mental Endurance save of 15 or higher. Repeated " +
+        "nightmares can drive the very sanity of weak-willed targets.\n\n" +
+        "Range: 100 feet\n" +
+        "ISP Cost: 10 points\n" +
+        "Duration: 8 hours (nightmare recurs)"
     );
     set_power_category("super");
-
     set_isp_cost(10);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(8);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(100);        /* feet */
+    set_range_type(2);
+    set_base_range(100);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "You need a target for induce nightmare.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living target.\n");
+        return 0;
+    }
+    int me = 0;
+    if (function_exists("query_stat", target)) me = target->query_stat("me");
+    int roll = random(20) + 1 + me;
+    if (roll >= 15) {
+        tell_object(user, target->query_cap_name() +
+            " shudders slightly but repels your intrusion.\n");
+        tell_object(target, "Something brushes the edge of your thoughts like " +
+            "cold fingers, then retreats.\n");
+        return 0;
+    }
+    target->set_property("nightmare_curse", 1);
+    target->set_property("fatigued", 1);
+    tell_object(user, "You slip into " + target->query_cap_name() +
+        "'s dreamscape and plant seeds of terror. They will not rest " +
+        "peacefully for hours.\n");
+    tell_object(target, "A creeping dread settles over you, a shadow at the " +
+        "edge of consciousness that promises no peaceful sleep tonight.\n");
     return 1;
 }

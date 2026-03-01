@@ -1,28 +1,56 @@
 /*
  * /lib/psionics/super/ley_line_transmission.lpc - Ley Line Transmission
+ * Transmit psionic messages instantly across ley lines to any distance.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("ley_line_transmission");
     set_power_name("Ley Line Transmission");
     set_power_desc(
-        "TODO:CONTENT — Transmit psionic messages instantly across ley lines to any distance."
+        "The psychic taps into the vast network of ley lines — the rivers of " +
+        "magical energy that crisscross the world — to transmit a psionic " +
+        "message to any recipient the psychic knows well enough to recognize " +
+        "mentally, regardless of distance. The message is received as a clear " +
+        "voice in the target's mind. The target cannot be forced to respond, " +
+        "but two psychics with this ability can hold a brief conversation. The " +
+        "psychic must be near a ley line (within a mile) to use this power, " +
+        "and transmission through nexus points is more powerful and reliable.\n\n" +
+        "Range: Unlimited (ley line network)\n" +
+        "ISP Cost: 30 points\n" +
+        "Duration: Instant message"
     );
     set_power_category("super");
-
     set_isp_cost(30);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(2);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    int ley_line = 0;
+    if (function_exists("query_property", environment(user))) {
+        ley_line = environment(user)->query_property("ley_line");
+    }
+    if (target && living(target) && target != user) {
+        tell_object(user, "You reach into the ley line currents and extend " +
+            "your consciousness outward. Your message carries across the " +
+            "network of power lines that span the world.\n");
+        tell_object(target, "A distant voice — clear as a bell despite the " +
+            "miles between you — speaks directly into your mind. " +
+            user->query_cap_name() + " transmits to you via ley line.\n");
+    } else {
+        tell_object(user, "You tap into the ley line network and project your " +
+            "consciousness outward, your thoughts carried on currents of pure " +
+            "magical energy to any distance. Specify a target to reach them.\n");
+    }
+    tell_room(environment(user),
+        user->query_cap_name() + " goes briefly still, eyes flickering, " +
+        "clearly reaching out across great distances.\n",
+        ({ user }));
     return 1;
 }

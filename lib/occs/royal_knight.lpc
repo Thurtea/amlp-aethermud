@@ -1,5 +1,5 @@
 // /lib/occs/royal_knight.lpc
-// Royal Knight - Noble mounted warrior
+// Royal Knight O.C.C. - Noble mounted warrior
 
 inherit "/std/occ";
 
@@ -11,27 +11,83 @@ void create() {
     set_alignment_requirement("principled");
 
     set_occ_description(
-        "Royal Knights are elite mounted warriors sworn to a liege. They are
-well-trained in heavy combat, mounted tactics, and chivalric codes."
+        "Royal Knights are the elite warriors of the kingdoms and city-states " +
+        "that persist on Rifts Earth — sworn champions bound by oaths of " +
+        "fealty, honor codes, and the ancient traditions of knighthood. They " +
+        "are trained from youth in heavy combat, mounted tactics, and the " +
+        "codes of chivalry that govern their behavior even in the most savage " +
+        "times. A Royal Knight's word is their bond, their armor their identity, " +
+        "and their liege's cause their purpose. Many serve kingdoms in the " +
+        "wilderness; others wander as errant champions seeking worthy causes."
     );
 
-    set_stat_requirements(([ "ps": 11, "me": 10 ]));
-    set_stat_bonuses(([ "ps": 2, "pe": 1 ]));
+    set_stat_requirements(([ "ps": 11, "me": 10, "pe": 10 ]));
+    set_stat_bonuses(([ "ps": 2, "pe": 1, "me": 1 ]));
 
-    set_occ_skills(({ "mounted_combat", "heavy_weapons", "leadership", "horsemanship", "tactics", "diplomacy" }));
-    set_occ_related_skills(({ "ride", "etiquette" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(4);
+    set_attacks_per_level(1, 2);
+    set_hand_to_hand_type("expert");
+
+    set_occ_skills(({
+        "language_american",
+        "horsemanship",
+        "hand_to_hand_combat",
+        "tactics",
+        "leadership",
+        "lore_nobility"
+    }));
+    set_occ_related_skills(({
+        "diplomacy", "etiquette", "heraldry",
+        "pilot_horse", "first_aid", "tracking"
+    }));
     set_occ_skill_count(6);
     set_elective_count(3);
-    set_secondary_count(6);
+    set_secondary_count(5);
 
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(60);
     set_sdc_per_level(8);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "/obj/armor/plate_armor", "/obj/gear/horse_tack" }));
+    set_standard_equipment(({
+        "/obj/armor/plate_armor",
+        "/obj/item/horse",
+        "/obj/item/heraldic_device"
+    }));
     set_starting_credits(300, 1500);
-    set_starting_weapons(({ "/obj/weapons/lance", "/obj/weapons/longsword" }));
+    set_starting_weapons(({
+        "/obj/weapon/longsword",
+        "/obj/weapon/lance",
+        "/obj/weapon/shield"
+    }));
     set_starting_armor(({ "/obj/armor/full_plate" }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(0);
     set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "chivalric_code", "leadership_aura" }));
+    set_vehicle_type("horse");
+    set_special_training("mounted heavy combat");
+
+    set_background(
+        "Royal Knights are trained from childhood or selected from exceptional " +
+        "warriors and elevated to knighthood through feat and oath. They serve " +
+        "their liege unto death and consider dishonor worse than defeat."
+    );
+    set_organizations(({ "Order of the Knights" }));
+    set_enemies(({ "monsters", "raiders", "chaos forces" }));
 }

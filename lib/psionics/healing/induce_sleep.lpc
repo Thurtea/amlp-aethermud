@@ -1,28 +1,65 @@
 /*
  * /lib/psionics/healing/induce_sleep.lpc - Induce Sleep
+ * Psionically trigger deep sleep in a target.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("induce_sleep");
     set_power_name("Induce Sleep");
     set_power_desc(
-        "TODO:CONTENT — Send a target into a natural deep sleep."
+        "The psychic reaches into the target's mind and triggers the brain's "
+        "sleep centers, inducing immediate deep slumber. The sleep is perfectly "
+        "natural in appearance and the target cannot be easily roused. Victims "
+        "may resist with a Mental Endurance saving throw of 14 or higher. "
+        "Cannot be used on beings in combat or under extreme stress.\n\n"
+        "Range: 30 feet\n"
+        "ISP Cost: 4 points\n"
+        "Duration: 20 minutes per level of the psychic"
     );
     set_power_category("healing");
-
     set_isp_cost(4);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(20);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(30);        /* feet */
+    set_range_type(2);
+    set_base_range(30);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "You need a target to use Induce Sleep.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (target == user) {
+        tell_object(user, "Use meditation if you wish to sleep.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living being.\n");
+        return 0;
+    }
+    // ME save vs 14
+    int target_me = 0;
+    if (function_exists("query_stat", target)) target_me = target->query_stat("me");
+    int roll = random(20) + 1 + target_me;
+    if (roll >= 14) {
+        tell_object(user, target->query_cap_name() +
+            " shakes off your sleep induction!\n");
+        tell_object(target, "A wave of drowsiness washes over you, but you resist.\n");
+        return 0;
+    }
+    target->set_property("asleep", 1);
+    tell_object(user, target->query_cap_name() +
+        "'s eyes flutter and close as they slip into deep sleep.\n");
+    tell_object(target, "An overwhelming drowsiness overtakes you... you fall into a deep sleep.\n");
+    tell_room(environment(user),
+        target->query_cap_name() + " suddenly slumps forward, fast asleep.\n",
+        ({ user, target }));
     return 1;
 }

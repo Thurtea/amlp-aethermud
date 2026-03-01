@@ -1,28 +1,61 @@
 /*
  * /lib/psionics/super/sense_ley_lines.lpc - Sense Ley Lines
+ * Detect ley lines, nexus points, and dimensional anomalies.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("sense_ley_lines");
     set_power_name("Sense Ley Lines");
     set_power_desc(
-        "TODO:CONTENT — Detect ley lines, nexus points, and dimensional anomalies."
+        "The psychic opens their mind to the vast flows of magical energy that " +
+        "course through the world. Ley lines become visible as glowing rivers " +
+        "of light stretching to the horizon, nexus points blaze like suns where " +
+        "lines intersect, and dimensional anomalies — rifts, thin spots, and " +
+        "magic-dead zones — register as distortions or voids in the flow. The " +
+        "psychic can gauge the strength of ley lines and estimate the power " +
+        "available at nearby nexus points. This awareness is crucial for magic " +
+        "users who wish to draw on environmental energy.\n\n" +
+        "Range: 500 feet\n" +
+        "ISP Cost: 4 points\n" +
+        "Duration: 2 minutes per level"
     );
     set_power_category("super");
-
     set_isp_cost(4);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(2);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(500);        /* feet */
+    set_range_type(2);
+    set_base_range(500);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    user->set_property("sense_ley_lines_active", 1);
+    object env = environment(user);
+    int ley_line = 0;
+    int nexus = 0;
+    if (function_exists("query_property", env)) {
+        ley_line = env->query_property("ley_line");
+        nexus = env->query_property("nexus_point");
+    }
+    if (nexus) {
+        tell_object(user, "You open your awareness to the magical currents of " +
+            "the world — and a blazing nexus point detonates in your perception " +
+            "right here. Ley lines converge from multiple directions in a " +
+            "thundering confluence of raw magical energy. The power here is " +
+            "immense.\n");
+    } else if (ley_line) {
+        tell_object(user, "A broad river of magical energy flows through this " +
+            "location — a ley line, powerful and steady. You can feel its " +
+            "current as clearly as a river beneath your feet. Other lines " +
+            "are visible in the distance.\n");
+    } else {
+        tell_object(user, "You open your perception to the ley line network. " +
+            "No lines run directly through this location, but you can sense " +
+            "their presence in the distance — currents of magical energy flowing " +
+            "through the world like veins through living flesh.\n");
+    }
     return 1;
 }

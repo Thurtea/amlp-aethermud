@@ -1,78 +1,92 @@
 // /lib/occs/robot_pilot.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// Source: archived-md/ttrpg-references.json ID: glitter-boy-pilot-helmet
-// Generated: 2026-02-12
-// TODO: Review and expand with gameplay balance
-//
-// This is a stub file. Implement the full OCC details.
+// Robot Pilot O.C.C. - Specialist operator of giant robot combat systems
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Robot Pilot");
     set_occ_id("robot_pilot");
-    set_occ_category(OCC_CAT_ADVENTURER);
+    set_occ_category(OCC_CAT_MILITARY);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A pilot specialized in operating robotic platforms and remote units.
-Conservative defaults for piloting and technical skills; please review."
+        "Robot Pilots are the operators of giant robotic combat vehicles — " +
+        "walking tanks that stride across battlefields dealing and absorbing " +
+        "staggering amounts of MDC damage. Unlike Power Armor Pilots who wear " +
+        "their vehicles, Robot Pilots control massive external machines from " +
+        "a cockpit, typically systems forty feet tall or more. The training " +
+        "emphasis is on vehicle systems management, weapons targeting across " +
+        "multiple systems simultaneously, and maintaining the machine under " +
+        "combat damage. Robot Pilots understand their machines deeply and can " +
+        "keep them operational under conditions that would stump a general " +
+        "mechanic."
     );
-    
-    set_stat_requirements(([
-        "iq": 11,
-        "me": 9
-    ]));
-    
-    set_stat_bonuses(([
-        "iq": 2,
-        "me": 1
-    ]));
-    
-    // Combat configuration
-    set_base_attacks(2);
+
+    set_stat_requirements(([ "iq": 11, "me": 9 ]));
+    set_stat_bonuses(([ "iq": 2, "me": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(3);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
-        "vehicle_piloting",
-        "robotics_basics",
+        "pilot_giant_robot",
+        "sensor_operation",
         "electronics",
-        "repair",
-        "sensor_operation"
+        "mechanical_repair",
+        "small_arms"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "tactics", "radio_basic", "computer_operation",
+        "robot_mechanics"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+
     set_base_ppe(0);
     set_ppe_per_level(0);
     set_base_isp(0);
     set_isp_per_level(0);
     set_magic_type("none");
     set_psionic_type("none");
-    
-    // HP/SDC
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/pilot_jumpsuit", "/obj/item/servo_interface" }));
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/pilot_jumpsuit",
+        "/obj/item/neural_interface",
+        "/obj/item/field_toolkit"
+    }));
     set_starting_credits(100, 400);
-    set_starting_weapons(({ "/obj/weapons/sidearm" }));
+    set_starting_weapons(({ "/obj/weapon/sidearm" }));
     set_starting_armor(({ "/obj/armor/pilot_armor" }));
-    
-    // Race restrictions
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
+
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "robot_systems_mastery", "field_maintenance" }));
+    set_vehicle_type("giant_robot");
+    set_special_training("giant robot combat systems");
+
+    set_background(
+        "Robot Pilots typically come from military academies or industrial " +
+        "facilities that operate construction robots. The step from construction " +
+        "to combat operation is large but not impossible; many of the best " +
+        "combat pilots started in civilian robot operations."
+    );
+    set_organizations(({ "CS military", "mercenary mech units", "independent operators" }));
+    set_enemies(({ "rival mech forces", "anti-technology extremists" }));
 }

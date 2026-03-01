@@ -1,28 +1,56 @@
 /*
  * /lib/psionics/healing/suppress_fear.lpc - Suppress Fear
+ * Remove fear, panic, and horror-factor effects from a person.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("suppress_fear");
     set_power_name("Suppress Fear");
     set_power_desc(
-        "TODO:CONTENT — Remove fear, panic, and horror-factor effects from a person."
+        "The psychic reaches into the target's mind and dampens the fear "
+        "response, allowing them to act calmly and rationally even in the "
+        "face of terrifying supernatural entities or horrific situations. "
+        "Panic, phobias triggered by the Horror Factor of monsters, and "
+        "fear-based magic effects are all neutralized. The power does not "
+        "make the target reckless — they simply remain calm.\n\n"
+        "Range: 30 feet\n"
+        "ISP Cost: 8 points\n"
+        "Duration: 5 minutes per level"
     );
     set_power_category("healing");
-
     set_isp_cost(8);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(5);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(30);        /* feet */
+    set_range_type(2);
+    set_base_range(30);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "You need a target to suppress fear.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living being.\n");
+        return 0;
+    }
+    target->set_property("fear_suppressed", 1);
+    target->set_property("panic", 0);
+    tell_object(user, "You project calming psionic energy toward " +
+        target->query_cap_name() + ". The fear drains from their eyes.\n");
+    if (target != user) {
+        tell_object(target, "A wave of calm washes over you. The fear you felt "
+            "recedes, replaced by cool, steady resolve.\n");
+    }
+    tell_room(environment(user),
+        target->query_cap_name() + " visibly relaxes, fear giving way to calm determination.\n",
+        ({ user, target }));
     return 1;
 }

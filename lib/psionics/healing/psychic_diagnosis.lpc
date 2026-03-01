@@ -1,28 +1,69 @@
 /*
  * /lib/psionics/healing/psychic_diagnosis.lpc - Psychic Diagnosis
+ * Identify illness, injury, poison, and supernatural affliction.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("psychic_diagnosis");
     set_power_name("Psychic Diagnosis");
     set_power_desc(
-        "TODO:CONTENT — Psychically diagnose illness, injury, and supernatural afflictions."
+        "By touching a person and concentrating, the psychic can read their "
+        "body's condition with perfect clarity. Injuries, diseases, toxins, "
+        "supernatural afflictions, and even the effects of magic are all "
+        "revealed in precise detail. This power is invaluable to healers and "
+        "field medics. Unlike conventional medicine, Psychic Diagnosis cannot "
+        "be fooled by rare or unknown conditions.\n\n"
+        "Range: Touch\n"
+        "ISP Cost: 4 points\n"
+        "Duration: Instant"
     );
     set_power_category("healing");
-
     set_isp_cost(4);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(1);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(1);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "Touch someone to diagnose them.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living being.\n");
+        return 0;
+    }
+    int cur = target->query_hp();
+    int max = target->query_max_hp();
+    if (max <= 0) max = 1;
+    int pct = (cur * 100) / max;
+    string condition;
+    if (pct >= 95) {
+        condition = "in perfect health — no injuries or ailments detected.";
+    } else if (pct >= 75) {
+        condition = "lightly injured with minor wounds and bruising. No serious condition.";
+    } else if (pct >= 50) {
+        condition = "moderately injured. Several wounds requiring attention.";
+    } else if (pct >= 25) {
+        condition = "seriously wounded. Risk of infection. Immediate treatment recommended.";
+    } else {
+        condition = "critically injured. Wounds are life-threatening without immediate care.";
+    }
+    string poison_status = "";
+    if (function_exists("query_property", target) && target->query_property("poisoned")) {
+        poison_status = " Toxins detected in the bloodstream.";
+    }
+    tell_object(user, "You read " + target->query_cap_name() + "'s condition:\n" +
+        capitalize(target->query_cap_name()) + " is " + condition + poison_status + "\n");
+    tell_object(target, user->query_cap_name() +
+        " touches you and concentrates, reading your physical condition.\n");
     return 1;
 }

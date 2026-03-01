@@ -1,28 +1,43 @@
 /*
  * /lib/psionics/sensitive/remote_sensing.lpc - Remote Sensing
+ * Project senses to a distant location to see and hear remotely.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("remote_sensing");
     set_power_name("Remote Sensing");
     set_power_desc(
-        "TODO:CONTENT — Project senses to a location seen before; see and hear remotely."
+        "The psychic projects their senses — sight, hearing, and smell — "
+        "to a distant location they have previously visited or can visualize "
+        "clearly. The psychic's body remains still while their senses operate "
+        "remotely. They can observe events, read signs, and perceive details "
+        "at the remote location just as clearly as if they were there. "
+        "The body is vulnerable during this state.\n\n"
+        "Range: Up to 500 feet to known locations\n"
+        "ISP Cost: 10 points\n"
+        "Duration: 2 minutes per level"
     );
     set_power_category("sensitive");
-
     set_isp_cost(10);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(2);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(500);        /* feet */
+    set_range_type(2);
+    set_base_range(500);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    user->set_property("remote_sensing_active", 1);
+    tell_object(user, "You close your eyes and project your senses outward. "
+        "Your body sits motionless as your perception slides through walls "
+        "and distance, arriving at a distant location. You see and hear "
+        "everything there as clearly as if you stood present.\n");
+    tell_room(environment(user),
+        user->query_cap_name() + " goes still as a statue, eyes closed, "
+        "their attention clearly elsewhere.\n",
+        ({ user }));
     return 1;
 }

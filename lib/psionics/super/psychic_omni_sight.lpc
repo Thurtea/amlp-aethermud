@@ -1,28 +1,52 @@
 /*
  * /lib/psionics/super/psychic_omni_sight.lpc - Psychic Omni-Sight
+ * See in all directions simultaneously; cannot be surprised.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("psychic_omni_sight");
     set_power_name("Psychic Omni-Sight");
     set_power_desc(
-        "TODO:CONTENT — See in all directions simultaneously; cannot be surprised."
+        "The psychic expands their visual perception to encompass a full " +
+        "spherical field of vision — seeing in every direction simultaneously " +
+        "without blind spots. Flanking attacks, ambushes from behind, and " +
+        "attacks from above or below are all perceived as clearly as frontal " +
+        "attacks. The psychic cannot be surprised while this power is active. " +
+        "The enhanced perception also allows the psychic to track multiple " +
+        "targets simultaneously, making them extremely effective in chaotic " +
+        "combat situations with many opponents.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 15 points\n" +
+        "Duration: 1 minute per level"
     );
     set_power_category("super");
-
     set_isp_cost(15);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(1);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (user->query_property("omni_sight")) {
+        user->set_property("omni_sight", 0);
+        tell_object(user, "Your expanded perception contracts back to normal " +
+            "forward-facing sight.\n");
+    } else {
+        user->set_property("omni_sight", 1);
+        tell_object(user, "Your perception expands dramatically — you can " +
+            "simultaneously see in every direction. Walls, floors, and ceilings " +
+            "are visible without turning your head. Every corner of the room " +
+            "is present in your awareness at once. No one can surprise you " +
+            "while this lasts.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + "'s eyes take on a strange, unfocused " +
+            "quality — seeing something beyond normal sight.\n",
+            ({ user }));
+    }
     return 1;
 }

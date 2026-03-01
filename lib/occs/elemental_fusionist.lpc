@@ -1,75 +1,89 @@
 // /lib/occs/elemental_fusionist.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Elemental Fusionist O.C.C. - Master of combined elemental forces
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Elemental Fusionist");
     set_occ_id("elemental_fusionist");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A caster who combines elemental forces into novel effects.
-Conservative defaults applied for casting, skills and starting gear; please
-review against canonical sources."
+        "Elemental Fusionists are among the most versatile magic users in " +
+        "existence — practitioners who have mastered not one element but the " +
+        "art of combining elemental forces to produce effects that neither " +
+        "element could create alone. Fire and water become steam and fog. " +
+        "Earth and air become sandstorms and whirlwinds. The combinations are " +
+        "nearly endless, and a creative Fusionist can improvise solutions to " +
+        "problems that stump dedicated elemental specialists. Their power is " +
+        "less concentrated than a dedicated Warlock's but far more flexible."
     );
-    
-    set_stat_requirements(([
-        "iq": 10,
-        "ps": 9
-    ]));
-    
-    set_stat_bonuses(([
-        "ps": 2,
-        "iq": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "iq": 10, "me": 10 ]));
+    set_stat_bonuses(([ "iq": 2, "me": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
         "spellcraft",
-        "elemental_lore",
+        "lore_elemental",
         "ritual_magic",
         "alchemy",
-        "concentration"
+        "meditation_magic"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "elemental_control", "natural_philosophy", "chemistry"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
-    set_base_ppe(0);
-    set_ppe_per_level(0);
+
+    set_base_ppe(45);
+    set_ppe_per_level(6);
     set_base_isp(0);
     set_isp_per_level(0);
-    set_magic_type("none");
+    set_magic_type("elemental_fusion");
     set_psionic_type("none");
-    
-    // HP/SDC
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/robes_common", "/obj/item/elemental_focus" }));
+    set_sdc_per_level(3);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/elemental_robe",
+        "/obj/item/elemental_focus",
+        "/obj/item/four_element_stones"
+    }));
     set_starting_credits(40, 200);
-    set_starting_weapons(({ "/obj/weapons/dagger" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/dagger" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "elemental_attunement_all", "fusion_casting" }));
+    set_vehicle_type("none");
+    set_special_training("multi-element fusion");
+
+    set_background(
+        "Elemental Fusionists achieved their broad mastery through either " +
+        "exceptional natural talent, extremely patient study under a master " +
+        "of all elements, or exposure to all four elements simultaneously " +
+        "during some formative magical event."
+    );
+    set_organizations(({ "Federation of Magic", "elemental orders" }));
+    set_enemies(({ "CS", "pure-element extremists" }));
 }

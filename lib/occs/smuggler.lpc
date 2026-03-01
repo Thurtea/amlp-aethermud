@@ -1,5 +1,5 @@
 // /lib/occs/smuggler.lpc
-// Smuggler - Transporter of illicit goods and black-market runner
+// Smuggler O.C.C. - Runner of contraband and illicit goods
 
 inherit "/std/occ";
 
@@ -11,28 +11,79 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Smugglers move contraband through borders and dangerous routes,
-balancing stealth, negotiation, and quick escapes. They favor vehicle
-operation and clandestine skills."
+        "Smugglers are the lifeblood of Rifts Earth's black market economy. " +
+        "They move contraband through checkpoints and across borders that " +
+        "conventional traders cannot cross — weapons into contested zones, " +
+        "D-bee refugees out of CS territory, magical artifacts to buyers who " +
+        "cannot ask questions, technology where it is prohibited. They rely on " +
+        "vehicle skill, fast thinking, social contacts, and the ability to " +
+        "talk their way past checkpoints. When talk fails, they run."
     );
 
-    set_stat_requirements(([ "me": 10, "spd": 9 ]));
-    set_stat_bonuses(([ "me": 1 ]));
+    set_stat_requirements(([ "me": 10, "spd": 9, "iq": 9 ]));
+    set_stat_bonuses(([ "me": 1, "spd": 1 ]));
 
-    set_occ_skills(({ "smuggling", "stealth", "pilot_vehicle", "negotiation", "mechanical_repair", "navigation" }));
-    set_occ_related_skills(({ "barter", "forgery" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "pilot_automobile",
+        "barter",
+        "forgery",
+        "navigation",
+        "detect_concealment"
+    }));
+    set_occ_related_skills(({
+        "mechanical_repair", "pilot_hover_vehicle", "pilot_watercraft",
+        "radio_basic", "intimidation", "wilderness_survival"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
 
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
     set_sdc_per_level(2);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "/obj/tools/smuggler_kit", "/obj/clothing/coveralls" }));
+    set_standard_equipment(({
+        "/obj/clothing/coveralls",
+        "/obj/tools/smuggler_kit",
+        "/obj/item/comm_device"
+    }));
     set_starting_credits(100, 700);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/light_cloth" }));
+    set_starting_weapons(({ "/obj/weapon/pistol" }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "black_market_contacts", "hidden_compartments" }));
+    set_vehicle_type("any");
+    set_special_training("covert transport");
+
+    set_background(
+        "Smugglers come from border communities, failed merchants, and anyone " +
+        "with a vehicle and no fear of checkpoints. Many start by carrying " +
+        "small contraband and gradually take on riskier and more lucrative runs. " +
+        "The Black Market is their employer, protector, and danger in equal measure."
+    );
+    set_organizations(({ "Black Market", "resistance networks" }));
+    set_enemies(({ "CS border control", "ISS", "rival smugglers" }));
 }

@@ -1,78 +1,90 @@
 // /lib/occs/cosmo_knight.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// Source: archived-md/ttrpg-references.json ID: a-cyber-knight-and-a-d-bee-companion-ride-through-a-snow-covered-forest
-// Generated: 2026-02-12
-// TODO: Review and expand with gameplay balance
-//
-// This is a stub file. Implement the full OCC details.
+// Cosmo-Knight O.C.C. - Cosmic champion imbued with stellar power
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
-    set_occ_name("Cosmo Knight");
+    set_occ_name("Cosmo-Knight");
     set_occ_id("cosmo_knight");
     set_occ_category(OCC_CAT_ADVENTURER);
-    set_alignment_requirement("any");
-    
+    set_alignment_requirement("principled");
+
     set_occ_description(
-        "A heavily-armed warrior blending cosmic symbolism and martial skill.
-Conservative defaults applied for heavy combat role; please review."
+        "Cosmo-Knights are among the most powerful individuals in the " +
+        "megaverse — chosen champions who have been imbued with cosmic " +
+        "energy by forces beyond ordinary comprehension. Their bodies radiate " +
+        "stellar power; they can survive in space, fly under their own power, " +
+        "project cosmic energy blasts, and endure damage that would vaporize " +
+        "lesser beings. They are warriors sworn to protect the innocent and " +
+        "oppose forces of destruction wherever they manifest. Their power is " +
+        "not unlimited — they can be killed — but they are profoundly difficult " +
+        "to stop. Even a Cosmo-Knight acting alone can change the outcome of a war."
     );
-    
-    set_stat_requirements(([
-        "ps": 11,
-        "me": 10
-    ]));
-    
-    set_stat_bonuses(([
-        "ps": 2,
-        "str": 1
-    ]));
-    
-    // Combat configuration
-    set_base_attacks(2);
-    set_attacks_per_level(1, 3);
-    set_hand_to_hand_type("basic");
-    
+
+    set_stat_requirements(([ "ps": 11, "me": 10 ]));
+    set_stat_bonuses(([ "ps": 5, "pe": 3, "me": 2 ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(5);
+    set_attacks_per_level(1, 2);
+    set_hand_to_hand_type("martial_arts");
+
     set_occ_skills(({
         "language_american",
-        "heavy_weapons",
-        "melee_weapons",
+        "hand_to_hand_combat",
         "tactics",
         "leadership",
-        "endurance"
+        "navigation_space",
+        "lore_dimensional"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "diplomacy", "lore_aliens", "astronomy",
+        "first_aid", "piloting"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
-    set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+    set_secondary_count(5);
+
     set_base_ppe(0);
     set_ppe_per_level(0);
     set_base_isp(0);
     set_isp_per_level(0);
-    set_magic_type("none");
+    set_magic_type("cosmic");
     set_psionic_type("none");
-    
-    // HP/SDC
-    set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/field_armor", "/obj/item/cosmo_emblem" }));
-    set_starting_credits(120, 500);
-    set_starting_weapons(({ "/obj/weapons/longsword" }));
-    set_starting_armor(({ "/obj/armor/heavy_plate" }));
-    
-    // Race restrictions
+
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(100);
+    set_sdc_per_level(20);
+    set_mdc_class(1);
+
+    set_standard_equipment(({ }));
+    set_starting_credits(200, 800);
+    set_starting_weapons(({ "/obj/weapon/cosmo_sword" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({
+        "cosmic_flight", "cosmic_energy_blast",
+        "space_survival", "cosmic_armor"
+    }));
+    set_vehicle_type("none");
+    set_special_training("cosmic combat");
+
+    set_background(
+        "Cosmo-Knights were chosen by cosmic forces — the how and why varies " +
+        "between individuals. Some were heroes before their imbuing; others were " +
+        "ordinary people. All carry the weight of what they now are and the " +
+        "responsibilities that come with power that dwarfs most opposition."
+    );
+    set_organizations(({ "Cosmo-Knight order", "Champions of Light" }));
+    set_enemies(({ "Splugorth", "evil dimensional beings", "forces of destruction" }));
 }

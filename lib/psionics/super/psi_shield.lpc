@@ -1,28 +1,56 @@
 /*
  * /lib/psionics/super/psi_shield.lpc - Psi-Shield
+ * Create a field of psychic energy that acts as physical armor.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("psi_shield");
     set_power_name("Psi-Shield");
     set_power_desc(
-        "TODO:CONTENT — Create a field of psychic energy that acts as physical armor."
+        "The psychic solidifies psionic energy into an invisible barrier that " +
+        "surrounds their body like a suit of force armor. Physical and energy " +
+        "attacks are partially deflected and absorbed by the shield, reducing " +
+        "the damage that reaches the psychic's body. The shield absorbs up to " +
+        "50 SDC worth of damage before collapsing and must be re-manifested. " +
+        "MDC attacks are reduced to SDC damage while passing through the shield. " +
+        "The shield is visible to those with See the Invisible as a shimmering " +
+        "full-body aura. It does not interfere with the psychic's own attacks.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 10 points\n" +
+        "Duration: 2 minutes per level"
     );
     set_power_category("super");
-
     set_isp_cost(10);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(2);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (user->query_property("psi_shield_active")) {
+        user->set_property("psi_shield_active", 0);
+        user->set_property("psi_shield_sdc", 0);
+        tell_object(user, "Your psi-shield flickers out. You are no longer " +
+            "protected by the psychic force barrier.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + "'s shimmering aura of force fades away.\n",
+            ({ user }));
+    } else {
+        int shield_sdc = 50;
+        user->set_property("psi_shield_active", 1);
+        user->set_property("psi_shield_sdc", shield_sdc);
+        tell_object(user, "Psionic energy solidifies around your body like " +
+            "invisible plate armor. You can feel the shield absorbing ambient " +
+            "kinetic impacts. It will hold until depleted or dismissed.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " shimmers as a field of force energy " +
+            "coalesces around them.\n",
+            ({ user }));
+    }
     return 1;
 }

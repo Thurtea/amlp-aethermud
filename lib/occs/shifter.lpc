@@ -1,74 +1,91 @@
 // /lib/occs/shifter.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Shifter O.C.C. - Master of dimensional magic and summoning
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Shifter");
     set_occ_id("shifter");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A combatant able to adapt their form or fighting style. Conservative
-defaults for agility and unarmed combat provided; please validate."
+        "Shifters are sorcerers who specialize in dimensional magic — the " +
+        "art of opening rifts, summoning beings from other dimensions, and " +
+        "binding those summoned to their will. They are among the most " +
+        "dangerous magic users on Rifts Earth, possessing the ability to call " +
+        "forth demons, alien intelligences, and dimensional beings of tremendous " +
+        "power. A skilled Shifter can open a rift to anywhere on the megaverse, " +
+        "summon allies or servants from across dimensions, and banish threats " +
+        "back to where they came from. Their power requires careful control; " +
+        "a Shifter who loses control of a summoning may not survive it."
     );
-    
-    set_stat_requirements(([
-        "spd": 10,
-        "ps": 8
-    ]));
-    
-    set_stat_bonuses(([
-        "spd": 2,
-        "ps": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "iq": 10, "me": 10 ]));
+    set_stat_bonuses(([ "me": 2, "iq": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
-        "unarmed_combat",
-        "acrobatics",
-        "stealth",
-        "perception",
-        "survival"
+        "spellcraft",
+        "lore_dimensional",
+        "lore_demons",
+        "ritual_magic",
+        "research"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "alchemy", "lore_aliens", "cartography_dimensional",
+        "meditation_magic", "language_dragonese"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
-    set_base_ppe(0);
-    set_ppe_per_level(0);
+
+    set_base_ppe(50);
+    set_ppe_per_level(8);
     set_base_isp(0);
     set_isp_per_level(0);
-    set_magic_type("none");
+    set_magic_type("shifter");
     set_psionic_type("none");
-    
-    // HP/SDC
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/skin_leathers", "/obj/item/shift_talisman" }));
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/dimensional_robe",
+        "/obj/item/summoning_focus",
+        "/obj/item/dimensional_compass"
+    }));
     set_starting_credits(30, 150);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/light_leather" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/dagger" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "open_rift", "summon_being", "dimensional_sense" }));
+    set_vehicle_type("none");
+    set_special_training("dimensional summoning");
+
+    set_background(
+        "Shifters are drawn to their art by the pull of the rifts themselves — " +
+        "they can feel the dimensional energies more keenly than most and are " +
+        "compelled to understand and control them. Some are self-taught; others " +
+        "studied under dangerous masters."
+    );
+    set_organizations(({ "Federation of Magic", "lone practitioners" }));
+    set_enemies(({ "CS", "those who fear what they summon" }));
 }

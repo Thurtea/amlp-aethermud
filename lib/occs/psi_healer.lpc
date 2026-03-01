@@ -1,79 +1,91 @@
 // /lib/occs/psi_healer.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// Source: archived-md/ttrpg-references.json ID: psi-stalker-r-c-c, a-typical-operator-in-traveling-clothes-a-wild-psi-stalker
-// Generated: 2026-02-12
-// TODO: Review and expand with gameplay balance
-//
-// This is a stub file. Implement the full OCC details.
+// Psi-Healer O.C.C. - Healing-focused psionic specialist
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
-    set_occ_name("Psi Healer");
+    set_occ_name("Psi-Healer");
     set_occ_id("psi_healer");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A psionic practitioner focused on healing and protective mental
-abilities. Conservative defaults for psionic support roles; review for
-balance."
+        "Psi-Healers are among the most valued and beloved psionics — " +
+        "practitioners who have focused their abilities entirely on the repair " +
+        "of damaged bodies and minds. Where other psychics project power outward " +
+        "in destructive or manipulative ways, Psi-Healers direct it inward " +
+        "toward the recipient's own life-force, accelerating natural healing, " +
+        "removing toxins, restoring damaged tissue, and shielding others from " +
+        "pain. A skilled Psi-Healer can restore the critically injured in " +
+        "minutes and has saved lives that all other medicine had abandoned. " +
+        "They are in demand everywhere and are rarely short of allies."
     );
-    
-    set_stat_requirements(([
-        "ps": 10,
-        "iq": 9
-    ]));
-    
-    set_stat_bonuses(([
-        "ps": 2,
-        "iq": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "me": 11, "pe": 9 ]));
+    set_stat_bonuses(([ "me": 2, "pe": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
-    set_attacks_per_level(1, 3);
+    set_attacks_per_level(1, 4);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
-        "psionics_healing",
         "first_aid",
-        "mental_resistance",
-        "diplomacy",
-        "herbalism"
+        "meditation_psionic",
+        "psychology",
+        "herbalism",
+        "anatomy"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "diplomacy", "lore_spirits", "biology",
+        "detect_concealment"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+
     set_base_ppe(0);
     set_ppe_per_level(0);
-    set_base_isp(0);
-    set_isp_per_level(0);
+    set_base_isp(40);
+    set_isp_per_level(8);
     set_magic_type("none");
-    set_psionic_type("none");
-    
-    // HP/SDC
+    set_psionic_type("healing");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/healer_robe", "/obj/item/med_kit" }));
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/healer_robe",
+        "/obj/item/medical_kit",
+        "/obj/item/psionic_focus"
+    }));
     set_starting_credits(40, 200);
-    set_starting_weapons(({ "/obj/weapons/dagger" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/dagger" }));
+    set_starting_armor(({ }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "psionic_heal", "pain_block", "life_sense" }));
+    set_vehicle_type("none");
+    set_special_training("psionic healing arts");
+
+    set_background(
+        "Psi-Healers usually discover their gift during a medical crisis — " +
+        "someone dying in front of them, and a desperate instinct to help that " +
+        "manifests as real healing power. They spend the rest of their lives " +
+        "developing and applying it. Few can resist a call for help."
+    );
+    set_organizations(({ "healer communities", "traveling medical units" }));
+    set_enemies(({ "those who harm the innocent", "psionic hunters" }));
 }

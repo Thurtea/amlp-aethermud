@@ -1,28 +1,46 @@
 /*
  * /lib/psionics/sensitive/speed_reading.lpc - Speed Reading
+ * Read and comprehend text at ten times normal speed.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("speed_reading");
     set_power_name("Speed Reading");
     set_power_desc(
-        "TODO:CONTENT — Read and comprehend text at ten times normal speed."
+        "The psychic accelerates their cognitive processing to absorb written " +
+        "information at ten times the normal rate. A document that would take an " +
+        "hour to read carefully is consumed and fully understood in six minutes. " +
+        "Comprehension and retention are not sacrificed — the psychic understands " +
+        "and remembers everything read. Technical manuals, books, maps, and encoded " +
+        "documents can all be processed at this enhanced rate. Combined with Total " +
+        "Recall, the psychic becomes a formidable information processor.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 2 points\n" +
+        "Duration: Maintained (active concentration)"
     );
     set_power_category("sensitive");
-
     set_isp_cost(2);
-    set_duration_type(3);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(3);
     set_base_duration(0);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (user->query_property("speed_reading")) {
+        user->set_property("speed_reading", 0);
+        tell_object(user, "Your accelerated reading state fades. " +
+            "Your mind returns to normal processing speed.\n");
+    } else {
+        user->set_property("speed_reading", 1);
+        tell_object(user, "Your perception of text shifts dramatically. Words " +
+            "seem to leap off the page, meaning crystallizing faster than you " +
+            "thought possible. You can now absorb written information at ten " +
+            "times your normal rate.\n");
+    }
     return 1;
 }

@@ -1,28 +1,67 @@
 /*
  * /lib/psionics/physical/pyrokinesis.lpc - Pyrokinesis
+ * Create and control small flames through psychic concentration.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("pyrokinesis");
     set_power_name("Pyrokinesis");
     set_power_desc(
-        "TODO:CONTENT — Create and control small flames through psychic concentration."
+        "The psychic can generate and control small flames with the power of "
+        "the mind. The flames can be used to light fires, melt small objects, "
+        "start campfires without matches, or as a minor offensive attack. The "
+        "fire is real and can spread if not controlled. At higher levels the "
+        "psychic can create larger, more intense flames, but Pyrokinesis is "
+        "never as destructive as Pyrokinesis: Major.\n\n"
+        "Range: 60 feet\n"
+        "ISP Cost: 6 points\n"
+        "Damage: 1d6 SDC (minor offensive use)\n"
+        "Duration: 1 minute"
     );
     set_power_category("physical");
-
     set_isp_cost(6);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(1);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(60);        /* feet */
+    set_range_type(2);
+    set_base_range(60);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (target && living(target) && target != user &&
+        environment(user) == environment(target)) {
+        // Offensive use — minor fire damage
+        int damage = random(6) + 1;
+        int max_hp = 0;
+        if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+        if (max_hp <= 0) max_hp = 100;
+        int pct = (damage * 100) / max_hp;
+        string sev;
+        if (pct <= 5) sev = "barely singes";
+        else if (pct <= 15) sev = "singes";
+        else if (pct <= 30) sev = "blasts";
+        else sev = "scorches";
+        tell_object(user, "You hurl a jet of psychic flame at " +
+            target->query_cap_name() + ". The fire " + sev + " them.\n");
+        tell_object(target, user->query_cap_name() +
+            " hurls psychic fire at you! It " + sev + " you.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " gestures sharply. Fire leaps toward " +
+            target->query_cap_name() + "!\n",
+            ({ user, target }));
+        target->take_damage(damage, 0);
+    } else {
+        // Utility use — light fires, warmth, illumination
+        tell_object(user, "You extend a thread of pyrokinetic focus. "
+            "A small flame blooms in your palm, perfectly controlled "
+            "and dancing at your mental command.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " conjures a small, hovering flame "
+            "that burns without fuel.\n",
+            ({ user }));
+    }
     return 1;
 }

@@ -1,5 +1,5 @@
 // /lib/occs/atlantean_nomad.lpc
-// Atlantean Nomad - Traveler and trader from Atlantis
+// Atlantean Nomad O.C.C. - Dimensional traveler and trader
 
 inherit "/std/occ";
 
@@ -11,33 +11,78 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Atlantean Nomads travel between dimensional markets and ruins,
-trading rare goods and surviving by wits and charm. They favor mobility
-and social skills over heavy combat training."
+        "Atlantean Nomads are the wandering traders and explorers of the True " +
+        "Atlantean people — those who live by moving between dimensions, worlds, " +
+        "and markets, carrying rare goods and ancient knowledge across dimensional " +
+        "boundaries. They are highly educated, broadly skilled, and possess " +
+        "the Atlantean blessing of supernatural longevity. A Nomad may have " +
+        "walked through a hundred worlds and traded in markets that exist nowhere " +
+        "on any map. They are survivors by temperament and diplomats by necessity."
     );
 
     set_stat_requirements(([ "me": 9, "iq": 9 ]));
-    set_stat_bonuses(([ "me": 1, "spd": 1 ]));
+    set_stat_bonuses(([ "me": 1, "spd": 1, "iq": 1 ]));
 
-    set_occ_skills(({ "language_american", "barter", "diplomacy", "survival", "navigation", "perception" }));
-    set_occ_related_skills(({ "tradecraft", "lore", "driving" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "barter",
+        "navigation",
+        "wilderness_survival",
+        "lore_dimensional",
+        "first_aid"
+    }));
+    set_occ_related_skills(({
+        "pilot_automobile", "cartography", "diplomacy",
+        "language_dragonese", "detect_concealment", "streetwise"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
 
-    set_base_ppe(0);
-    set_ppe_per_level(0);
+    set_base_ppe(10);
+    set_ppe_per_level(1);
     set_base_isp(0);
     set_isp_per_level(0);
+    set_magic_type("minor_tattoo");
+    set_psionic_type("none");
 
-    set_base_sdc(15);
-    set_sdc_per_level(0);
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(20);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "/obj/clothing/travel_coat", "/obj/kit/travel_pouch" }));
+    set_standard_equipment(({
+        "/obj/clothing/travel_coat",
+        "/obj/item/travel_pack",
+        "/obj/item/dimensional_compass"
+    }));
     set_starting_credits(50, 300);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/light_cloth" }));
+    set_starting_weapons(({ "/obj/weapon/knife" }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ "atlantean" }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(3);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "dimensional_sense", "merchant_network" }));
+    set_vehicle_type("any");
+    set_special_training("dimensional navigation");
+
+    set_background(
+        "Atlantean Nomads come from the traveling merchant families of Atlantis, " +
+        "trained from childhood to navigate dimensional markets. Their long " +
+        "lifespans mean they accumulate knowledge and contacts across centuries."
+    );
+    set_organizations(({ "True Atlantean merchant clans" }));
+    set_enemies(({ "Splugorth", "dimensional pirates" }));
 }

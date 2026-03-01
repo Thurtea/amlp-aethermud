@@ -1,5 +1,5 @@
 // /lib/occs/iss_peacekeeper.lpc
-// ISS Peacekeeper - Coaltion/ISS law enforcer
+// ISS Peacekeeper O.C.C. - Coalition/ISS law enforcer
 
 inherit "/std/occ";
 
@@ -11,27 +11,79 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "ISS Peacekeepers enforce law across occupied territories and
-perform security duties. Trained in crowd control and urban tactics."
+        "ISS Peacekeepers are the uniformed law enforcement officers of the " +
+        "Coalition States Internal Security Service. They patrol city streets, " +
+        "enforce CS law, respond to civil disturbances, and are trained to " +
+        "handle anti-supernatural operations. While less elite than ISS Specters, " +
+        "Peacekeepers are well-equipped, well-trained, and operate with broad " +
+        "authority. They are the CS's most visible symbol of order and control, " +
+        "trained equally in crowd suppression and lethal response."
     );
 
-    set_stat_requirements(([ "me": 10, "ps": 9 ]));
+    set_stat_requirements(([ "me": 10, "ps": 9, "iq": 9 ]));
     set_stat_bonuses(([ "me": 1, "ps": 1 ]));
 
-    set_occ_skills(({ "law_enforcement", "small_arms", "crowd_control", "investigation", "first_aid", "communications" }));
-    set_occ_related_skills(({ "tactics", "vehicle_operation" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("expert");
+
+    set_occ_skills(({
+        "language_american",
+        "law_enforcement",
+        "small_arms",
+        "first_aid",
+        "investigate",
+        "radio_basic"
+    }));
+    set_occ_related_skills(({
+        "tactics", "pilot_automobile", "computer_operation",
+        "detect_concealment", "crowd_control"
+    }));
     set_occ_skill_count(6);
     set_elective_count(3);
-    set_secondary_count(6);
+    set_secondary_count(5);
 
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(40);
     set_sdc_per_level(5);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "/obj/clothing/iss_uniform", "/obj/kit/riot_kit" }));
+    set_standard_equipment(({
+        "/obj/clothing/iss_uniform",
+        "/obj/item/badge",
+        "/obj/item/handcuffs",
+        "/obj/item/comm_device"
+    }));
     set_starting_credits(100, 400);
-    set_starting_weapons(({ "/obj/weapons/service_rifle" }));
+    set_starting_weapons(({ "/obj/weapon/service_rifle" }));
     set_starting_armor(({ "/obj/armor/heavy_vest" }));
+
+    set_race_requirements(({ "human" }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "cs_authority" }));
+    set_vehicle_type("patrol_vehicle");
+    set_special_training("law enforcement");
+
+    set_background(
+        "ISS Peacekeepers are recruited from the general CS population and " +
+        "trained at ISS academies. They are true believers in Coalition ideology " +
+        "for the most part, having been raised in CS propaganda since birth."
+    );
+    set_organizations(({ "Coalition States ISS" }));
+    set_enemies(({ "magic users", "D-bees", "Tolkeen survivors" }));
 }

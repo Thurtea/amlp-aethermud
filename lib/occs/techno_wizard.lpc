@@ -1,76 +1,90 @@
 // /lib/occs/techno_wizard.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Techno-Wizard O.C.C. - Engineer who blends technology and magic
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
-    set_occ_name("Techno Wizard");
+    set_occ_name("Techno-Wizard");
     set_occ_id("techno_wizard");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A mage who blends technology and magic — engineering meets arcana.
-Conservative defaults: tech-magic skills, low cybernetics, moderate PPE."
+        "Techno-Wizards are the engineers of the magical world — practitioners " +
+        "who have mastered the art of fusing arcane magic with mundane technology. " +
+        "They create magical devices, enchant weapons and armor, build machines " +
+        "that run on PPE instead of fuel, and construct wonders that neither a " +
+        "pure technician nor a pure wizard could produce alone. A TW-enhanced " +
+        "weapon channels magical energy through a physical mechanism; TW vehicles " +
+        "run on ambient magical power; TW armor provides protection no mundane " +
+        "material could match. They are the most practical of magic users."
     );
-    
-    set_stat_requirements(([
-        "iq": 11,
-        "me": 10
-    ]));
-    
-    set_stat_bonuses(([
-        "iq": 2,
-        "me": 1
-    ]));
-    
-    // Combat configuration
+
+    set_stat_requirements(([ "iq": 11, "me": 10 ]));
+    set_stat_bonuses(([ "iq": 2, "me": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(2);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
-    // Primary/secondary skills included — review ordering
+
     set_occ_skills(({
         "language_american",
         "spellcraft",
         "electronics",
-        "programming",
-        "repair",
+        "mechanical_repair",
+        "computer_operation",
         "alchemy"
     }));
-    
-    set_occ_related_skills(({ "technical_repair", "research_methods" }));
+    set_occ_related_skills(({
+        "electrical_engineering", "robot_mechanics",
+        "weapons_tech", "lore_magic_devices"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
-    // Techno-wizards have magic-like PPE and limited psionics
-    set_base_ppe(20);
-    set_ppe_per_level(2);
+
+    set_base_ppe(25);
+    set_ppe_per_level(3);
     set_base_isp(0);
     set_isp_per_level(0);
     set_magic_type("techno");
     set_psionic_type("none");
-    
-    // HP/SDC
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/arcane_jumpsuit", "/obj/item/tech_focus" }));
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/technical_jumpsuit",
+        "/obj/tools/techno_wizard_kit",
+        "/obj/item/spell_focus"
+    }));
     set_starting_credits(100, 400);
-    set_starting_weapons(({ "/obj/weapons/dagger" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
-    
-    // Race restrictions
+    set_starting_weapons(({ "/obj/weapon/tw_pistol" }));
+    set_starting_armor(({ "/obj/armor/tw_light_armor" }));
+
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "device_enchantment", "magic_engineering" }));
+    set_vehicle_type("any");
+    set_special_training("technical magic");
+
+    set_background(
+        "Techno-Wizards emerged from the unique conditions of Rifts Earth, where " +
+        "ancient technology and potent magic coexist. Most discovered the " +
+        "possibility through accident — a magical device interacting with " +
+        "technology in unexpected ways — and pursued it obsessively."
+    );
+    set_organizations(({ "Techno-Wizard guilds", "Coalition tech-captured programs" }));
+    set_enemies(({ "CS anti-magic forces", "those who steal TW designs" }));
 }

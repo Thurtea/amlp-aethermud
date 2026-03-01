@@ -1,28 +1,55 @@
 /*
  * /lib/psionics/healing/restore_fatigue.lpc - Restore Fatigue
+ * Instantly remove exhaustion and restore full physical energy.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("restore_fatigue");
     set_power_name("Restore Fatigue");
     set_power_desc(
-        "TODO:CONTENT — Instantly remove exhaustion and restore full physical energy."
+        "The psychic floods the target's body with revitalizing energy, "
+        "instantly eliminating exhaustion and restoring full physical vitality. "
+        "A person who has been running for hours, fighting continuously, or "
+        "severely sleep-deprived will feel completely refreshed and energized "
+        "as though they had just awakened from a full night's rest.\n\n"
+        "Range: Touch\n"
+        "ISP Cost: 4 points\n"
+        "Duration: Instant"
     );
     set_power_category("healing");
-
     set_isp_cost(4);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(1);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(1);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "Touch someone to restore their energy.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living being.\n");
+        return 0;
+    }
+    target->set_property("fatigued", 0);
+    target->set_property("exhausted", 0);
+    tell_object(user, "You channel revitalizing energy into " +
+        target->query_cap_name() + ". Exhaustion melts away from them.\n");
+    if (target != user) {
+        tell_object(target, "A warm rush of energy flows through you. " +
+            "Your exhaustion vanishes completely — you feel fully rested.\n");
+    }
+    tell_room(environment(user),
+        target->query_cap_name() + " straightens up, looking completely refreshed.\n",
+        ({ user, target }));
     return 1;
 }

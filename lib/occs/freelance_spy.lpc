@@ -1,5 +1,5 @@
 // /lib/occs/freelance_spy.lpc
-// Freelance Spy - Covert operative for hire
+// Freelance Spy O.C.C. - Covert operative for hire
 
 inherit "/std/occ";
 
@@ -11,27 +11,79 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Freelance Spies operate in the shadowy underworld of information
-and influence. Skilled in stealth, surveillance, and social manipulation."
+        "Freelance Spies operate in the shadowy underworld of information " +
+        "and influence on Rifts Earth. These covert operatives hire their " +
+        "considerable skills to the highest bidder — governments, corporations, " +
+        "criminal syndicates, or resistance movements. They are masters of " +
+        "surveillance, disguise, and social manipulation, able to slip into " +
+        "secure facilities and vanish before anyone knows they were there. " +
+        "A good Freelance Spy knows a dozen identities and trusts no one."
     );
 
-    set_stat_requirements(([ "me": 10, "iq": 9 ]));
+    set_stat_requirements(([ "me": 10, "iq": 9, "spd": 9 ]));
     set_stat_bonuses(([ "me": 1, "iq": 1 ]));
 
-    set_occ_skills(({ "surveillance", "stealth", "disguise", "hacking", "lockpicking", "interrogation" }));
-    set_occ_related_skills(({ "barter", "language_american" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type("expert");
+
+    set_occ_skills(({
+        "language_american",
+        "surveillance",
+        "stealth",
+        "disguise",
+        "lockpicking",
+        "interrogation"
+    }));
+    set_occ_related_skills(({
+        "barter", "forgery", "hacking", "computer_operation",
+        "radio_basic", "photography", "read_sensory"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
 
-    set_base_sdc(15);
-    set_sdc_per_level(0);
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
 
-    set_standard_equipment(({ "/obj/tools/spy_kit", "/obj/clothing/black_clothes" }));
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(20);
+    set_sdc_per_level(3);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/black_clothes",
+        "/obj/item/comm_device",
+        "/obj/tools/spy_kit"
+    }));
     set_starting_credits(100, 500);
-    set_starting_weapons(({ "/obj/weapons/silenced_pistol" }));
+    set_starting_weapons(({ "/obj/weapon/silenced_pistol" }));
     set_starting_armor(({ "/obj/armor/light_vest" }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(3);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "dead_drop", "cover_identity" }));
+    set_vehicle_type("any");
+    set_special_training("covert operations");
+
+    set_background(
+        "Freelance Spies usually come from military intelligence backgrounds, " +
+        "criminal organizations, or were recruited by government black programs " +
+        "and eventually went independent. Some operate from principle; most " +
+        "operate for profit."
+    );
+    set_organizations(({ "Black Market", "various governments" }));
+    set_enemies(({ "ISS", "CS Intelligence" }));
 }

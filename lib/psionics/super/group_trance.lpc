@@ -1,28 +1,69 @@
 /*
  * /lib/psionics/super/group_trance.lpc - Group Trance
+ * Place multiple targets simultaneously into a hypnotic trance.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("group_trance");
     set_power_name("Group Trance");
     set_power_desc(
-        "TODO:CONTENT — Place multiple targets simultaneously into a hypnotic trance."
+        "The psychic broadcasts a hypnotic compulsion that washes over every " +
+        "living mind in the area simultaneously. Targets that fail a Mental " +
+        "Endurance save fall into a pliable trance state — standing still, " +
+        "staring blankly, and following simple one-sentence instructions from " +
+        "the psychic. The trance is broken by physical pain, loud noises, or " +
+        "the psychic ending it. Particularly strong-willed individuals (ME 16+) " +
+        "may resist, and anyone already in combat is harder to affect. The " +
+        "psychic can maintain conversation with tranced targets normally.\n\n" +
+        "Range: 30 feet\n" +
+        "ISP Cost: 22 points\n" +
+        "Duration: 5 minutes per level"
     );
     set_power_category("super");
-
     set_isp_cost(22);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(5);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(30);        /* feet */
+    set_range_type(2);
+    set_base_range(30);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    object env = environment(user);
+    object *nearby = all_inventory(env);
+    int tranced = 0;
+    int resisted = 0;
+    int i = 0;
+    while (i < sizeof(nearby)) {
+        if (nearby[i] != user && living(nearby[i])) {
+            int me = 0;
+            if (function_exists("query_stat", nearby[i])) {
+                me = nearby[i]->query_stat("me");
+            }
+            int roll = random(20) + 1 + me;
+            if (roll >= 14) {
+                resisted += 1;
+                tell_object(nearby[i], "A strange drowsy feeling passes over " +
+                    "you, but you shake it off.\n");
+            } else {
+                if (function_exists("set_property", nearby[i])) {
+                    nearby[i]->set_property("tranced", 1);
+                }
+                tell_object(nearby[i], "The world becomes distant and soft. " +
+                    "Your thoughts slow to a pleasant drift...\n");
+                tranced += 1;
+            }
+        }
+        i += 1;
+    }
+    tell_object(user, "You broadcast the trance compulsion across the area. " +
+        tranced + " fell into trance; " + resisted + " resisted.\n");
+    tell_room(env,
+        user->query_cap_name() + "'s eyes pulse with soft light as a wave of " +
+        "psychic influence washes over the room.\n",
+        ({ user }));
     return 1;
 }

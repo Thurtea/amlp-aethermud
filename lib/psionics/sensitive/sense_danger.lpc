@@ -1,28 +1,60 @@
 /*
  * /lib/psionics/sensitive/sense_danger.lpc - Sense Danger
+ * Detect the presence of immediate danger in the environment.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("sense_danger");
     set_power_name("Sense Danger");
     set_power_desc(
-        "TODO:CONTENT — Detect the presence of immediate danger in the immediate environment."
+        "The psychic opens their mind to premonitions of danger, gaining an " +
+        "almost supernatural awareness of threats in the immediate area. Ambushes, " +
+        "booby traps, hostile intent, and approaching enemies register as a gut " +
+        "feeling of unease ranging from mild discomfort to urgent alarm. The " +
+        "psychic cannot pinpoint the exact source but gains a clear sense of " +
+        "direction and severity. In combat, this translates to a heightened " +
+        "awareness that is difficult to catch off-guard.\n\n" +
+        "Range: 90 feet\n" +
+        "ISP Cost: 8 points\n" +
+        "Duration: 2 minutes per level"
     );
     set_power_category("sensitive");
-
     set_isp_cost(8);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(2);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(90);        /* feet */
+    set_range_type(2);
+    set_base_range(90);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    user->set_property("sense_danger_active", 1);
+    object env = environment(user);
+    object *nearby = all_inventory(env);
+    int hostile_count = 0;
+    int i = 0;
+    while (i < sizeof(nearby)) {
+        if (nearby[i] != user && living(nearby[i])) {
+            if (function_exists("query_property", nearby[i]) &&
+                nearby[i]->query_property("hostile")) {
+                hostile_count += 1;
+            }
+        }
+        i += 1;
+    }
+    if (hostile_count > 1) {
+        tell_object(user, "A sharp premonition sets your nerves on edge. " +
+            "Multiple hostile presences are nearby — danger is close.\n");
+    } else if (hostile_count > 0) {
+        tell_object(user, "An uneasy feeling crawls across your skin. " +
+            "You sense a hostile presence nearby.\n");
+    } else {
+        tell_object(user, "You extend your danger sense outward. The immediate " +
+            "area feels clear — no imminent threats detected. Your senses " +
+            "remain primed for the duration.\n");
+    }
     return 1;
 }

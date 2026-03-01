@@ -1,28 +1,63 @@
 /*
  * /lib/psionics/healing/lifespan.lpc - Lifespan
+ * Sense the remaining natural lifespan of a living being.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("lifespan");
     set_power_name("Lifespan");
     set_power_desc(
-        "TODO:CONTENT — Dramatically extend the natural lifespan of a target by years."
+        "By touching a living being, the psychic can sense the thread of "
+        "their life force and gauge how much natural life remains. This power "
+        "reveals whether someone is young and full of life, middle-aged, elderly, "
+        "or near the natural end of their days. It does not predict death by "
+        "violence or accident — only the natural lifespan.\n\n"
+        "Range: Touch\n"
+        "ISP Cost: 50 points\n"
+        "Duration: Instant"
     );
     set_power_category("healing");
-
     set_isp_cost(50);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(1);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(1);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "Touch someone to sense their lifespan.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living being.\n");
+        return 0;
+    }
+    // Generate a lifespan reading based on HP percentage as proxy for vitality
+    int cur = target->query_hp();
+    int max = target->query_max_hp();
+    if (max <= 0) max = 1;
+    int vitality_pct = (cur * 100) / max;
+    string reading;
+    if (vitality_pct > 80) {
+        reading = "Young and vibrant, with many decades of natural life ahead.";
+    } else if (vitality_pct > 50) {
+        reading = "In the prime of life, perhaps years or decades remaining.";
+    } else if (vitality_pct > 25) {
+        reading = "Life force diminished — years, but perhaps not many, remain.";
+    } else {
+        reading = "The life thread is frail. This being is close to their natural end.";
+    }
+    tell_object(user, "You gently touch " + target->query_cap_name() +
+        " and sense the thread of their life.\n" + reading + "\n");
+    tell_object(target, user->query_cap_name() +
+        " touches you briefly with a look of concentration.\n");
     return 1;
 }

@@ -1,28 +1,67 @@
 /*
  * /lib/psionics/super/pyrokinesis_major.lpc - Pyrokinesis: Major
+ * Unleash massive fireballs and walls of psychic flame.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("pyrokinesis_major");
     set_power_name("Pyrokinesis: Major");
     set_power_desc(
-        "TODO:CONTENT — Unleash massive fireballs and walls of psychic flame."
+        "The psychic's mastery of fire reaches its apex — they can generate and " +
+        "direct massive quantities of psychic flame capable of creating large " +
+        "fireballs, sustained walls of fire, or columns of superheated plasma. " +
+        "The flames are real fire that burns structures and ignites flammable " +
+        "materials. A direct fireball inflicts serious MDC damage in a burst " +
+        "radius. A sustained wall of fire can seal corridors, drive back enemies, " +
+        "or destroy fortifications. The psychic is unharmed by their own flames.\n\n" +
+        "Range: 60 feet\n" +
+        "ISP Cost: 15 points\n" +
+        "Duration: Instant (fireball) or maintained (wall)"
     );
     set_power_category("super");
-
     set_isp_cost(15);
-    set_duration_type(0);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(0);
     set_base_duration(0);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(60);        /* feet */
+    set_range_type(2);
+    set_base_range(60);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    object env = environment(user);
+    if (target && living(target) && environment(target) == env) {
+        int damage = random(10) + random(10) + random(6) + 3;
+        int max_hp = 0;
+        if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
+        if (max_hp <= 0) max_hp = 100;
+        int pct = (damage * 100) / max_hp;
+        string sev;
+        if (pct <= 5) sev = "scorches";
+        else if (pct <= 15) sev = "engulfs";
+        else if (pct <= 30) sev = "incinerates";
+        else sev = "detonates through";
+        tell_object(user, "A massive ball of psychic fire erupts from your " +
+            "hands and " + sev + " " + target->query_cap_name() +
+            " with devastating force!\n");
+        tell_object(target, "A roaring psychic fireball slams into you, " +
+            "searing heat washing over you!\n");
+        tell_room(env,
+            user->query_cap_name() + " hurls a massive fireball of psychic " +
+            "flame at " + target->query_cap_name() + "!\n",
+            ({ user, target }));
+        if (function_exists("take_damage", target)) target->take_damage(damage);
+    } else {
+        user->set_property("fire_wall_active", 1);
+        tell_object(user, "You pour psychic energy outward and a roaring wall " +
+            "of flame erupts across the area, sealing positions and driving back " +
+            "anyone who approaches.\n");
+        tell_room(env,
+            user->query_cap_name() + " raises their hands and a massive wall " +
+            "of psychic flame roars to life!\n",
+            ({ user }));
+    }
     return 1;
 }

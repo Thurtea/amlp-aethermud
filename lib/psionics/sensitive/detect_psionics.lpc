@@ -1,28 +1,61 @@
 /*
  * /lib/psionics/sensitive/detect_psionics.lpc - Detect Psionics
+ * Sense the presence and use of psionic powers nearby.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("detect_psionics");
     set_power_name("Detect Psionics");
     set_power_desc(
-        "TODO:CONTENT — Sense the presence and use of psionic powers nearby."
+        "The psychic opens their mind to the subtle energy signatures of "
+        "psionic activity. Active psionic powers flare like torches to this "
+        "sense, and the lingering traces of recently used powers can be "
+        "detected. The psychic can identify the general category of power "
+        "in use (healing, physical, sensitive, super) and roughly gauge the "
+        "strength of the psionic source.\n\n"
+        "Range: 60 feet\n"
+        "ISP Cost: 6 points\n"
+        "Duration: 2 minutes"
     );
     set_power_category("sensitive");
-
     set_isp_cost(6);
-    set_duration_type(1);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(1);
     set_base_duration(2);
-    set_range_type(2);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(60);        /* feet */
+    set_range_type(2);
+    set_base_range(60);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    object env = environment(user);
+    object *nearby = all_inventory(env);
+    string detections = "";
+    int i = 0;
+    while (i < sizeof(nearby)) {
+        if (nearby[i] != user && living(nearby[i])) {
+            int isp = 0;
+            if (function_exists("query_isp", nearby[i])) isp = nearby[i]->query_isp();
+            if (isp > 0) {
+                detections += "  " + nearby[i]->query_cap_name() +
+                    " — psionic signature detected";
+                if (isp > 100) detections += " (extremely powerful)";
+                else if (isp > 50) detections += " (strong)";
+                else if (isp > 20) detections += " (moderate)";
+                else detections += " (minor)";
+                detections += "\n";
+            }
+        }
+        i += 1;
+    }
+    if (detections != "") {
+        tell_object(user, "Psionic signatures detected in the area:\n" + detections);
+    } else {
+        tell_object(user, "You extend your psionic senses. No active psionic "
+            "signatures detected in the immediate area.\n");
+    }
+    user->set_property("detect_psionics_active", 1);
     return 1;
 }

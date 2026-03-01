@@ -1,75 +1,93 @@
 // /lib/occs/mind_melter.lpc
-//  O.C.C. - Placeholder Implementation
-//
-// This is a stub file. Implement the full OCC details.
+// Mind Melter O.C.C. - The most powerful psionic class
 
 inherit "/std/occ";
 
 void create() {
     ::create();
-    
     set_occ_name("Mind Melter");
     set_occ_id("mind_melter");
     set_occ_category(OCC_CAT_ADVENTURER);
     set_alignment_requirement("any");
-    
+
     set_occ_description(
-        "A powerful psionic specialist focused on overwhelming mental attacks.
-Conservative defaults for high psionics and low physical requirements. Review
-for balance and canonical fidelity."
+        "Mind Melters are the most powerful psionic beings on Rifts Earth — " +
+        "humans born with an extraordinary concentration of psionic potential " +
+        "that far exceeds any other natural psychic. Where other psychics have " +
+        "a few abilities, Mind Melters have many; where others are limited in " +
+        "ISP, Mind Melters have reserves that seem almost limitless. They can " +
+        "access healing, sensitive, physical, and super psionic abilities, " +
+        "making them among the most versatile and feared beings alive. The " +
+        "Coalition States classify them as a primary threat. Most Mind Melters " +
+        "are aware of their power and have strong feelings about how to use it."
     );
-    
-    set_stat_requirements(([
-        "ps": 12,
-        "iq": 10
-    ]));
-    
-    set_stat_bonuses(([
-        "ps": 3,
-        "iq": 1
-    ]));
-    
-    // Combat configuration
-    set_base_attacks(2);
+
+    set_stat_requirements(([ "me": 14, "iq": 10 ]));
+    set_stat_bonuses(([ "me": 3, "iq": 1 ]));
+
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(3);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("basic");
-    
+
     set_occ_skills(({
         "language_american",
-        "psionics_advanced",
-        "mental_resistance",
-        "spellcraft",
-        "occult_lore",
-        "psychology"
+        "meditation_psionic",
+        "perception",
+        "psychology",
+        "lore_general",
+        "first_aid"
     }));
-    
-    set_occ_related_skills(({ }));
+    set_occ_related_skills(({
+        "detect_concealment", "interrogation",
+        "lore_spirits", "diplomacy"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
-    set_secondary_count(6);
-    
-    // Magic/Psionics (if applicable)
+    set_secondary_count(5);
+
     set_base_ppe(0);
     set_ppe_per_level(0);
-    set_base_isp(0);
-    set_isp_per_level(0);
+    set_base_isp(80);
+    set_isp_per_level(10);
     set_magic_type("none");
-    set_psionic_type("none");
-    
-    // HP/SDC
+    set_psionic_type("master");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(20);
-    set_sdc_per_level(0);
-    
-    set_standard_equipment(({ "/obj/clothing/psionic_robe", "/obj/item/mental_focus" }));
-    set_starting_credits(50, 250);
-    set_starting_weapons(({ "/obj/weapons/dagger" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
-    
-    // Race restrictions
-    set_race_requirements(({ }));
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/casual_clothes",
+        "/obj/item/psionic_focus"
+    }));
+    set_starting_credits(50, 300);
+    set_starting_weapons(({ "/obj/weapon/dagger" }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ "human" }));
     set_race_exclusions(({ }));
-    
-    // Cybernetics
-    set_cybernetics_allowed(1);
-    set_max_cybernetic_slots(4);
+
+    set_cybernetics_allowed(0);
+    set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({
+        "psionic_master", "isp_reserve", "multi_power_access"
+    }));
+    set_vehicle_type("none");
+    set_special_training("advanced psionic development");
+
+    set_background(
+        "Mind Melters are born, not made. The condition is congenital, usually " +
+        "manifesting in childhood as uncontrolled psionic events — objects " +
+        "moving, thoughts being read, emotions being felt before they're " +
+        "expressed. With training the power becomes controllable. Without it, " +
+        "the power controls them. Either outcome makes them dangerous."
+    );
+    set_organizations(({ "independent operatives", "psionic communes" }));
+    set_enemies(({ "Coalition States", "CS Psi-Battalion", "Psi-Stalkers" }));
 }

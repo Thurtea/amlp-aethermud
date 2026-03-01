@@ -1,28 +1,47 @@
 /*
  * /lib/psionics/super/mask_isp.lpc - Mask ISP & Psionics
+ * Hide one's ISP level and psionic nature from detection.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("mask_isp");
     set_power_name("Mask ISP & Psionics");
     set_power_desc(
-        "TODO:CONTENT — Hide one's ISP level and psionic nature from detection."
+        "The psychic folds their psionic signature inward, cloaking their " +
+        "ISP level and psionic nature from any form of detection. To Detect " +
+        "Psionics or similar powers they appear as a non-psionic individual " +
+        "with no detectable ISP. Aura reading shows only ordinary emotions and " +
+        "health. The mask is seamless — even experienced psychics cannot " +
+        "penetrate it without extraordinary means. The power requires only " +
+        "minimal ISP to initiate and then sustains itself automatically while " +
+        "the psychic maintains the low-level focus.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 7 points\n" +
+        "Duration: Maintained (automatic, no concentration)"
     );
     set_power_category("super");
-
     set_isp_cost(7);
-    set_duration_type(3);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(3);
     set_base_duration(0);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (user->query_property("isp_masked")) {
+        user->set_property("isp_masked", 0);
+        tell_object(user, "You release the psychic mask. Your true psionic " +
+            "nature is once again detectable to those with the ability.\n");
+    } else {
+        user->set_property("isp_masked", 1);
+        tell_object(user, "You fold your psionic aura inward, wrapping it in " +
+            "layer after layer of subtle suppression. To any scanner or " +
+            "sensitive, you now appear entirely mundane — no ISP, no powers, " +
+            "just an ordinary person.\n");
+    }
     return 1;
 }

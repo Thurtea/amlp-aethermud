@@ -1,5 +1,5 @@
 // /lib/occs/forger.lpc
-// Forger - Specialist in altering documents, IDs, and items
+// Forger O.C.C. - Specialist in false identities, documents, and items
 
 inherit "/std/occ";
 
@@ -11,28 +11,80 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Forgers are skilled artisans who can alter documents, create fake IDs,
-and modify items for covert operations. They combine craftsmanship with
-social engineering skills."
+        "Forgers are among the most valuable and quietly powerful specialists " +
+        "on Rifts Earth. Their ability to create perfect false identities, " +
+        "counterfeit documentation, and authentic-looking modified items makes " +
+        "them indispensable to spies, criminals, and resistance fighters alike. " +
+        "A skilled Forger can create a complete new identity that will pass CS " +
+        "inspection, or copy the seal on a Coalition military order well enough " +
+        "to fool a general's aide. They combine artistic skill, technical " +
+        "knowledge, and social understanding of how systems of authority work."
     );
 
     set_stat_requirements(([ "iq": 10, "me": 9 ]));
-    set_stat_bonuses(([ "iq": 1 ]));
+    set_stat_bonuses(([ "iq": 2 ]));
 
-    set_occ_skills(({ "forgery", "mechanical_repair", "electronics", "barter", "disguise", "lockpicking" }));
-    set_occ_related_skills(({ "artistry", "calligraphy", "computer_hacking" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 5);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "forgery",
+        "calligraphy",
+        "computer_operation",
+        "lockpicking",
+        "disguise"
+    }));
+    set_occ_related_skills(({
+        "artistry", "photography", "mechanical_repair",
+        "electronics", "barter", "hacking"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
 
-    set_base_sdc(15);
-    set_sdc_per_level(0);
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
 
-    set_standard_equipment(({ "/obj/tools/forgery_kit", "/obj/clothing/neutral_clothes" }));
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(15);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/tools/forgery_kit",
+        "/obj/clothing/neutral_clothes",
+        "/obj/item/portable_printer"
+    }));
     set_starting_credits(50, 250);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/light_cloth" }));
+    set_starting_weapons(({ "/obj/weapon/knife" }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(0);
     set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "perfect_duplicate", "identity_network" }));
+    set_vehicle_type("any");
+    set_special_training("document authentication");
+
+    set_background(
+        "Forgers come from artisan families, failed bureaucrats, intelligence " +
+        "washouts, or simply brilliant individuals who discovered their gift " +
+        "for reproduction. Most are meticulous to the point of obsession. " +
+        "They rarely fight — they never need to be where the danger is."
+    );
+    set_organizations(({ "Black Market", "resistance movements", "spy networks" }));
+    set_enemies(({ "CS document verification", "ISS" }));
 }

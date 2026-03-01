@@ -1,5 +1,5 @@
 // /lib/occs/ntset_protector.lpc
-// NTSET Protector - Guardian class for NTSET domains
+// NTSET Protector O.C.C. - Northern Territories Security and Enforcement Team
 
 inherit "/std/occ";
 
@@ -11,27 +11,79 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "NTSET Protectors serve as guardians of specialized domains,
-trained in defensive tactics and protective technologies."
+        "NTSET Protectors are elite frontier defenders serving the Northern " +
+        "Territories Security and Enforcement Team. Part ranger, part soldier, " +
+        "these operatives defend isolated settlements, conduct long-range patrols, " +
+        "and maintain a tenuous peace in regions too remote for standard military " +
+        "coverage. They must be completely self-reliant and capable of independent " +
+        "command decisions without backup. Many develop pragmatic views toward " +
+        "D-bee communities that would be considered heretical in the CS south."
     );
 
-    set_stat_requirements(([ "ps": 10, "me": 9 ]));
+    set_stat_requirements(([ "ps": 10, "pe": 10, "iq": 10 ]));
     set_stat_bonuses(([ "pe": 1, "ps": 1 ]));
 
-    set_occ_skills(({ "defense_tactics", "small_arms", "shield_use", "first_aid", "communications", "sensor_operation" }));
-    set_occ_related_skills(({ "engineering", "electronics" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(3);
+    set_attacks_per_level(1, 3);
+    set_hand_to_hand_type("expert");
+
+    set_occ_skills(({
+        "language_american",
+        "wilderness_survival",
+        "small_arms",
+        "land_navigation",
+        "tracking",
+        "first_aid"
+    }));
+    set_occ_related_skills(({
+        "hunting", "camouflage", "climbing", "swimming",
+        "radio_basic", "demolitions", "pilot_hover_vehicle"
+    }));
     set_occ_skill_count(6);
-    set_elective_count(3);
+    set_elective_count(4);
     set_secondary_count(6);
 
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
+
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(50);
     set_sdc_per_level(5);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "/obj/clothing/guard_uniform", "/obj/kit/shield_unit" }));
+    set_standard_equipment(({
+        "/obj/clothing/field_gear",
+        "/obj/item/survival_kit",
+        "/obj/item/comm_device"
+    }));
     set_starting_credits(150, 500);
-    set_starting_weapons(({ "/obj/weapons/assault_rifle" }));
-    set_starting_armor(({ "/obj/armor/heavy_shield" }));
+    set_starting_weapons(({ "/obj/weapon/assault_rifle" }));
+    set_starting_armor(({ "/obj/armor/scout_armor" }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(5);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "wilderness_expertise" }));
+    set_vehicle_type("light_vehicle");
+    set_special_training("frontier operations");
+
+    set_background(
+        "NTSET Protectors are drawn from frontier veterans and wilderness scouts. " +
+        "They operate with a degree of independence unusual for Coalition forces " +
+        "and are often changed by the experience of protecting communities at " +
+        "the edge of the known world."
+    );
+    set_organizations(({ "Northern Territories Security Force" }));
+    set_enemies(({ "Raiders", "Brodkil warbands", "hostile megabeasts" }));
 }

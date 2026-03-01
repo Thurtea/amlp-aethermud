@@ -1,5 +1,5 @@
 // /lib/occs/professional_thief.lpc
-// Professional Thief - Master burglar and infiltrator
+// Professional Thief O.C.C. - Master burglar and infiltrator
 
 inherit "/std/occ";
 
@@ -11,27 +11,85 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Professional Thieves are experts at burglary, infiltration, and
-high-stakes theft. They excel in stealth, lockpicking, and escape tactics."
+        "Professional Thieves are among the best in the business — master " +
+        "burglars, infiltrators, and high-stakes criminals who have turned " +
+        "theft into an art form. They plan their jobs meticulously, exploit " +
+        "every security weakness, and vanish before anyone realizes anything " +
+        "is missing. Unlike common pickpockets, these professionals take only " +
+        "what they can carry and always have three escape routes. Many are " +
+        "hired by wealthy clients to retrieve specific items; others freelance " +
+        "for the Black Market or work their own marks."
     );
 
-    set_stat_requirements(([ "spd": 11, "me": 10 ]));
-    set_stat_bonuses(([ "spd": 2 ]));
+    set_stat_requirements(([ "spd": 11, "me": 10, "iq": 10 ]));
+    set_stat_bonuses(([ "spd": 2, "iq": 1 ]));
 
-    set_occ_skills(({ "stealth", "pick_locks", "disable_trap", "thievery", "acrobatics", "disguise" }));
-    set_occ_related_skills(({ "forgery", "barter" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 4);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "prowl",
+        "pick_locks",
+        "pick_pockets",
+        "detect_concealment",
+        "acrobatics"
+    }));
+    set_occ_related_skills(({
+        "disguise", "forgery", "palming", "climbing",
+        "computer_operation", "safe_cracking", "barter",
+        "escape_artist"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
 
-    set_base_sdc(20);
-    set_sdc_per_level(0);
+    set_base_ppe(0);
+    set_ppe_per_level(0);
+    set_base_isp(0);
+    set_isp_per_level(0);
+    set_magic_type("none");
+    set_psionic_type("none");
 
-    set_standard_equipment(({ "/obj/tools/thief_tools", "/obj/clothing/dark_clothes" }));
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(20);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
+
+    set_standard_equipment(({
+        "/obj/clothing/dark_clothes",
+        "/obj/tools/thieves_tools",
+        "/obj/item/grappling_hook",
+        "/obj/item/rope"
+    }));
     set_starting_credits(50, 300);
-    set_starting_weapons(({ "/obj/weapons/knife", "/obj/weapons/dagger" }));
+    set_starting_weapons(({
+        "/obj/weapon/knife",
+        "/obj/weapon/dagger"
+    }));
     set_starting_armor(({ "/obj/armor/light_leather" }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(1);
     set_max_cybernetic_slots(4);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "cat_burglar", "fence_contacts" }));
+    set_vehicle_type("any");
+    set_special_training("infiltration");
+
+    set_background(
+        "Professional Thieves come from all backgrounds — orphans who learned " +
+        "to survive, trained agents gone rogue, or simply gifted individuals " +
+        "who discovered they had a talent for taking things. Many operate in " +
+        "major cities; some specialize in particular types of targets."
+    );
+    set_organizations(({ "Black Market", "Thieves Guilds" }));
+    set_enemies(({ "city watch", "private security firms" }));
 }

@@ -1,8 +1,5 @@
 // /lib/occs/xiticix_worker.lpc
-//  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
-//  Source: The Xiticix (parsed) - worker variant
-// Generated: 2026-02-12
-// TODO: Review and expand with gameplay balance
+// Xiticix Worker R.C.C. - Hive worker caste insectoid
 
 inherit "/std/occ";
 
@@ -14,21 +11,36 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "The worker caste of the Xiticix hive: less combative than the"
-        " warrior but essential to hive construction and maintenance."
+        "The worker caste of the Xiticix hive society forms the backbone of " +
+        "Xiticix civilization. Workers are less combative than warriors but " +
+        "essential to hive construction, food production, and maintenance. " +
+        "They possess the Xiticix natural exoskeleton armor, limited psionic " +
+        "hive-sense, and surprising strength for their size. Workers who " +
+        "separate from the hive (usually due to rift displacement or hive " +
+        "destruction) may develop individual identity and find their own way " +
+        "in the world — a disorienting but liberating experience."
     );
 
+    set_stat_requirements(([ ]));
     set_stat_bonuses(([
         "ps": 2,
-        "pp": 1
+        "pp": 1,
+        "pe": 2
     ]));
+
+    set_xp_table(XP_LEVELS);
 
     set_base_attacks(4);
     set_attacks_per_level(1, 2);
     set_hand_to_hand_type("natural");
 
-    set_occ_skills(({ "language_american", "wilderness_survival", "climb",
-                       "track" }));
+    set_occ_skills(({
+        "wilderness_survival",
+        "climbing",
+        "tracking",
+        "general_repair",
+        "language_american"
+    }));
     set_occ_related_skills(({ }));
     set_occ_skill_count(5);
     set_elective_count(1);
@@ -41,10 +53,13 @@ void create() {
     set_magic_type("none");
     set_psionic_type("minor");
 
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(30);
-    set_sdc_per_level(0);
+    set_sdc_per_level(4);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "short_sword" }));
+    set_standard_equipment(({ }));
     set_starting_credits(0, 0);
     set_starting_weapons(({ }));
     set_starting_armor(({ }));
@@ -54,4 +69,18 @@ void create() {
 
     set_cybernetics_allowed(0);
     set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "exoskeleton", "hive_sense" }));
+    set_vehicle_type("none");
+    set_special_training("none");
+
+    set_background(
+        "Xiticix Workers separated from their hive must rebuild their sense of " +
+        "self from scratch. The hive consciousness that guided every action is " +
+        "gone, replaced by an unfamiliar silence. Most find the isolation " +
+        "maddening at first; some eventually thrive."
+    );
+    set_organizations(({ }));
+    set_enemies(({ "anti-Xiticix militias", "CS patrols" }));
 }

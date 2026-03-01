@@ -1,6 +1,5 @@
 // /lib/occs/xiticix_warrior.lpc
-//  O.C.C. - Auto-populated stub from archived-md/ttrpg-references.txt
-//  Source: The Xiticix (parsed)
+// Xiticix Warrior R.C.C. - Hive warrior caste insectoid combatant
 
 inherit "/std/occ";
 
@@ -12,31 +11,41 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "An aggressive, insect-like humanoid warrior from a hive society."
-        " Territorial and organized, Xiticix warriors defend their hive-city"
-        " with coordinated swarms and lethal natural weapons."
+        "Xiticix Warriors are the aggressive combat caste of the insectoid " +
+        "Xiticix hive society. Territorial, organized, and relentless, they " +
+        "defend hive-cities with coordinated swarm tactics and lethal natural " +
+        "weapons — razor mandibles, clawed limbs, and barbed tails capable of " +
+        "piercing body armor. Warriors operate instinctively in coordination " +
+        "with their hive-mates and can communicate via pheromone signals over " +
+        "short distances. A Warrior separated from the hive is a dangerous " +
+        "and unpredictable creature navigating an alien social world alone."
     );
 
-    // stat bonuses (conservative, reviewable)
+    set_stat_requirements(([ ]));
     set_stat_bonuses(([
-        "ps": 4,
-        "pp": 2
+        "ps": 5,
+        "pp": 3,
+        "pe": 2
     ]));
 
-    // Combat configuration (matches parsed source: many natural attacks)
+    set_xp_table(XP_LEVELS);
+
     set_base_attacks(5);
     set_attacks_per_level(1, 3);
     set_hand_to_hand_type("natural");
 
-    // Representative OCC skills (please review/update to engine skill names)
-    set_occ_skills(({ "language_american", "wilderness_survival", "track",
-                       "climb", "stealth" }));
+    set_occ_skills(({
+        "wilderness_survival",
+        "tracking",
+        "climbing",
+        "prowl",
+        "language_american"
+    }));
     set_occ_related_skills(({ }));
     set_occ_skill_count(6);
     set_elective_count(2);
     set_secondary_count(4);
 
-    // Psionic / magic & reserves (parsed showed limited psionics)
     set_base_ppe(40);
     set_ppe_per_level(0);
     set_base_isp(0);
@@ -44,12 +53,13 @@ void create() {
     set_magic_type("none");
     set_psionic_type("limited");
 
-    // S.D.C. / pseudo-M.D.C. approximation (exoskeleton)
+    set_base_hp(0);
+    set_hp_per_level(0);
     set_base_sdc(60);
-    set_sdc_per_level(0);
+    set_sdc_per_level(6);
+    set_mdc_class(0);
 
-    // Starting equipment (representative)
-    set_standard_equipment(({ "short_sword", "spear" }));
+    set_standard_equipment(({ }));
     set_starting_credits(0, 0);
     set_starting_weapons(({ }));
     set_starting_armor(({ }));
@@ -57,7 +67,20 @@ void create() {
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
 
-    // No cybernetics by default (natural creature)
     set_cybernetics_allowed(0);
     set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "exoskeleton", "hive_sense", "pheromone_signal", "natural_weapons" }));
+    set_vehicle_type("none");
+    set_special_training("swarm tactics");
+
+    set_background(
+        "Xiticix Warriors separated from the hive retain all their fighting " +
+        "instincts but lack tactical coordination with other Warriors. They " +
+        "may form bonds with non-Xiticix companions as substitute hive-mates, " +
+        "protective and loyal but with a distinctly alien worldview."
+    );
+    set_organizations(({ }));
+    set_enemies(({ "CS military", "anti-Xiticix militias", "rival hives" }));
 }

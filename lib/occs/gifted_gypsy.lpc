@@ -1,5 +1,5 @@
 // /lib/occs/gifted_gypsy.lpc
-// Gifted Gypsy - Charismatic performer with minor mystical talents
+// Gifted Gypsy O.C.C. - Traveling performer with genuine mystical talents
 
 inherit "/std/occ";
 
@@ -11,33 +11,80 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Gifted Gypsies are traveling performers and mystics, combining
-music, storytelling and occasional minor magical talents to entertain and
-influence crowds."
+        "Gifted Gypsies are the traveling performers and mystics of Rifts Earth — " +
+        "fortune tellers, musicians, storytellers, and minor magic users who " +
+        "wander from settlement to settlement trading entertainment and small " +
+        "magical services for food and shelter. Their magical gifts are genuine " +
+        "but modest — minor divination, charms, and warding — and their real " +
+        "power lies in their extraordinary social skill and ability to read " +
+        "people. In a world of violence, a Gifted Gypsy survives on charisma, " +
+        "adaptability, and knowing when to run."
     );
 
-    set_stat_requirements(([ "pp": 10, "ma": 8 ]));
-    set_stat_bonuses(([ "pp": 1, "ma": 1 ]));
+    set_stat_requirements(([ "pp": 10, "me": 8 ]));
+    set_stat_bonuses(([ "pp": 1, "me": 2 ]));
 
-    set_occ_skills(({ "performance", "barter", "language_american", "divination_basic", "stealth", "streetwise" }));
-    set_occ_related_skills(({ "music", "entertainment" }));
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(2);
+    set_attacks_per_level(1, 5);
+    set_hand_to_hand_type("basic");
+
+    set_occ_skills(({
+        "language_american",
+        "barter",
+        "performance",
+        "streetwise",
+        "prowl",
+        "first_aid"
+    }));
+    set_occ_related_skills(({
+        "music", "dancing", "fortune_telling",
+        "disguise", "palming", "pick_pockets"
+    }));
     set_occ_skill_count(6);
     set_elective_count(4);
     set_secondary_count(6);
 
-    set_base_ppe(10);
+    set_base_ppe(15);
     set_ppe_per_level(2);
     set_base_isp(0);
     set_isp_per_level(0);
+    set_magic_type("minor");
+    set_psionic_type("none");
 
-    set_base_sdc(10);
-    set_sdc_per_level(0);
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(15);
+    set_sdc_per_level(2);
+    set_mdc_class(0);
 
-    set_standard_equipment(({ "/obj/clothing/performers_robe", "/obj/instrument/lute" }));
+    set_standard_equipment(({
+        "/obj/clothing/performers_robe",
+        "/obj/item/musical_instrument",
+        "/obj/item/tarot_cards"
+    }));
     set_starting_credits(20, 150);
-    set_starting_weapons(({ "/obj/weapons/knife" }));
-    set_starting_armor(({ "/obj/armor/robe" }));
+    set_starting_weapons(({ "/obj/weapon/knife" }));
+    set_starting_armor(({ }));
+
+    set_race_requirements(({ }));
+    set_race_exclusions(({ }));
 
     set_cybernetics_allowed(0);
     set_max_cybernetic_slots(2);
+    set_starting_cybernetics(({ }));
+
+    set_special_powers(({ "minor_divination", "charm_folk" }));
+    set_vehicle_type("wagon");
+    set_special_training("performance arts");
+
+    set_background(
+        "Gifted Gypsies travel in extended family groups or small troupes, " +
+        "moving constantly to avoid overstaying their welcome. Their genuine " +
+        "magical gifts distinguish them from ordinary con artists, though the " +
+        "line can be thin."
+    );
+    set_organizations(({ "traveling folk", "Gypsy caravans" }));
+    set_enemies(({ "CS anti-magic units", "suspicious local authorities" }));
 }

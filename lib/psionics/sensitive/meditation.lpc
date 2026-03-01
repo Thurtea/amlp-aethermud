@@ -1,28 +1,58 @@
 /*
  * /lib/psionics/sensitive/meditation.lpc - Meditation
+ * Enter deep meditation to recover ISP at an accelerated rate.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("meditation");
     set_power_name("Meditation");
     set_power_desc(
-        "TODO:CONTENT — Enter deep meditative state to recover ISP at double the normal rate."
+        "The psychic enters a deep meditative state, channeling the ambient "
+        "psionic energy of the world to replenish their Inner Strength Pool. "
+        "While meditating, the psychic is aware of their surroundings at a "
+        "basic level but cannot take other actions. ISP recovers at twice "
+        "the normal rate during meditation. A skilled psychic can meditate "
+        "for hours, restoring their full ISP in half the usual time.\n\n"
+        "Range: Self\n"
+        "ISP Cost: 0 points (restores ISP)\n"
+        "Duration: Maintained (active recovery)"
     );
     set_power_category("sensitive");
-
     set_isp_cost(0);
-    set_duration_type(3);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(3);
     set_base_duration(0);
-    set_range_type(0);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(0);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!user) return 0;
+    if (user->query_property("meditating")) {
+        // End meditation
+        user->set_property("meditating", 0);
+        tell_object(user, "You surface from your meditative state, "
+            "feeling mentally refreshed.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " opens their eyes, emerging from meditation.\n",
+            ({ user }));
+    } else {
+        // Begin meditation, immediately restore some ISP
+        user->set_property("meditating", 1);
+        int isp_restore = random(6) + 4;
+        int cur_isp = user->query_isp();
+        int max_isp = user->query_max_isp();
+        if (cur_isp + isp_restore > max_isp) isp_restore = max_isp - cur_isp;
+        if (isp_restore > 0) user->add_isp(isp_restore);
+        tell_object(user, "You fold your legs beneath you and let your breathing "
+            "slow. The world fades as you descend into deep meditation. "
+            "Psionic energy flows back into you steadily.\n");
+        tell_room(environment(user),
+            user->query_cap_name() + " sits cross-legged and becomes very still, "
+            "eyes half-closed in deep meditation.\n",
+            ({ user }));
+    }
     return 1;
 }

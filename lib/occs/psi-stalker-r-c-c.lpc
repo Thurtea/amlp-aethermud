@@ -1,7 +1,5 @@
 // /lib/occs/psi-stalker-r-c-c.lpc
-//  R.C.C. - Auto-generated conservative stub from archived-md/ttrpg-references.txt
-//  Source: Psi-Stalker R.C.C. (parsed)
-//  NOTE: Auto-generated — review and adjust numbers, skills, and equipment.
+// Psi-Stalker R.C.C. - Mutant predator with psionic detection abilities
 
 inherit "/std/occ";
 
@@ -13,32 +11,42 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "The Psi-Stalker is a mutant predator whose psychic sensitivity allows"
-        " it to detect psychic and magical energies.  Often a loner or hunter,"
-        " the stalker can follow subtle energy trails and is driven to feed"
-        " on victims' P.P.E.; trained stalkers sometimes serve as trackers or"
-        " elite anti-psionic hunters for organized forces."
+        "The Psi-Stalker is a mutant predator whose powerful psychic sensitivity " +
+        "allows them to detect, track, and feed on psychic and magical energies. " +
+        "They are driven by an instinctive hunger for PPE — the life-force energy " +
+        "radiated by practitioners of magic and strong psionics. In the wild, " +
+        "Psi-Stalkers hunt these beings relentlessly. Some are trained by " +
+        "organizations like the Coalition States to serve as elite anti-psionic " +
+        "trackers, valued for their ability to detect magic users through walls " +
+        "and at great distances. Their alien predatory nature makes them " +
+        "unsettling companions even when working alongside humans."
     );
 
-    // Conservative stat bonuses (review required)
+    set_stat_requirements(([ ]));
     set_stat_bonuses(([
         "ps": 2,
-        "pp": 3
+        "pp": 3,
+        "pe": 2
     ]));
 
-    // Combat configuration
-    set_base_attacks(2);
-    set_attacks_per_level(1, 1);
+    set_xp_table(XP_LEVELS);
+
+    set_base_attacks(3);
+    set_attacks_per_level(1, 2);
     set_hand_to_hand_type("natural");
 
-    // Representative OCC skills (engine skill names may need mapping)
-    set_occ_skills(({ "senses_psionic", "track", "stealth", "survival", "fight" }));
-    set_occ_related_skills(({ }));
+    set_occ_skills(({
+        "tracking",
+        "wilderness_survival",
+        "prowl",
+        "land_navigation",
+        "hand_to_hand_combat"
+    }));
+    set_occ_related_skills(({ "climbing", "swimming", "first_aid" }));
     set_occ_skill_count(5);
     set_elective_count(1);
-    set_secondary_count(2);
+    set_secondary_count(3);
 
-    // Psionic reserves (parsed source emphasises P.P.E.)
     set_base_ppe(40);
     set_ppe_per_level(2);
     set_base_isp(0);
@@ -46,26 +54,34 @@ void create() {
     set_magic_type("none");
     set_psionic_type("sensitive");
 
-    // S.D.C. / pseudo-M.D.C. (conservative)
-    set_base_sdc(40);
-    set_sdc_per_level(0);
+    set_base_hp(0);
+    set_hp_per_level(0);
+    set_base_sdc(50);
+    set_sdc_per_level(6);
+    set_mdc_class(0);
 
-    // Representative starting equipment
     set_standard_equipment(({ }));
-    set_starting_credits(0, 0);
+    set_starting_credits(0, 50);
     set_starting_weapons(({ }));
     set_starting_armor(({ }));
 
     set_race_requirements(({ }));
     set_race_exclusions(({ }));
 
-    // Likely no cybernetics by default (natural mutant)
     set_cybernetics_allowed(0);
     set_max_cybernetic_slots(0);
+    set_starting_cybernetics(({ }));
 
-    // Source excerpt for reviewer
-    /*
-    Raw excerpt:
-    "Psi-Stalker R.C.C. The Psi-stalker is a mutant whose psychic sensitive powers enable him to sense other psychics, psychic energy, and magic..."
-    */
+    set_special_powers(({ "ppe_sense", "psionic_track", "ppe_drain" }));
+    set_vehicle_type("none");
+    set_special_training("psionic tracking");
+
+    set_background(
+        "Psi-Stalkers exist at the intersection of predator and psychic, driven " +
+        "by hunger that ordinary food cannot satisfy. Those who find purpose " +
+        "beyond simple predation — working as trackers, bounty hunters, or " +
+        "mercenaries — often achieve a measure of peace with their nature."
+    );
+    set_organizations(({ "CS military tracker units", "freelance bounty hunters" }));
+    set_enemies(({ "magic practitioners", "Federation of Magic" }));
 }

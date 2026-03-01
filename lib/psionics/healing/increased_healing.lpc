@@ -1,28 +1,65 @@
 /*
  * /lib/psionics/healing/increased_healing.lpc - Increased Healing
+ * Dramatically speeds the natural healing rate of a person.
  */
 
 inherit "/std/psionic";
 
 void create() {
     ::create();
-
     set_power_id("increased_healing");
     set_power_name("Increased Healing");
     set_power_desc(
-        "TODO:CONTENT — Dramatically speed the natural healing rate of a person."
+        "By channeling psionic energy into a person's body, the psychic "
+        "dramatically accelerates the body's natural regenerative processes. "
+        "Wounds close faster, bruises fade, and broken bones begin to knit at "
+        "an accelerated rate. The recipient heals as though resting in ideal "
+        "conditions regardless of activity.\n\n"
+        "Range: Touch\n"
+        "ISP Cost: 10 points\n"
+        "Duration: Maintained (consumes ISP while active)"
     );
     set_power_category("healing");
-
     set_isp_cost(10);
-    set_duration_type(3);   /* 0=instant, 1=per minute, 2=per level, 3=maintained */
+    set_duration_type(3);
     set_base_duration(0);
-    set_range_type(1);      /* 0=self, 1=touch, 2=ranged, 3=area */
-    set_base_range(0);        /* feet */
+    set_range_type(1);
+    set_base_range(0);
 }
 
-/* TODO:CONTENT - implement activate() */
 int apply_effect(object user, object target) {
-    tell_object(user, "TODO:CONTENT — power not yet fully implemented.\n");
+    if (!target) {
+        tell_object(user, "You must touch someone to use Increased Healing.\n");
+        return 0;
+    }
+    if (environment(user) != environment(target)) {
+        tell_object(user, "Your target is not here.\n");
+        return 0;
+    }
+    if (!living(target)) {
+        tell_object(user, "That is not a living being.\n");
+        return 0;
+    }
+    int current = target->query_hp();
+    int maxhp   = target->query_max_hp();
+    if (current >= maxhp) {
+        tell_object(user, target->query_cap_name() + " is already at full health.\n");
+        return 0;
+    }
+    // Heal 1d6 HP immediately as the power takes hold
+    int heal = random(6) + 1;
+    if (current + heal > maxhp) heal = maxhp - current;
+    target->add_hp(heal);
+
+    tell_object(user, "You channel healing energy into " +
+        target->query_cap_name() + ". Their wounds begin closing rapidly.\n");
+    if (target != user) {
+        tell_object(target, user->query_cap_name() +
+            " touches you gently. Warmth spreads through your body as your wounds begin to close.\n");
+    }
+    tell_room(environment(user),
+        user->query_cap_name() + " places a hand on " + target->query_cap_name() +
+        ". A faint golden light pulses beneath the skin.\n",
+        ({ user, target }));
     return 1;
 }

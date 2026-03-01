@@ -1,0 +1,173 @@
+// /lib/std/qcs/door.lpc - QCS Door Object Template
+// Inherit this for QCS-created doors
+//
+// Provides:
+//   - Open/closed and locked/unlocked state
+//   - Optional key requirement (key_id must match an id on a held object)
+//   - do_open / do_close / do_lock / do_unlock hooks for the
+//     open/close/lock/unlock commands
+//   - Configurable descriptions for open and closed states
+
+inherit "/std/object";
+
+private int is_open;
+private int is_locked;
+private string key_id;       /* id that a key object must have; "" = no lock */
+private string open_desc;    /* long desc when open  */
+private string closed_desc;  /* long desc when closed */
+private string linked_room;  /* room path on the other side (informational) */
+private string exit_dir;     /* direction this door blocks, e.g. "north" */
+
+void create() {
+    ::create();
+
+    is_open     = 0;
+    is_locked   = 0;
+    key_id      = "";
+    exit_dir    = "";
+    linked_room = "";
+
+    set_id(({ "door" }));
+    set_short("a door");
+
+    closed_desc = "A sturdy door stands here, currently closed.\n";
+    open_desc   = "A door stands here, currently open.\n";
+
+    set_property("no_get", 1);
+}
+
+/* ========================= Accessors ========================= */
+
+int query_open()              { return is_open; }
+int query_locked()            { return is_locked; }
+string query_key_id()         { return key_id; }
+string query_linked_room()    { return linked_room; }
+string query_exit_dir()       { return exit_dir; }
+
+void set_key_id(string id)        { key_id = id; }
+void set_linked_room(string path) { linked_room = path; }
+void set_exit_dir(string dir)     { exit_dir = dir; }
+void set_open_desc(string d)      { open_desc = d; }
+void set_closed_desc(string d)    { closed_desc = d; }
+
+string query_long() {
+    if (is_open) return open_desc;
+    return closed_desc;
+}
+
+/* ========================= Key helper ========================= */
+
+int player_has_key(object player) {
+    if (!key_id || key_id == "") return 1;
+    object *inv = all_inventory(player);
+    foreach (object ob in inv) {
+        if (function_exists("id", ob) && ob->id(key_id)) return 1;
+    }
+    return 0;
+}
+
+/* ========================= do_open ========================= */
+
+int do_open(object player) {
+    if (!player) return 0;
+
+    if (is_open) {
+        tell_object(player, capitalize(query_short()) + " is already open.\n");
+        return 1;
+    }
+    if (is_locked) {
+        tell_object(player, capitalize(query_short()) + " is locked.\n");
+        return 1;
+    }
+
+    is_open = 1;
+
+    tell_object(player, "You open " + query_short() + ".\n");
+    object env = environment(this_object());
+    if (env) {
+        object *here = all_inventory(env);
+        foreach (object ob in here) {
+            if (living(ob) && ob != player) {
+                tell_object(ob, player->query_introduction_name(ob) +
+                    " opens " + query_short() + ".\n");
+            }
+        }
+    }
+    return 1;
+}
+
+/* ========================= do_close ========================= */
+
+int do_close(object player) {
+    if (!player) return 0;
+
+    if (!is_open) {
+        tell_object(player, capitalize(query_short()) + " is already closed.\n");
+        return 1;
+    }
+
+    is_open = 0;
+
+    tell_object(player, "You close " + query_short() + ".\n");
+    object env = environment(this_object());
+    if (env) {
+        object *here = all_inventory(env);
+        foreach (object ob in here) {
+            if (living(ob) && ob != player) {
+                tell_object(ob, player->query_introduction_name(ob) +
+                    " closes " + query_short() + ".\n");
+            }
+        }
+    }
+    return 1;
+}
+
+/* ========================= do_lock ========================= */
+
+int do_lock(object player) {
+    if (!player) return 0;
+
+    if (!key_id || key_id == "") {
+        tell_object(player, capitalize(query_short()) + " has no lock.\n");
+        return 1;
+    }
+    if (is_locked) {
+        tell_object(player, capitalize(query_short()) + " is already locked.\n");
+        return 1;
+    }
+    if (is_open) {
+        tell_object(player, "You must close " + query_short() + " before locking it.\n");
+        return 1;
+    }
+    if (!player_has_key(player)) {
+        tell_object(player, "You do not have the right key.\n");
+        return 1;
+    }
+
+    is_locked = 1;
+    tell_object(player, "You lock " + query_short() + ".\n");
+    return 1;
+}
+
+/* ========================= do_unlock ========================= */
+
+int do_unlock(object player) {
+    if (!player) return 0;
+
+    if (!key_id || key_id == "") {
+        tell_object(player, capitalize(query_short()) + " has no lock.\n");
+        return 1;
+    }
+    if (!is_locked) {
+        tell_object(player, capitalize(query_short()) + " is not locked.\n");
+        return 1;
+    }
+    if (!player_has_key(player)) {
+        tell_object(player, "You do not have the right key.\n");
+        return 1;
+    }
+
+    is_locked = 0;
+    tell_object(player, "You unlock " + query_short() + ".\n");
+    return 1;
+}

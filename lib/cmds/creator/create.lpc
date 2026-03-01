@@ -72,14 +72,15 @@ int main(string arg) {
     }
 
     // Validate type
-    string *valid_types = ({ "npc", "weapon", "armor", "room", "item" });
+    string *valid_types = ({ "npc", "weapon", "armor", "room", "item",
+                              "barkeep", "vendor", "door" });
     int found = 0;
     foreach (string vt in valid_types) {
         if (vt == type) { found = 1; break; }
     }
     if (!found) {
         write("Unknown type: " + type + "\n");
-        write("Valid types: npc, weapon, armor, room, item\n");
+        write("Valid types: npc, weapon, armor, room, item, barkeep, vendor, door\n");
         return 1;
     }
 
@@ -111,11 +112,14 @@ int main(string arg) {
     // Generate template
     string code;
     switch (type) {
-        case "npc":     code = gen_npc(name); break;
-        case "weapon":  code = gen_weapon(name); break;
-        case "armor":   code = gen_armor(name); break;
-        case "room":    code = gen_room(name); break;
-        case "item":    code = gen_item(name); break;
+        case "npc":      code = gen_npc(name); break;
+        case "weapon":   code = gen_weapon(name); break;
+        case "armor":    code = gen_armor(name); break;
+        case "room":     code = gen_room(name); break;
+        case "item":     code = gen_item(name); break;
+        case "barkeep":  code = gen_barkeep(name); break;
+        case "vendor":   code = gen_vendor(name); break;
+        case "door":     code = gen_door(name); break;
     }
 
     // Write file
@@ -135,6 +139,12 @@ int main(string arg) {
         write("  modify " + name + " damage \"2d6\" type \"energy\"\n");
     if (type == "room")
         write("  modify " + name + " exit \"north\" \"/domains/new_camelot/tavern\"\n");
+    if (type == "barkeep")
+        write("  Edit the file to call add_drink() in create() with name/price/desc.\n");
+    if (type == "vendor")
+        write("  Edit the file to call add_stock() in create() with name/price/path/desc.\n");
+    if (type == "door")
+        write("  Edit the file to set_key_id(), set_linked_room(), set_exit_dir() as needed.\n");
     write("  deploy " + name + " /domains/new_camelot/tavern\n");
 
     return 1;
@@ -245,6 +255,64 @@ string gen_item(string name) {
 "}\n";
 }
 
+string gen_barkeep(string name) {
+    string display = replace_string(name, "_", " ");
+    return "// " + name + ".lpc - QCS Generated Barkeep\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/barkeep\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_name(\"" + display + "\");\n"
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"barkeep\", \"bartender\" }));\n"
+"    set_short(\"" + display + "\");\n"
+"    set_long(\"" + capitalize(display) + " stands behind the bar, ready to serve.\\n\");\n\n"
+"    set_greeting(\"What can I get you?\");\n\n"
+"    // Add drinks: add_drink(name, price_uc, description)\n"
+"    add_drink(\"ale\",    50,  \"A cold mug of local ale.\");\n"
+"    add_drink(\"whiskey\", 75, \"A shot of aged whiskey.\");\n"
+"    add_drink(\"water\",  10,  \"A clean glass of water.\");\n"
+"}\n";
+}
+
+string gen_vendor(string name) {
+    string display = replace_string(name, "_", " ");
+    return "// " + name + ".lpc - QCS Generated Vendor\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/vendor\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_name(\"" + display + "\");\n"
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"vendor\", \"merchant\" }));\n"
+"    set_short(\"" + display + "\");\n"
+"    set_long(\"" + capitalize(display) + " has a variety of goods on display.\\n\");\n\n"
+"    set_shop_name(\"" + capitalize(display) + "'s Shop\");\n\n"
+"    // Add items: add_stock(name, price_uc, lpc_path, description)\n"
+"    // Leave path as \"\" for non-clonable entries.\n"
+"    add_stock(\"bandage\", 25, \"\", \"A clean cloth bandage.\");\n"
+"    add_stock(\"ration\",  40, \"\", \"One day's worth of trail rations.\");\n"
+"}\n";
+}
+
+string gen_door(string name) {
+    string display = replace_string(name, "_", " ");
+    return "// " + name + ".lpc - QCS Generated Door\n"
+"// Created: " + ctime(time()) + "\n\n"
+"inherit \"/std/qcs/door\";\n\n"
+"void create() {\n"
+"    ::create();\n\n"
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"door\" }));\n"
+"    set_short(\"" + display + "\");\n"
+"    set_closed_desc(\"" + capitalize(display) + " stands here, currently closed.\\n\");\n"
+"    set_open_desc(\"" + capitalize(display) + " stands open.\\n\");\n\n"
+"    // Optional: require a key\n"
+"    // set_key_id(\"iron key\");        /* id on a key object */\n\n"
+"    // Optional: link to the room on the other side\n"
+"    // set_linked_room(\"/domains/somewhere/room\");\n\n"
+"    // Optional: which direction does this door face\n"
+"    // set_exit_dir(\"north\");\n"
+"}\n";
+}
+
 int show_help() {
     write("QCS - Quick Creation System\n");
     write("===========================\n\n");
@@ -254,7 +322,10 @@ int show_help() {
     write("  weapon    Create a weapon\n");
     write("  armor     Create armor\n");
     write("  room      Create a room\n");
-    write("  item      Create a generic item\n\n");
+    write("  item      Create a generic item\n");
+    write("  barkeep   Create a barkeep/bartender NPC with drink inventory\n");
+    write("  vendor    Create a merchant NPC with item inventory\n");
+    write("  door      Create a door object (open/close/lock/unlock)\n\n");
     write("Examples:\n");
     write("  create npc goblin\n");
     write("  create weapon vibro_sword\n");

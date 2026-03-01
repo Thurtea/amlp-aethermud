@@ -1,0 +1,149 @@
+// /lib/std/qcs/barkeep.lpc - QCS Barkeep NPC Template
+// Inherit this for QCS-created barkeep/bartender NPCs
+//
+// Provides:
+//   - All QCS NPC features (stats, aggression, patrol, dialogue)
+//   - Drink inventory with per-drink pricing
+//   - "list" command shows available drinks and prices
+//   - "order <drink>" command deducts UC and delivers the drink
+
+inherit "/std/qcs/npc";
+
+private mapping drink_price;   /* drink_name -> int price (UC) */
+private mapping drink_desc;    /* drink_name -> string description */
+private string *drink_names;   /* ordered list for display */
+private string greeting;
+
+void create() {
+    ::create();
+
+    drink_price = ([]);
+    drink_desc  = ([]);
+    drink_names = ({});
+    greeting    = "What can I get you?";
+
+    set_name("barkeep");
+    set_id(({ "barkeep", "bartender", "bar keep" }));
+    set_short("a barkeep");
+    set_long("A barkeep stands behind the bar, ready to serve.\n");
+    set_gender("neuter");
+    set_race("human");
+    set_level(1);
+
+    set_property("no_attack", 1);
+    set_property("no_follow", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_list",  "list");
+    add_action("cmd_order", "order");
+    add_action("cmd_menu",  "menu");
+}
+
+/* ========================= Drink inventory ========================= */
+
+void add_drink(string name, int price, string desc) {
+    if (member_array(name, drink_names) == -1)
+        drink_names += ({ name });
+    drink_price[name] = price;
+    drink_desc[name]  = desc;
+}
+
+void remove_drink(string name) {
+    drink_names -= ({ name });
+    mapping new_price = ([]);
+    mapping new_desc  = ([]);
+    foreach (string k in drink_names) {
+        new_price[k] = drink_price[k];
+        new_desc[k]  = drink_desc[k];
+    }
+    drink_price = new_price;
+    drink_desc  = new_desc;
+}
+
+string *query_drink_names()    { return drink_names; }
+void set_greeting(string msg)  { greeting = msg; }
+string query_greeting()        { return greeting; }
+
+/* ========================= Commands ========================= */
+
+int cmd_list(string str) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (sizeof(drink_names) == 0) {
+        tell_object(player, query_cap_name() + " says: \"Sorry, nothing on tap right now.\"\n");
+        return 1;
+    }
+
+    tell_object(player, "\n" + query_cap_name() + " slides a menu across the bar:\n\n");
+    foreach (string name in drink_names) {
+        int price   = drink_price[name];
+        string desc = drink_desc[name];
+        tell_object(player, "  " + capitalize(name) + "  (" + price + " UC)  - " + desc + "\n");
+    }
+    tell_object(player, "\nOrder with: order <drink name>\n\n");
+    return 1;
+}
+
+int cmd_menu(string str) {
+    return cmd_list(str);
+}
+
+int cmd_order(string str) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (!str || str == "") {
+        tell_object(player,
+            query_cap_name() + " says: \"What'll it be? Type 'list' to see the drinks.\"\n");
+        return 1;
+    }
+
+    string wanted = lower_case(str);
+
+    if (member_array(wanted, drink_names) == -1) {
+        tell_object(player,
+            query_cap_name() + " says: \"Sorry, I don't have " + str +
+            ". Type 'list' to see what's available.\"\n");
+        return 1;
+    }
+
+    int price = drink_price[wanted];
+    int have  = player->query_universal_credits();
+
+    if (have < price) {
+        tell_object(player,
+            query_cap_name() + " says: \"That's " + price + " UC. You only have " +
+            have + " UC. Come back when you can pay.\"\n");
+        return 1;
+    }
+
+    player->remove_universal_credits(price);
+
+    tell_object(player,
+        query_cap_name() + " sets a " + wanted + " in front of you.\n" +
+        "You pay " + price + " UC.\n");
+
+    object env = environment(this_object());
+    if (env) {
+        object *here = all_inventory(env);
+        foreach (object ob in here) {
+            if (living(ob) && ob != player) {
+                tell_object(ob,
+                    player->query_introduction_name(ob) + " orders a " + wanted + ".\n");
+            }
+        }
+    }
+
+    return 1;
+}
+
+/* ========================= Greet on arrival ========================= */
+
+void init_living(object who) {
+    if (!who || !living(who)) return;
+    if (greeting && greeting != "")
+        tell_object(who, query_cap_name() + " says: \"" + greeting + "\"\n");
+}

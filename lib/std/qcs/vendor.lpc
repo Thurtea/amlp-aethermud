@@ -1,0 +1,171 @@
+// /lib/std/qcs/vendor.lpc - QCS Vendor NPC Template
+// Inherit this for QCS-created shop/merchant NPCs
+//
+// Provides:
+//   - All QCS NPC features (stats, aggression, patrol, dialogue)
+//   - Item inventory with per-item pricing and optional LPC clone path
+//   - "list" command shows stock and prices
+//   - "buy <item>" command deducts UC and clones or describes item
+
+inherit "/std/qcs/npc";
+
+private mapping stock_price;   /* item_name -> int price (UC) */
+private mapping stock_path;    /* item_name -> string lpc path (or "") */
+private mapping stock_desc;    /* item_name -> string description */
+private string *stock_names;   /* ordered list for display */
+private string shop_name;
+
+void create() {
+    ::create();
+
+    stock_price = ([]);
+    stock_path  = ([]);
+    stock_desc  = ([]);
+    stock_names = ({});
+    shop_name   = "General Goods";
+
+    set_name("vendor");
+    set_id(({ "vendor", "merchant", "shopkeeper", "trader" }));
+    set_short("a vendor");
+    set_long("A vendor stands here, surrounded by goods for sale.\n");
+    set_gender("neuter");
+    set_race("human");
+    set_level(1);
+
+    set_property("no_attack", 1);
+    set_property("no_follow", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_list", "list");
+    add_action("cmd_buy",  "buy");
+}
+
+/* ========================= Stock management ========================= */
+
+/*
+ * add_stock(name, price, path, desc)
+ *   name  - keyword player types to buy it (lowercase)
+ *   price - UC cost
+ *   path  - LPC path to clone (pass "" for non-clonable entries)
+ *   desc  - short description shown in listing
+ */
+void add_stock(string name, int price, string path, string desc) {
+    if (member_array(name, stock_names) == -1)
+        stock_names += ({ name });
+    stock_price[name] = price;
+    stock_path[name]  = path;
+    stock_desc[name]  = desc;
+}
+
+void remove_stock(string name) {
+    stock_names -= ({ name });
+    mapping np = ([]);
+    mapping nph = ([]);
+    mapping nd = ([]);
+    foreach (string k in stock_names) {
+        np[k]  = stock_price[k];
+        nph[k] = stock_path[k];
+        nd[k]  = stock_desc[k];
+    }
+    stock_price = np;
+    stock_path  = nph;
+    stock_desc  = nd;
+}
+
+string *query_stock_names()     { return stock_names; }
+void set_shop_name(string name) { shop_name = name; }
+string query_shop_name()        { return shop_name; }
+
+/* ========================= Commands ========================= */
+
+int cmd_list(string str) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (sizeof(stock_names) == 0) {
+        tell_object(player, query_cap_name() + " says: \"I'm all out of stock right now.\"\n");
+        return 1;
+    }
+
+    tell_object(player, "\n--- " + shop_name + " ---\n\n");
+    foreach (string name in stock_names) {
+        int price   = stock_price[name];
+        string desc = stock_desc[name];
+        tell_object(player, "  " + capitalize(name) + "  (" + price + " UC)  - " + desc + "\n");
+    }
+    tell_object(player, "\nBuy with: buy <item name>\n\n");
+    return 1;
+}
+
+int cmd_buy(string str) {
+    object player = this_player();
+    if (!player) return 0;
+
+    if (!str || str == "") {
+        tell_object(player,
+            query_cap_name() + " says: \"What would you like? Type 'list' to see what I have.\"\n");
+        return 1;
+    }
+
+    string wanted = lower_case(str);
+
+    if (member_array(wanted, stock_names) == -1) {
+        tell_object(player,
+            query_cap_name() + " says: \"I don't carry " + str +
+            ". Type 'list' to see available stock.\"\n");
+        return 1;
+    }
+
+    int price   = stock_price[wanted];
+    string path = stock_path[wanted];
+    int have    = player->query_universal_credits();
+
+    if (have < price) {
+        tell_object(player,
+            query_cap_name() + " says: \"That's " + price + " UC. You have " +
+            have + " UC. Not enough, I'm afraid.\"\n");
+        return 1;
+    }
+
+    player->remove_universal_credits(price);
+
+    if (path && path != "") {
+        object item;
+        catch { item = clone_object(path); };
+        if (item) {
+            if (function_exists("move", item))
+                item->move(player);
+            else
+                move_object(item, player);
+            string item_short = (function_exists("query_short", item) ? item->query_short() : wanted);
+            tell_object(player,
+                query_cap_name() + " hands you " + item_short + ".\n" +
+                "You pay " + price + " UC.\n");
+        } else {
+            player->add_universal_credits(price);
+            tell_object(player,
+                query_cap_name() + " says: \"Sorry, I seem to be out of that right now.\"\n");
+            return 1;
+        }
+    } else {
+        tell_object(player,
+            query_cap_name() + " hands you " + wanted + ".\n" +
+            "You pay " + price + " UC.\n");
+    }
+
+    object env = environment(this_object());
+    if (env) {
+        object *here = all_inventory(env);
+        foreach (object ob in here) {
+            if (living(ob) && ob != player) {
+                tell_object(ob,
+                    player->query_introduction_name(ob) + " buys " + wanted + " from " +
+                    query_short() + ".\n");
+            }
+        }
+    }
+
+    return 1;
+}

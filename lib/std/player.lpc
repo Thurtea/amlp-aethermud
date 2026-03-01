@@ -254,17 +254,17 @@ private void _do_first_boot_orientation() {
 
     // Print welcome banner.
     tell_object(this_object(),
-        "\n============================================================\n"
-        " WELCOME TO AETHERMUD\n"
-        " You have been promoted. First-boot orientation begins.\n"
-        "\n"
-        " Staff Ranks:\n"
-        "   0 = Player     - Standard player\n"
-        "   1 = Builder    - Creator / Coder\n"
-        "   2 = Wizard     - Full staff\n"
-        "   3 = Admin      - Server authority\n"
-        "\n"
-        " Type: talk archimedes   to begin orientation.\n"
+        "\n============================================================\n" +
+        " WELCOME TO AETHERMUD\n" +
+        " You have been promoted. First-boot orientation begins.\n" +
+        "\n" +
+        " Staff Ranks:\n" +
+        "   0 = Player     - Standard player\n" +
+        "   1 = Builder    - Creator / Coder\n" +
+        "   2 = Wizard     - Full staff\n" +
+        "   3 = Admin      - Server authority\n" +
+        "\n" +
+        " Type: talk archimedes   to begin orientation.\n" +
         "============================================================\n\n");
 
     // Clone Archimedes into the orientation room.

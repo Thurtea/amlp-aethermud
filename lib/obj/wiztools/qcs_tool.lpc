@@ -10,8 +10,8 @@ void create() {
     set_id(({ "qcs tool", "qcs", "creator tool", "qcs_tool" }));
     set_short("a QCS Creator Tool");
     set_long(
-        "A crystalline tablet etched with arcane blueprints. Its surface\n"
-        "shimmers with potential, ready to manifest objects from pure will.\n\n"
+        "A crystalline tablet etched with arcane blueprints. Its surface\n" +
+        "shimmers with potential, ready to manifest objects from pure will.\n\n" +
         "Type 'qcs' to open the creation menu.\n"
     );
     set_weight(1);

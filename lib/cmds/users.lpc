@@ -33,8 +33,8 @@ int main(string args) {
 
         // Role/title prefix shown to all
         string prefix = "";
-        if (upriv >= 2) prefix = "\033[1;31m[Admin]\033[0m ";
-        else if (upriv >= 1) prefix = "\033[1;34m[Wiz]\033[0m ";
+        if (upriv >= 2) prefix = "[Admin] ";
+        else if (upriv >= 1) prefix = "[Wiz] ";
 
         // Wizards+ see location
         if (priv >= 1) {

@@ -14,11 +14,13 @@
 - Verb-based combat (no numeric damage)
 - In-game file editor (ed)
 - QCS tools: room, npc, barkeep, vendor, door
+- WHO/users commands: ANSI rank flags (Admin=red, Domain=blue, Coding=cyan, RP=green); players see only population tier + staff count
+- Serena NPC in Splynn — paid remote viewing of online players (500 UC via `remoteview <name>`)
 - 152 commands (99 player-facing, 53 wizard/admin)
 
 ## Known Gaps (Next Sprint)
 - Spell activation not yet wired to combat loop (spells defined, cast command exists, damage routing incomplete)
-- Splynn domain has no room content (Rocky's bar, black market, catacombs all missing)
+- Splynn: Serena's Parlor added west of Moxim; further room content pending (Rocky's bar, black market, catacombs all missing)
 - Combat skill rolls not implemented (attacks always land)
 - Economy system not wired (shop daemons needed; buy/sell commands exist but need room-level shop objects)
 - Vehicle system not wired

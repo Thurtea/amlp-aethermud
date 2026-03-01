@@ -1,130 +1,137 @@
-// Who command
-// Wizards/admins: full player list with details
-// Regular players: population indicator only (Low/Medium/High)
+// lib/cmds/who.lpc
+// WHO command.
+// Players (upriv 0): population tier + staff count; no individual names.
+// Wizards (upriv >= 1): full list with colored rank flags.
+//
+// Rank flags (privilege_level + wizard_role):
+//   [Admin]    bold red   \033[1;31m  privilege_level 2 / role "admin"
+//   [Domain]   bold blue  \033[1;34m  role "domain"
+//   [Coding]   bold cyan  \033[1;36m  role "coding"
+//   [Roleplay] bold green \033[1;32m  role "rp" or any wiz without another role
+//
+// ANSI note: WHO command is an explicit exception to the no-ANSI rule.
 
 #include <globals.h>
 
+/* Return the colored rank flag string for a connected wizard object. */
+string rank_flag(object u) {
+    int upriv = 0;
+    string role = "";
+
+    if (function_exists("query_privilege_level", u))
+        upriv = u->query_privilege_level();
+    if (function_exists("query_property", u))
+        role = u->query_property("wizard_role");
+    if (!role) role = "";
+
+    if (upriv >= 2 || role == "admin")
+        return "\033[1;31m[Admin]\033[0m   ";
+    if (role == "domain")
+        return "\033[1;34m[Domain]\033[0m  ";
+    if (role == "coding")
+        return "\033[1;36m[Coding]\033[0m  ";
+    return "\033[1;32m[Roleplay]\033[0m";
+}
+
 int main(string arg) {
-    object *all_users, *wizards, *players;
-    object user;
-    int total_players;
-    string output, population;
+    object viewer = this_player();
+    if (!viewer) return 0;
 
-    user = previous_object();
-    all_users = users();
-    wizards = ({});
-    players = ({});
+    object *all_users = users();
+    if (!all_users) all_users = ({});
 
-    // Separate wizards from players
+    object *staff = ({});
+    int player_count = 0;
+    int admin_count  = 0;
+    int rp_count     = 0;
+
     foreach (object u in all_users) {
         if (!u) continue;
-        if (!u->query_name()) continue;
+        if (!function_exists("query_privilege_level", u)) continue;
 
-        if (u->query_privilege_level() >= 1) {
-            wizards += ({ u });
+        int upriv = u->query_privilege_level();
+
+        if (upriv >= 1) {
+            staff += ({ u });
+
+            string role = "";
+            if (function_exists("query_property", u))
+                role = u->query_property("wizard_role");
+            if (!role) role = "";
+
+            if (upriv >= 2 || role == "admin")
+                admin_count += 1;
+            if (role == "rp")
+                rp_count += 1;
         } else {
-            players += ({ u });
+            player_count += 1;
         }
     }
 
-    total_players = sizeof(players) + sizeof(wizards);
+    int total = player_count + sizeof(staff);
 
-    // Determine population indicator
-    if (total_players <= 5) {
+    string population;
+    if (total <= 10)
         population = "Low";
-    } else if (total_players <= 15) {
+    else if (total <= 30)
         population = "Medium";
-    } else {
+    else
         population = "High";
-    }
 
-    // Regular players: population indicator only
-    if (user->query_privilege_level() < 1) {
-        output = "\n";
-        output += "=== AETHERMUD ===\n\n";
-        output += "Population: " + population + "\n\n";
-        output += "=================\n\n";
-        tell_object(user, output);
+    int viewer_priv = viewer->query_privilege_level();
+
+    /* ---- Player view: population + staff availability only ---- */
+    if (viewer_priv < 1) {
+        string admin_label = (admin_count == 1) ? " Admin" : " Admins";
+        string rp_label    = (rp_count == 1)    ? " Roleplay Wizard" : " Roleplay Wizards";
+
+        write("\n");
+        write("===================================\n");
+        write("     AetherMUD -- Who's Online\n");
+        write("===================================\n");
+        write("\n");
+        write("  Players Online: " + population + "\n");
+        write("  (1-10 = Low, 11-30 = Medium, 31+ = High)\n");
+        write("\n");
+        write("  Staff available: " + admin_count + admin_label +
+              ", " + rp_count + rp_label + "\n");
+        write("\n");
+        write("-----------------------------------\n");
+        write("  Total connected: " + total + "\n");
+        write("\n");
         return 1;
     }
 
-    // Wizard/admin view: full player list
-    output = "\n";
-    output += "=== AETHERMUD - ONLINE PLAYERS & STAFF ===\n\n";
+    /* ---- Wizard view: full list with colored flags ---- */
+    write("\n");
+    write("===================================\n");
+    write("     AetherMUD -- Who's Online\n");
+    write("===================================\n");
+    write("\n");
 
-    // helper: remove color tokens like %^RED%^ for visible-width calculations
-    string strip_colours(string s) {
-        if (!s) return "";
-        return regreplace(s, "%\\^([A-Z_]+)%\\^", "", "g");
-    }
-
-    string pad_visible(string s, int width) {
-        string stripped = strip_colours(s);
-        int vis = strlen(stripped);
-        int pad = width - vis;
-        if (pad <= 0) return s;
-        return s + repeat_string(" ", pad);
-    }
-
-    // Wizards section
-    if (sizeof(wizards) > 0) {
-        output += "Wizards Online:\n";
-        output += "------------------------------------\n";
-
-        foreach (object wiz in wizards) {
-            string wiz_name = wiz->query_name();
-            string wiz_title = wiz->query_title() || "";
-            int idle_time = wiz->query_idle();
-            object wiz_env = environment(wiz);
-            string wiz_loc = wiz_env && function_exists("query_short", wiz_env) ? wiz_env->query_short() : (wiz_env ? file_name(wiz_env) : "Unknown");
-
-            string rank = "[WIZARD]";
-            if (wiz->query_privilege_level() >= 5) rank = "[ADMIN]";
-            else if (wiz->query_privilege_level() >= 3) rank = "[SENIOR WIZ]";
-
-            // Put role before name; align name by visible chars (strip colour tokens)
-            string display_name = capitalize(wiz_name) + ((idle_time > 120) ? " (idle)" : "");
-            display_name = pad_visible(display_name, 20);
-            output += "  " + rank + " " + display_name + " " + wiz_title + "\n";
-            output += sprintf("    (idle: %4d sec)  Loc: %s\n", idle_time, wiz_loc);
+    foreach (object u in staff) {
+        string uname = "";
+        if (function_exists("query_cap_name", u))
+            uname = u->query_cap_name();
+        if (!uname || uname == "") {
+            if (function_exists("query_name", u))
+                uname = capitalize(u->query_name());
         }
+        if (!uname || uname == "") uname = "Unknown";
 
-        output += "\n";
-    } else {
-        output += "No wizards currently online.\n\n";
+        write("  " + rank_flag(u) + " " + uname + "\n");
     }
 
-    // Players section
-    if (sizeof(players) > 0) {
-        output += "Players Online:\n";
-        output += "----------------\n";
+    if (sizeof(staff) == 0)
+        write("  (no staff online)\n");
 
-        foreach (object pl in players) {
-            string p_name = pl->query_name();
-            string p_title = pl->query_title() || "";
-            int p_idle = pl->query_idle();
-            object p_env = environment(pl);
-            string p_loc = p_env && function_exists("query_short", p_env) ? p_env->query_short() : (p_env ? file_name(p_env) : "Unknown");
+    write("\n");
+    write("  Players Online: " + population + "\n");
+    write("  (1-10 = Low, 11-30 = Medium, 31+ = High)\n");
+    write("\n");
+    write("-----------------------------------\n");
+    write("  Total connected: " + total + "\n");
+    write("\n");
 
-            string display_name = capitalize(p_name) + ((p_idle > 120) ? " (idle)" : "");
-            display_name = pad_visible(display_name, 20);
-            output += "  " + pad_visible("[PLAYER]", 12) + " " + display_name + " " + p_title + "\n";
-            output += sprintf("    (idle: %4d sec)  Loc: %s\n", p_idle, p_loc);
-        }
-
-        output += "\n";
-    } else {
-        output += "No players currently online.\n\n";
-    }
-
-    output += "------------------------------------\n";
-    output += "Population: " + population + "\n";
-    output += "====================================\n";
-    output += "\n[STAFF VIEW]\n";
-    output += "  Wizards: " + sizeof(wizards) + "\n";
-    output += "  Players: " + sizeof(players) + "\n";
-    output += "  Total: " + total_players + "\n\n";
-
-    tell_object(user, output);
     return 1;
 }

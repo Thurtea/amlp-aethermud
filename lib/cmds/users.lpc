@@ -1,13 +1,31 @@
 // /cmds/users.lpc
-// List all connected players (available to everyone)
+// List all connected players. Available to wizards; shows every name with
+// colored rank flags matching the WHO command convention.
+//
+// Rank flags (privilege_level + wizard_role):
+//   [Admin]    bold red   \033[1;31m  privilege_level 2 / role "admin"
+//   [Domain]   bold blue  \033[1;34m  role "domain"
+//   [Coding]   bold cyan  \033[1;36m  role "coding"
+//   [Roleplay] bold green \033[1;32m  role "rp" or any wiz without another role
+//   (none)                            players
+//
+// ANSI note: users.lpc follows the same exception as WHO.
 
 int main(string args) {
     object player = this_player();
     if (!player) return 0;
 
+    int priv = 0;
+    if (function_exists("query_privilege_level", player))
+        priv = player->query_privilege_level();
+
+    if (priv < 1) {
+        write("You need to be a wizard to use that command.\n");
+        return 1;
+    }
+
     object *all_users = users();
-    int count = sizeof(all_users);
-    int priv = player->query_privilege_level();
+    int count = (all_users ? sizeof(all_users) : 0);
 
     write("\n=== Connected Players ===\n\n");
 
@@ -20,36 +38,49 @@ int main(string args) {
         if (!u) continue;
 
         string uname = "";
-        string uloc = "";
-        string urole = "";
+        string uloc  = "";
+        string urole_str = "";
         int upriv = 0;
 
         if (function_exists("query_cap_name", u))
             uname = u->query_cap_name();
+        if (!uname || uname == "") {
+            if (function_exists("query_name", u))
+                uname = capitalize(u->query_name());
+        }
         if (!uname || uname == "") uname = "Unknown";
 
         if (function_exists("query_privilege_level", u))
             upriv = u->query_privilege_level();
 
-        // Role/title prefix shown to all
+        /* Colored rank prefix for wizards */
         string prefix = "";
-        if (upriv >= 2) prefix = "[Admin] ";
-        else if (upriv >= 1) prefix = "[Wiz] ";
+        if (upriv >= 1) {
+            string role = "";
+            if (function_exists("query_property", u))
+                role = u->query_property("wizard_role");
+            if (!role) role = "";
 
-        // Wizards+ see location
-        if (priv >= 1) {
-            object env = environment(u);
-            if (env && function_exists("query_short", env))
-                uloc = " - " + env->query_short();
+            if (upriv >= 2 || role == "admin")
+                prefix = "\033[1;31m[Admin]\033[0m    ";
+            else if (role == "domain")
+                prefix = "\033[1;34m[Domain]\033[0m   ";
+            else if (role == "coding")
+                prefix = "\033[1;36m[Coding]\033[0m   ";
+            else
+                prefix = "\033[1;32m[Roleplay]\033[0m ";
         }
 
-        // Wizards+ see role
-        if (priv >= 1 && function_exists("query_property", u)) {
-            string role = u->query_property("wizard_role");
-            if (role && role != "") urole = " (" + role + ")";
-        }
+        /* Location (wizards always see this) */
+        object env = environment(u);
+        if (env && function_exists("query_short", env))
+            uloc = " - " + env->query_short();
 
-        write("  " + prefix + uname + uloc + urole + "\n");
+        /* Role string for players (plain text label) */
+        if (upriv < 1)
+            urole_str = " (player)";
+
+        write("  " + prefix + uname + uloc + urole_str + "\n");
     }
 
     write("\n  Total: " + count + " player" + (count == 1 ? "" : "s") + " online.\n\n");

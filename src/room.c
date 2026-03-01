@@ -971,6 +971,30 @@ void room_init_world(void) {
         "stands in the center of the chaos, offering passage elsewhere.",
         12, -1, 13, 15, -1, -1);
 
+    /* Register room 11 in the path table under a virtual LPC path so that
+     * LPC rooms (e.g. serena_parlor) can navigate back here via add_exit().
+     * Also add a west flex_exit to Serena's parlor (overrides cardinal w=15). */
+    {
+        Room *r11 = &world_rooms[11];
+
+        /* Path-table registration: room_get_by_path("/domains/splynn/rooms/market_center")
+         * will return this C room without loading any LPC file. */
+        if (num_path_entries >= max_path_entries) {
+            max_path_entries = max_path_entries == 0 ? 64 : max_path_entries * 2;
+            path_table = realloc(path_table, sizeof(RoomPathEntry) * max_path_entries);
+        }
+        path_table[num_path_entries].path = strdup("/domains/splynn/rooms/market_center");
+        path_table[num_path_entries].room = r11;
+        num_path_entries++;
+
+        /* West flex_exit -> Serena's parlor (shadows cardinal w=15 which was Bazaar).
+         * Players reach the Bazaar from room 17 (Temple, east) or room 16 (Docks, north). */
+        r11->flex_exits = calloc(1, sizeof(RoomExit));
+        r11->flex_exits[0].direction   = strdup("west");
+        r11->flex_exits[0].target_path = strdup("/domains/splynn/rooms/serena_parlor");
+        r11->num_flex_exits = 1;
+    }
+
     init_room(12, "Slave Market",
         "Rows of cages and pens hold beings of every species. Slavers\n"
         "call out prices while buyers inspect the merchandise with cold\n"

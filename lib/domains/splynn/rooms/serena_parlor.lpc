@@ -1,0 +1,216 @@
+// lib/domains/splynn/rooms/serena_parlor.lpc
+// Serena's Parlor - private reading room off the Splynn Market Center
+//
+// Connected west from Splynn Market Center (C room 11).
+// C room 11 is registered in path_table as /domains/splynn/rooms/market_center
+// so the east exit here resolves back to the market floor.
+//
+// Commands handled here:
+//   remoteview <name>  - 500 UC; shows target's current location
+//   say price/cost/serena/service - Serena responds with her price
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Serena's Parlor");
+    set_long(
+        "A candlelit alcove draped in deep violet and black silks, hidden from\n"
+        "the roar of the Splynn market by a heavy curtain. Tall pillar candles\n"
+        "burn at the corners of a circular table of polished black glass that\n"
+        "reflects the flames in wavering doubles. The air is thick with incense --\n"
+        "night blossoms and something faintly electric. A bronze censer on a\n"
+        "wrought-iron stand releases slow curls of smoke that never quite settle.\n"
+        "Serena the Psi-Sensitive sits at the table, her pale eyes half-closed.\n"
+        "Cushioned chairs ring the table. The market floor lies to the east.\n"
+    );
+
+    add_exit("east", "/domains/splynn/rooms/market_center");
+
+    set_property("light", 1);
+    set_property("indoors", 1);
+
+    /* Spawn Serena */
+    object serena;
+    catch { serena = clone_object("/domains/splynn/npcs/serena"); };
+    if (serena) {
+        if (function_exists("move", serena))
+            serena->move(this_object());
+        else
+            move_object(serena, this_object());
+    }
+}
+
+/* ================================================================
+ * local_command() - intercepts room-level commands before global registry
+ * Priority 4 in command.lpc's execute_command()
+ * ================================================================ */
+int local_command(string verb, string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    /* ---- REMOTEVIEW ---- */
+    if (verb == "remoteview") {
+        if (!args || args == "") {
+            tell_object(player, "Remoteview whom? Speak a name.\n");
+            return 1;
+        }
+
+        /* Find Serena - must be present or service unavailable */
+        object serena = 0;
+        object *here = all_inventory(this_object());
+        foreach (object ob in here) {
+            if (!ob) continue;
+            if (function_exists("query_name", ob)) {
+                if (ob->query_name() == "serena") {
+                    serena = ob;
+                    break;
+                }
+            }
+        }
+
+        if (!serena) {
+            tell_object(player, "The parlor is empty. There is no one here to help you.\n");
+            return 1;
+        }
+
+        /* Locate the named player */
+        string target_name = lower_case(args);
+        object target = 0;
+        object *all_users = users();
+        if (all_users) {
+            foreach (object u in all_users) {
+                if (!u) continue;
+                string uname = "";
+                if (function_exists("query_name", u))
+                    uname = u->query_name();
+                if (lower_case(uname) == target_name) {
+                    target = u;
+                    break;
+                }
+            }
+        }
+
+        if (!target) {
+            tell_object(player,
+                "Serena presses her fingertips to her temples. After a long\n"
+                "moment she opens her eyes and shakes her head slowly.\n"
+                "\"That one is not present in this world. I cannot reach them.\"\n");
+            return 1;
+        }
+
+        if (target == player) {
+            tell_object(player,
+                "Serena raises an eyebrow. \"You wish to see yourself?\"\n"
+                "She gestures toward a fold in the silk. \"Try a mirror, dear.\"\n");
+            return 1;
+        }
+
+        /* Credit check */
+        int cost = 500;
+        int have = 0;
+        if (function_exists("query_universal_credits", player))
+            have = player->query_universal_credits();
+
+        if (have < cost) {
+            tell_object(player,
+                "Serena says: \"Five hundred credits for the sight.\n"
+                "You carry only " + have + ". Return when you have the coin.\"\n");
+            return 1;
+        }
+
+        /* Deduct credits */
+        player->remove_universal_credits(cost);
+
+        /* Gather target location info */
+        object target_env = environment(target);
+        string room_name = "an unknown location";
+        string room_desc = "The details are unclear -- shifting, indistinct.";
+
+        if (target_env) {
+            if (function_exists("query_short", target_env))
+                room_name = target_env->query_short();
+            if (function_exists("query_long", target_env))
+                room_desc = target_env->query_long();
+        }
+
+        string target_cap = "";
+        if (function_exists("query_cap_name", target))
+            target_cap = target->query_cap_name();
+        if (!target_cap || target_cap == "")
+            target_cap = capitalize(args);
+
+        /* Vision output */
+        tell_object(player,
+            "\nSerena places both palms flat on the black glass table. The candles\n"
+            "gutter and dim. A chill passes through the air. Her eyes go wide and\n"
+            "blank -- and then the vision comes to you as well, unbidden:\n\n");
+
+        tell_object(player,
+            "=== Remote Vision: " + target_cap + " ===\n\n"
+            "Location: " + room_name + "\n\n");
+
+        tell_object(player, room_desc + "\n");
+
+        tell_object(player,
+            "\n=== The vision fades ===\n\n"
+            "The candles brighten again. Serena exhales slowly.\n"
+            "\"You have seen. Five hundred credits, as agreed.\"\n\n");
+
+        /* Broadcast to others in the parlor */
+        foreach (object ob in here) {
+            if (!living(ob)) continue;
+            if (ob == player) continue;
+            if (ob == serena) continue;
+            string intro = "";
+            if (function_exists("query_introduction_name", player))
+                intro = player->query_introduction_name(ob);
+            if (!intro || intro == "") intro = "someone";
+            tell_object(ob,
+                "The candles gutter as Serena performs a remote viewing for " +
+                intro + ".\n");
+        }
+
+        return 1;
+    }
+
+    /* ---- SAY trigger: Serena responds to price/service inquiries ---- */
+    if (verb == "say") {
+        if (!args || args == "") return 0;
+        string lower_args = lower_case(args);
+
+        int is_inquiry = 0;
+        if (strsrch(lower_args, "price") >= 0)  is_inquiry = 1;
+        if (strsrch(lower_args, "cost")  >= 0)  is_inquiry = 1;
+        if (strsrch(lower_args, "serena") >= 0) is_inquiry = 1;
+        if (strsrch(lower_args, "service") >= 0) is_inquiry = 1;
+        if (strsrch(lower_args, "see") >= 0)    is_inquiry = 1;
+        if (strsrch(lower_args, "view") >= 0)   is_inquiry = 1;
+        if (strsrch(lower_args, "find") >= 0)   is_inquiry = 1;
+        if (strsrch(lower_args, "where") >= 0)  is_inquiry = 1;
+
+        if (is_inquiry) {
+            object *objs = all_inventory(this_object());
+            int found = 0;
+            foreach (object ob in objs) {
+                if (!ob) continue;
+                if (function_exists("query_name", ob)) {
+                    if (ob->query_name() == "serena") {
+                        found = 1;
+                        break;
+                    }
+                }
+            }
+            if (found) {
+                tell_object(player,
+                    "Serena's pale eyes drift to you. She speaks in a low, clear voice.\n"
+                    "\"Five hundred credits. Speak 'remoteview <name>' and I will\n"
+                    "show you where they walk in this world.\"\n");
+            }
+        }
+        return 0;  /* Let say command broadcast normally */
+    }
+
+    return 0;
+}

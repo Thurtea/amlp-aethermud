@@ -1,0 +1,48 @@
+// lib/domains/splynn/npcs/serena.lpc
+// Serena - Psi-Sensitive seer in Splynn Dimensional Market
+//
+// Spawned by serena_parlor.lpc. Offers remote viewing for 500 UC via
+// the "remoteview <name>" command (handled by the parlor room's
+// local_command, which checks environment for her presence).
+
+inherit "/std/npc";
+
+void create() {
+    ::create();
+
+    set_name("serena");
+    set_id(({"serena", "woman", "psi-sensitive", "seer", "psychic", "seeress"}));
+    set_short("Serena the Psi-Sensitive");
+    set_long(
+        "A slender woman of indeterminate age, dressed in deep violet robes\n"
+        "trimmed with silver thread. Her eyes — an unsettling pale grey — have\n"
+        "an unfocused quality, as though she perceives layers of reality\n"
+        "invisible to ordinary senses. A faint shimmer of psychic energy\n"
+        "surrounds her like a heat mirage. She glances at you briefly,\n"
+        "acknowledges your presence with a slight tilt of her head, then\n"
+        "returns her gaze to some distant, unseen horizon.\n"
+    );
+
+    set_gender("female");
+    set_race("human");
+    set_level(10);
+    set_hp(80);
+    set_aggro(0);
+
+    set_position_text("sits at the black glass table, her eyes half-closed in concentration.");
+
+    set_stat("intelligence quotient", 18);
+    set_stat("mental endurance", 22);
+    set_stat("mental affinity", 24);
+    set_stat("physical beauty", 17);
+
+    set_property("no_attack", 1);
+    set_property("no_follow", 1);
+}
+
+string query_talk() {
+    return "Serena's pale eyes focus on you.\n"
+        "\"I read what the ley lines carry. For five hundred credits,\n"
+        "I will show you where another soul walks in this world.\n"
+        "Speak 'remoteview <name>' when you wish to see.\"\n";
+}

@@ -1,0 +1,37 @@
+// lib/domains/splynn/rooms/splynn_library.lpc
+// Splynn Public Archive — east of the Splynn Market Center (C room 11).
+//
+// Connected via flex_exit east from room 11; west exit returns to
+// /domains/splynn/rooms/market_center (the path alias for room 11).
+// East exit leads to the Enhancement Chamber (stat_chamber).
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Splynn Public Archive");
+    set_long(
+        "Rows of shelves holding data-slates, bound manuscripts, and recovered\n"
+        "pre-Rifts documents stretch from floor to ceiling. A reading table sits\n"
+        "under harsh white lights in the center of the room. The archive is\n"
+        "surprisingly well-maintained for a city like Splynn. A glass case near\n"
+        "the door holds a single scroll.\n"
+    );
+
+    add_exit("west", "/domains/splynn/rooms/market_center");
+    add_exit("east", "/domains/splynn/rooms/stat_chamber");
+
+    set_property("light", 1);
+    set_property("indoors", 1);
+
+    /* Spawn the spell scroll in the glass case (in-room) */
+    object scroll;
+    catch { scroll = clone_object("/domains/splynn/obj/spell_scroll"); };
+    if (scroll) {
+        if (function_exists("move", scroll))
+            scroll->move(this_object());
+        else
+            move_object(scroll, this_object());
+    }
+}

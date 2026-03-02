@@ -989,13 +989,16 @@ void room_init_world(void) {
 
         /* West flex_exit -> Serena's parlor (shadows cardinal w=15 which was Bazaar).
          * Players reach the Bazaar from room 17 (Temple, east) or room 16 (Docks, north).
-         * South flex_exit -> Rocky's Bar (cardinal s=-1, previously blocked). */
-        r11->flex_exits = calloc(2, sizeof(RoomExit));
+         * South flex_exit -> Rocky's Bar (cardinal s=-1, previously blocked).
+         * East flex_exit -> Splynn Public Archive (cardinal e=-1, previously blocked). */
+        r11->flex_exits = calloc(3, sizeof(RoomExit));
         r11->flex_exits[0].direction   = strdup("west");
         r11->flex_exits[0].target_path = strdup("/domains/splynn/rooms/serena_parlor");
         r11->flex_exits[1].direction   = strdup("south");
         r11->flex_exits[1].target_path = strdup("/domains/splynn/rooms/rockys_bar");
-        r11->num_flex_exits = 2;
+        r11->flex_exits[2].direction   = strdup("east");
+        r11->flex_exits[2].target_path = strdup("/domains/splynn/rooms/splynn_library");
+        r11->num_flex_exits = 3;
     }
 
     init_room(12, "Slave Market",

@@ -1,0 +1,45 @@
+// lib/domains/splynn/obj/spell_scroll.lpc
+// An ancient spell scroll — single-use; teaches the reader a random spell.
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+
+    set_short("an ancient spell scroll");
+    set_long(
+        "A rolled parchment sealed with black wax. The text inside shimmers faintly.\n"
+    );
+
+    set_id(({ "scroll", "spell scroll", "ancient scroll", "parchment" }));
+    set_property("no_sell", 1);
+}
+
+int do_read(object player) {
+    if (!player) return 0;
+
+    if (function_exists("query_property", player) &&
+        player->query_property("spell_scroll_used")) {
+        tell_object(player,
+            "The scroll is blank. Its knowledge has already passed into you.\n");
+        return 1;
+    }
+
+    string *spells;
+    spells = ({ "armor", "fire_bolt", "heal", "shadow_cloak", "force_bolt", "light" });
+
+    string chosen;
+    chosen = spells[random(sizeof(spells))];
+
+    if (function_exists("learn_spell", player))
+        player->learn_spell(chosen);
+
+    if (function_exists("set_property", player))
+        player->set_property("spell_scroll_used", 1);
+
+    tell_object(player,
+        "The text burns itself into your mind, then fades from the page. "
+        "You have learned: " + chosen + ".\n");
+
+    return 1;
+}

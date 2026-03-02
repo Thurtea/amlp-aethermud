@@ -1593,6 +1593,26 @@ int query_dodge_bonus() {
     return bonus;
 }
 
+int query_combat_skill() {
+    int v;
+    v = 0;
+    if (skills) {
+        v = skills["combat"];
+        if (!v) v = 0;
+    }
+    return (v > 0) ? v : 5;
+}
+
+int query_dodge() {
+    int v;
+    v = 0;
+    if (skills) {
+        v = skills["dodge"];
+        if (!v) v = 0;
+    }
+    return (v > 0) ? v : 3;
+}
+
 // Query damage type (SDC or MDC)
 int query_damage_type() {
     // Check wielded weapon

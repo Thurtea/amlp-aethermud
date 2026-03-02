@@ -17,11 +17,15 @@
 - WHO/users commands: ANSI rank flags (Admin=red, Domain=blue, Coding=cyan, RP=green); players see only population tier + staff count
 - Serena NPC in Splynn — paid remote viewing of online players (500 UC via `remoteview <name>`)
 - 152 commands (99 player-facing, 53 wizard/admin)
+- Splynn Catacombs: train platform, 4 dungeon rooms, skeleton warriors, Obsidian Blade (25% rare spawn)
+- Juicer conversion clinic (Doc Voss, 10000 UC, permanent psionic/magic lock)
+- Splynn Library + Spell-Teaching Scroll (one-use per player)
+- Stat Enhancement Chamber (one-use +1 stat per player)
+- Combat skill rolls: 1d20 + combat_skill vs 10 + dodge
 
 ## Known Gaps (Next Sprint)
 - Spell activation not yet wired to combat loop (spells defined, cast command exists, damage routing incomplete)
-- Splynn: Serena's Parlor (west), Rocky's Bar (south), South Alley + Black Market (south of Rocky's) all wired; catacombs pending
-- Combat skill rolls not implemented (attacks always land)
+- Splynn: all major areas wired; vehicle-train to Shemarria and Coven Base pending
 - Economy: shop daemon stub in lib/std/shop.lpc — buy/sell wired; room-level shop objects needed per area
 - Vehicle system not wired
 - Juicer OCC conversion process not in-game (OCC defined, process room/NPC not built)

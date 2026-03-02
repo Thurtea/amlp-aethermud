@@ -748,6 +748,11 @@ int combat_calculate_strike_bonus(CombatParticipant *p, bool is_melee) {
     return bonus;
 }
 
+static int hit_roll(int att_skill, int def_dodge) {
+    int roll = (rand() % 20) + 1 + att_skill;
+    return (roll >= 10 + def_dodge) ? 1 : 0;
+}
+
 int combat_calculate_damage(int weapon_dice, int weapon_sides, int ps_bonus) {
     int damage = combat_roll_dice(weapon_dice, weapon_sides);
     damage += ps_bonus;
@@ -795,6 +800,22 @@ DamageResult combat_attack_melee(CombatParticipant *attacker, CombatParticipant 
         combat_send_to_participant(defender, msg_def);
         room_broadcast(attacker->session && attacker->session->current_room ? attacker->session->current_room : NULL, msg_room, NULL);
         return result;
+    }
+
+    /* Skill-roll gate: 1d20 + att_skill must meet 10 + def_dodge */
+    {
+        int att_skill = combat_calculate_strike_bonus(attacker, true);
+        int def_dodge = combat_calculate_dodge_bonus(defender);
+        if (att_skill <= 0) att_skill = 5;
+        if (def_dodge <= 0) def_dodge = 3;
+        if (!hit_roll(att_skill, def_dodge)) {
+            char msg_att[128], msg_def[128];
+            snprintf(msg_att, sizeof(msg_att), "You swing at %s but fail to connect.\n", defender->name);
+            snprintf(msg_def, sizeof(msg_def), "%s swings at you but fails to connect.\n", attacker->name);
+            combat_send_to_participant(attacker, msg_att);
+            combat_send_to_participant(defender, msg_def);
+            return result;
+        }
     }
 
     // Calculate damage

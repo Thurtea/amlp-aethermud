@@ -1,0 +1,73 @@
+// lib/domains/splynn/rooms/stat_chamber.lpc
+// The Enhancement Chamber — east of the Splynn Public Archive.
+//
+// One-time use: randomly raises a player stat by 1. Tracks use via a
+// player property so it cannot be exploited repeatedly.
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("The Enhancement Chamber");
+    set_long(
+        "A cylindrical room of brushed metal. A single reclining chair sits at the\n"
+        "center, connected to a ring of humming machines. A plaque on the wall reads:\n"
+        "  \"ONE SESSION PER VISITOR. NO EXCEPTIONS. RESULTS VARY.\"\n"
+    );
+
+    add_exit("west", "/domains/splynn/rooms/splynn_library");
+
+    set_property("light", 1);
+    set_property("indoors", 1);
+}
+
+int local_command(string verb, string arg) {
+    if (verb != "sit" && verb != "use") return 0;
+    if (!arg) return 0;
+    if (arg != "chair" && arg != "machine") return 0;
+
+    object player;
+    player = this_player();
+    if (!player) return 0;
+
+    if (function_exists("query_property", player) &&
+        player->query_property("stat_chamber_used")) {
+        tell_object(player,
+            "The machines register you and go dark. "
+            "You have already had your session.\n");
+        return 1;
+    }
+
+    string *stat_list;
+    stat_list = ({ "str", "dex", "con", "int", "wis" });
+
+    string chosen_stat;
+    chosen_stat = stat_list[random(sizeof(stat_list))];
+
+    if (function_exists("query_stat", player) &&
+        function_exists("set_stat", player)) {
+        int old_val;
+        old_val = player->query_stat(chosen_stat);
+        player->set_stat(chosen_stat, old_val + 1);
+    }
+
+    if (function_exists("set_property", player))
+        player->set_property("stat_chamber_used", 1);
+
+    tell_object(player,
+        "The machines hum to life around you. A warm current flows through\n"
+        "your body as the systems calibrate to your physiology. When it is\n"
+        "over you feel subtly different — sharper, stronger, more resilient.\n"
+        "You have gained +1 to " + chosen_stat + ".\n");
+
+    tell_room(environment(player),
+        player->query_cap_name() + " sits in the chair. The machines hum "
+        "briefly, then fall silent.\n",
+        ({ player }));
+
+    if (function_exists("save_player", player))
+        player->save_player();
+
+    return 1;
+}

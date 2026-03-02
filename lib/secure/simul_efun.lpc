@@ -154,6 +154,14 @@ string basename_path(path) {
 // OBJECT UTILITIES
 // ============================================================
 
+/* object_name(ob) — return the load path of ob (equivalent to file_name).
+ * The driver registers file_name() natively but not object_name(); this
+ * stub makes both names available to LPC callers. */
+string object_name(ob) {
+    if(!objectp(ob)) return "(void)";
+    return file_name(ob);
+}
+
 string obj_name(ob) {
     if(!objectp(ob)) return "(void)";
     string n = 0;

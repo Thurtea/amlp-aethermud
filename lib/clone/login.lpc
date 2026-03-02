@@ -166,7 +166,6 @@ void create_character() {
 void enter_game() {
     object user;
     mixed err;
-    int is_first_player;
 
     /* For returning players: reuse the already-loaded object from get_password().
      * For new characters created via the legacy path (creating_new=1): build fresh. */
@@ -174,15 +173,6 @@ void enter_game() {
         user = _loaded_player;
         _loaded_player = 0;
     } else {
-        /* Determine if this is the first player by checking save directory */
-        is_first_player = 0;
-        if (file_size(DIR_SAVE + "/players") == -2) {
-            string *files = get_dir(DIR_SAVE + "/players/*");
-            if (!files || sizeof(files) == 0) {
-                is_first_player = 1;
-            }
-        }
-
         err = catch(user = new(USER_OB));
         if (err || !user) {
             write("Failed to create user object.\n");
@@ -194,39 +184,6 @@ void enter_game() {
         user->set_name(player_name);
         user->set_race(DEFAULT_RACE);
         user->set_language(DEFAULT_LANGUAGE, DEFAULT_FLUENCY);
-
-        /* If this is the very first created player, make them Admin */
-        if (is_first_player) {
-            // ...existing code...
-            user->set_wizard_level(ADMIN_LEVEL);
-
-        /* Ensure wiztool is attached. If set_wizard_level didn't attach for
-         * some reason, clone and attach explicitly and log outcomes. */
-        catch {
-            if (!objectp(user->query_wiztool())) {
-                // ...existing code...
-                object wt = 0;
-                catch(wt = clone_object(WIZTOOL));
-                if (objectp(wt)) {
-                    // ...existing code...
-                    int res = 0;
-                    if (function_exists("attach_wiztool", user)) {
-                        catch(res = user->attach_wiztool(wt));
-                        // ...existing code...
-                    } else if (function_exists("attach", wt)) {
-                        catch(res = (int)wt->attach(user));
-                        // ...existing code...
-                    } else {
-                        write_file("/log/server.log", sprintf("[DEBUG login] no attach path available for %s\n", player_name));
-                    }
-                } else {
-                    write_file("/log/server.log", sprintf("[DEBUG login] failed to clone wiztool for %s\n", player_name));
-                }
-            } else {
-                write_file("/log/server.log", sprintf("[DEBUG login] wiztool already attached for %s\n", player_name));
-            }
-        };
-    }
     } /* end else (new/fallback player) */
 
     exec(user, this_object());

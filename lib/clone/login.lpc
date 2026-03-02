@@ -196,7 +196,7 @@ void enter_game() {
         user->set_language(DEFAULT_LANGUAGE, DEFAULT_FLUENCY);
 
         /* If this is the very first created player, make them Admin */
-        if (player_name == "Admin" || creating_new == 1 || is_first_player) {
+        if (is_first_player) {
             // ...existing code...
             user->set_wizard_level(ADMIN_LEVEL);
 

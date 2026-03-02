@@ -22,14 +22,14 @@
 - Splynn Library + Spell-Teaching Scroll (one-use per player)
 - Stat Enhancement Chamber (one-use +1 stat per player)
 - Combat skill rolls: 1d20 + combat_skill vs 10 + dodge
-- Spells wired to combat loop (cast.lpc → cast_spell() → receive_spell_damage / receive_healing)
+- Spells wired to combat: cast.lpc → cast_spell() → receive_spell_damage / receive_healing
+- Smuggler UC/BMC exchange command (lib/cmds/exchange.lpc)
+- QCS mercbase subcommand (qcs create mercbase <name> generates 4-room base)
 
 ## Known Gaps (Next Sprint)
-- Splynn: all major areas wired; vehicle-train to Shemarria and Coven Base pending
-- Economy: shop daemon stub in lib/std/shop.lpc — buy/sell wired; room-level shop objects needed per area
+- Splynn: all major areas wired; Shemarria rail connection and Coven Base pending
+- Economy: shop.lpc wired; black market buy/sell live (BMC currency); barkeep orders handled natively by qcs/barkeep
 - Vehicle system not wired
-- Merc group base system not implemented
-- Smuggler UC/BMC exchange ability not implemented
 
 ## Design Seeds (From Original Mud — Build When Ready)
 - **Rocky's Bar (Splynn)**: Barkeep NPC; use `qcs create barkeep rocky`.

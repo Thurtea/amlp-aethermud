@@ -2,11 +2,13 @@
 // Black Market Stall — west of the South Alley, entered via knock-pillar
 //
 // The Fence (black_market_vendor) is spawned here and sells:
-//   predator armor — 800 UC
-//   net gun        — 1200 UC
+//   predator armor — 800 BMC
+//   net gun        — 1200 BMC
 // Use "list" to see stock, "buy <item>" to purchase.
+// Inherits shop.lpc (which already inherits room.lpc) for the full
+// buy.lpc interface: find_item, has_item, get_price_bmc, purchase_item.
 
-inherit "/lib/std/room.lpc";
+inherit "/lib/std/shop.lpc";
 
 void create() {
     ::create();
@@ -27,6 +29,14 @@ void create() {
     set_property("light", 1);
     set_property("indoors", 1);
     set_property("no_magic", 0);
+
+    /* Shop: BMC-only, unlimited stock */
+    set_currency_type(1);
+    set_shopkeeper("the Fence");
+    add_for_sale_bmc("predator armor",
+        "/domains/splynn/obj/predator_armor", 800, -1);
+    add_for_sale_bmc("net gun",
+        "/domains/splynn/obj/net_gun", 1200, -1);
 
     /* Spawn the Fence */
     object vendor;

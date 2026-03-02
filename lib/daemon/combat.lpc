@@ -240,15 +240,26 @@ void process_combat_round(int combat_id) {
         
         // Check if combatant is still in same room as their target
         object target = combatant->query_combat_target();
-        if (!target || !target->is_alive() || 
+        if (!target || !target->is_alive() ||
             environment(combatant) != environment(target)) {
-            // Target lost/dead/fled - pick new target or end combat for this combatant
-            object new_target = find_new_target(combatant, active_combatants);
+            // Target is gone or in another room - try to find
+            // a same-room replacement
+            object new_target;
+            new_target = find_new_target(combatant, active_combatants);
             if (new_target) {
                 combatant->set_combat_target(new_target);
                 target = new_target;
+                tell_object(combatant,
+                    "Your target fled! Now fighting " +
+                    new_target->query_cap_name() + ".\n");
             } else {
+                // No valid same-room target - remove this combatant
+                // from combat entirely
                 combatant->set_combat_target(0);
+                active_combatants -= ({ combatant });
+                tell_object(combatant,
+                    "Peace has been restored by divine intervention.\n" +
+                    "Combat ended.\n");
                 continue;
             }
         }
@@ -308,7 +319,8 @@ void continue_attacks(int combat_id, object attacker, int remaining) {
     
     if (attacker->is_alive()) {
         object target = attacker->query_combat_target();
-        if (target && target->is_alive()) {
+        if (target && target->is_alive() &&
+                environment(attacker) == environment(target)) {
             perform_single_attack(combat_id, attacker, target);
             
             mapping combat = active_combats[combat_id];
@@ -321,15 +333,21 @@ void continue_attacks(int combat_id, object attacker, int remaining) {
 
 // Find a new target for a combatant
 object find_new_target(object combatant, object *available) {
+    object potential;
+    int i;
     if (!combatant || !available) return 0;
-    
-    // Find first valid target that isn't self
-    foreach (object potential : available) {
-        if (potential != combatant && potential->is_alive()) {
+
+    i = 0;
+    while (i < sizeof(available)) {
+        potential = available[i];
+        if (potential && potential != combatant &&
+            potential->is_alive() &&
+            environment(potential) == environment(combatant)) {
             return potential;
         }
+        i++;
     }
-    
+
     return 0;
 }
 
@@ -341,6 +359,7 @@ object find_new_target(object combatant, object *available) {
 void perform_single_attack(int combat_id, object attacker, object defender) {
     if (!attacker || !defender) return;
     if (!attacker->is_alive() || !defender->is_alive()) return;
+    if (environment(attacker) != environment(defender)) return;
     
     // Get attack verb based on archetype
     string archetype = attacker->query_combat_archetype();

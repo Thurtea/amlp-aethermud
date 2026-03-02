@@ -1090,6 +1090,20 @@ void chargen_complete(PlayerSession *sess) {
     }
     /* --- end first_admin.txt gate --- */
 
+    /* If first-boot admin, move to orientation room at C level so cmd_look
+     * and movement use the correct room.  LPC-level placement is handled
+     * separately by _do_first_boot_orientation() in player.lpc. */
+    if (sess->needs_orientation) {
+        Room *orient_room = room_get_by_path("/domains/start/orientation");
+        if (orient_room) {
+            if (sess->current_room) {
+                room_remove_player(sess->current_room, sess);
+            }
+            sess->current_room = orient_room;
+            room_add_player(orient_room, sess);
+        }
+    }
+
     send_to_player(sess, "\n");
 
     /* Auto-look at starting room */

@@ -49,6 +49,9 @@ private string working_directory;  // Current working directory for cd/pwd
 // Pending secondary skill selections (awaiting wizard review)
 private string *pending_skills;
 
+// First-boot orientation flag (1 = needs orientation room)
+private int needs_orientation;
+
 // Initialization
 void create() {
     // Initialize parent class fields directly to avoid scope resolution bug
@@ -335,34 +338,43 @@ void complete_promotion() {
 
 // Called by the C driver (process_chargen_state) immediately after a new
 // character's chargen completes.  needs_orientation=1 for new players.
-void enter_world(int needs_orientation) {
+void enter_world(int do_orientation) {
     object start_room;
 
-    if (needs_orientation) {
-        start_room = clone_object("/domains/start/orientation");
+    // If _do_first_boot_orientation() already placed us (via
+    // set_privilege_level), skip duplicate placement.
+    if (environment) {
+        if (function_exists("look", this_object())) {
+            this_object()->look();
+        }
+        return;
+    }
+
+    if (do_orientation) {
+        catch { start_room = clone_object("/domains/start/orientation"); };
         if (!start_room) {
             start_room = find_object("/domains/start/room/welcome");
             if (!start_room)
-                start_room = clone_object("/domains/start/room/welcome");
+                catch { start_room = clone_object("/domains/start/room/welcome"); };
         }
     } else if (this_object()->query_privilege_level() >= 1) {
         /* Returning wizard: try their personal workroom first */
         string wiz_name = lower_case(this_object()->query_name());
         string workroom_path = "/domains/wizard/" + wiz_name + "/workroom";
         object workroom = find_object(workroom_path);
-        if (!workroom) workroom = clone_object(workroom_path);
+        if (!workroom) catch { workroom = clone_object(workroom_path); };
         if (workroom) {
             start_room = workroom;
         } else {
             /* Workroom not found, fall back to welcome room */
             start_room = find_object("/domains/start/room/welcome");
             if (!start_room)
-                start_room = clone_object("/domains/start/room/welcome");
+                catch { start_room = clone_object("/domains/start/room/welcome"); };
         }
     } else {
         start_room = find_object("/domains/start/room/welcome");
         if (!start_room)
-            start_room = clone_object("/domains/start/room/welcome");
+            catch { start_room = clone_object("/domains/start/room/welcome"); };
     }
 
     if (start_room) {
@@ -373,8 +385,9 @@ void enter_world(int needs_orientation) {
         this_object()->look();
     }
 
-    if (needs_orientation) {
-        object arch = clone_object("/npc/archimedes");
+    if (do_orientation) {
+        object arch;
+        catch { arch = clone_object("/npc/archimedes"); };
         if (arch && start_room) {
             move_object(arch, start_room);
         }
@@ -733,6 +746,14 @@ void set_pending_skills(string *paths) {
 
 string *query_pending_skills() {
     return pending_skills;
+}
+
+int query_needs_orientation() {
+    return needs_orientation;
+}
+
+void set_needs_orientation(int val) {
+    needs_orientation = val;
 }
 
 // Command processing - CRITICAL FUNCTION

@@ -1,0 +1,59 @@
+// lib/domains/splynn/npcs/rocky.lpc
+// Rocky — barkeep at Rocky's Bar, Splynn
+//
+// Gruff human male, level 8, non-aggro.
+// Inherits the full QCS barkeep template (list / menu / order commands).
+// Carries a battered PPE talisman in his inventory — not for sale.
+
+inherit "/std/qcs/barkeep";
+
+void create() {
+    ::create();
+
+    set_name("rocky");
+    set_id("rocky");
+    add_id("barkeep");
+    add_id("bartender");
+    add_id("bar keep");
+    add_id("man");
+
+    set_short("Rocky the barkeep");
+    set_long(
+        "A stocky human male with a shaved head and a scar that runs from\n"
+        "his left ear to the corner of his mouth. He wears a leather apron\n"
+        "stained with a dozen different liquids and keeps a polishing rag\n"
+        "tucked in his belt. His eyes sweep the room with a professional\n"
+        "wariness — the look of someone who has thrown out worse than you.\n"
+    );
+
+    set_gender("male");
+    set_race("human");
+    set_level(8);
+    set_hp(120);
+    set_aggro(0);
+
+    set_position_text("stands behind the bar, polishing a glass with the same rag he uses on everything.");
+
+    set_stat("physical strength",   18);
+    set_stat("physical endurance",  16);
+    set_stat("physical beauty",      8);
+    set_stat("intelligence quotient", 12);
+    set_stat("mental affinity",     10);
+
+    set_property("no_attack", 1);
+    set_property("no_follow", 1);
+
+    /* Drinks */
+    add_drink("splynn stout",  50,  "A dark bitter brew from the market depths.");
+    add_drink("rift whiskey", 100,  "A single-malt that burns like plasma fire.");
+    add_drink("alien nectar", 200,  "A shimmering violet liquid of unknown origin.");
+
+    set_greeting("Yeah? What do ya want? We got Splynn Stout, Rift Whiskey, and Alien Nectar. Type 'list' to see prices.");
+
+    set_shop_name("Rocky's Bar");
+}
+
+/* Override to give Rocky a gruffer refusal */
+string query_talk() {
+    return "Rocky grunts without looking up. \"Drink or leave. I'm not a tour guide.\"\n";
+}

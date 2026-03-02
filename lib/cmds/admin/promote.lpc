@@ -1,132 +1,125 @@
 // /lib/cmds/admin/promote.lpc
 // Promote command - Grant wizard/admin privileges to a player
 //
-// Usage: promote <player> <level>
-// Levels: 0 = Player, 1 = Wizard, 2 = Admin
+// Usage: promote <player> <role>
+// Roles:
+//   admin   → privilege_level 2  + wizard_role "admin"
+//   domain  → privilege_level 1  + wizard_role "domain"
+//   coding  → privilege_level 1  + wizard_role "coding"
+//   rp      → privilege_level 1  + wizard_role "rp"
 //
-// On promotion to wizard+:
-//   1. Sets privilege level
-//   2. Assigns default wizard role
-//   3. Creates personal workroom if needed
-//   4. Clones standard wizkit to inventory
-//   5. Teleports to workroom
+// On first promotion to wizard+:
+//   1. Sets privilege level + wizard_role atomically
+//   2. Creates personal workroom if needed
+//   3. Clones role-appropriate wizkit to inventory
+//   4. Teleports to workroom
 
 #include <globals.h>
 
 int main(string arg) {
     object user, target;
-    string target_name, level_str;
+    string target_name, role;
     int new_level, user_level;
 
     user = this_player();
     user_level = user->query_privilege_level();
 
-    // Check if user has permission
     if (user_level < PRIV_WIZARD) {
         tell_object(user, "You must be at least a Wizard to use this command.\n");
         return 1;
     }
 
-    // Parse arguments
     if (!arg || arg == "") {
-        tell_object(user, "Usage: promote <player> <level>\n");
-        tell_object(user, "Levels: 0 = Player, 1 = Wizard, 2 = Admin\n");
+        tell_object(user, "Usage: promote <player> <role>\n");
+        tell_object(user, "Roles: admin, domain, coding, rp\n");
         return 1;
     }
 
-    if (sscanf(arg, "%s %s", target_name, level_str) != 2) {
-        tell_object(user, "Usage: promote <player> <level>\n");
-        tell_object(user, "Levels: 0 = Player, 1 = Wizard, 2 = Admin\n");
+    /* Safe two-token split (sscanf write-back not reliable in this VM) */
+    int sp = strsrch(arg, " ");
+    if (sp < 0) {
+        tell_object(user, "Usage: promote <player> <role>\n");
+        tell_object(user, "Roles: admin, domain, coding, rp\n");
+        return 1;
+    }
+    target_name = lower_case(substring(arg, 0, sp));
+    role        = lower_case(substring(arg, sp + 1));
+
+    /* Map role → privilege level */
+    if (role == "admin") {
+        new_level = 2;
+    } else if (role == "domain" || role == "coding" || role == "rp") {
+        new_level = 1;
+    } else {
+        tell_object(user, "Unknown role '" + role + "'.\n");
+        tell_object(user, "Roles: admin, domain, coding, rp\n");
         return 1;
     }
 
-    // Validate level
-    new_level = to_int(level_str);
-    if (new_level < 0 || new_level > 2) {
-        tell_object(user, "Invalid level. Use 0 (Player), 1 (Wizard), or 2 (Admin).\n");
+    /* Wizards cannot grant admin */
+    if (user_level == PRIV_WIZARD && new_level > PRIV_WIZARD) {
+        tell_object(user, "You need Admin privileges to promote to the admin role.\n");
         return 1;
     }
 
-    // Wizards can only promote to Wizard level
-    if (user_level == PRIV_WIZARD && new_level != PRIV_WIZARD) {
-        tell_object(user, "Wizards can only promote players to Wizard level.\n");
-        tell_object(user, "You need Admin privileges to set other levels.\n");
-        return 1;
-    }
-
-    // Find target player (must be online)
-    target_name = lower_case(target_name);
+    /* Find target player (must be online) */
     target = find_player(target_name);
-
     if (!target) {
-        tell_object(user, "Player not found: " + target_name + "\n");
-        tell_object(user, "Note: Player must be online to promote.\n");
+        tell_object(user, "Player '" + capitalize(target_name) + "' is not online.\n");
         return 1;
     }
 
-    // Get current level for feedback
     int old_level = target->query_privilege_level();
-
-    // Set new privilege level
-    target->set_privilege_level(new_level);
-
-    // Convert level numbers to names for display
     string *level_names = ({ "Player", "Wizard", "Admin" });
     string new_title = level_names[new_level];
     string old_title = level_names[old_level];
 
-    // Notify the user who performed the action
+    /* Apply privilege level + role atomically */
+    target->set_privilege_level(new_level);
+    if (function_exists("set_property", target))
+        target->set_property("wizard_role", role);
+
+    /* Feedback to promoter */
     if (old_level == new_level) {
-        tell_object(user, capitalize(target_name) + " is already " + new_title + ".\n");
-        return 1;
+        tell_object(user, capitalize(target_name) + " updated: " +
+                    new_title + " / role=" + role + ".\n");
     } else if (new_level > old_level) {
-        tell_object(user, "Promoted " + capitalize(target_name) + " from " + old_title +
-                    " to " + new_title + ".\n");
+        tell_object(user, "Promoted " + capitalize(target_name) +
+                    " from " + old_title + " to " + new_title +
+                    " (role: " + role + ").\n");
     } else {
-        tell_object(user, "Demoted " + capitalize(target_name) + " from " + old_title +
-                    " to " + new_title + ".\n");
+        tell_object(user, "Demoted " + capitalize(target_name) +
+                    " from " + old_title + " to " + new_title +
+                    " (role: " + role + ").\n");
     }
 
-    // Notify the target player
-    tell_object(target, "\n\033[1;33m*** Your privilege level has been changed! ***\033[0m\n");
-    tell_object(target, "Old level: " + old_title + "\n");
-    tell_object(target, "New level: \033[1m" + new_title + "\033[0m\n");
+    /* Notify target */
+    tell_object(target, "\n\033[1;33m*** Your wizard status has been updated! ***\033[0m\n");
+    tell_object(target, "Level: " + new_title + "  Role: " + role + "\n");
 
-    // --- Promotion to Wizard or Admin ---
-    if (new_level > old_level && new_level >= PRIV_WIZARD) {
-        // 1. Set default wizard role
-        string default_role = (new_level >= 2) ? "admin" : "rp";
-        if (function_exists("set_property", target)) {
-            target->set_property("wizard_role", default_role);
-        }
-        tell_object(user, "Default role set: " + default_role + "\n");
-        tell_object(user, "Change with: setrole " + target_name + " <domain|coding|rp|admin>\n");
-
-        // Broadcast staff announcement
+    /* First-time promotion to wizard/admin: workroom, wizkit, teleport */
+    if (old_level < PRIV_WIZARD && new_level >= PRIV_WIZARD) {
+        /* Staff announcement */
         string promoter_name = "System";
         if (function_exists("query_cap_name", user))
             promoter_name = user->query_cap_name();
         string announce_msg = "[Staff] " + promoter_name + " promoted " +
             capitalize(target_name) + " to " + new_title +
-            " (role: " + default_role + ")\n";
+            " (role: " + role + ")\n";
         object *all_users = users();
         foreach (object u in all_users) {
             if (!u) continue;
             int upriv = 0;
             if (function_exists("query_privilege_level", u))
                 upriv = u->query_privilege_level();
-            if (upriv >= 1) {
-                tell_object(u, announce_msg);
-            }
+            if (upriv >= 1) tell_object(u, announce_msg);
         }
 
-        // 2. Create personal workroom if needed
+        /* Create workroom + clone wizkit */
         string workroom_path = create_workroom(target_name);
-
-        // 3. Clone wizkit into inventory
         clone_wizkit(target, new_level);
 
-        // 4. Teleport to personal workroom
+        /* Teleport to personal workroom */
         object workroom = find_object(workroom_path);
         if (!workroom) {
             catch { workroom = load_object(workroom_path); };
@@ -140,19 +133,13 @@ int main(string arg) {
             tell_object(target, "Your wizkit has been cloned to your inventory.\n");
             tell_object(target, "Type 'inventory' to see your tools.\n");
             tell_object(target, "Type 'castle' to visit the Wizard Castle.\n");
-            tell_object(target, "Type 'help topics' for wizard help topics.\n");
             tell_object(target, "Type 'wiz help' for wiztool commands.\n\n");
-            tell_object(target, "\033[1mAvailable Wizard Roles:\033[0m\n");
-            tell_object(target, "  \033[1;34mDomain\033[0m    - World building & area creation\n");
-            tell_object(target, "  \033[1;36mCoding\033[0m    - Systems programming & debugging\n");
-            tell_object(target, "  \033[1;32mRoleplay\033[0m  - Events & storytelling\n");
-            tell_object(target, "  \033[1;31mAdmin\033[0m     - Full administration\n");
-            tell_object(target, "Your current role: \033[1m" + default_role + "\033[0m\n");
-            tell_object(target, "Ask an admin to change it with: setrole\n\n");
+            tell_object(target, "Your role: \033[1m" + role + "\033[0m\n");
+            tell_object(target, "Role can be changed with: setrole " +
+                        target_name + " <domain|coding|rp|admin>\n\n");
             tell_room(workroom, capitalize(target_name) + " appears in a shimmer of light.\n",
                       ({ target }));
         } else {
-            // Fallback: teleport to staff castle courtyard
             string courtyard = "/domains/staff_castle/room/courtyard";
             object croom = find_object(courtyard);
             if (!croom) { catch { croom = load_object(courtyard); }; }
@@ -165,17 +152,16 @@ int main(string arg) {
                           ({ target }));
             }
         }
-
-        // Log
-        log_file("promotions", ctime(time()) + " " + capitalize(target_name) +
-                 " promoted from " + old_title + " to " + new_title +
-                 " by " + user->query_name() + " (role: " + default_role + ")\n");
     }
 
-    // Save the change
-    if (function_exists("save_player", target)) {
+    /* Log */
+    log_file("promotions", ctime(time()) + " " + capitalize(target_name) +
+             " " + old_title + " -> " + new_title + " role=" + role +
+             " by " + user->query_name() + "\n");
+
+    /* Persist */
+    if (function_exists("save_player", target))
         target->save_player();
-    }
 
     return 1;
 }
@@ -303,30 +289,32 @@ void clone_wizkit(object target, int priv_level) {
 
 string query_help() {
     return
-"PROMOTE - Grant wizard or admin privileges to a player\n\n"
+"PROMOTE - Grant wizard/admin privileges to a player\n\n"
 "Usage:\n"
-"  promote <player> <level>\n\n"
-"Levels:\n"
-"  0 = Player (normal user)\n"
-"  1 = Wizard (builder access, basic admin tools)\n"
-"  2 = Admin (full system access)\n\n"
-"On promotion to Wizard/Admin:\n"
-"  - Default wizard role assigned (rp for wiz, admin for admin)\n"
+"  promote <player> <role>\n\n"
+"Roles (set privilege level and wizard_role simultaneously):\n"
+"  admin    privilege_level 2 + role \"admin\"   (Admin only)\n"
+"  domain   privilege_level 1 + role \"domain\"\n"
+"  coding   privilege_level 1 + role \"coding\"\n"
+"  rp       privilege_level 1 + role \"rp\"\n\n"
+"On first promotion to wizard+:\n"
+"  - privilege_level and wizard_role set atomically\n"
 "  - Personal workroom created at /domains/wizard/<name>/\n"
 "  - QCS workspace directories created (area/npc, area/room, etc.)\n"
-"  - Standard wizkit cloned to inventory\n"
+"  - Role-appropriate wizkit cloned to inventory\n"
 "  - Player teleported to their personal workroom\n\n"
+"Re-promoting an existing wizard updates their role without\n"
+"re-running workroom creation or teleport.\n\n"
 "Restrictions:\n"
-"  - Wizards can only promote players to Wizard level (1)\n"
-"  - Admins can promote to any level\n"
+"  - Wizards can promote to domain/coding/rp (not admin)\n"
+"  - Admins can promote to any role\n"
 "  - Target player must be online\n\n"
-"After promoting, use 'setrole <player> <role>' to assign their role:\n"
-"  domain    - World builder\n"
-"  coding    - Systems programmer\n"
-"  rp        - Event runner / RP facilitator\n"
-"  admin     - Administrator\n\n"
 "Examples:\n"
-"  promote thurtest 1          Grant Wizard privileges\n"
-"  promote jane 2              Grant Admin privileges (Admin only)\n\n"
+"  promote lyra domain         Grant Domain Wizard\n"
+"  promote soren coding        Grant Coding Wizard\n"
+"  promote kael rp             Grant Roleplay Wizard\n"
+"  promote jane admin          Grant Admin (Admin only)\n\n"
+"To change role only (already a wizard): setrole <player> <role>\n"
+"To remove privileges:                   demote <player>\n\n"
 "See also: demote, setrole, who\n";
 }

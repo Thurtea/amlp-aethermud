@@ -1,217 +1,352 @@
-// /std/shop.lpc
-// Standard shop inherit for merchant locations
+// lib/std/shop.lpc
+// Base shop object — inherit instead of room.lpc for rooms that sell items.
+//
+// Interface consumed by lib/cmds/buy.lpc and lib/cmds/sell.lpc (all called
+// on the room environment):
+//
+//   query_property("shop")  → 1
+//   find_item(arg)          → item_path string or 0
+//   has_item(path)          → 1 if qty > 0 or unlimited (-1)
+//   get_price_uc(path)      → int UC buy price
+//   get_price_bmc(path)     → int BMC buy price (0 = not accepted)
+//   query_currency_type()   → 0=UC only, 1=BMC only, 2=both
+//   purchase_item(path)     → decrement finite stock after a sale
+//   sell_item_to_shop(path) → receive an item sold by a player
+//   query_shopkeeper()      → string name for flavor messages
+//   query_sell_rate()       → float multiplier for player-sold item payout
+//
+// Setup API (for room create()):
+//   add_for_sale(name, path, price_uc, qty)      — UC-priced stock
+//   add_for_sale_bmc(name, path, price_bmc, qty) — BMC-priced stock
+//   add_item(path, qty, price_uc, price_bmc)      — legacy path-keyed API
+//   set_shopkeeper(name)
+//   set_sell_rate(rate)
+//   set_currency_type(type)
+//
+// Higher-level helpers (user spec):
+//   query_shop_item(name)                         → raw entry or 0
+//   list_for_sale()                               → write stock list
+//   sell_to_player(player, name)                  → programmatic sell
+//   buy_from_player(player, name, price_offered)  → programmatic buy
 
-inherit "/std/room";
+inherit "/lib/std/room.lpc";
 
-// Shop configuration
-mapping inventory;        // Maps item_path -> stock_quantity (-1 = unlimited)
-mapping prices_uc;        // Maps item_path -> UC price
-mapping prices_bmc;       // Maps item_path -> BMC price
-string *item_list;        // Ordered list of items for display
-string shopkeeper_name;   // Name of merchant
-int currency_type;        // 0 = UC only, 1 = BMC only, 2 = both
-float sell_rate;          // Percentage of buy price when selling (0.5 = 50%)
+// path-keyed mappings (consumed by buy.lpc / sell.lpc)
+mapping inventory;    /* path → qty (-1 = unlimited) */
+mapping prices_uc;    /* path → int UC price        */
+mapping prices_bmc;   /* path → int BMC price       */
+
+// name-keyed mapping for player-facing lookups
+mapping name_to_path; /* display name → path        */
+mapping item_names;   /* path → display name        */
+string *item_list;    /* ordered for display        */
+
+string shopkeeper_name;
+float  sell_rate;
+int    currency_type;   /* 0=UC, 1=BMC, 2=both */
+
+// ----------------------------------------------------------------
+// create
+// ----------------------------------------------------------------
 
 void create() {
     ::create();
-    
-    inventory = ([ ]);
-    prices_uc = ([ ]);
-    prices_bmc = ([ ]);
-    item_list = ({});
+
+    inventory    = ([]);
+    prices_uc    = ([]);
+    prices_bmc   = ([]);
+    name_to_path = ([]);
+    item_names   = ([]);
+    item_list    = ({});
+
     shopkeeper_name = "the shopkeeper";
-    currency_type = 0;  // Default: UC only
-    sell_rate = 0.5;    // Default: sell for 50% of buy price
-    
+    sell_rate       = 0.5;
+    currency_type   = 0;
+
     set_property("shop", 1);
-    set_property("no_combat", 1);  // No fighting in shops
+    set_property("no_combat", 1);
 }
 
-void set_shopkeeper(string name) {
-    shopkeeper_name = name;
+// ----------------------------------------------------------------
+// Setup helpers
+// ----------------------------------------------------------------
+
+void set_shopkeeper(string name)  { shopkeeper_name = name; }
+void set_sell_rate(float rate)    { sell_rate = rate; }
+void set_currency_type(int type)  { currency_type = type; }
+
+/*
+ * add_for_sale(name, path, price_uc, qty)
+ *   name     — display name / player keyword (lowercase preferred)
+ *   path     — LPC path to clone_object()
+ *   price_uc — UC buy price
+ *   qty      — stock count; -1 = unlimited
+ */
+void add_for_sale(string name, string path, int price_uc, int qty) {
+    if (member_array(path, item_list) == -1)
+        item_list += ({ path });
+    inventory[path]    = qty;
+    prices_uc[path]    = price_uc;
+    prices_bmc[path]   = 0;
+    item_names[path]   = name;
+    name_to_path[name] = path;
 }
 
-string query_shopkeeper() {
-    return shopkeeper_name;
+/*
+ * add_for_sale_bmc — same but priced in Black Market Credits
+ */
+void add_for_sale_bmc(string name, string path, int price_bmc, int qty) {
+    if (member_array(path, item_list) == -1)
+        item_list += ({ path });
+    inventory[path]    = qty;
+    prices_uc[path]    = 0;
+    prices_bmc[path]   = price_bmc;
+    item_names[path]   = name;
+    name_to_path[name] = path;
 }
 
-void set_currency_type(int type) {
-    // 0 = UC only, 1 = BMC only, 2 = both
-    currency_type = type;
+/*
+ * add_item(path, qty, price_uc, price_bmc) — legacy path-keyed API
+ * kept for backwards compatibility with any existing shop rooms.
+ */
+void add_item(string path, int qty, int price_uc, int price_bmc) {
+    if (member_array(path, item_list) == -1)
+        item_list += ({ path });
+    inventory[path]  = qty;
+    prices_uc[path]  = price_uc;
+    prices_bmc[path] = price_bmc;
+    /* no display-name registered — find_item falls back to path matching */
 }
 
-int query_currency_type() {
-    return currency_type;
-}
+// ----------------------------------------------------------------
+// Query helpers
+// ----------------------------------------------------------------
 
-void set_sell_rate(float rate) {
-    if (rate < 0.0) rate = 0.0;
-    if (rate > 1.0) rate = 1.0;
-    sell_rate = rate;
-}
+string query_shopkeeper()    { return shopkeeper_name; }
+float  query_sell_rate()     { return sell_rate; }
+int    query_currency_type() { return currency_type; }
 
-float query_sell_rate() {
-    return sell_rate;
-}
+// ----------------------------------------------------------------
+// Interface consumed by buy.lpc / sell.lpc
+// ----------------------------------------------------------------
 
-// Add an item to shop inventory
-void add_item(string item_path, int stock, int price_uc, int price_bmc) {
-    object item_obj;
-    
-    // Validate item exists
-    item_obj = load_object(item_path);
-    if (!item_obj) {
-        write("ERROR: Failed to load item: " + item_path + "\n");
-        return;
-    }
-    
-    inventory[item_path] = stock;
-    prices_uc[item_path] = price_uc;
-    prices_bmc[item_path] = price_bmc;
-    item_list += ({ item_path });
-}
+/*
+ * find_item(arg) — resolve player input to an item path.
+ * Checks: numeric index, exact display name, substring of display name,
+ * substring of path (fallback for items without display names).
+ */
+string find_item(string arg) {
+    int item_num;
+    string larg = lower_case(arg);
 
-// Query if item is in stock
-int has_item(string item_path) {
-    if (!member_array(item_path, item_list)) return 0;
-    if (inventory[item_path] == 0) return 0;  // Out of stock
-    return 1;
-}
-
-// Get UC price for item
-int get_price_uc(string item_path) {
-    if (!prices_uc[item_path]) return 0;
-    return prices_uc[item_path];
-}
-
-// Get BMC price for item
-int get_price_bmc(string item_path) {
-    if (!prices_bmc[item_path]) return 0;
-    return prices_bmc[item_path];
-}
-
-// Reduce stock when item purchased
-void purchase_item(string item_path) {
-    if (inventory[item_path] == -1) return;  // Unlimited stock
-    inventory[item_path]--;
-    if (inventory[item_path] < 0) inventory[item_path] = 0;
-}
-
-// Increase stock when item sold to shop
-void sell_item_to_shop(string item_path) {
-    if (inventory[item_path] == -1) return;  // Unlimited stock
-    inventory[item_path]++;
-}
-
-// Display shop inventory
-void list_inventory() {
-    object player, item_obj;
-    string item_path, output;
-    int i, price_uc, price_bmc, stock;
-    
-    player = this_player();
-    if (!player) return;
-    
-    output = "\n";
-    output += "===========================[ SHOP INVENTORY ]===========================\n";
-    output += shopkeeper_name + " says: \"Welcome! Here's what I have for sale:\"\n\n";
-    
-    if (sizeof(item_list) == 0) {
-        output += "  (Shop is currently empty)\n";
-    } else {
-        i = 0;
-        while (i < sizeof(item_list)) {
-            item_path = item_list[i];
-            item_obj = load_object(item_path);
-
-            if (!item_obj) { i += 1; continue; }
-
-            stock = inventory[item_path];
-            price_uc = prices_uc[item_path];
-            price_bmc = prices_bmc[item_path];
-
-            output += "  [" + (i+1) + "] " + item_obj->query_short();
-            
-            if (stock == -1) {
-                output += " (unlimited stock)";
-            } else if (stock == 0) {
-                output += " [OUT OF STOCK]";
-            } else {
-                output += " (" + stock + " in stock)";
-            }
-            output += "\n";
-            
-            // Show prices based on currency type
-            if (currency_type == 0 || currency_type == 2) {
-                if (price_uc > 0) {
-                    output += "      Price: " + price_uc + " UC";
-                    if (currency_type == 2 && price_bmc > 0) {
-                        output += " or " + price_bmc + " BMC";
-                    }
-                    output += "\n";
-                }
-            } else if (currency_type == 1) {
-                if (price_bmc > 0) {
-                    output += "      Price: " + price_bmc + " BMC\n";
-                }
-            }
-            
-            output += "\n";
-            i += 1;
-        }
+    /* numeric index */
+    if (sscanf(arg, "%d", item_num) == 1) {
+        if (item_num >= 1 && item_num <= sizeof(item_list))
+            return item_list[item_num - 1];
+        return 0;
     }
 
-    output += "\nUse 'buy <item name>' or 'buy <number>' to purchase.\n";
-    output += "Use 'sell <item name>' to sell items to the shop.\n";
-    output += "========================================================================\n\n";
-    
-    write(output);
-}
+    /* exact display-name match */
+    if (name_to_path[larg])
+        return name_to_path[larg];
 
-// Find item by name or number
-string find_item(string search) {
-    object item_obj;
-    string item_path;
-    int item_num, i;
-    
-    if (!search) return 0;
-    
-    // Check if it's a number
-    if (sscanf(search, "%d", item_num) == 1) {
-        if (item_num < 1 || item_num > sizeof(item_list)) {
-            return 0;
-        }
-        return item_list[item_num - 1];
+    /* substring display-name match */
+    string k;
+    foreach (string k in name_to_path) {
+        if (strsrch(k, larg) >= 0)
+            return name_to_path[k];
     }
-    
-    // Search by name
-    foreach (string item_path in item_list) {
-        item_obj = load_object(item_path);
-        
-        if (!item_obj) continue;
-        
-        // Check if search matches short description
-        if (regexp(lower_case(item_obj->query_short()), lower_case(search))) {
-            return item_path;
-        }
-        
-        // Check if search matches an ID
-        if (item_obj->id(search)) {
-            return item_path;
-        }
+
+    /* fallback: substring path match */
+    string p;
+    foreach (string p in item_list) {
+        if (strsrch(p, larg) >= 0)
+            return p;
     }
-    
+
     return 0;
 }
 
-void init() {
-    ::init();
-    add_action("list_cmd", "list");
-    add_action("list_cmd", "browse");
-    add_action("list_cmd", "shop");
+/*
+ * has_item(path) — 1 if in stock (unlimited or qty > 0)
+ */
+int has_item(string path) {
+    if (member_array(path, item_list) == -1) return 0;
+    int qty = inventory[path];
+    return (qty == -1 || qty > 0);
 }
 
-int list_cmd(string arg) {
-    list_inventory();
+int get_price_uc(string path)  { return prices_uc[path]  ? prices_uc[path]  : 0; }
+int get_price_bmc(string path) { return prices_bmc[path] ? prices_bmc[path] : 0; }
+
+/*
+ * purchase_item(path) — called by buy.lpc after successful payment.
+ */
+void purchase_item(string path) {
+    int qty = inventory[path];
+    if (qty == -1) return;
+    if (qty > 0)
+        inventory[path] = qty - 1;
+}
+
+/*
+ * sell_item_to_shop(path) — called by sell.lpc after player sells.
+ * Increments finite stock; unlimited stock is unchanged.
+ * Unknown items (not normally stocked) are added as buyback-only.
+ */
+void sell_item_to_shop(string path) {
+    if (member_array(path, item_list) == -1) {
+        /* Item not in stock list — add as buyback-only at 0 resale price */
+        item_list += ({ path });
+        inventory[path]  = 1;
+        prices_uc[path]  = 0;
+        prices_bmc[path] = 0;
+        return;
+    }
+    int qty = inventory[path];
+    if (qty != -1)
+        inventory[path] = qty + 1;
+}
+
+// ----------------------------------------------------------------
+// User-spec API
+// ----------------------------------------------------------------
+
+/*
+ * query_shop_item(name) — returns ({ path, price_uc, price_bmc, qty })
+ * for the given display name, or 0 if not found.
+ */
+mixed query_shop_item(string name) {
+    string path = name_to_path[lower_case(name)];
+    if (!path) return 0;
+    return ({ path, prices_uc[path], prices_bmc[path], inventory[path] });
+}
+
+/*
+ * list_for_sale() — write formatted stock list to this_player().
+ * Also triggered by "list"/"browse" via init()/local_command().
+ */
+void list_for_sale() {
+    object player = this_player();
+    if (!player) return;
+
+    if (!sizeof(item_list)) {
+        write(shopkeeper_name + " says: \"I'm all out of stock right now.\"\n");
+        return;
+    }
+
+    write("\n--- " + shopkeeper_name + " ---\n\n");
+
+    int idx = 1;
+    string path;
+    foreach (string path in item_list) {
+        int    p_uc  = prices_uc[path]  ? prices_uc[path]  : 0;
+        int    p_bmc = prices_bmc[path] ? prices_bmc[path] : 0;
+        int    qty   = inventory[path];
+
+        /* display name: prefer registered name, fall back to last path component */
+        string dname = item_names[path] ? item_names[path] : path;
+
+        string price_str;
+        if (p_uc > 0 && p_bmc > 0)
+            price_str = p_uc + " UC / " + p_bmc + " BMC";
+        else if (p_bmc > 0)
+            price_str = p_bmc + " BMC";
+        else
+            price_str = p_uc + " UC";
+
+        string qty_str = (qty == -1) ? "unlimited" : ("" + qty);
+
+        write("  [" + idx + "] " + capitalize(dname) +
+              "  [" + price_str + "]  (stock: " + qty_str + ")\n");
+
+        idx += 1;
+    }
+
+    write("\nBuy: buy <name or number>   Sell: sell <item>\n\n");
+}
+
+/* Kept for legacy callers */
+void list_inventory() { list_for_sale(); }
+
+// ----------------------------------------------------------------
+// init — wire list/browse/shop verbs when a player enters the room
+// ----------------------------------------------------------------
+
+void init() {
+    ::init();
+    add_action("local_list_cmd", "list");
+    add_action("local_list_cmd", "browse");
+    add_action("local_list_cmd", "shop");
+}
+
+int local_list_cmd(string arg) {
+    list_for_sale();
+    return 1;
+}
+
+/*
+ * local_command() — intercepts "list" for any room that doesn't use
+ * add_action (e.g. rooms where init() isn't guaranteed to fire).
+ */
+int local_command(string verb, string args) {
+    if (verb == "list" || verb == "browse") {
+        list_for_sale();
+        return 1;
+    }
+    return 0;
+}
+
+// ----------------------------------------------------------------
+// Higher-level helpers
+// ----------------------------------------------------------------
+
+/*
+ * sell_to_player(player, name) — shop sells named item to player (UC only).
+ * Returns 1 on success, 0 on failure.
+ */
+int sell_to_player(object player, string name) {
+    string path = find_item(name);
+    if (!path) {
+        write("That item is not for sale here.\n");
+        return 0;
+    }
+    if (!has_item(path)) {
+        write("That item is out of stock.\n");
+        return 0;
+    }
+    int price = get_price_uc(path);
+    if (player->query_universal_credits() < price) {
+        write("You need " + price + " UC.\n");
+        return 0;
+    }
+    object item;
+    catch { item = clone_object(path); };
+    if (!item) {
+        write("Error creating item.\n");
+        return 0;
+    }
+    player->remove_universal_credits(price);
+    if (function_exists("move", item))
+        item->move(player);
+    else
+        move_object(item, player);
+    purchase_item(path);
+    return 1;
+}
+
+/*
+ * buy_from_player(player, name, price_offered) — shop buys item from player.
+ * Pays sell_rate * price_offered in UC.  Returns 1 on success.
+ */
+int buy_from_player(object player, string name, int price_offered) {
+    object item = present(name, player);
+    if (!item) {
+        write("You don't have that item.\n");
+        return 0;
+    }
+    int payout = to_int(to_float(price_offered) * sell_rate);
+    player->add_universal_credits(payout);
+    item->remove();
     return 1;
 }

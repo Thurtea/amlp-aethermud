@@ -1,0 +1,38 @@
+// lib/domains/splynn/obj/net_gun.lpc
+// Ion Net Gun — black market exclusive, Splynn
+// Ranged entanglement weapon; 1200 UC via the black market vendor.
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+
+    set_short("an ion net gun");
+    set_long(
+        "A bulky, shoulder-mounted launcher that fires an expanding net of\n"
+        "ion-charged mono-filament. On impact the net contracts around the\n"
+        "target and delivers a sustained electrical charge. Excellent for\n"
+        "taking down fast-moving or flying targets. The battery pack is\n"
+        "fully charged; the net canister holds three shots.\n"
+    );
+
+    set_id("gun");
+    add_id("net gun");
+    add_id("ion gun");
+    add_id("ion net gun");
+    add_id("launcher");
+    add_id("net launcher");
+
+    set_weight(4500);   /* 4.5 kg — shoulder-mounted */
+    set_value(1200);    /* street value in UC */
+
+    set_property("weapon_type",    "ranged");
+    set_property("weapon_class",   "net");
+    set_property("two_handed",     1);
+    set_property("damage_type",    "entangle");
+    set_property("damage_dice",    "2d6");      /* electrical shock on hit */
+    set_property("range",          "medium");
+    set_property("ammo_type",      "net");
+    set_property("ammo_count",     3);
+    set_property("no_sell",        0);
+}

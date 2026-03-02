@@ -1,0 +1,42 @@
+// lib/domains/splynn/obj/ppe_talisman.lpc
+// Battered PPE Talisman — Rocky's personal keepsake
+//
+// Activatable from inventory — no wear required; Hawrk-duhk incompatible hook TBD
+//
+// Carries 100 PPE charges; rechargeable via PPE-channeling abilities.
+// Wears in the "talisman" slot if the armor system supports it,
+// otherwise treated as a held/inventory item.
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+
+    set_short("a battered PPE talisman");
+    set_long(
+        "A palm-sized disc of black glass threaded with veins of glowing\n"
+        "amber crystal. The metal rim is scratched and worn, as though it\n"
+        "has passed through many hands. A faint warmth radiates from it\n"
+        "even through closed fingers. Runes around the edge pulse slowly,\n"
+        "storing ambient PPE from the ley lines that cross Splynn.\n"
+    );
+
+    set_id("talisman");
+    add_id("ppe talisman");
+    add_id("battered talisman");
+    add_id("battered ppe talisman");
+    add_id("disc");
+
+    set_weight(50);   /* grams — light enough to palm */
+    set_value(0);     /* not for sale */
+
+    /* Slot — wears in "talisman" if the wear command supports it */
+    set_slot("talisman");
+
+    /* Core properties */
+    set_property("ppe_value",    100);
+    set_property("rechargeable", 1);
+
+    /* Prevent accidental sell/drop */
+    set_property("no_sell", 1);
+}

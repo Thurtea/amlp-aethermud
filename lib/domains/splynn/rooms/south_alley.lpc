@@ -1,0 +1,74 @@
+// lib/domains/splynn/rooms/south_alley.lpc
+// South Alley — south of Rocky's Bar
+//
+// Connects north → rockys_bar, west → black_market (hidden).
+// The west exit is always navigable but invisible until the player
+// knocks on the rune-carved pillar. "knock pillar" (or "knock wall")
+// triggers flavor text revealing the passage; the exit then works.
+//
+// Implementation note: west flex_exit is always present in the C Room
+// struct (parsed from add_exit below). The hidden-door illusion is
+// purely descriptive — the room text and knock action tell the story.
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("South Alley");
+    set_long(
+        "A cramped alley behind the Splynn market district, walled in by\\n"
+        "raw stone blocks slick with condensation. Broken crates and the\\n"
+        "occasional splatter of unknown origin line the base of the walls.\\n"
+        "A weathered stone pillar leans against the west wall, its surface\\n"
+        "carved with sigils that have been deliberately defaced. There is a\\n"
+        "faint smell of ozone — and something else. Something profitable.\\n"
+        "Rocky's Bar is back to the north.\\n"
+    );
+
+    add_exit("north", "/domains/splynn/rooms/rockys_bar");
+    add_exit("west",  "/domains/splynn/rooms/black_market");
+
+    set_property("light", 1);
+    set_property("indoors", 0);
+}
+
+int local_command(string verb, string args) {
+    if (verb == "knock") {
+        if (!args ||
+            (strsrch(args, "pillar") < 0 &&
+             strsrch(args, "wall")   < 0 &&
+             strsrch(args, "stone")  < 0)) {
+            write("Knock on what? The rune-carved pillar stands against the west wall.\n");
+            return 1;
+        }
+        write(
+            "You rap your knuckles against the carved pillar. A low, resonant\\n"
+            "boom rolls through the alley. After a heartbeat of silence a\\n"
+            "section of the west wall grinds sideways on hidden rollers,\\n"
+            "revealing a narrow gap and the dim glow of a lantern beyond.\\n"
+            "Someone is definitely open for business.\\n"
+        );
+        return 1;
+    }
+    if (verb == "examine" || verb == "look") {
+        if (args && strsrch(args, "pillar") >= 0) {
+            write(
+                "The pillar is old — older than the market itself. Carved into its\\n"
+                "face are sigils that someone has since taken a chisel to, though\\n"
+                "traces of the original patterns remain. It sits slightly away from\\n"
+                "the wall, as if it were never meant to be structural.\\n"
+            );
+            return 1;
+        }
+        if (args && strsrch(args, "sigil") >= 0) {
+            write(
+                "What remains of the sigils looks like a compressed dealer's mark —\\n"
+                "the kind black market operators use to identify a safe drop point.\\n"
+                "Someone knows what this pillar means.\\n"
+            );
+            return 1;
+        }
+    }
+    return 0;
+}

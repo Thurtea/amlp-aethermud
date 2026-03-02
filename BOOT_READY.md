@@ -20,9 +20,9 @@
 
 ## Known Gaps (Next Sprint)
 - Spell activation not yet wired to combat loop (spells defined, cast command exists, damage routing incomplete)
-- Splynn: Serena's Parlor added west of Moxim; further room content pending (Rocky's bar, black market, catacombs all missing)
+- Splynn: Serena's Parlor (west), Rocky's Bar (south), South Alley + Black Market (south of Rocky's) all wired; catacombs pending
 - Combat skill rolls not implemented (attacks always land)
-- Economy system not wired (shop daemons needed; buy/sell commands exist but need room-level shop objects)
+- Economy: shop daemon stub in lib/std/shop.lpc — buy/sell wired; room-level shop objects needed per area
 - Vehicle system not wired
 - Juicer OCC conversion process not in-game (OCC defined, process room/NPC not built)
 - Merc group base system not implemented

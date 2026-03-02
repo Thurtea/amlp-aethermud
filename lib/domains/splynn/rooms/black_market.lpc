@@ -1,0 +1,40 @@
+// lib/domains/splynn/rooms/black_market.lpc
+// Black Market Stall — west of the South Alley, entered via knock-pillar
+//
+// The Fence (black_market_vendor) is spawned here and sells:
+//   predator armor — 800 UC
+//   net gun        — 1200 UC
+// Use "list" to see stock, "buy <item>" to purchase.
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Black Market Stall");
+    set_long(
+        "A low alcove carved behind the pillar, just large enough for two\\n"
+        "people and a folding table. A single salvaged lantern hangs from a\\n"
+        "hook, casting everything in amber. The table is bare except for a\\n"
+        "scratched datapad displaying prices, and a lockbox bolted to the\\n"
+        "floor. Whoever operates this stall has been doing it for a long\\n"
+        "time — the floor is worn smooth in a precise path from the entrance\\n"
+        "to the box. The alley gap to the east is the only way out.\\n"
+    );
+
+    add_exit("east", "/domains/splynn/rooms/south_alley");
+
+    set_property("light", 1);
+    set_property("indoors", 1);
+    set_property("no_magic", 0);
+
+    /* Spawn the Fence */
+    object vendor;
+    catch { vendor = clone_object("/domains/splynn/npcs/black_market_vendor"); };
+    if (vendor) {
+        if (function_exists("move", vendor))
+            vendor->move(this_object());
+        else
+            move_object(vendor, this_object());
+    }
+}

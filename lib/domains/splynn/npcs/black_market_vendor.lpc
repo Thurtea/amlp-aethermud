@@ -1,0 +1,54 @@
+// lib/domains/splynn/npcs/black_market_vendor.lpc
+// The Fence — black market vendor in the Splynn hidden stall
+//
+// Uses qcs vendor template for "list" / "buy <item>" commands.
+// Sells predator armor and ion net gun; both clonable from their LPC paths.
+
+inherit "/std/qcs/vendor";
+
+void create() {
+    ::create();
+
+    set_name("fence");
+    set_id("fence");
+    add_id("vendor");
+    add_id("merchant");
+    add_id("dealer");
+    add_id("man");
+    add_id("woman");
+
+    set_short("a hooded figure");
+    set_long(
+        "A slight figure wrapped in a dark cloak, face hidden beneath a\n"
+        "deep hood. Only their hands are visible — pale, quick, always\n"
+        "moving. They speak in a low murmur and never make eye contact.\n"
+        "Whatever they sell, they did not come by it honestly.\n"
+    );
+
+    set_gender("neuter");
+    set_race("human");
+    set_level(6);
+    set_hp(60);
+    set_aggro(0);
+
+    set_position_text("stands in the shadows behind the stall, watching the entrance.");
+
+    set_property("no_attack", 1);
+    set_property("no_follow", 1);
+
+    set_shop_name("Black Market Stall");
+
+    add_stock("predator armor", 800,
+              "/domains/splynn/obj/predator_armor",
+              "Predator stealth suit — active camo, AC 30.");
+
+    add_stock("net gun", 1200,
+              "/domains/splynn/obj/net_gun",
+              "Ion net gun — 3-shot, entangles and shocks.");
+}
+
+string query_talk() {
+    return "The figure murmurs without looking up.\n"
+        "\"Keep your voice down. 'list' for stock. 'buy <item>' to purchase.\n"
+        "No questions. No receipts.\"\n";
+}

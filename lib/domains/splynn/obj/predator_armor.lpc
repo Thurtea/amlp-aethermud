@@ -1,0 +1,38 @@
+// lib/domains/splynn/obj/predator_armor.lpc
+// Predator Stealth Suit — black market exclusive, Splynn
+// Body armour with active stealth field; 800 UC via the black market vendor.
+
+inherit "/std/object";
+
+void create() {
+    ::create();
+
+    set_short("a predator stealth suit");
+    set_long(
+        "A full-body suit of jet-black reactive panels linked by a mesh of\n"
+        "nano-fibre stealth emitters. When the suit is active, light bends\n"
+        "around the wearer, rendering them nearly invisible to the naked eye.\n"
+        "The surface is warm to the touch and hums faintly. Stolen Coalition\n"
+        "tech, judging by the serial numbers that have been clumsily filed off.\n"
+    );
+
+    set_id("armor");
+    add_id("suit");
+    add_id("stealth suit");
+    add_id("predator suit");
+    add_id("predator armor");
+    add_id("predator stealth suit");
+
+    set_weight(2000);   /* 2 kg — lightweight composite */
+    set_value(800);     /* street value in UC */
+
+    set_slot("body");
+    set_armor_rating(30);
+    set_armor_max_damage(150);
+
+    set_property("invisible_on_wear", 1);
+    set_property("armor_class",       30);
+    set_property("armor_type",        "light");
+    set_property("powered",           1);   /* requires charge cell */
+    set_property("no_sell",           0);   /* can be resold on black market */
+}

@@ -1,0 +1,429 @@
+/*
+ * /lib/cmds/selectskills.lpc - Select secondary skills for wizard review
+ *
+ * Usage:
+ *   selectskills              Show skills list (page 1)
+ *   selectskills page <N>     Show page N
+ *   selectskills add <N>      Add skill by number
+ *   selectskills remove <N>   Remove skill by number
+ *   selectskills show         Show current selections
+ *   selectskills submit       Submit for wizard review
+ *   selectskills clear        Clear all selections
+ */
+
+#include <globals.h>
+
+#define SKILLS_PER_PAGE 20
+
+string *build_skill_list();
+void show_page(object user, string *all_skills, int page);
+
+string *build_skill_list() {
+    string *result;
+    string *entries;
+    string *files;
+    string cat;
+    string f;
+    string path;
+    int i;
+    int j;
+    object sk;
+
+    result = ({});
+    entries = get_dir("/skills/");
+    if (!entries) return result;
+
+    entries = sort_array(entries, 1);
+
+    i = 0;
+    while (i < sizeof(entries)) {
+        cat = entries[i];
+        i++;
+
+        if (strlen(cat) > 4 &&
+            substring(cat, strlen(cat) - 4) == ".lpc") continue;
+
+        files = get_dir("/skills/" + cat + "/*.lpc");
+        if (!files) continue;
+
+        files = sort_array(files, 1);
+        j = 0;
+        while (j < sizeof(files)) {
+            f = files[j];
+            j++;
+            path = "/skills/" + cat + "/" +
+                   substring(f, 0, strlen(f) - 4);
+
+            sk = 0;
+            catch { sk = load_object(path); };
+            if (sk && function_exists("query_is_primary_only", sk) &&
+                sk->query_is_primary_only()) {
+                continue;
+            }
+
+            result += ({ path });
+        }
+    }
+
+    /* Root-level skill files */
+    files = get_dir("/skills/*.lpc");
+    if (files) {
+        files = sort_array(files, 1);
+        j = 0;
+        while (j < sizeof(files)) {
+            f = files[j];
+            j++;
+            path = "/skills/" + substring(f, 0, strlen(f) - 4);
+
+            sk = 0;
+            catch { sk = load_object(path); };
+            if (sk && function_exists("query_is_primary_only", sk) &&
+                sk->query_is_primary_only()) {
+                continue;
+            }
+
+            result += ({ path });
+        }
+    }
+
+    return result;
+}
+
+void show_page(object user, string *all_skills, int page) {
+    int total;
+    int total_pages;
+    int start;
+    int end;
+    int i;
+    int pi;
+    int base_pct;
+    int is_selected;
+    string path;
+    string display;
+    string cat;
+    string last_cat;
+    string stripped;
+    string marker;
+    string num_str;
+    string *pending;
+    object sk;
+    int slash;
+
+    total = sizeof(all_skills);
+    total_pages = (total + SKILLS_PER_PAGE - 1) / SKILLS_PER_PAGE;
+
+    if (page < 1) page = 1;
+    if (page > total_pages) page = total_pages;
+
+    start = (page - 1) * SKILLS_PER_PAGE;
+    end = start + SKILLS_PER_PAGE;
+    if (end > total) end = total;
+
+    pending = ({});
+    if (function_exists("query_pending_skills", user))
+        pending = user->query_pending_skills();
+    if (!pending) pending = ({});
+
+    tell_object(user,
+        "=== Secondary Skill Selection (Page " + page +
+        "/" + total_pages + ") ===\n\n");
+
+    last_cat = "";
+    i = start;
+    while (i < end) {
+        path = all_skills[i];
+
+        /* Extract category from path: /skills/<category>/<skill> */
+        stripped = substring(path, 8);
+        slash = strsrch(stripped, "/");
+        if (slash != -1) {
+            cat = substring(stripped, 0, slash);
+        } else {
+            cat = "general";
+        }
+
+        if (cat != last_cat) {
+            tell_object(user,
+                "-- " + replace_string(cat, "_", " ") + " --\n");
+            last_cat = cat;
+        }
+
+        display = "";
+        base_pct = 30;
+        sk = 0;
+        catch { sk = load_object(path); };
+        if (sk) {
+            if (function_exists("query_skill_name", sk))
+                display = sk->query_skill_name();
+            if (function_exists("query_base_percentage", sk))
+                base_pct = sk->query_base_percentage();
+        }
+        if (!display || display == "") {
+            stripped = substring(path, strsrch(path, "/", -1) + 1);
+            display = replace_string(stripped, "_", " ");
+        }
+
+        is_selected = 0;
+        pi = 0;
+        while (pi < sizeof(pending)) {
+            if (pending[pi] == path) { is_selected = 1; break; }
+            pi++;
+        }
+
+        marker = "  ";
+        if (is_selected) marker = "* ";
+
+        num_str = "" + (i + 1);
+        while (strlen(num_str) < 3) num_str = " " + num_str;
+
+        while (strlen(display) < 28) display += " ";
+
+        tell_object(user,
+            marker + num_str + ". " + display +
+            " [base: " + base_pct + "%]\n");
+
+        i++;
+    }
+
+    tell_object(user,
+        "\nCommands: selectskills add <N>  |  remove <N>  |" +
+        "  show  |  submit  |  page <N>\n");
+    if (sizeof(pending) > 0)
+        tell_object(user,
+            "Selected: " + sizeof(pending) +
+            " skill(s). Type 'selectskills show' to see them.\n");
+}
+
+int main(string arg) {
+    object user;
+    string *all_skills;
+    string *pending;
+    string *new_pending;
+    string *all_users_arr;
+    int page;
+    int num;
+    int i;
+    int found;
+    string subcmd;
+    string rest;
+    string path;
+    string sname;
+    string pname;
+    string msg;
+    int sp;
+    object sk;
+    object *all_users;
+    object u;
+
+    user = this_player();
+    if (!user) return 0;
+
+    all_skills = build_skill_list();
+    if (!all_skills || !sizeof(all_skills)) {
+        write("No skills found in the system.\n");
+        return 1;
+    }
+
+    if (!arg || arg == "") {
+        show_page(user, all_skills, 1);
+        return 1;
+    }
+
+    sp = strsrch(arg, " ");
+    if (sp == -1) {
+        subcmd = lower_case(arg);
+        rest = "";
+    } else {
+        subcmd = lower_case(substring(arg, 0, sp));
+        rest = substring(arg, sp + 1);
+    }
+
+    if (subcmd == "list") {
+        page = 1;
+        if (rest != "") page = to_int(rest);
+        if (page < 1) page = 1;
+        show_page(user, all_skills, page);
+        return 1;
+    }
+
+    if (subcmd == "page") {
+        page = to_int(rest);
+        if (page < 1) page = 1;
+        show_page(user, all_skills, page);
+        return 1;
+    }
+
+    if (subcmd == "add") {
+        num = to_int(rest);
+        if (num < 1 || num > sizeof(all_skills)) {
+            write("Invalid skill number. Range: 1-" +
+                  sizeof(all_skills) + "\n");
+            return 1;
+        }
+
+        path = all_skills[num - 1];
+
+        pending = ({});
+        if (function_exists("query_pending_skills", user))
+            pending = user->query_pending_skills();
+        if (!pending) pending = ({});
+
+        i = 0;
+        while (i < sizeof(pending)) {
+            if (pending[i] == path) {
+                write("That skill is already in your selections.\n");
+                return 1;
+            }
+            i++;
+        }
+
+        pending += ({ path });
+        if (function_exists("set_pending_skills", user))
+            user->set_pending_skills(pending);
+
+        sname = path;
+        sk = 0;
+        catch { sk = load_object(path); };
+        if (sk && function_exists("query_skill_name", sk))
+            sname = sk->query_skill_name();
+
+        write("Added: " + sname +
+              " (" + sizeof(pending) + " selected)\n");
+        return 1;
+    }
+
+    if (subcmd == "remove") {
+        num = to_int(rest);
+        if (num < 1 || num > sizeof(all_skills)) {
+            write("Invalid skill number. Range: 1-" +
+                  sizeof(all_skills) + "\n");
+            return 1;
+        }
+
+        path = all_skills[num - 1];
+
+        pending = ({});
+        if (function_exists("query_pending_skills", user))
+            pending = user->query_pending_skills();
+        if (!pending) pending = ({});
+
+        new_pending = ({});
+        found = 0;
+        i = 0;
+        while (i < sizeof(pending)) {
+            if (pending[i] != path) {
+                new_pending += ({ pending[i] });
+            } else {
+                found = 1;
+            }
+            i++;
+        }
+
+        if (!found) {
+            write("That skill is not in your selections.\n");
+            return 1;
+        }
+
+        if (function_exists("set_pending_skills", user))
+            user->set_pending_skills(new_pending);
+
+        sname = path;
+        sk = 0;
+        catch { sk = load_object(path); };
+        if (sk && function_exists("query_skill_name", sk))
+            sname = sk->query_skill_name();
+
+        write("Removed: " + sname +
+              " (" + sizeof(new_pending) + " remaining)\n");
+        return 1;
+    }
+
+    if (subcmd == "show") {
+        pending = ({});
+        if (function_exists("query_pending_skills", user))
+            pending = user->query_pending_skills();
+        if (!pending || !sizeof(pending)) {
+            write("No skills selected yet." +
+                  " Use 'selectskills' to browse.\n");
+            return 1;
+        }
+
+        write("=== Your Pending Skill Selections ===\n\n");
+        i = 0;
+        while (i < sizeof(pending)) {
+            sname = pending[i];
+            sk = 0;
+            catch { sk = load_object(pending[i]); };
+            if (sk && function_exists("query_skill_name", sk))
+                sname = sk->query_skill_name();
+            write("  " + (i + 1) + ". " + sname + "\n");
+            i++;
+        }
+        write("\nType 'selectskills submit' when ready" +
+              " for wizard review.\n");
+        return 1;
+    }
+
+    if (subcmd == "submit") {
+        pending = ({});
+        if (function_exists("query_pending_skills", user))
+            pending = user->query_pending_skills();
+        if (!pending || !sizeof(pending)) {
+            write("No skills selected." +
+                  " Use 'selectskills add <N>' first.\n");
+            return 1;
+        }
+
+        write("Your skill selections have been saved. A wizard will review and\n");
+        write("assign them. Use 'skills' to see your current skills.\n");
+
+        all_users = users();
+        pname = "";
+        if (function_exists("query_name", user))
+            pname = user->query_name();
+
+        msg = "SKILL REQUEST: " + capitalize(pname) +
+              " has selected " + sizeof(pending) +
+              " secondary skill(s) for review.\n";
+
+        i = 0;
+        while (i < sizeof(all_users)) {
+            u = all_users[i];
+            i++;
+            if (!u || u == user) continue;
+            if (!function_exists("query_privilege_level", u)) continue;
+            if (u->query_privilege_level() >= 1) {
+                tell_object(u, msg);
+            }
+        }
+
+        return 1;
+    }
+
+    if (subcmd == "clear") {
+        if (function_exists("set_pending_skills", user))
+            user->set_pending_skills(({ }));
+        write("Skill selections cleared.\n");
+        return 1;
+    }
+
+    write("Usage: selectskills" +
+          " [list|page <N>|add <N>|remove <N>|show|submit|clear]\n");
+    return 1;
+}
+
+string query_help() {
+    return
+"SELECTSKILLS - Choose secondary skills for wizard assignment\n\n"
+"Usage:\n"
+"  selectskills              Browse all available skills (page 1)\n"
+"  selectskills page <N>     View page N of the skill list\n"
+"  selectskills add <N>      Add skill number N to your selections\n"
+"  selectskills remove <N>   Remove skill number N from selections\n"
+"  selectskills show         View your current selections\n"
+"  selectskills submit       Submit selections for wizard review\n"
+"  selectskills clear        Clear all selections\n\n"
+"Secondary skills supplement your OCC's primary skills.\n"
+"Once submitted, a wizard will review and assign them.\n\n"
+"See also: SKILLS, SETOCC\n";
+}

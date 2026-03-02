@@ -46,6 +46,9 @@ private mapping tattoos;  // Maps tattoo name -> tattoo data
 // Wizard building tools
 private string working_directory;  // Current working directory for cd/pwd
 
+// Pending secondary skill selections (awaiting wizard review)
+private string *pending_skills;
+
 // Initialization
 void create() {
     // Initialize parent class fields directly to avoid scope resolution bug
@@ -720,6 +723,16 @@ void set_primary_skills(mapping m) {
 
 void set_secondary_skills(mapping m) {
     // Placeholder
+}
+
+// Pending secondary skill selections (awaiting wizard review)
+void set_pending_skills(string *paths) {
+    pending_skills = paths;
+    save_player();
+}
+
+string *query_pending_skills() {
+    return pending_skills;
 }
 
 // Command processing - CRITICAL FUNCTION

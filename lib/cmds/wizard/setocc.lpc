@@ -91,6 +91,14 @@ int main(string arg) {
         player_name = function_exists("query_name", wiz) ? wiz->query_name() : "";
         occ_name = arg;
 
+    } else if (strsrch(arg, "skills ") == 0) {
+        // "skills <player>" or "skills <player> approve"
+        if (priv < 1) {
+            write("This command requires wizard privileges.\n");
+            return 1;
+        }
+        return do_skills(wiz, substring(arg, 7));
+
     } else if (strsrch(arg, "reset ") == 0) {
         // "reset <player>"
         if (priv < 1) {
@@ -386,6 +394,137 @@ int do_reset(object wiz, string player_name) {
     return 1;
 }
 
+// Review or approve a player's pending secondary skill selections
+int do_skills(object wiz, string args) {
+    string player_name;
+    string action;
+    int sp;
+    object target;
+    string *pending;
+    int i;
+    string sname;
+    string path;
+    object sk;
+    int base_pct;
+    string wname;
+    string tname;
+    object sd;
+
+    if (!args || args == "") {
+        write("Usage: setocc skills <player> [approve]\n");
+        return 1;
+    }
+
+    sp = strsrch(args, " ");
+    if (sp == -1) {
+        player_name = args;
+        action = "";
+    } else {
+        player_name = substring(args, 0, sp);
+        action = lower_case(substring(args, sp + 1));
+    }
+
+    target = find_player(lower_case(player_name));
+    if (!target) {
+        target = find_living(lower_case(player_name));
+    }
+    if (!target) {
+        write("Player '" + player_name +
+              "' not found. They must be online.\n");
+        return 1;
+    }
+
+    if (!interactive(target)) {
+        write(capitalize(player_name) + " is not a player.\n");
+        return 1;
+    }
+
+    pending = ({});
+    if (function_exists("query_pending_skills", target))
+        pending = target->query_pending_skills();
+    if (!pending) pending = ({});
+
+    tname = capitalize(player_name);
+
+    if (!sizeof(pending)) {
+        write(tname + " has no pending skill selections.\n");
+        return 1;
+    }
+
+    if (action != "approve") {
+        write("=== Pending Skills for " + tname + " ===\n\n");
+        i = 0;
+        while (i < sizeof(pending)) {
+            sname = pending[i];
+            sk = 0;
+            catch { sk = load_object(pending[i]); };
+            if (sk && function_exists("query_skill_name", sk))
+                sname = sk->query_skill_name();
+            write("  " + (i + 1) + ". " + sname + "\n");
+            i++;
+        }
+        write("\nTo approve: setocc skills " +
+              player_name + " approve\n");
+        return 1;
+    }
+
+    /* Approve: assign all pending skills */
+    sd = find_object("/daemon/skills");
+    if (!sd) { catch { sd = load_object("/daemon/skills"); }; }
+
+    wname = "A wizard";
+    if (function_exists("query_cap_name", wiz))
+        wname = wiz->query_cap_name();
+
+    write("Assigning secondary skills to " + tname + ":\n");
+    i = 0;
+    while (i < sizeof(pending)) {
+        path = pending[i];
+        sname = path;
+        base_pct = 30;
+
+        sk = 0;
+        catch { sk = load_object(path); };
+        if (sk) {
+            if (function_exists("query_skill_name", sk))
+                sname = sk->query_skill_name();
+            if (function_exists("query_base_percentage", sk))
+                base_pct = sk->query_base_percentage();
+        }
+
+        if (function_exists("add_skill", target)) {
+            target->add_skill(
+                substring(path, strsrch(path, "/", -1) + 1),
+                base_pct);
+        }
+
+        write("  " + sname + " at " + base_pct + "%\n");
+        i++;
+    }
+
+    /* Clear pending list */
+    if (function_exists("set_pending_skills", target))
+        target->set_pending_skills(({ }));
+
+    if (function_exists("save_player", target))
+        target->save_player();
+
+    tell_object(target,
+        "\n" + wname + " has approved your secondary skills!\n" +
+        "Type 'skills' to see your updated skill list.\n\n");
+
+    write("Done. " + sizeof(pending) +
+          " skill(s) assigned to " + tname + ".\n");
+
+    catch {
+        write_file("/log/wizard/occ_assignments.log",
+                   ctime(time()) + " " + wname +
+                   " approved secondary skills for " + tname + "\n");
+    };
+
+    return 1;
+}
+
 int list_occs() {
     write("=== Available OCCs ===\n\n");
 
@@ -426,12 +565,15 @@ int show_help() {
     write("  setocc <player> <occ>    Assign OCC to another player (wizard+)\n");
     write("  setocc <player> <occ> confirm  Bypass safety check\n");
     write("  setocc reset <player>    Remove OCC, reset to Pending (wizard+)\n");
+    write("  setocc skills <player>   Review pending skill selections (wizard+)\n");
+    write("  setocc skills <player> approve  Approve and assign skills\n");
     write("  setocc list              Show all available OCCs\n\n");
     write("Examples:\n");
     write("  setocc mercenary\n");
     write("  setocc Splynncryth cyber_knight\n");
     write("  setocc Splynncryth cosmo_knight confirm\n");
-    write("  setocc reset Splynncryth\n\n");
+    write("  setocc reset Splynncryth\n");
+    write("  setocc skills Splynncryth approve\n\n");
     write("See also: help occs, help setocc\n");
     return 1;
 }

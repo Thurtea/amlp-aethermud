@@ -915,6 +915,9 @@ void chargen_complete(PlayerSession *sess) {
     psionics_add_starting_powers(&sess->character, sess->character.occ);
     magic_add_starting_spells(&sess->character, sess->character.occ);
 
+    /* Add racial psionic powers (e.g. Brownie, Dog Boy, Psi-Stalker) */
+    psionics_add_racial_powers(&sess->character, sess->character.race);
+
     /* Assign starting languages based on race */
     assign_starting_languages(&sess->character);
     

@@ -101,3 +101,25 @@ string* query_skill_restrictions() {
 int query_size_penalty() {
     return -2;
 }
+
+void grant_psionics(object player) {
+    string *powers;
+    int i;
+
+    if (!player) return;
+
+    powers = ({
+        "/psionics/sensitive/sense_evil",
+        "/psionics/sensitive/empathy",
+        "/psionics/sensitive/presence_sense",
+        "/psionics/sensitive/telepathy",
+        "/psionics/sensitive/mind_block"
+    });
+    i = 0;
+    while (i < sizeof(powers)) {
+        if (function_exists("add_psionic", player)) {
+            player->add_psionic(powers[i]);
+        }
+        i++;
+    }
+}

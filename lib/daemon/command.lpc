@@ -102,6 +102,7 @@ void init_commands() {
     commands["remember"] = "cmds/remember";
     commands["position"] = "cmds/position";  // RP position
     // System
+    commands["done"] = "cmds/done";        // Orientation room exit
     commands["quit"] = "cmds/quit";
     commands["logout"] = "cmds/quit";
     commands["test"] = "cmds/test";

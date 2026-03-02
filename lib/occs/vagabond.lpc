@@ -165,5 +165,27 @@ int query_learning_bonus() {
 
 // Vagabonds can adapt to situations
 int query_adaptability_bonus() {
-    return 10;  // +10% when attempting unfamiliar tasks
+    return 10;
+}
+
+void grant_skills(object player) {
+    string *skills;
+    int i;
+
+    if (!player) return;
+
+    skills = ({
+        "language_american",
+        "mathematics_basic",
+        "pilot_automobile",
+        "streetwise",
+        "first_aid"
+    });
+    i = 0;
+    while (i < sizeof(skills)) {
+        if (function_exists("add_skill", player)) {
+            player->add_skill(skills[i], 30, 1);
+        }
+        i++;
+    }
 }

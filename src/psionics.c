@@ -13,7 +13,7 @@ void send_to_player(PlayerSession *session, const char *format, ...);
 
 /* =============== PSIONIC POWERS DATABASE =============== */
 
-PsionicPower PSION_POWERS[26] = {
+PsionicPower PSION_POWERS[28] = {
     /* SUPER PSIONIC POWERS (0-5) */
     {
         .id = 0, .name = "Mind Block", .description = "Shield mind from psychic attacks",
@@ -206,17 +206,33 @@ PsionicPower PSION_POWERS[26] = {
         .base_damage = 0, .damage_dice = 2, .damage_sides = 6, .is_mega_damage = true,
         .range_feet = 150, .area_effect_feet = 0, .category = PSION_SUPER,
         .is_combat_usable = true, .is_passive = false, .keywords = "damage mind psionic combat bolt"
+    },
+
+    /* SENSITIVE RACIAL POWERS (26-27) */
+    {
+        .id = 26, .name = "Sense Evil", .description = "Detect evil presences within 90 feet",
+        .isp_cost = 2, .isp_cost_per_round = 1, .duration_rounds = -1,
+        .base_damage = 0, .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false,
+        .range_feet = 90, .area_effect_feet = 0, .category = PSION_SENSITIVE,
+        .is_combat_usable = true, .is_passive = true, .keywords = "sense detect evil alignment"
+    },
+    {
+        .id = 27, .name = "Empathy", .description = "Sense emotions of others within 100 feet",
+        .isp_cost = 4, .isp_cost_per_round = 1, .duration_rounds = -1,
+        .base_damage = 0, .damage_dice = 0, .damage_sides = 0, .is_mega_damage = false,
+        .range_feet = 100, .area_effect_feet = 0, .category = PSION_SENSITIVE,
+        .is_combat_usable = false, .is_passive = true, .keywords = "sense emotion feeling empathy"
     }
 };
 
-int PSIONICS_POWER_COUNT = 26;
+int PSIONICS_POWER_COUNT = 28;
 
 /* =============== INITIALIZATION =============== */
 
 void psionics_init(void) {
     /* Verify power database is loaded */
-    if (PSIONICS_POWER_COUNT != 26) {
-        fprintf(stderr, "WARNING: Psionics database count mismatch! Expected 26, got %d\n",
+    if (PSIONICS_POWER_COUNT != 28) {
+        fprintf(stderr, "WARNING: Psionics database count mismatch! Expected 28, got %d\n",
                 PSIONICS_POWER_COUNT);
     }
 }
@@ -366,6 +382,42 @@ void psionics_add_starting_powers(struct Character *ch, const char *occ_name) {
         ch->psionics.isp_current = 40;
     }
     /* Headhunter, Vagabond, and other non-psionic classes: no starting powers */
+}
+
+/* Grant racial psionic powers based on race (separate from OCC grants) */
+void psionics_add_racial_powers(struct Character *ch, const char *race_name) {
+    if (!ch || !race_name) return;
+
+    if (strcasecmp(race_name, "Brownie") == 0) {
+        /* Minor psionic: sensitive abilities per Rifts sourcebook */
+        psionics_learn_power(ch, 26);  /* Sense Evil */
+        psionics_learn_power(ch, 27);  /* Empathy */
+        psionics_learn_power(ch, 19);  /* Presence Sense */
+        psionics_learn_power(ch, 4);   /* Telepathy */
+        psionics_learn_power(ch, 0);   /* Mind Block */
+        ch->psionics.isp_max = 23;
+        ch->psionics.isp_current = 23;
+    }
+    else if (strcasecmp(race_name, "Dog Boy") == 0 ||
+             strcasecmp(race_name, "Dog_Boy") == 0) {
+        /* Sensitive psionic: tracking and detection */
+        psionics_learn_power(ch, 26);  /* Sense Evil */
+        psionics_learn_power(ch, 19);  /* Presence Sense */
+        psionics_learn_power(ch, 17);  /* Sixth Sense */
+        ch->psionics.isp_max = 30;
+        ch->psionics.isp_current = 30;
+    }
+    else if (strcasecmp(race_name, "Psi-Stalker") == 0 ||
+             strcasecmp(race_name, "Psi Stalker") == 0) {
+        /* Natural psionic predator */
+        psionics_learn_power(ch, 26);  /* Sense Evil */
+        psionics_learn_power(ch, 19);  /* Presence Sense */
+        psionics_learn_power(ch, 17);  /* Sixth Sense */
+        psionics_learn_power(ch, 0);   /* Mind Block */
+        ch->psionics.isp_max = 35;
+        ch->psionics.isp_current = 35;
+    }
+    /* Other races: no racial psionics */
 }
 
 /* =============== ISP MANAGEMENT =============== */

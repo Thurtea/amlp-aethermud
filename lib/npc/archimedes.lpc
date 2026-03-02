@@ -30,18 +30,40 @@ int id(string str) {
     return ::id(str);
 }
 
-// catch_tell pattern matching hawk.lpc - intercept say messages
+// catch_tell pattern matching — intercept say messages in all formats
 void catch_tell(string msg) {
-    string speaker_name, text;
-    object room, speaker;
+    string speaker_name;
+    string text;
+    string rest;
+    object room;
+    object speaker;
+    object *living_here;
     int i;
 
-    // Messages arrive as "Name says: text\n" or "Name says 'text'\n"
-    if (sscanf(msg, "%s says: %s", speaker_name, text) != 2) {
-        if (sscanf(msg, "%s says '%s'", speaker_name, text) != 2) {
-            return;
+    if (!msg) return;
+
+    // Try all known formats:
+    // "Name says: text\n"              (say.lpc dispatch / done.lpc)
+    // "Name says (in lang): text\n"    (say.lpc with language)
+    // "Name says 'text'\n"             (alternate format)
+    // "Name says, \"text\" in lang.\n" (native C driver format)
+
+    speaker_name = "";
+    text = "";
+
+    if (sscanf(msg, "%s says: %s", speaker_name, text) < 1) {
+        if (sscanf(msg, "%s says (in %s): %s", speaker_name, rest, text) < 1) {
+            if (sscanf(msg, "%s says '%s'", speaker_name, text) < 1) {
+                if (sscanf(msg, "%s says, \"%s\" in %s", speaker_name, text, rest) < 1) {
+                    if (sscanf(msg, "%s says, \"%s", speaker_name, text) < 1) {
+                        return;
+                    }
+                }
+            }
         }
     }
+
+    if (speaker_name == "" || text == "") return;
 
     speaker_name = lower_case(speaker_name);
 
@@ -50,11 +72,11 @@ void catch_tell(string msg) {
     if (!room) return;
 
     speaker = 0;
-    object *living_here;
     living_here = all_inventory(room);
     i = 0;
     while (i < sizeof(living_here)) {
-        if (living_here[i] && function_exists("query_name", living_here[i])) {
+        if (living_here[i] &&
+            function_exists("query_name", living_here[i])) {
             if (lower_case(living_here[i]->query_name()) == speaker_name) {
                 speaker = living_here[i];
                 break;
@@ -65,16 +87,19 @@ void catch_tell(string msg) {
 
     if (!speaker) return;
 
-    // Strip whitespace and lowercase
+    // Normalize text
     text = lower_case(text);
-    // Remove trailing punctuation/newline
-    while (strlen(text) > 0 &&
-           (text[strlen(text)-1] == '\n' || text[strlen(text)-1] == '.' ||
-            text[strlen(text)-1] == '!' || text[strlen(text)-1] == '\'')) {
-        text = text[0..strlen(text)-2];
+    while (strlen(text) > 0) {
+        int last;
+        last = text[strlen(text)-1];
+        if (last == '\n' || last == '.' || last == '!' ||
+            last == '\'' || last == '"') {
+            text = text[0..strlen(text)-2];
+        } else {
+            break;
+        }
     }
 
-    // Watch for "done" or "finish" as substring so "I am done" also triggers
     if (strsrch(text, "done") < 0 && strsrch(text, "finish") < 0) return;
 
     tell_object(speaker,
@@ -82,7 +107,6 @@ void catch_tell(string msg) {
         "'Very well. Your journey begins now,' he says.\n" +
         "He steps back and fades from view.\n\n");
 
-    // Finish the promotion: give wiz-tools and move to workroom
     if (function_exists("complete_promotion", speaker))
         speaker->complete_promotion();
 

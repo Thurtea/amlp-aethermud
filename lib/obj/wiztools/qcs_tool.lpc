@@ -35,7 +35,15 @@ void init() {
 }
 
 int cmd_qcs(string str) {
-    object player = this_player();
+    object player;
+    string first_word;
+    string name_arg;
+    string *parts;
+    string subcmd;
+    string rest;
+    int _sp;
+
+    player = this_player();
     if (!check_wizard_level(player)) {
         write("The tool refuses to work for you.\n");
         return 1;
@@ -45,9 +53,28 @@ int cmd_qcs(string str) {
         return show_menu();
     }
 
-    // Direct subcommands
+    // Direct subcommands — check for "TYPE NAME" pattern first
     str = lower_case(str);
 
+    // Try to split into first_word + rest (e.g. "room myroom" or "1 myroom")
+    first_word = str;
+    name_arg = "";
+    _sp = strsrch(str, " ");
+    if (_sp >= 0) {
+        first_word = substring(str, 0, _sp);
+        name_arg = substring(str, _sp + 1);
+    }
+
+    // If a name was provided with a type shortcut, route directly to create
+    if (name_arg != "") {
+        if (first_word == "room"   || first_word == "1") return route_create("room "   + name_arg);
+        if (first_word == "npc"    || first_word == "2") return route_create("npc "    + name_arg);
+        if (first_word == "weapon" || first_word == "3") return route_create("weapon " + name_arg);
+        if (first_word == "armor"  || first_word == "4") return route_create("armor "  + name_arg);
+        if (first_word == "item"   || first_word == "5") return route_create("item "   + name_arg);
+    }
+
+    // Type-only shortcuts (no name — show usage)
     if (to_int(str) == 1 || str == "room")    return do_create("room");
     if (to_int(str) == 2 || str == "npc")     return do_create("npc");
     if (to_int(str) == 3 || str == "weapon")  return do_create("weapon");
@@ -63,10 +90,10 @@ int cmd_qcs(string str) {
     }
 
     // Handle compound commands: qcs create npc goblin
-    string *parts = explode(str, " ");
+    parts = explode(str, " ");
     if (sizeof(parts) >= 2) {
-        string subcmd = parts[0];
-        string rest = implode(parts[1..], " ");
+        subcmd = parts[0];
+        rest = implode(parts[1..], " ");
         if (subcmd == "create") return route_create(rest);
         if (subcmd == "modify") return route_modify(rest);
         if (subcmd == "deploy") return route_deploy(rest);
@@ -116,17 +143,20 @@ int do_create(string type) {
 
 // Route create command: qcs create npc goblin
 int route_create(string rest) {
-    string *rparts = explode(rest, " ");
+    string *rparts;
+    string type;
+    string name;
+    object cmd;
+
+    rparts = explode(rest, " ");
     if (sizeof(rparts) < 2) {
         write("Usage: qcs create <type> <name>\n");
         write("Types: room, npc, weapon, armor, item\n");
         return 1;
     }
-    string type = rparts[0];
-    string name = implode(rparts[1..], " ");
+    type = rparts[0];
+    name = implode(rparts[1..], " ");
 
-    // Delegate to the create command
-    object cmd;
     catch { cmd = load_object("/cmds/creator/create"); };
     if (cmd && function_exists("main", cmd)) {
         return cmd->main(type + " " + name);

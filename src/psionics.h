@@ -72,6 +72,7 @@ void psionics_init_abilities(struct Character *ch);
 void psionics_free_abilities(struct Character *ch);
 void psionics_learn_power(struct Character *ch, int power_id);
 void psionics_add_starting_powers(struct Character *ch, const char *occ_name);
+void psionics_add_racial_powers(struct Character *ch, const char *race_name);
 
 /* ISP management */
 int psionics_get_isp_max(struct Character *ch);
@@ -96,7 +97,7 @@ void psionics_record_power_use(struct Character *ch, int power_id);
 void psionics_check_power_rank_advance(struct Character *ch, int power_id);
 
 /* =============== POWER TEMPLATES ARRAY =============== */
-extern PsionicPower PSION_POWERS[26];
+extern PsionicPower PSION_POWERS[28];
 extern int PSIONICS_POWER_COUNT;
 
 #endif /* PSIONICS_H */

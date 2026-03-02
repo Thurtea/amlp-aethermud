@@ -1,0 +1,50 @@
+// /lib/cmds/done.lpc
+// Standalone "done" command for the orientation room.
+// Triggers Archimedes' promotion flow or falls back to direct promotion.
+
+#include <globals.h>
+
+int main(string arg) {
+    object player;
+    object room;
+    object arch;
+    object *inv;
+    string room_path;
+    int i;
+
+    player = previous_object();
+    room = environment(player);
+    if (!room) return 0;
+
+    room_path = object_name(room);
+    if (strsrch(room_path, "orientation") < 0 &&
+        strsrch(room_path, "hall_of_beginning") < 0) {
+        tell_object(player, "That command has no effect here.\n");
+        return 1;
+    }
+
+    arch = 0;
+    inv = all_inventory(room);
+    i = 0;
+    while (i < sizeof(inv)) {
+        if (inv[i] && function_exists("id", inv[i]) &&
+            inv[i]->id("archimedes")) {
+            arch = inv[i];
+            break;
+        }
+        i++;
+    }
+
+    if (arch) {
+        arch->catch_tell(player->query_name() + " says: done\n");
+    } else {
+        tell_object(player, "\nThe light fades. Your journey begins.\n\n");
+        if (function_exists("complete_promotion", player))
+            player->complete_promotion();
+    }
+    return 1;
+}
+
+string query_help() {
+    return "DONE - Signal readiness in the orientation room.\n";
+}

@@ -79,7 +79,12 @@ int do_call(string name) {
 }
 
 int cmd_orb(string str) {
-    object player = this_player();
+    object player;
+    string subcmd;
+    string rest;
+    int _sp;
+
+    player = this_player();
     if (!check_wizard_level(player)) {
         write("The orb remains dark and inert.\n");
         return 1;
@@ -87,8 +92,7 @@ int cmd_orb(string str) {
 
     if (!str || str == "") return show_help();
 
-    string subcmd, rest;
-    int _sp = strsrch(str, " ");
+    _sp = strsrch(str, " ");
     if (_sp >= 0) {
         subcmd = substring(str, 0, _sp);
         rest = substring(str, _sp + 1);
@@ -186,7 +190,7 @@ int cmd_status() {
     foreach (object u in all_users) {
         if (!u) continue;
         string occ = "";
-        if (function_exists("query_occ", u)) occ = u->query_occ();
+        if (function_exists("query_occ_id", u)) occ = u->query_occ_id();
         if (!occ || occ == "" || occ == "Pending" || occ == "pending")
             pending_occs++;
     }
@@ -229,12 +233,17 @@ int cmd_players() {
         int up = 0;
         if (function_exists("query_privilege_level", u))
             up = u->query_privilege_level();
-        string role_str = ({ "Player", "Wizard", "Admin" })[up];
+        string role_str;
+        if (up >= 4) role_str = "Admin";
+        else if (up >= 1) role_str = "Wizard";
+        else role_str = "Player";
 
-        string loc = "Unknown";
+        string loc = "";
         object env = environment(u);
         if (env && function_exists("query_short", env))
             loc = env->query_short();
+        if (!loc || loc == "")
+            loc = env ? file_name(env) : "Nowhere";
 
         int hp = 0, max_hp = 0, level = 0;
         if (function_exists("query_hp", u)) hp = u->query_hp();
@@ -242,9 +251,9 @@ int cmd_players() {
         if (function_exists("query_level", u)) level = u->query_level();
 
         string race = "?";
-        if (function_exists("query_race", u)) race = u->query_race();
+        if (function_exists("query_race_name", u)) race = u->query_race_name();
         string occ = "?";
-        if (function_exists("query_occ", u)) occ = u->query_occ();
+        if (function_exists("query_occ_id", u)) occ = u->query_occ_id();
         if (!occ || occ == "") occ = "Pending";
 
         write("  " + role_str + " " + uname + "\n");
@@ -255,78 +264,94 @@ int cmd_players() {
 }
 
 int cmd_find(string name) {
+    object target;
+    string tname;
+    int priv;
+    string priv_str;
+    string race;
+    string occ;
+    int level;
+    int hp;
+    int max_hp;
+    string loc;
+    object env;
+    string wrole;
+    string sirname;
+    string clan;
+    object *inv;
+
     if (!name || name == "") {
         write("Usage: orb find <player_name>\n");
         return 1;
     }
 
-    object target = find_player(lower_case(name));
+    target = find_player(lower_case(name));
     if (!target) {
         write("Player '" + name + "' not found online.\n");
         return 1;
     }
 
-    string tname = "Unknown";
+    tname = "Unknown";
     if (function_exists("query_cap_name", target))
         tname = target->query_cap_name();
 
     write("\n=== Player Report: " + tname + " ===\n\n");
 
-    // Basic info
-    int priv = 0;
+    priv = 0;
     if (function_exists("query_privilege_level", target))
         priv = target->query_privilege_level();
-    write("  Privilege: " + ({ "Player", "Wizard", "Admin" })[priv] + "\n");
+    if (priv >= 4) priv_str = "Admin";
+    else if (priv >= 1) priv_str = "Wizard";
+    else priv_str = "Player";
+    write("  Privilege: " + priv_str + "\n");
 
-    string race = "?", occ = "?";
-    if (function_exists("query_race", target)) race = target->query_race();
-    if (function_exists("query_occ", target)) occ = target->query_occ();
+    race = "?";
+    occ = "?";
+    if (function_exists("query_race_name", target)) race = target->query_race_name();
+    if (function_exists("query_occ_id", target)) occ = target->query_occ_id();
     if (!occ || occ == "") occ = "Pending";
     write("  Race: " + race + "\n");
     write("  OCC: " + occ + "\n");
 
-    int level = 0;
+    level = 0;
     if (function_exists("query_level", target)) level = target->query_level();
     write("  Level: " + level + "\n");
 
-    // Pools
-    int hp = 0, max_hp = 0;
+    hp = 0;
+    max_hp = 0;
     if (function_exists("query_hp", target)) hp = target->query_hp();
     if (function_exists("query_max_hp", target)) max_hp = target->query_max_hp();
     write("  HP: " + hp + "/" + max_hp + "\n");
 
-    // Location
-    string loc = "Unknown";
-    object env = environment(target);
+    loc = "";
+    env = environment(target);
     if (env) {
         if (function_exists("query_short", env))
             loc = env->query_short();
+        if (!loc || loc == "")
+            loc = file_name(env);
         write("  Location: " + loc + " (" + file_name(env) + ")\n");
     }
 
-    // Wizard role
-    string wrole = "";
+    wrole = "";
     if (function_exists("query_property", target))
         wrole = target->query_property("wizard_role");
     if (wrole && wrole != "")
         write("  Wizard Role: " + wrole + "\n");
 
-    // Sirname
-    string sirname = "";
+    sirname = "";
     if (function_exists("query_property", target))
         sirname = target->query_property("sirname");
     if (sirname && sirname != "")
         write("  Sirname: " + sirname + "\n");
 
-    // Clan
-    string clan = "";
+    clan = "";
     if (function_exists("query_property", target))
         clan = target->query_property("clan");
     if (clan && clan != "")
         write("  Clan: " + clan + "\n");
 
-    // Inventory
-    object *inv = all_inventory(target);
+    inv = all_inventory(target);
     if (inv && sizeof(inv)) {
         write("\n  Inventory (" + sizeof(inv) + " items):\n");
         foreach (object item in inv) {
@@ -465,13 +490,13 @@ int cmd_pending() {
     foreach (object u in all_users) {
         if (!u) continue;
         string occ = "";
-        if (function_exists("query_occ", u)) occ = u->query_occ();
+        if (function_exists("query_occ_id", u)) occ = u->query_occ_id();
         if (!occ || occ == "" || occ == "Pending" || occ == "pending") {
             string uname = "Unknown";
             if (function_exists("query_cap_name", u))
                 uname = u->query_cap_name();
             string race = "?";
-            if (function_exists("query_race", u)) race = u->query_race();
+            if (function_exists("query_race_name", u)) race = u->query_race_name();
             write("  " + uname + " (" + race + ") - OCC: Pending\n");
             occ_count++;
         }

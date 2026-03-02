@@ -2259,4 +2259,28 @@ void grant_power(string p, int l)  { /* power stored by C level    */ }
 void set_max_cybernetics(int n)    { /* stub */ }
 void set_cybernetics_allowed(int n){ /* stub */ }
 void add_cybernetic(string c)      { /* stub */ }
+
+//=============================================================================
+// Spell damage / healing entry points (called by cast.lpc after cast_spell())
+// Subclasses may override for resistances, counterspells, shields, etc.
+//=============================================================================
+
+/*
+ * receive_spell_damage(amount, effect_type, caster)
+ *   Receives raw spell damage from the cast.lpc dispatcher.
+ *   effect_type is a short label ("fire", "force", "cold", etc.).
+ *   Returns 1 if the target died, 0 otherwise.
+ */
+int receive_spell_damage(int amount, string effect_type, object caster) {
+    if (amount <= 0) return 0;
+    return take_damage(amount, 0);
+}
+
+/*
+ * receive_healing(amount, healer)
+ *   Receives healing from a successful heal-type spell.
+ */
+void receive_healing(int amount, object healer) {
+    if (amount > 0) heal_damage(amount, 0);
+}
 void add_combat_bonus(string b, int v) { /* stub */ }

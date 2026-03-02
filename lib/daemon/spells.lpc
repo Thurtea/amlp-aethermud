@@ -128,29 +128,91 @@ int calculate_ppe_per_level(int is_primary_caster) {
 /* ========================= Spell Casting ========================= */
 
 /*
- * Cast a spell
- * Returns: 1 = success, 0 = failure
+ * cast_spell(spell_id, caster, target)
+ *
+ * Executes a spell: validates, deducts PPE, calls apply_effect(), and
+ * returns a result mapping consumed by cast.lpc.
+ *
+ * Return mapping keys:
+ *   "success"  : int    1 = cast succeeded, 0 = failed
+ *   "damage"   : int    raw damage/healing amount (0 for non-damaging spells
+ *                       OR for old-style spells that applied damage internally)
+ *   "effect"   : string short type label ("fire","force","heal","stun","" …)
+ *   "message"  : string room broadcast (empty string for old-style spells
+ *                       that sent their own messages)
+ *   "self_msg" : string message shown only to caster (empty for old-style)
+ *
+ * PPE is deducted here, before calling apply_effect(), so that:
+ *   a) the base spell::cast() PPE deduction path is bypassed (we call
+ *      apply_effect() directly, not cast()), and
+ *   b) old-style spells that override cast() rather than apply_effect()
+ *      still get PPE deducted correctly.
+ *
+ * Old-style spells (return int from apply_effect) get a minimal mapping with
+ * damage=0 so cast.lpc does not double-apply damage they already handled.
+ * New-style spells return a full mapping from apply_effect() directly.
  */
-int cast_spell(string spell_id, object caster, object target) {
+mapping cast_spell(string spell_id, object caster, object target) {
+    mapping fail;
+    fail = ([
+        "success":  0,
+        "damage":   0,
+        "effect":   "",
+        "message":  "",
+        "self_msg": ""
+    ]);
+
     if (!initialized) load_all_spells();
-    
-    object spell = spells[spell_id];
+
+    object spell;
+    spell = spells[spell_id];
     if (!spell) {
-        tell_object(caster, "That spell doesn't exist.\n");
-        return 0;
+        fail["self_msg"] = "That spell doesn't exist.\n";
+        return fail;
     }
-    
-    int check = spell->can_cast(caster);
+
+    int check;
+    check = spell->can_cast(caster);
     if (check == 0) {
-        tell_object(caster, "You don't know that spell or can't cast it yet.\n");
-        return 0;
+        fail["self_msg"] = "You don't know that spell or can't cast it yet.\n";
+        return fail;
     }
     if (check == -1) {
-        tell_object(caster, "You don't have enough P.P.E.\n");
-        return 0;
+        fail["self_msg"] = "You don't have enough P.P.E.\n";
+        return fail;
     }
-    
-    return spell->cast(caster, target);
+
+    /* Deduct PPE before calling apply_effect().  The base spell::cast()
+     * also calls use_ppe(), but we bypass cast() to call apply_effect()
+     * directly, so we must deduct manually. */
+    int cost;
+    cost = spell->query_ppe_cost();
+    caster->use_ppe(cost);
+
+    /* Invoke the spell effect via apply_effect() */
+    mixed res;
+    res = spell->apply_effect(caster, target);
+
+    /* New-style spell: apply_effect() returned a full result mapping */
+    if (mappingp(res)) {
+        return res;
+    }
+
+    /* Old-style spell: apply_effect() returned int (1 = ok, 0 = failed).
+     * The spell already handled its own messages and damage internally.
+     * Return a minimal success/failure mapping with damage=0 so cast.lpc
+     * does not attempt to double-apply effects. */
+    int ok;
+    ok = res ? 1 : 0;
+    mapping result;
+    result = ([
+        "success":  ok,
+        "damage":   0,
+        "effect":   "",
+        "message":  "",
+        "self_msg": ok ? "" : "The spell fizzles.\n"
+    ]);
+    return result;
 }
 
 /*

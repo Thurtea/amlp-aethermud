@@ -1,47 +1,59 @@
 /*
  * /lib/cmds/cast.lpc - Cast a spell
- * 
+ *
  * Usage:
- *   cast                    - List your spells
- *   cast <spell>            - Cast a spell on yourself
+ *   cast                    - List your spells and P.P.E.
+ *   cast <spell>            - Cast a spell (on yourself by default)
  *   cast <spell> <target>   - Cast a spell on a target
- *   cast info <spell>       - Get info about a spell
+ *   cast info <spell>       - Get detailed info about a spell
+ *
+ * Flow:
+ *   1. Validate caster knows the spell.
+ *   2. Resolve optional target (present() then race-name fallback).
+ *   3. Echo incantation to room.
+ *   4. Call spells_d->cast_spell() — PPE deduction and apply_effect()
+ *      happen inside; returns a result mapping.
+ *   5. Write self_msg to caster; broadcast message to room.
+ *   6. Apply damage via receive_spell_damage() / take_damage() fallback.
+ *   7. Apply healing via receive_healing() / heal_damage() fallback.
  */
 
 #define SPELLS_DAEMON "/daemon/spells"
 
 int main(string args) {
-    object spells_d = find_object(SPELLS_DAEMON);
-    if (!spells_d) {
-        spells_d = load_object(SPELLS_DAEMON);
-    }
-    
-    /* Check if character is a spell caster */
-    int caster_level = this_player()->query_spell_caster_level();
+    object spells_d;
+    spells_d = find_object(SPELLS_DAEMON);
+    if (!spells_d) spells_d = load_object(SPELLS_DAEMON);
+
+    /* Must be a spell caster */
+    int caster_level;
+    caster_level = this_player()->query_spell_caster_level();
     if (caster_level <= 0) {
         write("You don't know how to cast spells.\n");
         return 1;
     }
-    
+
+    /* No args: list spells */
     if (!args || args == "") {
-        /* List spells */
         if (spells_d) {
             write(spells_d->format_spell_list(this_player()));
         } else {
-            mapping my_spells = this_player()->query_spells();
+            string *my_spells;
+            my_spells = this_player()->query_spells();
             write("Your Spells:\n");
-            foreach (string id, int level : my_spells) {
-                write("  " + id + " (level " + level + ")\n");
+            foreach (string id in my_spells) {
+                write("  " + id + "\n");
             }
-            write("P.P.E.: " + this_player()->query_ppe() + "/" + 
+            write("P.P.E.: " + this_player()->query_ppe() + "/" +
                   this_player()->query_max_ppe() + "\n");
         }
         return 1;
     }
-    
-    /* Check for info request */
-    if (sizeof(args) > 5 && args[0..4] == "info ") {
-        string spell_id = lower_case(args[5..]);
+
+    /* "info <spell>" request */
+    if (sizeof(args) > 5 && substring(args, 0, 5) == "info ") {
+        string spell_id;
+        spell_id = lower_case(substring(args, 5));
         if (spells_d) {
             write(spells_d->query_spell_info(spell_id));
         } else {
@@ -49,61 +61,63 @@ int main(string args) {
         }
         return 1;
     }
-    
-    /* Parse spell and optional target */
+
+    /* Parse "spell_name [target_name]" — split on first space only,
+     * so multi-word targets like "big orc" are preserved. */
     string spell_id, target_name;
-    object target;
-    
-    if (sscanf(args, "%s %s", spell_id, target_name) != 2) {
-        spell_id = args;
+    int sp;
+    sp = strsrch(args, " ");
+    if (sp >= 0) {
+        spell_id    = lower_case(substring(args, 0, sp));
+        target_name = substring(args, sp + 1);
+    } else {
+        spell_id    = lower_case(args);
         target_name = "";
     }
-    
-    spell_id = lower_case(spell_id);
-    
-    /* Check if player knows this spell */
+
+    /* Player must know the spell */
     if (!this_player()->knows_spell(spell_id)) {
         write("You don't know that spell.\n");
         return 1;
     }
-    
-    /* Check PPE */
+
+    /* Spell level check — cast_spell() re-checks but give early feedback */
     if (spells_d) {
-        object spell = spells_d->query_spell(spell_id);
-        if (spell) {
-            int cost = spell->query_ppe_cost();
-            if (this_player()->query_ppe() < cost) {
-                write("You don't have enough P.P.E. You need " + cost + 
-                      " but only have " + this_player()->query_ppe() + ".\n");
-                return 1;
-            }
-            
-            /* Check spell level vs caster level */
-            int spell_level = spell->query_spell_level();
+        object spell_obj;
+        spell_obj = spells_d->query_spell(spell_id);
+        if (spell_obj) {
+            int spell_level;
+            spell_level = spell_obj->query_spell_level();
             if (spell_level > caster_level) {
-                write("That spell is too advanced for you (level " + 
+                write("That spell is too advanced for you (level " +
                       spell_level + ", you are level " + caster_level + ").\n");
                 return 1;
             }
         }
     }
-    
-    /* Find target if specified */
+
+    /* Resolve target */
+    object target;
     if (target_name && target_name != "") {
-        object env = environment(this_player());
+        object env;
+        env = environment(this_player());
         if (env) {
-            // Try exact ID match first
+            /* Exact id match first */
             target = present(target_name, env);
-            
-            // If not found by ID, try by race/RCC name for living creatures
+
+            /* Fallback: match race name among living objects in room */
             if (!target) {
-                object *inv = all_inventory(env);
-                foreach (object ob : inv) {
+                object *inv;
+                inv = all_inventory(env);
+                foreach (object ob in inv) {
                     if (living(ob) && ob != this_player()) {
-                        string race = ob->query_race ? ob->query_race() : "";
-                        if (race && lower_case(race) == lower_case(target_name)) {
-                            target = ob;
-                            break;
+                        if (function_exists("query_race", ob)) {
+                            string race;
+                            race = ob->query_race();
+                            if (race && lower_case(race) == lower_case(target_name)) {
+                                target = ob;
+                                break;
+                            }
                         }
                     }
                 }
@@ -114,33 +128,96 @@ int main(string args) {
             return 1;
         }
     } else {
-        target = this_player();  /* Default to self */
+        target = this_player();
     }
-    
-    /* Echo incantation to room before casting */
+
+    /* Echo incantation to room (everyone except caster hears it) */
     if (spells_d) {
-        object spell_obj = spells_d->query_spell(spell_id);
+        object spell_obj;
+        spell_obj = spells_d->query_spell(spell_id);
         if (spell_obj) {
-            string incantation = spell_obj->query_incantation();
+            string incantation;
+            incantation = spell_obj->query_incantation();
             if (incantation && incantation != "") {
-                object room = environment(this_player());
-                if (room)
+                object room;
+                room = environment(this_player());
+                if (room) {
                     tell_room(room,
                         this_player()->query_cap_name() + " intones: \"" +
-                        incantation + "\"\n", ({ }));
+                        incantation + "\"\n",
+                        ({ this_player() }));
+                }
             }
         }
     }
 
-    /* Cast the spell */
-    int result;
-    if (spells_d) {
-        result = spells_d->cast_spell(spell_id, this_player(), target);
-    } else {
+    if (!spells_d) {
         write("Spells daemon not available.\n");
         return 1;
     }
-    
+
+    /* ------------------------------------------------------------------
+     * CAST — PPE deduction and apply_effect() happen inside cast_spell().
+     * ------------------------------------------------------------------ */
+    mapping result;
+    result = spells_d->cast_spell(spell_id, this_player(), target);
+
+    /* Failure */
+    if (!result || result["success"] == 0) {
+        string fail_msg;
+        fail_msg = result ? result["self_msg"] : "";
+        if (fail_msg && fail_msg != "") write(fail_msg);
+        return 1;
+    }
+
+    /* Show caster message (may be empty for old-style spells that
+     * sent their own output inside apply_effect()) */
+    string self_msg;
+    self_msg = result["self_msg"];
+    if (self_msg && self_msg != "") write(self_msg);
+
+    /* Broadcast room message to everyone except the caster */
+    string room_msg;
+    room_msg = result["message"];
+    if (room_msg && room_msg != "") {
+        object room;
+        room = environment(this_player());
+        if (room) tell_room(room, room_msg, ({ this_player() }));
+    }
+
+    /* ------------------------------------------------------------------
+     * Apply damage or healing from new-style spells.
+     * Old-style spells return damage=0 (they handled effects internally),
+     * so the blocks below are skipped — no double application.
+     * ------------------------------------------------------------------ */
+    int dmg;
+    dmg = result["damage"];
+
+    string effect;
+    effect = result["effect"];
+
+    if (dmg > 0 && target && living(target)) {
+
+        if (effect == "heal") {
+            /* --- Healing path --- */
+            if (function_exists("receive_healing", target))
+                target->receive_healing(dmg, this_player());
+            else if (function_exists("heal_damage", target))
+                target->heal_damage(dmg, 0);
+
+        } else {
+            /* --- Damage path --- */
+            /* Prefer receive_spell_damage (allows per-creature overrides). */
+            if (function_exists("receive_spell_damage", target))
+                target->receive_spell_damage(dmg, effect, this_player());
+            else if (function_exists("receive_damage", target))
+                target->receive_damage(dmg, this_player());
+            else if (function_exists("take_damage", target))
+                /* Same entry point as attack.lpc / fireball use directly */
+                target->take_damage(dmg, 0);
+        }
+    }
+
     return 1;
 }
 

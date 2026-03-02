@@ -1,0 +1,141 @@
+// /lib/races/borg.lpc
+// Full Conversion Cyborg (Borg) Race
+//
+// Full Conversion Cyborgs are humans who have undergone extensive
+// cybernetic augmentation, replacing most of their organic body with
+// mechanical systems. They are MDC beings with enhanced physical
+// attributes but diminished mental faculties.
+
+inherit "/std/race";
+
+#define RACE_DATA "/secure/race_data"
+
+mapping query_race_data();
+
+void create() {
+    ::create();
+
+    set_race_name("Borg");
+    set_race_id("borg");
+    set_race_plural("Borgs");
+    set_race_category(RACE_CAT_MUTANT);
+
+    set_race_description(
+        "Full Conversion Cyborgs have surrendered nearly all of their organic " +
+        "body in exchange for a mechanical shell of immense power. Encased in " +
+        "MDC alloys and driven by nuclear power cells, a Borg towers over " +
+        "ordinary humans and can shrug off attacks that would destroy a tank. " +
+        "The trade-off is steep: their connection to the metaphysical is " +
+        "severed. No Borg can channel ley line energy, open rifts, or wield " +
+        "psychic powers with any reliability. What remains of the original " +
+        "person is a brain, spinal column, and a handful of vital organs " +
+        "suspended in a life-support cradle deep inside the chassis."
+    );
+
+    // Physical characteristics
+    set_size_category(SIZE_MEDIUM);
+    set_height_range(72, 96);   // 6'0" to 8'0"
+    set_weight_range(400, 1200);
+    set_lifespan(200);
+    set_body_types(({ "standard", "heavy", "assault", "light" }));
+
+    // Stat modifiers — enhanced physical, diminished mental
+    set_stat_modifiers(([
+        "ps": 6,
+        "pe": 4,
+        "spd": 4,
+        "iq": -1,
+        "me": -2
+    ]));
+
+    // No special combat bonuses beyond stat mods
+    set_combat_bonuses(([
+    ]));
+
+    // MDC creature
+    set_natural_sdc(0);
+    set_mdc_creature(1);
+
+    // Mechanical body — resistant to toxins, immune to disease
+    set_resistances(([
+        "poison": 80,
+        "cold": 30
+    ]));
+    set_immunities(({ "disease" }));
+    set_vulnerabilities(({ "emp", "ion" }));
+
+    // No racial abilities in the psionic/magic sense
+    set_racial_abilities(({ }));
+
+    // Borgs cannot channel psionic or magical energy
+    set_psionic_potential(0);
+    set_magic_potential(0);
+
+    // OCC restrictions — cannot take magic or psionic OCCs
+    set_allowed_occs(({ }));
+    set_forbidden_occs(({
+        "Ley Line Walker", "Shifter", "Mystic", "Mind Melter"
+    }));
+    set_recommended_occs(({
+        "operator", "headhunter", "vagabond"
+    }));
+
+    // All alignments allowed
+    set_allowed_alignments(({ }));
+
+    // Starting resources
+    set_starting_equipment(({
+        "/obj/item/backpack",
+        "/obj/item/toolkit"
+    }));
+    set_starting_credits(200);
+
+    // Faction standing
+    set_default_factions(({ }));
+    set_hostile_factions(({ }));
+
+    // Cultural background
+    set_culture("Coalition or Independent");
+    set_homeland("Earth (Various)");
+    set_languages(({ "american" }));
+    set_primary_language("american");
+
+    set_property("starting_skill_package", ({
+        "language_american", "literacy_american",
+        "mechanical_basic", "pilot_automobile",
+        "hand_to_hand_basic"
+    }));
+    set_property("starting_spells", ({ }));
+    set_property("starting_psionics", ({ }));
+
+    RACE_DATA->register_race("borg", query_race_data());
+}
+
+// Borgs get a penalty to skill breadth — mechanical bodies limit finesse
+int query_skill_bonus() {
+    return -5;
+}
+
+string* query_skill_restrictions() {
+    return ({ "holistic_medicine", "acrobatics", "gymnastics" });
+}
+
+mapping query_race_data() {
+    return ([
+        "name":         "Borg",
+        "short":        "Full Conversion Cyborg — MDC mechanical war machine.",
+        "stat_mods":    ([ "ps": 6, "pe": 4, "spd": 4, "iq": -1, "me": -2 ]),
+        "natural_ar":   0,
+        "hp_bonus":     0,
+        "is_mdc":       1,
+        "size":         "medium",
+        "description":  "Full Conversion Cyborgs have surrendered nearly all " +
+                        "of their organic body in exchange for a mechanical " +
+                        "shell of immense power. Encased in MDC alloys and " +
+                        "driven by nuclear power cells, a Borg can shrug off " +
+                        "attacks that would destroy a tank. The trade-off is " +
+                        "steep: no Borg can channel ley line energy, open " +
+                        "rifts, or wield psychic powers.",
+        "restrictions": ({ "Ley Line Walker", "Shifter", "Mystic", "Mind Melter" })
+    ]);
+}

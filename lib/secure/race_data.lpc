@@ -1,0 +1,58 @@
+// /lib/secure/race_data.lpc
+// Central race registry daemon.
+//
+// Maintains a mapping of race_name -> race_data for all registered races.
+// Individual race files in /races/ self-register via register_race() from
+// their create() function.  load_races() bulk-loads every .lpc file in
+// /races/ so they get a chance to register.
+
+mapping races;
+
+void load_races();
+
+void create() {
+    races = ([]);
+    load_races();
+}
+
+// Register a single race.  Called by each race file's create().
+void register_race(string name, mapping data) {
+    if (!name || name == "") return;
+    if (!data) return;
+    races[name] = data;
+}
+
+// Return the data mapping for one race, or 0 if not found.
+mapping query_race(string name) {
+    if (!name) return 0;
+    if (races[name]) return races[name];
+    return 0;
+}
+
+// Return an array of all registered race names.
+string *query_all_races() {
+    return keys(races);
+}
+
+// Scan /races/ and load every .lpc file to trigger self-registration.
+void load_races() {
+    string *files;
+    int i, sz;
+
+    files = get_dir("/races/");
+    if (!files) return;
+    sz = sizeof(files);
+
+    for (i = 0; i < sz; i++) {
+        int flen;
+        flen = strlen(files[i]);
+        // Only process .lpc files (at least 5 chars: "x.lpc")
+        if (flen < 5) continue;
+        if (substring(files[i], flen - 4, flen) != ".lpc") continue;
+
+        // Strip .lpc extension to get the object path
+        string base;
+        base = substring(files[i], 0, flen - 4);
+        load_object("/races/" + base);
+    }
+}

@@ -6,6 +6,10 @@
 
 inherit "/std/race";
 
+#define RACE_DATA "/secure/race_data"
+
+mapping query_race_data();
+
 void create() {
     ::create();
     
@@ -96,6 +100,8 @@ void create() {
     // Humans rarely have innate spells/psionics but may start with simple lore
     set_property("starting_spells", ({ }));
     set_property("starting_psionics", ({ }));
+
+    RACE_DATA->register_race("human", query_race_data());
 }
 
 // Humans get a bonus to skill selection
@@ -106,4 +112,24 @@ int query_skill_bonus() {
 // Humans can learn any skill category
 string* query_skill_restrictions() {
     return ({ });  // No restrictions
+}
+
+mapping query_race_data() {
+    return ([
+        "name":         "Human",
+        "short":        "Versatile baseline race able to pursue any occupation.",
+        "stat_mods":    ([]),
+        "natural_ar":   0,
+        "hp_bonus":     0,
+        "is_mdc":       0,
+        "size":         "medium",
+        "description":  "Humans remain the dominant species on Rifts Earth, " +
+                        "despite the cataclysm and the arrival of countless " +
+                        "supernatural beings. Their greatest strength lies in " +
+                        "their adaptability, ingenuity, and determination. " +
+                        "While they lack the natural abilities of many other " +
+                        "races, humans make up for it with technology, magic, " +
+                        "and sheer willpower.",
+        "restrictions": ({})
+    ]);
 }

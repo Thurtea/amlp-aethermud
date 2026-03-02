@@ -5359,6 +5359,16 @@ void process_login_state(PlayerSession *session, const char *input) {
 
                 session->state = STATE_PLAYING;
 
+                /* Returning wizard: call enter_world(0) — no orientation needed */
+                if (session->player_object && global_vm && session->privilege_level >= 1) {
+                    VMValue ew_arg = vm_value_create_int(0);
+                    VMValue ew_result = obj_call_method(global_vm,
+                                            (obj_t *)session->player_object,
+                                            "enter_world", &ew_arg, 1);
+                    vm_value_release(&ew_arg);
+                    vm_value_release(&ew_result);
+                }
+
                 /* Re-give wiz-tools on every wizard/admin login: C items are not
                  * preserved through the binary save format, so we always
                  * recreate them here instead of relying on save/load. */

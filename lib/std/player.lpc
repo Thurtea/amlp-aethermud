@@ -301,6 +301,11 @@ void complete_promotion() {
     string workroom_path = "/domains/wizard/" + wiz_name + "/workroom";
     string workroom_fs   = "lib/domains/wizard/" + wiz_name + "/workroom.lpc";
 
+    string wiz_dir = "lib/domains/wizard/" + wiz_name;
+    if (!file_exists(wiz_dir)) {
+        mkdir(wiz_dir);
+    }
+
     if (!file_exists(workroom_fs)) {
         /* Copy template to wizard's domain */
         object tmpl = clone_object("/std/workroom_template");
@@ -336,6 +341,20 @@ void enter_world(int needs_orientation) {
             if (!start_room)
                 start_room = clone_object("/domains/start/room/welcome");
         }
+    } else if (this_object()->query_privilege_level() >= 1) {
+        /* Returning wizard: try their personal workroom first */
+        string wiz_name = lower_case(this_object()->query_name());
+        string workroom_path = "/domains/wizard/" + wiz_name + "/workroom";
+        object workroom = find_object(workroom_path);
+        if (!workroom) workroom = clone_object(workroom_path);
+        if (workroom) {
+            start_room = workroom;
+        } else {
+            /* Workroom not found, fall back to welcome room */
+            start_room = find_object("/domains/start/room/welcome");
+            if (!start_room)
+                start_room = clone_object("/domains/start/room/welcome");
+        }
     } else {
         start_room = find_object("/domains/start/room/welcome");
         if (!start_room)
@@ -346,7 +365,7 @@ void enter_world(int needs_orientation) {
         move_object(this_object(), start_room);
     }
 
-    if (this_object()->query_look) {
+    if (function_exists("look", this_object())) {
         this_object()->look();
     }
 

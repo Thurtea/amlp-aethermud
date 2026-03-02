@@ -74,8 +74,8 @@ void catch_tell(string msg) {
         text = text[0..strlen(text)-2];
     }
 
-    // Watch for "done" or "finish"
-    if (text != "done" && text != "finish") return;
+    // Watch for "done" or "finish" as substring so "I am done" also triggers
+    if (strsrch(text, "done") < 0 && strsrch(text, "finish") < 0) return;
 
     tell_object(speaker,
         "\nArchimedes nods with quiet approval.\n" +

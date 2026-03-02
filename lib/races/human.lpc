@@ -15,12 +15,12 @@ void create() {
     set_race_category(RACE_CAT_HUMAN);
     
     set_race_description(
-        "Humans remain the dominant species on Rifts Earth, despite the cataclysm "
-        "and the arrival of countless supernatural beings. Their greatest strength "
-        "lies in their adaptability, ingenuity, and determination. While they lack "
-        "the natural abilities of many other races, humans make up for it with "
-        "technology, magic, and sheer willpower. They can be found in every "
-        "corner of the world, from the Coalition States to the wilderness, "
+        "Humans remain the dominant species on Rifts Earth, despite the cataclysm " +
+        "and the arrival of countless supernatural beings. Their greatest strength " +
+        "lies in their adaptability, ingenuity, and determination. While they lack " +
+        "the natural abilities of many other races, humans make up for it with " +
+        "technology, magic, and sheer willpower. They can be found in every " +
+        "corner of the world, from the Coalition States to the wilderness, " +
         "pursuing every conceivable occupation."
     );
     

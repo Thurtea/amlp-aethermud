@@ -5813,7 +5813,15 @@ void handle_session_input(PlayerSession *session, const char *input) {
             send_prompt(session);
         } else if (session->state == STATE_CHARGEN) {
             if (strlen(line_start) > 0) {
+                int prev_chargen_state = session->chargen_state;
                 process_chargen_state(session, line_start);
+                /* If chargen state changed, discard remaining buffered input
+                 * to prevent stale lines from being processed in the new state. */
+                if (session->chargen_state != prev_chargen_state) {
+                    session->input_length = 0;
+                    session->input_buffer[0] = '\0';
+                    break;
+                }
             }
         } else if (session->state == STATE_PLAYING) {
             if (strlen(line_start) > 0) {

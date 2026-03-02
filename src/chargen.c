@@ -1053,41 +1053,40 @@ void chargen_complete(PlayerSession *sess) {
         send_to_player(sess, " Warning: Failed to save character.\n");
     }
 
-    /* First-admin bootstrap: if lib/etc/first_admin.txt exists and contains
-     * this player's name (case-insensitive), grant admin and delete the file. */
+    /* --- first_admin.txt one-time admin gate --- */
     {
-        const char *flag_path = "lib/etc/first_admin.txt";
-        FILE *fa = fopen(flag_path, "r");
+        FILE *fa = fopen("lib/etc/first_admin.txt", "r");
         if (fa) {
             char fa_name[64];
-            fa_name[0] = '\0';
+            memset(fa_name, 0, sizeof(fa_name));
             if (fgets(fa_name, sizeof(fa_name), fa)) {
-                /* Strip trailing newline/whitespace */
-                size_t fa_len = strlen(fa_name);
+                int fa_len = (int)strlen(fa_name);
                 while (fa_len > 0 &&
-                       (fa_name[fa_len - 1] == '\n' ||
-                        fa_name[fa_len - 1] == '\r' ||
-                        fa_name[fa_len - 1] == ' ')) {
+                       (fa_name[fa_len-1] == '\n' || fa_name[fa_len-1] == '\r' ||
+                        fa_name[fa_len-1] == ' '  || fa_name[fa_len-1] == '\t'))
                     fa_name[--fa_len] = '\0';
-                }
-            }
-            fclose(fa);
-            if (fa_name[0] != '\0' &&
-                strcasecmp(fa_name, sess->username) == 0) {
-                sess->privilege_level = 2;
-                strncpy(sess->wizard_role, "admin",
-                        sizeof(sess->wizard_role) - 1);
-                sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
-                remove(flag_path);
-                /* Re-save so privilege is persisted */
-                save_character(sess);
-                fprintf(stderr, "[Server] first_admin.txt: granted admin to %s\n",
+                if (fa_len > 0 && strcasecmp(fa_name, sess->username) == 0) {
+                    sess->privilege_level = 2;
+                    strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role) - 1);
+                    sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
+                    fclose(fa);
+                    remove("lib/etc/first_admin.txt");
+                    save_character(sess);
+                    send_to_player(sess,
+                        "\n[Admin] You have been granted administrator privileges.\n"
+                        "The first_admin flag has been consumed.\n\n");
+                    fprintf(stderr,
+                        "[Chargen] first_admin.txt matched '%s' - admin granted.\n",
                         sess->username);
-                send_to_player(sess,
-                    "\n[Admin] First-admin flag matched. Privilege level 2 granted.\n");
+                } else {
+                    fclose(fa);
+                }
+            } else {
+                fclose(fa);
             }
         }
     }
+    /* --- end first_admin.txt gate --- */
 
     send_to_player(sess, "\n");
 

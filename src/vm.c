@@ -81,7 +81,7 @@ VirtualMachine* vm_init(void) {
         WARN_LOG("Efun registry initialization failed");
     } else {
         /* Register all built-in efuns */
-        if (efun_register_all(vm->efun_registry) != 0) {
+        if (efun_register_all(vm->efun_registry) == 0) {
             WARN_LOG("Some efuns failed to register");
         }
     }

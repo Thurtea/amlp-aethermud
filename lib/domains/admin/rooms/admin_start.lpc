@@ -1,0 +1,37 @@
+// lib/domains/admin/rooms/admin_start.lpc
+// The Command Center — admin orientation room, reached on first login
+// after installation. Connects to the main world via south_alley.
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("The Command Center");
+    set_long(
+        "A sparse chamber of brushed steel and cool blue light. Banks of\n"
+        "silent monitors line the walls, each displaying a different corner\n"
+        "of the world — streets, dungeons, open skies. A single console\n"
+        "stands at the centre, its surface etched with compass-rose markings.\n"
+        "The air hums at a frequency just below hearing. This is where the\n"
+        "world is watched, and from here it can be shaped. The way out leads\n"
+        "south into the alleys of Splynn.\n"
+    );
+
+    add_exit("out", "/domains/splynn/rooms/south_alley");
+
+    set_property("light", 2);
+    set_property("indoors", 1);
+    set_property("no_mob", 1);
+    set_property("no_fight", 1);
+
+    /* Spawn the System */
+    object sys;
+    catch { sys = clone_object("/domains/admin/npcs/the_system"); };
+    if (sys) {
+        if (function_exists("move", sys))
+            sys->move(this_object());
+        else
+            move_object(sys, this_object());
+    }
+}

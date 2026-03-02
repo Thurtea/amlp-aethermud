@@ -1,0 +1,47 @@
+// lib/domains/splynn/npcs/dimensional_traveler.lpc
+// A Dimensional Traveler — tutorial greeter NPC in the Rift Gate entry room.
+
+inherit "/std/npc";
+
+void create() {
+    ::create();
+
+    set_name("traveler");
+    set_id("traveler");
+    add_id("dimensional traveler");
+    add_id("woman");
+    add_id("man");
+    add_id("stranger");
+
+    set_short("a Dimensional Traveler");
+    set_long(
+        "A weather-worn figure in a patchwork coat that has seen a dozen\n"
+        "worlds. Rift-burn scars trace faint lines along their forearms.\n"
+        "They carry no visible weapons — only a knowing, calm expression\n"
+        "that suggests they have been here, standing in exactly this spot,\n"
+        "many times before.\n"
+    );
+
+    set_gender("neuter");
+    set_race("human");
+    set_level(1);
+    set_aggro(0);
+
+    set_property("no_attack", 1);
+    set_property("no_follow", 1);
+}
+
+void init_living(object who) {
+    if (!who || !living(who)) return;
+    tell_object(who,
+        "\nThe Dimensional Traveler glances your way and nods.\n" +
+        "\"Welcome to AetherMUD.  Type HELP to get started.\n" +
+        " Type SCORE to see your character.  Type LOOK to see the world.\"\n\n"
+    );
+}
+
+string query_talk() {
+    return "The Dimensional Traveler says:\n"
+        "\"Welcome to AetherMUD.  Type HELP to get started.\n"
+        " Type SCORE to see your character.  Type LOOK to see the world.\"\n";
+}

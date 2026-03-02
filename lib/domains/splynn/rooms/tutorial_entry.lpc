@@ -1,0 +1,36 @@
+// lib/domains/splynn/rooms/tutorial_entry.lpc
+// Splynn — The Rift Gate: first room for new players after character creation.
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Splynn — The Rift Gate");
+    set_long(
+        "A shimmering tear in reality hangs in the air behind you, its edges\n"
+        "crackling with dimensional energy before slowly folding shut. You\n"
+        "have arrived in Splynn, the alien city-state of the Splugorth\n"
+        "Slavelords on the shores of the Atlantic Rift — a place where a\n"
+        "hundred species trade, scheme, and survive under the cold gaze of\n"
+        "bio-wizardry towers. The humid air carries the smell of ozone and\n"
+        "exotic spices. A broad stone archway to the south opens into the\n"
+        "narrow streets of the South Alley.\n"
+    );
+
+    add_exit("south", "/domains/splynn/rooms/south_alley");
+
+    set_property("light", 1);
+    set_property("indoors", 0);
+    set_property("no_fight", 1);
+
+    /* Spawn the Dimensional Traveler greeter */
+    object greeter;
+    catch { greeter = clone_object("/domains/splynn/npcs/dimensional_traveler"); };
+    if (greeter) {
+        if (function_exists("move", greeter))
+            greeter->move(this_object());
+        else
+            move_object(greeter, this_object());
+    }
+}

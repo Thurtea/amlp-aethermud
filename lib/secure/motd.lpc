@@ -1,0 +1,24 @@
+// /lib/secure/motd.lpc
+// Message of the Day — displayed once per login, after password verification
+// and before the player enters the world.
+//
+// Reads /data/motd.txt if it exists; falls back to a brief default.
+// Called by login.lpc:enter_game() with the already-exec'd user object.
+
+#include <globals.h>
+
+void show_motd(object user) {
+    if (!objectp(user)) return;
+
+    string text;
+    catch { text = read_file("/data/motd.txt"); };
+
+    if (!text || text == "") {
+        text = "\n--- Message of the Day ---\n" +
+               "Welcome to AetherMUD.\n" +
+               "Type 'help' for a list of commands.\n" +
+               "--------------------------\n\n";
+    }
+
+    tell_object(user, text);
+}

@@ -25,6 +25,12 @@
 - Spells wired to combat: cast.lpc → cast_spell() → receive_spell_damage / receive_healing
 - Smuggler UC/BMC exchange command (lib/cmds/exchange.lpc)
 - QCS mercbase subcommand (qcs create mercbase <name> generates 4-room base)
+- First-connect admin wizard: fresh boot intercept → install.lpc wizard → reboot
+- Character creation wizard: race/OCC selection at first login
+- MOTD system: /data/motd.txt shown after every login
+- ASCII banner shown on every new TCP connection
+- Admin orientation room: lib/domains/admin/rooms/admin_start.lpc
+- New player tutorial entry: lib/domains/splynn/rooms/tutorial_entry.lpc
 
 ## Known Gaps (Next Sprint)
 - Splynn: all major areas wired; Shemarria rail connection and Coven Base pending

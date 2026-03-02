@@ -102,17 +102,31 @@ private void init_directories() {
 
 // Called when a user connects
 object connect() {
-    object login;
-    
-    catch {
-        login = clone_object("/clone/login");
+    string banner;
+    catch { banner = read_file("/data/banner.txt"); };
+    if (banner && banner != "") write(banner);
+
+    // Check first-boot flag before anything else.
+    object fc;
+    catch { fc = load_object("/secure/first_connect"); };
+    if (fc && function_exists("query_first_boot", fc) && fc->query_first_boot()) {
+        object wizard;
+        catch { wizard = new("/secure/install"); };
+        if (wizard && function_exists("logon", wizard)) {
+            return wizard;
+        }
+        // If install wizard failed to load, fall through to normal login.
+        write("WARNING: Installation wizard unavailable; proceeding with normal login.\n");
     }
-    
+
+    object login;
+    catch { login = clone_object("/clone/login"); };
+
     if (!login) {
         write("ERROR: Failed to clone login object!\n");
         return 0;
     }
-    
+
     return login;
 }
 

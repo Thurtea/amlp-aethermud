@@ -5,62 +5,15 @@
 private string player_name;
 private string password;
 private int creating_new;
+private object _loaded_player;
 
 void create() {
     creating_new = 0;
 }
 
 void logon() {
-    string *files;
-    int needs_installation;
-    
-    // Check if this is first-time setup (no player files exist)
-    needs_installation = 0;
-    catch {
-        files = get_dir(DIR_SAVE + "/players/*.o");
-        if (!files || sizeof(files) == 0) {
-            needs_installation = 1;
-        }
-    };
-    
-    // If first-time setup, launch installation wizard
-    if (needs_installation) {
-        write("\n+----------------------------------------------------------------+\n");
-        write("|                                                                |\n");
-        write("|         FIRST-TIME SETUP DETECTED                             |\n");
-        write("|         Loading Installation Wizard...                        |\n");
-        write("|                                                                |\n");
-        write("+----------------------------------------------------------------+\n\n");
-        
-        object install_wizard;
-        mixed err;
-        
-        err = catch {
-            install_wizard = new("/secure/install");
-        };
-        
-        if (err || !install_wizard) {
-            write("[ERROR] Could not load installation wizard!\n");
-            write("Error: " + err + "\n");
-            write("Installation file should be at: /lib/secure/install.lpc\n");
-            destruct(this_object());
-            return;
-        }
-        
-        // Transfer control to installation wizard
-        exec(install_wizard, this_object());
-        destruct(this_object());
-        return;
-    }
-    
-    // Normal login flow
-    write("\n");
-    write("========================================\n");
-    write("       Welcome to AMLP-MUD\n");
-    write("========================================\n");
-    write("  A Multi-User Dungeon for Builders\n");
-    write("  Minimal Foundation - Maximum Potential\n");
-    write("========================================\n");
+    // First-boot routing is handled exclusively in master.lpc connect().
+    // By the time this runs, the install wizard has already completed.
     write("\n");
     write("Enter your character name (or 'new' to create): ");
     input_to("get_name");
@@ -78,10 +31,17 @@ void get_name(string name) {
     name = lower_case(name);
     
     if (name == "new" || name == "create") {
-        write("\nCreating new character...\n");
-        write("Enter desired character name: ");
-        creating_new = 1;
-        input_to("get_new_name");
+        object cc;
+        mixed cerr;
+        cerr = catch { cc = new("/secure/char_create"); };
+        if (cerr || !cc) {
+            write("\nERROR: Character creation unavailable.  Please reconnect.\n");
+            destruct(this_object());
+            return;
+        }
+        exec(cc, this_object());
+        if (function_exists("start", cc)) cc->start();
+        destruct(this_object());
         return;
     }
     
@@ -94,9 +54,17 @@ void get_name(string name) {
         input_to("confirm_new_character");
         return;
     }
-    
+
+    // Pre-load the player object now so get_password() can verify the hash.
+    _loaded_player = 0;
+    mixed lerr;
+    lerr = catch { _loaded_player = new(USER_OB); };
+    if (!lerr && objectp(_loaded_player) && function_exists("load_player", _loaded_player)) {
+        _loaded_player->load_player(lower_case(player_name));
+    }
+
     write("Password: ");
-    input_to("get_password", 1);  // 1 = hide input
+    input_to("get_password", 1);
 }
 
 void get_new_name(string name) {
@@ -160,14 +128,21 @@ void confirm_password(string pass) {
 }
 
 void get_password(string pass) {
-    string save_file;
-    string stored_password;
-    
-    save_file = DIR_SAVE + "/players/" + player_name + ".o";
-    
-    // Load saved password (simplified - in real system would restore object)
-    // For now, just allow any password
-    
+    string stored;
+
+    stored = "";
+    if (objectp(_loaded_player) && function_exists("query_password_hash", _loaded_player)) {
+        stored = _loaded_player->query_password_hash();
+    }
+
+    if (stored && stored != "" && crypt(pass, stored) != stored) {
+        write("\nWrong password.\n");
+        if (objectp(_loaded_player)) destruct(_loaded_player);
+        _loaded_player = 0;
+        destruct(this_object());
+        return;
+    }
+
     write("\nWelcome back, " + player_name + "!\n");
     enter_game();
 }
@@ -193,34 +168,37 @@ void enter_game() {
     mixed err;
     int is_first_player;
 
-    /* Determine if this is the first player by checking save directory */
-    is_first_player = 0;
-    if (file_size(DIR_SAVE + "/players") == -2) {
-        string *files = get_dir(DIR_SAVE + "/players/*");
-        if (!files || sizeof(files) == 0) {
-            is_first_player = 1;
+    /* For returning players: reuse the already-loaded object from get_password().
+     * For new characters created via the legacy path (creating_new=1): build fresh. */
+    if (objectp(_loaded_player)) {
+        user = _loaded_player;
+        _loaded_player = 0;
+    } else {
+        /* Determine if this is the first player by checking save directory */
+        is_first_player = 0;
+        if (file_size(DIR_SAVE + "/players") == -2) {
+            string *files = get_dir(DIR_SAVE + "/players/*");
+            if (!files || sizeof(files) == 0) {
+                is_first_player = 1;
+            }
         }
-    }
 
-    err = catch(user = new(USER_OB));
-    if (err || !user) {
-        write("Failed to create user object.\n");
-        write(err);
-        destruct(this_object());
-        return;
-    }
-    
-    user->set_name(player_name);
-    user->set_race(DEFAULT_RACE);
-    user->set_language(DEFAULT_LANGUAGE, DEFAULT_FLUENCY);
-    
-    /* If this is the very first created player, make them Admin */
-    /* Note: creating_new is set to 1 when a new character is being created.
-     * Previously the check used == 2 which prevented newly created players
-     * from being promoted to admin. Accept creating_new == 1 here. */
-    if (player_name == "Admin" || creating_new == 1 || is_first_player) {
-        // ...existing code...
-        user->set_wizard_level(ADMIN_LEVEL);
+        err = catch(user = new(USER_OB));
+        if (err || !user) {
+            write("Failed to create user object.\n");
+            write(err);
+            destruct(this_object());
+            return;
+        }
+
+        user->set_name(player_name);
+        user->set_race(DEFAULT_RACE);
+        user->set_language(DEFAULT_LANGUAGE, DEFAULT_FLUENCY);
+
+        /* If this is the very first created player, make them Admin */
+        if (player_name == "Admin" || creating_new == 1 || is_first_player) {
+            // ...existing code...
+            user->set_wizard_level(ADMIN_LEVEL);
 
         /* Ensure wiztool is attached. If set_wizard_level didn't attach for
          * some reason, clone and attach explicitly and log outcomes. */
@@ -249,9 +227,16 @@ void enter_game() {
             }
         };
     }
-    
+    } /* end else (new/fallback player) */
+
     exec(user, this_object());
+
+    /* Show MOTD after interactive control transfers to the player object */
+    object motd;
+    catch { motd = load_object("/secure/motd"); };
+    if (motd && function_exists("show_motd", motd)) motd->show_motd(user);
+
     user->enter_world();
-    
+
     destruct(this_object());
 }

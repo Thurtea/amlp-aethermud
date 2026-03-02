@@ -1,0 +1,495 @@
+// /lib/secure/char_create.lpc
+// Character Creation Wizard — interactive input_to chain for new players.
+//
+// Called from clone/login.lpc when a user types "new".
+// Control is exec()'d here from the login object.  When the wizard
+// finishes it creates the USER_OB, applies race/OCC, saves the player,
+// moves them to the new-player start room, and exec()'s back to them.
+//
+// Coding rules: no sscanf, no ++/--, foreach, i += 1, explicit +,
+// function_exists() guards on all foreign calls.
+
+#include <globals.h>
+
+#define PAGE_SIZE        20
+#define NEW_PLAYER_ROOM  "/domains/splynn/rooms/tutorial_entry"
+#define ALIGN_DEFAULT    "unprincipled"
+
+private string   cc_name;
+private string   cc_password;   /* crypted */
+private string   cc_race_id;
+private string   cc_occ_id;
+private string   *cc_races;     /* ordered race-id list built at wizard start */
+private string   *cc_occs;      /* ordered occ-id list filtered by race */
+private int      cc_race_page;
+private int      cc_occ_page;
+
+/* ============================================================
+ * Entry point — called by login.lpc after exec() transfer
+ * ============================================================ */
+void start() {
+    cc_name      = 0;
+    cc_password  = 0;
+    cc_race_id   = 0;
+    cc_occ_id    = 0;
+    cc_races     = ({});
+    cc_occs      = ({});
+    cc_race_page = 0;
+    cc_occ_page  = 0;
+
+    step_intro();
+}
+
+/* ============================================================
+ * Step 1 — Lore intro (20 lines max)
+ * ============================================================ */
+void step_intro() {
+    write("\n");
+    write("============================================================\n");
+    write("  RIFTS EARTH  —  YEAR 109 PA\n");
+    write("============================================================\n");
+    write("\n");
+    write("Three hundred years ago the Great Cataclysm tore the world\n");
+    write("apart.  Ley lines converged, nuclear arsenals ignited, and\n");
+    write("the death-scream of billions of souls punched holes through\n");
+    write("the fabric of reality.  The Rifts were born.\n");
+    write("\n");
+    write("Through those dimensional tears poured aliens, demons, and\n");
+    write("magic absent from Earth for ten thousand years.  Old cities\n");
+    write("crumbled; new powers rose on their bones.\n");
+    write("\n");
+    write("The Coalition States clings to human supremacy with iron\n");
+    write("fist.  The Federation of Magic weaves ley-line power in the\n");
+    write("wilderness.  Mercenaries, pirates, and travelers fill the\n");
+    write("spaces between.\n");
+    write("\n");
+    write("This is not a safe world.  It is yours.\n");
+    write("\n");
+    write("============================================================\n");
+    write("[Press ENTER to continue...] ");
+    input_to("ack_intro");
+}
+
+void ack_intro(string ignored) {
+    write("\n");
+    step_name();
+}
+
+/* ============================================================
+ * Step 2 — Character name
+ * ============================================================ */
+void step_name() {
+    write("Choose your character name.\n");
+    write("(3-12 letters, a-z only)\n");
+    write("Name: ");
+    input_to("get_name");
+}
+
+void get_name(string raw) {
+    if (!raw || raw == "") {
+        write("\nYou must enter a name.\n");
+        step_name();
+        return;
+    }
+
+    string name = lower_case(raw);
+
+    if (strlen(name) < 3) {
+        write("\nName must be at least 3 characters.\n");
+        step_name();
+        return;
+    }
+    if (strlen(name) > 12) {
+        write("\nName must be 12 characters or less.\n");
+        step_name();
+        return;
+    }
+
+    /* Alpha-only */
+    int ci = 0;
+    while (ci < strlen(name)) {
+        int ch = name[ci];
+        if (ch < 'a' || ch > 'z') {
+            write("\nName may only contain letters a-z.\n");
+            step_name();
+            return;
+        }
+        ci += 1;
+    }
+
+    /* Reserved names */
+    if (name == "admin" || name == "guest" || name == "system" || name == "test") {
+        write("\nThat name is reserved.  Please choose another.\n");
+        step_name();
+        return;
+    }
+
+    /* Save-file collision */
+    string save_path = DIR_SAVE + "/players/" + capitalize(name) + ".o";
+    if (file_size(save_path) > 0) {
+        write("\nA character named '" + capitalize(name) + "' already exists.\n");
+        step_name();
+        return;
+    }
+
+    cc_name = capitalize(name);
+    write("\nName: " + cc_name + "\n\n");
+    step_password();
+}
+
+/* ============================================================
+ * Password (collected here so login.lpc stays slim)
+ * ============================================================ */
+void step_password() {
+    write("Choose a password (minimum 6 characters):\n");
+    write("Password: ");
+    input_to("get_password", 1);
+}
+
+void get_password(string pass) {
+    if (!pass || strlen(pass) < 6) {
+        write("\nPassword must be at least 6 characters.\n");
+        step_password();
+        return;
+    }
+    cc_password = pass;
+    write("\nConfirm password: ");
+    input_to("confirm_password", 1);
+}
+
+void confirm_password(string pass) {
+    if (pass != cc_password) {
+        write("\nPasswords do not match.\n");
+        step_password();
+        return;
+    }
+    cc_password = crypt(cc_password, 0);
+    write("\n");
+    _build_race_list();
+    step_race(0);
+}
+
+/* ============================================================
+ * Internal helpers — build ordered lists via chargen daemon
+ * ============================================================ */
+void _build_race_list() {
+    object cgd;
+    catch { cgd = load_object(CHARGEN_D); };
+    if (cgd && function_exists("get_available_races", cgd)) {
+        string *tmp = cgd->get_available_races();
+        if (tmp && sizeof(tmp) > 0) {
+            cc_races = tmp;
+            return;
+        }
+    }
+    /* Fallback: scan directory, strip .lpc */
+    string *raw = get_dir("/races/*.lpc");
+    if (!raw) raw = ({});
+    string *stripped = ({});
+    foreach (string f in raw) {
+        stripped += ({ f[0..strlen(f) - 5] });
+    }
+    cc_races = stripped;
+}
+
+void _build_occ_list() {
+    object cgd;
+    catch { cgd = load_object(CHARGEN_D); };
+    if (cgd && function_exists("get_valid_occs_for_race", cgd)) {
+        string *tmp = cgd->get_valid_occs_for_race(cc_race_id);
+        if (tmp && sizeof(tmp) > 0) {
+            cc_occs = tmp;
+            return;
+        }
+    }
+    /* Fallback / race allows all — grab full list */
+    if (cgd && function_exists("get_available_occs", cgd)) {
+        string *tmp = cgd->get_available_occs();
+        if (tmp && sizeof(tmp) > 0) {
+            cc_occs = tmp;
+            return;
+        }
+    }
+    string *raw = get_dir("/occs/*.lpc");
+    if (!raw) raw = ({});
+    string *stripped = ({});
+    foreach (string f in raw) {
+        stripped += ({ f[0..strlen(f) - 5] });
+    }
+    cc_occs = stripped;
+}
+
+string _race_display_name(string rid) {
+    object cgd;
+    catch { cgd = load_object(CHARGEN_D); };
+    if (cgd && function_exists("load_race", cgd)) {
+        object robj;
+        catch { robj = cgd->load_race(rid); };
+        if (robj && function_exists("query_race_name", robj))
+            return robj->query_race_name();
+    }
+    return capitalize(implode(explode(rid, "_"), " "));
+}
+
+string _occ_display_name(string oid) {
+    object cgd;
+    catch { cgd = load_object(CHARGEN_D); };
+    if (cgd && function_exists("load_occ", cgd)) {
+        object oobj;
+        catch { oobj = cgd->load_occ(oid); };
+        if (oobj && function_exists("query_occ_name", oobj))
+            return oobj->query_occ_name();
+    }
+    return capitalize(implode(explode(oid, "_"), " "));
+}
+
+/* ============================================================
+ * Step 3 — Race selection (paginated)
+ * ============================================================ */
+void step_race(int page) {
+    cc_race_page = page;
+    int total = sizeof(cc_races);
+    if (total == 0) {
+        write("\nNo races available.  Defaulting to Human.\n");
+        cc_race_id = "human";
+        _build_occ_list();
+        step_occ(0);
+        return;
+    }
+
+    int start = page * PAGE_SIZE;
+    int stop  = start + PAGE_SIZE;
+    if (stop > total) stop = total;
+
+    int pages = (total + PAGE_SIZE - 1) / PAGE_SIZE;
+    write("\n--- RACE SELECTION  (page " + (page + 1) + " of " + pages + ") ---\n\n");
+
+    int i = start;
+    while (i < stop) {
+        write("  [" + (i + 1) + "] " + _race_display_name(cc_races[i]) + "\n");
+        i += 1;
+    }
+    write("\n");
+    if (start > 0)     write("  [p] Previous page\n");
+    if (stop < total)  write("  [n] Next page\n");
+    write("\nEnter number");
+    if (start > 0 || stop < total) write(", or p/n to page");
+    write(": ");
+    input_to("get_race_choice");
+}
+
+void get_race_choice(string raw) {
+    raw = lower_case(raw || "");
+
+    if (raw == "n" || raw == "next") {
+        int next = cc_race_page + 1;
+        if (next * PAGE_SIZE < sizeof(cc_races)) { step_race(next); return; }
+        write("\nAlready on last page.\n");
+        step_race(cc_race_page);
+        return;
+    }
+    if (raw == "p" || raw == "prev") {
+        if (cc_race_page > 0) { step_race(cc_race_page - 1); return; }
+        write("\nAlready on first page.\n");
+        step_race(0);
+        return;
+    }
+
+    int num = to_int(raw);
+    if (num < 1 || num > sizeof(cc_races)) {
+        write("\nInvalid choice.  Enter a number between 1 and " + sizeof(cc_races) + ".\n");
+        step_race(cc_race_page);
+        return;
+    }
+
+    cc_race_id = cc_races[num - 1];
+    write("\nRace selected: " + _race_display_name(cc_race_id) + "\n\n");
+    _build_occ_list();
+    step_occ(0);
+}
+
+/* ============================================================
+ * Step 4 — OCC selection (paginated, filtered by race)
+ * ============================================================ */
+void step_occ(int page) {
+    cc_occ_page = page;
+    int total = sizeof(cc_occs);
+    if (total == 0) {
+        write("\nNo O.C.C.s available for that race.  Defaulting to Vagabond.\n");
+        cc_occ_id = "vagabond";
+        step_confirm();
+        return;
+    }
+
+    int start = page * PAGE_SIZE;
+    int stop  = start + PAGE_SIZE;
+    if (stop > total) stop = total;
+
+    int pages = (total + PAGE_SIZE - 1) / PAGE_SIZE;
+    write("--- O.C.C. SELECTION  (page " + (page + 1) + " of " + pages + ") ---\n\n");
+
+    int i = start;
+    while (i < stop) {
+        write("  [" + (i + 1) + "] " + _occ_display_name(cc_occs[i]) + "\n");
+        i += 1;
+    }
+    write("\n");
+    if (start > 0)     write("  [p] Previous page\n");
+    if (stop < total)  write("  [n] Next page\n");
+    write("\nEnter number");
+    if (start > 0 || stop < total) write(", or p/n to page");
+    write(": ");
+    input_to("get_occ_choice");
+}
+
+void get_occ_choice(string raw) {
+    raw = lower_case(raw || "");
+
+    if (raw == "n" || raw == "next") {
+        int next = cc_occ_page + 1;
+        if (next * PAGE_SIZE < sizeof(cc_occs)) { step_occ(next); return; }
+        write("\nAlready on last page.\n");
+        step_occ(cc_occ_page);
+        return;
+    }
+    if (raw == "p" || raw == "prev") {
+        if (cc_occ_page > 0) { step_occ(cc_occ_page - 1); return; }
+        write("\nAlready on first page.\n");
+        step_occ(0);
+        return;
+    }
+
+    int num = to_int(raw);
+    if (num < 1 || num > sizeof(cc_occs)) {
+        write("\nInvalid choice.  Enter a number between 1 and " + sizeof(cc_occs) + ".\n");
+        step_occ(cc_occ_page);
+        return;
+    }
+
+    cc_occ_id = cc_occs[num - 1];
+    write("\nO.C.C. selected: " + _occ_display_name(cc_occ_id) + "\n\n");
+    step_confirm();
+}
+
+/* ============================================================
+ * Step 5 — Confirm
+ * ============================================================ */
+void step_confirm() {
+    string rname = _race_display_name(cc_race_id);
+    string oname = _occ_display_name(cc_occ_id);
+    write("You will be a " + rname + " " + oname + ".\n");
+    write("Correct? (yes/no): ");
+    input_to("get_confirm");
+}
+
+void get_confirm(string raw) {
+    raw = lower_case(raw || "");
+    if (raw == "yes" || raw == "y") {
+        do_finalize();
+        return;
+    }
+    if (raw == "no" || raw == "n") {
+        write("\nRestarting from race selection.\n");
+        cc_race_id = 0;
+        cc_occ_id  = 0;
+        step_race(0);
+        return;
+    }
+    write("\nPlease answer yes or no.\n");
+    step_confirm();
+}
+
+/* ============================================================
+ * Step 6 — Apply race/OCC, save, enter world
+ * ============================================================ */
+void do_finalize() {
+    write("\nCreating your character — please wait...\n");
+
+    object user;
+    mixed err;
+    err = catch { user = new(USER_OB); };
+    if (err || !user) {
+        write("\nERROR: Could not create character object.  Please reconnect.\n");
+        destruct(this_object());
+        return;
+    }
+
+    /* Basic identity — must be set before chargen daemon keys on name */
+    if (function_exists("set_name", user))       user->set_name(cc_name);
+    if (function_exists("set_real_name", user))  user->set_real_name(cc_name);
+    if (function_exists("set_password", user))   user->set_password(cc_password);
+    if (function_exists("set_language", user))   user->set_language("american", 98);
+    if (function_exists("set_primary_language", user))
+        user->set_primary_language("american");
+
+    /* Seed and finalize via chargen daemon */
+    object cgd;
+    catch { cgd = load_object(CHARGEN_D); };
+    int used_daemon = 0;
+    if (cgd &&
+        function_exists("start_creation", cgd) &&
+        function_exists("set_creation_selections", cgd) &&
+        function_exists("finalize_character", cgd)) {
+
+        cgd->start_creation(user);
+        cgd->set_creation_selections(user, cc_race_id, cc_occ_id);
+        /* Transfer interactive control before finalize so tell_object reaches player */
+        exec(user, this_object());
+        cgd->finalize_character(user);
+        used_daemon = 1;
+    }
+
+    if (!used_daemon) {
+        /*
+         * Fallback: chargen daemon unavailable.
+         * Apply race/OCC objects directly and set minimal stats.
+         */
+        if (function_exists("set_race_id", user))  user->set_race_id(cc_race_id);
+        if (function_exists("set_occ_id", user))   user->set_occ_id(cc_occ_id);
+
+        if (cgd) {
+            if (function_exists("load_race", cgd)) {
+                object robj;
+                catch { robj = cgd->load_race(cc_race_id); };
+                if (robj) {
+                    if (function_exists("query_race_name", robj) &&
+                        function_exists("set_race_name", user))
+                        user->set_race_name(robj->query_race_name());
+                    if (function_exists("query_race_article", robj) &&
+                        function_exists("set_race_article", user))
+                        user->set_race_article(robj->query_race_article());
+                    if (function_exists("apply_to_player", robj))
+                        robj->apply_to_player(user);
+                }
+            }
+            if (function_exists("load_occ", cgd)) {
+                object oobj;
+                catch { oobj = cgd->load_occ(cc_occ_id); };
+                if (oobj && function_exists("apply_to_player", oobj))
+                    oobj->apply_to_player(user);
+            }
+        }
+
+        exec(user, this_object());
+        tell_object(user,
+            "\nWelcome to Rifts Earth, " + cc_name + "!\n" +
+            "Type 'stats' to see your character sheet.\n\n");
+    }
+
+    /* Save new character */
+    if (function_exists("save_player", user)) user->save_player();
+
+    /* Move to new-player start room */
+    object start_room;
+    catch { start_room = load_object(NEW_PLAYER_ROOM); };
+    if (start_room) {
+        if (function_exists("move", user))
+            user->move(start_room);
+        else
+            move_object(user, start_room);
+    }
+
+    if (function_exists("force_me", user)) user->force_me("look");
+
+    destruct(this_object());
+}

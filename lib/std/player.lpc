@@ -976,6 +976,7 @@ void move_player(object destination) {
 // Accessors
 string query_name() { return name; }
 string query_password_hash() { return password_hash; }
+void set_password(string h) { password_hash = h; }
 object query_environment() { return environment; }
 void set_environment(object env) { environment = env; }
 
@@ -1186,7 +1187,7 @@ void restore_data(mapping data) {
 // Persist player data to disk
 int save_player() {
     if (!name || name == "" || name == "player") return 0;
-    string path = "/lib/save/" + lower_case(name) + ".o";
+    string path = DIR_SAVE + "/players/" + lower_case(name) + ".o";
     mapping data = save_data();
     if (!data) return 0;
     // Serialize using driver save_object efun if available, else write_file
@@ -1204,7 +1205,7 @@ int save_player() {
 // Load player data from disk
 int load_player(string player_name) {
     if (!player_name || player_name == "") return 0;
-    string path = "/lib/save/" + lower_case(player_name) + ".o";
+    string path = DIR_SAVE + "/players/" + lower_case(player_name) + ".o";
     if (!file_exists(path)) return 0;
     if (function_exists("restore_object")) {
         return restore_object(path);

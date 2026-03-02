@@ -112,7 +112,7 @@ int GetBriefMode() { return 0; }
 
 void enter_world() {
     object room;
-    
+
     write("\n");
     if (wizard_level >= WIZARD_LEVEL) {
         write("=== ADMINISTRATOR ACCESS GRANTED ===\n");
@@ -120,14 +120,33 @@ void enter_world() {
         write("\n");
     }
     write("Entering the world...\n\n");
-    
+
+    /* First-time admin routing: if setup_complete exists but admin_oriented
+     * does not, this is the admin's very first login after installation.
+     * Send them to the Command Center instead of the normal start room. */
+    if (wizard_level >= ADMIN_LEVEL &&
+        file_size("/data/setup_complete") > 0 &&
+        file_size("/data/admin_oriented") <= 0) {
+
+        write_file("/data/admin_oriented", ctime(time()) + "\n");
+
+        object admin_room;
+        catch { admin_room = load_object("/domains/admin/rooms/admin_start"); };
+        if (admin_room) {
+            move(admin_room);
+            force_me("look");
+            return;
+        }
+        /* Fall through to START_ROOM if admin_start failed to load */
+    }
+
     room = load_object(START_ROOM);
     if (!room) {
         write("ERROR: Start room not found!\n");
         destruct(this_object());
         return;
     }
-    
+
     move(room);
     force_me("look");
 }

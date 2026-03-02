@@ -5,6 +5,7 @@
 
 #include <globals.h>
 
+private string mud_name;
 private string admin_name;
 private string admin_capname;
 private string admin_password;
@@ -34,6 +35,51 @@ void logon() {
         input_to("post_install_prompt");
         return;
     }
+    show_port_info();
+}
+
+/*
+ * show_port_info — display-only step: read PORT from /data/mud_port if
+ * present, fall back to 3000 (the default in config/runtime.conf).
+ * The user presses Enter to continue; no port editing is done here.
+ */
+void show_port_info() {
+    string port_str = "3000";
+    string raw;
+    catch { raw = read_file("/data/mud_port"); };
+    if (raw && raw != "") {
+        raw = implode(explode(raw, "\n"), "");
+        raw = implode(explode(raw, " "), "");
+        if (raw != "") port_str = raw;
+    }
+    write("MUD will listen on port: " + port_str + "\n");
+    write("(To change the port, edit config/runtime.conf and restart.)\n\n");
+    write("[Press Enter to continue] ");
+    input_to("ack_port");
+}
+
+void ack_port(string ignored) {
+    write("\n");
+    input_mud_name();
+}
+
+void input_mud_name() {
+    write("Enter a name for your MUD (default: AetherMUD):\n");
+    write("MUD name: ");
+    input_to("get_mud_name");
+}
+
+void get_mud_name(string name) {
+    if (!name || name == "") {
+        name = "AetherMUD";
+    }
+    if (strlen(name) > 64) {
+        write("\nMUD name must be 64 characters or less.\n");
+        input_mud_name();
+        return;
+    }
+    mud_name = name;
+    write("\nMUD name set to: " + mud_name + "\n\n");
     input_name();
 }
 
@@ -128,7 +174,7 @@ void run_post_install() {
 
 void input_name() {
     write("What is your MUD admin username?\n");
-    write("(lowercase, 3-12 characters, alphanumeric only)\n");
+    write("(lowercase, 3-15 characters, alphanumeric only)\n");
     write("Username: ");
     input_to("get_name");
 }
@@ -149,8 +195,8 @@ void get_name(string name) {
         return;
     }
     
-    if (strlen(name) > 12) {
-        write("\nUsername must be 12 characters or less.\n");
+    if (strlen(name) > 15) {
+        write("\nUsername must be 15 characters or less.\n");
         input_name();
         return;
     }
@@ -184,14 +230,14 @@ void get_name(string name) {
 
 void input_password() {
     write("Create a password for " + admin_capname + "\n");
-    write("(minimum 5 characters)\n");
+    write("(minimum 6 characters)\n");
     write("Password: ");
     input_to("get_password", 1);  // 1 = hide input
 }
 
 void get_password(string pass) {
-    if (!pass || strlen(pass) < 5) {
-        write("\nPassword must be at least 5 characters.\n");
+    if (!pass || strlen(pass) < 6) {
+        write("\nPassword must be at least 6 characters.\n");
         input_password();
         return;
     }
@@ -412,24 +458,40 @@ void create_admin() {
 
 void lockout_install() {
     string install_dir = "/lib/secure";
-    
-    write("\nLocking installation wizard...\n");
-    
-    // Create backup of install wizard
+
+    write("\nFinalising installation...\n");
+
+    // Write MUD name to /data/mud_name
+    write_file("/data/mud_name", (mud_name ? mud_name : "AetherMUD") + "\n");
+    write("  MUD name stored: " + (mud_name ? mud_name : "AetherMUD") + "\n");
+
+    // Write admin contact record to /save/admin_contact.o
+    write_file("/save/admin_contact.o",
+        "name " + admin_name + "\n" +
+        "email " + (admin_email ? admin_email : "unknown@localhost") + "\n");
+    write("  Admin contact stored.\n");
+
+    // Mark first-boot complete so master.lpc stops routing here
+    object fc;
+    catch { fc = load_object("/secure/first_connect"); };
+    if (fc && function_exists("mark_first_boot_done", fc)) {
+        fc->mark_first_boot_done();
+        write("  First-boot flag cleared.\n");
+    }
+
+    // Backup install wizard
     catch(cp(install_dir + "/install.lpc", install_dir + "/install.first.lpc"));
     write("  Backed up: install.first.lpc\n");
-    
-    // Mark installation as complete
+
+    // Record setup completion
     write_file("/data/setup_complete", "Installation completed on: " + ctime(time()) + "\n");
+    write_file("/data/setup_complete", "MUD name: " + (mud_name ? mud_name : "AetherMUD") + "\n");
     write_file("/data/setup_complete", "First admin: " + admin_name + "\n");
-    
-    write("\nInstallation wizard locked. Normal login is now active.\n");
-    write("The MUD will now shut down.\n");
-    write("Please restart the MUD to login as " + admin_capname + ".\n\n");
-    write("Goodbye!\n\n");
-    
-    // Shut down the MUD
-    shutdown();
+
+    write("\nSetup complete. The mud will now reboot.\n");
+    write("Connect again after restart to log in as " + admin_capname + ".\n\n");
+
+    shutdown(1);
     destruct(this_object());
 }
 

@@ -393,6 +393,20 @@ void start_creation(object player) {
     tell_object(player, "\nAccept these stats? (choose 'accept' to proceed, 'reroll' to roll again)\n");
 }
 
+/*
+ * set_creation_selections — called by char_create.lpc after start_creation()
+ * to inject the wizard's collected race, occ, and default alignment before
+ * finalize_character() is invoked.
+ */
+void set_creation_selections(object player, string race_id, string occ_id) {
+    string pname = player->query_name();
+    if (!player_creation[pname]) return;
+    player_creation[pname]["race"]      = race_id;
+    player_creation[pname]["occ"]       = occ_id;
+    player_creation[pname]["alignment"] = "unprincipled";
+    player_creation[pname]["state"]     = STATE_FINALIZE;
+}
+
 // Get current creation state for a player
 int query_creation_state(object player) {
     string pname = player->query_name();

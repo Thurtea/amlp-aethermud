@@ -1,0 +1,57 @@
+// lib/domains/admin/npcs/the_system.lpc
+// "The System" — a non-combat orientation entity in the admin start room.
+// Responds to "help" with a summary of wizard commands.
+
+inherit "/std/npc";
+
+void create() {
+    ::create();
+
+    set_name("system");
+    set_id("system");
+    add_id("the system");
+    add_id("console");
+
+    set_short("the System");
+    set_long(
+        "A soft luminescence hovers at eye level — not quite an object, not\n"
+        "quite a person. It turns toward you with the calm assurance of\n"
+        "something that has always been here and always will be.\n"
+    );
+
+    set_gender("neuter");
+    set_race("construct");
+    set_level(99);
+    set_hp(9999);
+    set_aggro(0);
+
+    set_property("no_attack", 1);
+    set_property("no_follow", 1);
+    set_property("no_kill", 1);
+}
+
+void init() {
+    ::init();
+    add_action("cmd_help", "help");
+}
+
+int cmd_help(string arg) {
+    object player = this_player();
+    if (!player) return 0;
+
+    tell_object(player,
+        "\nThe System speaks in measured tones:\n\n"
+        "  qcs              - Quick Content System: create rooms, NPCs,\n"
+        "                     vendors, barkeeps, doors, mercbases\n"
+        "  goto <player>    - Teleport to a player's location\n"
+        "  transfer <p> <r> - Move a player to a room\n"
+        "  promote <p> <lv> - Set wizard level (0=player 1=wiz 2=admin)\n"
+        "  shutdown [1]     - Shut down (1 = warm reboot)\n\n"
+        "  Type 'out' to leave this room and enter Splynn.\n\n"
+    );
+    return 1;
+}
+
+string query_talk() {
+    return "The System says: \"Type 'help' for a list of wizard commands.\"\n";
+}

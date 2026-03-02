@@ -43,16 +43,17 @@ void load_races() {
     if (!files) return;
     sz = sizeof(files);
 
-    for (i = 0; i < sz; i++) {
+    i = 0;
+    while (i < sz) {
         int flen;
         flen = strlen(files[i]);
         // Only process .lpc files (at least 5 chars: "x.lpc")
-        if (flen < 5) continue;
-        if (substring(files[i], flen - 4, flen) != ".lpc") continue;
-
-        // Strip .lpc extension to get the object path
-        string base;
-        base = substring(files[i], 0, flen - 4);
-        load_object("/races/" + base);
+        if (flen >= 5 && substring(files[i], flen - 4, flen) == ".lpc") {
+            // Strip .lpc extension to get the object path
+            string base;
+            base = substring(files[i], 0, flen - 4);
+            load_object("/races/" + base);
+        }
+        i = i + 1;
     }
 }

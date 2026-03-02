@@ -278,23 +278,24 @@ private void _do_first_boot_orientation() {
 // Called by Archimedes (or any trusted code) after orientation completes.
 // Gives physical wiz-tools and teleports the player to their workroom.
 void complete_promotion() {
-    string *tools = ({
-        "/obj/wiztools/staff",
-        "/obj/wiztools/handbook",
-        "/obj/wiztools/crystal",
-        "/obj/wiztools/admin_wand",
-        "/obj/wiztools/qcs_tool",
-        "/obj/wiztools/rp_tool",
-        "/obj/wiztools/admin_orb",
-        "/obj/wiztools/code_tool"
-    });
-    int i;
     object tool;
 
-    for (i = 0; i < sizeof(tools); i++) {
-        tool = clone_object(tools[i]);
-        if (tool) move_object(tool, this_object());
-    }
+    tool = clone_object("/obj/wiztools/staff");
+    if (tool) move_object(tool, this_object());
+    tool = clone_object("/obj/wiztools/handbook");
+    if (tool) move_object(tool, this_object());
+    tool = clone_object("/obj/wiztools/crystal");
+    if (tool) move_object(tool, this_object());
+    tool = clone_object("/obj/wiztools/admin_wand");
+    if (tool) move_object(tool, this_object());
+    tool = clone_object("/obj/wiztools/qcs_tool");
+    if (tool) move_object(tool, this_object());
+    tool = clone_object("/obj/wiztools/rp_tool");
+    if (tool) move_object(tool, this_object());
+    tool = clone_object("/obj/wiztools/admin_orb");
+    if (tool) move_object(tool, this_object());
+    tool = clone_object("/obj/wiztools/code_tool");
+    if (tool) move_object(tool, this_object());
 
     /* Ensure workroom directory and file exist */
     string wiz_name = lower_case(this_object()->query_name());
@@ -543,8 +544,6 @@ void attach_wiztool(object wt) {
         tell_object(this_object(), "Wiztool attached. Type 'wiz help' for wizard commands.\n");
     }
 }
-
-void attach_wiztool() { attach_wiztool(0); }
 
 void detach_wiztool() {
     if (wiztool) {

@@ -609,14 +609,6 @@ void chargen_create_admin(PlayerSession *sess) {
         send_to_player(sess, "Warning: Failed to save character.\n\n");
     }
 
-    /* Sync privilege level to LPC player object */
-    if (sess->player_object && sess->privilege_level > 0) {
-        VMValue parg = vm_value_create_int(sess->privilege_level);
-        obj_call_method(global_vm, sess->player_object,
-            "set_privilege_level", &parg, 1);
-        vm_value_release(&parg);
-    }
-
     /* Show starting room */
     cmd_look(sess, "");
     send_to_player(sess, "\n> ");
@@ -659,45 +651,6 @@ static void chargen_show_races(PlayerSession *sess) {
 
 void chargen_init(PlayerSession *sess) {
     if (!sess) return;
-
-    /* --- First admin fast-path: skip ALL chargen --- */
-    {
-        FILE *fa = fopen("lib/etc/first_admin.txt", "r");
-        if (fa) {
-            char fa_name[64];
-            memset(fa_name, 0, sizeof(fa_name));
-            if (fgets(fa_name, sizeof(fa_name), fa)) {
-                int fa_len = (int)strlen(fa_name);
-                while (fa_len > 0 &&
-                       (fa_name[fa_len-1] == '\n' || fa_name[fa_len-1] == '\r' ||
-                        fa_name[fa_len-1] == ' '  || fa_name[fa_len-1] == '\t'))
-                    fa_name[--fa_len] = '\0';
-
-                if (fa_len > 0 && strcasecmp(fa_name, sess->username) == 0) {
-                    fclose(fa);
-                    fprintf(stderr,
-                        "[Chargen] first_admin fast-path: '%s' skipping chargen.\n",
-                        sess->username);
-
-                    /* Grant admin privileges before chargen_create_admin()
-                     * so they are included in the auto-save. */
-                    sess->privilege_level = 4;
-                    strncpy(sess->wizard_role, "admin",
-                            sizeof(sess->wizard_role) - 1);
-                    sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
-
-                    /* Consume the first_admin flag */
-                    remove("lib/etc/first_admin.txt");
-
-                    /* Full admin character setup: workroom, wiz-tools, save */
-                    chargen_create_admin(sess);
-                    return;
-                }
-            }
-            fclose(fa);
-        }
-    }
-    /* --- End first admin fast-path --- */
 
     sess->chargen_state = CHARGEN_STATS_ROLL;
     sess->chargen_page = 0;
@@ -962,9 +915,6 @@ void chargen_complete(PlayerSession *sess) {
     psionics_add_starting_powers(&sess->character, sess->character.occ);
     magic_add_starting_spells(&sess->character, sess->character.occ);
 
-    /* Add racial psionic powers (e.g. Brownie, Dog Boy, Psi-Stalker) */
-    psionics_add_racial_powers(&sess->character, sess->character.race);
-
     /* Assign starting languages based on race */
     assign_starting_languages(&sess->character);
     
@@ -1110,26 +1060,36 @@ void chargen_complete(PlayerSession *sess) {
             char fa_name[64];
             memset(fa_name, 0, sizeof(fa_name));
             if (fgets(fa_name, sizeof(fa_name), fa)) {
+                /* Strip trailing whitespace/newline */
                 int fa_len = (int)strlen(fa_name);
                 while (fa_len > 0 &&
                        (fa_name[fa_len-1] == '\n' || fa_name[fa_len-1] == '\r' ||
-                        fa_name[fa_len-1] == ' '  || fa_name[fa_len-1] == '\t'))
+                        fa_name[fa_len-1] == ' '  || fa_name[fa_len-1] == '\t')) {
                     fa_name[--fa_len] = '\0';
+                }
                 if (fa_len > 0 && strcasecmp(fa_name, sess->username) == 0) {
-                    sess->privilege_level = 4;
+                    sess->privilege_level = 2;
                     strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role) - 1);
                     sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
-                    sess->character.credits = 100000;
-                    sess->needs_orientation = 1;  /* triggers Archimedes on enter_world */
                     fclose(fa);
                     remove("lib/etc/first_admin.txt");
+                    /* Re-save to persist the elevated privilege */
                     save_character(sess);
                     send_to_player(sess,
                         "\n[Admin] You have been granted administrator privileges.\n"
                         "The first_admin flag has been consumed.\n\n");
                     fprintf(stderr,
-                        "[Chargen] first_admin.txt matched '%s' - admin granted.\n",
+                        "[Chargen] first_admin.txt matched '%s' — admin granted, file removed.\n",
                         sess->username);
+                    /* Setup wizard workroom for new admin */
+                    Room *wroom = setup_wizard_workroom(sess->username, "admin");
+                    if (wroom) {
+                        /* Move player to workroom */
+                        if (sess->current_room)
+                            room_remove_player(sess->current_room, sess);
+                        sess->current_room = wroom;
+                        room_add_player(wroom, sess);
+                    }
                 } else {
                     fclose(fa);
                 }
@@ -1140,28 +1100,6 @@ void chargen_complete(PlayerSession *sess) {
     }
     /* --- end first_admin.txt gate --- */
 
-    /* Sync privilege level to LPC player object (needed for first_admin gate) */
-    if (sess->player_object && sess->privilege_level > 0) {
-        VMValue parg = vm_value_create_int(sess->privilege_level);
-        obj_call_method(global_vm, sess->player_object,
-            "set_privilege_level", &parg, 1);
-        vm_value_release(&parg);
-    }
-
-    /* If first-boot admin, move to orientation room at C level so cmd_look
-     * and movement use the correct room.  LPC-level placement is handled
-     * separately by _do_first_boot_orientation() in player.lpc. */
-    if (sess->needs_orientation) {
-        Room *orient_room = room_get_by_path("/domains/start/orientation");
-        if (orient_room) {
-            if (sess->current_room) {
-                room_remove_player(sess->current_room, sess);
-            }
-            sess->current_room = orient_room;
-            room_add_player(orient_room, sess);
-        }
-    }
-
     send_to_player(sess, "\n");
 
     /* Auto-look at starting room */
@@ -1170,18 +1108,11 @@ void chargen_complete(PlayerSession *sess) {
 
     /* Staff-only: new character creation announcement */
     char staff_msg[256];
-    const char *race_str = sess->character.race ? sess->character.race : "unknown";
-    const char *occ_str  = sess->character.occ  ? sess->character.occ  : "Pending";
-    /* For RCC races the OCC already contains the race name — show OCC only */
-    if (sess->character.occ && strcasestr(sess->character.occ, race_str)) {
-        snprintf(staff_msg, sizeof(staff_msg),
-                "[Chargen] %s created a new character (%s).\r\n",
-                sess->username, occ_str);
-    } else {
-        snprintf(staff_msg, sizeof(staff_msg),
-                "[Chargen] %s created a new character (%s %s).\r\n",
-                sess->username, race_str, occ_str);
-    }
+    snprintf(staff_msg, sizeof(staff_msg),
+            "[Staff] %s created a new character (%s %s).\r\n",
+            sess->username,
+            sess->character.race ? sess->character.race : "unknown",
+            sess->character.occ ? sess->character.occ : "Vagabond");
     staff_message(staff_msg, sess);
 }
 
@@ -1261,7 +1192,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             if (choice >= 1 && choice <= num_loaded_races) {
                 ch->race = strdup(loaded_races[choice - 1].name);
 
-                send_to_player(sess, "\nYou selected: %s\n", ch->race);
+                send_to_player(sess, "\nYou selected: %s\n\n", ch->race);
 
                 /* RCC races (dragons, etc.) skip OCC selection */
                 if (loaded_races[choice - 1].is_rcc) {
@@ -1274,37 +1205,25 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         ch->occ = strdup(rcc_name);
                     }
                     send_to_player(sess, "As a %s, your class is %s.\n", ch->race, ch->occ);
-                    send_to_player(sess, "Racial Character Classes have innate abilities.\n");
-                }
+                    send_to_player(sess, "Racial Character Classes have innate abilities.\n\n");
 
-                send_to_player(sess, "Confirm? (yes/no): ");
-                sess->chargen_state = CHARGEN_RACE_CONFIRM;
+                    /* Do not roll here - roll will occur after starting zone selection */
+                    sess->chargen_state = CHARGEN_ZONE_SELECT;
+                    chargen_show_zones(sess);
+                } else {
+                    /* Non-RCC: O.C.C. will be assigned by a wizard later. */
+                    ch->occ = NULL;
+
+                    /* Do not roll yet - proceed to starting zone selection */
+                    sess->chargen_state = CHARGEN_ZONE_SELECT;
+                    chargen_show_zones(sess);
+                }
             } else {
                 send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
             }
             break;
 
         /* O.C.C. selection step removed: wizards assign O.C.C. via 'set' command. */
-
-        case CHARGEN_RACE_CONFIRM:
-            if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
-                /* If OCC wasn't set (non-RCC), wizard assigns later */
-                if (!ch->occ) {
-                    ch->occ = NULL;
-                }
-                sess->chargen_state = CHARGEN_ZONE_SELECT;
-                chargen_show_zones(sess);
-            } else if (strncasecmp(input, "no", 2) == 0 || strncasecmp(input, "n", 1) == 0) {
-                /* Return to race selection */
-                if (ch->race) { free(ch->race); ch->race = NULL; }
-                if (ch->occ)  { free(ch->occ);  ch->occ  = NULL; }
-                sess->chargen_state = CHARGEN_RACE_SELECT;
-                sess->chargen_page = 0;
-                chargen_show_races(sess);
-            } else {
-                send_to_player(sess, "Please answer 'yes' or 'no': ");
-            }
-            break;
             
         case CHARGEN_STATS_CONFIRM:
             if (strncasecmp(input, "back", 4) == 0 || strncasecmp(input, "b", 1) == 0) {
@@ -1370,8 +1289,8 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         sess->current_room = zone_room;
                     }
 
-                    send_to_player(sess, "\nSecondary skills can be selected from a list after character creation.\n"
-                                         "Ask a wizard online to assign your secondary skills with: setocc\n");
+                    /* Secondary skills can be learned through in-game training */
+                    send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
 
                     /* Proceed to alignment selection */
                     sess->chargen_state = CHARGEN_ALIGNMENT_SELECT;
@@ -1404,22 +1323,6 @@ void cmd_stats(PlayerSession *sess, const char *args) {
     }
     
     chargen_display_stats(sess);
-}
-
-/* Disposition command - shows player alignment */
-void cmd_disposition(PlayerSession *sess, const char *args) {
-    (void)args;
-    if (!sess) return;
-    if (sess->state != STATE_PLAYING) {
-        send_to_player(sess, "You must complete character creation first.\n");
-        return;
-    }
-    Character *ch = &sess->character;
-    if (ch->alignment) {
-        send_to_player(sess, "Your disposition is: %s\n", ch->alignment);
-    } else {
-        send_to_player(sess, "Your disposition has not been set.\n");
-    }
 }
 
 /* Skills command */

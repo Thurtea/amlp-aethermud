@@ -10,9 +10,9 @@ void create() {
     set_id(({"grok", "merchant", "shopkeeper", "shop keeper"}));
     set_short("Grok the merchant");
     set_long(
-        "Grok is a burly human merchant with a weathered face and shrewd eyes. He's "
-        "spent years trading goods across the wilderness, and his shop is well-stocked "
-        "with equipment for adventurers. He wears practical clothing with many pockets "
+        "Grok is a burly human merchant with a weathered face and shrewd eyes. He's " +
+        "spent years trading goods across the wilderness, and his shop is well-stocked " +
+        "with equipment for adventurers. He wears practical clothing with many pockets " +
         "and keeps a vibro-blade at his belt.\n"
     );
     

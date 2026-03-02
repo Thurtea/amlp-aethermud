@@ -28,10 +28,9 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"WAKE - Wake up yourself or another player\n\n"
-"Usage:\n"
-"  wake                   Wake yourself up\n"
-"  wake <name>            Wake a sleeping person nearby\n\n"
+    return "WAKE - Wake up yourself or another player\n\n" +
+"Usage:\n" +
+"  wake                   Wake yourself up\n" +
+"  wake <name>            Wake a sleeping person nearby\n\n" +
 "You can wake others who are sleeping in the same location.\n";
 }

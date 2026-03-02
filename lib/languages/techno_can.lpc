@@ -14,9 +14,9 @@ void create() {
     set_related_languages(({ "american" }));
     
     set_short("Techno-Can language");
-    set_long("Techno-Can is the technical/military jargon used by the "
-             "Coalition States. While based on American, it includes "
-             "extensive military codes, technical terminology, and "
-             "deliberately obfuscated vocabulary to prevent eavesdropping. "
+    set_long("Techno-Can is the technical/military jargon used by the " +
+             "Coalition States. While based on American, it includes " +
+             "extensive military codes, technical terminology, and " +
+             "deliberately obfuscated vocabulary to prevent eavesdropping. " +
              "Knowledge of this language often indicates Coalition training.");
 }

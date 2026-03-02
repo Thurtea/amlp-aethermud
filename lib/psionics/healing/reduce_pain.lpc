@@ -10,13 +10,13 @@ void create() {
     set_power_id("reduce_pain");
     set_power_name("Reduce Pain");
     set_power_desc(
-        "The psychic numbs the pain centers in the target's nervous system, "
-        "allowing them to ignore the debilitating effects of serious wounds. "
-        "While this power does not heal the underlying injury, it allows the "
-        "recipient to function at full capacity despite their wounds. A useful "
-        "field power when allies must keep fighting despite injury.\n\n"
-        "Range: Touch\n"
-        "ISP Cost: 4 points\n"
+        "The psychic numbs the pain centers in the target's nervous system, " +
+        "allowing them to ignore the debilitating effects of serious wounds. " +
+        "While this power does not heal the underlying injury, it allows the " +
+        "recipient to function at full capacity despite their wounds. A useful " +
+        "field power when allies must keep fighting despite injury.\n\n" +
+        "Range: Touch\n" +
+        "ISP Cost: 4 points\n" +
         "Duration: 10 minutes per level of the psychic"
     );
     set_power_category("healing");

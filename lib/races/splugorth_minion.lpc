@@ -17,15 +17,15 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Splugorth Minions are supernatural servitor creatures bound to the will of "
-        "the Splugorth alien intelligences through ancient pacts, magical compulsion, "
-        "or outright dimensional enslavement. Standing seven to ten feet tall with "
-        "thick, armored hide ranging from deep violet to charcoal black, they possess "
-        "multiple eyes and elongated limbs ending in powerful clawed hands. Each minion "
-        "is imbued with a measure of its master's supernatural power, granting it "
-        "mega-damage resilience, inherent magic ability, and a terrifying presence "
-        "that cows lesser beings. Their loyalty to the Splugorth is absolute, whether "
-        "through genuine devotion or inescapable magical binding, and they serve as "
+        "Splugorth Minions are supernatural servitor creatures bound to the will of " +
+        "the Splugorth alien intelligences through ancient pacts, magical compulsion, " +
+        "or outright dimensional enslavement. Standing seven to ten feet tall with " +
+        "thick, armored hide ranging from deep violet to charcoal black, they possess " +
+        "multiple eyes and elongated limbs ending in powerful clawed hands. Each minion " +
+        "is imbued with a measure of its master's supernatural power, granting it " +
+        "mega-damage resilience, inherent magic ability, and a terrifying presence " +
+        "that cows lesser beings. Their loyalty to the Splugorth is absolute, whether " +
+        "through genuine devotion or inescapable magical binding, and they serve as " +
         "overseers, enforcers, and field commanders across the Splugorth empire."
     );
 
@@ -107,10 +107,10 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(1);
     set_rcc_description(
-        "Splugorth Minions are a Racial Character Class whose abilities derive from "
-        "their supernatural nature and the empowerment bestowed by their Splugorth "
-        "masters. While their primary role is defined by their servitude, some minions "
-        "have developed specialized skills beyond their base capabilities, particularly "
+        "Splugorth Minions are a Racial Character Class whose abilities derive from " +
+        "their supernatural nature and the empowerment bestowed by their Splugorth " +
+        "masters. While their primary role is defined by their servitude, some minions " +
+        "have developed specialized skills beyond their base capabilities, particularly " +
         "those who serve in intelligence-gathering or magical oversight roles."
     );
 

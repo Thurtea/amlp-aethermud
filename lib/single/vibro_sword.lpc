@@ -10,9 +10,9 @@ void create() {
     set_id_alt("vibro");
     set_short("a vibro-sword");
     set_long(
-        "A gleaming vibro-sword whose molecular-aligned blade vibrates at "
-        "ultrasonic frequencies. The high-tech edge cuts through mega-damage "
-        "materials as if they were paper. A power indicator on the hilt shows "
+        "A gleaming vibro-sword whose molecular-aligned blade vibrates at " +
+        "ultrasonic frequencies. The high-tech edge cuts through mega-damage " +
+        "materials as if they were paper. A power indicator on the hilt shows " +
         "the blade is fully charged.\n"
     );
 

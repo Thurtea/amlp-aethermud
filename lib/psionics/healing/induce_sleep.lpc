@@ -10,13 +10,13 @@ void create() {
     set_power_id("induce_sleep");
     set_power_name("Induce Sleep");
     set_power_desc(
-        "The psychic reaches into the target's mind and triggers the brain's "
-        "sleep centers, inducing immediate deep slumber. The sleep is perfectly "
-        "natural in appearance and the target cannot be easily roused. Victims "
-        "may resist with a Mental Endurance saving throw of 14 or higher. "
-        "Cannot be used on beings in combat or under extreme stress.\n\n"
-        "Range: 30 feet\n"
-        "ISP Cost: 4 points\n"
+        "The psychic reaches into the target's mind and triggers the brain's " +
+        "sleep centers, inducing immediate deep slumber. The sleep is perfectly " +
+        "natural in appearance and the target cannot be easily roused. Victims " +
+        "may resist with a Mental Endurance saving throw of 14 or higher. " +
+        "Cannot be used on beings in combat or under extreme stress.\n\n" +
+        "Range: 30 feet\n" +
+        "ISP Cost: 4 points\n" +
         "Duration: 20 minutes per level of the psychic"
     );
     set_power_category("healing");

@@ -222,16 +222,15 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"CAST - Cast magical spells\n\n"
-"Usage:\n"
-"  cast                    List your spells and P.P.E.\n"
-"  cast <spell>            Cast a spell (on yourself by default)\n"
-"  cast <spell> <target>   Cast a spell on a target\n"
-"  cast info <spell>       Get detailed info about a spell\n\n"
-"Spells cost P.P.E. (Potential Psychic Energy) to cast.\n"
-"P.P.E. regenerates over time, and can also be drawn from\n"
-"ley lines, nexus points, and other sources.\n\n"
-"Spell levels range from 1 to 15. You can only cast spells\n"
+    return "CAST - Cast magical spells\n\n" +
+"Usage:\n" +
+"  cast                    List your spells and P.P.E.\n" +
+"  cast <spell>            Cast a spell (on yourself by default)\n" +
+"  cast <spell> <target>   Cast a spell on a target\n" +
+"  cast info <spell>       Get detailed info about a spell\n\n" +
+"Spells cost P.P.E. (Potential Psychic Energy) to cast.\n" +
+"P.P.E. regenerates over time, and can also be drawn from\n" +
+"ley lines, nexus points, and other sources.\n\n" +
+"Spell levels range from 1 to 15. You can only cast spells\n" +
 "of your caster level or lower.\n";
 }

@@ -9,13 +9,13 @@ void create() {
     set_spell_id("mental_blast");
     set_spell_name("Mental Blast");
     set_spell_desc(
-        "Unlike most magic that manifests physically, the Mental Blast is a "
-        "direct psychic assault delivered through magical means. A bolt of "
-        "invisible psionic-magical energy strikes the target's mind and nervous "
-        "system simultaneously. It bypasses all physical armor but can be blocked "
-        "by a mind block or psi-shield. On a failed save vs magic, the target "
-        "takes 6d6 SDC and is stunned for 1d4 melee rounds. On a successful save "
-        "the target takes half damage only. Supernatural beings of extreme evil "
+        "Unlike most magic that manifests physically, the Mental Blast is a " +
+        "direct psychic assault delivered through magical means. A bolt of " +
+        "invisible psionic-magical energy strikes the target's mind and nervous " +
+        "system simultaneously. It bypasses all physical armor but can be blocked " +
+        "by a mind block or psi-shield. On a failed save vs magic, the target " +
+        "takes 6d6 SDC and is stunned for 1d4 melee rounds. On a successful save " +
+        "the target takes half damage only. Supernatural beings of extreme evil " +
         "are immune. Robots and androids are unaffected."
     );
 
@@ -74,7 +74,7 @@ int apply_effect(object caster, object target) {
     int damage = saved ? (dice / 2) : dice;
 
     tell_object(caster,
-        "You unleash an invisible bolt of psychic-magical force!\n"
+        "You unleash an invisible bolt of psychic-magical force!\n" +
         "It strikes " + target->query_cap_name() + " in the mind - "
         + damage + " SDC damage!\n");
 

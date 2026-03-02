@@ -14,8 +14,8 @@ void create() {
     set_related_languages(({ "gnomish", "troll" }));
     
     set_short("Dwarven language");
-    set_long("Dwarven is a guttural language with deep, resonant tones that "
-             "carry well through underground tunnels. Rich in terminology for "
-             "mining, smithing, and stonework, but surprisingly limited in "
+    set_long("Dwarven is a guttural language with deep, resonant tones that " +
+             "carry well through underground tunnels. Rich in terminology for " +
+             "mining, smithing, and stonework, but surprisingly limited in " +
              "words for surface concepts like 'sky' or 'ocean'.");
 }

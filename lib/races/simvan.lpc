@@ -14,8 +14,8 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "Simvan are an adaptable demi-human group with modest psionic leanings"
-        " and urban survival skills. This is a conservative base; expand as"
+        "Simvan are an adaptable demi-human group with modest psionic leanings" +
+        " and urban survival skills. This is a conservative base; expand as" +
         " source text indicates."
     );
     

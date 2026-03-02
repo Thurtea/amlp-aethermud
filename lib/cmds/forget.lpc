@@ -58,11 +58,10 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"FORGET - Forget someone's introduction\n\n"
-"Usage:\n"
-"  forget <name>        Forget someone's name\n\n"
-"Use this to forget someone's name. They will need to\n"
-"introduce themselves again for you to know who they are.\n"
+    return "FORGET - Forget someone's introduction\n\n" +
+"Usage:\n" +
+"  forget <name>        Forget someone's name\n\n" +
+"Use this to forget someone's name. They will need to\n" +
+"introduce themselves again for you to know who they are.\n" +
 "Useful for roleplay scenarios.\n";
 }

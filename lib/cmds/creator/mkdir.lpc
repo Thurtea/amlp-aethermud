@@ -138,10 +138,9 @@ void help() {
 }
 
 string query_help() {
-    return
-"MKDIR - Create directory in workspace\n\n"
-"Usage:\n"
-"  mkdir <path>         Create a directory in your workspace\n\n"
-"Creates nested directories under your wizard area; use when organizing\n"
+    return "MKDIR - Create directory in workspace\n\n" +
+"Usage:\n" +
+"  mkdir <path>         Create a directory in your workspace\n\n" +
+"Creates nested directories under your wizard area; use when organizing\n" +
 "created files for deployment.\n";
 }

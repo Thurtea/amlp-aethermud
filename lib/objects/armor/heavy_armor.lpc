@@ -10,9 +10,9 @@ void create() {
     set_id(({"armor", "heavy armor", "heavy", "plate", "full plate"}));
     set_short("heavy combat armor");
     set_long(
-        "This is full heavy combat armor, offering maximum protection at the cost of "
-        "mobility. Thick reinforced plates cover the entire body, and the suit is "
-        "equipped with servo-motors to help bear the weight. Only serious soldiers "
+        "This is full heavy combat armor, offering maximum protection at the cost of " +
+        "mobility. Thick reinforced plates cover the entire body, and the suit is " +
+        "equipped with servo-motors to help bear the weight. Only serious soldiers " +
         "and frontline troops wear such comprehensive protection.\n"
     );
     

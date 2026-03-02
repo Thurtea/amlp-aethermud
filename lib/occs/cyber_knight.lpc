@@ -16,14 +16,14 @@ void create() {
     set_alignment_requirement("not_evil");
     
     set_occ_description(
-        "Cyber-Knights are an elite order of techno-warriors dedicated to righting "
-        "wrongs and protecting the innocent across Rifts Earth. Founded by Lord "
-        "Coake, the Cyber-Knights combine psionic powers, advanced cybernetic "
-        "enhancement, and rigorous martial training with a strict code of honor "
-        "reminiscent of the knights of old. Their signature ability is the psi-sword "
-        "- a blade of pure psychic energy that can cut through mega-damage materials. "
-        "Cyber-Knights travel the land as wandering champions, opposing tyranny, "
-        "evil, and injustice wherever they find it. Many operate independently, "
+        "Cyber-Knights are an elite order of techno-warriors dedicated to righting " +
+        "wrongs and protecting the innocent across Rifts Earth. Founded by Lord " +
+        "Coake, the Cyber-Knights combine psionic powers, advanced cybernetic " +
+        "enhancement, and rigorous martial training with a strict code of honor " +
+        "reminiscent of the knights of old. Their signature ability is the psi-sword " +
+        "- a blade of pure psychic energy that can cut through mega-damage materials. " +
+        "Cyber-Knights travel the land as wandering champions, opposing tyranny, " +
+        "evil, and injustice wherever they find it. Many operate independently, " +
         "while others serve with the order or assist communities in need."
     );
     
@@ -205,10 +205,10 @@ void create() {
     
     // Background
     set_background(
-        "Cyber-Knights are carefully selected from promising individuals who "
-        "demonstrate courage, honor, and potential. They undergo years of "
-        "rigorous training in combat, psionic development, and ethics. The "
-        "Cyber-Knight Code demands they protect the innocent, fight injustice, "
+        "Cyber-Knights are carefully selected from promising individuals who " +
+        "demonstrate courage, honor, and potential. They undergo years of " +
+        "rigorous training in combat, psionic development, and ethics. The " +
+        "Cyber-Knight Code demands they protect the innocent, fight injustice, " +
         "show mercy to the defeated, and maintain personal honor at all times."
     );
     set_organizations(({ "cyber_knight_order" }));

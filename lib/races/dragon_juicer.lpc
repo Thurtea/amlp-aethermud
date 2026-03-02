@@ -16,14 +16,14 @@ void create() {
     set_race_category(RACE_CAT_DRAGON);
 
     set_race_description(
-        "Dragon Juicers are the result of a forbidden augmentation process that "
-        "infuses a human subject with the blood and biological compounds extracted "
-        "from dragons, combined with the standard Juicer chemical enhancement "
-        "package. The result is a warrior of terrifying speed and power who "
-        "possesses a fraction of true draconic might, including limited mega-damage "
-        "resilience, enhanced senses, and the ability to channel dragon fire "
-        "through their hands. The cost is devastating: the process burns through "
-        "the subject's body at an accelerated rate, leaving most Dragon Juicers "
+        "Dragon Juicers are the result of a forbidden augmentation process that " +
+        "infuses a human subject with the blood and biological compounds extracted " +
+        "from dragons, combined with the standard Juicer chemical enhancement " +
+        "package. The result is a warrior of terrifying speed and power who " +
+        "possesses a fraction of true draconic might, including limited mega-damage " +
+        "resilience, enhanced senses, and the ability to channel dragon fire " +
+        "through their hands. The cost is devastating: the process burns through " +
+        "the subject's body at an accelerated rate, leaving most Dragon Juicers " +
         "with only five to seven years to live before total system burnout."
     );
 

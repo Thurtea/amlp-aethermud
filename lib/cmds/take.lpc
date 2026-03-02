@@ -162,15 +162,14 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"TAKE - Pick up items from the ground\n\n"
-"Usage:\n"
-"  take <item>    Pick up an item\n"
-"  take all       Pick up all items in room\n\n"
-"Examples:\n"
-"  take sword\n"
-"  take all\n\n"
-"You cannot take living creatures or items that are fixed\n"
-"in place. Weight limits apply based on your strength.\n\n"
+    return "TAKE - Pick up items from the ground\n\n" +
+"Usage:\n" +
+"  take <item>    Pick up an item\n" +
+"  take all       Pick up all items in room\n\n" +
+"Examples:\n" +
+"  take sword\n" +
+"  take all\n\n" +
+"You cannot take living creatures or items that are fixed\n" +
+"in place. Weight limits apply based on your strength.\n\n" +
 "See also: put, give, inventory\n";
 }

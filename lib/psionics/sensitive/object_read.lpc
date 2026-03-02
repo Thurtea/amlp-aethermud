@@ -10,12 +10,12 @@ void create() {
     set_power_id("object_read");
     set_power_name("Object Read");
     set_power_desc(
-        "By touching an object, the psychic can read the psychic impressions left behind "
-        "by intense emotions, trauma, or significant events connected to it. The older and "
-        "more mundane the object, the less information is available; objects linked to great "
-        "joy, love, violence, or death are rich with impressions. The psychic sees brief "
-        "visions of past owners and events, and may sense a previous owner's strongest "
-        "emotional state. Impressions are fragments, not complete records. The power gives "
+        "By touching an object, the psychic can read the psychic impressions left behind " +
+        "by intense emotions, trauma, or significant events connected to it. The older and " +
+        "more mundane the object, the less information is available; objects linked to great " +
+        "joy, love, violence, or death are rich with impressions. The psychic sees brief " +
+        "visions of past owners and events, and may sense a previous owner's strongest " +
+        "emotional state. Impressions are fragments, not complete records. The power gives " +
         "no location data. I.S.P. cost 6; instant result."
     );
     set_power_category("sensitive");

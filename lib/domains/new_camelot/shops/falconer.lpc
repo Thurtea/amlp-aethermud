@@ -20,13 +20,13 @@ void create() {
 
     set_short("Aldric's Falconry");
     set_long(
-        "A narrow shop built against New Camelot's inner wall, smelling "
-        "of leather, pine straw, and wind. Perch-rods line the walls, most "
-        "empty now. Aldric -- a lean, sun-darkened man with a hawk's "
-        "patience in his eyes -- sits behind a low counter. Pelts, jesses, "
-        "and hoods hang from wooden pegs. A hand-lettered sign reads:\n\n"
-        "  'I TRADE, NOT SELL. Bring me things worth having.'\n\n"
-        "Type 'list' or 'browse' to see what Aldric will accept.\n"
+        "A narrow shop built against New Camelot's inner wall, smelling " +
+        "of leather, pine straw, and wind. Perch-rods line the walls, most " +
+        "empty now. Aldric -- a lean, sun-darkened man with a hawk's " +
+        "patience in his eyes -- sits behind a low counter. Pelts, jesses, " +
+        "and hoods hang from wooden pegs. A hand-lettered sign reads:\n\n" +
+        "  'I TRADE, NOT SELL. Bring me things worth having.'\n\n" +
+        "Type 'list' or 'browse' to see what Aldric will accept.\n" +
         "Type 'trade <item>' to offer an item in exchange for an egg.\n"
     );
 
@@ -49,16 +49,16 @@ void init() {
 
 int cmd_list(string arg) {
     write(
-        "\n"
-        "==========[ ALDRIC'S FALCONRY -- TRADE LIST ]=========\n"
-        "Aldric says: \"I barter in rare goods for rare birds.\"\n\n"
-        "  10 x E-Clips (energy ammo)    ->  Hawk Egg        [Level 3]\n"
-        "  TX-500 Laser Rifle            ->  Master Hawk Egg [Level 5]\n"
-        "  Pre-Rifts Scimitar            ->  Master Hawk Egg [Level 5]\n"
-        "  Coalition States Uniform      ->  Falcon Egg      [Level 7]\n\n"
-        "Use: trade <item>   (e.g., 'trade scimitar', 'trade rifle')\n"
-        "     hatch egg      (once you have an egg, hatch it!)\n\n"
-        "See also: help falconry, help falconer, help pets\n"
+        "\n" +
+        "==========[ ALDRIC'S FALCONRY -- TRADE LIST ]=========\n" +
+        "Aldric says: \"I barter in rare goods for rare birds.\"\n\n" +
+        "  10 x E-Clips (energy ammo)    ->  Hawk Egg        [Level 3]\n" +
+        "  TX-500 Laser Rifle            ->  Master Hawk Egg [Level 5]\n" +
+        "  Pre-Rifts Scimitar            ->  Master Hawk Egg [Level 5]\n" +
+        "  Coalition States Uniform      ->  Falcon Egg      [Level 7]\n\n" +
+        "Use: trade <item>   (e.g., 'trade scimitar', 'trade rifle')\n" +
+        "     hatch egg      (once you have an egg, hatch it!)\n\n" +
+        "See also: help falconry, help falconer, help pets\n" +
         "======================================================\n\n"
     );
     return 1;
@@ -153,15 +153,15 @@ int _try_trade_rifle(object player, object *inv) {
     }
 
     write(
-        "Aldric takes the TX-500, turns it over in his hands, and sets it\n"
-        "under the counter with a satisfied nod.\n"
-        "He produces a cloth-wrapped bundle and sets it on the counter:\n"
-        "a speckled Master Hawk Egg.\n\n"
+        "Aldric takes the TX-500, turns it over in his hands, and sets it\n" +
+        "under the counter with a satisfied nod.\n" +
+        "He produces a cloth-wrapped bundle and sets it on the counter:\n" +
+        "a speckled Master Hawk Egg.\n\n" +
         "Aldric says: \"Treat it well. A master hawk is worth ten rifles.\"\n\n"
     );
 
     tell_room(environment(player),
-              player->query_cap_name() + " trades a rifle to the falconer "
+              player->query_cap_name() + " trades a rifle to the falconer " +
               "and receives a Master Hawk Egg.",
               ({ player }));
 
@@ -186,16 +186,16 @@ int _try_trade_uniform(object player, object *inv) {
     }
 
     write(
-        "Aldric's eyes narrow as you produce the Coalition uniform. He\n"
-        "examines it carefully, then folds it neatly beneath the counter.\n"
-        "From a locked strongbox he lifts a large mottled egg cradled\n"
-        "in soft leather.\n\n"
-        "Aldric says: \"A Falcon. The fastest raptor on Rifts Earth. "
+        "Aldric's eyes narrow as you produce the Coalition uniform. He\n" +
+        "examines it carefully, then folds it neatly beneath the counter.\n" +
+        "From a locked strongbox he lifts a large mottled egg cradled\n" +
+        "in soft leather.\n\n" +
+        "Aldric says: \"A Falcon. The fastest raptor on Rifts Earth. " +
         "Don't waste her.\"\n\n"
     );
 
     tell_room(environment(player),
-              player->query_cap_name() + " trades a Coalition uniform to "
+              player->query_cap_name() + " trades a Coalition uniform to " +
               "the falconer and receives a Falcon Egg.",
               ({ player }));
 
@@ -222,14 +222,14 @@ int _try_trade_eclips(object player, object *inv) {
     }
 
     write(
-        "Aldric counts out ten E-Clips on the counter, then sweeps them\n"
-        "into a wooden box beneath his bench.\n"
-        "He reaches up to a shelf and sets a speckled brown egg before you.\n\n"
+        "Aldric counts out ten E-Clips on the counter, then sweeps them\n" +
+        "into a wooden box beneath his bench.\n" +
+        "He reaches up to a shelf and sets a speckled brown egg before you.\n\n" +
         "Aldric says: \"Feed it well and train it harder. Good luck.\"\n\n"
     );
 
     tell_room(environment(player),
-              player->query_cap_name() + " trades ten E-Clips to the "
+              player->query_cap_name() + " trades ten E-Clips to the " +
               "falconer and receives a Hawk Egg.",
               ({ player }));
 
@@ -259,18 +259,18 @@ int _try_trade_scimitar(object player, object *inv) {
     }
 
     write(
-        "Aldric's eyes fix on the blade the moment you lay it on the counter.\n"
-        "He turns it over slowly, runs a thumb down the flat, and exhales\n"
-        "through his nose -- quiet satisfaction from a man who doesn't waste\n"
-        "words on things he wants. He tucks it under the bench and produces\n"
-        "a straw-padded wooden box from the shelf behind him.\n\n"
-        "Inside, cradled in soft wool, rests a speckled Master Hawk Egg.\n\n"
-        "Aldric says: \"A blade that old earns a bird worth keeping.\n"
+        "Aldric's eyes fix on the blade the moment you lay it on the counter.\n" +
+        "He turns it over slowly, runs a thumb down the flat, and exhales\n" +
+        "through his nose -- quiet satisfaction from a man who doesn't waste\n" +
+        "words on things he wants. He tucks it under the bench and produces\n" +
+        "a straw-padded wooden box from the shelf behind him.\n\n" +
+        "Inside, cradled in soft wool, rests a speckled Master Hawk Egg.\n\n" +
+        "Aldric says: \"A blade that old earns a bird worth keeping.\n" +
         "Train her right.\"\n\n"
     );
 
     tell_room(environment(player),
-              player->query_cap_name() + " trades an old scimitar to Aldric "
+              player->query_cap_name() + " trades an old scimitar to Aldric " +
               "and receives a Master Hawk Egg.",
               ({ player }));
 

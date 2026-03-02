@@ -5,8 +5,8 @@ void create() {
     ::create();
     set_short("Chi-Town - Entry Plaza");
     set_long(
-        "A bustling plaza marks the entry to Chi-Town. Neon signs and low\n"
-        "arches welcome travelers from the road. Merchants shout their wares\n"
+        "A bustling plaza marks the entry to Chi-Town. Neon signs and low\n" +
+        "arches welcome travelers from the road. Merchants shout their wares\n" +
         "from nearby stalls and a small gate lies to the south leading out.\n"
     );
 

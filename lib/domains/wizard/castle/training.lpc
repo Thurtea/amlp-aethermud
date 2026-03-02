@@ -9,14 +9,14 @@ void create() {
 
     set_short("Training Grounds");
     set_long(
-        "A spacious training room east of the main hall. The stone floor\n"
-        "is scuffed from countless practice sessions. Weapon racks line\n"
-        "the walls, holding practice swords, staves, and blasters.\n\n"
-        "A sturdy training dummy stands in the center of the room, its\n"
-        "wooden frame reinforced with metal bands. It's been patched and\n"
-        "repaired many times. A scoreboard on the wall tracks damage\n"
-        "dealt during practice sessions.\n\n"
-        "A sign reads: 'Hit the dummy to test combat mechanics.\n"
+        "A spacious training room east of the main hall. The stone floor\n" +
+        "is scuffed from countless practice sessions. Weapon racks line\n" +
+        "the walls, holding practice swords, staves, and blasters.\n\n" +
+        "A sturdy training dummy stands in the center of the room, its\n" +
+        "wooden frame reinforced with metal bands. It's been patched and\n" +
+        "repaired many times. A scoreboard on the wall tracks damage\n" +
+        "dealt during practice sessions.\n\n" +
+        "A sign reads: 'Hit the dummy to test combat mechanics.\n" +
         "All damage is practice-only. No XP or loot.'"
     );
 
@@ -55,23 +55,23 @@ int examine_items(string str) {
     if (!str) return 0;
     if (str == "dummy" || str == "training dummy") {
         write(
-            "The training dummy is a wooden mannequin reinforced with iron\n"
-            "bands. It's been battered and repaired countless times. Despite\n"
+            "The training dummy is a wooden mannequin reinforced with iron\n" +
+            "bands. It's been battered and repaired countless times. Despite\n" +
             "the abuse, it stands firm. It doesn't fight back.\n"
         );
         return 1;
     }
     if (str == "weapons" || str == "rack" || str == "racks") {
         write(
-            "The weapon racks hold a variety of practice weapons: wooden\n"
-            "swords, padded staves, and deactivated blaster replicas.\n"
+            "The weapon racks hold a variety of practice weapons: wooden\n" +
+            "swords, padded staves, and deactivated blaster replicas.\n" +
             "None of them are real weapons - they're for form practice.\n"
         );
         return 1;
     }
     if (str == "scoreboard" || str == "score" || str == "board") {
         write(
-            "The scoreboard shows recent practice results. Most entries\n"
+            "The scoreboard shows recent practice results. Most entries\n" +
             "are from wizards testing combat formulas and balancing damage.\n"
         );
         return 1;

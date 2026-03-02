@@ -16,15 +16,15 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Rangers are elite light infantry who combine exceptional wilderness "
-        "survival skills with expert military training. Unlike conventional "
-        "soldiers who fight in organized formations, Rangers operate in small "
-        "teams or alone, striking from ambush, scouting enemy territory, and "
-        "living off the land for weeks at a time. Many Rangers serve as scouts "
-        "for kingdoms, free cities, and resistance movements. Others are lone "
-        "wolves who hire out as wilderness guides, bounty hunters, and "
-        "troubleshooters. Rangers are not as heavily augmented as Headhunters "
-        "or as specialized as Wilderness Scouts - they are consummate "
+        "Rangers are elite light infantry who combine exceptional wilderness " +
+        "survival skills with expert military training. Unlike conventional " +
+        "soldiers who fight in organized formations, Rangers operate in small " +
+        "teams or alone, striking from ambush, scouting enemy territory, and " +
+        "living off the land for weeks at a time. Many Rangers serve as scouts " +
+        "for kingdoms, free cities, and resistance movements. Others are lone " +
+        "wolves who hire out as wilderness guides, bounty hunters, and " +
+        "troubleshooters. Rangers are not as heavily augmented as Headhunters " +
+        "or as specialized as Wilderness Scouts - they are consummate " +
         "all-around survival fighters."
     );
 
@@ -169,12 +169,12 @@ void create() {
     set_property("wilderness_survival_bonus", 10);
 
     set_background(
-        "Rangers emerge from wilderness communities, resistance movements, "
-        "and military scout units. Many are the children of nomads or "
-        "wilderness communities who grew up learning survival as a necessity. "
-        "Others are military veterans who found they preferred the freedom "
-        "of operating alone over conventional command structures. Rangers "
-        "are found across Rifts Earth wherever there is wilderness to traverse "
+        "Rangers emerge from wilderness communities, resistance movements, " +
+        "and military scout units. Many are the children of nomads or " +
+        "wilderness communities who grew up learning survival as a necessity. " +
+        "Others are military veterans who found they preferred the freedom " +
+        "of operating alone over conventional command structures. Rangers " +
+        "are found across Rifts Earth wherever there is wilderness to traverse " +
         "and dangers to scout."
     );
     set_organizations(({ }));

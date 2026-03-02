@@ -13,8 +13,8 @@ void create() {
     add_id("heavy armor");
     
     short_desc = "a large suit of plate armor";
-    long_desc = "This massive suit of plate armor is designed for large humanoids "
-                "such as ogres or titans. The thick metal plates provide excellent "
+    long_desc = "This massive suit of plate armor is designed for large humanoids " +
+                "such as ogres or titans. The thick metal plates provide excellent " +
                 "protection but are incredibly heavy and cumbersome.";
     
     // Phase 2, Step 5b: Size properties

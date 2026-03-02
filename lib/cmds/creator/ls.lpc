@@ -167,10 +167,9 @@ void help() {
 }
 
 string query_help() {
-    return
-"LS - List directory contents\n\n"
-"Usage:\n"
-"  ls <path>            List files in a directory (workspace)\n\n"
-"Shows files and directories in the given path. Useful for browsing\n"
+    return "LS - List directory contents\n\n" +
+"Usage:\n" +
+"  ls <path>            List files in a directory (workspace)\n\n" +
+"Shows files and directories in the given path. Useful for browsing\n" +
 "your building workspace.\n";
 }

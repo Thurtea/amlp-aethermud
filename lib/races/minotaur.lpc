@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Minotaurs are towering humanoids with the head and horns of a bull "
-        "and the body of a heavily muscled man. Standing seven to nine feet "
-        "tall, they are imposing figures of raw physical power. Many arrived "
-        "on Rifts Earth through dimensional portals and have carved out "
-        "territories in wilderness areas. Despite their bestial appearance, "
-        "Minotaurs possess keen intelligence and a strong sense of honor. "
-        "They are natural warriors who thrive in close combat, using their "
+        "Minotaurs are towering humanoids with the head and horns of a bull " +
+        "and the body of a heavily muscled man. Standing seven to nine feet " +
+        "tall, they are imposing figures of raw physical power. Many arrived " +
+        "on Rifts Earth through dimensional portals and have carved out " +
+        "territories in wilderness areas. Despite their bestial appearance, " +
+        "Minotaurs possess keen intelligence and a strong sense of honor. " +
+        "They are natural warriors who thrive in close combat, using their " +
         "horns and massive fists as readily as any weapon."
     );
 

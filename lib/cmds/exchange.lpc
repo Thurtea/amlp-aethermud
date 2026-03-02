@@ -263,21 +263,20 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"EXCHANGE - Smuggler currency conversion\n\n"
-"Usage:\n"
-"  exchange <amount> to bmc             Convert UC to BMC (self)\n"
-"  exchange <amount> to uc              Convert BMC to UC (self)\n"
-"  exchange <amount> to bmc for <name>  Service: pay your UC, client gets BMC\n"
-"  exchange <amount> to uc  for <name>  Service: pay your BMC, client gets UC\n\n"
-"Rates (base, Smuggler level 1):\n"
-"  BMC -> UC : 1 BMC  = 1.5 UC\n"
-"  UC  -> BMC: 2 UC   = 1 BMC\n\n"
-"Every 5 levels above 1 improves the rate by one step (capped at level 26).\n"
-"Minimum transaction: 10 of either currency.\n\n"
-"Service exchanges:\n"
-"  You spend your own currency. The client receives the converted amount\n"
-"  and pays you back the standard cost plus a 10%% service fee.\n"
-"  The client must be online and have sufficient funds.\n\n"
+    return "EXCHANGE - Smuggler currency conversion\n\n" +
+"Usage:\n" +
+"  exchange <amount> to bmc             Convert UC to BMC (self)\n" +
+"  exchange <amount> to uc              Convert BMC to UC (self)\n" +
+"  exchange <amount> to bmc for <name>  Service: pay your UC, client gets BMC\n" +
+"  exchange <amount> to uc  for <name>  Service: pay your BMC, client gets UC\n\n" +
+"Rates (base, Smuggler level 1):\n" +
+"  BMC -> UC : 1 BMC  = 1.5 UC\n" +
+"  UC  -> BMC: 2 UC   = 1 BMC\n\n" +
+"Every 5 levels above 1 improves the rate by one step (capped at level 26).\n" +
+"Minimum transaction: 10 of either currency.\n\n" +
+"Service exchanges:\n" +
+"  You spend your own currency. The client receives the converted amount\n" +
+"  and pays you back the standard cost plus a 10%% service fee.\n" +
+"  The client must be online and have sufficient funds.\n\n" +
 "This ability is exclusive to the Smuggler OCC.\n";
 }

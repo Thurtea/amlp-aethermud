@@ -46,12 +46,11 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"TELL - Send a private message to another player\n\n"
-"Usage:\n"
-"  tell <player> <message>    Send private message\n\n"
-"Example:\n"
-"  tell bob Hey, how are you?\n\n"
-"The message is only seen by you and the target player.\n\n"
+    return "TELL - Send a private message to another player\n\n" +
+"Usage:\n" +
+"  tell <player> <message>    Send private message\n\n" +
+"Example:\n" +
+"  tell bob Hey, how are you?\n\n" +
+"The message is only seen by you and the target player.\n\n" +
 "See also: SAY, CHAT, WHISPER\n";
 }

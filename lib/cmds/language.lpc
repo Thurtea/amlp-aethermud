@@ -46,13 +46,12 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"LANGUAGE - Switch your speaking language\n\n"
-"Usage:\n"
-"  language              Show what language you're speaking\n"
-"  language <lang>       Switch to speaking that language\n\n"
-"When you speak, listeners will hear you in the language you\n"
-"are speaking. If they don't understand it well, the text will\n"
-"appear garbled to them.\n\n"
+    return "LANGUAGE - Switch your speaking language\n\n" +
+"Usage:\n" +
+"  language              Show what language you're speaking\n" +
+"  language <lang>       Switch to speaking that language\n\n" +
+"When you speak, listeners will hear you in the language you\n" +
+"are speaking. If they don't understand it well, the text will\n" +
+"appear garbled to them.\n\n" +
 "See also: LANGUAGES, SAY\n";
 }

@@ -130,18 +130,17 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"MANIFEST - Use psionic powers\n\n"
-"Usage:\n"
-"  manifest                    List your psionic powers and ISP\n"
-"  manifest <power>            Use a power (on yourself by default)\n"
-"  manifest <power> <target>   Use a power on a target\n"
-"  manifest info <power>       Get detailed info about a power\n\n"
-"Psionic powers cost ISP (Inner Strength Points) to use.\n"
-"ISP regenerates over time at a rate based on your ME stat.\n\n"
-"Categories:\n"
-"  Sensitive - Detection and perception powers\n"
-"  Physical  - Mind over matter\n"
-"  Healing   - Recovery and restoration\n"
+    return "MANIFEST - Use psionic powers\n\n" +
+"Usage:\n" +
+"  manifest                    List your psionic powers and ISP\n" +
+"  manifest <power>            Use a power (on yourself by default)\n" +
+"  manifest <power> <target>   Use a power on a target\n" +
+"  manifest info <power>       Get detailed info about a power\n\n" +
+"Psionic powers cost ISP (Inner Strength Points) to use.\n" +
+"ISP regenerates over time at a rate based on your ME stat.\n\n" +
+"Categories:\n" +
+"  Sensitive - Detection and perception powers\n" +
+"  Physical  - Mind over matter\n" +
+"  Healing   - Recovery and restoration\n" +
 "  Super     - Most powerful abilities\n";
 }

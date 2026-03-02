@@ -9,12 +9,12 @@ void create() {
     set_spell_id("turn_dead");
     set_spell_name("Turn Dead");
     set_spell_desc(
-        "The mage channels a burst of positive life energy to repel or disrupt "
-        "lesser undead. Simple undead (zombies, skeletons) are instantly destroyed "
-        "on a failed save. More powerful undead (vampires, mummies, spectres) take "
-        "6d6 SDC damage and must save vs magic or flee for 1d6 melee rounds. "
-        "Undead of extreme supernatural power resist the effect and have a bonus "
-        "to their save. The effect radiates 30 feet from the caster. Living beings "
+        "The mage channels a burst of positive life energy to repel or disrupt " +
+        "lesser undead. Simple undead (zombies, skeletons) are instantly destroyed " +
+        "on a failed save. More powerful undead (vampires, mummies, spectres) take " +
+        "6d6 SDC damage and must save vs magic or flee for 1d6 melee rounds. " +
+        "Undead of extreme supernatural power resist the effect and have a bonus " +
+        "to their save. The effect radiates 30 feet from the caster. Living beings " +
         "are unaffected."
     );
 
@@ -38,7 +38,7 @@ int apply_effect(object caster, object target) {
     if (!caster) return 0;
 
     tell_object(caster,
-        "You release a pulse of pure life energy!\n"
+        "You release a pulse of pure life energy!\n" +
         "Brilliant white light blazes outward from your position in all directions!\n");
 
     object env = environment(caster);

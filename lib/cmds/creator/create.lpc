@@ -300,155 +300,155 @@ int create_mercbase(object player, string wiz_name, string groupname) {
 
 string gen_npc(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated NPC\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/npc\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_name(\"" + display + "\");\n"
-"    set_id(({ \"" + name + "\", \"" + display + "\", \"npc\" }));\n"
-"    set_short(\"a " + display + "\");\n"
-"    set_long(\"A " + display + " stands here.\\n\");\n\n"
-"    set_gender(\"neuter\");\n"
-"    set_race(\"human\");\n"
-"    set_level(1);\n\n"
-"    set_stat(\"intelligence quotient\", 10);\n"
-"    set_stat(\"mental endurance\", 10);\n"
-"    set_stat(\"mental affinity\", 10);\n"
-"    set_stat(\"physical strength\", 10);\n"
-"    set_stat(\"physical prowess\", 10);\n"
-"    set_stat(\"physical endurance\", 10);\n"
-"    set_stat(\"physical beauty\", 10);\n"
-"    set_stat(\"speed\", 10);\n"
+    return "// " + name + ".lpc - QCS Generated NPC\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/npc\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_name(\"" + display + "\");\n" +
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"npc\" }));\n" +
+"    set_short(\"a " + display + "\");\n" +
+"    set_long(\"A " + display + " stands here.\\n\");\n\n" +
+"    set_gender(\"neuter\");\n" +
+"    set_race(\"human\");\n" +
+"    set_level(1);\n\n" +
+"    set_stat(\"intelligence quotient\", 10);\n" +
+"    set_stat(\"mental endurance\", 10);\n" +
+"    set_stat(\"mental affinity\", 10);\n" +
+"    set_stat(\"physical strength\", 10);\n" +
+"    set_stat(\"physical prowess\", 10);\n" +
+"    set_stat(\"physical endurance\", 10);\n" +
+"    set_stat(\"physical beauty\", 10);\n" +
+"    set_stat(\"speed\", 10);\n" +
 "}\n";
 }
 
 string gen_weapon(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated Weapon\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/weapon\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_id(({ \"" + name + "\", \"" + display + "\", \"weapon\" }));\n"
-"    set_short(\"a " + display + "\");\n"
-"    set_long(\"A " + display + " of unremarkable craftsmanship.\\n\");\n\n"
-"    set_property(\"weapon_type\", \"sword\");\n"
-"    set_property(\"damage_type\", \"slashing\");\n"
-"    set_property(\"damage_dice\", \"1d6\");\n"
-"    set_property(\"mega_damage\", 0);\n"
-"    set_property(\"weight\", 3);\n"
-"    set_property(\"value\", 1000);\n"
+    return "// " + name + ".lpc - QCS Generated Weapon\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/weapon\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"weapon\" }));\n" +
+"    set_short(\"a " + display + "\");\n" +
+"    set_long(\"A " + display + " of unremarkable craftsmanship.\\n\");\n\n" +
+"    set_property(\"weapon_type\", \"sword\");\n" +
+"    set_property(\"damage_type\", \"slashing\");\n" +
+"    set_property(\"damage_dice\", \"1d6\");\n" +
+"    set_property(\"mega_damage\", 0);\n" +
+"    set_property(\"weight\", 3);\n" +
+"    set_property(\"value\", 1000);\n" +
 "}\n";
 }
 
 string gen_armor(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated Armor\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/armor\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_id(({ \"" + name + "\", \"" + display + "\", \"armor\" }));\n"
-"    set_short(\"a suit of " + display + "\");\n"
-"    set_long(\"A suit of " + display + " armor.\\n\");\n\n"
-"    set_property(\"armor_type\", \"light\");\n"
-"    set_property(\"armor_class\", 5);\n"
-"    set_property(\"max_armor_mdc\", 50);\n"
-"    set_property(\"armor_mdc\", 50);\n"
-"    set_property(\"wear_slot\", \"body\");\n"
-"    set_property(\"weight\", 20);\n"
-"    set_property(\"value\", 5000);\n"
+    return "// " + name + ".lpc - QCS Generated Armor\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/armor\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"armor\" }));\n" +
+"    set_short(\"a suit of " + display + "\");\n" +
+"    set_long(\"A suit of " + display + " armor.\\n\");\n\n" +
+"    set_property(\"armor_type\", \"light\");\n" +
+"    set_property(\"armor_class\", 5);\n" +
+"    set_property(\"max_armor_mdc\", 50);\n" +
+"    set_property(\"armor_mdc\", 50);\n" +
+"    set_property(\"wear_slot\", \"body\");\n" +
+"    set_property(\"weight\", 20);\n" +
+"    set_property(\"value\", 5000);\n" +
 "}\n";
 }
 
 string gen_room(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated Room\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/room\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_short(\"" + capitalize(display) + "\");\n"
-"    set_long(\n"
-"        \"This is a newly created room. Edit the description.\\n\"\n"
-"    );\n\n"
-"    set_property(\"light\", 2);\n\n"
-"    // Add exits:\n"
-"    // add_exit(\"north\", \"/domains/somewhere\");\n"
+    return "// " + name + ".lpc - QCS Generated Room\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/room\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_short(\"" + capitalize(display) + "\");\n" +
+"    set_long(\n" +
+"        \"This is a newly created room. Edit the description.\\n\"\n" +
+"    );\n\n" +
+"    set_property(\"light\", 2);\n\n" +
+"    // Add exits:\n" +
+"    // add_exit(\"north\", \"/domains/somewhere\");\n" +
 "}\n";
 }
 
 string gen_item(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated Item\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/item\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_id(({ \"" + name + "\", \"" + display + "\", \"item\" }));\n"
-"    set_short(\"a " + display + "\");\n"
-"    set_long(\"A " + display + ".\\n\");\n\n"
-"    set_property(\"weight\", 1);\n"
-"    set_property(\"value\", 100);\n"
+    return "// " + name + ".lpc - QCS Generated Item\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/item\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"item\" }));\n" +
+"    set_short(\"a " + display + "\");\n" +
+"    set_long(\"A " + display + ".\\n\");\n\n" +
+"    set_property(\"weight\", 1);\n" +
+"    set_property(\"value\", 100);\n" +
 "}\n";
 }
 
 string gen_barkeep(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated Barkeep\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/barkeep\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_name(\"" + display + "\");\n"
-"    set_id(({ \"" + name + "\", \"" + display + "\", \"barkeep\", \"bartender\" }));\n"
-"    set_short(\"" + display + "\");\n"
-"    set_long(\"" + capitalize(display) + " stands behind the bar, ready to serve.\\n\");\n\n"
-"    set_greeting(\"What can I get you?\");\n\n"
-"    // Add drinks: add_drink(name, price_uc, description)\n"
-"    add_drink(\"ale\",    50,  \"A cold mug of local ale.\");\n"
-"    add_drink(\"whiskey\", 75, \"A shot of aged whiskey.\");\n"
-"    add_drink(\"water\",  10,  \"A clean glass of water.\");\n"
+    return "// " + name + ".lpc - QCS Generated Barkeep\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/barkeep\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_name(\"" + display + "\");\n" +
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"barkeep\", \"bartender\" }));\n" +
+"    set_short(\"" + display + "\");\n" +
+"    set_long(\"" + capitalize(display) + " stands behind the bar, ready to serve.\\n\");\n\n" +
+"    set_greeting(\"What can I get you?\");\n\n" +
+"    // Add drinks: add_drink(name, price_uc, description)\n" +
+"    add_drink(\"ale\",    50,  \"A cold mug of local ale.\");\n" +
+"    add_drink(\"whiskey\", 75, \"A shot of aged whiskey.\");\n" +
+"    add_drink(\"water\",  10,  \"A clean glass of water.\");\n" +
 "}\n";
 }
 
 string gen_vendor(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated Vendor\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/vendor\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_name(\"" + display + "\");\n"
-"    set_id(({ \"" + name + "\", \"" + display + "\", \"vendor\", \"merchant\" }));\n"
-"    set_short(\"" + display + "\");\n"
-"    set_long(\"" + capitalize(display) + " has a variety of goods on display.\\n\");\n\n"
-"    set_shop_name(\"" + capitalize(display) + "'s Shop\");\n\n"
-"    // Add items: add_stock(name, price_uc, lpc_path, description)\n"
-"    // Leave path as \"\" for non-clonable entries.\n"
-"    add_stock(\"bandage\", 25, \"\", \"A clean cloth bandage.\");\n"
-"    add_stock(\"ration\",  40, \"\", \"One day's worth of trail rations.\");\n"
+    return "// " + name + ".lpc - QCS Generated Vendor\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/vendor\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_name(\"" + display + "\");\n" +
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"vendor\", \"merchant\" }));\n" +
+"    set_short(\"" + display + "\");\n" +
+"    set_long(\"" + capitalize(display) + " has a variety of goods on display.\\n\");\n\n" +
+"    set_shop_name(\"" + capitalize(display) + "'s Shop\");\n\n" +
+"    // Add items: add_stock(name, price_uc, lpc_path, description)\n" +
+"    // Leave path as \"\" for non-clonable entries.\n" +
+"    add_stock(\"bandage\", 25, \"\", \"A clean cloth bandage.\");\n" +
+"    add_stock(\"ration\",  40, \"\", \"One day's worth of trail rations.\");\n" +
 "}\n";
 }
 
 string gen_door(string name) {
     string display = replace_string(name, "_", " ");
-    return "// " + name + ".lpc - QCS Generated Door\n"
-"// Created: " + ctime(time()) + "\n\n"
-"inherit \"/std/qcs/door\";\n\n"
-"void create() {\n"
-"    ::create();\n\n"
-"    set_id(({ \"" + name + "\", \"" + display + "\", \"door\" }));\n"
-"    set_short(\"" + display + "\");\n"
-"    set_closed_desc(\"" + capitalize(display) + " stands here, currently closed.\\n\");\n"
-"    set_open_desc(\"" + capitalize(display) + " stands open.\\n\");\n\n"
-"    // Optional: require a key\n"
-"    // set_key_id(\"iron key\");        /* id on a key object */\n\n"
-"    // Optional: link to the room on the other side\n"
-"    // set_linked_room(\"/domains/somewhere/room\");\n\n"
-"    // Optional: which direction does this door face\n"
-"    // set_exit_dir(\"north\");\n"
+    return "// " + name + ".lpc - QCS Generated Door\n" +
+"// Created: " + ctime(time()) + "\n\n" +
+"inherit \"/std/qcs/door\";\n\n" +
+"void create() {\n" +
+"    ::create();\n\n" +
+"    set_id(({ \"" + name + "\", \"" + display + "\", \"door\" }));\n" +
+"    set_short(\"" + display + "\");\n" +
+"    set_closed_desc(\"" + capitalize(display) + " stands here, currently closed.\\n\");\n" +
+"    set_open_desc(\"" + capitalize(display) + " stands open.\\n\");\n\n" +
+"    // Optional: require a key\n" +
+"    // set_key_id(\"iron key\");        /* id on a key object */\n\n" +
+"    // Optional: link to the room on the other side\n" +
+"    // set_linked_room(\"/domains/somewhere/room\");\n\n" +
+"    // Optional: which direction does this door face\n" +
+"    // set_exit_dir(\"north\");\n" +
 "}\n";
 }
 
@@ -481,18 +481,17 @@ int show_help() {
 }
 
 string query_help() {
-    return
-"CREATE - Quick create templates for NPCs, items, rooms, etc.\n\n"
-"Usage:\n"
-"  create <type> <name>    Create template (npc, weapon, armor, room, item,\n"
-"                          barkeep, vendor, door, mercbase)\n\n"
-"Generates starter LPC files in your wizard workspace for common object\n"
-"types. Use 'modify' and 'deploy' to edit and place them.\n\n"
-"mercbase <groupname>\n"
-"  Scaffolds a 4-file merc group base:\n"
-"    common_room.lpc   Social/meeting hub (exits: east=armory, south=briefing)\n"
-"    armory.lpc        Quartermaster vendor spawn (exit: west=common)\n"
-"    briefing.lpc      Tactical map room (exit: north=common)\n"
-"    base_vendor.lpc   Quartermaster NPC; add stock via add_stock() calls\n"
+    return "CREATE - Quick create templates for NPCs, items, rooms, etc.\n\n" +
+"Usage:\n" +
+"  create <type> <name>    Create template (npc, weapon, armor, room, item,\n" +
+"                          barkeep, vendor, door, mercbase)\n\n" +
+"Generates starter LPC files in your wizard workspace for common object\n" +
+"types. Use 'modify' and 'deploy' to edit and place them.\n\n" +
+"mercbase <groupname>\n" +
+"  Scaffolds a 4-file merc group base:\n" +
+"    common_room.lpc   Social/meeting hub (exits: east=armory, south=briefing)\n" +
+"    armory.lpc        Quartermaster vendor spawn (exit: west=common)\n" +
+"    briefing.lpc      Tactical map room (exit: north=common)\n" +
+"    base_vendor.lpc   Quartermaster NPC; add stock via add_stock() calls\n" +
 "  Files land in: /domains/wizard/YOURNAME/mercbase_GROUPNAME/\n";
 }

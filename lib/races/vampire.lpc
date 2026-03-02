@@ -17,14 +17,14 @@ void create() {
     set_race_category(RACE_CAT_UNDEAD);
 
     set_race_description(
-        "Vampires are undead supernatural predators who feed on the blood and "
-        "psychic energy of the living. Transformed through the dark kiss of another "
-        "vampire or through powerful necromantic magic, they possess superhuman "
-        "strength, speed, and regenerative abilities that make them nearly "
-        "indestructible by conventional means. Their pale, cold flesh conceals a "
-        "predatory cunning honed over centuries, and their hypnotic gaze can bend "
-        "weaker minds to their will. However, they are cursed with devastating "
-        "vulnerabilities to sunlight, running water, silver, and wooden stakes "
+        "Vampires are undead supernatural predators who feed on the blood and " +
+        "psychic energy of the living. Transformed through the dark kiss of another " +
+        "vampire or through powerful necromantic magic, they possess superhuman " +
+        "strength, speed, and regenerative abilities that make them nearly " +
+        "indestructible by conventional means. Their pale, cold flesh conceals a " +
+        "predatory cunning honed over centuries, and their hypnotic gaze can bend " +
+        "weaker minds to their will. However, they are cursed with devastating " +
+        "vulnerabilities to sunlight, running water, silver, and wooden stakes " +
         "through the heart, which can destroy them utterly."
     );
 
@@ -105,11 +105,11 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Vampires are a Racial Character Class defined by their undead nature. "
-        "Their supernatural abilities, immortality, and devastating vulnerabilities "
-        "form a complete character framework. Vampires cannot take a separate OCC "
-        "but gain powers through age and the consumption of blood. Master vampires "
-        "who have survived for centuries develop abilities far beyond those of the "
+        "Vampires are a Racial Character Class defined by their undead nature. " +
+        "Their supernatural abilities, immortality, and devastating vulnerabilities " +
+        "form a complete character framework. Vampires cannot take a separate OCC " +
+        "but gain powers through age and the consumption of blood. Master vampires " +
+        "who have survived for centuries develop abilities far beyond those of the " +
         "newly turned."
     );
 

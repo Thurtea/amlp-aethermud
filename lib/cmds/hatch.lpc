@@ -75,17 +75,17 @@ int main(string arg) {
 
     roll = random(100) + 1;
 
-    write("You cup " + egg->query_short() + " in both hands and hold it\n"
+    write("You cup " + egg->query_short() + " in both hands and hold it\n" +
           "gently against your chest, warming it carefully...\n");
 
     tell_room(environment(player),
-              player->query_cap_name() + " holds a large egg carefully "
+              player->query_cap_name() + " holds a large egg carefully " +
               "against their chest.",
               ({ player }));
 
     if (roll > success_threshold) {
         // Failed hatch
-        write("\nA soft crack sounds -- but then silence. The egg grows\n"
+        write("\nA soft crack sounds -- but then silence. The egg grows\n" +
               "cold. The hatchling did not survive.\n");
         tell_room(environment(player),
                   player->query_cap_name() + "'s egg fails to hatch.",
@@ -95,10 +95,10 @@ int main(string arg) {
     }
 
     // Success!
-    write("\nThe egg trembles in your hands. A hairline crack races across\n"
-          "the shell -- then another -- and with a sharp creak the egg\n"
-          "splits open. A damp, wide-eyed " + tier_name + " hatchling\n"
-          "tumbles into your hands and fixes you with an intense stare.\n"
+    write("\nThe egg trembles in your hands. A hairline crack races across\n" +
+          "the shell -- then another -- and with a sharp creak the egg\n" +
+          "splits open. A damp, wide-eyed " + tier_name + " hatchling\n" +
+          "tumbles into your hands and fixes you with an intense stare.\n" +
           "It has imprinted on you.\n\n");
 
     tell_room(environment(player),
@@ -122,11 +122,11 @@ int main(string arg) {
 
     hawk->move(environment(player));
 
-    write(hawk->query_cap_name() + " has bonded with you. It will follow\n"
-          "you and obey SAY commands.\n\n"
-          "Try: say " + hawk->query_name() + " follow\n"
-          "     say " + hawk->query_name() + " scout north\n"
-          "     say " + hawk->query_name() + " attack <target>\n"
+    write(hawk->query_cap_name() + " has bonded with you. It will follow\n" +
+          "you and obey SAY commands.\n\n" +
+          "Try: say " + hawk->query_name() + " follow\n" +
+          "     say " + hawk->query_name() + " scout north\n" +
+          "     say " + hawk->query_name() + " attack <target>\n" +
           "Type 'help falconry' for full command list.\n\n");
 
     destruct(egg);
@@ -134,14 +134,13 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"HATCH - Hatch a hawk or falcon egg\n\n"
-"Usage:\n"
-"  hatch            Hatch the first egg in your inventory\n"
-"  hatch egg        Same as above\n"
-"  hatch hawk egg   Hatch a specific egg by name\n\n"
-"Hold the egg against your body to warm it. Success depends on\n"
-"your Falconry skill percentage. A failed hatch destroys the egg.\n\n"
-"Eggs are obtained by trading with Aldric at the New Camelot falconer.\n"
+    return "HATCH - Hatch a hawk or falcon egg\n\n" +
+"Usage:\n" +
+"  hatch            Hatch the first egg in your inventory\n" +
+"  hatch egg        Same as above\n" +
+"  hatch hawk egg   Hatch a specific egg by name\n\n" +
+"Hold the egg against your body to warm it. Success depends on\n" +
+"your Falconry skill percentage. A failed hatch destroys the egg.\n\n" +
+"Eggs are obtained by trading with Aldric at the New Camelot falconer.\n" +
 "See also: help falconry, help falconer, help pets\n";
 }

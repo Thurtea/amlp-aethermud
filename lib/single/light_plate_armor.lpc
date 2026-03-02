@@ -10,9 +10,9 @@ void create() {
     set_id_alt("plate");
     set_short("light mega-damage plate armor");
     set_long(
-        "A suit of light combat plate armor constructed from mega-damage ceramics "
-        "and reinforced polymers. Rated at 70 M.D.C., it offers excellent protection "
-        "without sacrificing mobility. Standard gear for mercenaries and adventurers "
+        "A suit of light combat plate armor constructed from mega-damage ceramics " +
+        "and reinforced polymers. Rated at 70 M.D.C., it offers excellent protection " +
+        "without sacrificing mobility. Standard gear for mercenaries and adventurers " +
         "who cannot afford heavier environmental armor.\n"
     );
 

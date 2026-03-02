@@ -16,14 +16,14 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Gargoyles are imposing supernatural beings standing six to eight feet tall, "
-        "with thick stone-like skin, powerful bat-like wings, curved horns, and "
-        "glowing red or amber eyes. Their bodies are living stone, granting them "
-        "incredible natural armor that can withstand mega-damage weapons and energy "
-        "blasts. Gargoyles are capable of sustained flight and possess supernatural "
-        "strength that makes them devastating in close combat. Though often perceived "
-        "as slow and brutish, gargoyles have a complex warrior culture with codes of "
-        "honor and fierce loyalty to their clans. On Rifts Earth, they are feared as "
+        "Gargoyles are imposing supernatural beings standing six to eight feet tall, " +
+        "with thick stone-like skin, powerful bat-like wings, curved horns, and " +
+        "glowing red or amber eyes. Their bodies are living stone, granting them " +
+        "incredible natural armor that can withstand mega-damage weapons and energy " +
+        "blasts. Gargoyles are capable of sustained flight and possess supernatural " +
+        "strength that makes them devastating in close combat. Though often perceived " +
+        "as slow and brutish, gargoyles have a complex warrior culture with codes of " +
+        "honor and fierce loyalty to their clans. On Rifts Earth, they are feared as " +
         "aerial predators and respected as nearly indestructible shock troops."
     );
 

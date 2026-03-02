@@ -14,14 +14,14 @@ void create() {
 
     set_short("Rocky's Bar");
     set_long(
-        "A low-ceilinged room carved from raw stone and lit by sputtering\n"
-        "bio-luminescent tubes that cast everything in a sickly green glow.\n"
-        "Mismatched stools line a bar of scarred duralloy plate. The shelves\n"
-        "behind the counter hold bottles of shapes and colors that suggest\n"
-        "origins in several different dimensions. The air smells of spilled\n"
-        "alcohol, ozone, and something organic that does not bear thinking\n"
-        "about. A handwritten sign above the bar reads:\n"
-        "  NO MAGIC. NO CREDIT. NO EXCEPTIONS.\n"
+        "A low-ceilinged room carved from raw stone and lit by sputtering\n" +
+        "bio-luminescent tubes that cast everything in a sickly green glow.\n" +
+        "Mismatched stools line a bar of scarred duralloy plate. The shelves\n" +
+        "behind the counter hold bottles of shapes and colors that suggest\n" +
+        "origins in several different dimensions. The air smells of spilled\n" +
+        "alcohol, ozone, and something organic that does not bear thinking\n" +
+        "about. A handwritten sign above the bar reads:\n" +
+        "  NO MAGIC. NO CREDIT. NO EXCEPTIONS.\n" +
         "The roar of the Splynn market can be heard to the north.\n"
     );
 

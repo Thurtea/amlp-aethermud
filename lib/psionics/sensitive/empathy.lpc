@@ -14,9 +14,9 @@ void create() {
     
     set_short("an empathy psionic power");
     set_long(
-        "Empathy allows the psychic to sense the emotions and feelings of "
-        "others. Can detect truthfulness, hostility, fear, love, hate, and "
-        "other strong emotions. Range is 100 feet. Cannot be blocked by "
+        "Empathy allows the psychic to sense the emotions and feelings of " +
+        "others. Can detect truthfulness, hostility, fear, love, hate, and " +
+        "other strong emotions. Range is 100 feet. Cannot be blocked by " +
         "normal means. Lasts 2 minutes per level. Costs 4 I.S.P. to use."
     );
     

@@ -61,10 +61,9 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"REMEMBER - Remember someone's introduction\n\n"
-"Usage:\n"
-"  remember <name>        Commit someone's name to permanent memory\n\n"
-"When someone introduces themselves to you, use this command\n"
+    return "REMEMBER - Remember someone's introduction\n\n" +
+"Usage:\n" +
+"  remember <name>        Commit someone's name to permanent memory\n\n" +
+"When someone introduces themselves to you, use this command\n" +
 "to remember their name even after logging out.\n";
 }

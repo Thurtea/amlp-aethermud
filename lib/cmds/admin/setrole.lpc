@@ -2,15 +2,12 @@
 // setrole - assign a wizard role to a promoted wizard
 // Admin-only command (privilege level 2)
 
-#include <mudlib.h>
-
 inherit "/std/cmd";
 
 int query_privilege_required() { return 4; }
 
 string query_help() {
-    return
-        "SYNTAX: setrole <player> <role>\n\n" +
+    return "SYNTAX: setrole <player> <role>\n\n" +
         "Assigns a wizard role to a promoted wizard.\n" +
         "Valid roles: admin, domain, coding, rp\n\n" +
         "The player must already be a wizard (privilege level >= 1).\n" +

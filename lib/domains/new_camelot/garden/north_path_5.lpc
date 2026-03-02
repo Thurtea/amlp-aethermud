@@ -4,7 +4,7 @@ void create() {
     ::create();
     set_short("Garden Pathway - North 5");
     set_long(
-        "You reach a small clearing where the path bends and returns toward the garden center.\n"
+        "You reach a small clearing where the path bends and returns toward the garden center.\n" +
         "A sense of enclosure makes this spot feel like the furthest point from town."
     );
 

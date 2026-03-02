@@ -14,8 +14,8 @@ void create() {
     set_related_languages(({ "faerie", "sylvan" }));
     
     set_short("Elven language");
-    set_long("The language of the True Elves who returned to Earth through "
-             "the Rifts. Elven is an ancient and melodic language with "
-             "complex grammar and many words that have no equivalent in "
+    set_long("The language of the True Elves who returned to Earth through " +
+             "the Rifts. Elven is an ancient and melodic language with " +
+             "complex grammar and many words that have no equivalent in " +
              "human tongues. It is closely related to other Fae languages.");
 }

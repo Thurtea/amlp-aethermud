@@ -118,15 +118,14 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"GIVE - Give items to other players\n\n"
-"Usage:\n"
-"  give <item> <player>       Give item to player\n"
-"  give <item> to <player>    Alternative syntax\n\n"
-"Examples:\n"
-"  give sword guard\n"
-"  give potion to wizard\n\n"
-"The target must be in the same room and able to carry\n"
-"the item's weight. Some items cannot be given away.\n\n"
+    return "GIVE - Give items to other players\n\n" +
+"Usage:\n" +
+"  give <item> <player>       Give item to player\n" +
+"  give <item> to <player>    Alternative syntax\n\n" +
+"Examples:\n" +
+"  give sword guard\n" +
+"  give potion to wizard\n\n" +
+"The target must be in the same room and able to carry\n" +
+"the item's weight. Some items cannot be given away.\n\n" +
 "See also: GET, DROP, TRADE\n";
 }

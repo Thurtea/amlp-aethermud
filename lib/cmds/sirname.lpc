@@ -172,20 +172,19 @@ int grant_sirname(object wiz, string target_name, string title) {
 }
 
 string query_help() {
-    return
-"SIRNAME - Honorific Title System\n\n"
-"Player Usage (Level 10+):\n"
-"  sirname              - View your current sirname\n"
-"  sirname <title>      - Request a sirname from staff\n\n"
-"Wizard Usage:\n"
-"  sirname <player> <title>  - Grant a sirname to a player\n\n"
-"When a player requests a sirname, all online staff receive a\n"
-"[Staff] notification. A wizard then grants it with:\n"
-"  sirname PlayerName Lord\n\n"
-"The sirname appears before the player's name:\n"
-"  Lord PlayerName is standing around.\n\n"
-"Examples:\n"
-"  sirname Lord          - Request 'Lord' as your sirname\n"
-"  sirname Thurtea Lord  - (Wizard) Grant 'Lord' to Thurtea\n\n"
+    return "SIRNAME - Honorific Title System\n\n" +
+"Player Usage (Level 10+):\n" +
+"  sirname              - View your current sirname\n" +
+"  sirname <title>      - Request a sirname from staff\n\n" +
+"Wizard Usage:\n" +
+"  sirname <player> <title>  - Grant a sirname to a player\n\n" +
+"When a player requests a sirname, all online staff receive a\n" +
+"[Staff] notification. A wizard then grants it with:\n" +
+"  sirname PlayerName Lord\n\n" +
+"The sirname appears before the player's name:\n" +
+"  Lord PlayerName is standing around.\n\n" +
+"Examples:\n" +
+"  sirname Lord          - Request 'Lord' as your sirname\n" +
+"  sirname Thurtea Lord  - (Wizard) Grant 'Lord' to Thurtea\n\n" +
 "Titles must be 2-20 characters, letters and spaces only.\n";
 }

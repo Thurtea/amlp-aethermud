@@ -17,16 +17,16 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Minions are minor supernatural entities brought into existence through "
-        "summoning rituals, dark pacts, or the sheer will of greater supernatural "
-        "beings who require expendable servants. They range in size from three to "
-        "six feet tall and take on a bewildering variety of forms, from hunched "
-        "imp-like creatures with leathery wings to faceless humanoid shapes made "
-        "of solidified shadow. All minions share a fundamental connection to their "
-        "creator or summoner, possessing a moderate degree of intelligence and a "
-        "natural resistance to magical effects. Those whose masters are destroyed "
-        "or who break free of their binding sometimes wander Rifts Earth as "
-        "independent beings, though they are rarely trusted and always viewed "
+        "Minions are minor supernatural entities brought into existence through " +
+        "summoning rituals, dark pacts, or the sheer will of greater supernatural " +
+        "beings who require expendable servants. They range in size from three to " +
+        "six feet tall and take on a bewildering variety of forms, from hunched " +
+        "imp-like creatures with leathery wings to faceless humanoid shapes made " +
+        "of solidified shadow. All minions share a fundamental connection to their " +
+        "creator or summoner, possessing a moderate degree of intelligence and a " +
+        "natural resistance to magical effects. Those whose masters are destroyed " +
+        "or who break free of their binding sometimes wander Rifts Earth as " +
+        "independent beings, though they are rarely trusted and always viewed " +
         "with suspicion by mortal and supernatural beings alike."
     );
 

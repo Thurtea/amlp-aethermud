@@ -16,13 +16,13 @@ void create() {
 
     set_short("Serena's Parlor");
     set_long(
-        "A candlelit alcove draped in deep violet and black silks, hidden from\n"
-        "the roar of the Splynn market by a heavy curtain. Tall pillar candles\n"
-        "burn at the corners of a circular table of polished black glass that\n"
-        "reflects the flames in wavering doubles. The air is thick with incense --\n"
-        "night blossoms and something faintly electric. A bronze censer on a\n"
-        "wrought-iron stand releases slow curls of smoke that never quite settle.\n"
-        "Serena the Psi-Sensitive sits at the table, her pale eyes half-closed.\n"
+        "A candlelit alcove draped in deep violet and black silks, hidden from\n" +
+        "the roar of the Splynn market by a heavy curtain. Tall pillar candles\n" +
+        "burn at the corners of a circular table of polished black glass that\n" +
+        "reflects the flames in wavering doubles. The air is thick with incense --\n" +
+        "night blossoms and something faintly electric. A bronze censer on a\n" +
+        "wrought-iron stand releases slow curls of smoke that never quite settle.\n" +
+        "Serena the Psi-Sensitive sits at the table, her pale eyes half-closed.\n" +
         "Cushioned chairs ring the table. The market floor lies to the east.\n"
     );
 
@@ -94,15 +94,15 @@ int local_command(string verb, string args) {
 
         if (!target) {
             tell_object(player,
-                "Serena presses her fingertips to her temples. After a long\n"
-                "moment she opens her eyes and shakes her head slowly.\n"
+                "Serena presses her fingertips to her temples. After a long\n" +
+                "moment she opens her eyes and shakes her head slowly.\n" +
                 "\"That one is not present in this world. I cannot reach them.\"\n");
             return 1;
         }
 
         if (target == player) {
             tell_object(player,
-                "Serena raises an eyebrow. \"You wish to see yourself?\"\n"
+                "Serena raises an eyebrow. \"You wish to see yourself?\"\n" +
                 "She gestures toward a fold in the silk. \"Try a mirror, dear.\"\n");
             return 1;
         }
@@ -115,7 +115,7 @@ int local_command(string verb, string args) {
 
         if (have < cost) {
             tell_object(player,
-                "Serena says: \"Five hundred credits for the sight.\n"
+                "Serena says: \"Five hundred credits for the sight.\n" +
                 "You carry only " + have + ". Return when you have the coin.\"\n");
             return 1;
         }
@@ -143,19 +143,19 @@ int local_command(string verb, string args) {
 
         /* Vision output */
         tell_object(player,
-            "\nSerena places both palms flat on the black glass table. The candles\n"
-            "gutter and dim. A chill passes through the air. Her eyes go wide and\n"
+            "\nSerena places both palms flat on the black glass table. The candles\n" +
+            "gutter and dim. A chill passes through the air. Her eyes go wide and\n" +
             "blank -- and then the vision comes to you as well, unbidden:\n\n");
 
         tell_object(player,
-            "=== Remote Vision: " + target_cap + " ===\n\n"
+            "=== Remote Vision: " + target_cap + " ===\n\n" +
             "Location: " + room_name + "\n\n");
 
         tell_object(player, room_desc + "\n");
 
         tell_object(player,
-            "\n=== The vision fades ===\n\n"
-            "The candles brighten again. Serena exhales slowly.\n"
+            "\n=== The vision fades ===\n\n" +
+            "The candles brighten again. Serena exhales slowly.\n" +
             "\"You have seen. Five hundred credits, as agreed.\"\n\n");
 
         /* Broadcast to others in the parlor */
@@ -204,8 +204,8 @@ int local_command(string verb, string args) {
             }
             if (found) {
                 tell_object(player,
-                    "Serena's pale eyes drift to you. She speaks in a low, clear voice.\n"
-                    "\"Five hundred credits. Speak 'remoteview <name>' and I will\n"
+                    "Serena's pale eyes drift to you. She speaks in a low, clear voice.\n" +
+                    "\"Five hundred credits. Speak 'remoteview <name>' and I will\n" +
                     "show you where they walk in this world.\"\n");
             }
         }

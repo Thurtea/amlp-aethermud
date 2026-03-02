@@ -10,8 +10,8 @@ void create() {
     set_id(({"armor", "light armor", "light", "vest"}));
     set_short("light combat armor");
     set_long(
-        "This is a set of lightweight combat armor, consisting of a reinforced vest "
-        "and protective padding. It offers basic protection without significantly "
+        "This is a set of lightweight combat armor, consisting of a reinforced vest " +
+        "and protective padding. It offers basic protection without significantly " +
         "restricting movement. Ideal for scouts and those who value mobility.\n"
     );
     

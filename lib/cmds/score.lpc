@@ -21,8 +21,7 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"SCORE - Show your character statistics\n\n"
-"This is an alias for the STATS command.\n\n"
+    return "SCORE - Show your character statistics\n\n" +
+"This is an alias for the STATS command.\n\n" +
 "See also: STATS, SKILLS, EQUIPMENT\n";
 }

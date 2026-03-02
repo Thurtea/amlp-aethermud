@@ -10,9 +10,9 @@ void create() {
     set_skill_id("pilot_automobile");
     set_skill_name("Pilot Automobile");
     set_skill_desc(
-        "The ability to operate standard ground vehicles including cars, "
-        "trucks, and motorcycles. Includes knowledge of traffic laws, "
-        "emergency maneuvers, and basic maintenance. Most people have "
+        "The ability to operate standard ground vehicles including cars, " +
+        "trucks, and motorcycles. Includes knowledge of traffic laws, " +
+        "emergency maneuvers, and basic maintenance. Most people have " +
         "this skill even in the post-apocalyptic world."
     );
     set_skill_category("pilot");

@@ -61,14 +61,13 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"EVAL - Load and optionally call a method on an LPC object\n\n"
-"Usage:\n"
-"  eval <lpc_path>             Load/recompile the object\n"
-"  eval <lpc_path>-><method>   Load and call a zero-arg method\n\n"
-"Examples:\n"
-"  eval /lib/daemon/skills\n"
-"  eval /lib/daemon/skills->query_skill_list\n"
-"  eval /lib/std/object\n\n"
+    return "EVAL - Load and optionally call a method on an LPC object\n\n" +
+"Usage:\n" +
+"  eval <lpc_path>             Load/recompile the object\n" +
+"  eval <lpc_path>-><method>   Load and call a zero-arg method\n\n" +
+"Examples:\n" +
+"  eval /lib/daemon/skills\n" +
+"  eval /lib/daemon/skills->query_skill_list\n" +
+"  eval /lib/std/object\n\n" +
 "Requires wizard or admin privileges.\n";
 }

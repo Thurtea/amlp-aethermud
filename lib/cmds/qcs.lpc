@@ -24,8 +24,7 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-        "QCS - Quick Creation System\n\n" +
+    return "QCS - Quick Creation System\n\n" +
         "Usage: qcs [subcommand]\n\n" +
         "  qcs                     Open creation menu\n" +
         "  qcs create <type> <name>  Create room/npc/weapon/armor/item\n" +

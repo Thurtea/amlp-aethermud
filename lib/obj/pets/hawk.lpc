@@ -49,10 +49,10 @@ void _apply_tier() {
         set_id(({ "falcon", "bird", "raptor", "peregrine", "pet falcon" }));
         set_short("a sleek peregrine falcon");
         set_long(
-            "A magnificent peregrine falcon -- nature's fastest predator. "
-            "Its slate-blue back and cream-barred chest shimmer with "
-            "restrained power. The bird's dark eyes miss nothing, and a "
-            "braided jess on its leg marks it as a trained companion. Even "
+            "A magnificent peregrine falcon -- nature's fastest predator. " +
+            "Its slate-blue back and cream-barred chest shimmer with " +
+            "restrained power. The bird's dark eyes miss nothing, and a " +
+            "braided jess on its leg marks it as a trained companion. Even " +
             "at rest it radiates lethal capability.\n"
         );
         set_level(7);
@@ -76,10 +76,10 @@ void _apply_tier() {
         set_id(({ "master hawk", "hawk", "bird", "raptor", "pet hawk" }));
         set_short("a powerful master hawk");
         set_long(
-            "A large and formidable hunting hawk with dark amber plumage "
-            "and golden eyes that reflect sharp intelligence. Its talons "
-            "are noticeably larger than those of a common hawk. A braided "
-            "leather jess marks it as a trained companion. The bird carries "
+            "A large and formidable hunting hawk with dark amber plumage " +
+            "and golden eyes that reflect sharp intelligence. Its talons " +
+            "are noticeably larger than those of a common hawk. A braided " +
+            "leather jess marks it as a trained companion. The bird carries " +
             "itself with calm authority.\n"
         );
         set_level(5);
@@ -104,9 +104,9 @@ void _apply_tier() {
         set_id(({ "hawk", "bird", "raptor", "pet hawk" }));
         set_short("a hunting hawk");
         set_long(
-            "A sleek hunting hawk with sharp talons and piercing amber "
-            "eyes. Its brown-and-white plumage is well-groomed and it "
-            "watches you with keen intelligence. A leather jess on its "
+            "A sleek hunting hawk with sharp talons and piercing amber " +
+            "eyes. Its brown-and-white plumage is well-groomed and it " +
+            "watches you with keen intelligence. A leather jess on its " +
             "leg marks it as a trained hunting bird.\n"
         );
         set_level(3);
@@ -239,7 +239,7 @@ void do_fly(string *words) {
     tell_object(owner,
                 query_cap_name() + " takes flight, circling overhead!");
     tell_room(environment(owner),
-              query_cap_name() + " takes to the air with a powerful beat "
+              query_cap_name() + " takes to the air with a powerful beat " +
               "of its wings!",
               ({ owner }));
 }
@@ -281,7 +281,7 @@ void do_scout(string *words) {
 
     if (!dest) {
         tell_object(owner,
-                    query_cap_name() + " ruffles its feathers -- there is "
+                    query_cap_name() + " ruffles its feathers -- there is " +
                     "nothing to the " + dir + ".");
         return;
     }
@@ -431,7 +431,7 @@ void _finish_hunt(object owner) {
         tell_object(owner,
                     query_cap_name() + " dives and snatches a rabbit!");
         tell_room(environment(owner),
-                  query_cap_name() + " dives and emerges with a rabbit in "
+                  query_cap_name() + " dives and emerges with a rabbit in " +
                   "its talons!",
                   ({ owner }));
     } else {

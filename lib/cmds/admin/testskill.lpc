@@ -113,24 +113,23 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"TESTSKILL - Test skill check mechanics (Debug command)\n\n"
-"Usage:\n"
-"  testskill <skill name>\n\n"
-"Description:\n"
-"  Performs a Palladium-style skill check for debugging purposes.\n"
-"  Rolls d100 and compares to your skill value.\n"
-"  Success if roll <= skill value.\n"
-"  Rolls of 96-100 are critical failures (always fail).\n\n"
-"Color coding:\n"
-"  " + ANSI_GREEN + "Green" + ANSI_RESET + "  = Success\n"
-"  " + ANSI_YELLOW + "Yellow" + ANSI_RESET + " = Normal failure\n"
-"  " + ANSI_RED + "Red" + ANSI_RESET + "    = Critical failure\n\n"
-"Examples:\n"
-"  testskill Hand to Hand\n"
-"  testskill Literacy\n"
-"  testskill Pilot Automobile\n\n"
-"This command is for testing and debugging only.\n"
-"Wizard/Admin access required.\n\n"
+    return "TESTSKILL - Test skill check mechanics (Debug command)\n\n" +
+"Usage:\n" +
+"  testskill <skill name>\n\n" +
+"Description:\n" +
+"  Performs a Palladium-style skill check for debugging purposes.\n" +
+"  Rolls d100 and compares to your skill value.\n" +
+"  Success if roll <= skill value.\n" +
+"  Rolls of 96-100 are critical failures (always fail).\n\n" +
+"Color coding:\n" +
+"  " + ANSI_GREEN + "Green" + ANSI_RESET + "  = Success\n" +
+"  " + ANSI_YELLOW + "Yellow" + ANSI_RESET + " = Normal failure\n" +
+"  " + ANSI_RED + "Red" + ANSI_RESET + "    = Critical failure\n\n" +
+"Examples:\n" +
+"  testskill Hand to Hand\n" +
+"  testskill Literacy\n" +
+"  testskill Pilot Automobile\n\n" +
+"This command is for testing and debugging only.\n" +
+"Wizard/Admin access required.\n\n" +
 "See also: skills, score\n";
 }

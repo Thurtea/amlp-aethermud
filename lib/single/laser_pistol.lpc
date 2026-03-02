@@ -8,8 +8,8 @@ void create() {
     set_id_alt("laser");
     set_short("a laser pistol");
     set_long(
-        "This is a standard Coalition-issue laser pistol. It fires concentrated "
-        "beams of coherent light that deal mega-damage. The weapon has a digital "
+        "This is a standard Coalition-issue laser pistol. It fires concentrated " +
+        "beams of coherent light that deal mega-damage. The weapon has a digital " +
         "ammo counter that shows 20 shots remaining in its E-clip.\n"
     );
     

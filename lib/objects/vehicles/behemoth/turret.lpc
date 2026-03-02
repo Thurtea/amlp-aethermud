@@ -12,14 +12,14 @@ void create() {
     
     set_short("the turret gunner station of the EX-5 Behemoth");
     set_long(
-        "This cramped weapons station sits atop the Behemoth, giving a commanding view "
-        "of the surrounding terrain through 360-degree viewports. The dual laser cannons "
-        "are controlled from a targeting seat with joystick controls and a heads-up "
-        "targeting display.\n\n"
-        "Ammunition feeds and power conduits snake through the tight space. The smell "
-        "of ozone and hot metal fills the air. Red warning lights indicate weapon "
-        "status, and a small screen shows the view from the cockpit.\n\n"
-        "A hatch in the floor leads down to the cockpit. In an emergency, the turret "
+        "This cramped weapons station sits atop the Behemoth, giving a commanding view " +
+        "of the surrounding terrain through 360-degree viewports. The dual laser cannons " +
+        "are controlled from a targeting seat with joystick controls and a heads-up " +
+        "targeting display.\n\n" +
+        "Ammunition feeds and power conduits snake through the tight space. The smell " +
+        "of ozone and hot metal fills the air. Red warning lights indicate weapon " +
+        "status, and a small screen shows the view from the cockpit.\n\n" +
+        "A hatch in the floor leads down to the cockpit. In an emergency, the turret " +
         "can operate independently of the main vehicle systems."
     );
     
@@ -29,7 +29,7 @@ void create() {
     
     set_items(([
         ({"lasers", "cannons", "weapons", "dual lasers"}) :
-            "Twin NG-L5 laser cannons mounted on motorized gimbals. Each fires 3d6 MD "
+            "Twin NG-L5 laser cannons mounted on motorized gimbals. Each fires 3d6 MD " +
             "per blast with unlimited ammunition (powered by vehicle reactor).",
         ({"targeting seat", "gunner seat", "controls"}) :
             "The gunner's seat with full targeting controls, joystick, and HUD display.",

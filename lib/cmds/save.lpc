@@ -15,10 +15,9 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"SAVE - Save your character\n\n"
-"Usage:\n"
-"  save                   Save your character data to disk\n\n"
-"Your character is also saved automatically on logout and\n"
+    return "SAVE - Save your character\n\n" +
+"Usage:\n" +
+"  save                   Save your character data to disk\n\n" +
+"Your character is also saved automatically on logout and\n" +
 "periodically during play. Use this command to save manually.\n";
 }

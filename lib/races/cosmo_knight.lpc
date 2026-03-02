@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Cosmo-Knights are mortal beings who have been chosen and empowered by "
-        "the mysterious Cosmic Forge to serve as champions of justice throughout "
-        "the Megaverse. They are imbued with vast cosmic energies that grant them "
-        "superhuman strength, the ability to fly through space, and devastating "
-        "energy blasts. Each Cosmo-Knight is effectively immortal and does not "
-        "age, though they can be slain in battle. They are bound by a strict "
-        "code of honor and must uphold justice wherever they travel, or risk "
+        "Cosmo-Knights are mortal beings who have been chosen and empowered by " +
+        "the mysterious Cosmic Forge to serve as champions of justice throughout " +
+        "the Megaverse. They are imbued with vast cosmic energies that grant them " +
+        "superhuman strength, the ability to fly through space, and devastating " +
+        "energy blasts. Each Cosmo-Knight is effectively immortal and does not " +
+        "age, though they can be slain in battle. They are bound by a strict " +
+        "code of honor and must uphold justice wherever they travel, or risk " +
         "losing their cosmic powers entirely."
     );
 
@@ -75,7 +75,7 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Cosmo-Knights are a full Racial Character Class. Their cosmic powers "
+        "Cosmo-Knights are a full Racial Character Class. Their cosmic powers " +
         "replace any OCC training."
     );
 

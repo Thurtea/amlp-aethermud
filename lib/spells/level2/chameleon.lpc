@@ -15,9 +15,9 @@ void create() {
     
     set_short("a chameleon spell");
     set_long(
-        "Chameleon causes the caster's body to change color and blend into "
-        "their surroundings, making them much harder to see. The spell grants "
-        "+6 to prowl skill and opponents are -6 to strike in combat. The effect "
+        "Chameleon causes the caster's body to change color and blend into " +
+        "their surroundings, making them much harder to see. The spell grants " +
+        "+6 to prowl skill and opponents are -6 to strike in combat. The effect " +
         "lasts 3 minutes per level. Costs 6 P.P.E. to cast."
     );
     

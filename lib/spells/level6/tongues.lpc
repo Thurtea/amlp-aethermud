@@ -13,16 +13,16 @@ void create() {
     set_spell_id("tongues");
     set_spell_name("Tongues");
     set_spell_desc(
-        "One of the most valuable spells for travelers and diplomats, "
-        "Tongues grants the caster the ability to understand and speak "
-        "any spoken language for the duration of the spell. This includes "
-        "all mortal languages, as well as the languages of supernatural "
-        "beings (though demons and dragons may notice the magical nature "
-        "of the communication). The spell does not grant literacy - the "
-        "caster can speak and understand, but cannot read or write in "
-        "languages they don't know.\n\n"
-        "While under the effect of Tongues, the caster understands all "
-        "speech as if spoken in their native language, and their own "
+        "One of the most valuable spells for travelers and diplomats, " +
+        "Tongues grants the caster the ability to understand and speak " +
+        "any spoken language for the duration of the spell. This includes " +
+        "all mortal languages, as well as the languages of supernatural " +
+        "beings (though demons and dragons may notice the magical nature " +
+        "of the communication). The spell does not grant literacy - the " +
+        "caster can speak and understand, but cannot read or write in " +
+        "languages they don't know.\n\n" +
+        "While under the effect of Tongues, the caster understands all " +
+        "speech as if spoken in their native language, and their own " +
         "speech is automatically understood by all listeners."
     );
     
@@ -54,9 +54,9 @@ int apply_effect(object caster, object target) {
     caster->set_property("tongues_duration", duration_minutes);
     
     tell_object(caster,
-        "You speak the words of power and feel your mind expand.\n"
-        "A warm sensation spreads through your ears and throat.\n"
-        "You can now understand and speak all languages!\n"
+        "You speak the words of power and feel your mind expand.\n" +
+        "A warm sensation spreads through your ears and throat.\n" +
+        "You can now understand and speak all languages!\n" +
         "Duration: " + duration_minutes + " minutes.\n");
     
     /* Notify room */

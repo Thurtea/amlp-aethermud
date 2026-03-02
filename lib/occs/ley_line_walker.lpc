@@ -17,15 +17,15 @@ void create() {
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Ley Line Walkers are sorcerers who have learned to sense and tap into "
-        "the vast magical power networks known as ley lines. These magical highways "
-        "crisscross the landscape of Rifts Earth, and those who understand them "
-        "can access tremendous magical power. Ley Line Walkers learn to recognize "
-        "ley line locations, draw power from them for spellcasting, and eventually "
-        "master the art of ley line walking - using the lines themselves as conduits "
-        "for rapid, near-instantaneous travel. They are typically scholarly in nature, "
-        "preferring to research and understand magic rather than engage in combat. "
-        "However, their command of magical power makes them formidable opponents when "
+        "Ley Line Walkers are sorcerers who have learned to sense and tap into " +
+        "the vast magical power networks known as ley lines. These magical highways " +
+        "crisscross the landscape of Rifts Earth, and those who understand them " +
+        "can access tremendous magical power. Ley Line Walkers learn to recognize " +
+        "ley line locations, draw power from them for spellcasting, and eventually " +
+        "master the art of ley line walking - using the lines themselves as conduits " +
+        "for rapid, near-instantaneous travel. They are typically scholarly in nature, " +
+        "preferring to research and understand magic rather than engage in combat. " +
+        "However, their command of magical power makes them formidable opponents when " +
         "forced to fight."
     );
     

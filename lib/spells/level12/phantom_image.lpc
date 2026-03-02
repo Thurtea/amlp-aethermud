@@ -9,13 +9,13 @@ void create() {
     set_spell_id("phantom_image");
     set_spell_name("Phantom Image");
     set_spell_desc(
-        "The mage creates a fully convincing illusion of any person, creature, "
-        "or object up to 20 feet tall. Unlike lesser illusions, the Phantom "
-        "Image can move, speak in simple phrases, and react to stimuli in a "
-        "convincing manner. Observers must make a save vs magic at -2 to see "
-        "through the illusion. The image has no physical substance and cannot "
-        "cause real harm, but the mage can direct its actions and have it "
-        "deliver messages, issue threats, or draw attention. Lasts 4 minutes "
+        "The mage creates a fully convincing illusion of any person, creature, " +
+        "or object up to 20 feet tall. Unlike lesser illusions, the Phantom " +
+        "Image can move, speak in simple phrases, and react to stimuli in a " +
+        "convincing manner. Observers must make a save vs magic at -2 to see " +
+        "through the illusion. The image has no physical substance and cannot " +
+        "cause real harm, but the mage can direct its actions and have it " +
+        "deliver messages, issue threats, or draw attention. Lasts 4 minutes " +
         "per level or until the caster breaks concentration."
     );
 
@@ -45,9 +45,9 @@ int apply_effect(object caster, object target) {
     caster->set_property("phantom_image_active", 1);
 
     tell_object(caster,
-        "You weave light and shadow into a convincing phantom. A fully "
-        "realized image springs into existence nearby, under your mental "
-        "direction. It can move, speak, and react as you will.\n"
+        "You weave light and shadow into a convincing phantom. A fully " +
+        "realized image springs into existence nearby, under your mental " +
+        "direction. It can move, speak, and react as you will.\n" +
         "Duration: " + (level * 4) + " minutes\n");
 
     object env = environment(caster);
@@ -55,7 +55,7 @@ int apply_effect(object caster, object target) {
         foreach (object ob : all_inventory(env)) {
             if (ob != caster && living(ob)) {
                 tell_object(ob,
-                    "A realistic-looking figure materializes nearby! "
+                    "A realistic-looking figure materializes nearby! " +
                     "It looks startlingly real.\n");
             }
         }

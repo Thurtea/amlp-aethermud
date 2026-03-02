@@ -14,9 +14,8 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"STAND - Stand up\n\n"
-"Usage:\n"
-"  stand                  Stand up from a sitting or resting position\n\n"
+    return "STAND - Stand up\n\n" +
+"Usage:\n" +
+"  stand                  Stand up from a sitting or resting position\n\n" +
 "You must be standing to move or fight effectively.\n";
 }

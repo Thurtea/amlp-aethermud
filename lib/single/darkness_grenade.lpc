@@ -10,11 +10,11 @@ void create() {
     set_id_alt("darkness");
     set_short("a darkness grenade");
     set_long(
-        "A smooth obsidian sphere etched with Atlantean rune-script. When "
-        "activated and thrown, it releases a cloud of supernatural darkness "
-        "that normal light and even night-vision optics cannot penetrate. "
-        "The darkness field lasts approximately one melee round (15 seconds) "
-        "and fills a 20-foot radius. Favored by Sunaj assassins for hit-and-fade "
+        "A smooth obsidian sphere etched with Atlantean rune-script. When " +
+        "activated and thrown, it releases a cloud of supernatural darkness " +
+        "that normal light and even night-vision optics cannot penetrate. " +
+        "The darkness field lasts approximately one melee round (15 seconds) " +
+        "and fills a 20-foot radius. Favored by Sunaj assassins for hit-and-fade " +
         "operations.\n"
     );
 

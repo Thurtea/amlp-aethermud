@@ -413,17 +413,16 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"SELECTSKILLS - Choose secondary skills for wizard assignment\n\n"
-"Usage:\n"
-"  selectskills              Browse all available skills (page 1)\n"
-"  selectskills page <N>     View page N of the skill list\n"
-"  selectskills add <N>      Add skill number N to your selections\n"
-"  selectskills remove <N>   Remove skill number N from selections\n"
-"  selectskills show         View your current selections\n"
-"  selectskills submit       Submit selections for wizard review\n"
-"  selectskills clear        Clear all selections\n\n"
-"Secondary skills supplement your OCC's primary skills.\n"
-"Once submitted, a wizard will review and assign them.\n\n"
+    return "SELECTSKILLS - Choose secondary skills for wizard assignment\n\n" +
+"Usage:\n" +
+"  selectskills              Browse all available skills (page 1)\n" +
+"  selectskills page <N>     View page N of the skill list\n" +
+"  selectskills add <N>      Add skill number N to your selections\n" +
+"  selectskills remove <N>   Remove skill number N from selections\n" +
+"  selectskills show         View your current selections\n" +
+"  selectskills submit       Submit selections for wizard review\n" +
+"  selectskills clear        Clear all selections\n\n" +
+"Secondary skills supplement your OCC's primary skills.\n" +
+"Once submitted, a wizard will review and assign them.\n\n" +
 "See also: SKILLS, SETOCC\n";
 }

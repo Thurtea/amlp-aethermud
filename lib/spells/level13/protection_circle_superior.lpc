@@ -9,13 +9,13 @@ void create() {
     set_spell_id("protection_circle_superior");
     set_spell_name("Protection Circle: Superior");
     set_spell_desc(
-        "A powerful warding circle drawn while reciting the invocation. "
-        "The superior protection circle prevents all supernatural creatures "
-        "from coming within 20 feet of its edge. Lesser beings cannot stand "
-        "within line of sight and are forced to flee. Greater beings are also "
-        "held at bay. All within the circle receive: +5 to save vs all magic "
-        "and psychic attacks, immunity to possession, +8 to save vs horror "
-        "factor, +10 PPE to each mage inside, and +10 ISP to each psychic. "
+        "A powerful warding circle drawn while reciting the invocation. " +
+        "The superior protection circle prevents all supernatural creatures " +
+        "from coming within 20 feet of its edge. Lesser beings cannot stand " +
+        "within line of sight and are forced to flee. Greater beings are also " +
+        "held at bay. All within the circle receive: +5 to save vs all magic " +
+        "and psychic attacks, immunity to possession, +8 to save vs horror " +
+        "factor, +10 PPE to each mage inside, and +10 ISP to each psychic. " +
         "Duration: 24 hours; can be reactivated at 20 PPE cost."
     );
 
@@ -48,15 +48,15 @@ int apply_effect(object caster, object target) {
     env->set_property("circle_expires", time() + 86400); // 24 hours
 
     tell_object(caster,
-        "You draw the superior protection circle while invoking the words of "
-        "warding. Runes glow along the circle's perimeter. A powerful ward "
-        "seals this area - supernatural evil cannot approach!\n"
-        "+5 to save vs magic/psychic, impervious to possession, +8 vs horror factor.\n"
+        "You draw the superior protection circle while invoking the words of " +
+        "warding. Runes glow along the circle's perimeter. A powerful ward " +
+        "seals this area - supernatural evil cannot approach!\n" +
+        "+5 to save vs magic/psychic, impervious to possession, +8 vs horror factor.\n" +
         "Duration: 24 hours.\n");
 
     tell_room(env,
         caster->query_cap_name() +
-        " draws a glowing circle of protection! Runes blaze along its edge "
+        " draws a glowing circle of protection! Runes blaze along its edge " +
         "as a powerful ward fills the area.\n",
         ({ caster }));
 
@@ -64,7 +64,7 @@ int apply_effect(object caster, object target) {
     foreach (object ob : all_inventory(env)) {
         if (living(ob) && ob != caster) {
             tell_object(ob,
-                "You feel a surge of arcane energy as the protection circle "
+                "You feel a surge of arcane energy as the protection circle " +
                 "is completed around you!\n");
         }
     }

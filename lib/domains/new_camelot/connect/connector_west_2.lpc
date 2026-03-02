@@ -4,7 +4,7 @@ void create() {
     ::create();
     set_short("Gatehouse path to the garden");
     set_long(
-        "A narrow path that passes a small gatehouse; beyond the gate a scent of flowers hangs in the air.\n"
+        "A narrow path that passes a small gatehouse; beyond the gate a scent of flowers hangs in the air.\n" +
         "A short westward step will bring you into a hidden garden."
     );
 

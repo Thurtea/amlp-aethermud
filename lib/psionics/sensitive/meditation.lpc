@@ -10,14 +10,14 @@ void create() {
     set_power_id("meditation");
     set_power_name("Meditation");
     set_power_desc(
-        "The psychic enters a deep meditative state, channeling the ambient "
-        "psionic energy of the world to replenish their Inner Strength Pool. "
-        "While meditating, the psychic is aware of their surroundings at a "
-        "basic level but cannot take other actions. ISP recovers at twice "
-        "the normal rate during meditation. A skilled psychic can meditate "
-        "for hours, restoring their full ISP in half the usual time.\n\n"
-        "Range: Self\n"
-        "ISP Cost: 0 points (restores ISP)\n"
+        "The psychic enters a deep meditative state, channeling the ambient " +
+        "psionic energy of the world to replenish their Inner Strength Pool. " +
+        "While meditating, the psychic is aware of their surroundings at a " +
+        "basic level but cannot take other actions. ISP recovers at twice " +
+        "the normal rate during meditation. A skilled psychic can meditate " +
+        "for hours, restoring their full ISP in half the usual time.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 0 points (restores ISP)\n" +
         "Duration: Maintained (active recovery)"
     );
     set_power_category("sensitive");
@@ -33,7 +33,7 @@ int apply_effect(object user, object target) {
     if (user->query_property("meditating")) {
         // End meditation
         user->set_property("meditating", 0);
-        tell_object(user, "You surface from your meditative state, "
+        tell_object(user, "You surface from your meditative state, " +
             "feeling mentally refreshed.\n");
         tell_room(environment(user),
             user->query_cap_name() + " opens their eyes, emerging from meditation.\n",
@@ -46,11 +46,11 @@ int apply_effect(object user, object target) {
         int max_isp = user->query_max_isp();
         if (cur_isp + isp_restore > max_isp) isp_restore = max_isp - cur_isp;
         if (isp_restore > 0) user->add_isp(isp_restore);
-        tell_object(user, "You fold your legs beneath you and let your breathing "
-            "slow. The world fades as you descend into deep meditation. "
+        tell_object(user, "You fold your legs beneath you and let your breathing " +
+            "slow. The world fades as you descend into deep meditation. " +
             "Psionic energy flows back into you steadily.\n");
         tell_room(environment(user),
-            user->query_cap_name() + " sits cross-legged and becomes very still, "
+            user->query_cap_name() + " sits cross-legged and becomes very still, " +
             "eyes half-closed in deep meditation.\n",
             ({ user }));
     }

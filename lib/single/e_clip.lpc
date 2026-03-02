@@ -10,9 +10,9 @@ void create() {
     set_id_alt("clip");
     set_short("an E-clip");
     set_long(
-        "A standard energy clip (E-clip) containing enough power cells for "
-        "30 shots in most energy weapons. The clip's charge indicator shows "
-        "it is fully loaded. Compatible with most Coalition and standard "
+        "A standard energy clip (E-clip) containing enough power cells for " +
+        "30 shots in most energy weapons. The clip's charge indicator shows " +
+        "it is fully loaded. Compatible with most Coalition and standard " +
         "E-weapons including laser pistols and ion blasters.\n"
     );
 

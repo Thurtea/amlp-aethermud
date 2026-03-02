@@ -123,15 +123,14 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"GET - Pick up items\n\n"
-"Usage:\n"
-"  get <item>    Pick up an item\n"
-"  get all       Pick up all items in room\n\n"
-"Examples:\n"
-"  get sword\n"
-"  get all\n\n"
-"You cannot pick up living creatures or items that are fixed\n"
-"in place. Weight limits apply based on your strength.\n\n"
+    return "GET - Pick up items\n\n" +
+"Usage:\n" +
+"  get <item>    Pick up an item\n" +
+"  get all       Pick up all items in room\n\n" +
+"Examples:\n" +
+"  get sword\n" +
+"  get all\n\n" +
+"You cannot pick up living creatures or items that are fixed\n" +
+"in place. Weight limits apply based on your strength.\n\n" +
 "See also: DROP, GIVE, INVENTORY\n";
 }

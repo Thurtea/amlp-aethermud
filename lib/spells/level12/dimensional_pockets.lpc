@@ -9,12 +9,12 @@ void create() {
     set_spell_id("dimensional_pockets");
     set_spell_name("Dimensional Pockets");
     set_spell_desc(
-        "The mage creates up to eight invisible pockets in the dimensional fabric, "
-        "each capable of holding one cubic foot of material (roughly the size of "
-        "a backpack). Items stored in dimensional pockets are removed from normal "
-        "space entirely and cannot be detected or stolen. The caster can access "
-        "any pocket with a thought and retrieve items instantly. The pockets "
-        "persist for 24 hours, after which any stored items are expelled onto "
+        "The mage creates up to eight invisible pockets in the dimensional fabric, " +
+        "each capable of holding one cubic foot of material (roughly the size of " +
+        "a backpack). Items stored in dimensional pockets are removed from normal " +
+        "space entirely and cannot be detected or stolen. The caster can access " +
+        "any pocket with a thought and retrieve items instantly. The pockets " +
+        "persist for 24 hours, after which any stored items are expelled onto " +
         "the ground. The mage can dismiss the pockets early at will."
     );
 
@@ -47,10 +47,10 @@ int apply_effect(object caster, object target) {
     caster->set_property("dim_pockets_items", ({ }));
 
     tell_object(caster,
-        "You tear eight small voids in the fabric of reality around you. "
-        "Eight dimensional pockets spring into existence, invisible and "
-        "imperceptible to anyone else. Each can hold up to one cubic foot "
-        "of material. They will last 24 hours or until dismissed.\n"
+        "You tear eight small voids in the fabric of reality around you. " +
+        "Eight dimensional pockets spring into existence, invisible and " +
+        "imperceptible to anyone else. Each can hold up to one cubic foot " +
+        "of material. They will last 24 hours or until dismissed.\n" +
         "Use 'pocket store <item>' and 'pocket retrieve <item>' to interact.\n");
 
     call_out("end_dimensional_pockets", 86400, caster);

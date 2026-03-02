@@ -10,8 +10,8 @@ void create() {
     set_id(({"wilks", "laser", "pistol", "laser pistol", "wilks laser"}));
     set_short("a Wilks laser pistol");
     set_long(
-        "This is a Wilks 320 laser pistol, one of the most common energy weapons in "
-        "North America. Reliable, easy to use, and deadly. The pistol has a sleek "
+        "This is a Wilks 320 laser pistol, one of the most common energy weapons in " +
+        "North America. Reliable, easy to use, and deadly. The pistol has a sleek " +
         "design with an ergonomic grip. A small display shows the charge level.\n"
     );
     

@@ -9,13 +9,13 @@ void create() {
     set_spell_id("restoration");
     set_spell_name("Restoration");
     set_spell_desc(
-        "The most powerful healing invocation known. This magic instantly and "
-        "completely heals all wounds, cuts, bruises, and burns - restoring "
-        "full SDC and hit points with only minimal scarring. It can heal "
-        "internal organs, mend broken bones, and make bullets or shrapnel "
-        "vanish as wounds close. Most remarkably, the invocation can restore "
-        "a severed limb - hand, arm, finger, foot, or leg - provided the limb "
-        "has not been detached from the body for more than 48 hours. "
+        "The most powerful healing invocation known. This magic instantly and " +
+        "completely heals all wounds, cuts, bruises, and burns - restoring " +
+        "full SDC and hit points with only minimal scarring. It can heal " +
+        "internal organs, mend broken bones, and make bullets or shrapnel " +
+        "vanish as wounds close. Most remarkably, the invocation can restore " +
+        "a severed limb - hand, arm, finger, foot, or leg - provided the limb " +
+        "has not been detached from the body for more than 48 hours. " +
         "Duration: Instant/permanent."
     );
 
@@ -56,19 +56,19 @@ int apply_effect(object caster, object target) {
 
     if (heal_target == caster) {
         tell_object(caster,
-            "Blinding white light floods through your body. Every wound closes, "
-            "every bruise fades, broken bones mend in an instant. You are "
-            "completely restored to full health.\n"
+            "Blinding white light floods through your body. Every wound closes, " +
+            "every bruise fades, broken bones mend in an instant. You are " +
+            "completely restored to full health.\n" +
             "HP and SDC fully restored. All physical afflictions cured.\n");
     } else {
         tell_object(caster,
             "Blinding white healing light flows from your hands into " +
-            heal_target->query_cap_name() + ". Every wound closes, bones mend, "
+            heal_target->query_cap_name() + ". Every wound closes, bones mend, " +
             "burns vanish. Full restoration complete.\n");
 
         tell_object(heal_target,
-            caster->query_cap_name() + " lays hands on you and channeling "
-            "pure healing magic floods through your body. Every injury disappears. "
+            caster->query_cap_name() + " lays hands on you and channeling " +
+            "pure healing magic floods through your body. Every injury disappears. " +
             "You are completely healed.\n");
     }
 

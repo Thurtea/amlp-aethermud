@@ -10,14 +10,14 @@ void create() {
     set_power_id("ectoplasm");
     set_power_name("Ectoplasm");
     set_power_desc(
-        "The psychic extrudes ectoplasm - a semi-physical psychic substance - "
-        "from their body, using it to manipulate objects, plug leaks, create "
-        "crude seals, or form simple shapes. The pale, sticky material is "
-        "real enough to be touched and has the consistency of thick gelatin. "
-        "It evaporates when the psychic stops concentrating. Cannot be used "
-        "as a weapon but is very useful for problem-solving.\n\n"
-        "Range: Self and immediate area (3 feet)\n"
-        "ISP Cost: 8 points\n"
+        "The psychic extrudes ectoplasm - a semi-physical psychic substance - " +
+        "from their body, using it to manipulate objects, plug leaks, create " +
+        "crude seals, or form simple shapes. The pale, sticky material is " +
+        "real enough to be touched and has the consistency of thick gelatin. " +
+        "It evaporates when the psychic stops concentrating. Cannot be used " +
+        "as a weapon but is very useful for problem-solving.\n\n" +
+        "Range: Self and immediate area (3 feet)\n" +
+        "ISP Cost: 8 points\n" +
         "Duration: 2 minutes per level"
     );
     set_power_category("physical");
@@ -31,11 +31,11 @@ void create() {
 int apply_effect(object user, object target) {
     if (!user) return 0;
     user->set_property("ectoplasm_active", 1);
-    tell_object(user, "A pale, luminescent substance begins oozing from your "
-        "hands - ectoplasm, psychic matter made semi-real. You can use it "
+    tell_object(user, "A pale, luminescent substance begins oozing from your " +
+        "hands - ectoplasm, psychic matter made semi-real. You can use it " +
         "to grip, plug, seal, or shape things within arm's reach.\n");
     tell_room(environment(user),
-        user->query_cap_name() + "'s hands are covered in a glowing, "
+        user->query_cap_name() + "'s hands are covered in a glowing, " +
         "translucent gel that drips but doesn't fall.\n",
         ({ user }));
     return 1;

@@ -17,12 +17,12 @@ void create() {
 
     set_short("South Alley");
     set_long(
-        "A cramped alley behind the Splynn market district, walled in by\\n"
-        "raw stone blocks slick with condensation. Broken crates and the\\n"
-        "occasional splatter of unknown origin line the base of the walls.\\n"
-        "A weathered stone pillar leans against the west wall, its surface\\n"
-        "carved with sigils that have been deliberately defaced. There is a\\n"
-        "faint smell of ozone — and something else. Something profitable.\\n"
+        "A cramped alley behind the Splynn market district, walled in by\\n" +
+        "raw stone blocks slick with condensation. Broken crates and the\\n" +
+        "occasional splatter of unknown origin line the base of the walls.\\n" +
+        "A weathered stone pillar leans against the west wall, its surface\\n" +
+        "carved with sigils that have been deliberately defaced. There is a\\n" +
+        "faint smell of ozone — and something else. Something profitable.\\n" +
         "Rocky's Bar is back to the north.\\n"
     );
 
@@ -44,10 +44,10 @@ int local_command(string verb, string args) {
             return 1;
         }
         write(
-            "You rap your knuckles against the carved pillar. A low, resonant\\n"
-            "boom rolls through the alley. After a heartbeat of silence a\\n"
-            "section of the west wall grinds sideways on hidden rollers,\\n"
-            "revealing a narrow gap and the dim glow of a lantern beyond.\\n"
+            "You rap your knuckles against the carved pillar. A low, resonant\\n" +
+            "boom rolls through the alley. After a heartbeat of silence a\\n" +
+            "section of the west wall grinds sideways on hidden rollers,\\n" +
+            "revealing a narrow gap and the dim glow of a lantern beyond.\\n" +
             "Someone is definitely open for business.\\n"
         );
         return 1;
@@ -55,17 +55,17 @@ int local_command(string verb, string args) {
     if (verb == "examine" || verb == "look") {
         if (args && strsrch(args, "pillar") >= 0) {
             write(
-                "The pillar is old — older than the market itself. Carved into its\\n"
-                "face are sigils that someone has since taken a chisel to, though\\n"
-                "traces of the original patterns remain. It sits slightly away from\\n"
+                "The pillar is old — older than the market itself. Carved into its\\n" +
+                "face are sigils that someone has since taken a chisel to, though\\n" +
+                "traces of the original patterns remain. It sits slightly away from\\n" +
                 "the wall, as if it were never meant to be structural.\\n"
             );
             return 1;
         }
         if (args && strsrch(args, "sigil") >= 0) {
             write(
-                "What remains of the sigils looks like a compressed dealer's mark —\\n"
-                "the kind black market operators use to identify a safe drop point.\\n"
+                "What remains of the sigils looks like a compressed dealer's mark —\\n" +
+                "the kind black market operators use to identify a safe drop point.\\n" +
                 "Someone knows what this pillar means.\\n"
             );
             return 1;

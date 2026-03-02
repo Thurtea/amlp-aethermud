@@ -9,10 +9,10 @@ void create() {
 
     set_short("a predator stealth suit");
     set_long(
-        "A full-body suit of jet-black reactive panels linked by a mesh of\n"
-        "nano-fibre stealth emitters. When the suit is active, light bends\n"
-        "around the wearer, rendering them nearly invisible to the naked eye.\n"
-        "The surface is warm to the touch and hums faintly. Stolen Coalition\n"
+        "A full-body suit of jet-black reactive panels linked by a mesh of\n" +
+        "nano-fibre stealth emitters. When the suit is active, light bends\n" +
+        "around the wearer, rendering them nearly invisible to the naked eye.\n" +
+        "The surface is warm to the touch and hums faintly. Stolen Coalition\n" +
         "tech, judging by the serial numbers that have been clumsily filed off.\n"
     );
 

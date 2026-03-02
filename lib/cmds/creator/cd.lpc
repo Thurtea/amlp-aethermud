@@ -46,10 +46,9 @@ void help() {
 }
 
 string query_help() {
-    return
-"CD - Change creator workspace directory\n\n"
-"Usage:\n"
-"  cd <path>           Change current creator workspace directory\n\n"
-"Used by builders to navigate their workspace. Paths are relative to\n"
+    return "CD - Change creator workspace directory\n\n" +
+"Usage:\n" +
+"  cd <path>           Change current creator workspace directory\n\n" +
+"Used by builders to navigate their workspace. Paths are relative to\n" +
 "your wizard area unless an absolute path is provided.\n";
 }

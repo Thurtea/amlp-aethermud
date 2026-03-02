@@ -14,8 +14,8 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "The Uteni are a hardy, rustic people adapted to harsh environments."
-        " They favor close-knit clans, practical skills, and survival knowledge."
+        "The Uteni are a hardy, rustic people adapted to harsh environments." +
+        " They favor close-knit clans, practical skills, and survival knowledge." +
         " This stub is conservative; please expand from canonical sources."
     );
     

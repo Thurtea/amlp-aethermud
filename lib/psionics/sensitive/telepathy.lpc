@@ -12,14 +12,14 @@ void create() {
     set_power_id("telepathy");
     set_power_name("Telepathy");
     set_power_desc(
-        "The most famous of all psionic powers, telepathy allows the psychic "
-        "to read surface thoughts and send mental messages to others. At basic "
-        "levels, the psychic can only read surface thoughts (what the person "
-        "is actively thinking about) and send simple mental messages. With "
-        "practice, deeper probing becomes possible.\n\n"
-        "The target may or may not be aware of the telepathic contact, depending "
-        "on their own mental defenses and sensitivity. Those with Mind Block "
-        "active are completely immune to telepathy.\n\n"
+        "The most famous of all psionic powers, telepathy allows the psychic " +
+        "to read surface thoughts and send mental messages to others. At basic " +
+        "levels, the psychic can only read surface thoughts (what the person " +
+        "is actively thinking about) and send simple mental messages. With " +
+        "practice, deeper probing becomes possible.\n\n" +
+        "The target may or may not be aware of the telepathic contact, depending " +
+        "on their own mental defenses and sensitivity. Those with Mind Block " +
+        "active are completely immune to telepathy.\n\n" +
         "Range: 100 feet per level of experience."
     );
     set_power_category("sensitive");

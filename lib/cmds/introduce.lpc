@@ -85,11 +85,10 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"INTRODUCE - Introduce yourself to others\n\n"
-"Usage:\n"
-"  introduce              Introduce yourself to everyone in the room\n"
-"  introduce <name>       Introduce yourself to a specific person\n\n"
-"Until you introduce yourself, others will only see your race\n"
+    return "INTRODUCE - Introduce yourself to others\n\n" +
+"Usage:\n" +
+"  introduce              Introduce yourself to everyone in the room\n" +
+"  introduce <name>       Introduce yourself to a specific person\n\n" +
+"Until you introduce yourself, others will only see your race\n" +
 "(e.g., 'a human' or 'an elf') instead of your name.\n";
 }

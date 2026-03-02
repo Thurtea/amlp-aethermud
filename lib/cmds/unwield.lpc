@@ -113,14 +113,13 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"UNWIELD - Unwield your weapon\n\n"
-"Usage:\n"
-"  unwield            Unwield primary weapon\n"
-"  unwield <weapon>   Unwield specific weapon\n\n"
-"Examples:\n"
-"  unwield\n"
-"  unwield sword\n\n"
-"The weapon will be placed back in your inventory.\n\n"
+    return "UNWIELD - Unwield your weapon\n\n" +
+"Usage:\n" +
+"  unwield            Unwield primary weapon\n" +
+"  unwield <weapon>   Unwield specific weapon\n\n" +
+"Examples:\n" +
+"  unwield\n" +
+"  unwield sword\n\n" +
+"The weapon will be placed back in your inventory.\n\n" +
 "See also: WIELD, REMOVE, EQUIPMENT\n";
 }

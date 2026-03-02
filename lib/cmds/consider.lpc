@@ -24,11 +24,10 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"CONSIDER - Assess a potential opponent\n\n"
-"Usage:\n"
-"  consider <name>        Estimate how dangerous this opponent is\n\n"
-"Compares your current HP against the target's HP to give you a\n"
-"rough idea of how a fight might go. Does not account for armor\n"
+    return "CONSIDER - Assess a potential opponent\n\n" +
+"Usage:\n" +
+"  consider <name>        Estimate how dangerous this opponent is\n\n" +
+"Compares your current HP against the target's HP to give you a\n" +
+"rough idea of how a fight might go. Does not account for armor\n" +
 "or abilities.\n";
 }

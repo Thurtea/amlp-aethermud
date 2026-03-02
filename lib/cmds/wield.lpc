@@ -110,16 +110,15 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"WIELD - Wield a weapon\n\n"
-"Usage:\n"
-"  wield <weapon>    Equip a weapon for combat\n\n"
-"Examples:\n"
-"  wield sword\n"
-"  wield rifle\n"
-"  wield vibro-blade\n\n"
-"Single-handed weapons are wielded in your right hand by\n"
-"default (or left if right is full). Two-handed weapons\n"
-"require both hands to be free.\n\n"
+    return "WIELD - Wield a weapon\n\n" +
+"Usage:\n" +
+"  wield <weapon>    Equip a weapon for combat\n\n" +
+"Examples:\n" +
+"  wield sword\n" +
+"  wield rifle\n" +
+"  wield vibro-blade\n\n" +
+"Single-handed weapons are wielded in your right hand by\n" +
+"default (or left if right is full). Two-handed weapons\n" +
+"require both hands to be free.\n\n" +
 "See also: UNWIELD, WEAR, EQUIPMENT\n";
 }

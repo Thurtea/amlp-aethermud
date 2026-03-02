@@ -82,14 +82,13 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"SAY - Speak to others in the room\n\n"
-"Usage:\n"
-"  say <message>          Speak to everyone in the room\n"
-"  '<message>             Short form of say\n\n"
-"You speak in your current primary language. Listeners who\n"
-"don't understand that language will hear garbled text.\n\n"
-"People who haven't been introduced to you will see your\n"
-"race description instead of your name.\n\n"
+    return "SAY - Speak to others in the room\n\n" +
+"Usage:\n" +
+"  say <message>          Speak to everyone in the room\n" +
+"  '<message>             Short form of say\n\n" +
+"You speak in your current primary language. Listeners who\n" +
+"don't understand that language will hear garbled text.\n\n" +
+"People who haven't been introduced to you will see your\n" +
+"race description instead of your name.\n\n" +
 "See also: LANGUAGE, LANGUAGES, INTRODUCE\n";
 }

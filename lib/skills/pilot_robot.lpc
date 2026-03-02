@@ -11,16 +11,16 @@ void create() {
     set_skill_display_name("Pilot: Robot Vehicle");
     set_short("the ability to pilot robot vehicles");
     set_long(
-        "Pilot: Robot Vehicle allows you to operate giant robots, power armor, "
-        "and heavy exploration vehicles like the EX-5 Behemoth. This includes "
-        "walking mechs, humanoid robots, and heavy combat vehicles with complex "
-        "control systems.\n\n"
-        "The skill covers: basic movement and maneuvering, combat operations, "
-        "system diagnostics, emergency procedures, and terrain navigation. Larger "
-        "and more complex robots require higher skill percentages to operate "
-        "safely.\n\n"
-        "Base: 30% + 5% per level\n"
-        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Pilot: Robot Vehicle allows you to operate giant robots, power armor, " +
+        "and heavy exploration vehicles like the EX-5 Behemoth. This includes " +
+        "walking mechs, humanoid robots, and heavy combat vehicles with complex " +
+        "control systems.\n\n" +
+        "The skill covers: basic movement and maneuvering, combat operations, " +
+        "system diagnostics, emergency procedures, and terrain navigation. Larger " +
+        "and more complex robots require higher skill percentages to operate " +
+        "safely.\n\n" +
+        "Base: 30% + 5% per level\n" +
+        "Bonus: +5% per point of Physical Prowess above 16\n" +
         "Related Stat: Physical Prowess"
     );
     

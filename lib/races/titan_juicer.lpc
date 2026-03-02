@@ -17,14 +17,14 @@ void create() {
     set_race_category(RACE_CAT_HUMAN);
 
     set_race_description(
-        "Titan Juicers are the result of pushing standard Juicer augmentation to "
-        "its absolute limits, flooding the body with a cocktail of super-adrenal "
-        "compounds, growth hormones, and synthetic bio-chemicals that transform a "
-        "normal human into a towering engine of destruction. Standing seven to eight "
-        "feet tall with grotesquely swollen muscles and veins visibly pulsing beneath "
-        "taut skin, they are living weapons capable of engaging MDC threats in hand-to-"
-        "hand combat. The terrible cost is an accelerated burnout that reduces their "
-        "remaining lifespan to three to five years, during which they suffer increasingly "
+        "Titan Juicers are the result of pushing standard Juicer augmentation to " +
+        "its absolute limits, flooding the body with a cocktail of super-adrenal " +
+        "compounds, growth hormones, and synthetic bio-chemicals that transform a " +
+        "normal human into a towering engine of destruction. Standing seven to eight " +
+        "feet tall with grotesquely swollen muscles and veins visibly pulsing beneath " +
+        "taut skin, they are living weapons capable of engaging MDC threats in hand-to-" +
+        "hand combat. The terrible cost is an accelerated burnout that reduces their " +
+        "remaining lifespan to three to five years, during which they suffer increasingly " +
         "violent berserker episodes and chemical dependency that makes withdrawal lethal."
     );
 
@@ -103,10 +103,10 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Titan Juicers are a Racial Character Class defined by their extreme chemical "
-        "augmentation. The process is so invasive that it replaces any prior training "
-        "or occupation. Their entire existence revolves around combat and the management "
-        "of their deteriorating bodies. There is no known method to safely reverse Titan "
+        "Titan Juicers are a Racial Character Class defined by their extreme chemical " +
+        "augmentation. The process is so invasive that it replaces any prior training " +
+        "or occupation. Their entire existence revolves around combat and the management " +
+        "of their deteriorating bodies. There is no known method to safely reverse Titan " +
         "Juicer augmentation."
     );
 

@@ -22,7 +22,7 @@ int main(string args) {
         // skip persistent objects that opt-out
         if (function_exists("query_property", o) && o->query_property("persistent")) continue;
         // safe to destruct
-        catch { destruct(o); } : { }
+        catch { destruct(o); };
         removed++;
     }
 
@@ -44,8 +44,8 @@ int main(string args) {
             }
         }
 
-        catch { destruct(old_room); } : { }
-        catch { load_object(rn); } : { tell_object(player, "Warning: reload failed.\n"); }
+        catch { destruct(old_room); };
+        catch { load_object(rn); };
         // move player back if void used
         object new_room = find_object(rn);
         if (new_room && environment(player) && environment(player) != new_room) {
@@ -65,10 +65,9 @@ void help() {
 }
 
 string query_help() {
-    return
-"CLEANUP - Remove ground objects and attempt reload\n\n"
-"Usage:\n"
-"  cleanup              Remove non-living objects from current room\n\n"
-"Safely destructs non-persistent items and attempts to reload the room if\n"
+    return "CLEANUP - Remove ground objects and attempt reload\n\n" +
+"Usage:\n" +
+"  cleanup              Remove non-living objects from current room\n\n" +
+"Safely destructs non-persistent items and attempts to reload the room if\n" +
 "no other players are present. Intended for builders.\n";
 }

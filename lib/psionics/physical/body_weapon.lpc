@@ -10,14 +10,14 @@ void create() {
     set_power_id("body_weapon");
     set_power_name("Body Weapon");
     set_power_desc(
-        "The psychic focuses psionic energy into their hands, manifesting a "
-        "hard, blade-like protrusion of solidified psychic force that extends "
-        "from the wrist or knuckles. The body weapon is as strong as steel "
-        "and can be used as a natural melee weapon. It adds extra damage to "
-        "unarmed attacks and can affect supernatural creatures that might be "
-        "immune to normal physical strikes.\n\n"
-        "Range: Self (melee touch)\n"
-        "ISP Cost: 6 points\n"
+        "The psychic focuses psionic energy into their hands, manifesting a " +
+        "hard, blade-like protrusion of solidified psychic force that extends " +
+        "from the wrist or knuckles. The body weapon is as strong as steel " +
+        "and can be used as a natural melee weapon. It adds extra damage to " +
+        "unarmed attacks and can affect supernatural creatures that might be " +
+        "immune to normal physical strikes.\n\n" +
+        "Range: Self (melee touch)\n" +
+        "ISP Cost: 6 points\n" +
         "Duration: 4 minutes per level"
     );
     set_power_category("physical");
@@ -36,7 +36,7 @@ int apply_effect(object user, object target) {
         "A blade of solid psychic force emerges from your wrist, " +
         "gleaming with inner light. Your strikes now carry extra force.\n");
     tell_room(environment(user),
-        user->query_cap_name() + " concentrates, and a shimmering blade of "
+        user->query_cap_name() + " concentrates, and a shimmering blade of " +
         "energy emerges from their hand!\n",
         ({ user }));
     return 1;

@@ -50,15 +50,14 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"SKILLS - Display your skills\n\n"
-"Usage:\n"
-"  skills              List all your skills and percentages\n"
-"  skills <skill>      View details about a specific skill\n\n"
-"Skills are rated by percentage (1-98%). When you attempt\n"
-"to use a skill, a d100 roll is made. Rolling equal to or\n"
-"under your skill percentage is a success. Rolling 96-100\n"
-"is always a critical failure.\n\n"
-"Skills improve per level based on OCC/RCC and whether the\n"
+    return "SKILLS - Display your skills\n\n" +
+"Usage:\n" +
+"  skills              List all your skills and percentages\n" +
+"  skills <skill>      View details about a specific skill\n\n" +
+"Skills are rated by percentage (1-98%). When you attempt\n" +
+"to use a skill, a d100 roll is made. Rolling equal to or\n" +
+"under your skill percentage is a success. Rolling 96-100\n" +
+"is always a critical failure.\n\n" +
+"Skills improve per level based on OCC/RCC and whether the\n" +
 "skill is a primary or secondary selection.\n";
 }

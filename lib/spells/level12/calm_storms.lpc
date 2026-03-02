@@ -9,13 +9,13 @@ void create() {
     set_spell_id("calm_storms");
     set_spell_name("Calm Storms");
     set_spell_desc(
-        "The mage calms a raging storm with a simple invocation, slowing "
-        "downpours to light rain, reducing wind speed by half, shrinking "
-        "ocean waves, and lightening stormy skies. Effective against both "
-        "natural and magically-induced storms. As a ritual, the effect is "
-        "even more powerful: turning a torrential rain into a drizzle, "
-        "reducing winds to a gentle breeze, and dispersing a tornado. "
-        "Area affected: 1 mile per level of the caster. "
+        "The mage calms a raging storm with a simple invocation, slowing " +
+        "downpours to light rain, reducing wind speed by half, shrinking " +
+        "ocean waves, and lightening stormy skies. Effective against both " +
+        "natural and magically-induced storms. As a ritual, the effect is " +
+        "even more powerful: turning a torrential rain into a drizzle, " +
+        "reducing winds to a gentle breeze, and dispersing a tornado. " +
+        "Area affected: 1 mile per level of the caster. " +
         "Duration: 1 hour per level."
     );
 
@@ -48,9 +48,9 @@ int apply_effect(object caster, object target) {
     env->set_property("weather_override", "clear");
 
     tell_object(caster,
-        "You speak the words of calming and raise your arms to the sky. "
-        "The storm around you begins to relent - the howling winds die down, "
-        "the rain softens to a drizzle, and the dark clouds thin.\n"
+        "You speak the words of calming and raise your arms to the sky. " +
+        "The storm around you begins to relent - the howling winds die down, " +
+        "the rain softens to a drizzle, and the dark clouds thin.\n" +
         "The storm is calmed for " + duration_min + " minutes.\n");
 
     tell_room(env,

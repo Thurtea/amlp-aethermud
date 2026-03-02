@@ -16,14 +16,14 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Wolfen are tall, powerful wolf-like humanoids who walk upright and "
-        "possess keen predatory senses. Standing seven to eight feet tall and "
-        "covered in thick fur, they are imposing warriors who live by a strict "
-        "code of honor and pack loyalty. Wolfen society is organized into "
-        "packs and clans with a strong military tradition, and they are "
-        "considered some of the finest melee combatants in the Megaverse. "
-        "Their heightened senses of smell and hearing make them exceptional "
-        "trackers and scouts, and their natural claws and fangs are formidable "
+        "Wolfen are tall, powerful wolf-like humanoids who walk upright and " +
+        "possess keen predatory senses. Standing seven to eight feet tall and " +
+        "covered in thick fur, they are imposing warriors who live by a strict " +
+        "code of honor and pack loyalty. Wolfen society is organized into " +
+        "packs and clans with a strong military tradition, and they are " +
+        "considered some of the finest melee combatants in the Megaverse. " +
+        "Their heightened senses of smell and hearing make them exceptional " +
+        "trackers and scouts, and their natural claws and fangs are formidable " +
         "weapons in close combat."
     );
 

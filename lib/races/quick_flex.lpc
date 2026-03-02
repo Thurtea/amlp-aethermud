@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_PSIONIC);
 
     set_race_description(
-        "Quick-Flex psychics are human beings whose psionic abilities manifest "
-        "entirely through their physical form, granting them superhuman speed, "
-        "reflexes, and agility far beyond normal human capabilities. They can move "
-        "so fast they appear as blurs, dodge gunfire through precognitive reflexes, "
-        "and strike multiple times before an opponent can react. Unlike most psychics "
-        "who focus their ISP on mental powers, Quick-Flex channel all psionic energy "
-        "into physical enhancement, making them extraordinary combatants but limited "
+        "Quick-Flex psychics are human beings whose psionic abilities manifest " +
+        "entirely through their physical form, granting them superhuman speed, " +
+        "reflexes, and agility far beyond normal human capabilities. They can move " +
+        "so fast they appear as blurs, dodge gunfire through precognitive reflexes, " +
+        "and strike multiple times before an opponent can react. Unlike most psychics " +
+        "who focus their ISP on mental powers, Quick-Flex channel all psionic energy " +
+        "into physical enhancement, making them extraordinary combatants but limited " +
         "in traditional psychic disciplines."
     );
 

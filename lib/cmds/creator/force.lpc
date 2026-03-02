@@ -53,10 +53,9 @@ void create() {
 }
 
 string query_help() {
-    return
-"FORCE - Force a player to execute a command (admin-only)\n\n"
-"Usage:\n"
-"  force <player> <command>   Make another player execute a command\n\n"
-"Requires administrative privileges. Use with extreme caution as it\n"
+    return "FORCE - Force a player to execute a command (admin-only)\n\n" +
+"Usage:\n" +
+"  force <player> <command>   Make another player execute a command\n\n" +
+"Requires administrative privileges. Use with extreme caution as it\n" +
 "affects other players directly.\n";
 }

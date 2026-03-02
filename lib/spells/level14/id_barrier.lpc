@@ -9,13 +9,13 @@ void create() {
     set_spell_id("id_barrier");
     set_spell_name("Id Barrier");
     set_spell_desc(
-        "A powerful defensive shield of semitransparent psychic energy. "
-        "The barrier radiates horror - anyone must save vs horror factor 14 "
-        "to even come within 10 feet of it. Those who fail cannot pass through "
-        "at all. Those who brave entry must save vs magic: success means "
-        "passing through with only a headache and losing one attack that melee. "
-        "Failure means facing an apparition of their greatest fear. "
-        "The barrier can be placed up to 200 ft away plus 100 ft per level. "
+        "A powerful defensive shield of semitransparent psychic energy. " +
+        "The barrier radiates horror - anyone must save vs horror factor 14 " +
+        "to even come within 10 feet of it. Those who fail cannot pass through " +
+        "at all. Those who brave entry must save vs magic: success means " +
+        "passing through with only a headache and losing one attack that melee. " +
+        "Failure means facing an apparition of their greatest fear. " +
+        "The barrier can be placed up to 200 ft away plus 100 ft per level. " +
         "Duration: 3 minutes (12 melees) per level."
     );
 
@@ -48,9 +48,9 @@ int apply_effect(object caster, object target) {
     env->set_property("id_barrier_caster", caster->query_name());
 
     tell_object(caster,
-        "A shimmering wall of semitransparent energy erupts from your outstretched "
-        "hands. It pulses with psychic horror - any who approach it will feel "
-        "their deepest fears clawing at their mind.\n"
+        "A shimmering wall of semitransparent energy erupts from your outstretched " +
+        "hands. It pulses with psychic horror - any who approach it will feel " +
+        "their deepest fears clawing at their mind.\n" +
         "Duration: " + (level * 3) + " minutes.\n");
 
     tell_room(env,
@@ -65,12 +65,12 @@ int apply_effect(object caster, object target) {
             int hf_save = (random(20) + 1) + (ob->query_me() ? ob->query_me() : 0);
             if (hf_save < 14) {
                 tell_object(ob,
-                    "The Id Barrier radiates overwhelming dread! Your deepest fears "
+                    "The Id Barrier radiates overwhelming dread! Your deepest fears " +
                     "crowd your mind - you cannot bring yourself to approach it!\n");
                 ob->set_property("id_barrier_blocked", 1);
             } else {
                 tell_object(ob,
-                    "The Id Barrier sends a chill of fear through you, but your "
+                    "The Id Barrier sends a chill of fear through you, but your " +
                     "willpower holds. You can approach if you dare.\n");
             }
         }

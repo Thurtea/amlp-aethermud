@@ -262,9 +262,8 @@ void init() {
 }
 
 string query_help() {
-    return
-"MKOBJECT - Create weapon/armor/item/NPC templates\n\n"
-"Usage:\n"
-"  mkobject <type> <filename>   Create an object template in your workspace\n\n"
+    return "MKOBJECT - Create weapon/armor/item/NPC templates\n\n" +
+"Usage:\n" +
+"  mkobject <type> <filename>   Create an object template in your workspace\n\n" +
 "Quickly scaffold common object types for editing and deployment.\n";
 }

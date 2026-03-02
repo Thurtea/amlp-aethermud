@@ -14,11 +14,10 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"TIME / DATE - Show the current time\n\n"
-"Usage:\n"
-"  time                   Display the current game and real time\n"
-"  date                   Alias for time\n\n"
-"Shows the current server time. Game-world time (day/night cycle)\n"
+    return "TIME / DATE - Show the current time\n\n" +
+"Usage:\n" +
+"  time                   Display the current game and real time\n" +
+"  date                   Alias for time\n\n" +
+"Shows the current server time. Game-world time (day/night cycle)\n" +
 "is shown if a time daemon is running.\n";
 }

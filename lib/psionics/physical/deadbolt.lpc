@@ -10,14 +10,14 @@ void create() {
     set_power_id("deadbolt");
     set_power_name("Deadbolt");
     set_power_desc(
-        "The psychic uses telekinetic force to hold a door, hatch, chest, "
-        "or other entryway firmly shut with the equivalent of 800 pounds of "
-        "force. The door cannot be opened from either side by normal means "
-        "while the power is maintained. Even explosives, power armor, or "
-        "supernatural strength will have difficulty overcoming this mental lock. "
-        "The psychic must maintain concentration to sustain the effect.\n\n"
-        "Range: 60 feet\n"
-        "ISP Cost: 6 points\n"
+        "The psychic uses telekinetic force to hold a door, hatch, chest, " +
+        "or other entryway firmly shut with the equivalent of 800 pounds of " +
+        "force. The door cannot be opened from either side by normal means " +
+        "while the power is maintained. Even explosives, power armor, or " +
+        "supernatural strength will have difficulty overcoming this mental lock. " +
+        "The psychic must maintain concentration to sustain the effect.\n\n" +
+        "Range: 60 feet\n" +
+        "ISP Cost: 6 points\n" +
         "Duration: 1 minute per level"
     );
     set_power_category("physical");
@@ -31,12 +31,12 @@ void create() {
 int apply_effect(object user, object target) {
     if (!user) return 0;
     // Apply to nearest exit/door or report effect
-    tell_object(user, "You reach out with your mind, seizing the nearest "
-        "exit with invisible telekinetic force. A faint vibration in the "
-        "air confirms the mental lock is in place - nothing is getting "
+    tell_object(user, "You reach out with your mind, seizing the nearest " +
+        "exit with invisible telekinetic force. A faint vibration in the " +
+        "air confirms the mental lock is in place - nothing is getting " +
         "through while you maintain your concentration.\n");
     tell_room(environment(user),
-        user->query_cap_name() + " gestures sharply. There is a sharp THUNK "
+        user->query_cap_name() + " gestures sharply. There is a sharp THUNK " +
         "as if a heavy bolt just slid home.\n",
         ({ user }));
     return 1;

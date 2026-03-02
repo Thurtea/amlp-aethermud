@@ -25,13 +25,12 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"FOLLOW - Follow another player or NPC\n\n"
-"Usage:\n"
-"  follow                 Show who you are currently following\n"
-"  follow <name>          Begin following someone in your location\n"
-"  follow stop            Stop following\n"
-"  follow none            Stop following\n\n"
-"When following, you will automatically move with the person you\n"
+    return "FOLLOW - Follow another player or NPC\n\n" +
+"Usage:\n" +
+"  follow                 Show who you are currently following\n" +
+"  follow <name>          Begin following someone in your location\n" +
+"  follow stop            Stop following\n" +
+"  follow none            Stop following\n\n" +
+"When following, you will automatically move with the person you\n" +
 "are following when they leave the room.\n";
 }

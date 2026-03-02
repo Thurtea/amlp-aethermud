@@ -13,14 +13,14 @@ void create() {
     set_spell_id("lightning_bolt");
     set_spell_name("Lightning Bolt");
     set_spell_desc(
-        "One of the most destructive elemental spells, Lightning Bolt summons "
-        "the raw power of a thunderstorm and hurls a massive bolt of electricity "
-        "at the target. The spell deals 1d6 mega-damage per level of the caster, "
-        "making it incredibly lethal even to heavily armored opponents.\n\n"
-        "The bolt crackles through the air with a deafening CRACK and strikes "
-        "with blinding speed. Targets are often left charred and smoking, and "
-        "the smell of ozone lingers in the air afterward. The spell's range "
-        "extends to 200 feet, allowing the caster to strike from a distance.\n\n"
+        "One of the most destructive elemental spells, Lightning Bolt summons " +
+        "the raw power of a thunderstorm and hurls a massive bolt of electricity " +
+        "at the target. The spell deals 1d6 mega-damage per level of the caster, " +
+        "making it incredibly lethal even to heavily armored opponents.\n\n" +
+        "The bolt crackles through the air with a deafening CRACK and strikes " +
+        "with blinding speed. Targets are often left charred and smoking, and " +
+        "the smell of ozone lingers in the air afterward. The spell's range " +
+        "extends to 200 feet, allowing the caster to strike from a distance.\n\n" +
         "This is a master's spell, requiring significant PPE and magical skill."
     );
     

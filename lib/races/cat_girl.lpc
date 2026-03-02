@@ -17,15 +17,15 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Cat Girls are a feline humanoid species believed to have originated from a "
-        "dimension where evolution favored upright-walking felinoids over primates. "
-        "They possess distinctly cat-like features including pointed furry ears, slit-"
-        "pupiled eyes that gleam in darkness, a long prehensile tail, and fine fur "
-        "covering their bodies in patterns unique to each individual. Their retractable "
-        "claws, extraordinary agility, and preternatural balance make them natural "
-        "acrobats and deadly close-quarters fighters. Cat Girls have keen senses of "
-        "hearing and smell that rival those of actual felines, and they can see clearly "
-        "in near-total darkness. Socially curious and fiercely independent, they tend "
+        "Cat Girls are a feline humanoid species believed to have originated from a " +
+        "dimension where evolution favored upright-walking felinoids over primates. " +
+        "They possess distinctly cat-like features including pointed furry ears, slit-" +
+        "pupiled eyes that gleam in darkness, a long prehensile tail, and fine fur " +
+        "covering their bodies in patterns unique to each individual. Their retractable " +
+        "claws, extraordinary agility, and preternatural balance make them natural " +
+        "acrobats and deadly close-quarters fighters. Cat Girls have keen senses of " +
+        "hearing and smell that rival those of actual felines, and they can see clearly " +
+        "in near-total darkness. Socially curious and fiercely independent, they tend " +
         "to be drawn to professions that reward stealth, dexterity, and quick thinking."
     );
 

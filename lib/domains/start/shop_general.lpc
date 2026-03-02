@@ -8,10 +8,10 @@ void create() {
 
     set_short("General Store");
     set_long(
-        "This is a well-stocked general store in the heart of the village. Shelves "
-        "line the walls, filled with supplies, weapons, armor, and various adventuring "
-        "gear. A large wooden counter dominates the center of the room, behind which "
-        "the shopkeeper conducts business. A sign on the wall reads: 'BUY and SELL - "
+        "This is a well-stocked general store in the heart of the village. Shelves " +
+        "line the walls, filled with supplies, weapons, armor, and various adventuring " +
+        "gear. A large wooden counter dominates the center of the room, behind which " +
+        "the shopkeeper conducts business. A sign on the wall reads: 'BUY and SELL - " +
         "Type LIST to see inventory'.\n"
     );
 

@@ -16,19 +16,19 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Godlings are the mortal-born offspring of gods, demigods, and other "
-        "supremely powerful supernatural beings drawn to Rifts Earth by its "
-        "overflowing psychic energy. They carry divine blood in their veins, "
-        "granting them physical and supernatural abilities far beyond those of "
-        "ordinary mortals. Each Godling inherits aspects of their divine parent's "
-        "domain, whether it be war, storms, wisdom, or death, manifesting as "
-        "unique powers and affinities. Their mega-damage bodies can withstand "
-        "punishment that would obliterate lesser beings, and they possess innate "
-        "magical and psionic capabilities that grow stronger with age and "
-        "experience. Despite their power, Godlings are exceedingly rare and "
-        "often struggle to find their place in a world that both reveres and "
-        "fears them. They are drawn to conflict and destiny as moths to flame, "
-        "their divine heritage ensuring they are never far from the center of "
+        "Godlings are the mortal-born offspring of gods, demigods, and other " +
+        "supremely powerful supernatural beings drawn to Rifts Earth by its " +
+        "overflowing psychic energy. They carry divine blood in their veins, " +
+        "granting them physical and supernatural abilities far beyond those of " +
+        "ordinary mortals. Each Godling inherits aspects of their divine parent's " +
+        "domain, whether it be war, storms, wisdom, or death, manifesting as " +
+        "unique powers and affinities. Their mega-damage bodies can withstand " +
+        "punishment that would obliterate lesser beings, and they possess innate " +
+        "magical and psionic capabilities that grow stronger with age and " +
+        "experience. Despite their power, Godlings are exceedingly rare and " +
+        "often struggle to find their place in a world that both reveres and " +
+        "fears them. They are drawn to conflict and destiny as moths to flame, " +
+        "their divine heritage ensuring they are never far from the center of " +
         "great events."
     );
 
@@ -118,12 +118,12 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Godlings are a Racial Character Class of exceptional power, their divine "
-        "heritage granting them abilities that dwarf mortal OCCs. Their supernatural "
-        "strength, mega-damage bodies, innate magic, and psionic abilities develop "
-        "naturally as they mature and grow into their divine potential. Godlings "
-        "cannot take mortal OCCs, as their divine nature provides a comprehensive "
-        "suite of abilities that defines their progression. Instead, they grow "
+        "Godlings are a Racial Character Class of exceptional power, their divine " +
+        "heritage granting them abilities that dwarf mortal OCCs. Their supernatural " +
+        "strength, mega-damage bodies, innate magic, and psionic abilities develop " +
+        "naturally as they mature and grow into their divine potential. Godlings " +
+        "cannot take mortal OCCs, as their divine nature provides a comprehensive " +
+        "suite of abilities that defines their progression. Instead, they grow " +
         "in power by discovering and mastering the aspects of their divine heritage."
     );
 

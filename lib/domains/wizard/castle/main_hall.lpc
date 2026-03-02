@@ -9,16 +9,16 @@ void create() {
 
     set_short("Wizard Castle - Main Hall");
     set_long(
-        "The grand main hall of the Wizard Castle stretches before you,\n"
-        "its vaulted ceiling supported by pillars of shimmering crystal.\n"
-        "Arcane runes pulse softly along the walls, casting the room in\n"
-        "a warm amber glow. A massive fireplace dominates the northern\n"
-        "wall, its flames dancing with unnatural colors.\n\n"
-        "A large round table sits in the center, covered with maps and\n"
-        "scrolls. Comfortable chairs surround it, each engraved with a\n"
-        "different sigil. To the east, a doorway leads to the training\n"
-        "grounds. To the west, a monitoring station hums with energy.\n"
-        "An elevator to the south provides access to the offices above.\n"
+        "The grand main hall of the Wizard Castle stretches before you,\n" +
+        "its vaulted ceiling supported by pillars of shimmering crystal.\n" +
+        "Arcane runes pulse softly along the walls, casting the room in\n" +
+        "a warm amber glow. A massive fireplace dominates the northern\n" +
+        "wall, its flames dancing with unnatural colors.\n\n" +
+        "A large round table sits in the center, covered with maps and\n" +
+        "scrolls. Comfortable chairs surround it, each engraved with a\n" +
+        "different sigil. To the east, a doorway leads to the training\n" +
+        "grounds. To the west, a monitoring station hums with energy.\n" +
+        "An elevator to the south provides access to the offices above.\n" +
         "To the north, a cozy alcove serves as home to Spike, the castle dog."
     );
 

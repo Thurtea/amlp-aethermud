@@ -9,12 +9,12 @@ void create() {
     set_spell_id("super_healing");
     set_spell_name("Super Healing");
     set_spell_desc(
-        "A powerful healing spell that restores 4d6 SDC and 2d6 Hit Points "
-        "and also counteracts poison, disease, and blindness. Unlike the "
-        "lower-level Heal Wounds, Super Healing also cleanses magical afflictions "
-        "of level 8 and below. It cannot restore lost limbs or reverse death "
-        "but can bring a character back from the brink of death if they still "
-        "have any HP remaining. The target must be touched. Cannot be cast on "
+        "A powerful healing spell that restores 4d6 SDC and 2d6 Hit Points " +
+        "and also counteracts poison, disease, and blindness. Unlike the " +
+        "lower-level Heal Wounds, Super Healing also cleanses magical afflictions " +
+        "of level 8 and below. It cannot restore lost limbs or reverse death " +
+        "but can bring a character back from the brink of death if they still " +
+        "have any HP remaining. The target must be touched. Cannot be cast on " +
         "the undead or mechanical constructs."
     );
 
@@ -64,16 +64,16 @@ int apply_effect(object caster, object target) {
 
     tell_object(caster,
         "Brilliant golden light pours from your hands into " +
-        target->query_cap_name() + "!\n"
-        "SDC restored: " + sdc_healed + "\n"
-        "HP restored: " + hp_healed + "\n"
+        target->query_cap_name() + "!\n" +
+        "SDC restored: " + sdc_healed + "\n" +
+        "HP restored: " + hp_healed + "\n" +
         "All active afflictions cleansed.\n");
 
     if (caster != target) {
         tell_object(target,
             caster->query_cap_name() +
-            " channels powerful healing energy into you!\n"
-            "You feel wounds knit, pain fade, and toxins dissolve.\n"
+            " channels powerful healing energy into you!\n" +
+            "You feel wounds knit, pain fade, and toxins dissolve.\n" +
             "SDC: +" + sdc_healed + "  HP: +" + hp_healed + "\n");
     }
 

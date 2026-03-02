@@ -5,9 +5,9 @@ void create() {
     ::create();
     set_short("Chapel of Light");
     set_long(
-        "A quiet stone chapel with stained glass windows depicting heroes\n"
-        "of ages past. Candles flicker on a simple altar. The air carries\n"
-        "a faint scent of incense. Wooden pews face the front, worn smooth\n"
+        "A quiet stone chapel with stained glass windows depicting heroes\n" +
+        "of ages past. Candles flicker on a simple altar. The air carries\n" +
+        "a faint scent of incense. Wooden pews face the front, worn smooth\n" +
         "by years of use. The town square is north, the gate south."
     );
 

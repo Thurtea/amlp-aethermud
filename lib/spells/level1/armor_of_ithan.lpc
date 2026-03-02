@@ -18,12 +18,12 @@ void create() {
     
     set_short_description("Creates magical armor for protection.");
     set_long_description(
-        "This spell creates a shimmering field of magical energy around the "
-        "caster, providing 100 S.D.C. of protection. The armor absorbs damage "
-        "before the caster's natural S.D.C. or Hit Points are affected.\n\n"
-        "Duration: 5 minutes per level\n"
-        "Range: Self\n"
-        "Protection: 100 S.D.C.\n"
+        "This spell creates a shimmering field of magical energy around the " +
+        "caster, providing 100 S.D.C. of protection. The armor absorbs damage " +
+        "before the caster's natural S.D.C. or Hit Points are affected.\n\n" +
+        "Duration: 5 minutes per level\n" +
+        "Range: Self\n" +
+        "Protection: 100 S.D.C.\n" +
         "P.P.E.: 10\n"
     );
 }

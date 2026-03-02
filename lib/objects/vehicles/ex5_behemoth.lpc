@@ -14,13 +14,13 @@ void create() {
     set_adjectives(({"massive", "armored", "northern gun", "exploration"}));
     set_short("an EX-5 Behemoth Explorer");
     set_long(
-        "The EX-5 Behemoth is Northern Gun's largest exploration vehicle. This massive "
-        "ground vehicle is built like a fortress on wheels, with eight enormous tires and "
-        "sloped armor plating. The vehicle stands three stories tall and stretches over "
-        "50 feet long.\n\n"
-        "The front features a reinforced ram and mounting points for heavy weapons. Armored "
-        "viewports show the cockpit level, while the upper deck has sensor arrays and a "
-        "defensive turret. Side hatches provide access to the interior.\n\n"
+        "The EX-5 Behemoth is Northern Gun's largest exploration vehicle. This massive " +
+        "ground vehicle is built like a fortress on wheels, with eight enormous tires and " +
+        "sloped armor plating. The vehicle stands three stories tall and stretches over " +
+        "50 feet long.\n\n" +
+        "The front features a reinforced ram and mounting points for heavy weapons. Armored " +
+        "viewports show the cockpit level, while the upper deck has sensor arrays and a " +
+        "defensive turret. Side hatches provide access to the interior.\n\n" +
         "This is clearly designed for long-range expeditions into hostile territory."
     );
     

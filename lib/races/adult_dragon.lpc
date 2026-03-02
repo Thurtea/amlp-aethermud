@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_DRAGON);
 
     set_race_description(
-        "Adult Dragons have matured beyond their hatchling years and have come "
-        "into the full measure of their draconic heritage. Ranging from thirty to "
-        "sixty feet in length, they are imposing mega-damage beings capable of "
-        "devastating breath attacks, powerful magic, and sustained flight at "
-        "incredible speeds. Their scales have hardened into formidable natural "
-        "armor, and their intellect has sharpened through centuries of experience. "
-        "Most Adult Dragons are shrewd, territorial, and command considerable "
+        "Adult Dragons have matured beyond their hatchling years and have come " +
+        "into the full measure of their draconic heritage. Ranging from thirty to " +
+        "sixty feet in length, they are imposing mega-damage beings capable of " +
+        "devastating breath attacks, powerful magic, and sustained flight at " +
+        "incredible speeds. Their scales have hardened into formidable natural " +
+        "armor, and their intellect has sharpened through centuries of experience. " +
+        "Most Adult Dragons are shrewd, territorial, and command considerable " +
         "influence in whatever region they claim as their domain."
     );
 

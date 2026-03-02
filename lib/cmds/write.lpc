@@ -17,9 +17,8 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"WRITE - Write a message on an object\n\n"
-"Usage:\n"
-"  write <message> on <object>    Write text onto a writable object\n\n"
+    return "WRITE - Write a message on an object\n\n" +
+"Usage:\n" +
+"  write <message> on <object>    Write text onto a writable object\n\n" +
 "Only objects that support writing (notes, boards) will accept this.\n";
 }

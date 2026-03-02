@@ -10,9 +10,9 @@ void create() {
     set_id_alt("vibro");
     set_short("a vibro-knife");
     set_long(
-        "A compact vibro-knife favored by assassins and special operatives. "
-        "The short vibrating blade deals mega-damage despite its modest size. "
-        "Easy to conceal inside a boot or sleeve, it is a preferred close-quarters "
+        "A compact vibro-knife favored by assassins and special operatives. " +
+        "The short vibrating blade deals mega-damage despite its modest size. " +
+        "Easy to conceal inside a boot or sleeve, it is a preferred close-quarters " +
         "weapon of Sunaj agents across the Megaverse.\n"
     );
 

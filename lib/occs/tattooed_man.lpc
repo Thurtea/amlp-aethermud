@@ -16,14 +16,14 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Tattooed Men (and Women) are Atlanteans who have sacrificed much of "
-        "their life force to inscribe magical tattoos across their bodies. "
-        "Each tattoo is a living spell, permanently bonded to the wearer and "
-        "activated by touching it and channeling P.P.E. The more tattoos worn, "
-        "the more powerful - and the more dangerous - the warrior becomes. "
-        "Tattooed warriors fight using their magical tattoos in combination "
-        "with conventional weapons and martial skill. They are among the most "
-        "feared supernatural warriors in the Megaverse, but the toll of so "
+        "Tattooed Men (and Women) are Atlanteans who have sacrificed much of " +
+        "their life force to inscribe magical tattoos across their bodies. " +
+        "Each tattoo is a living spell, permanently bonded to the wearer and " +
+        "activated by touching it and channeling P.P.E. The more tattoos worn, " +
+        "the more powerful - and the more dangerous - the warrior becomes. " +
+        "Tattooed warriors fight using their magical tattoos in combination " +
+        "with conventional weapons and martial skill. They are among the most " +
+        "feared supernatural warriors in the Megaverse, but the toll of so " +
         "many living tattoos gradually shortens the wearer's lifespan."
     );
 
@@ -147,11 +147,11 @@ void create() {
     set_property("tattoos_per_level", 2);
 
     set_background(
-        "Tattooed Men are carefully selected Atlantean warriors who undergo "
-        "years of ritual preparation before receiving their first tattoos. "
-        "The tattoo ceremonies are extremely painful and each one shortens "
-        "the warrior's natural lifespan. Despite this cost, many Atlanteans "
-        "eagerly seek the power to fight against the Splugorth who enslaved "
+        "Tattooed Men are carefully selected Atlantean warriors who undergo " +
+        "years of ritual preparation before receiving their first tattoos. " +
+        "The tattoo ceremonies are extremely painful and each one shortens " +
+        "the warrior's natural lifespan. Despite this cost, many Atlanteans " +
+        "eagerly seek the power to fight against the Splugorth who enslaved " +
         "their homeland."
     );
     set_organizations(({ "atlantean_clans", "tattoo_warrior_orders" }));

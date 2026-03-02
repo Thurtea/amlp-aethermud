@@ -14,8 +14,8 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "Eandroth are a reclusive folk known for resilience and craft. They"
-        " maintain unique cultural practices and modest magical traditions."
+        "Eandroth are a reclusive folk known for resilience and craft. They" +
+        " maintain unique cultural practices and modest magical traditions." +
         " Expand this stub from source material as needed."
     );
     

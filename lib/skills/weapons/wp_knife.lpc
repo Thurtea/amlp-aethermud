@@ -10,9 +10,9 @@ void create() {
     set_skill_id("wp_knife");
     set_skill_name("W.P. Knife");
     set_skill_desc(
-        "Training in the use of knives, daggers, and similar small bladed "
-        "weapons. Includes combat techniques, throwing, and maintenance. "
-        "Provides +1 to strike at level 1, and additional bonuses as "
+        "Training in the use of knives, daggers, and similar small bladed " +
+        "weapons. Includes combat techniques, throwing, and maintenance. " +
+        "Provides +1 to strike at level 1, and additional bonuses as " +
         "the skill improves."
     );
     set_skill_category("weapon");

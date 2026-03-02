@@ -9,9 +9,9 @@ void create() {
 
     set_short("The Elevator");
     set_long(
-        "A circular chamber with a polished marble floor. In the center\n"
-        "stands an ornate brass elevator cage with crystal-paneled doors.\n"
-        "The elevator provides access to the various wizard offices on\n"
+        "A circular chamber with a polished marble floor. In the center\n" +
+        "stands an ornate brass elevator cage with crystal-paneled doors.\n" +
+        "The elevator provides access to the various wizard offices on\n" +
         "the upper floors of the castle."
     );
 
@@ -79,20 +79,20 @@ int examine_elevator(string str) {
     if (!str) return 0;
     if (str == "elevator" || str == "cage" || str == "doors") {
         write(
-            "An ornate brass elevator with crystal-paneled doors. The\n"
-            "mechanism is magical rather than mechanical - no cables or\n"
-            "pulleys, just pure arcane engineering. The buttons glow\n"
+            "An ornate brass elevator with crystal-paneled doors. The\n" +
+            "mechanism is magical rather than mechanical - no cables or\n" +
+            "pulleys, just pure arcane engineering. The buttons glow\n" +
             "softly, each in its role's color.\n"
         );
         return 1;
     }
     if (str == "buttons" || str == "button") {
         write(
-            "Four buttons, each glowing a different color:\n"
-            "  Blue   - Domain Office\n"
-            "  Cyan   - Coding Office\n"
-            "  Green  - Roleplay Office\n"
-            "  Red    - Admin Office\n"
+            "Four buttons, each glowing a different color:\n" +
+            "  Blue   - Domain Office\n" +
+            "  Cyan   - Coding Office\n" +
+            "  Green  - Roleplay Office\n" +
+            "  Red    - Admin Office\n" +
             "Type 'press <name>' or just use the exit direction.\n"
         );
         return 1;

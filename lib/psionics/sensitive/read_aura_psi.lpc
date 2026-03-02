@@ -17,12 +17,12 @@ void create() {
     
     set_short_description("Psychically perceives the aura of a target.");
     set_long_description(
-        "This psionic ability allows the psychic to perceive the energy aura "
-        "surrounding a living being. The aura reveals the target's true nature, "
-        "emotional state, power level, and any deceptions or disguises. This is "
-        "the psionic equivalent of the Read Aura spell.\n\n"
-        "Duration: Instant\n"
-        "Range: 60 feet\n"
+        "This psionic ability allows the psychic to perceive the energy aura " +
+        "surrounding a living being. The aura reveals the target's true nature, " +
+        "emotional state, power level, and any deceptions or disguises. This is " +
+        "the psionic equivalent of the Read Aura spell.\n\n" +
+        "Duration: Instant\n" +
+        "Range: 60 feet\n" +
         "I.S.P.: 4\n"
     );
 }

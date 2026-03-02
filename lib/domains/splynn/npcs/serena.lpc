@@ -14,12 +14,12 @@ void create() {
     set_id(({"serena", "woman", "psi-sensitive", "seer", "psychic", "seeress"}));
     set_short("Serena the Psi-Sensitive");
     set_long(
-        "A slender woman of indeterminate age, dressed in deep violet robes\n"
-        "trimmed with silver thread. Her eyes — an unsettling pale grey — have\n"
-        "an unfocused quality, as though she perceives layers of reality\n"
-        "invisible to ordinary senses. A faint shimmer of psychic energy\n"
-        "surrounds her like a heat mirage. She glances at you briefly,\n"
-        "acknowledges your presence with a slight tilt of her head, then\n"
+        "A slender woman of indeterminate age, dressed in deep violet robes\n" +
+        "trimmed with silver thread. Her eyes — an unsettling pale grey — have\n" +
+        "an unfocused quality, as though she perceives layers of reality\n" +
+        "invisible to ordinary senses. A faint shimmer of psychic energy\n" +
+        "surrounds her like a heat mirage. She glances at you briefly,\n" +
+        "acknowledges your presence with a slight tilt of her head, then\n" +
         "returns her gaze to some distant, unseen horizon.\n"
     );
 
@@ -41,8 +41,8 @@ void create() {
 }
 
 string query_talk() {
-    return "Serena's pale eyes focus on you.\n"
-        "\"I read what the ley lines carry. For five hundred credits,\n"
-        "I will show you where another soul walks in this world.\n"
+    return "Serena's pale eyes focus on you.\n" +
+        "\"I read what the ley lines carry. For five hundred credits,\n" +
+        "I will show you where another soul walks in this world.\n" +
         "Speak 'remoteview <name>' when you wish to see.\"\n";
 }

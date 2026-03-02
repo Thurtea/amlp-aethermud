@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Trolls are towering, gangly humanoids standing eight to ten feet tall, "
-        "with long arms, warty green skin, and a hunched posture that belies their "
-        "terrifying speed when provoked. They are best known for their extraordinary "
-        "regenerative abilities, which allow them to regrow severed limbs and recover "
-        "from wounds that would kill lesser beings. Trolls are driven by a ravenous "
-        "hunger that dominates their behavior, making them aggressive and territorial. "
-        "While often dismissed as dim-witted brutes, trolls possess a feral cunning "
+        "Trolls are towering, gangly humanoids standing eight to ten feet tall, " +
+        "with long arms, warty green skin, and a hunched posture that belies their " +
+        "terrifying speed when provoked. They are best known for their extraordinary " +
+        "regenerative abilities, which allow them to regrow severed limbs and recover " +
+        "from wounds that would kill lesser beings. Trolls are driven by a ravenous " +
+        "hunger that dominates their behavior, making them aggressive and territorial. " +
+        "While often dismissed as dim-witted brutes, trolls possess a feral cunning " +
         "that makes them dangerous predators in the wilderness of Rifts Earth."
     );
 

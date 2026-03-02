@@ -186,17 +186,16 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"EXAMINE - Examine something in detail\n\n"
-"Usage:\n"
-"  examine <target>    Examine object, person, or room\n"
-"  examine room        Examine current room\n"
-"  examine             Same as 'examine room'\n\n"
-"Examples:\n"
-"  examine sword\n"
-"  examine guard\n"
-"  examine room\n\n"
-"Provides detailed information about the target, including\n"
-"condition, properties, and special features.\n\n"
+    return "EXAMINE - Examine something in detail\n\n" +
+"Usage:\n" +
+"  examine <target>    Examine object, person, or room\n" +
+"  examine room        Examine current room\n" +
+"  examine             Same as 'examine room'\n\n" +
+"Examples:\n" +
+"  examine sword\n" +
+"  examine guard\n" +
+"  examine room\n\n" +
+"Provides detailed information about the target, including\n" +
+"condition, properties, and special features.\n\n" +
 "See also: LOOK, INSPECT\n";
 }

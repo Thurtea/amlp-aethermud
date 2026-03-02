@@ -9,11 +9,11 @@ void create() {
     set_spell_id("impenetrable_wall");
     set_spell_name("Impenetrable Wall of Force");
     set_spell_desc(
-        "This spell creates a shimmering wall of light that no creature, "
-        "weapon, or object may penetrate. Only a Dispel Magic Barrier spell "
-        "or a powerful Negate Magic invocation can destroy the wall. "
-        "The wall measures 20 x 20 feet per level of experience. "
-        "It can be cast up to 100 feet away. "
+        "This spell creates a shimmering wall of light that no creature, " +
+        "weapon, or object may penetrate. Only a Dispel Magic Barrier spell " +
+        "or a powerful Negate Magic invocation can destroy the wall. " +
+        "The wall measures 20 x 20 feet per level of experience. " +
+        "It can be cast up to 100 feet away. " +
         "Duration: 5 melees per level of experience."
     );
 
@@ -49,10 +49,10 @@ int apply_effect(object caster, object target) {
     int wall_size = level * 20;
 
     tell_object(caster,
-        "A blazing wall of pure white force erupts from the air before you, "
-        "spanning " + wall_size + " x " + wall_size + " feet. Nothing can pass through "
-        "- no creature, weapon, or force may penetrate it. Only Dispel Magic "
-        "Barrier or Negate Magic can bring it down.\n"
+        "A blazing wall of pure white force erupts from the air before you, " +
+        "spanning " + wall_size + " x " + wall_size + " feet. Nothing can pass through " +
+        "- no creature, weapon, or force may penetrate it. Only Dispel Magic " +
+        "Barrier or Negate Magic can bring it down.\n" +
         "Duration: " + (level * 5) + " melees.\n");
 
     tell_room(env,

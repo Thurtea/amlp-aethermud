@@ -9,10 +9,10 @@ void create() {
     
     set_short("Far Shore of Crystal Lake");
     set_long(
-        "You have reached the far shore of Crystal Lake. The water laps gently "
-        "at the sandy beach behind you. A dense forest rises ahead to the east, "
-        "and you can see the shore you came from across the water to the south.\n\n"
-        "On the ground, half-buried in the sand, you notice something metallic "
+        "You have reached the far shore of Crystal Lake. The water laps gently " +
+        "at the sandy beach behind you. A dense forest rises ahead to the east, " +
+        "and you can see the shore you came from across the water to the south.\n\n" +
+        "On the ground, half-buried in the sand, you notice something metallic " +
         "glinting in the sunlight.\n"
     );
     

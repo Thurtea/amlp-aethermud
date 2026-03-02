@@ -10,14 +10,14 @@ void create() {
     set_power_id("telekinetic_push");
     set_power_name("Telekinetic Push");
     set_power_desc(
-        "The psychic generates a focused pulse of telekinetic force that "
-        "shoves a person or object away at range. The push is sudden and "
-        "powerful, capable of knocking a person off their feet, pushing "
-        "them away from the psychic, or disrupting an attack. The target "
-        "is thrown 1d6x10 feet and must make a Prowl roll or fall prone. "
-        "Can also be used to push objects, open doors, or clear obstacles.\n\n"
-        "Range: 60 feet\n"
-        "ISP Cost: 4 points\n"
+        "The psychic generates a focused pulse of telekinetic force that " +
+        "shoves a person or object away at range. The push is sudden and " +
+        "powerful, capable of knocking a person off their feet, pushing " +
+        "them away from the psychic, or disrupting an attack. The target " +
+        "is thrown 1d6x10 feet and must make a Prowl roll or fall prone. " +
+        "Can also be used to push objects, open doors, or clear obstacles.\n\n" +
+        "Range: 60 feet\n" +
+        "ISP Cost: 4 points\n" +
         "Duration: Instant (one burst of force)"
     );
     set_power_category("physical");
@@ -42,7 +42,7 @@ int apply_effect(object user, object target) {
     string fell_msg = fell ? " They stumble and fall!" : "";
     tell_object(user, "You release a burst of telekinetic force at " +
         target->query_cap_name() + ". They are shoved back hard!" + fell_msg + "\n");
-    tell_object(target, "An invisible force slams into you like a wall, "
+    tell_object(target, "An invisible force slams into you like a wall, " +
         "throwing you back " + push_dist + " feet!" + fell_msg + "\n");
     tell_room(environment(user),
         user->query_cap_name() + " gestures sharply. " + target->query_cap_name() +

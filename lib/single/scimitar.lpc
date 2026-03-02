@@ -15,11 +15,11 @@ void create() {
 
     set_short("a curved scimitar");
     set_long(
-        "A gracefully curved single-edged blade from the pre-Rifts era, "
-        "its steel still bright and keen despite its age. The bone handle "
-        "is wrapped in cracked leather, and a stylized bird of prey is "
-        "etched near the guard -- faded but unmistakable. A blade this "
-        "well-preserved is rare; a falconer might part with something "
+        "A gracefully curved single-edged blade from the pre-Rifts era, " +
+        "its steel still bright and keen despite its age. The bone handle " +
+        "is wrapped in cracked leather, and a stylized bird of prey is " +
+        "etched near the guard -- faded but unmistakable. A blade this " +
+        "well-preserved is rare; a falconer might part with something " +
         "extraordinary for it.\n"
     );
 

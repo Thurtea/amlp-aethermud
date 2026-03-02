@@ -22,13 +22,8 @@ int main(string args) {
         resolved += ".lpc";
     }
     
-    catch {
-        ob = load_object(resolved);
-    } : {
-        tell_object(player, "Error: Failed to load " + resolved + "\n");
-        return 1;
-    }
-    
+    catch { ob = load_object(resolved); };
+
     if (!ob) {
         tell_object(player, "Error: Load failed\n");
         return 1;
@@ -45,10 +40,9 @@ void help() {
 }
 
 string query_help() {
-    return
-"LOAD - Load an object into memory\n\n"
-"Usage:\n"
-"  load <object_path>   Load a file into memory for inspection\n\n"
-"Loads the specified LPC file into the driver without cloning. Useful\n"
+    return "LOAD - Load an object into memory\n\n" +
+"Usage:\n" +
+"  load <object_path>   Load a file into memory for inspection\n\n" +
+"Loads the specified LPC file into the driver without cloning. Useful\n" +
 "for testing and debugging builder-created files.\n";
 }

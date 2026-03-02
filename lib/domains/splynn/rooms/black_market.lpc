@@ -15,12 +15,12 @@ void create() {
 
     set_short("Black Market Stall");
     set_long(
-        "A low alcove carved behind the pillar, just large enough for two\\n"
-        "people and a folding table. A single salvaged lantern hangs from a\\n"
-        "hook, casting everything in amber. The table is bare except for a\\n"
-        "scratched datapad displaying prices, and a lockbox bolted to the\\n"
-        "floor. Whoever operates this stall has been doing it for a long\\n"
-        "time — the floor is worn smooth in a precise path from the entrance\\n"
+        "A low alcove carved behind the pillar, just large enough for two\\n" +
+        "people and a folding table. A single salvaged lantern hangs from a\\n" +
+        "hook, casting everything in amber. The table is bare except for a\\n" +
+        "scratched datapad displaying prices, and a lockbox bolted to the\\n" +
+        "floor. Whoever operates this stall has been doing it for a long\\n" +
+        "time — the floor is worn smooth in a precise path from the entrance\\n" +
         "to the box. The alley gap to the east is the only way out.\\n"
     );
 

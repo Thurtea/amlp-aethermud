@@ -16,14 +16,14 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Brodkil are massive, demon-blooded humanoids that stand seven to nine "
-        "feet tall with thick grey or mottled skin and pronounced brow ridges. "
-        "They are creatures of supernatural origin who have become permanent "
-        "residents of Rifts Earth, forming brutal tribal communities in the "
-        "wilderness. Known for their extreme cruelty and love of violence, "
-        "Brodkil are natural predators who often augment their already formidable "
-        "bodies with crude cybernetics and bionics. They frequently serve as "
-        "mercenaries and shock troops for anyone willing to pay or provide them "
+        "Brodkil are massive, demon-blooded humanoids that stand seven to nine " +
+        "feet tall with thick grey or mottled skin and pronounced brow ridges. " +
+        "They are creatures of supernatural origin who have become permanent " +
+        "residents of Rifts Earth, forming brutal tribal communities in the " +
+        "wilderness. Known for their extreme cruelty and love of violence, " +
+        "Brodkil are natural predators who often augment their already formidable " +
+        "bodies with crude cybernetics and bionics. They frequently serve as " +
+        "mercenaries and shock troops for anyone willing to pay or provide them " +
         "with opportunities for destruction."
     );
 

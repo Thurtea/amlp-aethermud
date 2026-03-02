@@ -8,7 +8,7 @@ void create() {
     set_name("wizard staff");
     set_short("a polished wizard staff");
     set_long(
-        "A gnarled staff crackling with latent energy. "
+        "A gnarled staff crackling with latent energy. " +
         "Grants 'force', 'invis', and 'vis' commands while carried.\n"
     );
     set_weight(0);

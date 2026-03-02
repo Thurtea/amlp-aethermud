@@ -12,17 +12,17 @@ void create() {
     set_power_id("psi_sword");
     set_power_name("Psi-Sword");
     set_power_desc(
-        "The signature power of the Cyber-Knight, the Psi-Sword is a blade "
-        "of pure psionic energy that can cut through almost anything. The "
-        "psychic focuses their inner strength and projects it as a glowing "
-        "blade of light, typically 3-4 feet long. The sword deals 4d6 M.D. "
-        "per strike and can parry energy blasts and other psi-swords.\n\n"
-        "The blade can take any shape the user desires (sword, axe, spear, "
-        "etc.) but is most commonly manifested as a sword. The weapon is "
-        "semi-solid, made of concentrated psionic energy, and only the "
-        "wielder can hold it.\n\n"
-        "Duration: 1 minute per level of experience.\n"
-        "Damage: 4d6 M.D.\n"
+        "The signature power of the Cyber-Knight, the Psi-Sword is a blade " +
+        "of pure psionic energy that can cut through almost anything. The " +
+        "psychic focuses their inner strength and projects it as a glowing " +
+        "blade of light, typically 3-4 feet long. The sword deals 4d6 M.D. " +
+        "per strike and can parry energy blasts and other psi-swords.\n\n" +
+        "The blade can take any shape the user desires (sword, axe, spear, " +
+        "etc.) but is most commonly manifested as a sword. The weapon is " +
+        "semi-solid, made of concentrated psionic energy, and only the " +
+        "wielder can hold it.\n\n" +
+        "Duration: 1 minute per level of experience.\n" +
+        "Damage: 4d6 M.D.\n" +
         "ISP Cost: 20 to create, maintained at no additional cost."
     );
     set_power_category("super");

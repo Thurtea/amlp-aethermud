@@ -14,9 +14,9 @@ void create() {
     set_related_languages(({ "elven", "sylvan" }));
     
     set_short("Faerie language");
-    set_long("The language of the Fae Courts and the beings that dwell in "
-             "the realms of Faerie. Rich in nuance and double-meanings, "
-             "Faerie is notoriously tricky as the same phrase can mean many "
-             "things depending on context, intent, and even the phase of "
+    set_long("The language of the Fae Courts and the beings that dwell in " +
+             "the realms of Faerie. Rich in nuance and double-meanings, " +
+             "Faerie is notoriously tricky as the same phrase can mean many " +
+             "things depending on context, intent, and even the phase of " +
              "the moon.");
 }

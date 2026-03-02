@@ -168,16 +168,15 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"PSI - Activate psionic powers\n\n"
-"Usage:\n"
-"  psi                             List your powers and I.S.P.\n"
-"  psi <power>                     Use a power (on yourself by default)\n"
-"  psi <power> <target>            Use a power on a target\n"
-"  psi telepathy <person> <msg>    Send a mental message to someone\n"
-"  psi info <power>                Get detailed info about a power\n\n"
-"Psionic powers cost I.S.P. (Inner Strength Points) to activate.\n"
-"I.S.P. regenerates through meditation and rest.\n\n"
-"Psionic categories: Sensitive, Physical, Healing, Super.\n"
+    return "PSI - Activate psionic powers\n\n" +
+"Usage:\n" +
+"  psi                             List your powers and I.S.P.\n" +
+"  psi <power>                     Use a power (on yourself by default)\n" +
+"  psi <power> <target>            Use a power on a target\n" +
+"  psi telepathy <person> <msg>    Send a mental message to someone\n" +
+"  psi info <power>                Get detailed info about a power\n\n" +
+"Psionic powers cost I.S.P. (Inner Strength Points) to activate.\n" +
+"I.S.P. regenerates through meditation and rest.\n\n" +
+"Psionic categories: Sensitive, Physical, Healing, Super.\n" +
 "Your category determines which powers you can learn.\n";
 }

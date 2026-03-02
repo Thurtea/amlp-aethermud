@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Halflings are small, sturdy folk standing three to four feet tall, with "
-        "rounded features, curly hair, and large bare feet that are tougher than "
-        "any boot leather. They are known across the dimensions for their remarkable "
-        "luck, which manifests as an almost supernatural ability to avoid danger and "
-        "find fortune in unlikely places. Halflings are naturally stealthy, moving "
-        "with a quiet grace that belies their portly frames. Though they prefer "
-        "comfort and good food to adventure, when called upon they display a courage "
+        "Halflings are small, sturdy folk standing three to four feet tall, with " +
+        "rounded features, curly hair, and large bare feet that are tougher than " +
+        "any boot leather. They are known across the dimensions for their remarkable " +
+        "luck, which manifests as an almost supernatural ability to avoid danger and " +
+        "find fortune in unlikely places. Halflings are naturally stealthy, moving " +
+        "with a quiet grace that belies their portly frames. Though they prefer " +
+        "comfort and good food to adventure, when called upon they display a courage " +
         "that shames many larger warriors, particularly with thrown weapons and slings."
     );
 

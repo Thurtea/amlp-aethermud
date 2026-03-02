@@ -9,14 +9,14 @@ void create() {
 
     set_short("Wizard Courtyard");
     set_long(
-        "A tranquil courtyard surrounded by ivy-covered stone walls.\n"
-        "The air hums with latent magical energy. A grand archway to\n"
-        "the north leads into the Wizard Castle, where the builders\n"
-        "and administrators of AetherMUD conduct their work.\n\n"
-        "A marble notice board stands near the entrance, listing the\n"
-        "castle's facilities. A path to the south leads back to the\n"
-        "Staff Castle courtyard.\n\n"
-        "Personal workrooms for each wizard are accessed via the\n"
+        "A tranquil courtyard surrounded by ivy-covered stone walls.\n" +
+        "The air hums with latent magical energy. A grand archway to\n" +
+        "the north leads into the Wizard Castle, where the builders\n" +
+        "and administrators of AetherMUD conduct their work.\n\n" +
+        "A marble notice board stands near the entrance, listing the\n" +
+        "castle's facilities. A path to the south leads back to the\n" +
+        "Staff Castle courtyard.\n\n" +
+        "Personal workrooms for each wizard are accessed via the\n" +
         "'home' command from anywhere in the castle."
     );
 

@@ -11,7 +11,7 @@ void create() {
     add_id("leather armor");
     
     short_desc = "a suit of leather armor";
-    long_desc = "This is a well-crafted suit of medium-sized leather armor, "
+    long_desc = "This is a well-crafted suit of medium-sized leather armor, " +
                 "providing basic protection without restricting movement.";
     
     // Phase 2, Step 5b: Size properties

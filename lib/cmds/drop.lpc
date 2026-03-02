@@ -102,14 +102,13 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"DROP - Drop items from your inventory\n\n"
-"Usage:\n"
-"  drop <item>    Drop an item\n"
-"  drop all       Drop all items\n\n"
-"Examples:\n"
-"  drop sword\n"
-"  drop all\n\n"
-"Some items (like quest items) cannot be dropped.\n\n"
+    return "DROP - Drop items from your inventory\n\n" +
+"Usage:\n" +
+"  drop <item>    Drop an item\n" +
+"  drop all       Drop all items\n\n" +
+"Examples:\n" +
+"  drop sword\n" +
+"  drop all\n\n" +
+"Some items (like quest items) cannot be dropped.\n\n" +
 "See also: GET, GIVE, INVENTORY\n";
 }

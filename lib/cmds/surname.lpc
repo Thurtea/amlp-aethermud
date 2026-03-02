@@ -123,25 +123,24 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"SURNAME - Choose your surname (Level 10+)\n\n"
-"Usage:\n"
-"  surname               Show your current surname\n"
-"  surname <name>        Set your surname (one time only)\n\n"
-"Surnames are earned at level 10 and represent your character's\n"
-"legacy and reputation. Once chosen, surnames CANNOT be changed,\n"
-"so choose carefully!\n\n"
-"Surname Rules:\n"
-"  - Must be 2-20 characters long\n"
-"  - Can only contain letters, hyphens, apostrophes, and spaces\n"
-"  - First letter will be automatically capitalized\n"
-"  - Cannot be changed once set\n\n"
-"Examples:\n"
-"  surname Ironheart\n"
-"  surname von Richter\n"
-"  surname O'Brien\n"
-"  surname the Bold\n\n"
-"Your full name will be displayed as: <Firstname> <Surname>\n\n"
-"This is a permanent choice that defines your character's identity!\n\n"
+    return "SURNAME - Choose your surname (Level 10+)\n\n" +
+"Usage:\n" +
+"  surname               Show your current surname\n" +
+"  surname <name>        Set your surname (one time only)\n\n" +
+"Surnames are earned at level 10 and represent your character's\n" +
+"legacy and reputation. Once chosen, surnames CANNOT be changed,\n" +
+"so choose carefully!\n\n" +
+"Surname Rules:\n" +
+"  - Must be 2-20 characters long\n" +
+"  - Can only contain letters, hyphens, apostrophes, and spaces\n" +
+"  - First letter will be automatically capitalized\n" +
+"  - Cannot be changed once set\n\n" +
+"Examples:\n" +
+"  surname Ironheart\n" +
+"  surname von Richter\n" +
+"  surname O'Brien\n" +
+"  surname the Bold\n\n" +
+"Your full name will be displayed as: <Firstname> <Surname>\n\n" +
+"This is a permanent choice that defines your character's identity!\n\n" +
 "See also: STATS, WHO\n";
 }

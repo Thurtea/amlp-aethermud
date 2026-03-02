@@ -14,10 +14,10 @@ void create() {
 
     set_short("a battered PPE talisman");
     set_long(
-        "A palm-sized disc of black glass threaded with veins of glowing\n"
-        "amber crystal. The metal rim is scratched and worn, as though it\n"
-        "has passed through many hands. A faint warmth radiates from it\n"
-        "even through closed fingers. Runes around the edge pulse slowly,\n"
+        "A palm-sized disc of black glass threaded with veins of glowing\n" +
+        "amber crystal. The metal rim is scratched and worn, as though it\n" +
+        "has passed through many hands. A faint warmth radiates from it\n" +
+        "even through closed fingers. Runes around the edge pulse slowly,\n" +
         "storing ambient PPE from the ley lines that cross Splynn.\n"
     );
 

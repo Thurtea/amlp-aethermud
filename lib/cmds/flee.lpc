@@ -131,14 +131,13 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"FLEE - Attempt to escape from combat\n\n"
-"Usage:\n"
-"  flee              Flee in a random direction\n"
-"  flee <direction>  Flee in a specific direction\n\n"
-"When in combat, you can attempt to flee to escape. Success\n"
-"depends on your PP (Physical Prowess/Dexterity) stat.\n\n"
-"If you fail to flee, your opponent gets a free attack on you\n"
-"as you turn to run!\n\n"
+    return "FLEE - Attempt to escape from combat\n\n" +
+"Usage:\n" +
+"  flee              Flee in a random direction\n" +
+"  flee <direction>  Flee in a specific direction\n\n" +
+"When in combat, you can attempt to flee to escape. Success\n" +
+"depends on your PP (Physical Prowess/Dexterity) stat.\n\n" +
+"If you fail to flee, your opponent gets a free attack on you\n" +
+"as you turn to run!\n\n" +
 "Related commands: ATTACK, KILL\n";
 }

@@ -42,12 +42,11 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"GROUP - Manage your adventuring group\n\n"
-"Usage:\n"
-"  group                  List your current group members\n"
-"  group <name>           Invite someone to your group\n"
-"  group join <name>      Accept a group invitation\n"
-"  group leave            Leave your current group\n\n"
+    return "GROUP - Manage your adventuring group\n\n" +
+"Usage:\n" +
+"  group                  List your current group members\n" +
+"  group <name>           Invite someone to your group\n" +
+"  group join <name>      Accept a group invitation\n" +
+"  group leave            Leave your current group\n\n" +
 "Groups allow coordinated combat and shared experience.\n";
 }

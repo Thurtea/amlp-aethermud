@@ -15,9 +15,9 @@ void create() {
     
     set_short("a fear spell");
     set_long(
-        "Fear fills the victim with overwhelming terror. The victim must make "
-        "a saving throw vs magic or be paralyzed with fear for 1 melee round, "
-        "then flee for 1D4+1 melees. Even after fleeing, the victim is -2 on "
+        "Fear fills the victim with overwhelming terror. The victim must make " +
+        "a saving throw vs magic or be paralyzed with fear for 1 melee round, " +
+        "then flee for 1D4+1 melees. Even after fleeing, the victim is -2 on " +
         "all combat rolls for 2D4 melee rounds. Costs 5 P.P.E. to cast."
     );
     

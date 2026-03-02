@@ -15,8 +15,8 @@ void create() {
     
     set_short("a blinding flash spell");
     set_long(
-        "Blinding Flash creates a sudden, brilliant burst of light that "
-        "temporarily blinds all who see it. Those affected are -8 to strike, "
+        "Blinding Flash creates a sudden, brilliant burst of light that " +
+        "temporarily blinds all who see it. Those affected are -8 to strike, " +
         "parry, and dodge for 1D4 melees. Costs 1 P.P.E. to cast."
     );
     

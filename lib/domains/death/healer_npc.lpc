@@ -10,8 +10,8 @@ void create() {
     set_id(({"healer", "hooded healer", "figure"}));
     set_short("a hooded healer");
     set_long(
-        "This mysterious figure wears a hooded robe that obscures their face. They move " 
-        "silently about the chamber, tending to the deceased and preparing them for their " 
+        "This mysterious figure wears a hooded robe that obscures their face. They move " +
+        "silently about the chamber, tending to the deceased and preparing them for their " +
         "return to the world of the living. Their hands glow with soft healing energy.\n"
     );
     

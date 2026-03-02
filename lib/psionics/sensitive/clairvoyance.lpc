@@ -10,12 +10,12 @@ void create() {
     set_power_id("clairvoyance");
     set_power_name("Clairvoyance");
     set_power_desc(
-        "The psychic receives spontaneous visions of distant or future events, or can "
-        "deliberately attempt to sense a known location. In its passive form, random "
-        "clairvoyant flashes come as impressions of danger, tragedy, or joy linked to "
-        "someone the psychic cares about. In its active form, the psychic concentrates on "
-        "a known person or place and receives glimpses of their current condition. Visions "
-        "are symbolic and fragmentary, never precise. Particularly powerful visions may "
+        "The psychic receives spontaneous visions of distant or future events, or can " +
+        "deliberately attempt to sense a known location. In its passive form, random " +
+        "clairvoyant flashes come as impressions of danger, tragedy, or joy linked to " +
+        "someone the psychic cares about. In its active form, the psychic concentrates on " +
+        "a known person or place and receives glimpses of their current condition. Visions " +
+        "are symbolic and fragmentary, never precise. Particularly powerful visions may " +
         "reveal imminent dangers (game master's discretion). I.S.P. cost 4; duration varies."
     );
     set_power_category("sensitive");

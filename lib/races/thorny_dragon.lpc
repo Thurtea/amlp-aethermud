@@ -16,15 +16,15 @@ void create() {
     set_race_category(RACE_CAT_DRAGON);
 
     set_race_description(
-        "Thorny Dragons are a smaller but extremely dangerous dragon subspecies "
-        "distinguished by the dense covering of razor-sharp spikes, bony ridges, "
-        "and barbed thorns that cover their entire body. Ranging from fifteen to "
-        "twenty-five feet in length, they lack the overwhelming magical aptitude "
-        "of their larger cousins but compensate with extraordinary natural armor "
-        "and devastating physical attacks. Their spiked hide inflicts mega-damage "
-        "on anything that strikes them in melee, and their powerful tail is lined "
-        "with barbs capable of shredding power armor. Thorny Dragons are prized "
-        "as mounts by those bold enough to earn their trust, though most who try "
+        "Thorny Dragons are a smaller but extremely dangerous dragon subspecies " +
+        "distinguished by the dense covering of razor-sharp spikes, bony ridges, " +
+        "and barbed thorns that cover their entire body. Ranging from fifteen to " +
+        "twenty-five feet in length, they lack the overwhelming magical aptitude " +
+        "of their larger cousins but compensate with extraordinary natural armor " +
+        "and devastating physical attacks. Their spiked hide inflicts mega-damage " +
+        "on anything that strikes them in melee, and their powerful tail is lined " +
+        "with barbs capable of shredding power armor. Thorny Dragons are prized " +
+        "as mounts by those bold enough to earn their trust, though most who try " +
         "end up impaled on their spines."
     );
 

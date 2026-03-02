@@ -24,8 +24,7 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-        "CRYSTAL - Server Monitor\n\n" +
+    return "CRYSTAL - Server Monitor\n\n" +
         "Usage: crystal [subcommand]\n\n" +
         "  crystal            Show server status summary\n" +
         "  crystal status     Same as above\n" +

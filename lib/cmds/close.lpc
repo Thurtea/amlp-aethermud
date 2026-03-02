@@ -14,9 +14,8 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"CLOSE - Close a door or container\n\n"
-"Usage:\n"
-"  close <object>     Close an open container or door\n\n"
+    return "CLOSE - Close a door or container\n\n" +
+"Usage:\n" +
+"  close <object>     Close an open container or door\n\n" +
 "Closing a container does not lock it. Use 'lock' to lock it.\n";
 }

@@ -67,12 +67,11 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"ATTACK - Initiate combat with a target\n\n"
-"Usage:\n"
-"  attack <target>    Attack a creature or character\n"
-"  kill <target>      Alias for attack\n\n"
-"Combat begins immediately and continues automatically every 3 seconds.\n"
-"The NPC will retaliate - watch your health!\n\n"
+    return "ATTACK - Initiate combat with a target\n\n" +
+"Usage:\n" +
+"  attack <target>    Attack a creature or character\n" +
+"  kill <target>      Alias for attack\n\n" +
+"Combat begins immediately and continues automatically every 3 seconds.\n" +
+"The NPC will retaliate - watch your health!\n\n" +
 "Related commands: FLEE, SCORE (shows health)\n";
 }

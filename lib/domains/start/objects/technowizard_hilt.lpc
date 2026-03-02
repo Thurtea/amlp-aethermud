@@ -17,11 +17,11 @@ void create() {
     set_id(({"hilt", "metal hilt", "sword hilt", "technowizard hilt"}));
     set_short("a metallic sword hilt");
     set_long(
-        "This is an ornate metallic sword hilt, about a foot long, made of "
-        "a strange silvery alloy covered in glowing runes and techno-magical "
-        "circuitry. The hilt is cold to the touch and thrums with latent "
-        "magical energy. There is no blade attached - just the hilt itself.\n\n"
-        "Etched into the pommel are the words: 'Charge with P.P.E.'\n\n"
+        "This is an ornate metallic sword hilt, about a foot long, made of " +
+        "a strange silvery alloy covered in glowing runes and techno-magical " +
+        "circuitry. The hilt is cold to the touch and thrums with latent " +
+        "magical energy. There is no blade attached - just the hilt itself.\n\n" +
+        "Etched into the pommel are the words: 'Charge with P.P.E.'\n\n" +
         "The hilt " + (charged ? "blazes with a flaming energy blade!" : 
                                  "is currently inactive.") + "\n"
     );
@@ -164,11 +164,11 @@ int activate_blade(string str) {
     
     set_short("a flaming techno-wizard sword");
     set_long(
-        "This techno-wizard weapon consists of an ornate metallic hilt from which "
-        "blazes a three-foot blade of pure flame and magical energy! "
-        "The blade crackles and hisses, casting flickering red light. Runes along "
-        "the hilt pulse with power.\n\n"
-        "The blade will last approximately " + blade_duration + " minutes before "
+        "This techno-wizard weapon consists of an ornate metallic hilt from which " +
+        "blazes a three-foot blade of pure flame and magical energy! " +
+        "The blade crackles and hisses, casting flickering red light. Runes along " +
+        "the hilt pulse with power.\n\n" +
+        "The blade will last approximately " + blade_duration + " minutes before " +
         "the P.P.E. is depleted.\n"
     );
     
@@ -215,12 +215,12 @@ int deactivate_blade(string str) {
     
     set_short("a metallic sword hilt");
     set_long(
-        "This is an ornate metallic sword hilt, about a foot long, made of "
-        "a strange silvery alloy covered in glowing runes and techno-magical "
-        "circuitry. The hilt is cold to the touch and thrums with latent "
-        "magical energy. There is no blade attached - just the hilt itself.\n\n"
-        "Etched into the pommel are the words: 'Charge with P.P.E.'\n\n"
-        "The hilt is currently inactive.\n"
+        "This is an ornate metallic sword hilt, about a foot long, made of " +
+        "a strange silvery alloy covered in glowing runes and techno-magical " +
+        "circuitry. The hilt is cold to the touch and thrums with latent " +
+        "magical energy. There is no blade attached - just the hilt itself.\n\n" +
+        "Etched into the pommel are the words: 'Charge with P.P.E.'\n\n" +
+        "The hilt is currently inactive.\n" +
         "P.P.E. remaining: " + ppe_stored + "/" + max_ppe_storage + "\n"
     );
     
@@ -263,11 +263,11 @@ void drain_ppe() {
         
         set_short("a metallic sword hilt");
         set_long(
-            "This is an ornate metallic sword hilt, about a foot long, made of "
-            "a strange silvery alloy covered in glowing runes and techno-magical "
-            "circuitry. The hilt is cold to the touch and thrums with latent "
-            "magical energy. There is no blade attached - just the hilt itself.\n\n"
-            "Etched into the pommel are the words: 'Charge with P.P.E.'\n\n"
+            "This is an ornate metallic sword hilt, about a foot long, made of " +
+            "a strange silvery alloy covered in glowing runes and techno-magical " +
+            "circuitry. The hilt is cold to the touch and thrums with latent " +
+            "magical energy. There is no blade attached - just the hilt itself.\n\n" +
+            "Etched into the pommel are the words: 'Charge with P.P.E.'\n\n" +
             "The hilt is currently inactive and depleted of P.P.E.\n"
         );
         

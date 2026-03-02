@@ -20,10 +20,9 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"KILL - Initiate combat with a target\n\n"
-"This is an alias for the ATTACK command.\n\n"
-"Usage:\n"
-"  kill <target>    Attack a creature or character\n\n"
+    return "KILL - Initiate combat with a target\n\n" +
+"This is an alias for the ATTACK command.\n\n" +
+"Usage:\n" +
+"  kill <target>    Attack a creature or character\n\n" +
 "See 'help attack' for more information.\n";
 }

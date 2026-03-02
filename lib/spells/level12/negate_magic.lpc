@@ -9,13 +9,13 @@ void create() {
     set_spell_id("negate_magic");
     set_spell_name("Negate Magic");
     set_spell_desc(
-        "The mage creates a field of anti-magical energy that suppresses all "
-        "active spells, wards, and magical effects within a 20-foot radius. "
-        "Ongoing spells are cancelled for the duration; wards and glyphs are "
-        "temporarily deactivated but not destroyed. No new spells can be cast "
-        "within the field while it is active and the caster concentrates. "
-        "The effect lasts 1 minute per level or until the caster breaks "
-        "concentration. The caster can also target a single magical effect "
+        "The mage creates a field of anti-magical energy that suppresses all " +
+        "active spells, wards, and magical effects within a 20-foot radius. " +
+        "Ongoing spells are cancelled for the duration; wards and glyphs are " +
+        "temporarily deactivated but not destroyed. No new spells can be cast " +
+        "within the field while it is active and the caster concentrates. " +
+        "The effect lasts 1 minute per level or until the caster breaks " +
+        "concentration. The caster can also target a single magical effect " +
         "instead of using area-of-effect mode."
     );
 
@@ -58,14 +58,14 @@ int apply_effect(object caster, object target) {
 
     // Area mode: affect all living in the room
     tell_object(caster,
-        "You unleash a pulse of anti-magic. All spells in the area are suppressed!\n"
+        "You unleash a pulse of anti-magic. All spells in the area are suppressed!\n" +
         "Duration: " + level + " minutes\n");
 
     if (env) {
         foreach (object ob : all_inventory(env)) {
             if (ob != caster && living(ob)) {
                 tell_object(ob,
-                    "A wave of anti-magical force crashes through the area! "
+                    "A wave of anti-magical force crashes through the area! " +
                     "Your active magic effects are suppressed!\n");
                 ob->set_property("magic_negated", 1);
                 call_out("end_negate_magic_target", duration_secs, ob);

@@ -17,13 +17,13 @@ void create() {
     set_race_category(RACE_CAT_DRAGON);
 
     set_race_description(
-        "Ancient Dragons are primordial wyrms of staggering power, having "
-        "survived for tens of thousands of years through cunning, magic, and "
-        "raw might. Their colossal forms can stretch over a hundred feet from "
-        "snout to tail, and their scales are harder than the strongest mega-damage "
-        "alloys known to science. They command powerful magic as naturally as "
-        "breathing, and their intellect rivals or surpasses the greatest mortal "
-        "scholars. Few beings in the Megaverse can challenge an Ancient Dragon "
+        "Ancient Dragons are primordial wyrms of staggering power, having " +
+        "survived for tens of thousands of years through cunning, magic, and " +
+        "raw might. Their colossal forms can stretch over a hundred feet from " +
+        "snout to tail, and their scales are harder than the strongest mega-damage " +
+        "alloys known to science. They command powerful magic as naturally as " +
+        "breathing, and their intellect rivals or surpasses the greatest mortal " +
+        "scholars. Few beings in the Megaverse can challenge an Ancient Dragon " +
         "and hope to survive."
     );
 

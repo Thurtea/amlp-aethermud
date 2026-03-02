@@ -10,8 +10,8 @@ void create() {
     set_id(({"armor", "medium armor", "medium", "platemail", "armor"}));
     set_short("medium combat armor");
     set_long(
-        "This medium armor provides a good balance between protection and mobility. "
-        "It consists of reinforced plates covering vital areas, with flexible joints "
+        "This medium armor provides a good balance between protection and mobility. " +
+        "It consists of reinforced plates covering vital areas, with flexible joints " +
         "allowing for reasonable movement. Popular among soldiers and mercenaries.\n"
     );
     

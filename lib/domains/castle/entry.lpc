@@ -9,12 +9,12 @@ void create() {
     
     set_short("Castle Entry Hall");
     set_long(
-        "You stand in the grand entry hall of the Wizard's Castle. Tall stone "
-        "pillars support a vaulted ceiling, and magical torches flicker with "
-        "eternal flames. To the north is the throne room, and passages lead "
-        "east and west to various castle chambers.\n\n"
-        "A path south leads back to the village.\n\n"
-        "Spike the Dog Boy stands guard here, and you can see a magnificent "
+        "You stand in the grand entry hall of the Wizard's Castle. Tall stone " +
+        "pillars support a vaulted ceiling, and magical torches flicker with " +
+        "eternal flames. To the north is the throne room, and passages lead " +
+        "east and west to various castle chambers.\n\n" +
+        "A path south leads back to the village.\n\n" +
+        "Spike the Dog Boy stands guard here, and you can see a magnificent " +
         "hawk perched on a stand nearby.\n"
     );
     

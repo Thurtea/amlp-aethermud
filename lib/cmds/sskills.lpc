@@ -36,11 +36,10 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"SSKILLS - Show your secondary skills\n\n"
-"Usage:\n"
-"  sskills    List all secondary skills\n\n"
-"Displays skills selected outside of your O.C.C. package.\n"
-"Secondary skills are chosen in consultation with an RP-Wizard.\n\n"
+    return "SSKILLS - Show your secondary skills\n\n" +
+"Usage:\n" +
+"  sskills    List all secondary skills\n\n" +
+"Displays skills selected outside of your O.C.C. package.\n" +
+"Secondary skills are chosen in consultation with an RP-Wizard.\n\n" +
 "See also: pskills, occs, help skills\n";
 }

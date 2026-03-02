@@ -11,14 +11,14 @@ void create() {
     set_skill_display_name("Pilot: Aircraft");
     set_short("the ability to pilot aircraft");
     set_long(
-        "Pilot: Aircraft allows you to operate jets, helicopters, combat aircraft, "
-        "and other flying vehicles. This includes both military and civilian aircraft, "
-        "from simple prop planes to advanced VTOL fighters.\n\n"
-        "The skill covers: takeoff and landing, navigation, combat maneuvers, instrument "
-        "reading, weather flying, and emergency procedures. Advanced aircraft require "
-        "higher skill percentages.\n\n"
-        "Base: 30% + 4% per level\n"
-        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Pilot: Aircraft allows you to operate jets, helicopters, combat aircraft, " +
+        "and other flying vehicles. This includes both military and civilian aircraft, " +
+        "from simple prop planes to advanced VTOL fighters.\n\n" +
+        "The skill covers: takeoff and landing, navigation, combat maneuvers, instrument " +
+        "reading, weather flying, and emergency procedures. Advanced aircraft require " +
+        "higher skill percentages.\n\n" +
+        "Base: 30% + 4% per level\n" +
+        "Bonus: +5% per point of Physical Prowess above 16\n" +
         "Related Stat: Physical Prowess"
     );
     

@@ -10,7 +10,8 @@
 int main(string args) {
     object player = previous_object();
     string filepath, resolved, content;
-    string *parts, *lines;
+    string *parts;
+    string *lines;
     int num_lines = 10; // Default: show first 10 lines
     int i;
     
@@ -102,11 +103,10 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"HEAD - Show start of file\n\n"
-"Usage:\n"
-"  head <file>           Show the first lines of a file\n\n"
-"Useful for quickly previewing file headers and metadata in workspace\n"
+    return "HEAD - Show start of file\n\n" +
+"Usage:\n" +
+"  head <file>           Show the first lines of a file\n\n" +
+"Useful for quickly previewing file headers and metadata in workspace\n" +
 "files.\n";
 }
 

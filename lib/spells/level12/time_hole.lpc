@@ -9,13 +9,13 @@ void create() {
     set_spell_id("time_hole");
     set_spell_name("Time Hole");
     set_spell_desc(
-        "The mage teleports himself and his possessions into a stasis field "
-        "in a limbo-like dimension - a white void. Within the time hole, the "
-        "wizard controls a 20-foot area per level of experience and cannot go "
-        "beyond it. The mage can effectively disappear for days or weeks, "
-        "undetectable and unreachable. This is how men of magic recover from "
-        "physical damage or restore exhausted PPE reserves in safety. "
-        "The mage can end the effect at will by willing himself to return. "
+        "The mage teleports himself and his possessions into a stasis field " +
+        "in a limbo-like dimension - a white void. Within the time hole, the " +
+        "wizard controls a 20-foot area per level of experience and cannot go " +
+        "beyond it. The mage can effectively disappear for days or weeks, " +
+        "undetectable and unreachable. This is how men of magic recover from " +
+        "physical damage or restore exhausted PPE reserves in safety. " +
+        "The mage can end the effect at will by willing himself to return. " +
         "Duration: Indefinite until the mage chooses to leave."
     );
 
@@ -54,7 +54,7 @@ int apply_effect(object caster, object target) {
         if (dest) caster->move_player(dest);
 
         tell_object(caster,
-            "You will yourself back to reality. The white void fades and the "
+            "You will yourself back to reality. The white void fades and the " +
             "world snaps back into focus around you.\n");
         return 1;
     }
@@ -79,8 +79,8 @@ int apply_effect(object caster, object target) {
     }
 
     tell_object(caster,
-        "The world dissolves around you. You stand in a featureless white void - "
-        "a pocket between moments. Time passes, but you are untouchable here.\n"
+        "The world dissolves around you. You stand in a featureless white void - " +
+        "a pocket between moments. Time passes, but you are untouchable here.\n" +
         "You may recover and rest safely. Cast 'time hole' again to return.\n");
 
     if (env)

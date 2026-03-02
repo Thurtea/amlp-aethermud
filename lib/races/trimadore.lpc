@@ -14,7 +14,7 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "Trimadore are a rugged folk from frontier lands. This placeholder"
+        "Trimadore are a rugged folk from frontier lands. This placeholder" +
         " provides conservative defaults; expand with canonical details."
     );
     

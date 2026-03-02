@@ -17,13 +17,13 @@ void create() {
     set_race_category(RACE_CAT_PSIONIC);
 
     set_race_description(
-        "Psi-Ghosts are extraordinarily rare human psychics born with the ability "
-        "to render themselves intangible, invisible, and capable of phasing through "
-        "solid matter using nothing but the power of their minds. They can project "
-        "their consciousness onto the astral plane, becoming true ghost-like entities "
-        "that are nearly impossible to detect or harm by conventional means. Their "
-        "physical bodies tend to be frail and underdeveloped, as their psionic gifts "
-        "manifest at the expense of corporeal strength, making them vulnerable when "
+        "Psi-Ghosts are extraordinarily rare human psychics born with the ability " +
+        "to render themselves intangible, invisible, and capable of phasing through " +
+        "solid matter using nothing but the power of their minds. They can project " +
+        "their consciousness onto the astral plane, becoming true ghost-like entities " +
+        "that are nearly impossible to detect or harm by conventional means. Their " +
+        "physical bodies tend to be frail and underdeveloped, as their psionic gifts " +
+        "manifest at the expense of corporeal strength, making them vulnerable when " +
         "they cannot maintain their ethereal state."
     );
 

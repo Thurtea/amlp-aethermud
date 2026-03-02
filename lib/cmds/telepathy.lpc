@@ -73,12 +73,11 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"TELEPATHY - Send a mental message\n\n"
-"Usage:\n"
-"  telepathy <person> <message>    Send a telepathic message\n\n"
-"Requires the Telepathy psionic power.\n"
-"Uses I.S.P. (Inner Strength Points).\n\n"
-"Also available as: psi telepathy <person> <message>\n"
+    return "TELEPATHY - Send a mental message\n\n" +
+"Usage:\n" +
+"  telepathy <person> <message>    Send a telepathic message\n\n" +
+"Requires the Telepathy psionic power.\n" +
+"Uses I.S.P. (Inner Strength Points).\n\n" +
+"Also available as: psi telepathy <person> <message>\n" +
 "To read surface thoughts: psi telepathy <target>\n";
 }

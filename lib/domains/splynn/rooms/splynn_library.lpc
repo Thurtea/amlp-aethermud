@@ -12,10 +12,10 @@ void create() {
 
     set_short("Splynn Public Archive");
     set_long(
-        "Rows of shelves holding data-slates, bound manuscripts, and recovered\n"
-        "pre-Rifts documents stretch from floor to ceiling. A reading table sits\n"
-        "under harsh white lights in the center of the room. The archive is\n"
-        "surprisingly well-maintained for a city like Splynn. A glass case near\n"
+        "Rows of shelves holding data-slates, bound manuscripts, and recovered\n" +
+        "pre-Rifts documents stretch from floor to ceiling. A reading table sits\n" +
+        "under harsh white lights in the center of the room. The archive is\n" +
+        "surprisingly well-maintained for a city like Splynn. A glass case near\n" +
         "the door holds a single scroll.\n"
     );
 

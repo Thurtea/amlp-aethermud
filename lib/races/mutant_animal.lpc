@@ -18,16 +18,16 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Mutant Animals are creatures that have undergone radical genetic mutation, "
-        "whether through deliberate bio-engineering, exposure to ley line energy, or "
-        "the unpredictable mutagenic effects of dimensional rifts. The result is a "
-        "being that walks upright on two legs, possesses human-level intelligence and "
-        "the capacity for speech, yet retains the physical characteristics, instincts, "
-        "and natural weapons of its animal origin. They range in size from four to "
-        "seven feet depending on their base species, and their appearances are as "
-        "varied as the animal kingdom itself. Most Mutant Animals struggle with the "
-        "duality of their nature, balancing predatory instincts against rational "
-        "thought, and face prejudice from humans who view them as abominations or "
+        "Mutant Animals are creatures that have undergone radical genetic mutation, " +
+        "whether through deliberate bio-engineering, exposure to ley line energy, or " +
+        "the unpredictable mutagenic effects of dimensional rifts. The result is a " +
+        "being that walks upright on two legs, possesses human-level intelligence and " +
+        "the capacity for speech, yet retains the physical characteristics, instincts, " +
+        "and natural weapons of its animal origin. They range in size from four to " +
+        "seven feet depending on their base species, and their appearances are as " +
+        "varied as the animal kingdom itself. Most Mutant Animals struggle with the " +
+        "duality of their nature, balancing predatory instincts against rational " +
+        "thought, and face prejudice from humans who view them as abominations or " +
         "dangerous beasts rather than thinking beings."
     );
 

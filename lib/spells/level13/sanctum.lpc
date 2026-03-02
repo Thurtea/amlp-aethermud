@@ -9,13 +9,13 @@ void create() {
     set_spell_id("sanctum");
     set_spell_name("Sanctum");
     set_spell_desc(
-        "The mage invokes a sanctum to protect a room up to 30 x 30 feet, "
-        "shielding it from mystic disturbance. While inside the sanctum: "
-        "the mage cannot be found by the Locate spell, cannot be seen by "
-        "second sight, and cannot be affected by bonding magic. Animated "
-        "dead and lesser undead cannot enter. Lesser monsters must save vs "
-        "magic to enter. Greater beings and humans are not impeded. "
-        "Can be created up to 200 miles away from the caster. "
+        "The mage invokes a sanctum to protect a room up to 30 x 30 feet, " +
+        "shielding it from mystic disturbance. While inside the sanctum: " +
+        "the mage cannot be found by the Locate spell, cannot be seen by " +
+        "second sight, and cannot be affected by bonding magic. Animated " +
+        "dead and lesser undead cannot enter. Lesser monsters must save vs " +
+        "magic to enter. Greater beings and humans are not impeded. " +
+        "Can be created up to 200 miles away from the caster. " +
         "Duration: Lifetime of the mage or until canceled."
     );
 
@@ -52,11 +52,11 @@ int apply_effect(object caster, object target) {
     env->set_property("undead_barred", 1);
 
     tell_object(caster,
-        "You invoke the sanctum ritual, weaving wards into the very walls. "
-        "The room hums with protective energy. This place is now shielded from "
-        "scrying, detection, and the undead.\n"
-        "Effects: Immune to Locate, immune to second sight scrying, "
-        "undead and lesser monsters barred from entry.\n"
+        "You invoke the sanctum ritual, weaving wards into the very walls. " +
+        "The room hums with protective energy. This place is now shielded from " +
+        "scrying, detection, and the undead.\n" +
+        "Effects: Immune to Locate, immune to second sight scrying, " +
+        "undead and lesser monsters barred from entry.\n" +
         "Duration: Permanent until canceled.\n");
 
     tell_room(env,

@@ -16,17 +16,17 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Deevils are malicious supernatural entities from the dimension of Dyval, "
-        "eternal rivals to the demons of Hades. Where demons are often blunt "
-        "instruments of destruction, Deevils are masterful manipulators and cunning "
-        "schemers who prefer corruption, temptation, and subterfuge over direct "
-        "confrontation. They possess shapeshifting abilities that allow them to "
-        "assume pleasing or innocuous forms, and they wield cold-based supernatural "
-        "powers in contrast to the fire favored by their demonic rivals. Their "
-        "mega-damage bodies and extensive magical abilities make them formidable "
-        "opponents, but their true danger lies in their patience and their talent "
-        "for turning allies against one another. The ongoing war between Hades "
-        "and Dyval has spilled onto Rifts Earth, with Deevils constantly scheming "
+        "Deevils are malicious supernatural entities from the dimension of Dyval, " +
+        "eternal rivals to the demons of Hades. Where demons are often blunt " +
+        "instruments of destruction, Deevils are masterful manipulators and cunning " +
+        "schemers who prefer corruption, temptation, and subterfuge over direct " +
+        "confrontation. They possess shapeshifting abilities that allow them to " +
+        "assume pleasing or innocuous forms, and they wield cold-based supernatural " +
+        "powers in contrast to the fire favored by their demonic rivals. Their " +
+        "mega-damage bodies and extensive magical abilities make them formidable " +
+        "opponents, but their true danger lies in their patience and their talent " +
+        "for turning allies against one another. The ongoing war between Hades " +
+        "and Dyval has spilled onto Rifts Earth, with Deevils constantly scheming " +
         "to undermine both demons and mortals alike."
     );
 
@@ -114,12 +114,12 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Deevils are a Racial Character Class whose supernatural nature encompasses "
-        "their shapeshifting, cold-based powers, and manipulative abilities. Their "
-        "extensive innate magical and psionic capabilities surpass mortal training. "
-        "Deevils grow in power through cunning schemes, the corruption of mortals, "
-        "and the accumulation of influence across dimensions. They cannot take "
-        "mortal OCCs, as their alien intelligence operates on fundamentally "
+        "Deevils are a Racial Character Class whose supernatural nature encompasses " +
+        "their shapeshifting, cold-based powers, and manipulative abilities. Their " +
+        "extensive innate magical and psionic capabilities surpass mortal training. " +
+        "Deevils grow in power through cunning schemes, the corruption of mortals, " +
+        "and the accumulation of influence across dimensions. They cannot take " +
+        "mortal OCCs, as their alien intelligence operates on fundamentally " +
         "different principles than mortal learning."
     );
 

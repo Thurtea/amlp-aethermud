@@ -12,14 +12,14 @@ void create() {
     
     set_short("the cockpit of the EX-5 Behemoth");
     set_long(
-        "The cockpit is a cramped but efficient control center packed with screens, "
-        "gauges, and control systems. The pilot's seat dominates the center, surrounded "
-        "by a wraparound console covered in switches, levers, and touchscreens. To the "
-        "right is the co-pilot station with navigation and weapons controls.\n\n"
-        "Through the armored viewports, you can see the terrain outside. The thick "
-        "transparisteel is rated for Mega-Damage impacts. Red emergency lights line "
-        "the ceiling, and the whole room vibrates slightly with engine noise.\n\n"
-        "A ladder leads down to the crew quarters, and a hatch leads aft to the turret "
+        "The cockpit is a cramped but efficient control center packed with screens, " +
+        "gauges, and control systems. The pilot's seat dominates the center, surrounded " +
+        "by a wraparound console covered in switches, levers, and touchscreens. To the " +
+        "right is the co-pilot station with navigation and weapons controls.\n\n" +
+        "Through the armored viewports, you can see the terrain outside. The thick " +
+        "transparisteel is rated for Mega-Damage impacts. Red emergency lights line " +
+        "the ceiling, and the whole room vibrates slightly with engine noise.\n\n" +
+        "A ladder leads down to the crew quarters, and a hatch leads aft to the turret " +
         "access."
     );
     
@@ -30,7 +30,7 @@ void create() {
     
     set_items(([
         ({"console", "controls", "screens"}) : 
-            "The main control console features: steering controls, throttle, radar display, "
+            "The main control console features: steering controls, throttle, radar display, " +
             "communications panel, weapon systems, and dozens of status readouts.",
         ({"viewport", "viewports", "window", "windows"}) :
             "Thick armored transparisteel viewports give you a clear view outside.",

@@ -4,7 +4,7 @@ void create() {
     ::create();
     set_short("A leafy approach path");
     set_long(
-        "A gentle path that curves northward between hedgerows. The route feels like an approach toward a secluded garden.\n"
+        "A gentle path that curves northward between hedgerows. The route feels like an approach toward a secluded garden.\n" +
         "The path turns west ahead toward a tucked-away gate."
     );
 

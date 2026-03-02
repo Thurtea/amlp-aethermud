@@ -14,10 +14,10 @@ void create() {
     
     set_short("a deaden pain psionic power");
     set_long(
-        "Deaden Pain blocks pain receptors, allowing the subject to ignore "
-        "pain penalties from wounds. The character can function at full "
-        "capacity even when near death. Does not heal damage, only blocks "
-        "pain. Lasts 60 minutes per level. Range: Self or touch. "
+        "Deaden Pain blocks pain receptors, allowing the subject to ignore " +
+        "pain penalties from wounds. The character can function at full " +
+        "capacity even when near death. Does not heal damage, only blocks " +
+        "pain. Lasts 60 minutes per level. Range: Self or touch. " +
         "Costs 4 I.S.P. to use."
     );
     

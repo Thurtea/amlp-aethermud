@@ -16,14 +16,14 @@ void create() {
     set_alignment_requirement("not_evil");
 
     set_occ_description(
-        "Psi-Mystics are unusual individuals who have simultaneously awakened "
-        "both psionic powers and magical sensitivity. Unlike the Mystic who "
-        "channels magic instinctively, or the Mind Melter who relies purely "
-        "on psychic power, the Psi-Mystic weaves both arts together into a "
-        "unified spiritual practice. They develop a smaller pool of each "
-        "ability type than specialists, but their ability to combine psionic "
-        "and magical effects creates unique tactical possibilities. Psi-Mystics "
-        "are often spiritual guides, seers, and advisors as well as capable "
+        "Psi-Mystics are unusual individuals who have simultaneously awakened " +
+        "both psionic powers and magical sensitivity. Unlike the Mystic who " +
+        "channels magic instinctively, or the Mind Melter who relies purely " +
+        "on psychic power, the Psi-Mystic weaves both arts together into a " +
+        "unified spiritual practice. They develop a smaller pool of each " +
+        "ability type than specialists, but their ability to combine psionic " +
+        "and magical effects creates unique tactical possibilities. Psi-Mystics " +
+        "are often spiritual guides, seers, and advisors as well as capable " +
         "combatants."
     );
 
@@ -145,11 +145,11 @@ void create() {
     }));
 
     set_background(
-        "Psi-Mystics discover their dual gifts spontaneously, usually in "
-        "moments of extreme stress or spiritual crisis. They are drawn to "
-        "seek out masters of both traditions and often spend years traveling "
-        "to learn. Many become wandering advisors and troubleshooters, "
-        "using their unique blend of gifts to help communities deal with "
+        "Psi-Mystics discover their dual gifts spontaneously, usually in " +
+        "moments of extreme stress or spiritual crisis. They are drawn to " +
+        "seek out masters of both traditions and often spend years traveling " +
+        "to learn. Many become wandering advisors and troubleshooters, " +
+        "using their unique blend of gifts to help communities deal with " +
         "supernatural threats and spiritual imbalances."
     );
     set_organizations(({ }));

@@ -15,9 +15,9 @@ void create() {
     
     set_short("a sense magic spell");
     set_long(
-        "Sense Magic allows the caster to detect the presence of magical "
-        "energy, enchantments, and supernatural beings within 120 feet. "
-        "The spell reveals magic items, active spells, ley lines, and "
+        "Sense Magic allows the caster to detect the presence of magical " +
+        "energy, enchantments, and supernatural beings within 120 feet. " +
+        "The spell reveals magic items, active spells, ley lines, and " +
         "magical creatures. Lasts 2 minutes per level. Costs 4 P.P.E. to cast."
     );
     

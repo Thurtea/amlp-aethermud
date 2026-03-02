@@ -10,13 +10,13 @@ void create() {
     set_power_id("cure_minor_disorders");
     set_power_name("Cure Minor Disorders");
     set_power_desc(
-        "The psychic can psionically treat and cure a wide variety of minor medical "
-        "conditions by touch. Ailments that can be cured include: headaches, minor "
-        "infections (before they become serious), small cuts and abrasions (heals 1D6 SDC), "
-        "minor burns, temporary blindness or deafness from non-magical causes, nausea, "
-        "mild fever (slows progression of illness), and minor psychic-induced stress "
-        "or disorientation. The cure is instantaneous and requires a moment of physical "
-        "contact. Cannot heal hit points, major wounds, broken bones, or disease. "
+        "The psychic can psionically treat and cure a wide variety of minor medical " +
+        "conditions by touch. Ailments that can be cured include: headaches, minor " +
+        "infections (before they become serious), small cuts and abrasions (heals 1D6 SDC), " +
+        "minor burns, temporary blindness or deafness from non-magical causes, nausea, " +
+        "mild fever (slows progression of illness), and minor psychic-induced stress " +
+        "or disorientation. The cure is instantaneous and requires a moment of physical " +
+        "contact. Cannot heal hit points, major wounds, broken bones, or disease. " +
         "I.S.P. cost 10; touch range; instant."
     );
     set_power_category("healing");

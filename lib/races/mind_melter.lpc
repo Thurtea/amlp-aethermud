@@ -16,12 +16,12 @@ void create() {
     set_race_category(RACE_CAT_PSIONIC);
 
     set_race_description(
-        "Mind Melters are among the most powerful psychics on Rifts Earth, human "
-        "variants born with an overwhelming connection to psionic energy. Their "
-        "mental abilities far exceed those of ordinary psychics, granting them "
-        "mastery over telepathy, telekinesis, and devastating mind blast attacks. "
-        "The Coalition States considers them to be dangerous mutants and hunts "
-        "them relentlessly, forcing many Mind Melters to live as fugitives or "
+        "Mind Melters are among the most powerful psychics on Rifts Earth, human " +
+        "variants born with an overwhelming connection to psionic energy. Their " +
+        "mental abilities far exceed those of ordinary psychics, granting them " +
+        "mastery over telepathy, telekinesis, and devastating mind blast attacks. " +
+        "The Coalition States considers them to be dangerous mutants and hunts " +
+        "them relentlessly, forcing many Mind Melters to live as fugitives or " +
         "seek shelter among those who value their extraordinary gifts."
     );
 

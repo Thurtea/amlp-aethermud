@@ -9,10 +9,10 @@ void create() {
     
     set_short("Recovery Chamber");
     set_long(
-            "You find yourself in a dim chamber smelling of herbs and antiseptic. "
-            "A hooded medic moves silently between cots, tending to the wounded. "
-            "A faint shimmer marks the way back to the world of the living.\n\n"
-            "\"Thought we'd lost you,\" the medic says without looking up. "
+            "You find yourself in a dim chamber smelling of herbs and antiseptic. " +
+            "A hooded medic moves silently between cots, tending to the wounded. " +
+            "A faint shimmer marks the way back to the world of the living.\n\n" +
+            "\"Thought we'd lost you,\" the medic says without looking up. " +
             "\"Your gear is still where you fell. Head back when you're ready, or type RECLAIM to call your belongings to you.\""
     );
     
@@ -52,14 +52,14 @@ void describe_death_recovery(object player) {
     if (!player) return;
     
     tell_object(player,
-        "\n"
-        "=======================================================\n"
-        "              DEATH AND RECOVERY\n"
-        "=======================================================\n"
-        "\n"
-        "You awaken in the Recovery Chamber, your body aching\n"
-        "from your recent death. Hooded healers have patched\n"
-        "you up, but the ordeal has left its mark.\n"
+        "\n" +
+        "=======================================================\n" +
+        "              DEATH AND RECOVERY\n" +
+        "=======================================================\n" +
+        "\n" +
+        "You awaken in the Recovery Chamber, your body aching\n" +
+        "from your recent death. Hooded healers have patched\n" +
+        "you up, but the ordeal has left its mark.\n" +
         "\n");
     
     scars = player->query_scars();
@@ -68,11 +68,11 @@ void describe_death_recovery(object player) {
     }
     
     tell_object(player,
-        "Your corpse remains where you fell. Use the BODY CHUTE\n"
-        "to return to the world and recover your items.\n"
-        "\n"
-        "Lives: " + player->query_lives() + "/" + player->query_max_lives() + "\n"
-        "=======================================================\n"
+        "Your corpse remains where you fell. Use the BODY CHUTE\n" +
+        "to return to the world and recover your items.\n" +
+        "\n" +
+        "Lives: " + player->query_lives() + "/" + player->query_max_lives() + "\n" +
+        "=======================================================\n" +
         "\n");
 }
 

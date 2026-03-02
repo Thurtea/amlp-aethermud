@@ -10,14 +10,14 @@ void create() {
     set_power_id("suppress_fear");
     set_power_name("Suppress Fear");
     set_power_desc(
-        "The psychic reaches into the target's mind and dampens the fear "
-        "response, allowing them to act calmly and rationally even in the "
-        "face of terrifying supernatural entities or horrific situations. "
-        "Panic, phobias triggered by the Horror Factor of monsters, and "
-        "fear-based magic effects are all neutralized. The power does not "
-        "make the target reckless - they simply remain calm.\n\n"
-        "Range: 30 feet\n"
-        "ISP Cost: 8 points\n"
+        "The psychic reaches into the target's mind and dampens the fear " +
+        "response, allowing them to act calmly and rationally even in the " +
+        "face of terrifying supernatural entities or horrific situations. " +
+        "Panic, phobias triggered by the Horror Factor of monsters, and " +
+        "fear-based magic effects are all neutralized. The power does not " +
+        "make the target reckless - they simply remain calm.\n\n" +
+        "Range: 30 feet\n" +
+        "ISP Cost: 8 points\n" +
         "Duration: 5 minutes per level"
     );
     set_power_category("healing");
@@ -46,7 +46,7 @@ int apply_effect(object user, object target) {
     tell_object(user, "You project calming psionic energy toward " +
         target->query_cap_name() + ". The fear drains from their eyes.\n");
     if (target != user) {
-        tell_object(target, "A wave of calm washes over you. The fear you felt "
+        tell_object(target, "A wave of calm washes over you. The fear you felt " +
             "recedes, replaced by cool, steady resolve.\n");
     }
     tell_room(environment(user),

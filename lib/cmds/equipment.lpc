@@ -90,12 +90,11 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"EQUIPMENT - Show equipped items\n\n"
-"Usage:\n"
-"  equipment    Show all equipped items\n"
-"  eq           Short form\n\n"
-"Displays your currently equipped armor, weapons, and\n"
-"accessories in each equipment slot.\n\n"
+    return "EQUIPMENT - Show equipped items\n\n" +
+"Usage:\n" +
+"  equipment    Show all equipped items\n" +
+"  eq           Short form\n\n" +
+"Displays your currently equipped armor, weapons, and\n" +
+"accessories in each equipment slot.\n\n" +
 "See also: WEAR, WIELD, REMOVE, INVENTORY\n";
 }

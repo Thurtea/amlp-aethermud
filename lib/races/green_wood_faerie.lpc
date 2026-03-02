@@ -12,16 +12,16 @@ void create() {
     set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Green Wood Faeries are among the most common and yet most "
-        "reclusive of the faerie folk. Their skin is the colour of "
-        "bark and leaves, their hair woven with living vines. They "
-        "serve as guardians of ancient groves, sacred clearings, and "
-        "the wild places that technology has not yet consumed. On "
-        "Rifts Earth, Green Wood Faeries have become fierce defenders "
-        "of the recovering wilderness, warring openly against Coalition "
-        "patrols that attempt to clear forests for expansion. They wield "
-        "nature's own power - plant growth, root entanglement, and the "
-        "whispered voices of trees - as weapons. They are longer-lived "
+        "Green Wood Faeries are among the most common and yet most " +
+        "reclusive of the faerie folk. Their skin is the colour of " +
+        "bark and leaves, their hair woven with living vines. They " +
+        "serve as guardians of ancient groves, sacred clearings, and " +
+        "the wild places that technology has not yet consumed. On " +
+        "Rifts Earth, Green Wood Faeries have become fierce defenders " +
+        "of the recovering wilderness, warring openly against Coalition " +
+        "patrols that attempt to clear forests for expansion. They wield " +
+        "nature's own power - plant growth, root entanglement, and the " +
+        "whispered voices of trees - as weapons. They are longer-lived " +
         "than most faerie folk and more deliberate in their thinking."
     );
 
@@ -72,7 +72,7 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Green Wood Faeries are nature spirits whose connection to "
+        "Green Wood Faeries are nature spirits whose connection to " +
         "the living world defines their existence."
     );
 

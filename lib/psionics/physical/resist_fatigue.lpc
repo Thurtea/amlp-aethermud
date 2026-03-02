@@ -10,11 +10,11 @@ void create() {
     set_power_id("resist_fatigue");
     set_power_name("Resist Fatigue");
     set_power_desc(
-        "The psychic steels the body against fatigue and exhaustion through sheer mental "
-        "discipline. For the duration the character does not suffer the normal penalties of "
-        "physical exertion: combat actions, sprinting, heavy labor, and forced marching exact "
-        "no fatigue toll. Strength, endurance, and other attributes are not enhanced, only "
-        "the weariness that accumulates from using them is suppressed. Duration 5 minutes per "
+        "The psychic steels the body against fatigue and exhaustion through sheer mental " +
+        "discipline. For the duration the character does not suffer the normal penalties of " +
+        "physical exertion: combat actions, sprinting, heavy labor, and forced marching exact " +
+        "no fatigue toll. Strength, endurance, and other attributes are not enhanced, only " +
+        "the weariness that accumulates from using them is suppressed. Duration 5 minutes per " +
         "level; I.S.P. cost 4."
     );
     set_power_category("physical");

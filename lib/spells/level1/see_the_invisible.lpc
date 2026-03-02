@@ -15,9 +15,9 @@ void create() {
     
     set_short("a see the invisible spell");
     set_long(
-        "See the Invisible grants the mage the ability to see things that "
-        "are invisible, whether by magic, technology, or natural ability. "
-        "This includes invisible beings, objects, and magical effects. "
+        "See the Invisible grants the mage the ability to see things that " +
+        "are invisible, whether by magic, technology, or natural ability. " +
+        "This includes invisible beings, objects, and magical effects. " +
         "Lasts 5 minutes per level. Costs 4 P.P.E. to cast."
     );
     

@@ -10,9 +10,9 @@ void create() {
     set_skill_id("first_aid");
     set_skill_name("First Aid");
     set_skill_desc(
-        "Basic emergency medical treatment including cleaning wounds, "
-        "applying bandages, treating shock, and stabilizing patients. "
-        "A successful roll can heal 1d6 S.D.C. or 1d4 Hit Points, or "
+        "Basic emergency medical treatment including cleaning wounds, " +
+        "applying bandages, treating shock, and stabilizing patients. " +
+        "A successful roll can heal 1d6 S.D.C. or 1d4 Hit Points, or " +
         "stabilize a dying patient."
     );
     set_skill_category("medical");

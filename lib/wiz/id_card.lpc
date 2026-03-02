@@ -8,7 +8,7 @@ void create() {
     set_name("id card");
     set_short("a wizard ID card");
     set_long(
-        "An official AetherMUD staff identification card. "
+        "An official AetherMUD staff identification card. " +
         "Grants 'identify' and 'finger' commands while carried.\n"
     );
     set_weight(0);

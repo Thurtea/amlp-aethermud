@@ -10,7 +10,7 @@ static void create() {
     SetKeyName("anti-idle token");
     SetId(({ "noidle", "antiidle", "token", "no-idle-token" }));
     SetShort("an anti-idle token");
-    SetLong("A small brass token embossed with the words 'NO-IDLE'.\n"
+    SetLong("A small brass token embossed with the words 'NO-IDLE'.\n" +
             "When carried, it prevents the server from disconnecting you for idling.");
     SetMass(1);
     SetValue(0);

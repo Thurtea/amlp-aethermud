@@ -12,9 +12,9 @@ void create() {
     add_id("universal id card");
     set_short("a Universal ID card");
     set_long(
-        "A slim duraplastic card embossed with the AMLP Federal Credit Union logo.\n"
-        "Your name and citizen ID are etched in micro-print along the edge.\n"
-        "It stores your credit balance and serves as your universal identification.\n"
+        "A slim duraplastic card embossed with the AMLP Federal Credit Union logo.\n" +
+        "Your name and citizen ID are etched in micro-print along the edge.\n" +
+        "It stores your credit balance and serves as your universal identification.\n" +
         "Type 'examine atm card' to check your current balance."
     );
     set_weight(0);

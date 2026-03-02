@@ -19,10 +19,10 @@ void create() {
 
     set_short("Rocky the barkeep");
     set_long(
-        "A stocky human male with a shaved head and a scar that runs from\n"
-        "his left ear to the corner of his mouth. He wears a leather apron\n"
-        "stained with a dozen different liquids and keeps a polishing rag\n"
-        "tucked in his belt. His eyes sweep the room with a professional\n"
+        "A stocky human male with a shaved head and a scar that runs from\n" +
+        "his left ear to the corner of his mouth. He wears a leather apron\n" +
+        "stained with a dozen different liquids and keeps a polishing rag\n" +
+        "tucked in his belt. His eyes sweep the room with a professional\n" +
         "wariness — the look of someone who has thrown out worse than you.\n"
     );
 

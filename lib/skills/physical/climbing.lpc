@@ -10,8 +10,8 @@ void create() {
     set_skill_id("climbing");
     set_skill_name("Climbing");
     set_skill_desc(
-        "The ability to scale walls, cliffs, trees, and other surfaces. "
-        "Includes knowledge of proper handholds, ropes, and safety gear. "
+        "The ability to scale walls, cliffs, trees, and other surfaces. " +
+        "Includes knowledge of proper handholds, ropes, and safety gear. " +
         "A failed roll may result in a fall."
     );
     set_skill_category("physical");

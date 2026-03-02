@@ -13,13 +13,13 @@ void create() {
     set_spell_id("heal_wounds");
     set_spell_name("Heal Wounds");
     set_spell_desc(
-        "A fundamental healing spell that channels magical energy to close "
-        "wounds and restore vitality. The caster places their hands on the "
-        "target (or themselves) and channels positive energy, causing cuts "
-        "to seal and bruises to fade. The spell restores 2d6 Hit Points or "
-        "SDC to the target.\n\n"
-        "The target feels warmth spreading through their body as injuries "
-        "knit back together. While not as powerful as psych healing abilities, "
+        "A fundamental healing spell that channels magical energy to close " +
+        "wounds and restore vitality. The caster places their hands on the " +
+        "target (or themselves) and channels positive energy, causing cuts " +
+        "to seal and bruises to fade. The spell restores 2d6 Hit Points or " +
+        "SDC to the target.\n\n" +
+        "The target feels warmth spreading through their body as injuries " +
+        "knit back together. While not as powerful as psych healing abilities, " +
         "this spell is reliable and requires no special mindset."
     );
     

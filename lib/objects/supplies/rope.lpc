@@ -10,7 +10,7 @@ void create() {
     set_id(({"rope", "cord", "line"}));
     set_short("50 feet of rope");
     set_long(
-        "This is 50 feet of strong rope, useful for climbing, tying things, or "
+        "This is 50 feet of strong rope, useful for climbing, tying things, or " +
         "restraining prisoners. Every adventurer should carry some rope.\n"
     );
     

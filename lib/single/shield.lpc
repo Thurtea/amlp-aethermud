@@ -8,9 +8,9 @@ void create() {
     set_id("shield");
     set_short("a wooden shield");
     set_long(
-        "A sturdy wooden shield reinforced with iron bands around the rim.\n"
-        "The face bears the emblem of a phoenix rising from flames, hand-painted\n"
-        "in gold and red. The shield feels solid and protective, ready to turn aside\n"
+        "A sturdy wooden shield reinforced with iron bands around the rim.\n" +
+        "The face bears the emblem of a phoenix rising from flames, hand-painted\n" +
+        "in gold and red. The shield feels solid and protective, ready to turn aside\n" +
         "the blows of enemies."
     );
     set_weight(8000);   // 8 lbs

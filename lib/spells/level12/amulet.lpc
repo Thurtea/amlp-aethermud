@@ -9,12 +9,12 @@ void create() {
     set_spell_id("amulet");
     set_spell_name("Amulet");
     set_spell_desc(
-        "A potent invocation that instills a medallion or charm with mystic "
-        "properties. The amulet must be made of purified metal or semiprecious stone. "
-        "A Charm amulet grants +1 to save vs magic and psychic attacks. "
-        "An Amulet of Protection Against Sickness grants +6 to saving throws. "
-        "An Amulet Against Insanity grants +4 to save vs insanity. "
-        "An Amulet Against the Supernatural grants +2 vs horror factor. "
+        "A potent invocation that instills a medallion or charm with mystic " +
+        "properties. The amulet must be made of purified metal or semiprecious stone. " +
+        "A Charm amulet grants +1 to save vs magic and psychic attacks. " +
+        "An Amulet of Protection Against Sickness grants +6 to saving throws. " +
+        "An Amulet Against Insanity grants +4 to save vs insanity. " +
+        "An Amulet Against the Supernatural grants +2 vs horror factor. " +
         "The amulet exists as long as the medallion is not destroyed."
     );
 
@@ -38,10 +38,10 @@ int apply_effect(object caster, object target) {
     if (!caster) return 0;
 
     tell_object(caster,
-        "Mystic energies flow from your hands into the medallion. "
-        "The metal glows briefly with inner light, then settles into a warm "
-        "hum. The amulet is complete - it will protect its wearer from "
-        "magical and supernatural forces.\n"
+        "Mystic energies flow from your hands into the medallion. " +
+        "The metal glows briefly with inner light, then settles into a warm " +
+        "hum. The amulet is complete - it will protect its wearer from " +
+        "magical and supernatural forces.\n" +
         "Amulet effect: +1 to save vs magic/psychic attacks.\n");
 
     object env = environment(caster);

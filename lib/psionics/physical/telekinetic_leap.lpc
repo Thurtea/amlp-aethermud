@@ -10,14 +10,14 @@ void create() {
     set_power_id("telekinetic_leap");
     set_power_name("Telekinetic Leap");
     set_power_desc(
-        "The psychic uses telekinetic force to launch themselves far beyond "
-        "what their muscles alone could manage. A normal running leap of "
-        "perhaps 10 feet becomes a soaring 40-foot bound. The psychic "
-        "lands with perfect control, the telekinetic field cushioning "
-        "the impact. This power is exceptionally useful for traversing "
-        "obstacles, reaching elevated positions, or escaping danger.\n\n"
-        "Range: Self\n"
-        "ISP Cost: 8 points\n"
+        "The psychic uses telekinetic force to launch themselves far beyond " +
+        "what their muscles alone could manage. A normal running leap of " +
+        "perhaps 10 feet becomes a soaring 40-foot bound. The psychic " +
+        "lands with perfect control, the telekinetic field cushioning " +
+        "the impact. This power is exceptionally useful for traversing " +
+        "obstacles, reaching elevated positions, or escaping danger.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 8 points\n" +
         "Duration: Instant (one leap: up to 40 feet horizontal, 20 feet vertical)"
     );
     set_power_category("physical");
@@ -30,11 +30,11 @@ void create() {
 
 int apply_effect(object user, object target) {
     if (!user) return 0;
-    tell_object(user, "You tense and release a burst of telekinetic force "
-        "beneath you. The world blurs as you soar through the air in a "
+    tell_object(user, "You tense and release a burst of telekinetic force " +
+        "beneath you. The world blurs as you soar through the air in a " +
         "tremendous leap, landing with controlled grace.\n");
     tell_room(environment(user),
-        user->query_cap_name() + " crouches for an instant, then launches "
+        user->query_cap_name() + " crouches for an instant, then launches " +
         "into the air in a massive leap, landing with supernatural precision!\n",
         ({ user }));
     return 1;

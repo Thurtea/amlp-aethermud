@@ -9,11 +9,11 @@ void create() {
     set_spell_id("summon_rain");
     set_spell_name("Summon and Control Rain");
     set_spell_desc(
-        "The sorcerer conjures a rainstorm from thin air. The rain can be "
-        "controlled as a drizzle, light rain, or heavy downpour. "
-        "One mile per level of experience is affected by the rain. "
-        "A heavy storm reduces visibility and slows travel. "
-        "The caster can control the intensity freely while the spell lasts. "
+        "The sorcerer conjures a rainstorm from thin air. The rain can be " +
+        "controlled as a drizzle, light rain, or heavy downpour. " +
+        "One mile per level of experience is affected by the rain. " +
+        "A heavy storm reduces visibility and slows travel. " +
+        "The caster can control the intensity freely while the spell lasts. " +
         "Duration: 1 hour per level."
     );
 
@@ -46,9 +46,9 @@ int apply_effect(object caster, object target) {
     env->set_property("weather_override", "rain");
 
     tell_object(caster,
-        "You raise your hands and intone the weather invocation. Dark clouds "
-        "roll in from nowhere and rain begins to fall at your command. "
-        "You may control the intensity - from a light drizzle to a downpour.\n"
+        "You raise your hands and intone the weather invocation. Dark clouds " +
+        "roll in from nowhere and rain begins to fall at your command. " +
+        "You may control the intensity - from a light drizzle to a downpour.\n" +
         "Duration: " + duration_min + " minutes.\n");
 
     tell_room(env,

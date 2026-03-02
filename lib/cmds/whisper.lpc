@@ -61,13 +61,12 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"WHISPER - Whisper privately to someone in the same room\n\n"
-"Usage:\n"
-"  whisper <player> <message>    Whisper to player\n\n"
-"Example:\n"
-"  whisper guard the password is 'dragon'\n\n"
-"Only the target player sees the message. Others in the room\n"
-"will notice you whispered, but not hear what you said.\n\n"
+    return "WHISPER - Whisper privately to someone in the same room\n\n" +
+"Usage:\n" +
+"  whisper <player> <message>    Whisper to player\n\n" +
+"Example:\n" +
+"  whisper guard the password is 'dragon'\n\n" +
+"Only the target player sees the message. Others in the room\n" +
+"will notice you whispered, but not hear what you said.\n\n" +
 "See also: SAY, TELL, EMOTE\n";
 }

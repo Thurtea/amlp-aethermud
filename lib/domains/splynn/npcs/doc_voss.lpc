@@ -41,10 +41,10 @@ void create() {
 }
 
 string query_talk() {
-    return "Doc Voss looks at you clinically. \"The Juicer process. Permanent\n"
-        "modifications: chemical harness, hyper-coagulant implants, adrenal\n"
-        "accelerators. You gain speed, strength, endurance beyond normal limits.\n"
-        "You lose the ability to use psionics or magic. You have approximately\n"
-        "ten years before your body gives out. Cost is ten thousand credits.\n"
+    return "Doc Voss looks at you clinically. \"The Juicer process. Permanent\n" +
+        "modifications: chemical harness, hyper-coagulant implants, adrenal\n" +
+        "accelerators. You gain speed, strength, endurance beyond normal limits.\n" +
+        "You lose the ability to use psionics or magic. You have approximately\n" +
+        "ten years before your body gives out. Cost is ten thousand credits.\n" +
         "Say 'convert' when you have decided. There is no reversal.\"\n";
 }

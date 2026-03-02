@@ -10,15 +10,15 @@ void create() {
     set_power_id("telekinetic_punch");
     set_power_name("Telekinetic Punch");
     set_power_desc(
-        "The psychic focuses a burst of telekinetic force into a tight, "
-        "invisible fist that strikes the target at a distance. The punch "
-        "is as solid as a physical blow, staggering the target and capable "
-        "of breaking bone if aimed correctly. Unlike telekinesis, this is "
-        "an instantaneous strike rather than sustained force - fast, precise, "
-        "and difficult to dodge.\n\n"
-        "Range: 30 feet\n"
-        "ISP Cost: 6 points\n"
-        "Damage: 2d6 SDC\n"
+        "The psychic focuses a burst of telekinetic force into a tight, " +
+        "invisible fist that strikes the target at a distance. The punch " +
+        "is as solid as a physical blow, staggering the target and capable " +
+        "of breaking bone if aimed correctly. Unlike telekinesis, this is " +
+        "an instantaneous strike rather than sustained force - fast, precise, " +
+        "and difficult to dodge.\n\n" +
+        "Range: 30 feet\n" +
+        "ISP Cost: 6 points\n" +
+        "Damage: 2d6 SDC\n" +
         "Duration: Instant"
     );
     set_power_category("physical");
@@ -52,10 +52,10 @@ int apply_effect(object user, object target) {
     else if (pct <= 15) sev = "strikes solidly";
     else if (pct <= 30) sev = "hits hard";
     else sev = "slams into";
-    tell_object(user, "You thrust your hand forward, driving an invisible "
+    tell_object(user, "You thrust your hand forward, driving an invisible " +
         "telekinetic fist into " + target->query_cap_name() + ". " +
         "The blow " + sev + " them!\n");
-    tell_object(target, "An invisible force " + sev + " you with the impact "
+    tell_object(target, "An invisible force " + sev + " you with the impact " +
         "of a heavy punch!\n");
     tell_room(environment(user),
         user->query_cap_name() + " thrusts a hand toward " +

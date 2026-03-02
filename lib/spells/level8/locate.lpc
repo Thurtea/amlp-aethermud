@@ -9,12 +9,12 @@ void create() {
     set_spell_id("locate");
     set_spell_name("Locate");
     set_spell_desc(
-        "The mage reaches out psychically and locks onto the general location "
-        "of a specific person or object they have previously encountered or can "
-        "visualize clearly (a photo or personal item may substitute). The spell "
-        "returns the general direction and distance to the target, and whether "
-        "it is on the same plane of existence. Range is 15 miles per level of "
-        "experience. Dimensional barriers and strong warding may block the spell "
+        "The mage reaches out psychically and locks onto the general location " +
+        "of a specific person or object they have previously encountered or can " +
+        "visualize clearly (a photo or personal item may substitute). The spell " +
+        "returns the general direction and distance to the target, and whether " +
+        "it is on the same plane of existence. Range is 15 miles per level of " +
+        "experience. Dimensional barriers and strong warding may block the spell " +
         "or require a contested roll."
     );
 
@@ -43,7 +43,7 @@ int apply_effect(object caster, object target) {
         string loc = where ? where->query_short() : "an unknown location";
         tell_object(caster,
             "You reach out with your mind, seeking " +
-            target->query_cap_name() + "...\n"
+            target->query_cap_name() + "...\n" +
             "Your mystic sense locks on. They are at: " + loc + "\n");
         return 1;
     }
@@ -52,15 +52,15 @@ int apply_effect(object caster, object target) {
     if (target && !living(target)) {
         string loc = file_name(target);
         tell_object(caster,
-            "Your Locate spell fixes on the target.\n"
+            "Your Locate spell fixes on the target.\n" +
             "It is at: " + (environment(target) ? environment(target)->query_short() : loc) + "\n");
         return 1;
     }
 
     // No target - report what the caster knows about recent targets (stub behavior)
     tell_object(caster,
-        "You close your eyes and extend your awareness outward in all directions. "
-        "The Locate spell pulses through the ley line network, searching... "
+        "You close your eyes and extend your awareness outward in all directions. " +
+        "The Locate spell pulses through the ley line network, searching... " +
         "Direct the spell by casting: cast locate <target name>\n");
     return 1;
 }

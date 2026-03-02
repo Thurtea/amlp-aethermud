@@ -191,22 +191,22 @@ string create_workroom(string wiz_name) {
     if (file_size(workroom_file) <= 0) {
         string cap_name = capitalize(wiz_name);
         string code =
-"// " + cap_name + "'s Wizard Workroom\n"
-"inherit \"/lib/std/room.lpc\";\n\n"
-"void create() {\n"
-"    ::create();\n"
-"    set_short(\"" + cap_name + "'s Workroom\");\n"
-"    set_long(\n"
-"        \"A private wizard's workroom. Arcane symbols cover the walls\\n\"\n"
-"        \"and a large desk sits in the center, covered in scrolls and\\n\"\n"
-"        \"strange devices. A wooden chest sits in the corner, marked\\n\"\n"
-"        \"with arcane symbols. A shimmering portal leads back to the world.\\n\"\n"
-"        \"A passage marked 'castle' leads to the Wizard Castle.\"\n"
-"    );\n"
-"    add_exit(\"out\", \"/domains/new_camelot/town_square\");\n"
-"    add_exit(\"castle\", \"/domains/wizard/castle/main_hall\");\n"
-"    set_property(\"light\", 2);\n"
-"    set_property(\"indoors\", 1);\n"
+"// " + cap_name + "'s Wizard Workroom\n" +
+"inherit \"/lib/std/room.lpc\";\n\n" +
+"void create() {\n" +
+"    ::create();\n" +
+"    set_short(\"" + cap_name + "'s Workroom\");\n" +
+"    set_long(\n" +
+"        \"A private wizard's workroom. Arcane symbols cover the walls\\n\"\n" +
+"        \"and a large desk sits in the center, covered in scrolls and\\n\"\n" +
+"        \"strange devices. A wooden chest sits in the corner, marked\\n\"\n" +
+"        \"with arcane symbols. A shimmering portal leads back to the world.\\n\"\n" +
+"        \"A passage marked 'castle' leads to the Wizard Castle.\"\n" +
+"    );\n" +
+"    add_exit(\"out\", \"/domains/new_camelot/town_square\");\n" +
+"    add_exit(\"castle\", \"/domains/wizard/castle/main_hall\");\n" +
+"    set_property(\"light\", 2);\n" +
+"    set_property(\"indoors\", 1);\n" +
 "}\n";
         write_file(workroom_file, code);
     }
@@ -294,32 +294,31 @@ void clone_wizkit(object target, int priv_level) {
 }
 
 string query_help() {
-    return
-"PROMOTE - Grant wizard/admin privileges to a player\n\n"
-"Usage:\n"
-"  promote <player> <role>\n\n"
-"Roles (set privilege level and wizard_role simultaneously):\n"
-"  rp       privilege_level 1 (Roleplay Wizard)\n"
-"  coding   privilege_level 2 (Coding Wizard)\n"
-"  domain   privilege_level 3 (Domain Wizard)\n"
-"  admin    privilege_level 4 (Admin, Admin only)\n\n"
-"On first promotion to wizard+:\n"
-"  - privilege_level and wizard_role set atomically\n"
-"  - Personal workroom created at /domains/wizard/<name>/\n"
-"  - QCS workspace directories created (area/npc, area/room, etc.)\n"
-"  - Role-appropriate wizkit cloned to inventory\n"
-"  - Player teleported to their personal workroom\n\n"
-"Re-promoting an existing wizard updates their role without\n"
-"re-running workroom creation or teleport.\n\n"
-"Restrictions:\n"
-"  - Only Admins (privilege 4) can promote\n"
-"  - Target player must be online\n\n"
-"Examples:\n"
-"  promote lyra domain         Grant Domain Wizard\n"
-"  promote soren coding        Grant Coding Wizard\n"
-"  promote kael rp             Grant Roleplay Wizard\n"
-"  promote jane admin          Grant Admin (Admin only)\n\n"
-"To change role only (already a wizard): setrole <player> <role>\n"
-"To remove privileges:                   demote <player>\n\n"
+    return "PROMOTE - Grant wizard/admin privileges to a player\n\n" +
+"Usage:\n" +
+"  promote <player> <role>\n\n" +
+"Roles (set privilege level and wizard_role simultaneously):\n" +
+"  rp       privilege_level 1 (Roleplay Wizard)\n" +
+"  coding   privilege_level 2 (Coding Wizard)\n" +
+"  domain   privilege_level 3 (Domain Wizard)\n" +
+"  admin    privilege_level 4 (Admin, Admin only)\n\n" +
+"On first promotion to wizard+:\n" +
+"  - privilege_level and wizard_role set atomically\n" +
+"  - Personal workroom created at /domains/wizard/<name>/\n" +
+"  - QCS workspace directories created (area/npc, area/room, etc.)\n" +
+"  - Role-appropriate wizkit cloned to inventory\n" +
+"  - Player teleported to their personal workroom\n\n" +
+"Re-promoting an existing wizard updates their role without\n" +
+"re-running workroom creation or teleport.\n\n" +
+"Restrictions:\n" +
+"  - Only Admins (privilege 4) can promote\n" +
+"  - Target player must be online\n\n" +
+"Examples:\n" +
+"  promote lyra domain         Grant Domain Wizard\n" +
+"  promote soren coding        Grant Coding Wizard\n" +
+"  promote kael rp             Grant Roleplay Wizard\n" +
+"  promote jane admin          Grant Admin (Admin only)\n\n" +
+"To change role only (already a wizard): setrole <player> <role>\n" +
+"To remove privileges:                   demote <player>\n\n" +
 "See also: demote, setrole, who\n";
 }

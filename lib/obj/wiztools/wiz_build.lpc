@@ -10,16 +10,16 @@ void create() {
     set_id(({ "build tool", "wiz build", "wiz_build", "domain tool" }));
     set_short("a Domain Wizard's build tool");
     set_long(
-        "A brass compass that always points toward unfinished areas.\n"
-        "Its needle spins when near rooms that need descriptions,\n"
-        "exits, or NPCs. A true builder's companion.\n\n"
-        "Commands:\n"
-        "  build area       List your area files\n"
-        "  build rooms      List all rooms in current domain\n"
-        "  build exits      Show exits from current room\n"
-        "  build clone <room_path>  Clone a room template\n"
-        "  build link <dir> <room>  Link exit to another room\n"
-        "  build audit      Check current room for missing data\n"
+        "A brass compass that always points toward unfinished areas.\n" +
+        "Its needle spins when near rooms that need descriptions,\n" +
+        "exits, or NPCs. A true builder's companion.\n\n" +
+        "Commands:\n" +
+        "  build area       List your area files\n" +
+        "  build rooms      List all rooms in current domain\n" +
+        "  build exits      Show exits from current room\n" +
+        "  build clone <room_path>  Clone a room template\n" +
+        "  build link <dir> <room>  Link exit to another room\n" +
+        "  build audit      Check current room for missing data\n" +
         "  build help       Show this help\n"
     );
     set_weight(1);

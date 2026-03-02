@@ -9,7 +9,7 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "A created vampire that lacks some of the mastery of true elders, "
+        "A created vampire that lacks some of the mastery of true elders, " +
         "but retains core vampiric powers and the ability to create more." 
     );
 

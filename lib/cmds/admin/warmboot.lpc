@@ -1,10 +1,6 @@
 // /cmds/admin/warmboot.lpc
 // True warmboot: reloads all .lpc files in lib/ and lib/domains/
 
-#include <lib.h>
-
-inherit LIB_DAEMON;
-
 int main(string arg) {
     object player = this_player();
     if (!player || player->query_privilege_level() < 4) {

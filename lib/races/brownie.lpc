@@ -12,15 +12,15 @@ void create() {
     set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Brownies are tiny, wizened faerie folk standing barely two feet tall, "
-        "with large amber eyes, pointed ears, and nimble clever fingers. "
-        "Traditionally bound to households and communities they choose to aid, "
-        "Brownies on Rifts Earth have adapted their domestic instincts to a far "
-        "more chaotic world. Their innate magic is subtle but surprisingly deep - "
-        "a Brownie who masters the arcane arts can reshape the battlefield with "
-        "illusions and manipulations no one expects from a two-foot creature. "
-        "They are rarely aggressive but can be fiercely protective of those "
-        "they have bonded with. Brownies despise iron and salt, which disrupt "
+        "Brownies are tiny, wizened faerie folk standing barely two feet tall, " +
+        "with large amber eyes, pointed ears, and nimble clever fingers. " +
+        "Traditionally bound to households and communities they choose to aid, " +
+        "Brownies on Rifts Earth have adapted their domestic instincts to a far " +
+        "more chaotic world. Their innate magic is subtle but surprisingly deep - " +
+        "a Brownie who masters the arcane arts can reshape the battlefield with " +
+        "illusions and manipulations no one expects from a two-foot creature. " +
+        "They are rarely aggressive but can be fiercely protective of those " +
+        "they have bonded with. Brownies despise iron and salt, which disrupt " +
         "their magical nature."
     );
 
@@ -68,7 +68,7 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Brownies are complete beings whose faerie nature replaces any OCC. "
+        "Brownies are complete beings whose faerie nature replaces any OCC. " +
         "They rely on innate magic rather than training-based classes."
     );
 

@@ -9,17 +9,17 @@ void create() {
 
     set_short("Admin Office");
     set_long(
-        "The Admin Office is a secure chamber at the top of the castle.\n"
-        "Heavy wards shimmer around the doorway, restricting access to\n"
-        "those with the highest authority. The room is functional and\n"
-        "austere compared to the other offices.\n\n"
-        "A [Admin] banner marks the authority of this space.\n\n"
-        "A large desk dominates the room, covered with reports on player\n"
-        "activity, system performance, and staff assignments. A crystal\n"
-        "orb on the desk can be used to monitor the entire MUD at once.\n\n"
-        "Filing cabinets along one wall contain player records, ban\n"
-        "lists, and administrative logs. A secure vault in the corner\n"
-        "holds powerful artifacts and admin-only tools.\n\n"
+        "The Admin Office is a secure chamber at the top of the castle.\n" +
+        "Heavy wards shimmer around the doorway, restricting access to\n" +
+        "those with the highest authority. The room is functional and\n" +
+        "austere compared to the other offices.\n\n" +
+        "A [Admin] banner marks the authority of this space.\n\n" +
+        "A large desk dominates the room, covered with reports on player\n" +
+        "activity, system performance, and staff assignments. A crystal\n" +
+        "orb on the desk can be used to monitor the entire MUD at once.\n\n" +
+        "Filing cabinets along one wall contain player records, ban\n" +
+        "lists, and administrative logs. A secure vault in the corner\n" +
+        "holds powerful artifacts and admin-only tools.\n\n" +
         "The elevator back to the main floor is to the south."
     );
 
@@ -87,24 +87,24 @@ int cmd_orb(string str) {
 int examine_office(string str) {
     if (!str) return 0;
     if (str == "orb" || str == "crystal") {
-        write("A crystal orb that provides an overview of the entire MUD.\n"
+        write("A crystal orb that provides an overview of the entire MUD.\n" +
               "Type 'orb' to activate it (Admin only).\n");
         return 1;
     }
     if (str == "desk" || str == "reports") {
-        write("The desk is covered with administrative reports.\n"
+        write("The desk is covered with administrative reports.\n" +
               "Player counts, uptime statistics, and bug reports.\n");
         return 1;
     }
     if (str == "vault" || str == "artifacts") {
-        write("The vault is sealed with powerful wards. It contains\n"
-              "admin-only tools and artifacts too dangerous for general\n"
+        write("The vault is sealed with powerful wards. It contains\n" +
+              "admin-only tools and artifacts too dangerous for general\n" +
               "wizard use.\n");
         return 1;
     }
     if (str == "cabinets" || str == "files" || str == "records") {
-        write("Filing cabinets containing player records, ban lists,\n"
-              "and administrative action logs. Everything is neatly\n"
+        write("Filing cabinets containing player records, ban lists,\n" +
+              "and administrative action logs. Everything is neatly\n" +
               "organized and indexed.\n");
         return 1;
     }

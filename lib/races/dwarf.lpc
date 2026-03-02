@@ -16,12 +16,12 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "Dwarves are stout, powerful beings who arrived on Rifts Earth through the "
-        "dimensional rifts. Standing between four and five feet tall, they are as "
-        "wide as they are strong, with muscular builds and incredible endurance. "
-        "Dwarves are renowned for their craftsmanship, particularly in metalwork "
-        "and engineering. They have a natural resistance to magic and poison, and "
-        "are fierce warriors when provoked. While gruff and stubborn, dwarves are "
+        "Dwarves are stout, powerful beings who arrived on Rifts Earth through the " +
+        "dimensional rifts. Standing between four and five feet tall, they are as " +
+        "wide as they are strong, with muscular builds and incredible endurance. " +
+        "Dwarves are renowned for their craftsmanship, particularly in metalwork " +
+        "and engineering. They have a natural resistance to magic and poison, and " +
+        "are fierce warriors when provoked. While gruff and stubborn, dwarves are " +
         "loyal to those who earn their respect."
     );
     

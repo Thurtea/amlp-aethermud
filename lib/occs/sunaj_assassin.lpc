@@ -17,12 +17,12 @@ void create() {
     set_alignment_requirement("not_good");
 
     set_occ_description(
-        "The Sunaj are a shadowy order of True Atlantean assassins, their very "
-        "existence denied by most Atlantean clans. Operating in absolute secrecy, "
-        "they combine ancient tattoo magic with deadly combat training to become "
-        "the most feared killers in the Megaverse. A Sunaj can meld with shadows, "
-        "conjure weapons from their magical tattoos, and strike with lethal "
-        "precision before vanishing without a trace. Their loyalty is absolute, "
+        "The Sunaj are a shadowy order of True Atlantean assassins, their very " +
+        "existence denied by most Atlantean clans. Operating in absolute secrecy, " +
+        "they combine ancient tattoo magic with deadly combat training to become " +
+        "the most feared killers in the Megaverse. A Sunaj can meld with shadows, " +
+        "conjure weapons from their magical tattoos, and strike with lethal " +
+        "precision before vanishing without a trace. Their loyalty is absolute, " +
         "their methods ruthless, and their targets never see them coming."
     );
 
@@ -203,11 +203,11 @@ void create() {
 
     // Background
     set_background(
-        "You were selected as a child by the Sunaj order, your potential recognized "
-        "by the elders. Years of brutal training in the shadow arts, tattoo magic, "
-        "and the ways of silent death have forged you into a weapon. The order's "
-        "existence is denied by all True Atlantean clans, and you operate in absolute "
-        "secrecy. Your missions serve the hidden agendas of powerful Atlantean "
+        "You were selected as a child by the Sunaj order, your potential recognized " +
+        "by the elders. Years of brutal training in the shadow arts, tattoo magic, " +
+        "and the ways of silent death have forged you into a weapon. The order's " +
+        "existence is denied by all True Atlantean clans, and you operate in absolute " +
+        "secrecy. Your missions serve the hidden agendas of powerful Atlantean " +
         "factions, and failure is not an option - the order does not forgive."
     );
     set_organizations(({ "sunaj_order" }));

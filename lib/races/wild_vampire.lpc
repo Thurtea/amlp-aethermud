@@ -9,7 +9,7 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "A feral branch of vampires adapted to survive in the wilds. "
+        "A feral branch of vampires adapted to survive in the wilds. " +
         "They are less sophisticated than urban vampires but fierce predators."
     );
 

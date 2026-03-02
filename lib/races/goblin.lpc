@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Goblins are small, wiry humanoids standing three to four feet tall, with "
-        "pointed ears, sharp teeth, and yellow or red eyes that gleam in the dark. "
-        "Their skin ranges from sickly green to mottled grey, and they give off a "
-        "distinctive musty odor. While physically weak and notoriously cowardly when "
-        "alone, goblins possess a devious intelligence that makes them dangerous in "
-        "groups, where they employ ambushes, traps, and overwhelming numbers. They "
-        "have excellent night vision and thrive in underground lairs, sewers, and "
+        "Goblins are small, wiry humanoids standing three to four feet tall, with " +
+        "pointed ears, sharp teeth, and yellow or red eyes that gleam in the dark. " +
+        "Their skin ranges from sickly green to mottled grey, and they give off a " +
+        "distinctive musty odor. While physically weak and notoriously cowardly when " +
+        "alone, goblins possess a devious intelligence that makes them dangerous in " +
+        "groups, where they employ ambushes, traps, and overwhelming numbers. They " +
+        "have excellent night vision and thrive in underground lairs, sewers, and " +
         "ruins across Rifts Earth, forming sprawling warrens wherever they settle."
     );
 

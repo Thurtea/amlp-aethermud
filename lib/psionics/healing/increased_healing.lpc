@@ -10,13 +10,13 @@ void create() {
     set_power_id("increased_healing");
     set_power_name("Increased Healing");
     set_power_desc(
-        "By channeling psionic energy into a person's body, the psychic "
-        "dramatically accelerates the body's natural regenerative processes. "
-        "Wounds close faster, bruises fade, and broken bones begin to knit at "
-        "an accelerated rate. The recipient heals as though resting in ideal "
-        "conditions regardless of activity.\n\n"
-        "Range: Touch\n"
-        "ISP Cost: 10 points\n"
+        "By channeling psionic energy into a person's body, the psychic " +
+        "dramatically accelerates the body's natural regenerative processes. " +
+        "Wounds close faster, bruises fade, and broken bones begin to knit at " +
+        "an accelerated rate. The recipient heals as though resting in ideal " +
+        "conditions regardless of activity.\n\n" +
+        "Range: Touch\n" +
+        "ISP Cost: 10 points\n" +
         "Duration: Maintained (consumes ISP while active)"
     );
     set_power_category("healing");

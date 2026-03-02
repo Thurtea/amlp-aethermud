@@ -46,11 +46,10 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"DRINK - Consume a liquid\n\n"
-"Usage:\n"
-"  drink <object>    Drink from the named object\n\n"
-"Examples:\n"
-"  drink blood       Drink from a pool of blood (vampires)\n"
+    return "DRINK - Consume a liquid\n\n" +
+"Usage:\n" +
+"  drink <object>    Drink from the named object\n\n" +
+"Examples:\n" +
+"  drink blood       Drink from a pool of blood (vampires)\n" +
 "  drink potion      Consume a healing potion\n";
 }

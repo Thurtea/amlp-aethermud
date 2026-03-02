@@ -42,11 +42,10 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"INVENTORY - Display your inventory\n\n"
-"Usage:\n"
-"  inventory    Show what you're carrying\n"
-"  i            Short form\n\n"
-"Shows all items in your inventory with their weight.\n\n"
+    return "INVENTORY - Display your inventory\n\n" +
+"Usage:\n" +
+"  inventory    Show what you're carrying\n" +
+"  i            Short form\n\n" +
+"Shows all items in your inventory with their weight.\n\n" +
 "See also: GET, DROP, GIVE, EQUIPMENT\n";
 }

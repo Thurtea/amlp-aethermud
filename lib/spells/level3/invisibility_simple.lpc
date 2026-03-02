@@ -15,10 +15,10 @@ void create() {
     
     set_short("an invisibility spell");
     set_long(
-        "Invisibility: Simple makes the caster completely invisible. The "
-        "invisibility lasts 3 minutes per level, but ends immediately if "
-        "the caster makes a hostile action (attacks, casts offensive spell). "
-        "Those with See the Invisible or similar powers can still see the "
+        "Invisibility: Simple makes the caster completely invisible. The " +
+        "invisibility lasts 3 minutes per level, but ends immediately if " +
+        "the caster makes a hostile action (attacks, casts offensive spell). " +
+        "Those with See the Invisible or similar powers can still see the " +
         "invisible character. Costs 6 P.P.E. to cast."
     );
     

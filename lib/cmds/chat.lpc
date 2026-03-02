@@ -32,12 +32,11 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"CHAT - Global chat channel\n\n"
-"Usage:\n"
-"  chat <message>    Send message to all online players\n\n"
-"Example:\n"
-"  chat Anyone want to group up?\n\n"
-"Everyone online will see your message prefixed with [CHAT].\n\n"
+    return "CHAT - Global chat channel\n\n" +
+"Usage:\n" +
+"  chat <message>    Send message to all online players\n\n" +
+"Example:\n" +
+"  chat Anyone want to group up?\n\n" +
+"Everyone online will see your message prefixed with [CHAT].\n\n" +
 "See also: SAY, TELL, SHOUT\n";
 }

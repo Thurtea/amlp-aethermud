@@ -10,13 +10,13 @@ void create() {
     set_power_id("restore_fatigue");
     set_power_name("Restore Fatigue");
     set_power_desc(
-        "The psychic floods the target's body with revitalizing energy, "
-        "instantly eliminating exhaustion and restoring full physical vitality. "
-        "A person who has been running for hours, fighting continuously, or "
-        "severely sleep-deprived will feel completely refreshed and energized "
-        "as though they had just awakened from a full night's rest.\n\n"
-        "Range: Touch\n"
-        "ISP Cost: 4 points\n"
+        "The psychic floods the target's body with revitalizing energy, " +
+        "instantly eliminating exhaustion and restoring full physical vitality. " +
+        "A person who has been running for hours, fighting continuously, or " +
+        "severely sleep-deprived will feel completely refreshed and energized " +
+        "as though they had just awakened from a full night's rest.\n\n" +
+        "Range: Touch\n" +
+        "ISP Cost: 4 points\n" +
         "Duration: Instant"
     );
     set_power_category("healing");

@@ -9,15 +9,15 @@ void create() {
 
     set_short("Domain Wizard Office");
     set_long(
-        "The Domain Wizard Office is a spacious workshop dedicated to\n"
-        "world building. Large drafting tables display maps of existing\n"
-        "domains, with blank parchment ready for new designs. Shelves\n"
-        "hold miniature models of buildings, terrain features, and NPCs.\n\n"
-        "A [Domain] banner hangs on the wall, marking this as the\n"
-        "headquarters for those who shape the physical world of AetherMUD.\n\n"
-        "A bulletin board lists current building projects and area\n"
-        "assignments. Reference books on room design and NPC creation\n"
-        "line the back wall.\n\n"
+        "The Domain Wizard Office is a spacious workshop dedicated to\n" +
+        "world building. Large drafting tables display maps of existing\n" +
+        "domains, with blank parchment ready for new designs. Shelves\n" +
+        "hold miniature models of buildings, terrain features, and NPCs.\n\n" +
+        "A [Domain] banner hangs on the wall, marking this as the\n" +
+        "headquarters for those who shape the physical world of AetherMUD.\n\n" +
+        "A bulletin board lists current building projects and area\n" +
+        "assignments. Reference books on room design and NPC creation\n" +
+        "line the back wall.\n\n" +
         "The elevator back to the main floor is to the south."
     );
 
@@ -36,26 +36,26 @@ int examine_office(string str) {
     if (!str) return 0;
     if (str == "board" || str == "bulletin" || str == "projects") {
         write(
-            "Current Domain Projects:\n"
-            "  - Expand New Camelot district (market, residential)\n"
-            "  - Build wilderness encounters for levels 1-5\n"
-            "  - Create Coalition States frontier outpost\n"
-            "  - Design Xiticix Hive zone (high level)\n"
+            "Current Domain Projects:\n" +
+            "  - Expand New Camelot district (market, residential)\n" +
+            "  - Build wilderness encounters for levels 1-5\n" +
+            "  - Create Coalition States frontier outpost\n" +
+            "  - Design Xiticix Hive zone (high level)\n" +
             "  - Populate starting area with NPCs and shops\n"
         );
         return 1;
     }
     if (str == "maps" || str == "table" || str == "tables") {
-        write("The maps show the current layout of all domains. You can\n"
-              "see New Camelot, the starting village, the staff castle,\n"
+        write("The maps show the current layout of all domains. You can\n" +
+              "see New Camelot, the starting village, the staff castle,\n" +
               "and vast unmapped regions waiting to be built.\n");
         return 1;
     }
     if (str == "books" || str == "reference") {
-        write("Reference books cover:\n"
-              "  - Room creation with mkroom/QCS\n"
-              "  - NPC design and combat balance\n"
-              "  - Exit linking and area connectivity\n"
+        write("Reference books cover:\n" +
+              "  - Room creation with mkroom/QCS\n" +
+              "  - NPC design and combat balance\n" +
+              "  - Exit linking and area connectivity\n" +
               "  - Descriptions and atmosphere writing\n");
         return 1;
     }

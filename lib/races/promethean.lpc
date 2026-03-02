@@ -14,8 +14,8 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "Prometheans are innovators and tinkerers with a talent for technology"
-        " and limited techno-magic. This stub is conservative - please refine"
+        "Prometheans are innovators and tinkerers with a talent for technology" +
+        " and limited techno-magic. This stub is conservative - please refine" +
         " using source material."
     );
     

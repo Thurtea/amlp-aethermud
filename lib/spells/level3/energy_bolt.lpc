@@ -15,8 +15,8 @@ void create() {
     
     set_short("an energy bolt spell");
     set_long(
-        "Energy Bolt hurls a crackling bolt of magical energy at a single "
-        "target. The bolt automatically strikes (no need to roll to strike) "
+        "Energy Bolt hurls a crackling bolt of magical energy at a single " +
+        "target. The bolt automatically strikes (no need to roll to strike) " +
         "and inflicts 4D6 M.D. damage. Range is 200 feet. Costs 5 P.P.E. to cast."
     );
     

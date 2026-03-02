@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_GIANT);
     
     set_race_description(
-        "Ogres are massive humanoids standing eight to twelve feet tall, with "
-        "heavily muscled bodies and brutish features. They came to Rifts Earth "
-        "through dimensional portals, and have established themselves in wilderness "
-        "areas and as hired muscle in various settlements. While often dismissed "
-        "as stupid brutes, ogres possess a cunning intelligence and strong tribal "
-        "culture. They are formidable warriors, capable of wielding weapons that "
-        "would be siege equipment for smaller beings. Many have found employment "
+        "Ogres are massive humanoids standing eight to twelve feet tall, with " +
+        "heavily muscled bodies and brutish features. They came to Rifts Earth " +
+        "through dimensional portals, and have established themselves in wilderness " +
+        "areas and as hired muscle in various settlements. While often dismissed " +
+        "as stupid brutes, ogres possess a cunning intelligence and strong tribal " +
+        "culture. They are formidable warriors, capable of wielding weapons that " +
+        "would be siege equipment for smaller beings. Many have found employment " +
         "as mercenaries, bouncers, or manual laborers."
     );
     

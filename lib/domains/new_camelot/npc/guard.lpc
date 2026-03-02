@@ -22,7 +22,7 @@ void create() {
     set_id(({"guard", "town guard", "new camelot guard"}));
     set_short("a New Camelot guard");
     set_long(
-        "A Coalition-era guard in battered Coalition armour stands watch.\n"
+        "A Coalition-era guard in battered Coalition armour stands watch.\n" +
         "A vibro-sword hangs at their hip, and their eyes scan the square.\n"
     );
 

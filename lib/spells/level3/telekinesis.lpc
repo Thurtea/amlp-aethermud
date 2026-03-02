@@ -15,10 +15,10 @@ void create() {
     
     set_short("a telekinesis spell");
     set_long(
-        "Telekinesis allows the mage to move objects using mental power. "
-        "Can lift and manipulate up to 200 lbs per level of experience at "
-        "a distance of up to 60 feet. Objects can be moved at 20 feet per "
-        "melee round. Concentration is required. Lasts 2 minutes per level. "
+        "Telekinesis allows the mage to move objects using mental power. " +
+        "Can lift and manipulate up to 200 lbs per level of experience at " +
+        "a distance of up to 60 feet. Objects can be moved at 20 feet per " +
+        "melee round. Concentration is required. Lasts 2 minutes per level. " +
         "Costs 6 P.P.E. to cast."
     );
     

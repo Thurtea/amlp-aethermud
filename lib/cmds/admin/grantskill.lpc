@@ -143,30 +143,29 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"GRANTSKILL - Grant or improve a skill for a player\n\n"
-"Usage:\n"
-"  grantskill <player> <skill> [percentage]\n\n"
-"This command allows RP wizards and admins to grant skills to players\n"
-"as rewards for roleplay, quests, training, or special circumstances.\n\n"
-"If the player already has the skill, it will be improved to the new\n"
-"percentage (if higher). If not specified, skills are granted at 30%\n"
-"(base competency).\n\n"
-"Examples:\n"
-"  grantskill valery pilot_hover_cycle 65\n"
-"    (Grants Pilot: Hover Cycle at 65%)\n\n"
-"  grantskill marcus weapon_systems\n"
-"    (Grants Weapon Systems at 30%)\n\n"
-"  grantskill sarah lore_demons_monsters 80\n"
-"    (Grants Lore: Demons & Monsters at 80%)\n\n"
-"Common skills to grant:\n"
-"  Combat: weapon_systems, hand_to_hand_expert, boxing\n"
-"  Technical: robot_mechanics, computer_operation, robot_combat\n"
-"  Piloting: pilot_hover_cycle, pilot_robot, pilot_power_armor\n"
-"  Espionage: intelligence, streetwise, disguise\n"
-"  Lore: lore_demons_monsters, lore_magic, lore_rifts\n\n"
-"Use 'wiz ls /skills' to browse available skill files.\n\n"
-"Note: Be judicious with skill grants. Skills should be earned through\n"
-"roleplay, training, or quests, not given freely.\n\n"
+    return "GRANTSKILL - Grant or improve a skill for a player\n\n" +
+"Usage:\n" +
+"  grantskill <player> <skill> [percentage]\n\n" +
+"This command allows RP wizards and admins to grant skills to players\n" +
+"as rewards for roleplay, quests, training, or special circumstances.\n\n" +
+"If the player already has the skill, it will be improved to the new\n" +
+"percentage (if higher). If not specified, skills are granted at 30%\n" +
+"(base competency).\n\n" +
+"Examples:\n" +
+"  grantskill valery pilot_hover_cycle 65\n" +
+"    (Grants Pilot: Hover Cycle at 65%)\n\n" +
+"  grantskill marcus weapon_systems\n" +
+"    (Grants Weapon Systems at 30%)\n\n" +
+"  grantskill sarah lore_demons_monsters 80\n" +
+"    (Grants Lore: Demons & Monsters at 80%)\n\n" +
+"Common skills to grant:\n" +
+"  Combat: weapon_systems, hand_to_hand_expert, boxing\n" +
+"  Technical: robot_mechanics, computer_operation, robot_combat\n" +
+"  Piloting: pilot_hover_cycle, pilot_robot, pilot_power_armor\n" +
+"  Espionage: intelligence, streetwise, disguise\n" +
+"  Lore: lore_demons_monsters, lore_magic, lore_rifts\n\n" +
+"Use 'wiz ls /skills' to browse available skill files.\n\n" +
+"Note: Be judicious with skill grants. Skills should be earned through\n" +
+"roleplay, training, or quests, not given freely.\n\n" +
 "See also: SETOCC, TESTSKILL, TATTOOGUN\n";
 }

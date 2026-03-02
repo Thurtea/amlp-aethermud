@@ -10,13 +10,13 @@ void create() {
     set_power_id("impervious_to_poison");
     set_power_name("Impervious to Poison/Toxins");
     set_power_desc(
-        "The psychic accelerates and enhances their body's natural detoxification "
-        "systems, both neutralizing toxins already present and resisting new ones. "
-        "Chemical poisons, venoms, most drugs, and biological toxins are rendered "
-        "harmless. The body breaks them down almost instantly. Note that magical "
-        "or supernatural toxins may only be partially resisted.\n\n"
-        "Range: Self\n"
-        "ISP Cost: 4 points\n"
+        "The psychic accelerates and enhances their body's natural detoxification " +
+        "systems, both neutralizing toxins already present and resisting new ones. " +
+        "Chemical poisons, venoms, most drugs, and biological toxins are rendered " +
+        "harmless. The body breaks them down almost instantly. Note that magical " +
+        "or supernatural toxins may only be partially resisted.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 4 points\n" +
         "Duration: 2 minutes per level"
     );
     set_power_category("physical");
@@ -31,8 +31,8 @@ int apply_effect(object user, object target) {
     if (!user) return 0;
     user->set_property("impervious_poison", 1);
     user->set_property("poisoned", 0);
-    tell_object(user, "You accelerate your body's detoxification systems. "
-        "Any current toxins are rapidly neutralized, and you feel your "
+    tell_object(user, "You accelerate your body's detoxification systems. " +
+        "Any current toxins are rapidly neutralized, and you feel your " +
         "body's defenses heighten against new poisons.\n");
     tell_room(environment(user),
         user->query_cap_name() + " takes a steady breath, looking more alert.\n",

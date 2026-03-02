@@ -10,8 +10,8 @@ void create() {
     set_skill_id("swimming");
     set_skill_name("Swimming");
     set_skill_desc(
-        "The ability to swim and stay afloat. Characters without this skill "
-        "can only dog paddle and may drown in rough water. Includes "
+        "The ability to swim and stay afloat. Characters without this skill " +
+        "can only dog paddle and may drown in rough water. Includes " +
         "knowledge of currents, diving, and water safety."
     );
     set_skill_category("physical");

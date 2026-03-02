@@ -9,12 +9,12 @@ void create() {
     set_spell_id("talisman");
     set_spell_name("Talisman");
     set_spell_desc(
-        "A talisman is an ordinary object empowered with a single magic spell. "
-        "The object cannot be larger than two feet in any dimension. The mage "
-        "may imbue it with any one spell from levels one through eight. "
-        "The talisman can cast that spell three times total. After all three "
-        "charges are used, the item is drained of magic. The original creator "
-        "can recharge it at a cost of 50 PPE plus the cost of the stored spell. "
+        "A talisman is an ordinary object empowered with a single magic spell. " +
+        "The object cannot be larger than two feet in any dimension. The mage " +
+        "may imbue it with any one spell from levels one through eight. " +
+        "The talisman can cast that spell three times total. After all three " +
+        "charges are used, the item is drained of magic. The original creator " +
+        "can recharge it at a cost of 50 PPE plus the cost of the stored spell. " +
         "PPE cost: 500 + PPE cost of the stored spell."
     );
 
@@ -41,10 +41,10 @@ int apply_effect(object caster, object target) {
     object item = target ? target : caster;
 
     tell_object(caster,
-        "You focus your will on the object, channeling 500 PPE into it while "
-        "invoking the talisman ritual. The object glows briefly with stored "
-        "magical potential. It has been imbued with 3 charges of your chosen spell.\n"
-        "The item now functions as a talisman. It can be used by anyone "
+        "You focus your will on the object, channeling 500 PPE into it while " +
+        "invoking the talisman ritual. The object glows briefly with stored " +
+        "magical potential. It has been imbued with 3 charges of your chosen spell.\n" +
+        "The item now functions as a talisman. It can be used by anyone " +
         "to cast the stored spell three times before the charges run dry.\n");
 
     if (target && target != caster) {
@@ -57,7 +57,7 @@ int apply_effect(object caster, object target) {
     if (env) {
         tell_room(env,
             caster->query_cap_name() +
-            " completes a ritual, empowering an object with stored magic! "
+            " completes a ritual, empowering an object with stored magic! " +
             "It now functions as a talisman.\n",
             ({ caster }));
     }

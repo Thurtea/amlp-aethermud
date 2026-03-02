@@ -16,14 +16,14 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Orcs are stocky, powerful humanoids standing five and a half to seven feet "
-        "tall, with broad shoulders, thick muscles, and coarse features including "
-        "jutting lower jaws with prominent tusks. Their skin ranges from dark green "
-        "to brownish-grey, and their eyes are typically red or yellow with a feral "
-        "intensity. Orcs live for war and conquest, organized into tribal clans led "
-        "by the strongest and most ruthless among them. While they lack the refinement "
-        "of other races, orcs possess a raw physical power and battle-hardened "
-        "resilience that makes them formidable opponents on the battlefields of "
+        "Orcs are stocky, powerful humanoids standing five and a half to seven feet " +
+        "tall, with broad shoulders, thick muscles, and coarse features including " +
+        "jutting lower jaws with prominent tusks. Their skin ranges from dark green " +
+        "to brownish-grey, and their eyes are typically red or yellow with a feral " +
+        "intensity. Orcs live for war and conquest, organized into tribal clans led " +
+        "by the strongest and most ruthless among them. While they lack the refinement " +
+        "of other races, orcs possess a raw physical power and battle-hardened " +
+        "resilience that makes them formidable opponents on the battlefields of " +
         "Rifts Earth, where they serve as mercenaries, raiders, and tribal warriors."
     );
 

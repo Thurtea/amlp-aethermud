@@ -12,10 +12,10 @@ void create() {
     set_power_id("telekinesis");
     set_power_name("Telekinesis");
     set_power_desc(
-        "The ability to move objects with the power of the mind. The "
-        "psychic can lift and manipulate objects up to 60 lbs at level 1, "
-        "+10 lbs per additional level. Objects can be moved at a rate of "
-        "up to 10 feet per melee round (about walking speed). Fine "
+        "The ability to move objects with the power of the mind. The " +
+        "psychic can lift and manipulate objects up to 60 lbs at level 1, " +
+        "+10 lbs per additional level. Objects can be moved at a rate of " +
+        "up to 10 feet per melee round (about walking speed). Fine " +
         "manipulation (like untying knots) requires intense concentration."
     );
     set_power_category("physical");

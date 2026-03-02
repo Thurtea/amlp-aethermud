@@ -10,9 +10,9 @@ void create() {
     set_id(({"ion", "blaster", "ion blaster"}));
     set_short("an ion blaster");
     set_long(
-        "This powerful ion blaster fires concentrated bolts of ionized energy capable "
-        "of punching through armor and dealing devastating damage. The weapon is heavier "
-        "than standard laser rifles but packs considerably more punch. Blue energy "
+        "This powerful ion blaster fires concentrated bolts of ionized energy capable " +
+        "of punching through armor and dealing devastating damage. The weapon is heavier " +
+        "than standard laser rifles but packs considerably more punch. Blue energy " +
         "crackles along the barrel.\n"
     );
     

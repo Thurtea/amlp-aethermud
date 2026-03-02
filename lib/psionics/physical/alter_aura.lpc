@@ -10,14 +10,14 @@ void create() {
     set_power_id("alter_aura");
     set_power_name("Alter Aura (Self)");
     set_power_desc(
-        "The psychic manipulates their own life-energy field, altering the "
-        "visible aura to deceive psionic and magical detection. The user can "
-        "make themselves appear non-psionic, disguise their true level, fake "
-        "being possessed by a supernatural entity, or appear as a different "
-        "type of being entirely. The alteration is convincing enough to fool "
-        "all but the most powerful psionic detection.\n\n"
-        "Range: Self\n"
-        "ISP Cost: 2 points\n"
+        "The psychic manipulates their own life-energy field, altering the " +
+        "visible aura to deceive psionic and magical detection. The user can " +
+        "make themselves appear non-psionic, disguise their true level, fake " +
+        "being possessed by a supernatural entity, or appear as a different " +
+        "type of being entirely. The alteration is convincing enough to fool " +
+        "all but the most powerful psionic detection.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 2 points\n" +
         "Duration: Maintained (costs ISP to sustain)"
     );
     set_power_category("physical");
@@ -31,7 +31,7 @@ void create() {
 int apply_effect(object user, object target) {
     if (!user) return 0;
     user->set_property("aura_masked", 1);
-    tell_object(user, "You concentrate inward, reshaping the flow of your "
+    tell_object(user, "You concentrate inward, reshaping the flow of your " +
         "psionic energy. Your aura is now disguised.\n");
     tell_room(environment(user),
         user->query_cap_name() + "'s presence seems subtly different somehow.\n",

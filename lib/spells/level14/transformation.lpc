@@ -9,14 +9,14 @@ void create() {
     set_spell_id("transformation");
     set_spell_name("Transformation");
     set_spell_desc(
-        "Transformation is a powerful dark spell that transforms a human "
-        "being into a grisly, demonic monster. The target fails to save at "
-        "-3. Once transformed, the creature is a mindless slave of the mage. "
-        "The monster has no memory of its human life, retains no skills, "
-        "knowledge, or attributes. It obeys the mage without question - "
-        "except that principled, scrupulous, and unprincipled subjects will "
-        "not kill or harm a child or beloved close friend/loved one. "
-        "PPE cost: 2000. Saving throw: Standard -3. "
+        "Transformation is a powerful dark spell that transforms a human " +
+        "being into a grisly, demonic monster. The target fails to save at " +
+        "-3. Once transformed, the creature is a mindless slave of the mage. " +
+        "The monster has no memory of its human life, retains no skills, " +
+        "knowledge, or attributes. It obeys the mage without question - " +
+        "except that principled, scrupulous, and unprincipled subjects will " +
+        "not kill or harm a child or beloved close friend/loved one. " +
+        "PPE cost: 2000. Saving throw: Standard -3. " +
         "Duration: 3 days per level."
     );
 
@@ -63,21 +63,21 @@ int apply_effect(object caster, object target) {
     target->set_property("transformation_expires", time() + duration_secs);
 
     tell_object(caster,
-        target->query_cap_name() + " writhes and screams as the transformation "
-        "takes hold! Flesh tears and reshapes into something monstrous. "
+        target->query_cap_name() + " writhes and screams as the transformation " +
+        "takes hold! Flesh tears and reshapes into something monstrous. " +
         "The creature that was " + target->query_name() +
-        " now kneels before you, mindlessly obedient.\n"
+        " now kneels before you, mindlessly obedient.\n" +
         "Duration: " + (level * 3) + " days.\n");
 
     tell_object(target,
-        "Agony erupts through you as dark magic reshapes your body! "
-        "Your thoughts dissolve. Your memories fade to nothing. "
+        "Agony erupts through you as dark magic reshapes your body! " +
+        "Your thoughts dissolve. Your memories fade to nothing. " +
         "There is only the mage's will now...\n");
 
     object env = environment(caster);
     if (env) {
         tell_room(env,
-            target->query_cap_name() + " screams and twists as terrible dark "
+            target->query_cap_name() + " screams and twists as terrible dark " +
             "magic warps them into a demonic monstrosity!\n",
             ({ caster, target }));
     }
@@ -92,7 +92,7 @@ void end_transformation(object caster, object target) {
     target->remove_property("transformation_master");
     target->remove_property("transformation_expires");
     tell_object(target,
-        "Your body agonizingly reshapes back to its original form. "
+        "Your body agonizingly reshapes back to its original form. " +
         "Memories and self flood back as the Transformation ends.\n");
     if (caster) tell_object(caster,
         "The Transformation on " + target->query_name() + " has expired.\n");

@@ -10,15 +10,15 @@ void create() {
     set_power_id("telemechanics");
     set_power_name("Telemechanics");
     set_power_desc(
-        "By touching any machine or device, the psychic instantly and "
-        "intuitively understands its operation, purpose, and current state. "
-        "Alien technology, pre-Rifts devices, ancient mechanisms, and "
-        "damaged equipment all yield their secrets to the telemechanic. "
-        "They can operate, diagnose, and even repair devices they have "
-        "never seen before. The psychic can also sense if a machine is "
-        "booby-trapped or malfunctioning.\n\n"
-        "Range: Touch (the machine)\n"
-        "ISP Cost: 10 points\n"
+        "By touching any machine or device, the psychic instantly and " +
+        "intuitively understands its operation, purpose, and current state. " +
+        "Alien technology, pre-Rifts devices, ancient mechanisms, and " +
+        "damaged equipment all yield their secrets to the telemechanic. " +
+        "They can operate, diagnose, and even repair devices they have " +
+        "never seen before. The psychic can also sense if a machine is " +
+        "booby-trapped or malfunctioning.\n\n" +
+        "Range: Touch (the machine)\n" +
+        "ISP Cost: 10 points\n" +
         "Duration: 2 minutes per level"
     );
     set_power_category("physical");
@@ -32,12 +32,12 @@ void create() {
 int apply_effect(object user, object target) {
     if (!user) return 0;
     user->set_property("telemechanics_active", 1);
-    tell_object(user, "You place your hands on the nearest mechanical surface "
-        "and open your mind. A rush of mechanical knowledge floods in - "
-        "gears, circuits, power flows, stress points - all crystal clear. "
+    tell_object(user, "You place your hands on the nearest mechanical surface " +
+        "and open your mind. A rush of mechanical knowledge floods in - " +
+        "gears, circuits, power flows, stress points - all crystal clear. " +
         "You understand this machine as if you built it yourself.\n");
     tell_room(environment(user),
-        user->query_cap_name() + " presses hands against a surface and goes "
+        user->query_cap_name() + " presses hands against a surface and goes " +
         "very still, eyes unfocused.\n",
         ({ user }));
     return 1;

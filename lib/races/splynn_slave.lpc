@@ -17,14 +17,14 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Splynn Slaves are a bio-engineered servitor race created in the flesh vats "
-        "and gene pools beneath the city of Splynn on the reconstituted continent of "
-        "Atlantis. Designed by the Splugorth alien intelligences to be obedient, "
-        "durable, and easily replaced, they possess enhanced physical endurance but "
-        "have been genetically conditioned for reduced willpower and diminished force "
-        "of personality. Their smooth, grayish skin bears faint bio-modification "
-        "scarring, and many carry embedded identification tattoos from their creators. "
-        "Those who have escaped Splugorth control struggle with deeply ingrained "
+        "Splynn Slaves are a bio-engineered servitor race created in the flesh vats " +
+        "and gene pools beneath the city of Splynn on the reconstituted continent of " +
+        "Atlantis. Designed by the Splugorth alien intelligences to be obedient, " +
+        "durable, and easily replaced, they possess enhanced physical endurance but " +
+        "have been genetically conditioned for reduced willpower and diminished force " +
+        "of personality. Their smooth, grayish skin bears faint bio-modification " +
+        "scarring, and many carry embedded identification tattoos from their creators. " +
+        "Those who have escaped Splugorth control struggle with deeply ingrained " +
         "conditioning but burn with a fierce hatred for their former masters."
     );
 

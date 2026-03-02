@@ -66,13 +66,12 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"SHOUT - Shout loudly, heard in adjacent rooms\n\n"
-"Usage:\n"
-"  shout <message>    Shout a message\n\n"
-"Example:\n"
-"  shout Help! I'm under attack!\n\n"
-"Your shout will be heard clearly in your current room, and\n"
-"faintly in adjacent rooms.\n\n"
+    return "SHOUT - Shout loudly, heard in adjacent rooms\n\n" +
+"Usage:\n" +
+"  shout <message>    Shout a message\n\n" +
+"Example:\n" +
+"  shout Help! I'm under attack!\n\n" +
+"Your shout will be heard clearly in your current room, and\n" +
+"faintly in adjacent rooms.\n\n" +
 "See also: SAY, CHAT, YELL\n";
 }

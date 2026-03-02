@@ -10,12 +10,12 @@ void create() {
     set_power_id("sense_evil");
     set_power_name("Sense Evil");
     set_power_desc(
-        "The psychic can sense the presence and general direction of supernatural evil, "
-        "demonic entities, and powerful malevolent intent within range. The power reveals "
-        "only that evil is present and its approximate intensity (minor, moderate, powerful, "
-        "overwhelming); it does not identify it or pinpoint it precisely. Aberrant or "
-        "miscreant alignments may or may not register depending on the intensity of their "
-        "intent at the moment. Disguised demons and possessing entities are always detected. "
+        "The psychic can sense the presence and general direction of supernatural evil, " +
+        "demonic entities, and powerful malevolent intent within range. The power reveals " +
+        "only that evil is present and its approximate intensity (minor, moderate, powerful, " +
+        "overwhelming); it does not identify it or pinpoint it precisely. Aberrant or " +
+        "miscreant alignments may or may not register depending on the intensity of their " +
+        "intent at the moment. Disguised demons and possessing entities are always detected. " +
         "Range 90 ft; duration 2 minutes per level; I.S.P. cost 2."
     );
     set_power_category("sensitive");

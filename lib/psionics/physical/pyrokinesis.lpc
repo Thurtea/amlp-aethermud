@@ -10,15 +10,15 @@ void create() {
     set_power_id("pyrokinesis");
     set_power_name("Pyrokinesis");
     set_power_desc(
-        "The psychic can generate and control small flames with the power of "
-        "the mind. The flames can be used to light fires, melt small objects, "
-        "start campfires without matches, or as a minor offensive attack. The "
-        "fire is real and can spread if not controlled. At higher levels the "
-        "psychic can create larger, more intense flames, but Pyrokinesis is "
-        "never as destructive as Pyrokinesis: Major.\n\n"
-        "Range: 60 feet\n"
-        "ISP Cost: 6 points\n"
-        "Damage: 1d6 SDC (minor offensive use)\n"
+        "The psychic can generate and control small flames with the power of " +
+        "the mind. The flames can be used to light fires, melt small objects, " +
+        "start campfires without matches, or as a minor offensive attack. The " +
+        "fire is real and can spread if not controlled. At higher levels the " +
+        "psychic can create larger, more intense flames, but Pyrokinesis is " +
+        "never as destructive as Pyrokinesis: Major.\n\n" +
+        "Range: 60 feet\n" +
+        "ISP Cost: 6 points\n" +
+        "Damage: 1d6 SDC (minor offensive use)\n" +
         "Duration: 1 minute"
     );
     set_power_category("physical");
@@ -55,11 +55,11 @@ int apply_effect(object user, object target) {
         target->take_damage(damage, 0);
     } else {
         // Utility use - light fires, warmth, illumination
-        tell_object(user, "You extend a thread of pyrokinetic focus. "
-            "A small flame blooms in your palm, perfectly controlled "
+        tell_object(user, "You extend a thread of pyrokinetic focus. " +
+            "A small flame blooms in your palm, perfectly controlled " +
             "and dancing at your mental command.\n");
         tell_room(environment(user),
-            user->query_cap_name() + " conjures a small, hovering flame "
+            user->query_cap_name() + " conjures a small, hovering flame " +
             "that burns without fuel.\n",
             ({ user }));
     }

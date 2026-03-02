@@ -5,9 +5,9 @@ void create() {
     ::create();
     set_short("The Silver Unicorn Tavern");
     set_long(
-        "A warm tavern with heavy wooden beams and a roaring fireplace.\n"
-        "Travelers from across AetherMUD share tales of adventure over\n"
-        "mugs of ale. A bard plays softly in the corner. The barkeep\n"
+        "A warm tavern with heavy wooden beams and a roaring fireplace.\n" +
+        "Travelers from across AetherMUD share tales of adventure over\n" +
+        "mugs of ale. A bard plays softly in the corner. The barkeep\n" +
         "nods a greeting from behind the counter."
     );
 

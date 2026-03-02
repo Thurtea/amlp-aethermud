@@ -10,8 +10,8 @@ void create() {
     set_id(({"vibro-blade", "blade", "sword", "vibroblade"}));
     set_short("a vibrating combat blade");
     set_long(
-        "This is a vibro-blade, a high-frequency vibrating sword that can cut through "
-        "most materials with ease. The blade hums with barely contained energy, its "
+        "This is a vibro-blade, a high-frequency vibrating sword that can cut through " +
+        "most materials with ease. The blade hums with barely contained energy, its " +
         "edge a blur of motion. Standard issue for many mercenaries and soldiers.\n"
     );
     

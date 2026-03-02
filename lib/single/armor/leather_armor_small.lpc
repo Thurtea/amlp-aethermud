@@ -12,7 +12,7 @@ void create() {
     add_id("small armor");
     
     short_desc = "a small suit of leather armor";
-    long_desc = "This leather armor is sized for smaller races such as "
+    long_desc = "This leather armor is sized for smaller races such as " +
                 "dwarves, goblins, or halflings. It provides basic protection.";
     
     // Phase 2, Step 5b: Size properties

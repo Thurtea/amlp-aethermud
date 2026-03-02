@@ -16,16 +16,16 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Changelings are enigmatic supernatural beings born with the innate ability "
-        "to alter their physical form to perfectly replicate any humanoid creature "
-        "they have observed. In their true form they appear as slender, pale-skinned "
-        "beings with smooth, almost featureless faces and large dark eyes, but few "
-        "ever see a Changeling's natural appearance. They are consummate spies, "
-        "infiltrators, and con artists, able to assume the identity of anyone from "
-        "a Coalition soldier to a village elder with flawless precision. While not "
-        "physically powerful compared to other supernatural beings, their ability to "
-        "be anyone and go anywhere makes them invaluable allies and terrifying "
-        "enemies. Most Changelings live among other races, adopting identities for "
+        "Changelings are enigmatic supernatural beings born with the innate ability " +
+        "to alter their physical form to perfectly replicate any humanoid creature " +
+        "they have observed. In their true form they appear as slender, pale-skinned " +
+        "beings with smooth, almost featureless faces and large dark eyes, but few " +
+        "ever see a Changeling's natural appearance. They are consummate spies, " +
+        "infiltrators, and con artists, able to assume the identity of anyone from " +
+        "a Coalition soldier to a village elder with flawless precision. While not " +
+        "physically powerful compared to other supernatural beings, their ability to " +
+        "be anyone and go anywhere makes them invaluable allies and terrifying " +
+        "enemies. Most Changelings live among other races, adopting identities for " +
         "years or even decades at a time."
     );
 
@@ -101,11 +101,11 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(1);
     set_rcc_description(
-        "Changelings are a Racial Character Class centered on their shapeshifting "
-        "abilities and social manipulation skills. Their power to assume any "
-        "humanoid form is innate and does not require training. However, "
-        "Changelings frequently take OCCs to round out their capabilities, "
-        "especially those that complement their infiltration talents such as "
+        "Changelings are a Racial Character Class centered on their shapeshifting " +
+        "abilities and social manipulation skills. Their power to assume any " +
+        "humanoid form is innate and does not require training. However, " +
+        "Changelings frequently take OCCs to round out their capabilities, " +
+        "especially those that complement their infiltration talents such as " +
         "Rogue Scholar, City Rat, or Spy."
     );
 

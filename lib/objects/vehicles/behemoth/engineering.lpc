@@ -12,15 +12,15 @@ void create() {
     
     set_short("the engineering section of the EX-5 Behemoth");
     set_long(
-        "The engineering section is a maze of pipes, conduits, and machinery. The massive "
-        "diesel-electric engine dominates the center of the room, its eight cylinders "
-        "thrumming with power. Heat radiates from every surface, and the noise is "
-        "nearly deafening.\n\n"
-        "Control panels line the walls, monitoring fuel flow, engine temperature, electrical "
-        "output, and countless other systems. A tool bench holds diagnostic equipment and "
-        "spare parts. The air smells of hot metal, fuel, and lubricants.\n\n"
-        "An experienced operator could perform field repairs here, or even boost power "
-        "to the engines in an emergency. A ladder leads down to the cargo hold, and a "
+        "The engineering section is a maze of pipes, conduits, and machinery. The massive " +
+        "diesel-electric engine dominates the center of the room, its eight cylinders " +
+        "thrumming with power. Heat radiates from every surface, and the noise is " +
+        "nearly deafening.\n\n" +
+        "Control panels line the walls, monitoring fuel flow, engine temperature, electrical " +
+        "output, and countless other systems. A tool bench holds diagnostic equipment and " +
+        "spare parts. The air smells of hot metal, fuel, and lubricants.\n\n" +
+        "An experienced operator could perform field repairs here, or even boost power " +
+        "to the engines in an emergency. A ladder leads down to the cargo hold, and a " +
         "door leads forward to the crew quarters."
     );
     
@@ -31,10 +31,10 @@ void create() {
     
     set_items(([
         ({"engine", "diesel engine", "motor"}) :
-            "The heart of the Behemoth: a massive eight-cylinder diesel engine coupled to "
+            "The heart of the Behemoth: a massive eight-cylinder diesel engine coupled to " +
             "electric generators that power the drive motors.",
         ({"control panels", "monitors", "panels"}) :
-            "Status displays show: Engine temp: NORMAL, Fuel pressure: OPTIMAL, "
+            "Status displays show: Engine temp: NORMAL, Fuel pressure: OPTIMAL, " +
             "Electrical output: 85%, Coolant levels: FULL.",
         ({"tools", "tool bench"}) :
             "A well-equipped workbench with diagnostic tools, welding equipment, and spare parts.",

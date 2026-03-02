@@ -14,10 +14,10 @@ void create() {
     
     set_short("a presence sense psionic power");
     set_long(
-        "Presence Sense allows the psychic to detect the presence of other "
-        "minds within 120 feet. Can sense through walls and obstacles. "
-        "Reveals number of beings, approximate direction and distance, but "
-        "not specific identity. Invisible and hidden beings are detected. "
+        "Presence Sense allows the psychic to detect the presence of other " +
+        "minds within 120 feet. Can sense through walls and obstacles. " +
+        "Reveals number of beings, approximate direction and distance, but " +
+        "not specific identity. Invisible and hidden beings are detected. " +
         "Lasts 2 minutes per level. Costs 4 I.S.P. to use."
     );
     

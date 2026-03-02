@@ -18,12 +18,12 @@ void create() {
     
     set_short_description("Hurls an explosive ball of fire at a target.");
     set_long_description(
-        "The caster conjures a sphere of magical flame and hurls it at a target, "
-        "where it explodes on impact. The fireball inflicts 4d6 damage to the "
-        "primary target and splash damage to nearby enemies.\n\n"
-        "Duration: Instant\n"
-        "Range: 90 feet\n"
-        "Damage: 4d6 S.D.C.\n"
+        "The caster conjures a sphere of magical flame and hurls it at a target, " +
+        "where it explodes on impact. The fireball inflicts 4d6 damage to the " +
+        "primary target and splash damage to nearby enemies.\n\n" +
+        "Duration: Instant\n" +
+        "Range: 90 feet\n" +
+        "Damage: 4d6 S.D.C.\n" +
         "P.P.E.: 10\n"
     );
 }

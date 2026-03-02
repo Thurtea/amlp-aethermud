@@ -14,9 +14,9 @@ void create() {
     add_id("power armor");
     
     short_desc = "Coalition States Dead Boy armor";
-    long_desc = "This is the iconic black armor of the Coalition States. "
-                "The suit is constructed from mega-damage materials and provides "
-                "excellent protection. The distinctive skull-like faceplate strikes "
+    long_desc = "This is the iconic black armor of the Coalition States. " +
+                "The suit is constructed from mega-damage materials and provides " +
+                "excellent protection. The distinctive skull-like faceplate strikes " +
                 "fear into enemies. Only CS military personnel are authorized to wear this.";
     
     // Phase 2, Step 5b: Size properties

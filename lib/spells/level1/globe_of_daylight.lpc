@@ -15,9 +15,9 @@ void create() {
     
     set_short("a globe of daylight spell");
     set_long(
-        "Globe of Daylight creates a small globe of brilliant light that "
-        "illuminates a 12 foot radius area. The light is as bright as daylight "
-        "and can be moved around by the caster. It lasts for 10 minutes per "
+        "Globe of Daylight creates a small globe of brilliant light that " +
+        "illuminates a 12 foot radius area. The light is as bright as daylight " +
+        "and can be moved around by the caster. It lasts for 10 minutes per " +
         "level of experience. Costs 2 P.P.E. to cast."
     );
     

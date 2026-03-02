@@ -11,8 +11,8 @@ void create() {
 
     set_short("The Enhancement Chamber");
     set_long(
-        "A cylindrical room of brushed metal. A single reclining chair sits at the\n"
-        "center, connected to a ring of humming machines. A plaque on the wall reads:\n"
+        "A cylindrical room of brushed metal. A single reclining chair sits at the\n" +
+        "center, connected to a ring of humming machines. A plaque on the wall reads:\n" +
         "  \"ONE SESSION PER VISITOR. NO EXCEPTIONS. RESULTS VARY.\"\n"
     );
 
@@ -34,7 +34,7 @@ int local_command(string verb, string arg) {
     if (function_exists("query_property", player) &&
         player->query_property("stat_chamber_used")) {
         tell_object(player,
-            "The machines register you and go dark. "
+            "The machines register you and go dark. " +
             "You have already had your session.\n");
         return 1;
     }
@@ -56,13 +56,13 @@ int local_command(string verb, string arg) {
         player->set_property("stat_chamber_used", 1);
 
     tell_object(player,
-        "The machines hum to life around you. A warm current flows through\n"
-        "your body as the systems calibrate to your physiology. When it is\n"
-        "over you feel subtly different — sharper, stronger, more resilient.\n"
+        "The machines hum to life around you. A warm current flows through\n" +
+        "your body as the systems calibrate to your physiology. When it is\n" +
+        "over you feel subtly different — sharper, stronger, more resilient.\n" +
         "You have gained +1 to " + chosen_stat + ".\n");
 
     tell_room(environment(player),
-        player->query_cap_name() + " sits in the chair. The machines hum "
+        player->query_cap_name() + " sits in the chair. The machines hum " +
         "briefly, then fall silent.\n",
         ({ player }));
 

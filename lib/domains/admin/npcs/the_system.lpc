@@ -14,8 +14,8 @@ void create() {
 
     set_short("the System");
     set_long(
-        "A soft luminescence hovers at eye level — not quite an object, not\n"
-        "quite a person. It turns toward you with the calm assurance of\n"
+        "A soft luminescence hovers at eye level — not quite an object, not\n" +
+        "quite a person. It turns toward you with the calm assurance of\n" +
         "something that has always been here and always will be.\n"
     );
 
@@ -40,13 +40,13 @@ int cmd_help(string arg) {
     if (!player) return 0;
 
     tell_object(player,
-        "\nThe System speaks in measured tones:\n\n"
-        "  qcs              - Quick Content System: create rooms, NPCs,\n"
-        "                     vendors, barkeeps, doors, mercbases\n"
-        "  goto <player>    - Teleport to a player's location\n"
-        "  transfer <p> <r> - Move a player to a room\n"
-        "  promote <p> <lv> - Set wizard level (0=player 1=wiz 2=admin)\n"
-        "  shutdown [1]     - Shut down (1 = warm reboot)\n\n"
+        "\nThe System speaks in measured tones:\n\n" +
+        "  qcs              - Quick Content System: create rooms, NPCs,\n" +
+        "                     vendors, barkeeps, doors, mercbases\n" +
+        "  goto <player>    - Teleport to a player's location\n" +
+        "  transfer <p> <r> - Move a player to a room\n" +
+        "  promote <p> <lv> - Set wizard level (0=player 1=wiz 2=admin)\n" +
+        "  shutdown [1]     - Shut down (1 = warm reboot)\n\n" +
         "  Type 'out' to leave this room and enter Splynn.\n\n"
     );
     return 1;

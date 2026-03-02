@@ -16,16 +16,16 @@ void create() {
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Glitter Boy Pilots are elite combat specialists trained to pilot the "
-        "legendary Glitter Boy power armor suit. The Glitter Boy is a massive "
-        "military-grade power armor system equipped with a plasma ejector rifle, "
-        "plasma cartridge cannons, and other integrated weapons systems. It is one "
-        "of the most powerful single-pilot combat units in existence. A Glitter Boy "
-        "Pilot must undergo extensive training to master this complex machine, learning "
-        "everything from armor systems management to advanced combat tactics. They are "
-        "highly disciplined soldiers, typically serving military organizations or hiring "
-        "out as elite mercenaries. A single Glitter Boy Pilot can engage entire military "
-        "units and emerge victorious, making them some of the most feared and respected "
+        "Glitter Boy Pilots are elite combat specialists trained to pilot the " +
+        "legendary Glitter Boy power armor suit. The Glitter Boy is a massive " +
+        "military-grade power armor system equipped with a plasma ejector rifle, " +
+        "plasma cartridge cannons, and other integrated weapons systems. It is one " +
+        "of the most powerful single-pilot combat units in existence. A Glitter Boy " +
+        "Pilot must undergo extensive training to master this complex machine, learning " +
+        "everything from armor systems management to advanced combat tactics. They are " +
+        "highly disciplined soldiers, typically serving military organizations or hiring " +
+        "out as elite mercenaries. A single Glitter Boy Pilot can engage entire military " +
+        "units and emerge victorious, making them some of the most feared and respected " +
         "warriors in the world."
     );
     
@@ -199,11 +199,11 @@ void create() {
     
     // Background
     set_background(
-        "Glitter Boy Pilots come from elite military training programs or are "
-        "selected for their exceptional aptitude in mechanical systems and combat. "
-        "They are typically highly disciplined and loyal to their organizations, "
-        "though some become independent operators or mercenaries after leaving "
-        "service. A Glitter Boy Pilot is one of the most valuable military assets "
+        "Glitter Boy Pilots come from elite military training programs or are " +
+        "selected for their exceptional aptitude in mechanical systems and combat. " +
+        "They are typically highly disciplined and loyal to their organizations, " +
+        "though some become independent operators or mercenaries after leaving " +
+        "service. A Glitter Boy Pilot is one of the most valuable military assets " +
         "in the world."
     );
     set_organizations(({

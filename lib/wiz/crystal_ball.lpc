@@ -8,7 +8,7 @@ void create() {
     set_name("crystal ball");
     set_short("a smoky crystal ball");
     set_long(
-        "A flawless sphere of smoky quartz. "
+        "A flawless sphere of smoky quartz. " +
         "Grants 'goto' and 'trans' commands while carried.\n"
     );
     set_weight(0);

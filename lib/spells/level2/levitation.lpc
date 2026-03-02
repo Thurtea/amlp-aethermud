@@ -15,9 +15,9 @@ void create() {
     
     set_short("a levitation spell");
     set_long(
-        "Levitation allows the caster to rise into the air and float at will. "
-        "Maximum height is 100 feet. Movement speed is approximately half normal "
-        "running speed. The spell lasts 5 minutes per level. "
+        "Levitation allows the caster to rise into the air and float at will. " +
+        "Maximum height is 100 feet. Movement speed is approximately half normal " +
+        "running speed. The spell lasts 5 minutes per level. " +
         "Costs 5 P.P.E. to cast."
     );
     

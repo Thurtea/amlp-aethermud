@@ -28,10 +28,9 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"OPEN - Open a door or container\n\n"
-"Usage:\n"
-"  open <object>      Open a container or door in your inventory or room\n\n"
-"The object must have an unlocked opening mechanism. Use 'unlock'\n"
+    return "OPEN - Open a door or container\n\n" +
+"Usage:\n" +
+"  open <object>      Open a container or door in your inventory or room\n\n" +
+"The object must have an unlocked opening mechanism. Use 'unlock'\n" +
 "first if it is locked.\n";
 }

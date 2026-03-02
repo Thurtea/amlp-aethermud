@@ -16,14 +16,14 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Demons are malevolent supernatural entities from the infernal planes known "
-        "as Hades and Dyval, brought to Rifts Earth through dimensional rifts and "
-        "dark summoning rituals. They are creatures of immense power, their bodies "
-        "forged from mega-damage materials and infused with hellfire and dark magic. "
-        "Ranging from lesser imps to towering greater demons, they vary wildly in "
-        "form but share a common hunger for destruction, souls, and dominion over "
-        "mortals. Their presence warps the world around them, inspiring primal terror "
-        "in the living. Most demons serve powerful demon lords and pursue agendas of "
+        "Demons are malevolent supernatural entities from the infernal planes known " +
+        "as Hades and Dyval, brought to Rifts Earth through dimensional rifts and " +
+        "dark summoning rituals. They are creatures of immense power, their bodies " +
+        "forged from mega-damage materials and infused with hellfire and dark magic. " +
+        "Ranging from lesser imps to towering greater demons, they vary wildly in " +
+        "form but share a common hunger for destruction, souls, and dominion over " +
+        "mortals. Their presence warps the world around them, inspiring primal terror " +
+        "in the living. Most demons serve powerful demon lords and pursue agendas of " +
         "conquest, corruption, and chaos wherever they tread."
     );
 
@@ -109,11 +109,11 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Demons are a Racial Character Class whose immense supernatural power "
-        "defines their entire existence. Their infernal abilities, mega-damage "
-        "bodies, and innate magical prowess far exceed what any mortal OCC could "
-        "provide. Demons grow in power through age, conquest, and the accumulation "
-        "of souls and dark energy. They cannot take mortal OCCs, as their demonic "
+        "Demons are a Racial Character Class whose immense supernatural power " +
+        "defines their entire existence. Their infernal abilities, mega-damage " +
+        "bodies, and innate magical prowess far exceed what any mortal OCC could " +
+        "provide. Demons grow in power through age, conquest, and the accumulation " +
+        "of souls and dark energy. They cannot take mortal OCCs, as their demonic " +
         "nature is fundamentally incompatible with structured training."
     );
 

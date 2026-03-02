@@ -8,13 +8,13 @@ void create() {
 
     set_short("Splynn — The Rift Gate");
     set_long(
-        "A shimmering tear in reality hangs in the air behind you, its edges\n"
-        "crackling with dimensional energy before slowly folding shut. You\n"
-        "have arrived in Splynn, the alien city-state of the Splugorth\n"
-        "Slavelords on the shores of the Atlantic Rift — a place where a\n"
-        "hundred species trade, scheme, and survive under the cold gaze of\n"
-        "bio-wizardry towers. The humid air carries the smell of ozone and\n"
-        "exotic spices. A broad stone archway to the south opens into the\n"
+        "A shimmering tear in reality hangs in the air behind you, its edges\n" +
+        "crackling with dimensional energy before slowly folding shut. You\n" +
+        "have arrived in Splynn, the alien city-state of the Splugorth\n" +
+        "Slavelords on the shores of the Atlantic Rift — a place where a\n" +
+        "hundred species trade, scheme, and survive under the cold gaze of\n" +
+        "bio-wizardry towers. The humid air carries the smell of ozone and\n" +
+        "exotic spices. A broad stone archway to the south opens into the\n" +
         "narrow streets of the South Alley.\n"
     );
 

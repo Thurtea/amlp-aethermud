@@ -11,14 +11,14 @@ void create() {
     set_skill_display_name("Pilot: Power Armor");
     set_short("the ability to pilot power armor");
     set_long(
-        "Pilot: Power Armor allows you to operate powered exoskeletons and combat "
-        "armor suits like the SAMAS, Glitter Boy, or Triax Power Armor. These suits "
-        "amplify strength and provide protection, but require skill to operate effectively.\n\n"
-        "The skill covers: basic movement and coordination, combat maneuvers, jump jet "
-        "operation (if equipped), weapon systems integration, and emergency protocols. "
-        "Power armor effectively becomes a second skin for a skilled pilot.\n\n"
-        "Base: 40% + 5% per level\n"
-        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Pilot: Power Armor allows you to operate powered exoskeletons and combat " +
+        "armor suits like the SAMAS, Glitter Boy, or Triax Power Armor. These suits " +
+        "amplify strength and provide protection, but require skill to operate effectively.\n\n" +
+        "The skill covers: basic movement and coordination, combat maneuvers, jump jet " +
+        "operation (if equipped), weapon systems integration, and emergency protocols. " +
+        "Power armor effectively becomes a second skin for a skilled pilot.\n\n" +
+        "Base: 40% + 5% per level\n" +
+        "Bonus: +5% per point of Physical Prowess above 16\n" +
         "Related Stat: Physical Prowess"
     );
     

@@ -361,21 +361,20 @@ int show_topic(string topic, int priv_level) {
 }
 
 string query_help() {
-    return
-"HELP - Topic-based help system\n\n"
-"Usage:\n"
-"  help                  List all available topics (alphabetical)\n"
-"  help <topic>          Read a specific help topic\n"
-"  help topics           Same as 'help' (full topic list)\n"
-"  help <category>       List topics in a category\n\n"
-"Categories: basics, systems, occs, social, meta\n"
-"Wizard categories: wizard (requires wizard access)\n\n"
-"The help system searches:\n"
-"  1. Help text files   (lib/help/ and lib/data/help/)\n"
-"  2. Commands          (lib/cmds/) via query_help()\n"
-"  3. Spells            (lib/spells/) via query_help()\n"
-"  4. Psionics          (lib/psionics/) via query_help()\n"
-"  5. Skills            (lib/skills/) via query_help()\n"
-"  6. OCCs              (lib/occs/) via query_help()\n"
+    return "HELP - Topic-based help system\n\n" +
+"Usage:\n" +
+"  help                  List all available topics (alphabetical)\n" +
+"  help <topic>          Read a specific help topic\n" +
+"  help topics           Same as 'help' (full topic list)\n" +
+"  help <category>       List topics in a category\n\n" +
+"Categories: basics, systems, occs, social, meta\n" +
+"Wizard categories: wizard (requires wizard access)\n\n" +
+"The help system searches:\n" +
+"  1. Help text files   (lib/help/ and lib/data/help/)\n" +
+"  2. Commands          (lib/cmds/) via query_help()\n" +
+"  3. Spells            (lib/spells/) via query_help()\n" +
+"  4. Psionics          (lib/psionics/) via query_help()\n" +
+"  5. Skills            (lib/skills/) via query_help()\n" +
+"  6. OCCs              (lib/occs/) via query_help()\n" +
 "  7. Races             (lib/races/) via query_help()\n";
 }

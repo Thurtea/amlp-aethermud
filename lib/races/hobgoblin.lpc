@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Hobgoblins are tall, powerfully built goblinoids standing five to six feet "
-        "tall, with dark orange to reddish-brown skin, flat noses, and sharp fangs. "
-        "Unlike their smaller goblin cousins, hobgoblins are disciplined, organized, "
-        "and possess a strong martial culture that revolves around military hierarchy "
-        "and conquest. They are natural soldiers who fight with tactical precision "
-        "rather than the chaotic swarm tactics of goblins. Hobgoblin warbands are "
-        "among the most feared organized threats in the wilderness of Rifts Earth, "
+        "Hobgoblins are tall, powerfully built goblinoids standing five to six feet " +
+        "tall, with dark orange to reddish-brown skin, flat noses, and sharp fangs. " +
+        "Unlike their smaller goblin cousins, hobgoblins are disciplined, organized, " +
+        "and possess a strong martial culture that revolves around military hierarchy " +
+        "and conquest. They are natural soldiers who fight with tactical precision " +
+        "rather than the chaotic swarm tactics of goblins. Hobgoblin warbands are " +
+        "among the most feared organized threats in the wilderness of Rifts Earth, " +
         "employing coordinated strategies and maintaining strict chains of command."
     );
 

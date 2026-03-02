@@ -170,24 +170,23 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"REPAIR - Repair damaged armor\n\n"
-"Usage:\n"
-"  repair <armor>    Attempt to repair damaged armor\n\n"
-"Armor requires different skills to repair:\n\n"
-"S.D.C. Armor:\n"
-"  - Can be repaired with Mechanical Engineer, Operator,\n"
-"    or Basic Mechanics skills\n"
-"  - Unskilled attempts possible but rarely successful\n"
-"  - Restores 2d6 S.D.C. on success\n\n"
-"M.D.C. Armor:\n"
-"  - Requires M.D.C. Armor Repair skill (specialized)\n"
-"  - Cannot be repaired without proper training\n"
-"  - Restores 1d6 M.D.C. on success\n"
-"  - Much more difficult to repair\n\n"
-"Examples:\n"
-"  repair armor\n"
-"  repair helmet\n\n"
-"Note: Examine your armor to see its current condition.\n\n"
+    return "REPAIR - Repair damaged armor\n\n" +
+"Usage:\n" +
+"  repair <armor>    Attempt to repair damaged armor\n\n" +
+"Armor requires different skills to repair:\n\n" +
+"S.D.C. Armor:\n" +
+"  - Can be repaired with Mechanical Engineer, Operator,\n" +
+"    or Basic Mechanics skills\n" +
+"  - Unskilled attempts possible but rarely successful\n" +
+"  - Restores 2d6 S.D.C. on success\n\n" +
+"M.D.C. Armor:\n" +
+"  - Requires M.D.C. Armor Repair skill (specialized)\n" +
+"  - Cannot be repaired without proper training\n" +
+"  - Restores 1d6 M.D.C. on success\n" +
+"  - Much more difficult to repair\n\n" +
+"Examples:\n" +
+"  repair armor\n" +
+"  repair helmet\n\n" +
+"Note: Examine your armor to see its current condition.\n\n" +
 "See also: EXAMINE, EQUIPMENT\n";
 }

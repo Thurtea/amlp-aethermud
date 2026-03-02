@@ -14,10 +14,9 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"SLEEP - Fall asleep\n\n"
-"Usage:\n"
-"  sleep                  Lie down and go to sleep\n\n"
-"Sleeping provides the fastest HP and SDC recovery. Use 'wake'\n"
+    return "SLEEP - Fall asleep\n\n" +
+"Usage:\n" +
+"  sleep                  Lie down and go to sleep\n\n" +
+"Sleeping provides the fastest HP and SDC recovery. Use 'wake'\n" +
 "to wake yourself or another player.\n";
 }

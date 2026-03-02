@@ -16,15 +16,15 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Coalition Grunts are the standard infantry soldiers of the Coalition "
-        "States - the most powerful human military on Rifts Earth. They are "
-        "trained to use dead boy armor and CS military weapons, follow orders "
-        "without question, and hold an intense distrust of magic and the "
-        "supernatural. Coalition Grunts are indoctrinated from an early age "
-        "to believe that non-humans are inferior and dangerous, and that "
-        "magic is evil. While they lack the specialized skills of Headhunters "
-        "or Special Forces, they are well-equipped, disciplined, and "
-        "dangerous in numbers. Many Coalition soldiers eventually question "
+        "Coalition Grunts are the standard infantry soldiers of the Coalition " +
+        "States - the most powerful human military on Rifts Earth. They are " +
+        "trained to use dead boy armor and CS military weapons, follow orders " +
+        "without question, and hold an intense distrust of magic and the " +
+        "supernatural. Coalition Grunts are indoctrinated from an early age " +
+        "to believe that non-humans are inferior and dangerous, and that " +
+        "magic is evil. While they lack the specialized skills of Headhunters " +
+        "or Special Forces, they are well-equipped, disciplined, and " +
+        "dangerous in numbers. Many Coalition soldiers eventually question " +
         "their programming and go AWOL, becoming disillusioned freedom fighters."
     );
 
@@ -157,12 +157,12 @@ void create() {
     set_property("cs_rank", "private");
 
     set_background(
-        "Coalition Grunts are recruited from the millions of humans living "
-        "under Coalition rule. Most enlist voluntarily, driven by patriotism "
-        "or lack of other options. CS military training is thorough and "
-        "intensive, emphasizing discipline, loyalty, and hatred of "
-        "supernatural threats. Many soldiers spend their entire careers "
-        "believing in the CS cause. Others eventually see the truth "
+        "Coalition Grunts are recruited from the millions of humans living " +
+        "under Coalition rule. Most enlist voluntarily, driven by patriotism " +
+        "or lack of other options. CS military training is thorough and " +
+        "intensive, emphasizing discipline, loyalty, and hatred of " +
+        "supernatural threats. Many soldiers spend their entire careers " +
+        "believing in the CS cause. Others eventually see the truth " +
         "about their government and desert."
     );
     set_organizations(({ "coalition_states_military" }));

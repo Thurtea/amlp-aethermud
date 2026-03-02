@@ -8,7 +8,7 @@ void create() {
     set_name("admin orb");
     set_short("a pulsing admin orb");
     set_long(
-        "A swirling sphere of dark energy that hovers at eye level when released. "
+        "A swirling sphere of dark energy that hovers at eye level when released. " +
         "Grants 'mudstats' and 'purge' commands while carried.\n"
     );
     set_weight(0);
@@ -128,7 +128,7 @@ private void _setup_one_test_char(object p) {
         _give_item(p, "/single/laser_pistol");
         _give_item(p, "/single/e_clip");
         tell_object(p,
-            "\n[SETUP] Configured as test_ck: Human Cyber-Knight, Level 15.\n"
+            "\n[SETUP] Configured as test_ck: Human Cyber-Knight, Level 15.\n" +
             "Inventory: light plate armor, vibro-sword, laser pistol, e-clip.\n");
         tell_object(tp, "Configured " + p->query_name() + " as Cyber-Knight (L15).\n");
 
@@ -139,7 +139,7 @@ private void _setup_one_test_char(object p) {
         _give_item(p, "/single/darkness_grenade");
         _give_item(p, "/single/e_clip");
         tell_object(p,
-            "\n[SETUP] Configured as test_sunaj: Atlantean Sunaj Assassin, Level 15.\n"
+            "\n[SETUP] Configured as test_sunaj: Atlantean Sunaj Assassin, Level 15.\n" +
             "Inventory: shadow armor, vibro-knife, laser pistol, darkness grenade, e-clip.\n");
         tell_object(tp, "Configured " + p->query_name() + " as Sunaj Assassin (L15).\n");
 
@@ -150,13 +150,13 @@ private void _setup_one_test_char(object p) {
             p->set_stat("spd", 22);
         }
         tell_object(p,
-            "\n[SETUP] Configured as test_dragon: Great Horned Dragon, Level 15.\n"
+            "\n[SETUP] Configured as test_dragon: Great Horned Dragon, Level 15.\n" +
             "No gear - natural MDC armor and attacks apply.\n");
         tell_object(tp, "Configured " + p->query_name() + " as Great Horned Dragon (L15).\n");
 
     } else {
         tell_object(tp,
-            "Note: '" + p->query_name() + "' is not a recognised test character "
+            "Note: '" + p->query_name() + "' is not a recognised test character " +
             "(expected test_ck / test_sunaj / test_dragon). Level set to 15, no gear given.\n");
     }
 }
@@ -181,7 +181,7 @@ int cmd_setup_test_chars(string args) {
         }
         if (sizeof(plist) == 0) {
             tell_object(tp,
-                "No test_* players are currently online.\n"
+                "No test_* players are currently online.\n" +
                 "Log in as test_ck, test_sunaj, or test_dragon first.\n");
             return 1;
         }

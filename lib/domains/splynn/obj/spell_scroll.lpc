@@ -38,7 +38,7 @@ int do_read(object player) {
         player->set_property("spell_scroll_used", 1);
 
     tell_object(player,
-        "The text burns itself into your mind, then fades from the page. "
+        "The text burns itself into your mind, then fades from the page. " +
         "You have learned: " + chosen + ".\n");
 
     return 1;

@@ -9,14 +9,14 @@ void create() {
     set_spell_id("dimensional_portal");
     set_spell_name("Dimensional Portal");
     set_spell_desc(
-        "The most powerful dimensional magic: the invocation opens a two-way "
-        "door to another dimension. The mage can open a door to a specific "
-        "known world or randomly to an unknown dimension. This is the only "
-        "known means by which a greater being can enter this dimension. "
-        "Once the portal closes, the only way back is to open another. "
-        "One of the real dangers is that something unwanted may slip through. "
-        "As a spell: 30 seconds (2 melees) per level. "
-        "As a ritual: 1 minute (4 melees) per level. "
+        "The most powerful dimensional magic: the invocation opens a two-way " +
+        "door to another dimension. The mage can open a door to a specific " +
+        "known world or randomly to an unknown dimension. This is the only " +
+        "known means by which a greater being can enter this dimension. " +
+        "Once the portal closes, the only way back is to open another. " +
+        "One of the real dangers is that something unwanted may slip through. " +
+        "As a spell: 30 seconds (2 melees) per level. " +
+        "As a ritual: 1 minute (4 melees) per level. " +
         "PPE cost: 1000."
     );
 
@@ -56,16 +56,16 @@ int apply_effect(object caster, object target) {
     }
 
     tell_object(caster,
-        "You channel all 1000 PPE into the dimensional invocation. "
-        "The air tears open before you in a shimmering oval of iridescent light - "
-        "a two-way portal to another dimension! "
-        "WARNING: Greater beings may enter through this portal. "
-        "Something may always slip through before it closes.\n"
+        "You channel all 1000 PPE into the dimensional invocation. " +
+        "The air tears open before you in a shimmering oval of iridescent light - " +
+        "a two-way portal to another dimension! " +
+        "WARNING: Greater beings may enter through this portal. " +
+        "Something may always slip through before it closes.\n" +
         "Duration: " + (level * 30) + " seconds.\n");
 
     tell_room(env,
         "The air screams and tears open as " + caster->query_cap_name() +
-        " invokes the Dimensional Portal! A shimmering oval of reality-bending "
+        " invokes the Dimensional Portal! A shimmering oval of reality-bending " +
         "light burns in the air - a gateway to another dimension!\n",
         ({ caster }));
 
@@ -82,7 +82,7 @@ int apply_effect(object caster, object target) {
 void slip_through(object caster, object env) {
     if (!env || !env->query_property("dimensional_portal_active")) return;
     tell_room(env,
-        "Something slips through the portal before you can act! "
+        "Something slips through the portal before you can act! " +
         "A glimmer of alien energy materializes at the portal's edge...\n",
         ({ }));
     if (caster) tell_object(caster,
@@ -97,6 +97,6 @@ void close_dimensional_portal(object caster, object env) {
     if (caster) tell_object(caster,
         "The Dimensional Portal collapses. The way between worlds is sealed.\n");
     if (env) tell_room(env,
-        "The dimensional portal shivers and collapses inward with a thunderclap "
+        "The dimensional portal shivers and collapses inward with a thunderclap " +
         "of imploding air!\n", ({ }));
 }

@@ -16,14 +16,14 @@ void create() {
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Juicers are chemical super-soldiers, humans enhanced by a Bio-Comp "
-        "drug harness that continuously pumps performance-enhancing chemicals "
-        "into their bodies. The result is superhuman strength, speed, and reflexes "
-        "- but at a terrible price. The chemicals burn out the Juicer's body, giving "
-        "them only five to eight years to live after conversion. This death sentence "
-        "attracts those with nothing to lose - the desperate, the thrill-seekers, "
-        "and those seeking one last chance at glory. Juicers live fast and die young, "
-        "often seeking death in battle rather than the slow deterioration that awaits. "
+        "Juicers are chemical super-soldiers, humans enhanced by a Bio-Comp " +
+        "drug harness that continuously pumps performance-enhancing chemicals " +
+        "into their bodies. The result is superhuman strength, speed, and reflexes " +
+        "- but at a terrible price. The chemicals burn out the Juicer's body, giving " +
+        "them only five to eight years to live after conversion. This death sentence " +
+        "attracts those with nothing to lose - the desperate, the thrill-seekers, " +
+        "and those seeking one last chance at glory. Juicers live fast and die young, " +
+        "often seeking death in battle rather than the slow deterioration that awaits. " +
         "Some seek a cure, though none has been found. Others simply embrace the ride."
     );
     
@@ -198,11 +198,11 @@ void create() {
     
     // Background
     set_background(
-        "Juicers come from all walks of life, but most share one thing: desperation. "
-        "Some are former soldiers seeking an edge, others are criminals looking for "
-        "power, and some are simply people with nothing left to lose. The conversion "
-        "process is expensive and dangerous, offered by black market clinics and "
-        "some legitimate organizations. Once converted, Juicers must maintain their "
+        "Juicers come from all walks of life, but most share one thing: desperation. " +
+        "Some are former soldiers seeking an edge, others are criminals looking for " +
+        "power, and some are simply people with nothing left to lose. The conversion " +
+        "process is expensive and dangerous, offered by black market clinics and " +
+        "some legitimate organizations. Once converted, Juicers must maintain their " +
         "chemical supply or face painful withdrawal and death."
     );
     set_organizations(({ "juicer_uprising" }));

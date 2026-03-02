@@ -43,7 +43,7 @@ void create() {
     
     set_short("the corpse of " + corpse_name);
     set_long(
-        "This is the lifeless body of " + corpse_name + ". It lies motionless on "
+        "This is the lifeless body of " + corpse_name + ". It lies motionless on " +
         "the ground. You can search it to recover items.\n"
     );
     
@@ -56,7 +56,7 @@ void set_corpse_name(string name) {
     corpse_name = name;
     set_short("the corpse of " + corpse_name);
     set_long(
-        "This is the lifeless body of " + corpse_name + ". It lies motionless on "
+        "This is the lifeless body of " + corpse_name + ". It lies motionless on " +
         "the ground. You can search it to recover items.\n"
     );
 

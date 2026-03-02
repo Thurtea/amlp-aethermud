@@ -46,13 +46,8 @@ int main(string args) {
     }
     
     // Reload
-    catch {
-        ob = load_object(resolved);
-    } : {
-        tell_object(player, "Error: Failed to reload " + resolved + "\n");
-        return 1;
-    }
-    
+    catch { ob = load_object(resolved); };
+
     if (!ob) {
         tell_object(player, "Error: Reload failed\n");
         return 1;
@@ -63,11 +58,10 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"UPDATE - Update a deployed object with workspace changes\n\n"
-"Usage:\n"
-"  update <name>         Update an existing deployed object from workspace\n\n"
-"Replace or refresh a deployed file with the version from your creator\n"
+    return "UPDATE - Update a deployed object with workspace changes\n\n" +
+"Usage:\n" +
+"  update <name>         Update an existing deployed object from workspace\n\n" +
+"Replace or refresh a deployed file with the version from your creator\n" +
 "workspace. Requires appropriate permissions.\n";
 }
 

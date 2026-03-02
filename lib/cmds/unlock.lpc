@@ -14,9 +14,8 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"UNLOCK - Unlock a door or container\n\n"
-"Usage:\n"
-"  unlock <object>    Unlock a container or door (must have key)\n\n"
+    return "UNLOCK - Unlock a door or container\n\n" +
+"Usage:\n" +
+"  unlock <object>    Unlock a container or door (must have key)\n\n" +
 "You must be carrying the correct key. Use 'open' after unlocking.\n";
 }

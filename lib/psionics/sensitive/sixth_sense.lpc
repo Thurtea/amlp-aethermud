@@ -12,10 +12,10 @@ void create() {
     set_power_id("sixth_sense");
     set_power_name("Sixth Sense");
     set_power_desc(
-        "This power gives the psychic a precognitive flash of impending "
-        "danger. It cannot be called upon at will, but rather, activates "
-        "automatically when there is imminent danger to the psychic or "
-        "someone nearby. The warning comes as a sudden flash of insight "
+        "This power gives the psychic a precognitive flash of impending " +
+        "danger. It cannot be called upon at will, but rather, activates " +
+        "automatically when there is imminent danger to the psychic or " +
+        "someone nearby. The warning comes as a sudden flash of insight " +
         "or gut feeling that something is wrong."
     );
     set_power_category("sensitive");

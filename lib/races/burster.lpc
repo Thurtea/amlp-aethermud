@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_PSIONIC);
 
     set_race_description(
-        "Bursters are pyrokinetic psychics, human beings born with the devastating "
-        "ability to generate and control fire through psionic power alone. They can "
-        "ignite objects at a distance, hurl bolts of flame, create walls of fire, "
-        "and even envelop their own bodies in a raging inferno without suffering harm. "
-        "Bursters are emotionally volatile and their powers often manifest during "
-        "moments of intense anger or stress, making them as dangerous to their allies "
-        "as to their enemies. The Coalition States classifies them as extreme-threat "
+        "Bursters are pyrokinetic psychics, human beings born with the devastating " +
+        "ability to generate and control fire through psionic power alone. They can " +
+        "ignite objects at a distance, hurl bolts of flame, create walls of fire, " +
+        "and even envelop their own bodies in a raging inferno without suffering harm. " +
+        "Bursters are emotionally volatile and their powers often manifest during " +
+        "moments of intense anger or stress, making them as dangerous to their allies " +
+        "as to their enemies. The Coalition States classifies them as extreme-threat " +
         "psychic operatives and shoots them on sight."
     );
 

@@ -10,8 +10,8 @@ void create() {
     set_starts_open(0);
     set_short("wizard's chest");
     set_long(
-        "A sturdy oak chest with arcane symbols carved into its lid.\n"
-        "The symbols pulse faintly with residual magical energy.\n"
+        "A sturdy oak chest with arcane symbols carved into its lid.\n" +
+        "The symbols pulse faintly with residual magical energy.\n" +
         "Type 'look in chest' to see its contents."
     );
     set_property("no_get", 1);

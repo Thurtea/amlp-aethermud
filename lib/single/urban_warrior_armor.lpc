@@ -8,8 +8,8 @@ void create() {
     set_id_alt("urban");
     set_short("urban warrior light armor");
     set_long(
-        "This is lightweight body armor designed for urban combat. It provides "
-        "50 M.D.C. of protection and is made of composite ceramics and mega-damage "
+        "This is lightweight body armor designed for urban combat. It provides " +
+        "50 M.D.C. of protection and is made of composite ceramics and mega-damage " +
         "fabrics. The black armor is form-fitting and allows excellent mobility.\n"
     );
     

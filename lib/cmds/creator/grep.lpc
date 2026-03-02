@@ -14,7 +14,8 @@
 int main(string args) {
     object player = previous_object();
     string pattern, path, resolved;
-    string *parts, *files;
+    string *parts;
+    string *files;
     int case_insensitive = 0;
     int show_line_numbers = 0;
     int recursive = 0;
@@ -123,11 +124,10 @@ int main(string args) {
     return 1;
 }
     string query_help() {
-        return
-            "GREP - Search files for a pattern\n\n"
-            "Usage:\n"
-            "  grep <pattern> <file>   Search a file for a pattern\n\n"
-            "Searches files in your workspace for matching text. Useful for\n"
+        return "GREP - Search files for a pattern\n\n" +
+            "Usage:\n" +
+            "  grep <pattern> <file>   Search a file for a pattern\n\n" +
+            "Searches files in your workspace for matching text. Useful for\n" +
             "locating definitions and references while building.\n";
     }
 

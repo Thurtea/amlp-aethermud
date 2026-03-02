@@ -14,9 +14,9 @@ void create() {
     
     set_short("a levitation psionic power");
     set_long(
-        "Levitation allows the psychic to fly using mental power at a speed "
-        "of 10 mph per I.S.P. spent. Can hover motionless or fly at speed. "
-        "Each I.S.P. provides 10 minutes of flight at that speed. Costs "
+        "Levitation allows the psychic to fly using mental power at a speed " +
+        "of 10 mph per I.S.P. spent. Can hover motionless or fly at speed. " +
+        "Each I.S.P. provides 10 minutes of flight at that speed. Costs " +
         "vary: 8 I.S.P. for 10 mph, 16 for 20 mph, etc. Range: Self."
     );
     

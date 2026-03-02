@@ -17,15 +17,15 @@ void create() {
     set_race_category(RACE_CAT_HUMAN);
 
     set_race_description(
-        "Mega-Juicers are the final evolution of chemical super-soldier augmentation, "
-        "subjects who have undergone multiple rounds of increasingly lethal procedures "
-        "that saturate every cell of their body with synthetic bio-compounds. Towering "
-        "between seven and nine feet tall with muscles like knotted steel cable, they "
-        "possess physical capabilities that rival lesser supernatural beings. Their "
-        "nervous systems have been rewired to suppress all pain and fear, making them "
-        "utterly fearless combatants who fight with reckless, near-suicidal aggression. "
-        "The price is absolute: total systemic burnout within two to three years, with "
-        "no known reversal, and a progressive detachment from emotion and humanity that "
+        "Mega-Juicers are the final evolution of chemical super-soldier augmentation, " +
+        "subjects who have undergone multiple rounds of increasingly lethal procedures " +
+        "that saturate every cell of their body with synthetic bio-compounds. Towering " +
+        "between seven and nine feet tall with muscles like knotted steel cable, they " +
+        "possess physical capabilities that rival lesser supernatural beings. Their " +
+        "nervous systems have been rewired to suppress all pain and fear, making them " +
+        "utterly fearless combatants who fight with reckless, near-suicidal aggression. " +
+        "The price is absolute: total systemic burnout within two to three years, with " +
+        "no known reversal, and a progressive detachment from emotion and humanity that " +
         "leaves them hollow-eyed instruments of destruction in their final months."
     );
 
@@ -108,11 +108,11 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Mega-Juicers are a Racial Character Class representing the absolute zenith "
-        "of chemical augmentation. The procedure is so extreme that it redefines the "
-        "subject at a cellular level, erasing any prior training. Mega-Juicers exist "
-        "solely as weapons, and their remaining lifespan is measured in months rather "
-        "than years. Reversal is impossible; the only question is how they choose to "
+        "Mega-Juicers are a Racial Character Class representing the absolute zenith " +
+        "of chemical augmentation. The procedure is so extreme that it redefines the " +
+        "subject at a cellular level, erasing any prior training. Mega-Juicers exist " +
+        "solely as weapons, and their remaining lifespan is measured in months rather " +
+        "than years. Reversal is impossible; the only question is how they choose to " +
         "spend their final days."
     );
 

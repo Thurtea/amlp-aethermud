@@ -9,14 +9,14 @@ void create() {
     set_spell_id("teleport_superior");
     set_spell_name("Teleport: Superior");
     set_spell_desc(
-        "The arcanist instantly transports himself and up to 1000 lbs per "
-        "level of experience, hundreds of miles away. The mage must have a "
-        "mental picture of the destination. Chances of success by familiarity: "
-        "Familiar location or visible destination: 99%. Place seen a few times "
-        "(2-6 visits): 85%. Place seen only in a photo: 80%. Never visited but "
-        "described in detail: 58%. Known only by name or brief description: 20%. "
-        "Failed teleports may result in appearing at the wrong location, "
-        "fall damage, or instant death if teleporting into solid matter. "
+        "The arcanist instantly transports himself and up to 1000 lbs per " +
+        "level of experience, hundreds of miles away. The mage must have a " +
+        "mental picture of the destination. Chances of success by familiarity: " +
+        "Familiar location or visible destination: 99%. Place seen a few times " +
+        "(2-6 visits): 85%. Place seen only in a photo: 80%. Never visited but " +
+        "described in detail: 58%. Known only by name or brief description: 20%. " +
+        "Failed teleports may result in appearing at the wrong location, " +
+        "fall damage, or instant death if teleporting into solid matter. " +
         "Range: 300 miles per level. PPE cost: 600."
     );
 
@@ -72,7 +72,7 @@ int apply_effect(object caster, object target) {
             // Fall damage
             int dmg = (random(6)+1) + (random(6)+1) + (random(6)+1);
             tell_object(caster,
-                "The teleport is disrupted! You materialize 10 feet above the ground "
+                "The teleport is disrupted! You materialize 10 feet above the ground " +
                 "and fall for " + dmg + " SDC damage!\n");
             caster->take_damage(dmg, "fall");
             object fail_dest;
@@ -89,7 +89,7 @@ int apply_effect(object caster, object target) {
     if (dest_obj) {
         caster->move_player(dest_obj);
         tell_object(caster,
-            "Space folds around you and you vanish in an instant! "
+            "Space folds around you and you vanish in an instant! " +
             "The world snaps back into being around you at your destination.\n");
 
         object env = environment(caster);

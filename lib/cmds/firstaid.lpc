@@ -101,15 +101,14 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"FIRSTAID - Apply first aid to yourself or another\n\n"
-"Usage:\n"
-"  firstaid              Treat yourself\n"
-"  firstaid <target>     Treat someone nearby\n\n"
-"Requires the 'first_aid' skill.  Rolls d100 vs your skill percentage.\n"
-"  Success:          Heals 1d6 SDC\n"
-"  Failure:          No effect\n"
-"  Critical failure: Botched treatment\n\n"
-"Cooldown: 60 seconds between uses.\n\n"
+    return "FIRSTAID - Apply first aid to yourself or another\n\n" +
+"Usage:\n" +
+"  firstaid              Treat yourself\n" +
+"  firstaid <target>     Treat someone nearby\n\n" +
+"Requires the 'first_aid' skill.  Rolls d100 vs your skill percentage.\n" +
+"  Success:          Heals 1d6 SDC\n" +
+"  Failure:          No effect\n" +
+"  Critical failure: Botched treatment\n\n" +
+"Cooldown: 60 seconds between uses.\n\n" +
 "First Aid is an OCC skill for Mercenary, Body Fixer, City Rat, and others.\n";
 }

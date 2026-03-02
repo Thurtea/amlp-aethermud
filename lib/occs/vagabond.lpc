@@ -16,13 +16,13 @@ void create() {
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Vagabonds are the everyday people of Rifts Earth - survivors who have "
-        "learned to get by through adaptability and street smarts rather than "
-        "specialized training. They might be drifters, displaced refugees, or "
-        "just ordinary folks who never had the opportunity for formal education "
-        "or military training. What Vagabonds lack in specialized expertise, they "
-        "make up for in versatility. They pick up skills wherever they can, becoming "
-        "jacks of all trades. Many Vagabonds eventually specialize and transition "
+        "Vagabonds are the everyday people of Rifts Earth - survivors who have " +
+        "learned to get by through adaptability and street smarts rather than " +
+        "specialized training. They might be drifters, displaced refugees, or " +
+        "just ordinary folks who never had the opportunity for formal education " +
+        "or military training. What Vagabonds lack in specialized expertise, they " +
+        "make up for in versatility. They pick up skills wherever they can, becoming " +
+        "jacks of all trades. Many Vagabonds eventually specialize and transition " +
         "to other professions, but others embrace their flexible lifestyle."
     );
     
@@ -149,9 +149,9 @@ void create() {
     
     // Background
     set_background(
-        "Vagabonds come from all walks of life - displaced farmers, orphaned "
-        "children who grew up on the streets, former slaves, or simply people "
-        "who never found a stable profession. Some are wanderers by choice, "
+        "Vagabonds come from all walks of life - displaced farmers, orphaned " +
+        "children who grew up on the streets, former slaves, or simply people " +
+        "who never found a stable profession. Some are wanderers by choice, " +
         "others are forced into vagrancy by circumstance."
     );
     set_organizations(({ }));

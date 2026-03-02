@@ -9,13 +9,13 @@ void create() {
     set_spell_id("close_rift");
     set_spell_name("Close Rift");
     set_spell_desc(
-        "The master of magic can close a dimensional rift by sheer force of "
-        "will. However, the monumental effort permanently drains the mage of "
-        "two PPE points from their permanent base, whether successful or not. "
-        "The rift has an automatic save vs magic due to its mystic nature "
-        "(standard save to resist). A Close Rift Ritual increases odds for "
-        "success (save difficulty 16). On success the rift instantly vanishes. "
-        "On failure the rift is unaffected but the 2 PPE are lost forever. "
+        "The master of magic can close a dimensional rift by sheer force of " +
+        "will. However, the monumental effort permanently drains the mage of " +
+        "two PPE points from their permanent base, whether successful or not. " +
+        "The rift has an automatic save vs magic due to its mystic nature " +
+        "(standard save to resist). A Close Rift Ritual increases odds for " +
+        "success (save difficulty 16). On success the rift instantly vanishes. " +
+        "On failure the rift is unaffected but the 2 PPE are lost forever. " +
         "PPE cost: 200 (minimum). Range: 100 feet."
     );
 
@@ -49,7 +49,7 @@ int apply_effect(object caster, object target) {
     // Check if there's an active rift in this room
     if (!env || !env->query_property("rift_active")) {
         tell_object(caster,
-            "You channel the invocation but there is no active rift here to close. "
+            "You channel the invocation but there is no active rift here to close. " +
             "The effort still permanently drains 2 PPE from your base reserves.\n");
         return 1;
     }
@@ -63,19 +63,19 @@ int apply_effect(object caster, object target) {
         env->remove_property("rift_destination");
 
         tell_object(caster,
-            "Your will crashes against the rift like a hammer blow. It shudders, "
-            "contracts, and collapses into nothing with a thunderclap of displaced air. "
+            "Your will crashes against the rift like a hammer blow. It shudders, " +
+            "contracts, and collapses into nothing with a thunderclap of displaced air. " +
             "The rift is closed! (2 PPE permanently lost)\n");
 
         tell_room(env,
             caster->query_cap_name() +
-            " screams an invocation and the rift shudders and collapses inward "
+            " screams an invocation and the rift shudders and collapses inward " +
             "with a thunderclap!\n",
             ({ caster }));
     } else {
         // Failure - rift resists
         tell_object(caster,
-            "You channel everything you have into closing the rift but it holds firm. "
+            "You channel everything you have into closing the rift but it holds firm. " +
             "The attempt fails. (2 PPE permanently lost)\n");
 
         tell_room(env,

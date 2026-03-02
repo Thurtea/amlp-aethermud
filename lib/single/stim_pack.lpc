@@ -8,8 +8,8 @@ void create() {
     set_id_alt("pack");
     set_short("a stim pack");
     set_long(
-        "This small injector contains a cocktail of combat stimulants. When used, "
-        "it provides a temporary boost to reflexes and endurance. The effects last "
+        "This small injector contains a cocktail of combat stimulants. When used, " +
+        "it provides a temporary boost to reflexes and endurance. The effects last " +
         "for about 10 minutes, followed by mild fatigue.\n"
     );
     

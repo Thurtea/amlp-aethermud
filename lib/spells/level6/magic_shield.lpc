@@ -13,14 +13,14 @@ void create() {
     set_spell_id("magic_shield");
     set_spell_name("Magic Shield");
     set_spell_desc(
-        "This defensive spell creates an invisible mystical shield that "
-        "enhances the caster's ability to dodge and parry incoming attacks. "
-        "The shield grants a +2 bonus to all dodge and parry rolls, making "
-        "the caster significantly harder to hit in combat.\n\n"
-        "Unlike a physical shield, the Magic Shield does not encumber the "
-        "caster and can be used while wielding two-handed weapons or casting "
-        "spells. The shield manifests as a faint shimmer in the air that "
-        "seems to guide the caster's movements, helping them avoid danger.\n\n"
+        "This defensive spell creates an invisible mystical shield that " +
+        "enhances the caster's ability to dodge and parry incoming attacks. " +
+        "The shield grants a +2 bonus to all dodge and parry rolls, making " +
+        "the caster significantly harder to hit in combat.\n\n" +
+        "Unlike a physical shield, the Magic Shield does not encumber the " +
+        "caster and can be used while wielding two-handed weapons or casting " +
+        "spells. The shield manifests as a faint shimmer in the air that " +
+        "seems to guide the caster's movements, helping them avoid danger.\n\n" +
         "Duration: 1 minute per level of experience."
     );
     

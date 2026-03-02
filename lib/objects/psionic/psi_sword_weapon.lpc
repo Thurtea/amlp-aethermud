@@ -11,10 +11,10 @@ void create() {
     set_id(({"sword", "psi-sword", "psi sword", "psisword", "blade", "psionic sword"}));
     set_short("a psi-sword");
     set_long(
-        "This is a sword composed entirely of psionic energy. The blade shimmers "
-        "with magenta and blue light, pulsing with psycho-kinetic "
-        "power. The 'blade' is solid enough to parry physical attacks and can cut "
-        "through nearly anything. It makes a faint humming sound.\n\n"
+        "This is a sword composed entirely of psionic energy. The blade shimmers " +
+        "with magenta and blue light, pulsing with psycho-kinetic " +
+        "power. The 'blade' is solid enough to parry physical attacks and can cut " +
+        "through nearly anything. It makes a faint humming sound.\n\n" +
         "The psi-sword inflicts 3d6 Mega-Damage per strike!\n"
     );
     

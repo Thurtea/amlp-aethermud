@@ -121,7 +121,10 @@ string resolve_path(base, path) {
     string full;
     if(path[0] == '/') { full = path; }
     else { if(base[strlen(base)-1] != '/') base += "/"; full = base + path; }
-    string *parts = explode(full, "/"), *out = ({});
+    string *parts;
+    string *out;
+    parts = explode(full, "/");
+    out = ({});
     foreach(string part in parts) {
         if(part=="" || part==".") continue;
         if(part=="..") { if(sizeof(out)) out = out[0..(sizeof(out)-2)]; }

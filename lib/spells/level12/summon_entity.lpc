@@ -9,14 +9,14 @@ void create() {
     set_spell_id("summon_entity");
     set_spell_name("Summon and Control Entity");
     set_spell_desc(
-        "An impressive ritual that plucks an entity from its native dimension "
-        "and magically teleports it before the conjurer. The alien being is "
-        "automatically under the mage's control and will obey without question. "
-        "The entity can be used for manual labor, protection, or assault. "
-        "A specific entity type may be designated, or a random one is called. "
-        "The supernatural creature can be returned to its own dimension at "
-        "any time before the duration expires. After duration, the mage "
-        "loses control and the entity may act independently. "
+        "An impressive ritual that plucks an entity from its native dimension " +
+        "and magically teleports it before the conjurer. The alien being is " +
+        "automatically under the mage's control and will obey without question. " +
+        "The entity can be used for manual labor, protection, or assault. " +
+        "A specific entity type may be designated, or a random one is called. " +
+        "The supernatural creature can be returned to its own dimension at " +
+        "any time before the duration expires. After duration, the mage " +
+        "loses control and the entity may act independently. " +
         "Duration: 24 hours per level."
     );
 
@@ -43,10 +43,10 @@ int apply_effect(object caster, object target) {
     int duration_hrs = level * 24;
 
     tell_object(caster,
-        "The air shimmers and tears as dimensional energies respond to your "
-        "invocation. A rift opens briefly and an entity steps through, "
-        "fixing you with an unreadable gaze before bowing its head in "
-        "submission. The entity is bound to your will.\n"
+        "The air shimmers and tears as dimensional energies respond to your " +
+        "invocation. A rift opens briefly and an entity steps through, " +
+        "fixing you with an unreadable gaze before bowing its head in " +
+        "submission. The entity is bound to your will.\n" +
         "Duration: " + duration_hrs + " hours.\n");
 
     object env = environment(caster);

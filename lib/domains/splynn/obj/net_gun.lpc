@@ -9,10 +9,10 @@ void create() {
 
     set_short("an ion net gun");
     set_long(
-        "A bulky, shoulder-mounted launcher that fires an expanding net of\n"
-        "ion-charged mono-filament. On impact the net contracts around the\n"
-        "target and delivers a sustained electrical charge. Excellent for\n"
-        "taking down fast-moving or flying targets. The battery pack is\n"
+        "A bulky, shoulder-mounted launcher that fires an expanding net of\n" +
+        "ion-charged mono-filament. On impact the net contracts around the\n" +
+        "target and delivers a sustained electrical charge. Excellent for\n" +
+        "taking down fast-moving or flying targets. The battery pack is\n" +
         "fully charged; the net canister holds three shots.\n"
     );
 

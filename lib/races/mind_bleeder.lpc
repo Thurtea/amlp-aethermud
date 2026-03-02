@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_PSIONIC);
 
     set_race_description(
-        "Mind Bleeders are psionic vampires, a horrifying mutation of humanity "
-        "that sustains itself by draining the Inner Strength Points and psychic "
-        "energy of other living beings. Their empathic and telepathic abilities "
-        "allow them to locate victims and feed without physical contact, leaving "
-        "their targets mentally exhausted and emotionally hollow. Feared and "
-        "hunted by virtually every civilization on Rifts Earth, Mind Bleeders "
-        "live as outcasts, concealing their true nature behind masks of normalcy "
+        "Mind Bleeders are psionic vampires, a horrifying mutation of humanity " +
+        "that sustains itself by draining the Inner Strength Points and psychic " +
+        "energy of other living beings. Their empathic and telepathic abilities " +
+        "allow them to locate victims and feed without physical contact, leaving " +
+        "their targets mentally exhausted and emotionally hollow. Feared and " +
+        "hunted by virtually every civilization on Rifts Earth, Mind Bleeders " +
+        "live as outcasts, concealing their true nature behind masks of normalcy " +
         "while quietly feeding on those around them."
     );
 

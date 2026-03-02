@@ -10,14 +10,14 @@ void create() {
     set_power_id("impervious_to_fire");
     set_power_name("Impervious to Fire");
     set_power_desc(
-        "The psychic creates a psionic heat-dissipating field that renders "
-        "them completely immune to fire, heat, and flame for the duration. "
-        "Plasma weapons, fire-breathing creatures, magical fireballs, and "
-        "even the heat of a blast furnace cannot harm the psychic while "
-        "this power is active. Clothes and equipment are not protected unless "
-        "they are being worn/held at the time of activation.\n\n"
-        "Range: Self\n"
-        "ISP Cost: 4 points\n"
+        "The psychic creates a psionic heat-dissipating field that renders " +
+        "them completely immune to fire, heat, and flame for the duration. " +
+        "Plasma weapons, fire-breathing creatures, magical fireballs, and " +
+        "even the heat of a blast furnace cannot harm the psychic while " +
+        "this power is active. Clothes and equipment are not protected unless " +
+        "they are being worn/held at the time of activation.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 4 points\n" +
         "Duration: 2 minutes per level"
     );
     set_power_category("physical");
@@ -31,11 +31,11 @@ void create() {
 int apply_effect(object user, object target) {
     if (!user) return 0;
     user->set_property("impervious_fire", 1);
-    tell_object(user, "You focus psionic energy into a heat-dissipating field. "
-        "You can feel the warmth around you but it cannot harm you. "
+    tell_object(user, "You focus psionic energy into a heat-dissipating field. " +
+        "You can feel the warmth around you but it cannot harm you. " +
         "Fire and heat attacks will not touch you while this lasts.\n");
     tell_room(environment(user),
-        user->query_cap_name() + " seems oddly relaxed in the heat, "
+        user->query_cap_name() + " seems oddly relaxed in the heat, " +
         "their skin untouched by nearby flames.\n",
         ({ user }));
     return 1;

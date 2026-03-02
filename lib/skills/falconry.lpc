@@ -16,9 +16,9 @@ void create() {
     set_skill_id("falconry");
     set_skill_name("Falconry");
     set_skill_desc(
-        "The ancient art of training birds of prey. A skilled falconer can "
-        "direct a hawk to scout ahead, attack enemies, retrieve game, and "
-        "return on command. Passive bonus: +2 Perception outdoors when "
+        "The ancient art of training birds of prey. A skilled falconer can " +
+        "direct a hawk to scout ahead, attack enemies, retrieve game, and " +
+        "return on command. Passive bonus: +2 Perception outdoors when " +
         "skill is 50% or higher. Primary OCCs: Wilderness Scout, Nomad."
     );
     set_skill_category("wilderness");

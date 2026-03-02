@@ -16,17 +16,17 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
 
     set_race_description(
-        "Nightbane are unique supernatural beings who live dual existences, "
-        "appearing as ordinary humans in their facade form but capable of "
-        "transforming into a powerful morphus, a supernatural body shaped by "
-        "their subconscious fears and desires. The morphus can take countless "
-        "forms, from angelic to demonic, mechanical to bestial, but always "
-        "reflects the inner nature of the individual. In their morphus form, "
-        "Nightbane gain tremendous physical power, supernatural abilities, "
-        "and resistance to damage. However, in their human facade they are "
-        "vulnerable and possess only limited supernatural awareness. Most "
-        "Nightbane discover their true nature during adolescence, often "
-        "triggered by extreme stress or danger, and spend their lives hunted "
+        "Nightbane are unique supernatural beings who live dual existences, " +
+        "appearing as ordinary humans in their facade form but capable of " +
+        "transforming into a powerful morphus, a supernatural body shaped by " +
+        "their subconscious fears and desires. The morphus can take countless " +
+        "forms, from angelic to demonic, mechanical to bestial, but always " +
+        "reflects the inner nature of the individual. In their morphus form, " +
+        "Nightbane gain tremendous physical power, supernatural abilities, " +
+        "and resistance to damage. However, in their human facade they are " +
+        "vulnerable and possess only limited supernatural awareness. Most " +
+        "Nightbane discover their true nature during adolescence, often " +
+        "triggered by extreme stress or danger, and spend their lives hunted " +
         "by the Nightlords who seek to enslave or destroy them."
     );
 
@@ -108,11 +108,11 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(1);
     set_rcc_description(
-        "Nightbane are a Racial Character Class defined by their dual nature and "
-        "morphus transformation. Their supernatural abilities are innate and "
-        "manifest regardless of training. Nightbane frequently take OCCs to "
-        "supplement their morphus powers, with many becoming scholars, warriors, "
-        "or mystics. Their human facade allows them to function in normal society "
+        "Nightbane are a Racial Character Class defined by their dual nature and " +
+        "morphus transformation. Their supernatural abilities are innate and " +
+        "manifest regardless of training. Nightbane frequently take OCCs to " +
+        "supplement their morphus powers, with many becoming scholars, warriors, " +
+        "or mystics. Their human facade allows them to function in normal society " +
         "while their morphus form grants them the power to face supernatural threats."
     );
 

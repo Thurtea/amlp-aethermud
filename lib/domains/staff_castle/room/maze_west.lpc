@@ -10,9 +10,9 @@ void create() {
     set_id("castle_maze_west");
     set_short("Western Path through the Hedge Maze");
     set_long(
-        "This narrow pathway through the hedge maze leads west. Tall, well-maintained\n"
-        "hedges enclose you on all sides, forming an intricate labyrinth. The path\n"
-        "behind you leads back toward the main garden, while other passages branch\n"
+        "This narrow pathway through the hedge maze leads west. Tall, well-maintained\n" +
+        "hedges enclose you on all sides, forming an intricate labyrinth. The path\n" +
+        "behind you leads back toward the main garden, while other passages branch\n" +
         "off in different directions."
     );
     

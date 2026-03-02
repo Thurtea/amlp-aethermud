@@ -9,12 +9,12 @@ void create() {
     set_spell_id("metamorphosis_mist");
     set_spell_name("Metamorphosis: Mist");
     set_spell_desc(
-        "The most powerful of the metamorph magics. The mage transforms "
-        "into a semi-transparent mist. In mist form: no physical or energy "
-        "attacks can harm the caster, no locked door can stop passage through "
-        "cracks and keyholes, and the caster moves at a speed of 14 with "
-        "80% prowl skill. The caster can hear and see normally but cannot "
-        "communicate or cast magic while in mist form. "
+        "The most powerful of the metamorph magics. The mage transforms " +
+        "into a semi-transparent mist. In mist form: no physical or energy " +
+        "attacks can harm the caster, no locked door can stop passage through " +
+        "cracks and keyholes, and the caster moves at a speed of 14 with " +
+        "80% prowl skill. The caster can hear and see normally but cannot " +
+        "communicate or cast magic while in mist form. " +
         "Duration: 20 minutes per level of experience."
     );
 
@@ -58,16 +58,16 @@ int apply_effect(object caster, object target) {
     caster->set_property("invulnerable", 1);
 
     tell_object(caster,
-        "Your body dissolves into a semi-transparent mist! You drift free "
-        "of physical constraints. You can slip through any crack or keyhole. "
-        "No weapon or energy attack can touch you in this form.\n"
-        "You cannot speak or cast spells while in mist form.\n"
+        "Your body dissolves into a semi-transparent mist! You drift free " +
+        "of physical constraints. You can slip through any crack or keyhole. " +
+        "No weapon or energy attack can touch you in this form.\n" +
+        "You cannot speak or cast spells while in mist form.\n" +
         "Duration: " + (level * 20) + " minutes.\n");
 
     object env = environment(caster);
     if (env)
         tell_room(env,
-            caster->query_cap_name() + "'s body dissolves into a drifting "
+            caster->query_cap_name() + "'s body dissolves into a drifting " +
             "semi-transparent mist!\n", ({ caster }));
 
     call_out("end_mist_form", duration_secs, caster);

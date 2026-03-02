@@ -10,14 +10,14 @@ void create() {
     set_power_id("detect_psionics");
     set_power_name("Detect Psionics");
     set_power_desc(
-        "The psychic opens their mind to the subtle energy signatures of "
-        "psionic activity. Active psionic powers flare like torches to this "
-        "sense, and the lingering traces of recently used powers can be "
-        "detected. The psychic can identify the general category of power "
-        "in use (healing, physical, sensitive, super) and roughly gauge the "
-        "strength of the psionic source.\n\n"
-        "Range: 60 feet\n"
-        "ISP Cost: 6 points\n"
+        "The psychic opens their mind to the subtle energy signatures of " +
+        "psionic activity. Active psionic powers flare like torches to this " +
+        "sense, and the lingering traces of recently used powers can be " +
+        "detected. The psychic can identify the general category of power " +
+        "in use (healing, physical, sensitive, super) and roughly gauge the " +
+        "strength of the psionic source.\n\n" +
+        "Range: 60 feet\n" +
+        "ISP Cost: 6 points\n" +
         "Duration: 2 minutes"
     );
     set_power_category("sensitive");
@@ -53,7 +53,7 @@ int apply_effect(object user, object target) {
     if (detections != "") {
         tell_object(user, "Psionic signatures detected in the area:\n" + detections);
     } else {
-        tell_object(user, "You extend your psionic senses. No active psionic "
+        tell_object(user, "You extend your psionic senses. No active psionic " +
             "signatures detected in the immediate area.\n");
     }
     user->set_property("detect_psionics_active", 1);

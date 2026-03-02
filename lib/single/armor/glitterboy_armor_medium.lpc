@@ -15,10 +15,10 @@ void create() {
     add_id("chrome armor");
     
     short_desc = "Glitter Boy power armor";
-    long_desc = "This is the legendary Glitter Boy power armor - a towering suit of "
-                "chrome-plated mega-damage armor. The reflective surface gleams brilliantly, "
-                "designed to deflect laser fire. The suit includes the famous boom gun, "
-                "a shoulder-mounted rail gun capable of devastating firepower. "
+    long_desc = "This is the legendary Glitter Boy power armor - a towering suit of " +
+                "chrome-plated mega-damage armor. The reflective surface gleams brilliantly, " +
+                "designed to deflect laser fire. The suit includes the famous boom gun, " +
+                "a shoulder-mounted rail gun capable of devastating firepower. " +
                 "Glitter Boy armor is one of the most recognizable and feared sights on Rifts Earth.";
     
     // Phase 2: Size properties

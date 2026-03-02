@@ -9,11 +9,11 @@ void create() {
     
     set_short("Shore of Crystal Lake");
     set_long(
-        "The shore opens onto a pristine crystal lake. The water is "
-        "clear and inviting, stretching about fifty feet to the far shore. "
-        "The lake bed is visible through the crystalline waters, and something "
-        "metallic glints on the opposite shore.\n\n"
-        "The lake looks deep enough to require swimming to cross. To the north "
+        "The shore opens onto a pristine crystal lake. The water is " +
+        "clear and inviting, stretching about fifty feet to the far shore. " +
+        "The lake bed is visible through the crystalline waters, and something " +
+        "metallic glints on the opposite shore.\n\n" +
+        "The lake looks deep enough to require swimming to cross. To the north " +
         "is a path leading back to the village.\n"
     );
     
@@ -95,6 +95,6 @@ int swim_lake(string str) {
 }
 
 string query_lake_description() {
-    return "The lake is about fifty feet across and looks to be 10-15 feet deep. "
+    return "The lake is about fifty feet across and looks to be 10-15 feet deep. " +
            "The water is crystal clear.";
 }

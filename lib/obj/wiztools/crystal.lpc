@@ -9,12 +9,12 @@ void create() {
     set_id(({ "crystal ball", "crystal", "ball", "viewing crystal" }));
     set_short("a crystal ball");
     set_long(
-        "A swirling sphere of smoky quartz resting on a silver stand.\n"
-        "Shadows of distant places shift within its depths.\n\n"
-        "Commands:\n"
-        "  crystal            Server status summary\n"
-        "  crystal status     Rooms, NPCs, players online\n"
-        "  crystal scan       List LPC files in key lib/ directories\n"
+        "A swirling sphere of smoky quartz resting on a silver stand.\n" +
+        "Shadows of distant places shift within its depths.\n\n" +
+        "Commands:\n" +
+        "  crystal            Server status summary\n" +
+        "  crystal status     Rooms, NPCs, players online\n" +
+        "  crystal scan       List LPC files in key lib/ directories\n" +
         "  crystal help       This help\n"
     );
     set_weight(1);

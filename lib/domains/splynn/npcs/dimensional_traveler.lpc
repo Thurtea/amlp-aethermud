@@ -15,10 +15,10 @@ void create() {
 
     set_short("a Dimensional Traveler");
     set_long(
-        "A weather-worn figure in a patchwork coat that has seen a dozen\n"
-        "worlds. Rift-burn scars trace faint lines along their forearms.\n"
-        "They carry no visible weapons — only a knowing, calm expression\n"
-        "that suggests they have been here, standing in exactly this spot,\n"
+        "A weather-worn figure in a patchwork coat that has seen a dozen\n" +
+        "worlds. Rift-burn scars trace faint lines along their forearms.\n" +
+        "They carry no visible weapons — only a knowing, calm expression\n" +
+        "that suggests they have been here, standing in exactly this spot,\n" +
         "many times before.\n"
     );
 
@@ -41,7 +41,7 @@ void init_living(object who) {
 }
 
 string query_talk() {
-    return "The Dimensional Traveler says:\n"
-        "\"Welcome to AetherMUD.  Type HELP to get started.\n"
+    return "The Dimensional Traveler says:\n" +
+        "\"Welcome to AetherMUD.  Type HELP to get started.\n" +
         " Type SCORE to see your character.  Type LOOK to see the world.\"\n";
 }

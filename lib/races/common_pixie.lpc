@@ -12,15 +12,15 @@ void create() {
     set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Common Pixies stand about a foot and a half tall, slightly larger "
-        "than faeries, with oversized pointed ears, bright mischievous eyes, "
-        "and translucent dragonfly-like wings. They are inveterate tricksters "
-        "who cannot resist playing pranks on anyone and everyone. On Rifts "
-        "Earth, Pixies have colonized urban ruins as readily as wild forests, "
-        "delighting in confusing Coalition patrols and leading bandits in "
-        "circles. Despite their irritating tendencies, Pixies are brave and "
-        "will fight tenaciously when cornered or when protecting those they "
-        "care for. Their innate magic leans toward illusion and confusion "
+        "Common Pixies stand about a foot and a half tall, slightly larger " +
+        "than faeries, with oversized pointed ears, bright mischievous eyes, " +
+        "and translucent dragonfly-like wings. They are inveterate tricksters " +
+        "who cannot resist playing pranks on anyone and everyone. On Rifts " +
+        "Earth, Pixies have colonized urban ruins as readily as wild forests, " +
+        "delighting in confusing Coalition patrols and leading bandits in " +
+        "circles. Despite their irritating tendencies, Pixies are brave and " +
+        "will fight tenaciously when cornered or when protecting those they " +
+        "care for. Their innate magic leans toward illusion and confusion " +
         "rather than direct offense, making them tricky opponents."
     );
 
@@ -71,7 +71,7 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Pixies are supernatural tricksters whose innate illusory magic "
+        "Pixies are supernatural tricksters whose innate illusory magic " +
         "and fae nature define their capabilities."
     );
 

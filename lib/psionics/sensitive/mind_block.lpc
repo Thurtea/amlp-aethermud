@@ -14,10 +14,10 @@ void create() {
     
     set_short("a mind block psionic power");
     set_long(
-        "Mind Block creates a psychic barrier that protects the user from "
-        "psionic attacks, mind reading, empathy, telepathy, and similar "
-        "mental powers. The user is +2 to save vs all psionic attacks. "
-        "Automatically blocks casual mind reading and empathy. "
+        "Mind Block creates a psychic barrier that protects the user from " +
+        "psionic attacks, mind reading, empathy, telepathy, and similar " +
+        "mental powers. The user is +2 to save vs all psionic attacks. " +
+        "Automatically blocks casual mind reading and empathy. " +
         "Lasts 10 minutes per level. Range: Self. Costs 4 I.S.P. to use."
     );
     

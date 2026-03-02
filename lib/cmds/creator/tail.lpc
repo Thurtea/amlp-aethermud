@@ -11,7 +11,8 @@
 int main(string args) {
     object player = previous_object();
     string filepath, resolved, content;
-    string *parts, *lines;
+    string *parts;
+    string *lines;
     int num_lines = 10; // Default: show last 10 lines
     int follow_mode = 0;
     int i, start_line;
@@ -121,10 +122,9 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"TAIL - Show end of file\n\n"
-"Usage:\n"
-"  tail <file>           Show the last lines of a file (like Unix tail)\n\n"
+    return "TAIL - Show end of file\n\n" +
+"Usage:\n" +
+"  tail <file>           Show the last lines of a file (like Unix tail)\n\n" +
 "Useful for monitoring logs or recently edited files in your workspace.\n";
 }
 

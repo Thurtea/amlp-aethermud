@@ -10,8 +10,8 @@ void create() {
     set_id(({"medkit", "med kit", "medical kit", "kit", "bandages"}));
     set_short("a medical kit");
     set_long(
-        "This compact medical kit contains bandages, antiseptic, painkillers, and "
-        "basic medical supplies. It can be used to treat wounds and restore health "
+        "This compact medical kit contains bandages, antiseptic, painkillers, and " +
+        "basic medical supplies. It can be used to treat wounds and restore health " +
         "in the field. The kit has enough supplies for several uses.\n"
     );
     

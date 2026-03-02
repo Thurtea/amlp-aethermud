@@ -11,11 +11,11 @@ void create() {
     set_id(({"spike", "dog", "dog boy", "canine"}));
     set_short("Spike the Dog Boy");
     set_long(
-        "This is Spike, a loyal Dog Boy who serves as the castle guard. He has "
-        "the body of a muscular human but the head of a German Shepherd, with "
-        "alert ears and intelligent brown eyes. He wears a simple tunic and carries "
-        "a sturdy club at his side. His tail wags slightly when he sees friendly "
-        "faces.\n\n"
+        "This is Spike, a loyal Dog Boy who serves as the castle guard. He has " +
+        "the body of a muscular human but the head of a German Shepherd, with " +
+        "alert ears and intelligent brown eyes. He wears a simple tunic and carries " +
+        "a sturdy club at his side. His tail wags slightly when he sees friendly " +
+        "faces.\n\n" +
         "Spike is here to help test the combat system and protect the castle.\n"
     );
     

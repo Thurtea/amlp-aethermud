@@ -16,14 +16,14 @@ void create() {
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Body Fixers are the healers of Rifts Earth - part doctor, part cybernetic "
-        "surgeon, and part miracle worker. In a world where injuries are common "
-        "and death lurks around every corner, Body Fixers are invaluable. They "
-        "combine knowledge of traditional medicine with cybernetic installation "
-        "and repair, able to treat everything from gunshot wounds to malfunctioning "
-        "bionics. Some work in established clinics, others are street docs who "
-        "ask no questions, and many travel with adventuring groups or mercenary "
-        "companies as combat medics. A skilled Body Fixer can mean the difference "
+        "Body Fixers are the healers of Rifts Earth - part doctor, part cybernetic " +
+        "surgeon, and part miracle worker. In a world where injuries are common " +
+        "and death lurks around every corner, Body Fixers are invaluable. They " +
+        "combine knowledge of traditional medicine with cybernetic installation " +
+        "and repair, able to treat everything from gunshot wounds to malfunctioning " +
+        "bionics. Some work in established clinics, others are street docs who " +
+        "ask no questions, and many travel with adventuring groups or mercenary " +
+        "companies as combat medics. A skilled Body Fixer can mean the difference " +
         "between life and death."
     );
     
@@ -170,10 +170,10 @@ void create() {
     
     // Background
     set_background(
-        "Body Fixers learn their trade through apprenticeship, surviving medical "
-        "schools, or self-study from pre-Rifts medical texts. Most are driven by "
-        "a genuine desire to help others, though some are in it purely for the "
-        "credits. The best Body Fixers combine compassion with clinical skill, "
+        "Body Fixers learn their trade through apprenticeship, surviving medical " +
+        "schools, or self-study from pre-Rifts medical texts. Most are driven by " +
+        "a genuine desire to help others, though some are in it purely for the " +
+        "credits. The best Body Fixers combine compassion with clinical skill, " +
         "able to work under pressure and make hard decisions."
     );
     set_organizations(({ "healers_guild" }));

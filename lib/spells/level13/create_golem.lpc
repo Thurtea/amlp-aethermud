@@ -9,13 +9,13 @@ void create() {
     set_spell_id("create_golem");
     set_spell_name("Create Golem");
     set_spell_desc(
-        "An elaborate ritual creating a powerful clay construct. "
-        "Steps: 1) Draw a pentagram in animal blood. 2) Sculpt a humanoid "
-        "shape from clay. 3) Place two onyx gems (worth at least 1000 credits "
-        "each) as eyes. 4) Insert an iron heart into the clay body. 5) Recite "
-        "the ritual invocation. Finally, place a single drop of your blood on "
-        "the golem's forehead to give it life. This permanently drains the mage "
-        "of 6 SDC points. The golem is a powerful, obedient construct. "
+        "An elaborate ritual creating a powerful clay construct. " +
+        "Steps: 1) Draw a pentagram in animal blood. 2) Sculpt a humanoid " +
+        "shape from clay. 3) Place two onyx gems (worth at least 1000 credits " +
+        "each) as eyes. 4) Insert an iron heart into the clay body. 5) Recite " +
+        "the ritual invocation. Finally, place a single drop of your blood on " +
+        "the golem's forehead to give it life. This permanently drains the mage " +
+        "of 6 SDC points. The golem is a powerful, obedient construct. " +
         "PPE cost: 700 PPE. Duration: Exists until destroyed."
     );
 
@@ -46,16 +46,16 @@ int apply_effect(object caster, object target) {
         (caster->query_property("golem_sdc_drain") || 0) + 6);
 
     tell_object(caster,
-        "You complete the elaborate ritual, pressing your bleeding thumb to the "
-        "golem's forehead. It shudders, then rises with a grinding of clay. "
-        "The onyx eyes focus on you with absolute obedience.\n"
+        "You complete the elaborate ritual, pressing your bleeding thumb to the " +
+        "golem's forehead. It shudders, then rises with a grinding of clay. " +
+        "The onyx eyes focus on you with absolute obedience.\n" +
         "The ritual permanently costs you 6 SDC points.\n");
 
     object env = environment(caster);
     if (env) {
         tell_room(env,
             "The clay form " + caster->query_cap_name() +
-            " has been working on suddenly stirs to life, rising with a grinding "
+            " has been working on suddenly stirs to life, rising with a grinding " +
             "rumble as a golem!\n",
             ({ caster }));
     }

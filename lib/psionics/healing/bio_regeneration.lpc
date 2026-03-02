@@ -12,9 +12,9 @@ void create() {
     set_power_id("bio_regeneration");
     set_power_name("Bio-Regeneration");
     set_power_desc(
-        "The psychic can channel their inner strength to accelerate their "
-        "body's natural healing process. The character enters a trance-like "
-        "state and regenerates 2d6 hit points and 3d6 S.D.C. The process "
+        "The psychic can channel their inner strength to accelerate their " +
+        "body's natural healing process. The character enters a trance-like " +
+        "state and regenerates 2d6 hit points and 3d6 S.D.C. The process " +
         "takes about 10 minutes and leaves the character somewhat fatigued."
     );
     set_power_category("healing");
@@ -46,8 +46,8 @@ int apply_effect(object user, object target) {
     }
     
     tell_object(user,
-        "You enter a healing trance...\n"
-        "Warmth spreads through your body as your wounds begin to close.\n"
+        "You enter a healing trance...\n" +
+        "Warmth spreads through your body as your wounds begin to close.\n" +
         "You heal " + (new_hp - old_hp) + " HP and " + 
         (new_sdc - old_sdc) + " S.D.C.\n");
     

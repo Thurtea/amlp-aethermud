@@ -29,12 +29,11 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"DCHAT - Domain chat channel\n\n"
-"Usage:\n"
-"  dchat <message>\n\n"
-"Broadcasts a message to all online wizards and admins.\n"
-"Requires wizard or admin privileges.\n\n"
-"Example:\n"
+    return "DCHAT - Domain chat channel\n\n" +
+"Usage:\n" +
+"  dchat <message>\n\n" +
+"Broadcasts a message to all online wizards and admins.\n" +
+"Requires wizard or admin privileges.\n\n" +
+"Example:\n" +
 "  dchat Server test starting now.\n";
 }

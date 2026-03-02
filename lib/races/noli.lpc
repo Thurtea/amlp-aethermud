@@ -14,8 +14,8 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "Noli are a small, nimble people known for craft and quick reflexes."
-        " This placeholder gives conservative defaults; replace with canonical"
+        "Noli are a small, nimble people known for craft and quick reflexes." +
+        " This placeholder gives conservative defaults; replace with canonical" +
         " details when available."
     );
     

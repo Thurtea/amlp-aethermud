@@ -4,7 +4,7 @@ void create() {
     ::create();
     set_short("Garden Pathway - North 4");
     set_long(
-        "This part of the garden feels wild and untamed; brambles push at the path.\n"
+        "This part of the garden feels wild and untamed; brambles push at the path.\n" +
         "A faint trail to the east disappears among the undergrowth. The path continues north."
     );
 

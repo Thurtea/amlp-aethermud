@@ -12,15 +12,15 @@ void create() {
     set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Frost Pixies are a cold-adapted variant of pixie, their wings "
-        "formed of crystalline ice rather than membrane. They dwell in "
-        "frozen forests, mountain passes, and the long winters of the "
-        "northern wilderness. Their skin has a faint blue tinge, and their "
-        "laughter sounds like chiming icicles. While sharing the trickster "
-        "nature of their pixie kin, Frost Pixies are somewhat more patient "
-        "and cunning, preferring to use the cold itself as their weapon. "
-        "They command potent ice magic and can lower the temperature of "
-        "a room simply by entering it. They are rare south of the 45th "
+        "Frost Pixies are a cold-adapted variant of pixie, their wings " +
+        "formed of crystalline ice rather than membrane. They dwell in " +
+        "frozen forests, mountain passes, and the long winters of the " +
+        "northern wilderness. Their skin has a faint blue tinge, and their " +
+        "laughter sounds like chiming icicles. While sharing the trickster " +
+        "nature of their pixie kin, Frost Pixies are somewhat more patient " +
+        "and cunning, preferring to use the cold itself as their weapon. " +
+        "They command potent ice magic and can lower the temperature of " +
+        "a room simply by entering it. They are rare south of the 45th " +
         "parallel, uncomfortable in warm climates."
     );
 
@@ -70,7 +70,7 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Frost Pixies are elemental fae whose ice-attuned nature defines "
+        "Frost Pixies are elemental fae whose ice-attuned nature defines " +
         "their existence. They do not follow standard OCCs."
     );
 

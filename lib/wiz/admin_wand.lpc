@@ -8,7 +8,7 @@ void create() {
     set_name("admin wand");
     set_short("a glowing admin wand");
     set_long(
-        "A slender wand tipped with a shard of enchanted crystal. "
+        "A slender wand tipped with a shard of enchanted crystal. " +
         "Grants 'promote', 'demote', and 'shutdown' commands while carried.\n"
     );
     set_weight(0);
@@ -31,7 +31,7 @@ int try_command(string verb, string args) {
 int cmd_promote(string args) {
     if (!args || args == "") {
         tell_object(this_player(),
-            "Usage: promote <player> <level>\n"
+            "Usage: promote <player> <level>\n" +
             "  Levels: 0=Player  1=Wizard  2=Admin\n");
         return 1;
     }

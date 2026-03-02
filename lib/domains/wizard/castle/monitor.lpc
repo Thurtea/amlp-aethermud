@@ -9,14 +9,14 @@ void create() {
 
     set_short("Monitoring Station");
     set_long(
-        "A dimly lit room west of the main hall, filled with the soft\n"
-        "hum of arcane machinery. Crystal screens line the walls, each\n"
-        "one displaying a different scene from across AetherMUD.\n\n"
-        "One screen shows the starting village, where new players begin\n"
-        "their journey. Another displays the bustling streets of New\n"
-        "Camelot. A third shows the wilderness beyond the settlements.\n\n"
-        "A comfortable chair sits before the main console, with controls\n"
-        "for adjusting the viewing crystals. A logbook on the desk\n"
+        "A dimly lit room west of the main hall, filled with the soft\n" +
+        "hum of arcane machinery. Crystal screens line the walls, each\n" +
+        "one displaying a different scene from across AetherMUD.\n\n" +
+        "One screen shows the starting village, where new players begin\n" +
+        "their journey. Another displays the bustling streets of New\n" +
+        "Camelot. A third shows the wilderness beyond the settlements.\n\n" +
+        "A comfortable chair sits before the main console, with controls\n" +
+        "for adjusting the viewing crystals. A logbook on the desk\n" +
         "records notable events and player activity."
     );
 
@@ -115,20 +115,20 @@ int examine_screens(string str) {
     if (!str) return 0;
     if (str == "screens" || str == "crystals" || str == "screen") {
         write(
-            "The crystal screens show real-time views of the world.\n"
-            "Use 'scan' to survey all mortal activity, or\n"
+            "The crystal screens show real-time views of the world.\n" +
+            "Use 'scan' to survey all mortal activity, or\n" +
             "'watch <player>' to focus on a specific player.\n"
         );
         return 1;
     }
     if (str == "console" || str == "controls") {
-        write("The console has controls for the monitoring crystals.\n"
+        write("The console has controls for the monitoring crystals.\n" +
               "Commands: scan, watch <player>\n");
         return 1;
     }
     if (str == "logbook" || str == "log") {
-        write("The logbook contains records of notable player events.\n"
-              "Recent entries mention new character creations and\n"
+        write("The logbook contains records of notable player events.\n" +
+              "Recent entries mention new character creations and\n" +
               "several combat encounters in the wilderness.\n");
         return 1;
     }

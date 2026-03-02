@@ -14,10 +14,9 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"SIT - Sit down\n\n"
-"Usage:\n"
-"  sit                    Sit down in your current location\n\n"
-"Sitting reduces stamina drain while resting. Use 'stand' to\n"
+    return "SIT - Sit down\n\n" +
+"Usage:\n" +
+"  sit                    Sit down in your current location\n\n" +
+"Sitting reduces stamina drain while resting. Use 'stand' to\n" +
 "get back up.\n";
 }

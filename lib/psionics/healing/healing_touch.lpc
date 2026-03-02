@@ -12,17 +12,17 @@ void create() {
     set_power_id("healing_touch");
     set_power_name("Healing Touch");
     set_power_desc(
-        "By touching another person (or oneself), the psychic can channel "
-        "healing energy directly into the body, restoring Hit Points and S.D.C. "
-        "The healing is instantaneous and can be performed even in the heat "
-        "of combat. The power restores 2d6 Hit Points or S.D.C., whichever "
-        "the target needs most.\n\n"
-        "Unlike Bio-Regeneration which only works on the psych themselves, "
-        "Healing Touch can be used on others. The psychic simply places their "
-        "hand on the wounded area and concentrates, channeling their Inner "
-        "Strength into healing energy.\n\n"
-        "Range: Touch only\n"
-        "Healing: 2d6 HP or S.D.C.\n"
+        "By touching another person (or oneself), the psychic can channel " +
+        "healing energy directly into the body, restoring Hit Points and S.D.C. " +
+        "The healing is instantaneous and can be performed even in the heat " +
+        "of combat. The power restores 2d6 Hit Points or S.D.C., whichever " +
+        "the target needs most.\n\n" +
+        "Unlike Bio-Regeneration which only works on the psych themselves, " +
+        "Healing Touch can be used on others. The psychic simply places their " +
+        "hand on the wounded area and concentrates, channeling their Inner " +
+        "Strength into healing energy.\n\n" +
+        "Range: Touch only\n" +
+        "Healing: 2d6 HP or S.D.C.\n" +
         "ISP Cost: 6 points"
     );
     set_power_category("healing");

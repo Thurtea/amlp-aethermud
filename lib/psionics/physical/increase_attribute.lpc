@@ -10,14 +10,14 @@ void create() {
     set_power_id("increase_attribute");
     set_power_name("Increase Attribute");
     set_power_desc(
-        "By focusing psionic energy into one specific physical or mental "
-        "attribute, the psychic can temporarily elevate it far beyond its "
-        "normal limits. Strength, speed, endurance, intelligence, perception, "
-        "and other core attributes can all be enhanced. The boost is significant "
-        "and immediately noticeable. However, only one attribute can be "
-        "increased at a time, and it returns to normal when the power ends.\n\n"
-        "Range: Self\n"
-        "ISP Cost: 10 points\n"
+        "By focusing psionic energy into one specific physical or mental " +
+        "attribute, the psychic can temporarily elevate it far beyond its " +
+        "normal limits. Strength, speed, endurance, intelligence, perception, " +
+        "and other core attributes can all be enhanced. The boost is significant " +
+        "and immediately noticeable. However, only one attribute can be " +
+        "increased at a time, and it returns to normal when the power ends.\n\n" +
+        "Range: Self\n" +
+        "ISP Cost: 10 points\n" +
         "Duration: 2 minutes per level"
     );
     set_power_category("physical");
@@ -35,10 +35,10 @@ int apply_effect(object user, object target) {
     user->set_property("attribute_boost_active", 1);
     string *attrs = ({ "PS", "PP", "PE", "SPD", "ME", "IQ", "PB", "MA" });
     string boosted = attrs[random(sizeof(attrs))];
-    tell_object(user, "You channel psionic energy into your " + boosted + ". "
+    tell_object(user, "You channel psionic energy into your " + boosted + ". " +
         "Power surges through you. The attribute is enhanced significantly.\n");
     tell_room(environment(user),
-        user->query_cap_name() + " seems to grow more powerful for a moment, "
+        user->query_cap_name() + " seems to grow more powerful for a moment, " +
         "radiating focused intensity.\n",
         ({ user }));
     return 1;

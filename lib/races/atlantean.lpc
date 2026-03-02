@@ -17,13 +17,13 @@ void create() {
     set_race_category(RACE_CAT_HUMAN);
 
     set_race_description(
-        "Atlanteans are an ancient sub-race of humanity who developed "
-        "dimensional travel technology millennia before the Coming of the Rifts. "
-        "Taller and longer-lived than ordinary humans, they carry magical "
-        "tattoos known as Marks of Heritage that identify their clan lineage "
-        "and grant supernatural abilities. Driven from their homeland by the "
-        "Splugorth, Atlanteans have become wanderers of the Megaverse. Their "
-        "mastery of tattoo magic is unrivaled, and their hatred of the Splugorth "
+        "Atlanteans are an ancient sub-race of humanity who developed " +
+        "dimensional travel technology millennia before the Coming of the Rifts. " +
+        "Taller and longer-lived than ordinary humans, they carry magical " +
+        "tattoos known as Marks of Heritage that identify their clan lineage " +
+        "and grant supernatural abilities. Driven from their homeland by the " +
+        "Splugorth, Atlanteans have become wanderers of the Megaverse. Their " +
+        "mastery of tattoo magic is unrivaled, and their hatred of the Splugorth " +
         "is legendary."
     );
 

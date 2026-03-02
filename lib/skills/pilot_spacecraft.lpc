@@ -11,14 +11,14 @@ void create() {
     set_skill_display_name("Pilot: Spacecraft");
     set_short("the ability to pilot spacecraft");
     set_long(
-        "Pilot: Spacecraft allows you to operate spaceships, orbital shuttles, and "
-        "interplanetary vehicles. This is a rare and valuable skill in Rifts Earth, "
-        "as functional spacecraft are extremely uncommon.\n\n"
-        "The skill covers: orbital mechanics, zero-gravity maneuvering, docking procedures, "
-        "re-entry protocols, life support management, and emergency EVA operations. Most "
-        "spacecraft operations require extensive computer assistance.\n\n"
-        "Base: 20% + 4% per level\n"
-        "Bonus: +5% per point of Physical Prowess above 16\n"
+        "Pilot: Spacecraft allows you to operate spaceships, orbital shuttles, and " +
+        "interplanetary vehicles. This is a rare and valuable skill in Rifts Earth, " +
+        "as functional spacecraft are extremely uncommon.\n\n" +
+        "The skill covers: orbital mechanics, zero-gravity maneuvering, docking procedures, " +
+        "re-entry protocols, life support management, and emergency EVA operations. Most " +
+        "spacecraft operations require extensive computer assistance.\n\n" +
+        "Base: 20% + 4% per level\n" +
+        "Bonus: +5% per point of Physical Prowess above 16\n" +
         "Related Stat: Physical Prowess"
     );
     

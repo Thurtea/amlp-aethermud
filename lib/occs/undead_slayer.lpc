@@ -16,13 +16,13 @@ void create() {
     set_alignment_requirement("not_evil");
 
     set_occ_description(
-        "Undead Slayers are Atlantean warriors dedicated to eradicating "
-        "vampires and other undead abominations from the Megaverse. They "
-        "are experts on vampire physiology, weaknesses, and habits. Armed "
-        "with magic weapons, wooden stakes, and specialized anti-undead "
-        "equipment, they travel from dimension to dimension hunting their "
-        "prey. Undead Slayers are immune to vampire bite and possess "
-        "innate abilities to detect and resist supernatural evil. "
+        "Undead Slayers are Atlantean warriors dedicated to eradicating " +
+        "vampires and other undead abominations from the Megaverse. They " +
+        "are experts on vampire physiology, weaknesses, and habits. Armed " +
+        "with magic weapons, wooden stakes, and specialized anti-undead " +
+        "equipment, they travel from dimension to dimension hunting their " +
+        "prey. Undead Slayers are immune to vampire bite and possess " +
+        "innate abilities to detect and resist supernatural evil. " +
         "They are among the most effective vampire hunters in existence."
     );
 
@@ -154,11 +154,11 @@ void create() {
     set_property("vampire_sense_range", 200); /* feet */
 
     set_background(
-        "Undead Slayers are trained from childhood to hunt the Undead. "
-        "The Atlantean clans have maintained this tradition for millennia, "
-        "viewing the destruction of vampires as a sacred duty. They travel "
-        "across dimensions wherever vampires have established footholds, "
-        "systematically eliminating them. Their knowledge of vampire "
+        "Undead Slayers are trained from childhood to hunt the Undead. " +
+        "The Atlantean clans have maintained this tradition for millennia, " +
+        "viewing the destruction of vampires as a sacred duty. They travel " +
+        "across dimensions wherever vampires have established footholds, " +
+        "systematically eliminating them. Their knowledge of vampire " +
         "culture, powers, and weaknesses is encyclopedic."
     );
     set_organizations(({ "atlantean_clans", "undead_slayer_order" }));

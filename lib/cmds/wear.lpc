@@ -97,15 +97,14 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"WEAR - Wear armor or clothing\n\n"
-"Usage:\n"
-"  wear <item>    Equip armor or clothing\n\n"
-"Examples:\n"
-"  wear helmet\n"
-"  wear armor\n"
-"  wear boots\n\n"
-"The item must be in your inventory and the appropriate\n"
-"equipment slot must be empty.\n\n"
+    return "WEAR - Wear armor or clothing\n\n" +
+"Usage:\n" +
+"  wear <item>    Equip armor or clothing\n\n" +
+"Examples:\n" +
+"  wear helmet\n" +
+"  wear armor\n" +
+"  wear boots\n\n" +
+"The item must be in your inventory and the appropriate\n" +
+"equipment slot must be empty.\n\n" +
 "See also: REMOVE, WIELD, EQUIPMENT\n";
 }

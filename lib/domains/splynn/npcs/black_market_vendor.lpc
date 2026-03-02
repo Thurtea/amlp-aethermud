@@ -19,9 +19,9 @@ void create() {
 
     set_short("a hooded figure");
     set_long(
-        "A slight figure wrapped in a dark cloak, face hidden beneath a\n"
-        "deep hood. Only their hands are visible — pale, quick, always\n"
-        "moving. They speak in a low murmur and never make eye contact.\n"
+        "A slight figure wrapped in a dark cloak, face hidden beneath a\n" +
+        "deep hood. Only their hands are visible — pale, quick, always\n" +
+        "moving. They speak in a low murmur and never make eye contact.\n" +
         "Whatever they sell, they did not come by it honestly.\n"
     );
 
@@ -48,7 +48,7 @@ void create() {
 }
 
 string query_talk() {
-    return "The figure murmurs without looking up.\n"
-        "\"Keep your voice down. 'list' for stock. 'buy <item>' to purchase.\n"
+    return "The figure murmurs without looking up.\n" +
+        "\"Keep your voice down. 'list' for stock. 'buy <item>' to purchase.\n" +
         "No questions. No receipts.\"\n";
 }

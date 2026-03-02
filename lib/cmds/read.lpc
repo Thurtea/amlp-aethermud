@@ -18,10 +18,9 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"READ - Read text from an object\n\n"
-"Usage:\n"
-"  read <object>      Read text written on or in an object\n\n"
-"Some objects such as books, signs, and notes can be read.\n"
+    return "READ - Read text from an object\n\n" +
+"Usage:\n" +
+"  read <object>      Read text written on or in an object\n\n" +
+"Some objects such as books, signs, and notes can be read.\n" +
 "Not all objects have readable text.\n";
 }

@@ -16,14 +16,14 @@ void create() {
     set_race_category(RACE_CAT_SHIFTER);
 
     set_race_description(
-        "Werewolves are lycanthropic shapeshifters who can assume three forms: a "
-        "normal human appearance, a terrifying hybrid wolf-man, and a massive dire "
-        "wolf. The curse of lycanthropy grants them supernatural strength, keen "
-        "predatory senses, and rapid regeneration that allows them to recover from "
-        "all but the most grievous wounds. In their transformed state they become "
-        "MDC creatures capable of shrugging off conventional weapons, though silver "
-        "remains their bane, bypassing their supernatural toughness entirely. Most "
-        "werewolves struggle to control the beast within, especially during the "
+        "Werewolves are lycanthropic shapeshifters who can assume three forms: a " +
+        "normal human appearance, a terrifying hybrid wolf-man, and a massive dire " +
+        "wolf. The curse of lycanthropy grants them supernatural strength, keen " +
+        "predatory senses, and rapid regeneration that allows them to recover from " +
+        "all but the most grievous wounds. In their transformed state they become " +
+        "MDC creatures capable of shrugging off conventional weapons, though silver " +
+        "remains their bane, bypassing their supernatural toughness entirely. Most " +
+        "werewolves struggle to control the beast within, especially during the " +
         "full moon, when the urge to transform and hunt becomes overwhelming."
     );
 
@@ -102,10 +102,10 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(1);
     set_rcc_description(
-        "Werewolves are a Racial Character Class defined by their lycanthropic "
-        "transformation abilities. Their shapeshifting, regeneration, and "
-        "supernatural physical attributes form the core of their power. While "
-        "the RCC provides significant combat ability, werewolves may also select "
+        "Werewolves are a Racial Character Class defined by their lycanthropic " +
+        "transformation abilities. Their shapeshifting, regeneration, and " +
+        "supernatural physical attributes form the core of their power. While " +
+        "the RCC provides significant combat ability, werewolves may also select " +
         "certain OCCs to supplement their natural prowess with learned skills."
     );
 

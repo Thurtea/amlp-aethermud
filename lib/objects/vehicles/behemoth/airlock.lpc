@@ -12,14 +12,14 @@ void create() {
     
     set_short("the airlock of the EX-5 Behemoth");
     set_long(
-        "This small chamber serves as the vehicle's primary entry and exit point. Heavy "
-        "bulkhead doors seal off the interior from the outside environment, protecting "
-        "against hostile atmospheres, radiation, and combat damage.\n\n"
-        "The outer hatch is currently " + (is_hatch_open() ? "open" : "sealed") + ". "
-        "Red hazard stripes mark the pressure-seal threshold. Emergency breathing "
-        "apparatus hangs from wall mounts, and a decontamination shower is built into "
-        "one corner.\n\n"
-        "A passage leads forward to the crew quarters, and another leads up to the cockpit "
+        "This small chamber serves as the vehicle's primary entry and exit point. Heavy " +
+        "bulkhead doors seal off the interior from the outside environment, protecting " +
+        "against hostile atmospheres, radiation, and combat damage.\n\n" +
+        "The outer hatch is currently " + (is_hatch_open() ? "open" : "sealed") + ". " +
+        "Red hazard stripes mark the pressure-seal threshold. Emergency breathing " +
+        "apparatus hangs from wall mounts, and a decontamination shower is built into " +
+        "one corner.\n\n" +
+        "A passage leads forward to the crew quarters, and another leads up to the cockpit " +
         "via a ladder."
     );
     
@@ -30,12 +30,12 @@ void create() {
     
     set_items(([
         ({"hatch", "door", "outer hatch", "outer door"}) :
-            "The outer hatch is a massive slab of MDC-rated armor plating with a wheel lock "
+            "The outer hatch is a massive slab of MDC-rated armor plating with a wheel lock " +
             "and emergency explosive bolts.",
         ({"breathing apparatus", "masks", "gear"}) :
             "Emergency breather masks for hostile environments.",
         ({"shower", "decontamination shower"}) :
-            "A built-in shower system for removing radiation, biological contaminants, or "
+            "A built-in shower system for removing radiation, biological contaminants, or " +
             "chemical agents before entering the main vehicle."
     ]));
 }

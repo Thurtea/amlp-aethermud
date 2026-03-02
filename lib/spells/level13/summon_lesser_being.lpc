@@ -9,13 +9,13 @@ void create() {
     set_spell_id("summon_lesser_being");
     set_spell_name("Summon Lesser Being");
     set_spell_desc(
-        "An impressive ritual that plucks a supernatural lesser being from "
-        "its native dimension and places it before the mystic. A specific "
-        "lesser monster can be designated, or a random creature is called. "
-        "The supernatural being is automatically under the mage's control "
-        "and will obey without question - except it will not commit suicide "
-        "and may not fight to the death. The being can be returned to its "
-        "dimension at any time before duration ends. After expiration the "
+        "An impressive ritual that plucks a supernatural lesser being from " +
+        "its native dimension and places it before the mystic. A specific " +
+        "lesser monster can be designated, or a random creature is called. " +
+        "The supernatural being is automatically under the mage's control " +
+        "and will obey without question - except it will not commit suicide " +
+        "and may not fight to the death. The being can be returned to its " +
+        "dimension at any time before duration ends. After expiration the " +
         "mage loses control. Duration: 24 hours per level."
     );
 
@@ -42,17 +42,17 @@ int apply_effect(object caster, object target) {
     int duration_hrs = level * 24;
 
     tell_object(caster,
-        "Dimensional energies swirl as you complete the ritual. The fabric "
-        "of space tears open and a supernatural lesser being materializes "
-        "before you. It regards you with alien eyes, then bows in submission "
-        "to your power.\n"
+        "Dimensional energies swirl as you complete the ritual. The fabric " +
+        "of space tears open and a supernatural lesser being materializes " +
+        "before you. It regards you with alien eyes, then bows in submission " +
+        "to your power.\n" +
         "Duration: " + duration_hrs + " hours.\n");
 
     object env = environment(caster);
     if (env) {
         tell_room(env,
             "A rift tears in the air near " + caster->query_cap_name() +
-            "! A supernatural creature steps through and bows in submission "
+            "! A supernatural creature steps through and bows in submission " +
             "to the mage.\n",
             ({ caster }));
     }

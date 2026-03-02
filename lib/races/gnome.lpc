@@ -16,13 +16,13 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
 
     set_race_description(
-        "Gnomes are small, wiry beings standing three to three and a half feet tall, "
-        "with large noses, bright inquisitive eyes, and wild hair that seems to have "
-        "a mind of its own. They are renowned across the dimensions for their insatiable "
-        "curiosity, inventive genius, and natural affinity for both magic and mechanical "
-        "devices. Gnomes possess an innate resistance to illusion magic, seeing through "
-        "deceptions that fool larger races with ease. Their minds work at a frenetic "
-        "pace, constantly analyzing, theorizing, and tinkering, which makes them "
+        "Gnomes are small, wiry beings standing three to three and a half feet tall, " +
+        "with large noses, bright inquisitive eyes, and wild hair that seems to have " +
+        "a mind of its own. They are renowned across the dimensions for their insatiable " +
+        "curiosity, inventive genius, and natural affinity for both magic and mechanical " +
+        "devices. Gnomes possess an innate resistance to illusion magic, seeing through " +
+        "deceptions that fool larger races with ease. Their minds work at a frenetic " +
+        "pace, constantly analyzing, theorizing, and tinkering, which makes them " +
         "exceptional artificers and techno-wizards on Rifts Earth."
     );
 

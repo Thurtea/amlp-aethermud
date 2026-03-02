@@ -16,14 +16,14 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Headhunters are professional warriors, bounty hunters, and mercenaries "
-        "who rely on weapons, body armor, and cybernetic/bionic augmentation to "
-        "survive in a world dominated by mega-damage creatures, magic, and the "
-        "supernatural. What they lack in mystic power, they make up for with "
-        "firepower, skill, and technology. Many Headhunters serve as bounty "
-        "hunters, bodyguards, or freelance soldiers. They are experts with "
-        "weapons and vehicle combat, and often have cybernetic enhancements "
-        "that give them an edge. The term 'Headhunter' refers to their "
+        "Headhunters are professional warriors, bounty hunters, and mercenaries " +
+        "who rely on weapons, body armor, and cybernetic/bionic augmentation to " +
+        "survive in a world dominated by mega-damage creatures, magic, and the " +
+        "supernatural. What they lack in mystic power, they make up for with " +
+        "firepower, skill, and technology. Many Headhunters serve as bounty " +
+        "hunters, bodyguards, or freelance soldiers. They are experts with " +
+        "weapons and vehicle combat, and often have cybernetic enhancements " +
+        "that give them an edge. The term 'Headhunter' refers to their " +
         "reputation for always getting their target."
     );
 
@@ -180,11 +180,11 @@ void create() {
 
     // Background
     set_background(
-        "Headhunters come from all walks of life - former soldiers, wilderness "
-        "survivors, city toughs, and self-taught warriors. What they share is a "
-        "reliance on technology and weapons to survive. Many start as local "
-        "defenders or hired guns before building a reputation as bounty hunters "
-        "or freelance soldiers. The name 'Headhunter' is both a badge of honor "
+        "Headhunters come from all walks of life - former soldiers, wilderness " +
+        "survivors, city toughs, and self-taught warriors. What they share is a " +
+        "reliance on technology and weapons to survive. Many start as local " +
+        "defenders or hired guns before building a reputation as bounty hunters " +
+        "or freelance soldiers. The name 'Headhunter' is both a badge of honor " +
         "and a warning - they always get their target."
     );
     set_organizations(({ "mercenary_guilds" }));

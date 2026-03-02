@@ -16,9 +16,9 @@ void create() {
     set_race_category(RACE_CAT_DRAGON);
 
     set_race_description(
-        "Great Horned Dragons are ancient and powerful beings, among the most "
-        "intelligent and formidable of all dragon species. They possess massive "
-        "horns, razor-sharp claws, and can breathe fire. Their most unique ability "
+        "Great Horned Dragons are ancient and powerful beings, among the most " +
+        "intelligent and formidable of all dragon species. They possess massive " +
+        "horns, razor-sharp claws, and can breathe fire. Their most unique ability " +
         "is metamorphosis - the power to take the form of any humanoid race."
     );
 

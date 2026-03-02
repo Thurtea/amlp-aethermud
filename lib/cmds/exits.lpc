@@ -44,10 +44,9 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"EXITS - Show available exits from current room\n\n"
-"Usage:\n"
-"  exits    Display all obvious exits\n\n"
-"Shows the direction and destination name for each exit.\n\n"
+    return "EXITS - Show available exits from current room\n\n" +
+"Usage:\n" +
+"  exits    Display all obvious exits\n\n" +
+"Shows the direction and destination name for each exit.\n\n" +
 "See also: LOOK, MAP, GO\n";
 }

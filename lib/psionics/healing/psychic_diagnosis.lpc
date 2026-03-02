@@ -10,14 +10,14 @@ void create() {
     set_power_id("psychic_diagnosis");
     set_power_name("Psychic Diagnosis");
     set_power_desc(
-        "By touching a person and concentrating, the psychic can read their "
-        "body's condition with perfect clarity. Injuries, diseases, toxins, "
-        "supernatural afflictions, and even the effects of magic are all "
-        "revealed in precise detail. This power is invaluable to healers and "
-        "field medics. Unlike conventional medicine, Psychic Diagnosis cannot "
-        "be fooled by rare or unknown conditions.\n\n"
-        "Range: Touch\n"
-        "ISP Cost: 4 points\n"
+        "By touching a person and concentrating, the psychic can read their " +
+        "body's condition with perfect clarity. Injuries, diseases, toxins, " +
+        "supernatural afflictions, and even the effects of magic are all " +
+        "revealed in precise detail. This power is invaluable to healers and " +
+        "field medics. Unlike conventional medicine, Psychic Diagnosis cannot " +
+        "be fooled by rare or unknown conditions.\n\n" +
+        "Range: Touch\n" +
+        "ISP Cost: 4 points\n" +
         "Duration: Instant"
     );
     set_power_category("healing");

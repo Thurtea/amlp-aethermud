@@ -16,12 +16,12 @@ void create() {
     set_race_category(RACE_CAT_PSIONIC);
 
     set_race_description(
-        "Psi-Healers are among the most valued and revered psychics on Rifts "
-        "Earth, born with an innate gift for healing through psionic power alone. "
-        "They can mend broken bones, close wounds, cure diseases, and even perform "
-        "delicate psychic surgery without any physical tools or medical equipment. "
-        "Their compassionate nature and gentle mental affinity make them natural "
-        "caregivers, though their lack of combat ability leaves them dependent on "
+        "Psi-Healers are among the most valued and revered psychics on Rifts " +
+        "Earth, born with an innate gift for healing through psionic power alone. " +
+        "They can mend broken bones, close wounds, cure diseases, and even perform " +
+        "delicate psychic surgery without any physical tools or medical equipment. " +
+        "Their compassionate nature and gentle mental affinity make them natural " +
+        "caregivers, though their lack of combat ability leaves them dependent on " +
         "others for protection in the dangerous wastelands."
     );
 

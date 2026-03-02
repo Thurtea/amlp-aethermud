@@ -18,21 +18,21 @@ void create() {
     set_race_category(RACE_CAT_SUPERNATURAL);
     
     set_race_description(
-        "Splugorth are ancient evil alien intelligences, massive tentacled beings "
-        "of immense supernatural power. They are masters of bio-wizardry, dimensional "
-        "magic, and control vast slave empires spanning multiple dimensions. Each "
-        "Splugorth is a unique entity with individual personality, though all share "
-        "traits of cunning intelligence, ruthless ambition, and insatiable appetite "
-        "for power and control.\n\n"
-        "The most famous Splugorth is Splynncryth, Lord of Atlantis, who rules the "
-        "dimensional marketplace city of Splynn with an iron tentacle. Splugorth are "
-        "mega-damage creatures of enormous size, typically 20-40 feet in length with "
-        "hundreds of writhing tentacles. They possess vast psionic and magical powers, "
-        "and their physical forms are nearly indestructible.\n\n"
-        "Splugorth are essentially immortal, though they can be destroyed through "
-        "sufficient violence. They are highly intelligent, possess supernatural "
-        "perception, and can communicate telepathically across dimensions. Most "
-        "Splugorth surround themselves with armies of servants, minions, and "
+        "Splugorth are ancient evil alien intelligences, massive tentacled beings " +
+        "of immense supernatural power. They are masters of bio-wizardry, dimensional " +
+        "magic, and control vast slave empires spanning multiple dimensions. Each " +
+        "Splugorth is a unique entity with individual personality, though all share " +
+        "traits of cunning intelligence, ruthless ambition, and insatiable appetite " +
+        "for power and control.\n\n" +
+        "The most famous Splugorth is Splynncryth, Lord of Atlantis, who rules the " +
+        "dimensional marketplace city of Splynn with an iron tentacle. Splugorth are " +
+        "mega-damage creatures of enormous size, typically 20-40 feet in length with " +
+        "hundreds of writhing tentacles. They possess vast psionic and magical powers, " +
+        "and their physical forms are nearly indestructible.\n\n" +
+        "Splugorth are essentially immortal, though they can be destroyed through " +
+        "sufficient violence. They are highly intelligent, possess supernatural " +
+        "perception, and can communicate telepathically across dimensions. Most " +
+        "Splugorth surround themselves with armies of servants, minions, and " +
         "bio-wizard creations."
     );
     
@@ -109,22 +109,22 @@ void create() {
     
     // Special notes
     set_special_notes(
-        "ADMIN NOTE: Splugorth are extraordinarily powerful NPCs, not intended as "
-        "playable characters in standard campaigns. If allowed as player characters, "
-        "they should be heavily restricted and require admin approval. Their vast "
-        "powers, mega-damage nature, and effective immortality make them unsuitable "
-        "for balanced gameplay without significant limitations.\n\n"
-        "POWERS SUMMARY:\n"
-        "- MDC: 400-2400 (4D6x100)\n"
-        "- Attacks: 6-8 tentacle strikes per round\n"
-        "- Damage: 2D6x10 MD per tentacle strike\n"
-        "- Magic: All spell categories, cast as 10th level minimum\n"
-        "- Psionics: Master level, 300+ ISP, all powers\n"
-        "- Special: Bio-Wizardry, dimensional travel, regeneration\n\n"
-        "ROLE-PLAY NOTES:\n"
-        "Splugorth are alien intelligences with utterly inhuman psychology. They view "
-        "other beings as property, entertainment, or tools. They are patient, cunning, "
-        "and utterly ruthless. A Splugorth PC should be played with gravitas and an "
+        "ADMIN NOTE: Splugorth are extraordinarily powerful NPCs, not intended as " +
+        "playable characters in standard campaigns. If allowed as player characters, " +
+        "they should be heavily restricted and require admin approval. Their vast " +
+        "powers, mega-damage nature, and effective immortality make them unsuitable " +
+        "for balanced gameplay without significant limitations.\n\n" +
+        "POWERS SUMMARY:\n" +
+        "- MDC: 400-2400 (4D6x100)\n" +
+        "- Attacks: 6-8 tentacle strikes per round\n" +
+        "- Damage: 2D6x10 MD per tentacle strike\n" +
+        "- Magic: All spell categories, cast as 10th level minimum\n" +
+        "- Psionics: Master level, 300+ ISP, all powers\n" +
+        "- Special: Bio-Wizardry, dimensional travel, regeneration\n\n" +
+        "ROLE-PLAY NOTES:\n" +
+        "Splugorth are alien intelligences with utterly inhuman psychology. They view " +
+        "other beings as property, entertainment, or tools. They are patient, cunning, " +
+        "and utterly ruthless. A Splugorth PC should be played with gravitas and an " +
         "appropriate sense of ancient, terrible power."
     );
 }

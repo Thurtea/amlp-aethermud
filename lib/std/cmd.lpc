@@ -1,0 +1,6 @@
+// /lib/std/cmd.lpc — Minimal command base class (alias)
+// Stub for commands that inherit this base.
+
+int query_privilege_required() { return 0; }
+
+string query_help() { return "No help available.\n"; }

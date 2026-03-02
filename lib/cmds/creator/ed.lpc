@@ -16,7 +16,8 @@
 int main(string args) {
     object player = previous_object();
     string verb, file_path, cmd_args, resolved;
-    string *lines, *parts;
+    string *lines;
+    string *parts;
     int line_num, i;
     
     if (!args || args == "") {
@@ -43,9 +44,8 @@ int main(string args) {
         tell_object(player, "New file: " + resolved + "\n");
     } else {
         // Read existing file
-        catch {
-            lines = explode(read_file(resolved), "\n");
-        } : {
+        catch { lines = explode(read_file(resolved), "\n"); };
+        if (!lines) {
             tell_object(player, "Error: Cannot read file\n");
             return 1;
         }
@@ -148,12 +148,7 @@ void save_file(object player, string file_path, string *lines) {
     
     content = implode(lines, "\n");
     
-    catch {
-        write_file(file_path, content);
-    } : {
-        tell_object(player, "Error: Cannot write file\n");
-        return;
-    }
+    catch { write_file(file_path, content); };
     
     tell_object(player, "Wrote " + sizeof(lines) + " lines to: " + file_path + "\n");
 }
@@ -199,10 +194,9 @@ void help() {
 }
 
 string query_help() {
-    return
-"ED - Simple line editor for LPC files\n\n"
-"Usage:\n"
-"  ed <file> [command]   Edit a file with simple line commands (show, a, d, w)\n\n"
-"Provides lightweight editing operations for creator workspace files.\n"
+    return "ED - Simple line editor for LPC files\n\n" +
+"Usage:\n" +
+"  ed <file> [command]   Edit a file with simple line commands (show, a, d, w)\n\n" +
+"Provides lightweight editing operations for creator workspace files.\n" +
 "Useful when making quick changes without leaving the game.\n";
 }

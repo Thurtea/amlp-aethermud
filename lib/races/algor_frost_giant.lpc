@@ -12,7 +12,7 @@ void create() {
     set_race_category(RACE_CAT_GIANT);
 
     set_race_description(
-        "Algor Frost Giants are enormous humanoids of ice and snow, living in\n"
+        "Algor Frost Giants are enormous humanoids of ice and snow, living in\n" +
         "icy wastelands. They are slow but immensely strong and resistant to cold."
     );
 

@@ -10,11 +10,11 @@ void create() {
     set_power_id("electrokinesis");
     set_power_name("Electrokinesis");
     set_power_desc(
-        "The psychic can generate, direct, and control small amounts of electrical energy. "
-        "At basic levels the power can short out small electronic devices, create a static "
-        "discharge, or deliver a shocking touch (1D6 SDC). At higher intensities the psychic "
-        "can deliver a ranged lightning bolt (range 60 ft, 3D6 SDC) or temporarily disable "
-        "electronic systems including robots and power armor sensors. Cannot affect mega-damage "
+        "The psychic can generate, direct, and control small amounts of electrical energy. " +
+        "At basic levels the power can short out small electronic devices, create a static " +
+        "discharge, or deliver a shocking touch (1D6 SDC). At higher intensities the psychic " +
+        "can deliver a ranged lightning bolt (range 60 ft, 3D6 SDC) or temporarily disable " +
+        "electronic systems including robots and power armor sensors. Cannot affect mega-damage " +
         "structures. I.S.P. cost is 8 per activation; duration maintained by concentration."
     );
     set_power_category("physical");

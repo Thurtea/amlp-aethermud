@@ -18,13 +18,13 @@ void create() {
     set_alignment_requirement("any");
 
     set_occ_description(
-        "Dragon hatchlings are young but tremendously powerful creatures of "
-        "magic. Born fully sentient and capable of speech, they possess natural "
-        "mega-damage hides, the ability to fly, breathe fire, shapeshift into "
-        "humanoid forms via metamorphosis, and an innate connection to both "
-        "psionic and magical energies. The hatchling period lasts until roughly "
-        "600 years of age, during which the dragon explores the world and "
-        "develops its abilities. Dragons have no formal society and are fiercely "
+        "Dragon hatchlings are young but tremendously powerful creatures of " +
+        "magic. Born fully sentient and capable of speech, they possess natural " +
+        "mega-damage hides, the ability to fly, breathe fire, shapeshift into " +
+        "humanoid forms via metamorphosis, and an innate connection to both " +
+        "psionic and magical energies. The hatchling period lasts until roughly " +
+        "600 years of age, during which the dragon explores the world and " +
+        "develops its abilities. Dragons have no formal society and are fiercely " +
         "independent and territorial."
     );
 
@@ -133,12 +133,12 @@ void create() {
 
     // Background
     set_background(
-        "You hatched from your egg fully sentient, possessing an innate "
-        "understanding of language, magic, and the fundamental nature of the "
-        "cosmos. Left to fend for yourself within days of hatching, as is the "
-        "way of all dragons, you now explore the world of Rifts Earth - a "
-        "realm overflowing with the magical energy that sustains your kind. "
-        "Your immense power belies your youth; even as a hatchling, you are "
+        "You hatched from your egg fully sentient, possessing an innate " +
+        "understanding of language, magic, and the fundamental nature of the " +
+        "cosmos. Left to fend for yourself within days of hatching, as is the " +
+        "way of all dragons, you now explore the world of Rifts Earth - a " +
+        "realm overflowing with the magical energy that sustains your kind. " +
+        "Your immense power belies your youth; even as a hatchling, you are " +
         "a mega-damage creature capable of flight, fire breath, and shapeshifting."
     );
     set_organizations(({ }));  // Dragons are solitary

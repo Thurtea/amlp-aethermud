@@ -29,18 +29,17 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"POSITION - Set your custom position for roleplay\n\n"
-"Usage:\n"
-"  position <description>    Set a custom position description\n"
-"  position                  Reset to default (standing around)\n\n"
-"Examples:\n"
-"  position is sitting by the fire.\n"
-"  position is leaning against the wall, arms crossed.\n"
-"  position is kneeling in prayer.\n"
-"  position lies wounded on the ground.\n\n"
-"Your position appears when others look at the room:\n"
-"  'A human is sitting by the fire.'\n\n"
+    return "POSITION - Set your custom position for roleplay\n\n" +
+"Usage:\n" +
+"  position <description>    Set a custom position description\n" +
+"  position                  Reset to default (standing around)\n\n" +
+"Examples:\n" +
+"  position is sitting by the fire.\n" +
+"  position is leaning against the wall, arms crossed.\n" +
+"  position is kneeling in prayer.\n" +
+"  position lies wounded on the ground.\n\n" +
+"Your position appears when others look at the room:\n" +
+"  'A human is sitting by the fire.'\n\n" +
 "Position automatically resets when you move to another room.\n";
 }
 

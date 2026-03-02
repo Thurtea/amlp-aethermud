@@ -9,12 +9,12 @@ void create() {
     set_spell_id("aura_of_death");
     set_spell_name("Aura of Death");
     set_spell_desc(
-        "The mage wraps themselves in a cloak of death energy, a visible black "
-        "corona that radiates pure supernatural dread. All living beings within "
-        "20 feet must roll a save vs magic or suffer a -2 to all combat rolls "
-        "as the aura saps their will and fills them with mortal terror. "
-        "Undead and supernatural evil beings are unaffected; good-aligned "
-        "supernatural beings take additional penalties. The aura lasts 2 minutes "
+        "The mage wraps themselves in a cloak of death energy, a visible black " +
+        "corona that radiates pure supernatural dread. All living beings within " +
+        "20 feet must roll a save vs magic or suffer a -2 to all combat rolls " +
+        "as the aura saps their will and fills them with mortal terror. " +
+        "Undead and supernatural evil beings are unaffected; good-aligned " +
+        "supernatural beings take additional penalties. The aura lasts 2 minutes " +
         "per level of the caster. Humans and D-Bees struck with awe save at -3."
     );
 
@@ -58,8 +58,8 @@ int apply_effect(object caster, object target) {
     caster->set_property("aura_of_death_active", 1);
 
     tell_object(caster,
-        "Black energies coalesce around you, forming a visible corona of "
-        "death. You can feel it radiating fear into all nearby.\n"
+        "Black energies coalesce around you, forming a visible corona of " +
+        "death. You can feel it radiating fear into all nearby.\n" +
         "Duration: " + (level * 2) + " minutes\n");
 
     object env = environment(caster);
@@ -68,7 +68,7 @@ int apply_effect(object caster, object target) {
             if (ob != caster && living(ob)) {
                 tell_object(ob,
                     "A corona of black death energy erupts around " +
-                    caster->query_cap_name() + "! "
+                    caster->query_cap_name() + "! " +
                     "Primal dread seizes your soul!\n");
                 ob->set_property("aura_of_death_penalty", 2);
             }

@@ -45,11 +45,10 @@ int main(string str) {
 }
 
 string query_help() {
-    return
-"PSKILLS - Show your primary occupational skills\n\n"
-"Usage:\n"
-"  pskills    List all skills from your O.C.C.\n\n"
-"Displays all skills granted by your Occupational Character Class.\n"
-"If no skills are shown, you have not yet selected an O.C.C.\n\n"
+    return "PSKILLS - Show your primary occupational skills\n\n" +
+"Usage:\n" +
+"  pskills    List all skills from your O.C.C.\n\n" +
+"Displays all skills granted by your Occupational Character Class.\n" +
+"If no skills are shown, you have not yet selected an O.C.C.\n\n" +
 "See also: sskills, occs, selectocc, help skills\n";
 }

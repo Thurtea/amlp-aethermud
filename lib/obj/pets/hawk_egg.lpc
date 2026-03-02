@@ -31,10 +31,10 @@ void _update_desc() {
         add_id("large egg");
         set_short("a mottled peregrine falcon egg");
         set_long(
-            "A large, pale cream egg mottled with reddish-brown splotches. "
-            "It is noticeably warm to the touch and vibrates faintly with "
-            "life. A falcon of exceptional speed and intelligence waits "
-            "within. The egg is wrapped in soft leather to protect it.\n"
+            "A large, pale cream egg mottled with reddish-brown splotches. " +
+            "It is noticeably warm to the touch and vibrates faintly with " +
+            "life. A falcon of exceptional speed and intelligence waits " +
+            "within. The egg is wrapped in soft leather to protect it.\n" +
             "  [Level 7 Falcon -- use 'hatch egg' to hatch it]\n"
         );
     } else if (egg_type == "master_hawk") {
@@ -43,10 +43,10 @@ void _update_desc() {
         add_id("egg");
         set_short("a speckled master hawk egg");
         set_long(
-            "A handsome speckled egg slightly larger than a chicken's. Its "
-            "shell has an unusual blue-grey sheen and is warm against your "
-            "palm. A master hunting hawk gestates inside -- stronger and "
-            "more obedient than a common bird. The egg is nestled in straw.\n"
+            "A handsome speckled egg slightly larger than a chicken's. Its " +
+            "shell has an unusual blue-grey sheen and is warm against your " +
+            "palm. A master hunting hawk gestates inside -- stronger and " +
+            "more obedient than a common bird. The egg is nestled in straw.\n" +
             "  [Level 5 Master Hawk -- use 'hatch egg' to hatch it]\n"
         );
     } else {
@@ -54,10 +54,10 @@ void _update_desc() {
         add_id("egg");
         set_short("a speckled hawk egg");
         set_long(
-            "A brown-speckled egg slightly smaller than your fist. It feels "
-            "warm and solid in your hand. A hunting hawk grows inside, "
-            "waiting to be hatched and trained. The shell is surprisingly "
-            "tough.\n"
+            "A brown-speckled egg slightly smaller than your fist. It feels " +
+            "warm and solid in your hand. A hunting hawk grows inside, " +
+            "waiting to be hatched and trained. The shell is surprisingly " +
+            "tough.\n" +
             "  [Level 3 Hawk -- use 'hatch egg' to hatch it]\n"
         );
     }
@@ -100,8 +100,8 @@ int cmd_hatch(string arg) {
 
     if (skill_pct < req_pct) {
         write(
-            "You cradle the " + query_short() + " in your hands, but you "
-            "lack the falconry training to coax it open.\n"
+            "You cradle the " + query_short() + " in your hands, but you " +
+            "lack the falconry training to coax it open.\n" +
             "  [Requires Falconry " + req_pct + "% -- you have " +
             skill_pct + "%]\n"
         );
@@ -124,13 +124,13 @@ int cmd_hatch(string arg) {
     hawk->move(environment(player));
 
     write(
-        "\nYou cradle the " + query_short() + " in both hands and breathe\n"
-        "warm air along the shell. A hairline crack appears... then another.\n"
-        "A tiny beak forces through, chips away a wedge of shell, and then --\n"
-        "in a burst of fragments -- a " + hawk->query_short() + " tumbles\n"
-        "free. It fixes one bright amber eye on you, lets out a small sharp\n"
-        "cry, and hops up to perch on your arm.\n\n"
-        "  Commands: say " + hawk->query_name() + " follow/stay/come/perch/fly\n"
+        "\nYou cradle the " + query_short() + " in both hands and breathe\n" +
+        "warm air along the shell. A hairline crack appears... then another.\n" +
+        "A tiny beak forces through, chips away a wedge of shell, and then --\n" +
+        "in a burst of fragments -- a " + hawk->query_short() + " tumbles\n" +
+        "free. It fixes one bright amber eye on you, lets out a small sharp\n" +
+        "cry, and hops up to perch on your arm.\n\n" +
+        "  Commands: say " + hawk->query_name() + " follow/stay/come/perch/fly\n" +
         "            say " + hawk->query_name() + " scout <dir>  |  say " +
         hawk->query_name() + " attack <target>\n"
     );

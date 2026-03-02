@@ -12,13 +12,13 @@ void create() {
     
     set_short("the cargo hold of the EX-5 Behemoth");
     set_long(
-        "The cargo hold occupies the entire rear section of the Behemoth. This cavernous "
-        "space is designed to carry everything an exploration team might need: spare parts, "
-        "weapons, ammunition, food supplies, scientific equipment, and salvaged materials.\n\n"
-        "Cargo nets line the walls, and heavy-duty tie-down points dot the deck. Emergency "
-        "lights cast everything in a dim red glow. The smell of oil, metal, and recycled "
-        "air fills the space. A massive rear loading ramp (currently sealed) would allow "
-        "vehicles or large equipment to be loaded directly into the hold.\n\n"
+        "The cargo hold occupies the entire rear section of the Behemoth. This cavernous " +
+        "space is designed to carry everything an exploration team might need: spare parts, " +
+        "weapons, ammunition, food supplies, scientific equipment, and salvaged materials.\n\n" +
+        "Cargo nets line the walls, and heavy-duty tie-down points dot the deck. Emergency " +
+        "lights cast everything in a dim red glow. The smell of oil, metal, and recycled " +
+        "air fills the space. A massive rear loading ramp (currently sealed) would allow " +
+        "vehicles or large equipment to be loaded directly into the hold.\n\n" +
         "A door leads forward to the crew quarters, and a ladder leads up to engineering."
     );
     

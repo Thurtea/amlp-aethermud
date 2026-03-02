@@ -82,32 +82,31 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"TATTOOS - View your magical tattoos\n\n"
-"Usage:\n"
-"  tattoos\n\n"
-"This command displays all of your magical Atlantean tattoos, their\n"
-"locations on your body, and how many tattoo slots you have remaining.\n\n"
-"ATLANTEAN TATTOO MAGIC:\n"
-"True Atlanteans possess the unique ability to use magical tattoos -\n"
-"permanent markings that grant incredible powers. These are not mere\n"
-"decorations, but sources of real magical energy.\n\n"
-"TATTOO LIMITS:\n"
-"- Standard Atlanteans: 6 tattoos maximum\n"
-"- Tattoo Warriors: 10-15 tattoos\n\n"
-"REQUESTING TATTOOS:\n"
-"Tattoos must be earned through roleplay and granted by wizards.\n"
-"To request a tattoo:\n"
-"  1. Use 'who' to see online wizards\n"
-"  2. Use 'tell <wizard> I would like the <tattoo> on my <location>'\n\n"
-"Example:\n"
-"  tell merlin I would like the flaming_sword tattoo on my right_arm\n\n"
-"BODY LOCATIONS:\n"
-"Valid locations include: chest, back, right_arm, left_arm, right_leg,\n"
-"left_leg, right_hand, left_hand, forehead, neck, abdomen, shoulders\n\n"
-"ACTIVATING TATTOOS:\n"
-"Once you have tattoos, activate their powers with:\n"
-"  activate <tattoo_name>\n\n"
-"Each tattoo has different powers, costs, and cooldowns.\n\n"
+    return "TATTOOS - View your magical tattoos\n\n" +
+"Usage:\n" +
+"  tattoos\n\n" +
+"This command displays all of your magical Atlantean tattoos, their\n" +
+"locations on your body, and how many tattoo slots you have remaining.\n\n" +
+"ATLANTEAN TATTOO MAGIC:\n" +
+"True Atlanteans possess the unique ability to use magical tattoos -\n" +
+"permanent markings that grant incredible powers. These are not mere\n" +
+"decorations, but sources of real magical energy.\n\n" +
+"TATTOO LIMITS:\n" +
+"- Standard Atlanteans: 6 tattoos maximum\n" +
+"- Tattoo Warriors: 10-15 tattoos\n\n" +
+"REQUESTING TATTOOS:\n" +
+"Tattoos must be earned through roleplay and granted by wizards.\n" +
+"To request a tattoo:\n" +
+"  1. Use 'who' to see online wizards\n" +
+"  2. Use 'tell <wizard> I would like the <tattoo> on my <location>'\n\n" +
+"Example:\n" +
+"  tell merlin I would like the flaming_sword tattoo on my right_arm\n\n" +
+"BODY LOCATIONS:\n" +
+"Valid locations include: chest, back, right_arm, left_arm, right_leg,\n" +
+"left_leg, right_hand, left_hand, forehead, neck, abdomen, shoulders\n\n" +
+"ACTIVATING TATTOOS:\n" +
+"Once you have tattoos, activate their powers with:\n" +
+"  activate <tattoo_name>\n\n" +
+"Each tattoo has different powers, costs, and cooldowns.\n\n" +
 "See also: ACTIVATE, WHO, TELL\n";
 }

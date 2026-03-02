@@ -18,12 +18,12 @@ void create() {
     
     set_short_description("Grants the ability to swim perfectly like a fish.");
     set_long_description(
-        "This spell transforms the caster into an expert swimmer, able to "
-        "move through water as effortlessly as a fish. The caster can hold "
-        "their breath for the duration, swim at incredible speeds, and needs "
-        "no swimming skill checks while under the spell's effect.\n\n"
-        "Duration: 1 minute per level\n"
-        "Range: Self\n"
+        "This spell transforms the caster into an expert swimmer, able to " +
+        "move through water as effortlessly as a fish. The caster can hold " +
+        "their breath for the duration, swim at incredible speeds, and needs " +
+        "no swimming skill checks while under the spell's effect.\n\n" +
+        "Duration: 1 minute per level\n" +
+        "Range: Self\n" +
         "P.P.E.: 6\n"
     );
 }
@@ -59,7 +59,7 @@ int cast(object caster, object target, string args) {
                 "You can now swim perfectly and breathe underwater!");
     
     tell_room(environment(caster),
-              "" + caster->query_cap_name() + "'s hands shimmer with blue light, "
+              "" + caster->query_cap_name() + "'s hands shimmer with blue light, " +
               "and thin webbing appears between their fingers!",
               ({ caster }));
     

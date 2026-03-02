@@ -15,7 +15,7 @@ void create() {
     set_alignment_requirement("not_anarchist");
     
         set_occ_description(
-            "A highly trained combat operator skilled in unconventional warfare.\n"
+            "A highly trained combat operator skilled in unconventional warfare.\n" +
             "Conservative defaults for combat, tactics, and gear; review for balance."
         );
     
@@ -142,9 +142,9 @@ void create() {
     
     // Background
     set_background(
-        "Special Forces Soldiers come from military academies, enlistment programs, "
-        "or recruitment drives. Most are loyal to their organizations, though some "
-        "leave to pursue independent careers as mercenaries, bodyguards, or adventurers. "
+        "Special Forces Soldiers come from military academies, enlistment programs, " +
+        "or recruitment drives. Most are loyal to their organizations, though some " +
+        "leave to pursue independent careers as mercenaries, bodyguards, or adventurers. " +
         "They are disciplined, well-trained, and dangerous in combat."
     );
     set_organizations(({

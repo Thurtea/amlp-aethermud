@@ -17,8 +17,8 @@ void create() {
     set_related_languages(({ "euro", "spanish" }));
     
     set_short("American language");
-    set_long("American is the primary language spoken in post-apocalyptic "
-             "North America. It evolved from pre-Rifts English but has "
-             "incorporated many slang terms and regional variations over "
+    set_long("American is the primary language spoken in post-apocalyptic " +
+             "North America. It evolved from pre-Rifts English but has " +
+             "incorporated many slang terms and regional variations over " +
              "the centuries since the Coming of the Rifts.");
 }

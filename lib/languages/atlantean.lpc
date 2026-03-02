@@ -14,8 +14,8 @@ void create() {
     set_related_languages(({ "greek", "lemurian" }));
     
     set_short("Atlantean language");
-    set_long("The language of the True Atlanteans, dimensional travelers "
-             "and monster hunters. Atlantean is an incredibly ancient "
-             "language with deep ties to magic. Many wards, runes, and "
+    set_long("The language of the True Atlanteans, dimensional travelers " +
+             "and monster hunters. Atlantean is an incredibly ancient " +
+             "language with deep ties to magic. Many wards, runes, and " +
              "tattoo magic require knowledge of Atlantean to understand.");
 }

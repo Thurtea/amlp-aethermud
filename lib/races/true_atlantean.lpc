@@ -17,13 +17,13 @@ void create() {
     set_race_category(RACE_CAT_HUMAN);
 
     set_race_description(
-        "True Atlanteans are an ancient sub-race of humanity who developed "
-        "dimensional travel technology millennia before the Coming of the Rifts. "
-        "They are taller and longer-lived than ordinary humans, and carry magical "
-        "tattoos known as Marks of Heritage that identify their clan lineage. "
-        "Driven from their homeland of Atlantis by the Splugorth, they have "
-        "become wanderers of the Megaverse, sworn enemies of the alien "
-        "intelligence and its minions. Their mastery of magic and dimensional "
+        "True Atlanteans are an ancient sub-race of humanity who developed " +
+        "dimensional travel technology millennia before the Coming of the Rifts. " +
+        "They are taller and longer-lived than ordinary humans, and carry magical " +
+        "tattoos known as Marks of Heritage that identify their clan lineage. " +
+        "Driven from their homeland of Atlantis by the Splugorth, they have " +
+        "become wanderers of the Megaverse, sworn enemies of the alien " +
+        "intelligence and its minions. Their mastery of magic and dimensional " +
         "lore is unrivaled among humanoid races."
     );
 

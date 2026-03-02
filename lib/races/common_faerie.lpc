@@ -12,15 +12,15 @@ void create() {
     set_race_category(RACE_CAT_FAERIE);
 
     set_race_description(
-        "Common Faeries are the iconic winged beings of legend, standing "
-        "roughly a foot tall with gossamer wings and luminous eyes. They "
-        "glow faintly with warm golden or blue light. On Rifts Earth, faeries "
-        "emerged in force after the Great Cataclysm tore open the dimensional "
-        "barriers, flooding North America with these supernatural beings. "
-        "Common Faeries are playful, impulsive, and frequently mischievous, "
-        "though rarely malicious. They possess powerful natural magic and an "
-        "instinctive ability to perceive magical auras and supernatural "
-        "presences. Their wings allow true flight, and their small size makes "
+        "Common Faeries are the iconic winged beings of legend, standing " +
+        "roughly a foot tall with gossamer wings and luminous eyes. They " +
+        "glow faintly with warm golden or blue light. On Rifts Earth, faeries " +
+        "emerged in force after the Great Cataclysm tore open the dimensional " +
+        "barriers, flooding North America with these supernatural beings. " +
+        "Common Faeries are playful, impulsive, and frequently mischievous, " +
+        "though rarely malicious. They possess powerful natural magic and an " +
+        "instinctive ability to perceive magical auras and supernatural " +
+        "presences. Their wings allow true flight, and their small size makes " +
         "them extraordinarily hard to strike in combat."
     );
 
@@ -71,7 +71,7 @@ void create() {
     set_is_rcc(1);
     set_can_have_occ(0);
     set_rcc_description(
-        "Common Faeries are supernatural beings whose innate magical nature "
+        "Common Faeries are supernatural beings whose innate magical nature " +
         "defines their existence. They do not follow human OCCs."
     );
 

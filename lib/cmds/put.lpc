@@ -138,16 +138,15 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"PUT - Put down items from your inventory\n\n"
-"Usage:\n"
-"  put <item>     Put down an item\n"
-"  put all        Put down all items\n\n"  
-"Examples:\n"
-"  put sword\n"
-"  put all\n\n"
-"You cannot put down items that are wielded or worn - you must\n"
-"unwield or remove them first. Some items (like quest items) \n"
-"cannot be dropped at all.\n\n"
+    return "PUT - Put down items from your inventory\n\n" +
+"Usage:\n" +
+"  put <item>     Put down an item\n" +
+"  put all        Put down all items\n\n" +
+"Examples:\n" +
+"  put sword\n" +
+"  put all\n\n" +
+"You cannot put down items that are wielded or worn - you must\n" +
+"unwield or remove them first. Some items (like quest items) \n" +
+"cannot be dropped at all.\n\n" +
 "See also: take, give, inventory, wield, wear\n";
 }

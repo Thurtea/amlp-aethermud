@@ -10,10 +10,10 @@ void create() {
     set_id_alt("shadow");
     set_short("a suit of shadow armor");
     set_long(
-        "A suit of specially treated mega-damage body armor favored by Sunaj "
-        "assassins. The matte-black composite surface absorbs ambient light, "
-        "making the wearer nearly invisible in shadow. Rated at 50 M.D.C., "
-        "it sacrifices some protection for superior stealth and flexibility. "
+        "A suit of specially treated mega-damage body armor favored by Sunaj " +
+        "assassins. The matte-black composite surface absorbs ambient light, " +
+        "making the wearer nearly invisible in shadow. Rated at 50 M.D.C., " +
+        "it sacrifices some protection for superior stealth and flexibility. " +
         "Arcane runes woven into the lining enhance tattoo-magic resonance.\n"
     );
 

@@ -10,15 +10,15 @@ void create() {
     set_power_id("commune_with_spirits");
     set_power_name("Commune with Spirits");
     set_power_desc(
-        "The psychic opens their mind to the spirit world, making contact "
-        "with any ghosts, spirits, or disembodied entities that linger in "
-        "the area. Communications are limited to the spirit's ability to "
-        "convey information - some are eloquent, others can only convey "
-        "strong emotions or impressions. Spirits of the recently dead may "
-        "know what happened to them, while ancient spirits know the history "
-        "of a location.\n\n"
-        "Range: Area (50 feet)\n"
-        "ISP Cost: 6 points\n"
+        "The psychic opens their mind to the spirit world, making contact " +
+        "with any ghosts, spirits, or disembodied entities that linger in " +
+        "the area. Communications are limited to the spirit's ability to " +
+        "convey information - some are eloquent, others can only convey " +
+        "strong emotions or impressions. Spirits of the recently dead may " +
+        "know what happened to them, while ancient spirits know the history " +
+        "of a location.\n\n" +
+        "Range: Area (50 feet)\n" +
+        "ISP Cost: 6 points\n" +
         "Duration: Instant contact"
     );
     set_power_category("sensitive");
@@ -44,17 +44,17 @@ int apply_effect(object user, object target) {
         i += 1;
     }
     if (found_spirit) {
-        tell_object(user, "You open your mind and a chill fills you as "
-            "spirit consciousness brushes against yours. Impressions, "
+        tell_object(user, "You open your mind and a chill fills you as " +
+            "spirit consciousness brushes against yours. Impressions, " +
             "fragments of memory, and wordless emotion flood your senses.\n");
     } else {
-        tell_object(user, "You extend your consciousness into the spirit world. "
-            "The area feels quiet - no strong spirit presences detected. "
-            "There may be faint echoes of the past, but no spirits are "
+        tell_object(user, "You extend your consciousness into the spirit world. " +
+            "The area feels quiet - no strong spirit presences detected. " +
+            "There may be faint echoes of the past, but no spirits are " +
             "actively present.\n");
     }
     tell_room(env,
-        user->query_cap_name() + " goes still, eyes unfocused, clearly "
+        user->query_cap_name() + " goes still, eyes unfocused, clearly " +
         "communing with something unseen.\n",
         ({ user }));
     return 1;

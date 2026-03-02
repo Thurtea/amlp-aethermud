@@ -10,9 +10,9 @@ void create() {
     set_skill_id("literacy");
     set_skill_name("Literacy");
     set_skill_desc(
-        "The ability to read and write. In Rifts Earth, literacy is not "
-        "universal. This skill represents education in reading and writing "
-        "in your native language. Can be taken multiple times for different "
+        "The ability to read and write. In Rifts Earth, literacy is not " +
+        "universal. This skill represents education in reading and writing " +
+        "in your native language. Can be taken multiple times for different " +
         "languages."
     );
     set_skill_category("technical");

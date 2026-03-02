@@ -15,10 +15,10 @@ void create() {
     
     set_short("a sense evil spell");
     set_long(
-        "Sense Evil allows the spell caster to sense evil or hostile "
-        "intent in others. The spell can detect evil alignments (Aberrant, "
-        "Miscreant, Diabolic) and sense murderous or hostile intent. It "
-        "has a range of 90 feet and lasts 2 minutes per level. "
+        "Sense Evil allows the spell caster to sense evil or hostile " +
+        "intent in others. The spell can detect evil alignments (Aberrant, " +
+        "Miscreant, Diabolic) and sense murderous or hostile intent. It " +
+        "has a range of 90 feet and lasts 2 minutes per level. " +
         "Costs 2 P.P.E. to cast."
     );
     

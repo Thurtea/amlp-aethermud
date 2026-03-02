@@ -30,9 +30,8 @@ int main(string args) {
     }
     
     // Try to read file
-    catch {
-        lines = explode(read_file(resolved), "\n");
-    } : {
+    catch { lines = explode(read_file(resolved), "\n"); };
+    if (!lines) {
         tell_object(player, "Error: Cannot read file\n");
         return 1;
     }
@@ -60,10 +59,9 @@ void help() {
 }
 
 string query_help() {
-    return
-"CAT - Show file contents\n\n"
-"Usage:\n"
-"  cat <file>           Display the contents of a file in your workspace\n\n"
-"Useful for quickly viewing source files while editing or reviewing\n"
+    return "CAT - Show file contents\n\n" +
+"Usage:\n" +
+"  cat <file>           Display the contents of a file in your workspace\n\n" +
+"Useful for quickly viewing source files while editing or reviewing\n" +
 "templates created by the QCS.\n";
 }

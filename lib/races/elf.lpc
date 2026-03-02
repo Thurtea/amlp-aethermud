@@ -16,12 +16,12 @@ void create() {
     set_race_category(RACE_CAT_DEMIHUMAN);
     
     set_race_description(
-        "Elves are beings of grace and magic who came to Rifts Earth through "
-        "dimensional portals. They are tall, slender, and beautiful by human "
-        "standards, with pointed ears and an ethereal quality. Most elves possess "
-        "an innate connection to magic and the supernatural. They are long-lived, "
-        "often surviving for thousands of years, which gives them patience and "
-        "a different perspective on time. Many elves are drawn to the practice of "
+        "Elves are beings of grace and magic who came to Rifts Earth through " +
+        "dimensional portals. They are tall, slender, and beautiful by human " +
+        "standards, with pointed ears and an ethereal quality. Most elves possess " +
+        "an innate connection to magic and the supernatural. They are long-lived, " +
+        "often surviving for thousands of years, which gives them patience and " +
+        "a different perspective on time. Many elves are drawn to the practice of " +
         "magic, and they make exceptional spell casters."
     );
     

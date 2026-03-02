@@ -9,12 +9,12 @@ void create() {
     set_spell_id("summon_storm");
     set_spell_name("Summon and Control Storm");
     set_spell_desc(
-        "The spell caster conjures a destructive storm from thin air. "
-        "A rainstorm creates a torrential downpour of 4 inches per hour, "
-        "causing flooding and reducing visibility to near zero - slowing "
-        "travel to about 20 mph. A windstorm brings gusts of 70 to 90 mph, "
-        "uprooting small trees, overturning vehicles, and reducing foot travel "
-        "speed by 90%. The storm can also produce lightning strikes dealing "
+        "The spell caster conjures a destructive storm from thin air. " +
+        "A rainstorm creates a torrential downpour of 4 inches per hour, " +
+        "causing flooding and reducing visibility to near zero - slowing " +
+        "travel to about 20 mph. A windstorm brings gusts of 70 to 90 mph, " +
+        "uprooting small trees, overturning vehicles, and reducing foot travel " +
+        "speed by 90%. The storm can also produce lightning strikes dealing " +
         "2D6 MDC damage to targets. Duration: 1 hour per level."
     );
 
@@ -48,14 +48,14 @@ int apply_effect(object caster, object target) {
     env->set_property("storm_caster", caster->query_name());
 
     tell_object(caster,
-        "You raise your arms and invoke the storm. Dark clouds boil in from "
-        "nowhere, the wind howls, and lightning tears the sky. A full "
-        "destructive storm rages at your command.\n"
+        "You raise your arms and invoke the storm. Dark clouds boil in from " +
+        "nowhere, the wind howls, and lightning tears the sky. A full " +
+        "destructive storm rages at your command.\n" +
         "Duration: " + duration_min + " minutes.\n");
 
     tell_room(env,
         caster->query_cap_name() +
-        " throws their arms wide and screams an invocation! Black clouds "
+        " throws their arms wide and screams an invocation! Black clouds " +
         "erupt overhead and a destructive storm unleashes its fury!\n",
         ({ caster }));
 

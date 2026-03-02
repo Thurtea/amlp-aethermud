@@ -4,7 +4,7 @@ void create() {
     ::create();
     set_short("Quiet side-street");
     set_long(
-        "A quiet, narrow side-street lined with low cottages and clipped hedges.\n"
+        "A quiet, narrow side-street lined with low cottages and clipped hedges.\n" +
         "The lane continues west; to the east is the lane that runs toward the town square."
     );
 

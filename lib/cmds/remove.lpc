@@ -85,15 +85,14 @@ int main(string arg) {
 }
 
 string query_help() {
-    return
-"REMOVE - Remove equipped items\n\n"
-"Usage:\n"
-"  remove <item>    Unequip armor or equipment\n\n"
-"Examples:\n"
-"  remove helmet\n"
-"  remove armor\n"
-"  remove boots\n\n"
-"The item will be placed back in your inventory.\n"
-"Some cursed items cannot be removed.\n\n"
+    return "REMOVE - Remove equipped items\n\n" +
+"Usage:\n" +
+"  remove <item>    Unequip armor or equipment\n\n" +
+"Examples:\n" +
+"  remove helmet\n" +
+"  remove armor\n" +
+"  remove boots\n\n" +
+"The item will be placed back in your inventory.\n" +
+"Some cursed items cannot be removed.\n\n" +
 "See also: WEAR, UNWIELD, EQUIPMENT\n";
 }

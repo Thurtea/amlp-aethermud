@@ -18,12 +18,12 @@ void create() {
     
     set_short_description("Reveals the true nature, alignment, and magical aura of a target.");
     set_long_description(
-        "This spell allows the caster to see the magical aura surrounding a living "
-        "being, revealing their true race, alignment, level of power, and any "
-        "magical disguises or transformations. Perfect for detecting shapeshifters, "
-        "illusions, and hidden supernatural beings.\n\n"
-        "Duration: Instant\n"
-        "Range: 60 feet\n"
+        "This spell allows the caster to see the magical aura surrounding a living " +
+        "being, revealing their true race, alignment, level of power, and any " +
+        "magical disguises or transformations. Perfect for detecting shapeshifters, " +
+        "illusions, and hidden supernatural beings.\n\n" +
+        "Duration: Instant\n" +
+        "Range: 60 feet\n" +
         "P.P.E.: 6\n"
     );
 }

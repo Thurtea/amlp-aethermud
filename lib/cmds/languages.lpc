@@ -42,18 +42,17 @@ int main(string args) {
 }
 
 string query_help() {
-    return
-"LANGUAGES - List your known languages\n\n"
-"Usage:\n"
-"  languages              List all languages you know\n\n"
-"Shows all languages you know and your proficiency in each.\n"
-"Your current speaking language is marked with [speaking].\n\n"
-"Proficiency levels:\n"
-"  98-100%  Native Speaker\n"
-"  90-97%   Fluent\n"
-"  75-89%   Advanced\n"
-"  50-74%   Conversational\n"
-"  25-49%   Basic\n"
-"  1-24%    Rudimentary\n\n"
+    return "LANGUAGES - List your known languages\n\n" +
+"Usage:\n" +
+"  languages              List all languages you know\n\n" +
+"Shows all languages you know and your proficiency in each.\n" +
+"Your current speaking language is marked with [speaking].\n\n" +
+"Proficiency levels:\n" +
+"  98-100%  Native Speaker\n" +
+"  90-97%   Fluent\n" +
+"  75-89%   Advanced\n" +
+"  50-74%   Conversational\n" +
+"  25-49%   Basic\n" +
+"  1-24%    Rudimentary\n\n" +
 "See also: LANGUAGE, SAY\n";
 }

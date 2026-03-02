@@ -16,13 +16,13 @@ void create() {
     set_alignment_requirement("any");
     
     set_occ_description(
-        "Operators are the unsung heroes of Rifts Earth - the mechanics, engineers, "
-        "and technicians who keep civilization running. While others fight monsters "
-        "and cast spells, Operators repair vehicles, maintain power armor, fix "
-        "weapons, and build new devices from salvage. A good Operator is worth their "
-        "weight in gold to any community or adventuring party. They combine "
-        "theoretical knowledge with practical skill, able to diagnose problems, "
-        "improvise solutions, and create wonders from scrap. Many Operators run "
+        "Operators are the unsung heroes of Rifts Earth - the mechanics, engineers, " +
+        "and technicians who keep civilization running. While others fight monsters " +
+        "and cast spells, Operators repair vehicles, maintain power armor, fix " +
+        "weapons, and build new devices from salvage. A good Operator is worth their " +
+        "weight in gold to any community or adventuring party. They combine " +
+        "theoretical knowledge with practical skill, able to diagnose problems, " +
+        "improvise solutions, and create wonders from scrap. Many Operators run " +
         "their own shops or travel with mercenary companies."
     );
     
@@ -174,9 +174,9 @@ void create() {
     
     // Background
     set_background(
-        "Operators often learned their trade from family or through apprenticeship. "
-        "Some attended surviving technical schools, while others are self-taught "
-        "geniuses who figured out how things work by taking them apart. Most "
+        "Operators often learned their trade from family or through apprenticeship. " +
+        "Some attended surviving technical schools, while others are self-taught " +
+        "geniuses who figured out how things work by taking them apart. Most " +
         "Operators have a specialty - vehicles, weapons, robots, or electronics."
     );
     set_organizations(({ }));

@@ -10,14 +10,14 @@ void create() {
     set_power_id("psychic_purification");
     set_power_name("Psychic Purification");
     set_power_desc(
-        "The psychic accelerates the body's natural filtering systems, purging "
-        "toxins, poisons, recreational drugs, and even certain supernatural "
-        "contaminations in seconds. The power works on the cellular level, "
-        "neutralizing harmful substances before they can cause further damage. "
-        "It is effective against most biological and chemical toxins, though "
-        "it has limited effect on magical curses.\n\n"
-        "Range: Touch\n"
-        "ISP Cost: 8 points\n"
+        "The psychic accelerates the body's natural filtering systems, purging " +
+        "toxins, poisons, recreational drugs, and even certain supernatural " +
+        "contaminations in seconds. The power works on the cellular level, " +
+        "neutralizing harmful substances before they can cause further damage. " +
+        "It is effective against most biological and chemical toxins, though " +
+        "it has limited effect on magical curses.\n\n" +
+        "Range: Touch\n" +
+        "ISP Cost: 8 points\n" +
         "Duration: Instant"
     );
     set_power_category("healing");

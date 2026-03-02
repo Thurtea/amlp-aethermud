@@ -2,15 +2,12 @@
 // demote - return a wizard to player status
 // Admin-only command (privilege level 2)
 
-#include <mudlib.h>
-
 inherit "/std/cmd";
 
 int query_privilege_required() { return 4; }
 
 string query_help() {
-    return
-        "SYNTAX: demote <player>\n\n" +
+    return "SYNTAX: demote <player>\n\n" +
         "Returns a wizard to normal player status.\n" +
         "  - Sets privilege level to 0\n" +
         "  - Clears wizard_role property\n" +

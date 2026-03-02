@@ -294,6 +294,88 @@ read in `chargen_complete()`.
 time. No caching of compiled parents across child loads observed in logs.  
 **Impact:** Boot time slightly longer than necessary. Non-functional.
 
+### BUG-7 — FIXED: lib/std/player.lpc — Privilege level silently capped at 2
+**Severity:** Critical  
+**File:** lib/std/player.lpc, `set_privilege_level()`  
+**Error:** Guard `if (lv < 0 || lv > 2) return;` silently discarded privilege levels 3 and 4.
+Thurtea's save file stores `privilege_level=4`. On login the C driver called `set_privilege_level(4)`,
+the guard fired, the LPC object privilege stayed 0, and all admin commands returned "insufficient privileges".  
+**Fix applied (Session 2):** Changed `lv > 2` to `lv > 4`. Updated `is_admin()` to `>= 4`,
+`query_rank_name()` to a 4-case switch, tool-grant thresholds to match levels 1–4, and
+first-boot guard to `>= 4`. Companion files updated: `lib/clone/user.lpc` (4-level title switch
+in `query_title()`, "STAFF ACCESS GRANTED" banner in `enter_world()`).
+
+### BUG-8 — FIXED: src/chargen.c — first_admin grants privilege level 2 (Coding), not 4 (Admin)
+**Severity:** Critical  
+**File:** src/chargen.c, `chargen_complete()` first_admin block  
+**Error:** `sess->privilege_level = 2` — first admin created as Coding Wizard, not Admin.
+Also missing `credits = 100000`.  
+**Fix applied (Session 2):** Changed to `privilege_level = 4`, `wizard_role = "admin"`,
+`credits = 100000`.
+
+### BUG-9 — FIXED: src/wiz_tools.c — Wizard tool functions guarded at level < 5 (nonexistent)
+**Severity:** High  
+**File:** src/wiz_tools.c — `wiz_shutdown`, `wiz_destruct`, `wiz_promote`, `wiz_ban`, `wiz_unban`  
+**Error:** All five functions used `privilege_level < 5` as their guard; level 5 is nonexistent
+(max is 4), so wiz-tools were inaccessible to everyone including admins.  
+**Fix applied (Session 2):** Changed all five guards to `< 4`.
+
+### BUG-10 — FIXED: lib/cmds/admin/*.lpc — All admin LPC commands guarded at privilege level 2
+**Severity:** High  
+**Files:** orb.lpc, demote.lpc, reequip.lpc, setrole.lpc, promote.lpc, shutdown.lpc, warmboot.lpc, buildtest.lpc  
+**Error:** `query_privilege_required()` returned 2 (Coding Wizard level) — all 8 admin LPC
+commands were accessible to Coding Wizards and above, not Admin-only as intended.  
+**Fix applied (Session 2):** All 8 commands now return 4 from `query_privilege_required()` and
+have inline guards at `< 4`.
+
+### BUG-11 — FIXED: src/driver.c — 13 C-side admin command fallbacks guarded at privilege level 2
+**Severity:** Critical  
+**File:** src/driver.c — promote, demote, setrole, users, reequip, force, slay, npcspawn,
+warmboot, reboot, ban, broadcast/wall, shutdown (C-side fallback handlers)  
+**Error:** All 13 admin-command C fallbacks used `privilege_level < 2`, allowing Coding Wizards
+(level 2) to run Admin-only commands. Also, `finger` and `users` privilege display showed
+"Admin" for level 2 (Coding Wizard), and `reequip` error message said "level 2".  
+**Fix applied (Session 3):** All 13 guards changed to `< 4`. `users`/`finger` privilege display
+updated to 4-level ternary chain (Admin/Domain/Coding/Roleplay/Player). `reequip` error message
+updated to "level 4". `promote` usage text lists all 5 levels by name.
+
+---
+
+## Session 3 Changes (2026-03-xx)
+
+**Scope:** C-side privilege fallback audit + save/restore audit + documentation.
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `src/driver.c` | 14 replacements: 13× `privilege_level < 2` → `< 4` in admin command C fallbacks; 4-level priv display in `users`/`finger`; `reequip` error message; `promote` usage text; `slay`/`npcspawn` comments |
+| `lib/obj/corpse.lpc` | Updated header TODO comment to document that callout scheduler is global-function-only (no object reference stored); `call_out("decay",...)` line remains commented; decay handled by C-side death.c corpse_registry |
+
+### Save/Restore Audit Result
+All character fields round-trip correctly through `save_character()` / `load_character()`:
+- `privilege_level`, `wizard_role` (v≥5), `title`/`enter_msg`/`leave_msg`/`goto_msg` (v≥6)
+- `race`, `occ`, all 8 stats (`CharacterStats`), `level`, `xp`
+- `hp`/`max_hp`, `sdc`/`max_sdc`, `health_type`, `mdc`/`max_mdc`
+- `isp`/`max_isp`, `ppe`/`max_ppe`, psionics/magic pool mirrors
+- `credits`, `bm_credits` (v≥7), `num_tattoos`/`tattoos` (v≥8)
+- `permanently_dead` (v≥9), `death_killer` (v≥10)
+- `save_vs_magic`/`save_vs_horror`/`save_vs_fear`, `num_racial_abilities`/`racial_abilities`, `race_skill_bonus` (v≥11)
+- Skills array (up to 20), psionic powers, magic spells
+- Inventory + equipment (delegates to `inventory_write/read_to_file()`)
+- Clan, languages, `current_language`, alignment
+- Natural weapons, introduced_to list
+- Lives remaining, scars (v≥4)
+- Description, position
+- Original race/occ/hp_max/mdc_max (for wizard demotion)
+- Room path (v≥3) and fallback to numeric room ID
+
+No missing or mismatched fields found. Version guards correctly zero-fill all new fields
+when loading older saves.
+
+### Build Status
+`make clean && make` — **zero errors, zero warnings** in all modified files. Driver binary
+present at `build/driver`.
+
 ---
 
 ## Priority Fix Queue

@@ -9,7 +9,11 @@
  *   contents    - mapping of item name → item object
  *
  * Decay: after DECAY_SECONDS the corpse removes itself from the room.
- * TODO: wire call_out() once the C driver exposes it to LPC.
+ * NOTE: call_out() is exposed as an efun, but the callout scheduler is
+ * global-function-only and cannot dispatch obj_call_method() on a specific
+ * object. Corpse decay is handled by the C-side death.c corpse_registry
+ * (CORPSE_DECAY_SECS = 300). The decay() method below is kept for future
+ * use if the scheduler is upgraded to store (object, func) pairs.
  */
 
 #define DECAY_SECONDS 300
@@ -43,7 +47,9 @@ void set_corpse_of(string player_name) {
             move_object(pool, room);
         }
     }
-    /* TODO: call_out("decay", DECAY_SECONDS); */
+    /* Decay is handled by the C-side death.c corpse_registry. The decay()
+     * method below will be wired here if the callout scheduler gains
+     * object-method dispatch support. */
 }
 
 string query_corpse_of() { return corpse_of; }

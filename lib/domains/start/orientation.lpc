@@ -1,20 +1,19 @@
 // /lib/domains/start/orientation.lpc
-// The Aether Threshold - staging room used only during first-boot onboarding.
-// No exits. Archimedes is cloned here by the promotion system.
+// The Hall of Beginning - staging room for first-boot onboarding.
+// No exits. Archimedes is cloned here by enter_world().
 
 inherit "/std/room";
 
 void create() {
     ::create();
 
-    set_short("The Aether Threshold");
+    set_short("The Hall of Beginning");
     set_long(
-        "A calm, glowing antechamber stretches around you, suspended between worlds. "
-        "Faint runes trace intricate patterns across the polished stone floor, pulsing "
-        "with soft azure light. The air hums faintly with arcane energy, carrying no "
-        "scent and no sound beyond that constant, reassuring vibration. There are no "
-        "walls visible at the edges; the chamber simply fades into luminous mist, "
-        "as though reality itself has not quite decided what shape to take here.\n"
+        "You stand in a circular chamber of white marble. Soft light\n" +
+        "filters down from above. This is where your journey as an\n" +
+        "administrator of AetherMUD begins.\n\n" +
+        "Archimedes the Mentor stands nearby, ready to guide you.\n" +
+        "When you are ready to proceed, tell him you are done.\n"
     );
 
     set_exits(([  ]));
@@ -22,4 +21,7 @@ void create() {
     set_property("indoors", 1);
     set_property("light", 5);
     set_property("no_weather", 1);
+}
+
+void reset() {
 }

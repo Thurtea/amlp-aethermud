@@ -1,38 +1,59 @@
 // lib/std/workroom_template.lpc
 // Base template for all wizard workrooms.
-// Auto-generated workrooms inherit this and call set_owner() in create().
+// Used by complete_promotion() to generate a wizard's personal workroom.
 
 inherit "/std/room";
 
-private string owner_name;
+private string wiz_name;
 
 void create() {
     ::create();
-    owner_name = "";
+    wiz_name = "";
     set_short("A wizard's workroom");
     set_long(
-        "A private workroom belonging to a staff member. "
-        "Bookshelves and tool racks line the walls. "
-        "A faint shimmer in the air hints at the room's magical protections.\n"
+        "A private workroom belonging to a staff member.\n" +
+        "From here you can build, test, and manage your domain areas.\n"
     );
-    add_exit("out", "/domains/start/village_center");
     set_property("indoors", 1);
     set_property("light", 3);
     set_property("no_weather", 1);
 }
 
-// Set the owner's name and update short/long descriptions accordingly.
-void set_owner(string nm) {
-    if (!nm || nm == "") return;
-    owner_name = nm;
-    string dn = capitalize(nm);
-    set_short(dn + "'s workroom");
+void set_wizard_name(string name) {
+    if (!name || name == "") return;
+    wiz_name = name;
+    string dn = capitalize(name);
+    set_short(dn + "'s Workroom");
     set_long(
-        "The private workroom of " + dn + ". "
-        "Bookshelves and tool racks line the walls, filled with tomes and "
-        "arcane instruments. A faint shimmer in the air hints at the room's "
-        "magical protections. An exit leads back to the world.\n"
+        "This is " + dn + "'s personal workroom.\n" +
+        "From here you can build, test, and manage your domain areas.\n"
     );
 }
 
-string query_owner() { return owner_name; }
+string query_wizard_name() { return wiz_name; }
+
+// Backward-compatible alias used by _ensure_workroom() generated code
+void set_owner(string nm) { set_wizard_name(nm); }
+string query_owner() { return wiz_name; }
+
+void save_as(string path) {
+    if (!path || path == "") return;
+    string dn = capitalize(wiz_name);
+    string src =
+        "// Auto-generated workroom for " + dn + "\n" +
+        "inherit \"/std/room\";\n\n" +
+        "void create() {\n" +
+        "    ::create();\n" +
+        "    set_short(\"" + dn + "'s Workroom\");\n" +
+        "    set_long(\"This is " + dn + "'s personal workroom.\\n\" +\n" +
+        "        \"From here you can build, test, and manage your domain areas.\\n\");\n" +
+        "    set_property(\"indoors\", 1);\n" +
+        "    set_property(\"light\", 3);\n" +
+        "    set_property(\"no_weather\", 1);\n" +
+        "}\n";
+    write_file(path, src);
+}
+
+void remove() {
+    ::remove();
+}

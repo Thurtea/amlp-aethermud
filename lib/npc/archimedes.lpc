@@ -1,34 +1,23 @@
 // /lib/npc/archimedes.lpc
-// Archimedes - orientation guide owl. Appears only during first-boot onboarding.
-// After the player types 'done' or asks all 8 core topics, he farewells and
-// calls player->complete_promotion() before destructing.
+// Archimedes the Mentor - orientation guide NPC.
+// Watches for the player saying "done" or "finish" via catch_tell(),
+// then calls complete_promotion() and self-destructs.
 
 inherit "/std/living";
-
-private string *topics_asked;
-
-private string *CORE_TOPICS = ({
-    "wiz-tools", "ranks", "workroom", "commands",
-    "chargen", "spells", "combat", "rifts",
-    "blood", "psionics", "tattoos", "falconry", "clans"
-});
 
 void create() {
     ::create();
 
-    topics_asked = ({});
-
-    set_name("Archimedes");
-    set_id(({ "archimedes", "owl", "tawny owl" }));
-    set_short("a small tawny owl");
+    set_name("archimedes");
+    set_id(({ "archimedes", "mentor" }));
+    set_short("Archimedes the Mentor");
     set_long(
-        "A small owl with glowing amber eyes perches here, a tiny scroll tucked "
-        "carefully under one wing. It regards you with unsettling intelligence, "
-        "head tilting this way and that as though cataloguing your every detail. "
-        "This is clearly no ordinary bird.\n"
+        "A wise, patient figure in robes covered with strange symbols.\n" +
+        "He gestures for you to approach. When you are ready to proceed,\n" +
+        "type: say done\n"
     );
 
-    set_gender("neuter");
+    set_gender("male");
     set_race("human");
     set_level(1);
 
@@ -36,251 +25,66 @@ void create() {
     set_property("no_follow", 1);
 }
 
-void init() {
-    ::init();
-    add_action("cmd_talk", "talk");
-    add_action("cmd_ask",  "ask");
-    add_action("cmd_help", "help");
-    add_action("cmd_done", "done");
+int id(string str) {
+    if (str == "archimedes") return 1;
+    return ::id(str);
 }
 
-// ---- Topic responses ----
+// catch_tell pattern matching hawk.lpc - intercept say messages
+void catch_tell(string msg) {
+    string speaker_name, text;
+    object room, speaker;
+    int i;
 
-private string topic_response(string topic) {
-    switch (topic) {
-        case "wiz-tools":
-        case "wiztool":
-        case "wiz tools":
-            return
-                "Archimedes ruffles his feathers knowingly.\n"
-                "'Your wiz-tools are the instruments of your craft,' he says. "
-                "'The code tool lets you write and deploy LPC objects in the game world. "
-                "The crystal ball monitors who is online and tracks server health. "
-                "The admin wand handles quick player management from anywhere. "
-                "The admin orb grants broad server oversight, log access, and zone counts. "
-                "Each item responds to: help <itemname> for full instructions.'\n";
-
-        case "ranks":
-        case "rank":
-        case "roles":
-            return
-                "Archimedes unfurls the tiny scroll with one talon.\n"
-                "'The staff structure in AetherMUD runs four levels,' he reads. "
-                "'Rank 0 is Player - the mortals who inhabit this world. "
-                "Rank 1 is Builder - creators and coders shaping content. "
-                "Rank 2 is Wizard - full staff with domain access. "
-                "Rank 3 is Admin - server authority above all others. "
-                "You hold Rank 2 now. Respect the players you serve.'\n";
-
-        case "workroom":
-        case "work room":
-            return
-                "The owl blinks his amber eyes slowly.\n"
-                "'Your workroom is your private sanctuary,' he explains. "
-                "'It exists under /domains/wizard/yourname/ and was created when "
-                "you were promoted. You will be transported there once our "
-                "conversation ends. From it you can write LPC files, test objects, "
-                "and build your projects without disturbing the rest of the world.'\n";
-
-        case "commands":
-        case "command":
-            return
-                "Archimedes taps the scroll with one talon.\n"
-                "'Beyond standard player commands, staff rank unlocks many more,' he says. "
-                "'Type wiz to see all wizard commands available to you. "
-                "Key ones include: goto, trans, echo, load, clone, dest, stat, "
-                "snoop, and force. The help system covers each - "
-                "type help <command> for details on any one of them.'\n";
-
-        case "chargen":
-        case "character generation":
-        case "character":
-            return
-                "Archimedes tucks the scroll tighter under his wing.\n"
-                "'New players begin character generation the moment they connect,' "
-                "he says. 'They choose name, race, OCC, attributes, and then "
-                "begin in the village at the edge of town. "
-                "As staff, you can observe chargen with the snoop command, "
-                "or bypass it entirely with goto and trans for testing purposes.'\n";
-
-        case "spells":
-        case "magic":
-            return
-                "The owl's eyes glow slightly brighter.\n"
-                "'Magic in AetherMUD follows the Palladium Megaverse system,' "
-                "he explains. 'Spell casters spend PPE - Potential Psychic Energy - "
-                "to cast spells ranging from Level 1 to Level 15. "
-                "OCCs like the Line Walker and Shifter command the deepest PPE reserves. "
-                "Type help magic or help spells for the full system overview.'\n";
-
-        case "combat":
-        case "fighting":
-            return
-                "Archimedes flexes his talons thoughtfully.\n"
-                "'Combat follows the Palladium melee round system,' he says. "
-                "'Eight actions per melee round, resolved in initiative order. "
-                "Characters have SDC for flesh damage and MDC if they are Mega-Damage class. "
-                "Most humans are SDC creatures - one blast from a rail gun is lethal. "
-                "MDC armor and power armor are the great equalisers in this world.'\n";
-
-        case "rifts":
-        case "rifts earth":
-            return
-                "The owl spreads both wings briefly, as if to encompass everything.\n"
-                "'Rifts Earth is the setting,' he says solemnly. "
-                "'The year is 109 P.A. - Post Apocalypse. "
-                "Nuclear war and dimensional chaos tore open rifts across the globe. "
-                "Monsters, aliens, and ancient horrors poured through. "
-                "Humanity clings to fortified cities like Chi-Town and New Camelot. "
-                "The Coalition States enforce an iron order in the East. "
-                "And adventurers like your players stand in the middle of all of it.'\n";
-
-        case "blood":
-        case "blood pools":
-        case "vampires":
-            return
-                "Archimedes flicks one talon toward the floor with quiet gravity.\n"
-                "'Blood pools appear when a living creature dies in the world,' he says. "
-                "'They persist for ten minutes before congealing and fading. "
-                "Vampiric creatures and certain psionic OCCs can drain them for HP and ISP. "
-                "Each pool holds three sips - enough for one hungry predator. "
-                "Administrators can observe blood trail behaviour using stat on any blood pool object.'\n";
-
-        case "psionics":
-        case "psionic":
-        case "isp":
-            return
-                "Archimedes taps the side of his head with one talon.\n"
-                "'Psionics draw on Inner Strength Points, ISP,' he explains. "
-                "'There are four categories: Physical, Sensitive, Healing, and Super. "
-                "ISP regenerates over time or through rest. "
-                "The psi command lists known powers and their costs. "
-                "Staff can grant psionic powers to players using grantskill combined with the psionic category flag.'\n";
-
-        case "tattoos":
-        case "tattoo":
-        case "tattoo magic":
-        case "atlantean tattoos":
-            return
-                "Archimedes spreads one wing and traces an arc in the air.\n"
-                "'Tattoo magic is the exclusive art of the Atlanteans,' he says. "
-                "'Each magical tattoo is inscribed with PPE and can be activated to produce powerful effects. "
-                "The tattoos command lets a player see their current tattoos and body locations. "
-                "Wizards with a tattoo gun item can inscribe tattoos using: tattoo <player> <name> <location>. "
-                "Activate a tattoo in play with: activate <tattoo_name>.'\n";
-
-        case "falconry":
-        case "hawk":
-        case "falcon":
-        case "falconer":
-            return
-                "Archimedes puffs up with what might be professional pride.\n"
-                "'Falconry is the ancient bond between trainer and bird,' he says. "
-                "'A player with the falconry skill can hatch a hawk egg and bond with the companion. "
-                "The hawk obeys spoken commands - hawk stay, hawk fly, hawk follow me, hawk eat corpse. "
-                "Success depends on a falconry skill roll. "
-                "The hawk status command shows its current health and state.'\n";
-
-        case "clans":
-        case "clan":
-        case "clan aerihman":
-        case "aerihman":
-        case "sunaj":
-            return
-                "Archimedes lowers his voice to a near-whisper.\n"
-                "'Clan Aerihman is the ancient and feared Atlantean assassin brotherhood,' he says. "
-                "'A True Atlantean may type clan aerihman to begin initiation - assuming they are of the blood. "
-                "Initiation grants the Sunaj Assassin OCC, four ritual tattoos, shadow armour, and clan gear. "
-                "The clan property is permanently set on the character. "
-                "Staff can observe initiation using stat on the player object.'\n";
-
-        default:
-            return
-                "Archimedes tilts his head.\n"
-                "'I do not know about that particular topic,' he admits. 'Try asking about: "
-                "wiz-tools, ranks, workroom, commands, chargen, spells, combat, rifts, "
-                "blood, psionics, tattoos, falconry, or clans.'\n";
-    }
-}
-
-// ---- Commands ----
-
-int cmd_talk(string str) {
-    object player = this_player();
-    if (!str || lower_case(str) != "archimedes") return 0;
-
-    tell_object(player,
-        "Archimedes clicks his beak in greeting.\n"
-        "'Welcome to AetherMUD,' he says warmly. 'I can answer questions about:\n"
-        "  wiz-tools, ranks, workroom, commands, chargen, spells, combat, rifts\n"
-        "Use: ask archimedes about <topic>\n"
-        "When you are ready to proceed to your workroom, type: done\n");
-    return 1;
-}
-
-int cmd_ask(string str) {
-    object player = this_player();
-    if (!str) return 0;
-
-    string topic;
-    if (sscanf(str, "archimedes about %s", topic) != 1) {
-        if (sscanf(str, "archimedes %s", topic) != 1) return 0;
-    }
-
-    string canon = lower_case(topic);
-    tell_object(player, topic_response(canon));
-
-    if (member_array(canon, topics_asked) == -1)
-        topics_asked += ({ canon });
-
-    // Check if all 8 core topics have been asked
-    int asked_all = 1;
-    foreach (string t in CORE_TOPICS) {
-        if (member_array(t, topics_asked) == -1) {
-            asked_all = 0;
-            break;
+    // Messages arrive as "Name says: text\n" or "Name says 'text'\n"
+    if (sscanf(msg, "%s says: %s", speaker_name, text) != 2) {
+        if (sscanf(msg, "%s says '%s'", speaker_name, text) != 2) {
+            return;
         }
     }
 
-    if (asked_all) {
-        tell_object(player,
-            "\nArchimedes claps both wings together with a soft whump.\n"
-            "'You have covered everything I know. Type done when you are "
-            "ready to proceed to your workroom.'\n");
+    speaker_name = lower_case(speaker_name);
+
+    // Find the speaking object in the room
+    room = environment(this_object());
+    if (!room) return;
+
+    speaker = 0;
+    object *living_here;
+    living_here = all_inventory(room);
+    i = 0;
+    while (i < sizeof(living_here)) {
+        if (living_here[i] && function_exists("query_name", living_here[i])) {
+            if (lower_case(living_here[i]->query_name()) == speaker_name) {
+                speaker = living_here[i];
+                break;
+            }
+        }
+        i++;
     }
 
-    return 1;
-}
+    if (!speaker) return;
 
-int cmd_help(string str) {
-    object player = this_player();
-    if (!str || lower_case(str) != "archimedes") return 0;
+    // Strip whitespace and lowercase
+    text = lower_case(text);
+    // Remove trailing punctuation/newline
+    while (strlen(text) > 0 &&
+           (text[strlen(text)-1] == '\n' || text[strlen(text)-1] == '.' ||
+            text[strlen(text)-1] == '!' || text[strlen(text)-1] == '\'')) {
+        text = text[0..strlen(text)-2];
+    }
 
-    tell_object(player,
-        "Archimedes spreads one wing slightly.\n"
-        "'I am your orientation guide,' he explains. 'I know about:\n"
-        "  wiz-tools, ranks, workroom, commands, chargen, spells, combat, rifts\n"
-        "Ask with: ask archimedes about <topic>\n"
-        "When finished: done\n");
-    return 1;
-}
+    // Watch for "done" or "finish"
+    if (text != "done" && text != "finish") return;
 
-int cmd_done(string str) {
-    object player = this_player();
-    if (!player) return 0;
-    if (environment(player) != environment(this_object())) return 0;
-
-    tell_object(player,
-        "\nArchimedes bows his head with great dignity.\n"
-        "'Excellent. The Aether Threshold releases you now,' he says quietly.\n"
-        "'Build well. The world needs steady hands.'\n"
-        "The owl dissolves in a soft flash of amber light, his tiny scroll "
-        "fluttering to the floor and then fading into mist.\n\n");
+    tell_object(speaker,
+        "\nArchimedes nods with quiet approval.\n" +
+        "'Very well. Your journey begins now,' he says.\n" +
+        "He steps back and fades from view.\n\n");
 
     // Finish the promotion: give wiz-tools and move to workroom
-    if (function_exists("complete_promotion", player))
-        player->complete_promotion();
+    if (function_exists("complete_promotion", speaker))
+        speaker->complete_promotion();
 
     destruct(this_object());
-    return 1;
 }

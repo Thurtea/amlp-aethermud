@@ -5514,10 +5514,16 @@ void process_chargen_state(PlayerSession *session, const char *input) {
                 "set_privilege_level", &parg, 1);
             vm_value_release(&parg);
         }
-        VMValue oarg = vm_value_create_int(session->needs_orientation);
-        obj_call_method(global_vm, session->player_object,
-            "enter_world", &oarg, 1);
-        vm_value_release(&oarg);
+
+        /* Call enter_world(needs_orientation) on the LPC player object */
+        if (session->player_object && global_vm) {
+            VMValue ew_arg = vm_value_create_int(session->needs_orientation);
+            VMValue ew_result = obj_call_method(global_vm,
+                                    (obj_t *)session->player_object,
+                                    "enter_world", &ew_arg, 1);
+            vm_value_release(&ew_arg);
+            vm_value_release(&ew_result);
+        }
         session->needs_orientation = 0;
     }
 }

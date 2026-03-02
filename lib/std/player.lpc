@@ -278,10 +278,7 @@ private void _do_first_boot_orientation() {
 // Called by Archimedes (or any trusted code) after orientation completes.
 // Gives physical wiz-tools and teleports the player to their workroom.
 void complete_promotion() {
-    string lower_nm = lower_case(name);
-
-    // Give the full admin wiz-tool set.
-    string *admin_tools = ({
+    string *tools = ({
         "/obj/wiztools/staff",
         "/obj/wiztools/handbook",
         "/obj/wiztools/crystal",
@@ -292,46 +289,73 @@ void complete_promotion() {
         "/obj/wiztools/code_tool"
     });
     int i;
-    for (i = 0; i < sizeof(admin_tools); i++) {
-        object tool;
-        catch { tool = clone_object(admin_tools[i]); };
-        if (tool) tool->move(this_object());
+    object tool;
+
+    for (i = 0; i < sizeof(tools); i++) {
+        tool = clone_object(tools[i]);
+        if (tool) move_object(tool, this_object());
     }
 
-    // Ensure workroom exists and teleport there.
-    string wpath = _ensure_workroom(lower_nm);
-    object wroom;
-    catch { wroom = load_object(wpath); };
-    if (wroom) move_player(wroom);
+    /* Ensure workroom directory and file exist */
+    string wiz_name = lower_case(this_object()->query_name());
+    string workroom_path = "/domains/wizard/" + wiz_name + "/workroom";
+    string workroom_fs   = "lib/domains/wizard/" + wiz_name + "/workroom.lpc";
+
+    if (!file_exists(workroom_fs)) {
+        /* Copy template to wizard's domain */
+        object tmpl = clone_object("/std/workroom_template");
+        if (tmpl) {
+            tmpl->set_wizard_name(wiz_name);
+            tmpl->save_as(workroom_fs);
+            tmpl->remove();
+        }
+    }
+
+    object workroom = find_object(workroom_path);
+    if (!workroom) workroom = clone_object(workroom_path);
+
+    if (workroom) {
+        move_object(this_object(), workroom);
+    }
 
     tell_object(this_object(),
-        "\nYour wiz-tools have been placed in your inventory.\n" +
-        "Type 'inventory' to see them. Type 'examine <tool>' to learn what each does.\n" +
-        "Type 'wiz' to see all wizard commands available to you.\n");
-
-    working_directory = "/domains/wizard/" + lower_nm;
+        "\n*** Your wizard journey begins. ***\n" +
+        "Type 'help wizard' to get started. Your workroom is your home base.\n" +
+        "Your wiztools are in your inventory. Type 'inventory' to see them.\n");
 }
 
 // Called by the C driver (process_chargen_state) immediately after a new
-// character's chargen completes.  orientate=1 only for the first admin.
-void enter_world(int orientate) {
-    if (!orientate || privilege_level < 4) return;
+// character's chargen completes.  needs_orientation=1 for new players.
+void enter_world(int needs_orientation) {
+    object start_room;
 
-    // Clone Archimedes into the player's current room.
-    object here = environment(this_object());
-    if (here) {
-        object owl;
-        catch { owl = clone_object("/npc/archimedes"); };
-        if (owl) move_object(owl, here);
+    if (needs_orientation) {
+        start_room = clone_object("/domains/start/orientation");
+        if (!start_room) {
+            start_room = find_object("/domains/start/room/welcome");
+            if (!start_room)
+                start_room = clone_object("/domains/start/room/welcome");
+        }
+    } else {
+        start_room = find_object("/domains/start/room/welcome");
+        if (!start_room)
+            start_room = clone_object("/domains/start/room/welcome");
     }
 
-    tell_object(this_object(),
-        "\nA small tawny owl swoops through the air and lands nearby, a tiny\n" +
-        "scroll tucked under one wing. It regards you with unsettling intelligence.\n" +
-        "This is Archimedes. He will orient you to AetherMUD.\n" +
-        "Type: talk archimedes\n");
+    if (start_room) {
+        move_object(this_object(), start_room);
+    }
 
-    set_property("needs_orientation", 0);
+    if (this_object()->query_look) {
+        this_object()->look();
+    }
+
+    if (needs_orientation) {
+        object arch = clone_object("/npc/archimedes");
+        if (arch && start_room) {
+            move_object(arch, start_room);
+        }
+    }
 }
 
 // ---- Promotion / demotion ----

@@ -1,0 +1,41 @@
+// lib/domains/splynn/npcs/skeleton_warrior.lpc
+// Skeleton Warrior — undead guardian of the Splynn catacombs
+//
+// Aggressive, level 12. Spawned by catacombs_hall.lpc (2 per reset).
+// No loot, no credits. Does not speak.
+
+inherit "/std/npc";
+
+void create() {
+    ::create();
+
+    set_name("skeleton warrior");
+    set_id(({"skeleton warrior", "skeleton", "warrior", "bones"}));
+
+    set_short("a skeleton warrior");
+    set_long(
+        "A reanimated skeleton clad in corroded plate armor, the rusted joints\n" +
+        "grinding with every step. The jaw works silently, opening and closing\n" +
+        "on nothing. Empty sockets track your movement with a focused malice\n" +
+        "that no living creature could sustain. The armor bears no insignia\n" +
+        "that survives identification.\n"
+    );
+
+    set_gender("male");
+    set_race("undead");
+    set_level(12);
+    set_hp(90);
+    set_aggro(1);
+
+    set_stat("physical strength",   14);
+    set_stat("physical agility",    10);
+    set_stat("physical endurance",  12);
+
+    set_property("aggressive", 1);
+    set_property("no_loot",    1);
+    set_property("no_follow",  1);
+}
+
+string query_talk() {
+    return "The skeleton warrior does not speak.\n";
+}

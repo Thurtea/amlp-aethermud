@@ -1,0 +1,27 @@
+// lib/domains/splynn/rooms/catacombs_entry.lpc
+// Catacombs Entrance — first room beyond the underground rail platform.
+//
+// Reached by boarding the shuttle in train_platform.
+// West returns to train_platform; east leads deeper into catacombs_hall.
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Catacombs Entrance");
+    set_long(
+        "Ancient stone walls covered in carved glyphs press close on every\n" +
+        "side. The air is cold and smells of dust and old iron. Torches\n" +
+        "mounted in iron sconces burn with a pale, unnatural flame that casts\n" +
+        "no shadows in the conventional sense -- instead the light seems to\n" +
+        "outline things that are not quite there. A rail tunnel opens to the\n" +
+        "west. A stone corridor leads east.\n"
+    );
+
+    add_exit("west", "/domains/splynn/rooms/train_platform");
+    add_exit("east", "/domains/splynn/rooms/catacombs_hall");
+
+    set_property("light",   1);
+    set_property("indoors", 1);
+}

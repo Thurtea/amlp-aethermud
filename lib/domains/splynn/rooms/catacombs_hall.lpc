@@ -1,0 +1,43 @@
+// lib/domains/splynn/rooms/catacombs_hall.lpc
+// Catacombs Hall — main corridor of the undead catacombs.
+//
+// Connects east from catacombs_entry and west to catacombs_vault.
+// North branch leads to catacombs_alcove (rare blade spawn).
+// Spawns 2 skeleton warriors on create().
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Catacombs Hall");
+    set_long(
+        "A wide stone corridor with arched ceilings that vanish into shadow.\n" +
+        "Rows of sealed stone alcoves line both walls, each carved with the\n" +
+        "likeness of a face -- or something close to one. The carved faces\n" +
+        "of the sealed crypts stare blankly at nothing. Pale torch-light\n" +
+        "flickers without a source of wind. The air hums with a cold that\n" +
+        "has nothing to do with temperature.\n"
+    );
+
+    add_exit("west",  "/domains/splynn/rooms/catacombs_entry");
+    add_exit("east",  "/domains/splynn/rooms/catacombs_vault");
+    add_exit("north", "/domains/splynn/rooms/catacombs_alcove");
+
+    set_property("light",   1);
+    set_property("indoors", 1);
+
+    /* Spawn two skeleton warriors */
+    int i = 0;
+    while (i < 2) {
+        object sk;
+        catch { sk = clone_object("/domains/splynn/npcs/skeleton_warrior"); };
+        if (sk) {
+            if (function_exists("move", sk))
+                sk->move(this_object());
+            else
+                move_object(sk, this_object());
+        }
+        i += 1;
+    }
+}

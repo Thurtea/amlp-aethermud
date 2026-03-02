@@ -28,6 +28,7 @@ void create() {
 
     add_exit("north", "/domains/splynn/rooms/rockys_bar");
     add_exit("west",  "/domains/splynn/rooms/black_market");
+    add_exit("down",  "/domains/splynn/rooms/train_platform");  // underground rail
 
     set_property("light", 1);
     set_property("indoors", 0);

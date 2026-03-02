@@ -1,0 +1,38 @@
+// lib/domains/splynn/obj/obsidian_blade.lpc
+// Obsidian Blade of Soul Slaying — rare spawn in catacombs_alcove
+//
+// Two-handed sword of volcanic obsidian. Cannot be sold. No credit value.
+// 25% chance spawn placed by catacombs_alcove.lpc.
+
+inherit "/std/weapon";
+
+void create() {
+    ::create();
+
+    set_name("Obsidian Blade of Soul Slaying");
+    set_id(({
+        "obsidian blade",
+        "blade",
+        "katana",
+        "ghostly katana",
+        "soul blade"
+    }));
+
+    set_short("the Obsidian Blade of Soul Slaying");
+    set_long(
+        "A long blade of volcanic obsidian that seems to drink the light around\n" +
+        "it -- the air near the edge shimmers darkly, like a heat haze in\n" +
+        "reverse. The temperature drops noticeably within arm's reach; close\n" +
+        "enough to grip and you can see your own breath. The blade hums at a\n" +
+        "frequency you feel in your teeth more than hear with your ears.\n"
+    );
+
+    set_weight(3);
+    set_value(0);
+
+    set_property("weapon_class", "sword");
+    set_property("damage_type",  "soulslaying");
+    set_property("damage_dice",  "3d10");
+    set_property("two_handed",   1);
+    set_property("no_sell",      1);
+}

@@ -1,0 +1,28 @@
+// lib/domains/splynn/rooms/catacombs_vault.lpc
+// Sealed Vault — eastern terminus of the catacombs.
+//
+// Placeholder room. A note left for future quest content.
+// West returns to catacombs_hall.
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Sealed Vault");
+    set_long(
+        "A heavy stone door stands permanently open at the far end of a short\n" +
+        "passage. Inside is a circular vault room. The walls are covered floor\n" +
+        "to ceiling in glyphs that pulse faintly with a light that has no\n" +
+        "visible source. Whatever was stored here is long gone -- nothing\n" +
+        "remains but the faint impression of something important. The vault\n" +
+        "feels like a held breath.\n"
+    );
+
+    add_exit("west", "/domains/splynn/rooms/catacombs_hall");
+
+    set_property("light",   1);
+    set_property("indoors", 1);
+
+    // Future: amulet+card combo to Shemarria rail gun run goes here
+}

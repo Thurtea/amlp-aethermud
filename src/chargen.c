@@ -1070,6 +1070,7 @@ void chargen_complete(PlayerSession *sess) {
                     strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role) - 1);
                     sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
                     sess->character.credits = 100000;
+                    sess->needs_orientation = 1;  /* triggers Archimedes on enter_world */
                     fclose(fa);
                     remove("lib/etc/first_admin.txt");
                     save_character(sess);

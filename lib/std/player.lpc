@@ -278,30 +278,60 @@ private void _do_first_boot_orientation() {
 // Called by Archimedes (or any trusted code) after orientation completes.
 // Gives physical wiz-tools and teleports the player to their workroom.
 void complete_promotion() {
-    int lv = privilege_level;
     string lower_nm = lower_case(name);
 
-    // Give physical wiz-tool items.
-    string *tool_paths = ({"/wiz/id_card", "/wiz/code_tool"});
-    if (lv >= 2)
-        tool_paths += ({"/wiz/crystal_ball", "/wiz/wizard_staff",
-                        "/wiz/admin_wand",   "/wiz/admin_orb"});
-    foreach (string tp in tool_paths) {
+    // Give the full admin wiz-tool set.
+    string *admin_tools = ({
+        "/obj/wiztools/staff",
+        "/obj/wiztools/handbook",
+        "/obj/wiztools/crystal",
+        "/obj/wiztools/admin_wand",
+        "/obj/wiztools/qcs_tool",
+        "/obj/wiztools/rp_tool",
+        "/obj/wiztools/admin_orb",
+        "/obj/wiztools/code_tool"
+    });
+    int i;
+    for (i = 0; i < sizeof(admin_tools); i++) {
         object tool;
-        catch { tool = clone_object(tp); };
-        if (tool) give_wiz_item(tool);
+        catch { tool = clone_object(admin_tools[i]); };
+        if (tool) tool->move(this_object());
     }
 
     // Ensure workroom exists and teleport there.
     string wpath = _ensure_workroom(lower_nm);
     object wroom;
     catch { wroom = load_object(wpath); };
-    if (wroom) {
-        move_player(wroom);
-        tell_object(this_object(), "You are transported to your workroom.\n");
-    }
+    if (wroom) move_player(wroom);
+
+    tell_object(this_object(),
+        "\nYour wiz-tools have been placed in your inventory.\n" +
+        "Type 'inventory' to see them. Type 'examine <tool>' to learn what each does.\n" +
+        "Type 'wiz' to see all wizard commands available to you.\n");
 
     working_directory = "/domains/wizard/" + lower_nm;
+}
+
+// Called by the C driver (process_chargen_state) immediately after a new
+// character's chargen completes.  orientate=1 only for the first admin.
+void enter_world(int orientate) {
+    if (!orientate || privilege_level < 4) return;
+
+    // Clone Archimedes into the player's current room.
+    object here = environment(this_object());
+    if (here) {
+        object owl;
+        catch { owl = clone_object("/npc/archimedes"); };
+        if (owl) move_object(owl, here);
+    }
+
+    tell_object(this_object(),
+        "\nA small tawny owl swoops through the air and lands nearby, a tiny\n" +
+        "scroll tucked under one wing. It regards you with unsettling intelligence.\n" +
+        "This is Archimedes. He will orient you to AetherMUD.\n" +
+        "Type: talk archimedes\n");
+
+    set_property("needs_orientation", 0);
 }
 
 // ---- Promotion / demotion ----

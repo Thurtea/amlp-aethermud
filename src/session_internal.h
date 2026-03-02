@@ -109,6 +109,10 @@ typedef struct PlayerSession {
 
     /* Death state guard */
     int is_dead;                   /* 1 if player is dead, prevents duplicate death */
+
+    /* First-boot orientation flag: set by chargen after first_admin grant.
+     * Cleared by process_chargen_state() after calling enter_world(). */
+    int needs_orientation;
 } PlayerSession;
 
 /* Player communication */

@@ -5504,6 +5504,22 @@ void process_login_state(PlayerSession *session, const char *input) {
 /* Process input during character generation */
 void process_chargen_state(PlayerSession *session, const char *input) {
     chargen_process_input(session, input);
+
+    /* If chargen just transitioned to STATE_PLAYING, sync privilege to the LPC
+     * player object and fire the enter_world() hook so Archimedes can appear. */
+    if (session->state == STATE_PLAYING && session->player_object) {
+        if (session->privilege_level > 0) {
+            VMValue parg = vm_value_create_int(session->privilege_level);
+            obj_call_method(global_vm, session->player_object,
+                "set_privilege_level", &parg, 1);
+            vm_value_release(&parg);
+        }
+        VMValue oarg = vm_value_create_int(session->needs_orientation);
+        obj_call_method(global_vm, session->player_object,
+            "enter_world", &oarg, 1);
+        vm_value_release(&oarg);
+        session->needs_orientation = 0;
+    }
 }
 
 /* Process input during playing state */

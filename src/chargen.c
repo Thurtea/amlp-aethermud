@@ -1052,9 +1052,45 @@ void chargen_complete(PlayerSession *sess) {
     } else {
         send_to_player(sess, " Warning: Failed to save character.\n");
     }
-    
+
+    /* First-admin bootstrap: if lib/etc/first_admin.txt exists and contains
+     * this player's name (case-insensitive), grant admin and delete the file. */
+    {
+        const char *flag_path = "lib/etc/first_admin.txt";
+        FILE *fa = fopen(flag_path, "r");
+        if (fa) {
+            char fa_name[64];
+            fa_name[0] = '\0';
+            if (fgets(fa_name, sizeof(fa_name), fa)) {
+                /* Strip trailing newline/whitespace */
+                size_t fa_len = strlen(fa_name);
+                while (fa_len > 0 &&
+                       (fa_name[fa_len - 1] == '\n' ||
+                        fa_name[fa_len - 1] == '\r' ||
+                        fa_name[fa_len - 1] == ' ')) {
+                    fa_name[--fa_len] = '\0';
+                }
+            }
+            fclose(fa);
+            if (fa_name[0] != '\0' &&
+                strcasecmp(fa_name, sess->username) == 0) {
+                sess->privilege_level = 2;
+                strncpy(sess->wizard_role, "admin",
+                        sizeof(sess->wizard_role) - 1);
+                sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
+                remove(flag_path);
+                /* Re-save so privilege is persisted */
+                save_character(sess);
+                fprintf(stderr, "[Server] first_admin.txt: granted admin to %s\n",
+                        sess->username);
+                send_to_player(sess,
+                    "\n[Admin] First-admin flag matched. Privilege level 2 granted.\n");
+            }
+        }
+    }
+
     send_to_player(sess, "\n");
-    
+
     /* Auto-look at starting room */
     cmd_look(sess, "");
     send_to_player(sess, "\n> ");

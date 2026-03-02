@@ -5702,36 +5702,11 @@ void process_login_state(PlayerSession *session, const char *input) {
             /* Clear password buffer */
             memset(session->password_buffer, 0, sizeof(session->password_buffer));
 
-                /* Reserved names always skip chargen; "Thurtea" always gets admin. */
-                int _is_thurtea     = (strcasecmp(session->username, "Thurtea") == 0);
-                int _is_splynncryth = (strcasecmp(session->username, "Splynncryth") == 0);
-                int _is_test        = (strncasecmp(session->username, "test_", 5) == 0);
-                int _auto_admin     = _is_thurtea ||
-                                      (!first_player_created && !any_saved_players());
-                int _skip_chargen   = _auto_admin || _is_splynncryth || _is_test;
-
-                if (_auto_admin) {
-                    session->privilege_level = 2;  /* Admin */
-                    strncpy(session->wizard_role, "admin", sizeof(session->wizard_role));
-                    first_player_created = 1;
-                    fprintf(stderr, "[Server] Auto-admin created: %s\n", session->username);
-                    if (session->player_object) {
-                        VMValue parg = vm_value_create_int(session->privilege_level);
-                        VMValue r = obj_call_method(global_vm, session->player_object,
-                            "set_privilege_level", &parg, 1);
-                        vm_value_release(&r);
-                        vm_value_release(&parg);
-                    }
-                } else {
-                    session->privilege_level = 0;  /* Regular player */
-                }
-
-                if (_skip_chargen) {
-                    chargen_create_admin(session);  /* applies defaults, STATE_PLAYING */
-                } else {
-                    session->state = STATE_CHARGEN;
-                    chargen_init(session);
-                }
+                /* All new players go through normal chargen.
+                 * Admin privileges are granted post-chargen via lib/etc/first_admin.txt. */
+                session->privilege_level = 0;
+                session->state = STATE_CHARGEN;
+                chargen_init(session);
             break;
             
         default:

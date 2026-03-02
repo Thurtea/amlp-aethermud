@@ -66,6 +66,9 @@ private void init_daemons() {
         "/daemon/spells",
         "/daemon/npc_daemon",
     });
+
+    load_object("/secure/race_data");
+    load_object("/secure/occ_data");
     
     foreach (string daemon in daemon_list) {
         object d;

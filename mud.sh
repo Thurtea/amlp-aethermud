@@ -358,6 +358,12 @@ fresh() {
     # User already confirmed above; pass --force so wipe_all doesn't re-prompt.
     wipe_all --force    || { echo "[✗] Wipe failed, aborting.";  return 1; }
     rebuild_driver      || { echo "[✗] Build failed, aborting."; return 1; }
+
+    # Recreate first-admin bootstrap file so the first new character gets admin
+    mkdir -p "$MUDLIB_DIR/lib/etc"
+    echo "Thurtea" > "$MUDLIB_DIR/lib/etc/first_admin.txt"
+    echo "[✓] first_admin.txt recreated for Thurtea"
+
     start_server
 }
 

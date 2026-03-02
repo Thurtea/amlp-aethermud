@@ -1,0 +1,33 @@
+mapping occ_registry;
+
+void create() {
+    occ_registry = ([]);
+    load_occs();
+}
+
+void register_occ(string name, mapping data) {
+    occ_registry[name] = data;
+}
+
+mapping query_occ(string name) {
+    return occ_registry[name];
+}
+
+string *query_all_occs() {
+    return keys(occ_registry);
+}
+
+void load_occs() {
+    string *files;
+    string f;
+    int i;
+    object ob;
+    files = get_dir("/occs/*.lpc");
+    if (!files) return;
+    i = 0;
+    while (i < sizeof(files)) {
+        f = files[i];
+        catch { ob = load_object("/occs/" + f); }
+        i++;
+    }
+}

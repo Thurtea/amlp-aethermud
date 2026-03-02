@@ -10,7 +10,7 @@ void create() {
 
     set_name("archimedes");
     set_id(({ "archimedes", "mentor" }));
-    set_short("Archimedes the Mentor");
+    set_short("a mentor known as Archimedes");
     set_long(
         "A wise, patient figure in robes covered with strange symbols.\n" +
         "He gestures for you to approach. When you are ready to proceed,\n" +

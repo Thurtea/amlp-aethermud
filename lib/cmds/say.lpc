@@ -69,7 +69,15 @@ int main(string arg) {
         lang_note = " (in " + speaker_lang + ")";
     }
     tell_object(user, "You say" + lang_note + ": " + arg + "\n");
-    
+
+    /* Dispatch catch_tell to NPCs/objects that implement it */
+    string ct_msg = user->query_name() + " says: " + arg + "\n";
+    foreach (object ob in inv) {
+        if (ob && ob != user && function_exists("catch_tell", ob)) {
+            ob->catch_tell(ct_msg);
+        }
+    }
+
     return 1;
 }
 

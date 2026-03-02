@@ -1279,8 +1279,8 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         sess->current_room = zone_room;
                     }
 
-                    /* Secondary skills can be learned through in-game training */
-                    send_to_player(sess, "\nSecondary skills can be learned through in-game training.\n");
+                    send_to_player(sess, "\nSecondary skills can be selected from a list after character creation.\n"
+                                         "Ask a wizard online to assign your secondary skills with: setocc\n");
 
                     /* Proceed to alignment selection */
                     sess->chargen_state = CHARGEN_ALIGNMENT_SELECT;

@@ -255,6 +255,10 @@ int do_help() {
     write("  qcs create vendor arms_dealer     (merchant with item inventory)\n\n");
     write("Doors:\n");
     write("  qcs create door iron_door         (open/close/lock/unlock door)\n\n");
+    write("Merc bases:\n");
+    write("  qcs create mercbase ironclaws     (4-room base: common/armory/briefing + vendor)\n");
+    write("  Scaffold lands in /domains/wizard/YOURNAME/mercbase_ironclaws/\n");
+    write("  Link to your domain: add_exit() in your hub room pointing to common_room\n\n");
     write("Menu: Type 'qcs' to show the menu.\n");
     write("Direct: Type 'qcs create/modify/deploy ...' for direct use.\n\n");
     write("All files are saved in your workspace:\n");

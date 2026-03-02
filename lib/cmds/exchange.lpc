@@ -1,0 +1,283 @@
+/*
+ * /lib/cmds/exchange.lpc - Smuggler currency exchange
+ *
+ * Usage:
+ *   exchange <amount> to bmc            Convert UC → BMC (self)
+ *   exchange <amount> to uc             Convert BMC → UC (self)
+ *   exchange <amount> to bmc for <name> Smuggler service: spend own UC, give
+ *                                       target BMC; target pays cost + 10% fee
+ *   exchange <amount> to uc for <name>  Smuggler service: spend own BMC, give
+ *                                       target UC; target pays cost + 10% fee
+ *
+ * Only Smuggler OCC players may use this command.
+ *
+ * Rate (fixed-point, ×10 internally):
+ *   bonus = clamp((level - 1) / 5, 0, 5)
+ *   BMC → UC: received = amount * (15 + bonus) / 10   (base 1.5 UC/BMC)
+ *   UC → BMC: received = amount * 10 / (20 - bonus)   (base 0.5 BMC/UC)
+ *   Max bonus rate (bonus 5): 2 UC/BMC and 10/15 BMC/UC
+ */
+
+int main(string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    /* ---- OCC guard ---- */
+    string occ = "";
+    if (function_exists("query_occ", player))
+        occ = player->query_occ();
+    if (!occ || lower_case(occ) != "smuggler") {
+        tell_object(player,
+            "Only Smugglers know the back-channel exchanges.\n");
+        return 1;
+    }
+
+    if (!args || args == "") {
+        tell_object(player, query_help());
+        return 1;
+    }
+
+    /* ---- Parse: "<amount> to <currency> [for <target>]" ---- */
+    int to_pos = strsrch(args, " to ");
+    if (to_pos < 0) {
+        tell_object(player, "Usage: exchange <amount> to bmc|uc [for <player>]\n");
+        return 1;
+    }
+
+    string amount_str  = args[0..to_pos - 1];
+    string right       = lower_case(args[to_pos + 4..]);   /* skip " to " */
+
+    string currency    = "";
+    string target_name = "";
+    int for_pos = strsrch(right, " for ");
+    if (for_pos >= 0) {
+        currency    = right[0..for_pos - 1];
+        target_name = right[for_pos + 5..];
+    } else {
+        currency = right;
+    }
+
+    /* Trim whitespace from currency (could have trailing space) */
+    currency = lower_case(replace_string(currency, " ", ""));
+
+    if (currency != "bmc" && currency != "uc") {
+        tell_object(player,
+            "Specify a currency: 'bmc' or 'uc'.\n");
+        return 1;
+    }
+
+    int amount = to_int(amount_str);
+    if (amount < 10) {
+        tell_object(player,
+            "Minimum transaction is 10 of either currency.\n");
+        return 1;
+    }
+
+    /* ---- Compute level bonus (0-5) ---- */
+    int plevel = 1;
+    if (function_exists("query_level", player))
+        plevel = player->query_level();
+    if (plevel < 1) plevel = 1;
+
+    int bonus = (plevel - 1) / 5;
+    if (bonus > 5) bonus = 5;
+
+    /* ---- Self exchange ---- */
+    if (target_name == "") {
+        if (currency == "uc") {
+            /* BMC → UC: player spends BMC, receives UC */
+            int have_bmc = 0;
+            if (function_exists("query_black_market_credits", player))
+                have_bmc = player->query_black_market_credits();
+            if (have_bmc < amount) {
+                tell_object(player,
+                    "You only have " + have_bmc + " BMC. You need " +
+                    amount + ".\n");
+                return 1;
+            }
+            int gain_uc = (amount * (15 + bonus)) / 10;
+            if (function_exists("remove_black_market_credits", player))
+                player->remove_black_market_credits(amount);
+            if (function_exists("add_universal_credits", player))
+                player->add_universal_credits(gain_uc);
+            tell_object(player,
+                "You exchange " + amount + " BMC for " + gain_uc + " UC.\n");
+            if (function_exists("save_player", player))
+                player->save_player();
+            return 1;
+        }
+
+        /* UC → BMC: player spends UC, receives BMC */
+        int have_uc = 0;
+        if (function_exists("query_universal_credits", player))
+            have_uc = player->query_universal_credits();
+        if (have_uc < amount) {
+            tell_object(player,
+                "You only have " + have_uc + " UC. You need " + amount + ".\n");
+            return 1;
+        }
+        int gain_bmc = (amount * 10) / (20 - bonus);
+        if (gain_bmc < 1) {
+            tell_object(player,
+                "That amount is too small to yield any BMC at your current rate.\n");
+            return 1;
+        }
+        if (function_exists("remove_universal_credits", player))
+            player->remove_universal_credits(amount);
+        if (function_exists("add_black_market_credits", player))
+            player->add_black_market_credits(gain_bmc);
+        tell_object(player,
+            "You exchange " + amount + " UC for " + gain_bmc + " BMC.\n");
+        if (function_exists("save_player", player))
+            player->save_player();
+        return 1;
+    }
+
+    /* ---- Smuggler service: find target ---- */
+    object target = 0;
+    object *all_users = users();
+    if (all_users) {
+        string tname_lc = lower_case(target_name);
+        foreach (object u in all_users) {
+            if (!u) continue;
+            string uname = "";
+            if (function_exists("query_name", u))
+                uname = u->query_name();
+            if (lower_case(uname) == tname_lc) {
+                target = u;
+                break;
+            }
+        }
+    }
+
+    if (!target) {
+        tell_object(player,
+            capitalize(target_name) + " is not in the world right now.\n");
+        return 1;
+    }
+    if (target == player) {
+        tell_object(player,
+            "You cannot use yourself as a client. Use the direct form instead.\n");
+        return 1;
+    }
+
+    if (currency == "uc") {
+        /* Service: smuggler spends BMC, target receives UC, target pays BMC + 10% fee */
+        int smug_bmc = 0;
+        if (function_exists("query_black_market_credits", player))
+            smug_bmc = player->query_black_market_credits();
+        if (smug_bmc < amount) {
+            tell_object(player,
+                "You only have " + smug_bmc + " BMC. You need " + amount +
+                " to run this exchange.\n");
+            return 1;
+        }
+        /* UC target will receive */
+        int t_gain_uc = (amount * (15 + bonus)) / 10;
+        /* Client cost: standard BMC amount + 10% fee; fee_bmc rounds down */
+        int fee_bmc   = amount / 10;
+        int t_cost_bmc = amount + fee_bmc;
+
+        /* Check target has enough BMC */
+        int t_bmc = 0;
+        if (function_exists("query_black_market_credits", target))
+            t_bmc = target->query_black_market_credits();
+        if (t_bmc < t_cost_bmc) {
+            tell_object(player,
+                capitalize(target_name) + " only has " + t_bmc +
+                " BMC and cannot cover the " + t_cost_bmc + " BMC cost (including fee).\n");
+            return 1;
+        }
+
+        /* Execute: smuggler loses BMC, gets fee; target pays BMC, receives UC */
+        if (function_exists("remove_black_market_credits", player))
+            player->remove_black_market_credits(amount);
+        if (function_exists("add_black_market_credits", player))
+            player->add_black_market_credits(fee_bmc);
+        if (function_exists("remove_black_market_credits", target))
+            target->remove_black_market_credits(t_cost_bmc);
+        if (function_exists("add_universal_credits", target))
+            target->add_universal_credits(t_gain_uc);
+
+        tell_object(player,
+            "You run the exchange. " + capitalize(target_name) +
+            " receives " + t_gain_uc + " UC. Your cut: " + fee_bmc + " BMC.\n");
+        tell_object(target,
+            "The smuggler converts " + amount + " BMC into " + t_gain_uc +
+            " UC for you. You paid " + t_cost_bmc + " BMC (" + fee_bmc +
+            " BMC service fee included).\n");
+    } else {
+        /* Service: smuggler spends UC, target receives BMC, target pays UC + 10% fee */
+        int smug_uc = 0;
+        if (function_exists("query_universal_credits", player))
+            smug_uc = player->query_universal_credits();
+        if (smug_uc < amount) {
+            tell_object(player,
+                "You only have " + smug_uc + " UC. You need " + amount +
+                " to run this exchange.\n");
+            return 1;
+        }
+        int t_gain_bmc = (amount * 10) / (20 - bonus);
+        if (t_gain_bmc < 1) {
+            tell_object(player,
+                "That amount is too small to yield any BMC at your current rate.\n");
+            return 1;
+        }
+        int fee_uc   = amount / 10;
+        int t_cost_uc = amount + fee_uc;
+
+        int t_uc = 0;
+        if (function_exists("query_universal_credits", target))
+            t_uc = target->query_universal_credits();
+        if (t_uc < t_cost_uc) {
+            tell_object(player,
+                capitalize(target_name) + " only has " + t_uc +
+                " UC and cannot cover the " + t_cost_uc + " UC cost (including fee).\n");
+            return 1;
+        }
+
+        if (function_exists("remove_universal_credits", player))
+            player->remove_universal_credits(amount);
+        if (function_exists("add_universal_credits", player))
+            player->add_universal_credits(fee_uc);
+        if (function_exists("remove_universal_credits", target))
+            target->remove_universal_credits(t_cost_uc);
+        if (function_exists("add_black_market_credits", target))
+            target->add_black_market_credits(t_gain_bmc);
+
+        tell_object(player,
+            "You run the exchange. " + capitalize(target_name) +
+            " receives " + t_gain_bmc + " BMC. Your cut: " + fee_uc + " UC.\n");
+        tell_object(target,
+            "The smuggler converts " + amount + " UC into " + t_gain_bmc +
+            " BMC for you. You paid " + t_cost_uc + " UC (" + fee_uc +
+            " UC service fee included).\n");
+    }
+
+    if (function_exists("save_player", player))
+        player->save_player();
+    if (function_exists("save_player", target))
+        target->save_player();
+
+    return 1;
+}
+
+string query_help() {
+    return
+"EXCHANGE - Smuggler currency conversion\n\n"
+"Usage:\n"
+"  exchange <amount> to bmc             Convert UC to BMC (self)\n"
+"  exchange <amount> to uc              Convert BMC to UC (self)\n"
+"  exchange <amount> to bmc for <name>  Service: pay your UC, client gets BMC\n"
+"  exchange <amount> to uc  for <name>  Service: pay your BMC, client gets UC\n\n"
+"Rates (base, Smuggler level 1):\n"
+"  BMC -> UC : 1 BMC  = 1.5 UC\n"
+"  UC  -> BMC: 2 UC   = 1 BMC\n\n"
+"Every 5 levels above 1 improves the rate by one step (capped at level 26).\n"
+"Minimum transaction: 10 of either currency.\n\n"
+"Service exchanges:\n"
+"  You spend your own currency. The client receives the converted amount\n"
+"  and pays you back the standard cost plus a 10%% service fee.\n"
+"  The client must be online and have sufficient funds.\n\n"
+"This ability is exclusive to the Smuggler OCC.\n";
+}

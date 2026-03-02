@@ -90,6 +90,7 @@ void init_commands() {
     commands["sskills"] = "cmds/sskills";
     commands["description"] = "cmds/description";
     commands["selectocc"] = "cmds/selectocc";
+    commands["exchange"]  = "cmds/exchange";  /* Smuggler OCC: UC<->BMC conversion */
     commands["hatch"] = "cmds/hatch";       // Falconry: hatch a hawk egg
     commands["clan"] = "cmds/clan";         // Clan initiation (e.g. clan aerihman)
     commands["tattoo"] = "cmds/tattoo";     // Wizard: apply tattoo to player

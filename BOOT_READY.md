@@ -22,13 +22,12 @@
 - Splynn Library + Spell-Teaching Scroll (one-use per player)
 - Stat Enhancement Chamber (one-use +1 stat per player)
 - Combat skill rolls: 1d20 + combat_skill vs 10 + dodge
+- Spells wired to combat loop (cast.lpc → cast_spell() → receive_spell_damage / receive_healing)
 
 ## Known Gaps (Next Sprint)
-- Spell activation not yet wired to combat loop (spells defined, cast command exists, damage routing incomplete)
 - Splynn: all major areas wired; vehicle-train to Shemarria and Coven Base pending
 - Economy: shop daemon stub in lib/std/shop.lpc — buy/sell wired; room-level shop objects needed per area
 - Vehicle system not wired
-- Juicer OCC conversion process not in-game (OCC defined, process room/NPC not built)
 - Merc group base system not implemented
 - Smuggler UC/BMC exchange ability not implemented
 

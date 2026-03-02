@@ -1,0 +1,50 @@
+// lib/domains/splynn/npcs/doc_voss.lpc
+// Doc Voss — Juicer conversion surgeon, Splynn clinic
+//
+// Spawned by juicer_clinic.lpc. Non-aggressive. The actual conversion
+// logic lives in the clinic's local_command so it can access the room
+// context cleanly; query_talk() delivers his pitch directly.
+
+inherit "/std/npc";
+
+void create() {
+    ::create();
+
+    set_name("voss");
+    set_id(({"voss", "doc voss", "surgeon", "doctor"}));
+
+    set_short("Doc Voss");
+    set_long(
+        "A compact man in a white duralloy coat stained with the residue of\n" +
+        "chemicals whose names you do not know. His hands are unnaturally\n" +
+        "steady -- not the steadiness of calm but the steadiness of something\n" +
+        "that has been corrected. His eyes are flat and professional in the\n" +
+        "way that a blade is flat: not unkind, simply not designed for it.\n"
+    );
+
+    set_gender("male");
+    set_race("human");
+    set_level(15);
+    set_hp(150);
+    set_aggro(0);
+
+    set_position_text("works at a steel bench, not looking up.");
+
+    set_stat("physical strength",    14);
+    set_stat("physical agility",     16);
+    set_stat("physical endurance",   14);
+    set_stat("intelligence quotient", 20);
+
+    set_property("no_attack", 1);
+    set_property("no_loot",   1);
+    set_property("no_follow", 1);
+}
+
+string query_talk() {
+    return "Doc Voss looks at you clinically. \"The Juicer process. Permanent\n"
+        "modifications: chemical harness, hyper-coagulant implants, adrenal\n"
+        "accelerators. You gain speed, strength, endurance beyond normal limits.\n"
+        "You lose the ability to use psionics or magic. You have approximately\n"
+        "ten years before your body gives out. Cost is ten thousand credits.\n"
+        "Say 'convert' when you have decided. There is no reversal.\"\n";
+}

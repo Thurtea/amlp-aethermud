@@ -27,6 +27,7 @@ void create() {
 
     add_exit("north", "/domains/splynn/rooms/market_center");
     add_exit("south", "/domains/splynn/rooms/south_alley");
+    add_exit("west",  "/domains/splynn/rooms/juicer_clinic");
 
     set_property("light", 1);
     set_property("indoors", 1);

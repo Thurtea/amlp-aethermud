@@ -1,0 +1,162 @@
+// lib/domains/splynn/rooms/juicer_clinic.lpc
+// Doc Voss's Clinic — Juicer conversion room, west of Rocky's Bar
+//
+// Commands:
+//   consult / ask  — Doc Voss delivers his conversion pitch
+//   convert        — Full Juicer procedure: credit check, flag-set, narration
+
+inherit "/lib/std/room.lpc";
+
+void create() {
+    ::create();
+
+    set_short("Doc Voss's Clinic");
+    set_long(
+        "A clean, cold room that smells of antiseptic and machine oil. Surgical\n" +
+        "equipment gleams under harsh white lights mounted flush into the ceiling.\n" +
+        "An operating table with heavy restraint straps dominates the center of\n" +
+        "the room; the steel surface is worn to a dull sheen by use. Ranks of\n" +
+        "sealed cabinets line the walls. Doc Voss works at a steel bench along\n" +
+        "the far wall, not looking up. The bar lies to the east.\n"
+    );
+
+    add_exit("east", "/domains/splynn/rooms/rockys_bar");
+
+    set_property("light",   1);
+    set_property("indoors", 1);
+
+    /* Spawn Doc Voss */
+    object voss;
+    catch { voss = clone_object("/domains/splynn/npcs/doc_voss"); };
+    if (voss) {
+        if (function_exists("move", voss))
+            voss->move(this_object());
+        else
+            move_object(voss, this_object());
+    }
+}
+
+/* ================================================================
+ * local_command()
+ * Handles: consult/ask  — consultation speech
+ *          convert       — Juicer procedure
+ * ================================================================ */
+int local_command(string verb, string args) {
+    object player = this_player();
+    if (!player) return 0;
+
+    /* ---- CONSULT / ASK ---- */
+    if (verb == "consult" || verb == "ask") {
+        /* Find Voss in room inventory */
+        object voss = 0;
+        object *here = all_inventory(this_object());
+        foreach (object ob in here) {
+            if (!ob) continue;
+            if (function_exists("query_name", ob)) {
+                if (ob->query_name() == "voss") {
+                    voss = ob;
+                    break;
+                }
+            }
+        }
+
+        if (!voss) {
+            tell_object(player, "The clinic is empty. No one is here to consult.\n");
+            return 1;
+        }
+
+        tell_object(player,
+            "Doc Voss looks up from the bench, studying you the way a mechanic\n" +
+            "studies a machine that may need work.\n" +
+            "\"The Juicer process. Permanent modifications: chemical harness,\n" +
+            "hyper-coagulant implants, adrenal accelerators. You gain speed,\n" +
+            "strength, endurance beyond normal limits. You lose the ability to\n" +
+            "use psionics or magic. You have approximately ten years before your\n" +
+            "body gives out. Cost is ten thousand credits. Say 'convert' when\n" +
+            "you have decided. There is no reversal.\"\n" +
+            "He turns back to the bench.\n");
+        return 1;
+    }
+
+    /* ---- CONVERT ---- */
+    if (verb == "convert") {
+        /* Step 1: already converted? */
+        int already = 0;
+        if (function_exists("query_property", player))
+            already = player->query_property("juicer_process_complete");
+        if (already) {
+            tell_object(player,
+                "Doc Voss says: \"The procedure is already done. I cannot\n" +
+                "operate on you again.\"\n");
+            return 1;
+        }
+
+        /* Step 2: OCC check */
+        string occ = "";
+        if (function_exists("query_occ", player))
+            occ = player->query_occ();
+        if (!occ || lower_case(occ) != "juicer") {
+            tell_object(player,
+                "Doc Voss says: \"You have not committed to the Juicer path.\n" +
+                "Choose your OCC first.\"\n");
+            return 1;
+        }
+
+        /* Step 3: credit check */
+        int have = 0;
+        if (function_exists("query_universal_credits", player))
+            have = player->query_universal_credits();
+        if (have < 10000) {
+            tell_object(player,
+                "Doc Voss says: \"Ten thousand credits. You are short by " +
+                (10000 - have) + " credits.\"\n");
+            return 1;
+        }
+
+        /* Step 4: deduct credits */
+        if (function_exists("remove_universal_credits", player))
+            player->remove_universal_credits(10000);
+
+        /* Step 5: set conversion flags */
+        if (function_exists("set_property", player)) {
+            player->set_property("juicer_process_complete", 1);
+            player->set_property("psionic_disabled",        1);
+            player->set_property("magic_disabled",          1);
+            player->set_property("juicer_enhanced",         1);
+            player->set_property("juicer_speed_bonus",      3);
+            player->set_property("juicer_str_bonus",        6);
+            player->set_property("juicer_hp_bonus",        50);
+        }
+
+        /* Step 6: zero PSI */
+        if (function_exists("set_psi_points", player))
+            player->set_psi_points(0);
+
+        /* Step 7: zero PPE */
+        if (function_exists("set_ppe", player))
+            player->set_ppe(0);
+
+        /* Step 8: narration */
+        tell_object(player,
+            "\nDoc Voss gestures to the table. \"Lie down.\"\n" +
+            "The restraints close. The surgical arms descend. You feel a\n" +
+            "sting, then cold, then nothing...\n");
+
+        tell_object(player,
+            "\nTime passes. An uncertain amount of time.\n");
+
+        tell_object(player,
+            "\nYou wake. Your body feels *wrong* -- too fast, too strong,\n" +
+            "like a machine in a flesh frame. Doc Voss stands over you,\n" +
+            "wiping his hands.\n" +
+            "\"The procedure is complete,\" he says. \"Welcome to borrowed time.\"\n\n");
+
+        /* Step 9: save */
+        if (function_exists("save_player", player))
+            player->save_player();
+
+        return 1;
+    }
+
+    return 0;
+}

@@ -70,7 +70,7 @@ string *dedup(string *arr) {
 
 // Canonical topic lists (no separators) - exact names required by policy.
 string *PLAYER_TOPICS = ({
-    "armorofithan","calllightning","combat","commands","communication",
+    "armor_of_ithan","calllightning","combat","commands","communication",
     "credits","cyberknight","death","description","dragonhatchling",
     "energybolt","equipment","experience","fireball","fly",
     "globeofdaylight","heal","interaction","invisibility","languages",

@@ -57,24 +57,20 @@ int cmd_qcs(string str) {
     if (to_int(str) == 7 || str == "deploy")  return do_deploy_menu();
     if (to_int(str) == 8 || str == "modify")  return do_modify_menu();
     if (to_int(str) == 9 || str == "help")    return do_help();
-    if (to_int(str) == 0 || str == "exit" || str == "quit") {
+    if (str == "0" || str == "exit" || str == "quit") {
         write("QCS tool deactivated.\n");
         return 1;
     }
 
     // Handle compound commands: qcs create npc goblin
-    string subcmd, rest;
-    if (sscanf(str, "%s %s", subcmd, rest) == 2) {
-        switch (subcmd) {
-            case "create":
-                return route_create(rest);
-            case "modify":
-                return route_modify(rest);
-            case "deploy":
-                return route_deploy(rest);
-            case "list":
-                return do_list();
-        }
+    string *parts = explode(str, " ");
+    if (sizeof(parts) >= 2) {
+        string subcmd = parts[0];
+        string rest = implode(parts[1..], " ");
+        if (subcmd == "create") return route_create(rest);
+        if (subcmd == "modify") return route_modify(rest);
+        if (subcmd == "deploy") return route_deploy(rest);
+        if (subcmd == "list")   return do_list();
     }
 
     write("Unknown option. Type 'qcs' for the menu.\n");
@@ -120,12 +116,14 @@ int do_create(string type) {
 
 // Route create command: qcs create npc goblin
 int route_create(string rest) {
-    string type, name;
-    if (sscanf(rest, "%s %s", type, name) != 2) {
+    string *rparts = explode(rest, " ");
+    if (sizeof(rparts) < 2) {
         write("Usage: qcs create <type> <name>\n");
         write("Types: room, npc, weapon, armor, item\n");
         return 1;
     }
+    string type = rparts[0];
+    string name = implode(rparts[1..], " ");
 
     // Delegate to the create command
     object cmd;
@@ -186,21 +184,27 @@ int do_list() {
     write("Base: " + base + "/\n\n");
 
     int total = 0;
-    foreach (string type in types) {
-        string dir = base + "/" + type + "/";
+    int ti = 0;
+    while (ti < sizeof(types)) {
+        string ltype = types[ti];
+        string dir = base + "/" + ltype + "/";
         string *files = get_dir(dir + "*.lpc");
 
         if (files && sizeof(files)) {
-            write(capitalize(type) + "s:\n");
-            foreach (string f in files) {
-                string name = f;
-                // Strip .lpc
-                if (sscanf(f, "%s.lpc", name) != 1) name = f;
-                write("  " + name + "\n");
-                total++;
+            write(capitalize(ltype) + "s:\n");
+            int fi = 0;
+            while (fi < sizeof(files)) {
+                string f = files[fi];
+                string fname = f;
+                if (strlen(f) > 4 && f[strlen(f)-4..strlen(f)-1] == ".lpc")
+                    fname = f[0..strlen(f)-5];
+                write("  " + fname + "\n");
+                total += 1;
+                fi += 1;
             }
             write("\n");
         }
+        ti += 1;
     }
 
     if (total == 0) {

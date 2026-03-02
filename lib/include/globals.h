@@ -23,10 +23,20 @@
 #define WIZTOOL         "/std/wiztool"
 
 // === PRIVILEGE LEVELS ===
+// Must match src/session_internal.h and the design doc:
+//   0 = player
+//   1 = roleplay wizard  (wizard_role = "roleplay")
+//   2 = coding wizard    (wizard_role = "code")
+//   3 = domain wizard    (wizard_role = "domain")
+//   4 = admin wizard     (wizard_role = "admin")
 #define PRIV_PLAYER     0
+#define PRIV_ROLEPLAY   1
+#define PRIV_CODING     2
+#define PRIV_DOMAIN     3
+#define PRIV_ADMIN      4
+// Aliases kept for backwards compat inside old LPC files
 #define PRIV_WIZARD     1
-#define PRIV_ADMIN      2
-#define PRIV_ROOT       3
+#define PRIV_ROOT       PRIV_ADMIN
 
 // === COLOR CODES (ANSI) ===
 #define ANSI_RESET      "\x1b[0m"
@@ -99,7 +109,7 @@
 #define START_ROOM       "/domains/forest/rooms/void"
 #define PLAYER_LEVEL     0
 #define WIZARD_LEVEL     1
-#define ADMIN_LEVEL      2
+#define ADMIN_LEVEL      4
 #define STD_WIZTOOL      "/std/wiztool"
 
 #endif // __GLOBALS_H__

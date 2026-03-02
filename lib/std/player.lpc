@@ -167,7 +167,7 @@ int query_privilege_level() {
 }
 int is_player() { return privilege_level == 0; }
 int is_wizard() { return privilege_level >= 1; }
-int is_admin() { return privilege_level >= 2; }
+int is_admin() { return privilege_level >= 4; }
 int query_wizard_level() { return privilege_level; }  // For introduction system
 
 // ---- Wiz-tool item helpers ----
@@ -307,15 +307,17 @@ void complete_promotion() {
 // ---- Promotion / demotion ----
 
 void set_privilege_level(int lv) {
-    if (lv < 0 || lv > 2) return;
+    if (lv < 0 || lv > 4) return;
     int old_lv = privilege_level;
     privilege_level = lv;
 
     // Update title
     switch (lv) {
         case 0: title = "Player"; break;
-        case 1: title = "Wizard"; break;
-        case 2: title = "Admin";  break;
+        case 1: title = "Roleplay Wizard"; break;
+        case 2: title = "Coding Wizard"; break;
+        case 3: title = "Domain Wizard"; break;
+        case 4: title = "Admin"; break;
     }
     set_short(name + " the " + title);
 
@@ -359,7 +361,7 @@ void set_privilege_level(int lv) {
     // 3b. Check for first-boot onboarding (admin-level promotions only).
     //     If the server has never had an admin before, redirect to orientation
     //     instead of going straight to workroom.
-    if (lv >= 2) {
+    if (lv >= 4) {
         object fc;
         catch { fc = load_object("/secure/first_connect"); };
         if (fc && fc->query_first_boot()) {
@@ -380,12 +382,16 @@ void set_privilege_level(int lv) {
     }
 
     // 4. Clone and give physical wiz-tool items for new rank
-    //    Rank 1 (Wizard): id_card, code_tool
-    //    Rank 2 (Admin):  above + crystal_ball, wizard_staff, admin_wand, admin_orb
-    string *tool_paths = ({"/wiz/id_card", "/wiz/code_tool"});
-    if (lv >= 2)
-        tool_paths += ({"/wiz/crystal_ball", "/wiz/wizard_staff",
-                        "/wiz/admin_wand",   "/wiz/admin_orb"});
+    //    Rank 1 (Roleplay Wizard): handbook, rp_tool
+    //    Rank 2 (Coding Wizard):   handbook, code_tool, crystal_ball
+    //    Rank 3 (Domain Wizard):   above + qcs_tool, wiz_build
+    //    Rank 4 (Admin):           all tools
+    string *tool_paths = ({ "/wiz/id_card" });
+    if (lv >= 1) tool_paths += ({ "/wiz/rp_tool" });
+    if (lv >= 2) tool_paths += ({ "/wiz/code_tool", "/wiz/crystal_ball" });
+    if (lv >= 3) tool_paths += ({ "/wiz/admin_wand", "/wiz/wizard_staff" });
+    if (lv >= 4)
+        tool_paths += ({ "/wiz/admin_orb" });
     foreach (string tp in tool_paths) {
         object tool;
         catch { tool = clone_object(tp); };
@@ -408,7 +414,14 @@ void set_privilege_level(int lv) {
     working_directory = "/domains/wizard/" + lower_nm;
 
     // 8. Announce promotion to all players
-    string rank_name = (lv == 2) ? "Admin" : "Wizard";
+    string rank_name;
+    switch(lv) {
+        case 1: rank_name = "Roleplay Wizard"; break;
+        case 2: rank_name = "Coding Wizard"; break;
+        case 3: rank_name = "Domain Wizard"; break;
+        case 4: rank_name = "Admin"; break;
+        default: rank_name = "Wizard"; break;
+    }
     tell_object(this_object(), "\n[SYSTEM] You have been promoted to " + rank_name + "!\n");
     object *plist = users();
     string amsg = "[Server] " + name + " has been promoted to " + rank_name + "!\n";

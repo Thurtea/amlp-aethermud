@@ -3,10 +3,10 @@
 //
 // Usage: promote <player> <role>
 // Roles:
-//   admin   → privilege_level 2  + wizard_role "admin"
-//   domain  → privilege_level 1  + wizard_role "domain"
-//   coding  → privilege_level 1  + wizard_role "coding"
-//   rp      → privilege_level 1  + wizard_role "rp"
+//   rp      → privilege_level 1  + wizard_role "roleplay"
+//   coding  → privilege_level 2  + wizard_role "coding"
+//   domain  → privilege_level 3  + wizard_role "domain"
+//   admin   → privilege_level 4  + wizard_role "admin"
 //
 // On first promotion to wizard+:
 //   1. Sets privilege level + wizard_role atomically
@@ -16,6 +16,8 @@
 
 #include <globals.h>
 
+int query_privilege_required() { return 4; }
+
 int main(string arg) {
     object user, target;
     string target_name, role;
@@ -24,8 +26,8 @@ int main(string arg) {
     user = this_player();
     user_level = user->query_privilege_level();
 
-    if (user_level < PRIV_WIZARD) {
-        tell_object(user, "You must be at least a Wizard to use this command.\n");
+    if (user_level < PRIV_ADMIN) {
+        tell_object(user, "You must be an Administrator to use this command.\n");
         return 1;
     }
 
@@ -47,17 +49,21 @@ int main(string arg) {
 
     /* Map role → privilege level */
     if (role == "admin") {
+        new_level = 4;
+    } else if (role == "domain") {
+        new_level = 3;
+    } else if (role == "coding") {
         new_level = 2;
-    } else if (role == "domain" || role == "coding" || role == "rp") {
+    } else if (role == "rp") {
         new_level = 1;
     } else {
         tell_object(user, "Unknown role '" + role + "'.\n");
-        tell_object(user, "Roles: admin, domain, coding, rp\n");
+        tell_object(user, "Roles: rp, coding, domain, admin\n");
         return 1;
     }
 
-    /* Wizards cannot grant admin */
-    if (user_level == PRIV_WIZARD && new_level > PRIV_WIZARD) {
+    /* Non-admins cannot promote to admin */
+    if (user_level < PRIV_ADMIN && new_level >= PRIV_ADMIN) {
         tell_object(user, "You need Admin privileges to promote to the admin role.\n");
         return 1;
     }
@@ -70,9 +76,9 @@ int main(string arg) {
     }
 
     int old_level = target->query_privilege_level();
-    string *level_names = ({ "Player", "Wizard", "Admin" });
+    string *level_names = ({ "Player", "Roleplay Wizard", "Coding Wizard", "Domain Wizard", "Admin" });
     string new_title = level_names[new_level];
-    string old_title = level_names[old_level];
+    string old_title = old_level < sizeof(level_names) ? level_names[old_level] : "Unknown";
 
     /* Apply privilege level + role atomically */
     target->set_privilege_level(new_level);
@@ -98,7 +104,7 @@ int main(string arg) {
     tell_object(target, "Level: " + new_title + "  Role: " + role + "\n");
 
     /* First-time promotion to wizard/admin: workroom, wizkit, teleport */
-    if (old_level < PRIV_WIZARD && new_level >= PRIV_WIZARD) {
+    if (old_level < PRIV_ROLEPLAY && new_level >= PRIV_ROLEPLAY) {
         /* Staff announcement */
         string promoter_name = "System";
         if (function_exists("query_cap_name", user))
@@ -236,7 +242,7 @@ void clone_wizkit(object target, int priv_level) {
     }
 
     // Admin gets all tools
-    if (priv_level >= 2) {
+    if (priv_level >= 4) {
         wizkit += ({
             "/obj/wiztools/admin_wand",
             "/obj/wiztools/admin_orb",
@@ -293,10 +299,10 @@ string query_help() {
 "Usage:\n"
 "  promote <player> <role>\n\n"
 "Roles (set privilege level and wizard_role simultaneously):\n"
-"  admin    privilege_level 2 + role \"admin\"   (Admin only)\n"
-"  domain   privilege_level 1 + role \"domain\"\n"
-"  coding   privilege_level 1 + role \"coding\"\n"
-"  rp       privilege_level 1 + role \"rp\"\n\n"
+"  rp       privilege_level 1 (Roleplay Wizard)\n"
+"  coding   privilege_level 2 (Coding Wizard)\n"
+"  domain   privilege_level 3 (Domain Wizard)\n"
+"  admin    privilege_level 4 (Admin, Admin only)\n\n"
 "On first promotion to wizard+:\n"
 "  - privilege_level and wizard_role set atomically\n"
 "  - Personal workroom created at /domains/wizard/<name>/\n"
@@ -306,8 +312,7 @@ string query_help() {
 "Re-promoting an existing wizard updates their role without\n"
 "re-running workroom creation or teleport.\n\n"
 "Restrictions:\n"
-"  - Wizards can promote to domain/coding/rp (not admin)\n"
-"  - Admins can promote to any role\n"
+"  - Only Admins (privilege 4) can promote\n"
 "  - Target player must be online\n\n"
 "Examples:\n"
 "  promote lyra domain         Grant Domain Wizard\n"

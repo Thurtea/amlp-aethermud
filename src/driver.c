@@ -2876,14 +2876,14 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     
     /* Admin commands */
     if (strcmp(cmd, "promote") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
 
         if (!args || *args == '\0') {
             return vm_value_create_string(
                 "Usage: promote <player> <level>\r\n"
-                "Levels: 0=player, 1=wizard, 2=admin\r\n");
+                "Levels: 0=player, 1=roleplay, 2=coding, 3=domain, 4=admin\r\n");
         }
 
         char target_name[64];
@@ -3098,7 +3098,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
     /* DEMOTE command - alias for promote <player> 0 */
     if (strcmp(cmd, "demote") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         if (!args || !args[0]) {
@@ -3160,7 +3160,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
 
     /* SETROLE - Set wizard role (admin/domain/code/roleplay) */
     if (strcmp(cmd, "setrole") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         if (!args || !args[0]) {
@@ -3248,7 +3248,7 @@ VMValue execute_command(PlayerSession *session, const char *command) {
     }
 
     if (strcmp(cmd, "users") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         
@@ -3259,8 +3259,10 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
-                const char *priv_name = (sessions[i]->privilege_level == 2) ? "Admin" :
-                                       (sessions[i]->privilege_level == 1) ? "Wizard" : "Player";
+                const char *priv_name = (sessions[i]->privilege_level >= 4) ? "Admin" :
+                                       (sessions[i]->privilege_level == 3) ? "Domain" :
+                                       (sessions[i]->privilege_level == 2) ? "Coding" :
+                                       (sessions[i]->privilege_level == 1) ? "Roleplay" : "Player";
                 time_t idle = time(NULL) - sessions[i]->last_activity;
                 char line[128];
                 snprintf(line, sizeof(line), "%-15s %-14s %ld sec\r\n",
@@ -3530,9 +3532,9 @@ more_room_source:
      * Removes any existing wiz-tools (IDs -30 to -37) then re-adds them.
      * This lets admins recover lost tools without relogging. */
     if (strcmp(cmd, "reequip") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string(
-                "Error: reequip requires admin access (privilege level 2).\r\n");
+                "Error: reequip requires admin access (privilege level 4).\r\n");
         }
 
         /* Remove any existing wiz-tools by name (case-insensitive substring match)
@@ -4239,8 +4241,10 @@ more_room_source:
             ch->stats.iq, ch->stats.me, ch->stats.ma, ch->stats.ps,
             ch->stats.pp, ch->stats.pe, ch->stats.pb, ch->stats.spd,
             target->privilege_level,
-            target->privilege_level == 2 ? "Admin" :
-            target->privilege_level == 1 ? "Wizard" : "Player",
+            target->privilege_level >= 4 ? "Admin" :
+            target->privilege_level == 3 ? "Domain" :
+            target->privilege_level == 2 ? "Coding" :
+            target->privilege_level == 1 ? "Roleplay" : "Player",
             target->current_room ? target->current_room->name : "Nowhere",
             target->current_room ? target->current_room->id : -1,
             target->ip_address,
@@ -4398,7 +4402,7 @@ more_room_source:
 
     /* FORCE - Force a player to execute a command (admin only) */
     if (strcmp(cmd, "force") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         if (!args || !*args) {
@@ -4425,9 +4429,9 @@ more_room_source:
         return vm_value_create_string(response);
     }
 
-    /* SLAY - Instantly kill a player (admin, privilege_level >= 2) */
+    /* SLAY - Instantly kill a player (admin, privilege_level >= 4) */
     if (strcmp(cmd, "slay") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             send_to_player(session, "You don't have permission to do that.\n");
         } else {
             cmd_slay(session, args ? args : "");
@@ -4436,9 +4440,9 @@ more_room_source:
         return result;
     }
 
-    /* NPCSPAWN - Spawn an NPC in current room (admin, privilege_level >= 2) */
+    /* NPCSPAWN - Spawn an NPC in current room (admin, privilege_level >= 4) */
     if (strcmp(cmd, "npcspawn") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             send_to_player(session, "You don't have permission to do that.\n");
         } else {
             cmd_npcspawn(session, args ? args : "");
@@ -4586,7 +4590,7 @@ more_room_source:
 
         /* WARMBOOT - Reload all .lpc files in core lib dirs */
         if (strcmp(cmd, "warmboot") == 0) {
-            if (session->privilege_level < 2) {
+            if (session->privilege_level < 4) {
                 return vm_value_create_string("You don't have permission to use that command.\r\n");
             }
 
@@ -4708,7 +4712,7 @@ more_room_source:
 
     /* REBOOT - Graceful server restart */
     if (strcmp(cmd, "reboot") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
 
@@ -4744,7 +4748,7 @@ more_room_source:
 
     /* BAN - Ban a player */
     if (strcmp(cmd, "ban") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         if (!args || !*args) {
@@ -4777,7 +4781,7 @@ more_room_source:
 
     /* BROADCAST / WALL - Admin message to all players */
     if (strcmp(cmd, "broadcast") == 0 || strcmp(cmd, "wall") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         if (!args || !*args) {
@@ -5308,7 +5312,7 @@ more_room_source:
     }
 
     if (strcmp(cmd, "shutdown") == 0) {
-        if (session->privilege_level < 2) {
+        if (session->privilege_level < 4) {
             return vm_value_create_string("You don't have permission to use that command.\r\n");
         }
         
@@ -5572,10 +5576,10 @@ void process_login_state(PlayerSession *session, const char *input) {
 
                 session->state = STATE_PLAYING;
 
-                /* Re-give wiz-tools on every admin login: C items are not
+                /* Re-give wiz-tools on every wizard/admin login: C items are not
                  * preserved through the binary save format, so we always
                  * recreate them here instead of relying on save/load. */
-                if (session->privilege_level >= 2) {
+                if (session->privilege_level >= 1) {
                     static const struct { int id; const char *name; const char *desc; } wt[] = {
                         { -30, "wizard staff",
                           "A gnarled staff crackling with latent energy.\n"

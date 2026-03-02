@@ -6,7 +6,7 @@
 
 inherit "/std/cmd";
 
-int query_privilege_required() { return 2; }
+int query_privilege_required() { return 4; }
 
 string query_help() {
     return
@@ -25,11 +25,19 @@ int main(string args) {
     string target_name, role;
     object target;
 
-    if (!args || sscanf(args, "%s %s", target_name, role) != 2) {
+    if (!args || args == "") {
         write("Usage: setrole <player> <role>\n");
         write("Roles: admin, domain, coding, rp\n");
         return 1;
     }
+    int sp = strsrch(args, " ");
+    if (sp < 0) {
+        write("Usage: setrole <player> <role>\n");
+        write("Roles: admin, domain, coding, rp\n");
+        return 1;
+    }
+    target_name = lower_case(substring(args, 0, sp));
+    role        = lower_case(substring(args, sp + 1));
 
     target_name = lower_case(target_name);
     role = lower_case(role);
@@ -57,13 +65,15 @@ int main(string args) {
     // Set the role
     target->set_property("wizard_role", role);
 
-    // Adjust privilege level for admin role
+    // Adjust privilege level based on role
     if (role == "admin") {
-        target->set_privilege_level(2);
-    } else {
-        if (target->query_privilege_level() < 1) {
-            target->set_privilege_level(1);
-        }
+        target->set_privilege_level(4);   /* PRIV_ADMIN */
+    } else if (role == "domain") {
+        target->set_privilege_level(3);   /* PRIV_DOMAIN */
+    } else if (role == "coding") {
+        target->set_privilege_level(2);   /* PRIV_CODING */
+    } else {  /* rp */
+        target->set_privilege_level(1);   /* PRIV_ROLEPLAY */
     }
 
     // Detach old wiztool and attach the appropriate one

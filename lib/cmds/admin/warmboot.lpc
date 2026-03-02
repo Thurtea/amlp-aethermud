@@ -7,7 +7,7 @@ inherit LIB_DAEMON;
 
 int main(string arg) {
     object player = this_player();
-    if (!player->is_admin()) {
+    if (!player || player->query_privilege_level() < 4) {
         write("You do not have permission to use warmboot.");
         return 1;
     }

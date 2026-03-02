@@ -99,8 +99,12 @@ string query_title() {
     switch(wizard_level) {
         case ADMIN_LEVEL:
             return "[Admin] ";
-        case WIZARD_LEVEL:
-            return "[Wizard] ";
+        case PRIV_DOMAIN:
+            return "[Domain] ";
+        case PRIV_CODING:
+            return "[Coding] ";
+        case PRIV_ROLEPLAY:
+            return "[RP] ";
         default:
             return "";
     }
@@ -115,7 +119,11 @@ void enter_world() {
 
     write("\n");
     if (wizard_level >= WIZARD_LEVEL) {
-        write("=== ADMINISTRATOR ACCESS GRANTED ===\n");
+        write("=== STAFF ACCESS GRANTED ===\n");
+        if (wizard_level >= ADMIN_LEVEL)
+            write("You are logged in as Administrator.\n");
+        else
+            write("You are logged in as a Wizard.\n");
         write("Use 'wiz' to see wizard commands.\n");
         write("\n");
     }

@@ -2,12 +2,17 @@
 
 #include <globals.h>
 
+int query_privilege_required() { return 4; }
+
 int main(string arg) {
     object user;
-    
+
     user = previous_object();
-    
-    // Should add security check here
+
+    if (!user || user->query_privilege_level() < 4) {
+        tell_object(user, "You must be an administrator to use this command.\n");
+        return 1;
+    }
     tell_object(user, "Shutting down server...\n");
     shout("Server shutting down!\n");
     shutdown();

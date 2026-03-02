@@ -10,8 +10,8 @@ int main(string arg) {
     string template, pname;
     object target;
 
-    if (!tp || tp->query_privilege_level() < 100) {
-        tell_object(tp, "You must be an admin (level 100) to use this command.\n");
+    if (!tp || tp->query_privilege_level() < 4) {
+        tell_object(tp, "You must be an admin to use this command.\n");
         return 1;
     }
     if (!arg || sscanf(arg, "%s %s", template, pname) != 2) {

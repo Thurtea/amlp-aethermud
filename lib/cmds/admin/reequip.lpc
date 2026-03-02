@@ -3,7 +3,7 @@
 // Admin-only (privilege >= 2).  The actual work is done by the C-level
 // handler in driver.c which has access to inventory_add_force().
 
-int query_privilege_required() { return 2; }
+int query_privilege_required() { return 4; }
 
 int main(string args) {
     // The C driver intercepts "reequip" before this LPC ever runs.
@@ -27,6 +27,6 @@ string query_help() {
 "  RP-Wizard skill tool - Skill management (rp ...)\n"
 "  admin orb          - Realtime server overview (orb ...)\n"
 "  code tool          - LPC file tools (code check/reload/info)\n\n"
-"Requires: Admin access (privilege level 2).\n"
+"Requires: Admin access (privilege level 4).\n"
 "Use this command if your wiz-tools go missing (e.g. after a save/load).\n";
 }

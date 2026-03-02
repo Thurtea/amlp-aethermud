@@ -180,8 +180,8 @@ int wiz_force(PlayerSession *sess, const char *target_name, const char *command)
 
 /* Initiate graceful server shutdown (admin-only). If delay_seconds > 0, announce it. */
 int wiz_shutdown(PlayerSession *sess, int delay_seconds) {
-    /* Level 5 required for destructive/dangerous ops */
-    if (!sess || sess->privilege_level < 5) return 0;
+    /* Level 4 required for shutdown */
+    if (!sess || sess->privilege_level < 4) return 0;
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (sessions[i] && sessions[i]->state == STATE_PLAYING) {
@@ -471,7 +471,7 @@ int wiz_clone(PlayerSession *sess, const char *lpc_path, const char *target_name
 
 /* Destroy an LPC object by path or object name. Admin-only (level 5). */
 int wiz_destruct(PlayerSession *sess, const char *target) {
-    if (!sess || sess->privilege_level < 5 || !target) return 0;
+    if (!sess || sess->privilege_level < 4 || !target) return 0;
 
     /* If looks like a path, try to find/load object */
     VMValue path_val = vm_value_create_string(target);
@@ -494,7 +494,7 @@ int wiz_destruct(PlayerSession *sess, const char *target) {
 
 /* Promote or set a player's privilege level. Admin-only (level 5). */
 int wiz_promote(PlayerSession *sess, const char *target_name, int new_level) {
-    if (!sess || sess->privilege_level < 5 || !target_name) return 0;
+    if (!sess || sess->privilege_level < 4 || !target_name) return 0;
     PlayerSession *target = find_player_by_name(target_name);
     if (!target) {
         send_to_player(sess, "Player not found: %s\n", target_name);
@@ -558,7 +558,7 @@ static int remove_line_from_file(const char *path, const char *needle) {
 }
 
 int wiz_ban(PlayerSession *sess, const char *target) {
-    if (!sess || sess->privilege_level < 5 || !target) return 0;
+    if (!sess || sess->privilege_level < 4 || !target) return 0;
     /* decide if IP (contains dot) or username */
     if (strchr(target, '.') != NULL) {
         /* treat as IP */
@@ -581,7 +581,7 @@ int wiz_ban(PlayerSession *sess, const char *target) {
 }
 
 int wiz_unban(PlayerSession *sess, const char *target) {
-    if (!sess || sess->privilege_level < 5 || !target) return 0;
+    if (!sess || sess->privilege_level < 4 || !target) return 0;
     if (strchr(target, '.') != NULL) {
         if (!remove_line_from_file("data/banned_ips.txt", target)) {
             send_to_player(sess, "IP not found in ban list: %s\n", target);

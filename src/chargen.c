@@ -1066,9 +1066,10 @@ void chargen_complete(PlayerSession *sess) {
                         fa_name[fa_len-1] == ' '  || fa_name[fa_len-1] == '\t'))
                     fa_name[--fa_len] = '\0';
                 if (fa_len > 0 && strcasecmp(fa_name, sess->username) == 0) {
-                    sess->privilege_level = 2;
+                    sess->privilege_level = 4;
                     strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role) - 1);
                     sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
+                    sess->character.credits = 100000;
                     fclose(fa);
                     remove("lib/etc/first_admin.txt");
                     save_character(sess);

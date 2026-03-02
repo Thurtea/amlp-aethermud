@@ -5,12 +5,12 @@
 
 inherit "/std/command";
 
-int query_privilege_required() { return 2; }
+int query_privilege_required() { return 4; }
 
 int main(string arg) {
     object tp = previous_object();
     int priv = tp->query_privilege_level();
-    if (priv < 2) {
+    if (priv < 4) {
         tell_object(tp, "You must be an admin to use the orb command.\n");
         return 1;
     }
@@ -65,9 +65,9 @@ int main(string arg) {
             object *players = users();
             string out = "Staff Wizards Online:\n";
             foreach(object player : players) {
-                if (player->query_privilege_level() >= 2) {
+                if (player->query_privilege_level() >= 4) {
                     out += player->query_name() + " (Admin)\n";
-                } else if (player->query_privilege_level() == 1) {
+                } else if (player->query_privilege_level() >= 1) {
                     out += player->query_name() + " (Wizard)\n";
                 }
             }

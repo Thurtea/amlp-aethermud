@@ -109,7 +109,14 @@ object connect() {
     // Check first-boot flag before anything else.
     object fc;
     catch { fc = load_object("/secure/first_connect"); };
+    int needs_install = 0;
     if (fc && function_exists("query_first_boot", fc) && fc->query_first_boot()) {
+        needs_install = 1;
+    }
+    if (file_size("/data/setup_complete") == -1) {
+        needs_install = 1;
+    }
+    if (needs_install) {
         object wizard;
         catch { wizard = new("/secure/install"); };
         if (wizard && function_exists("logon", wizard)) {

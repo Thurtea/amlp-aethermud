@@ -12,7 +12,7 @@ int main(string arg) {
     string room_path;
     int i;
 
-    player = previous_object();
+    player = this_player();
     room = environment(player);
     if (!room) return 0;
 

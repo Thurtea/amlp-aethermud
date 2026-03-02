@@ -652,6 +652,65 @@ static void chargen_show_races(PlayerSession *sess) {
 void chargen_init(PlayerSession *sess) {
     if (!sess) return;
 
+    /* --- First admin fast-path: skip ALL chargen --- */
+    {
+        FILE *fa = fopen("lib/etc/first_admin.txt", "r");
+        if (fa) {
+            char fa_name[64];
+            memset(fa_name, 0, sizeof(fa_name));
+            if (fgets(fa_name, sizeof(fa_name), fa)) {
+                int fa_len = (int)strlen(fa_name);
+                while (fa_len > 0 &&
+                       (fa_name[fa_len-1] == '\n' || fa_name[fa_len-1] == '\r' ||
+                        fa_name[fa_len-1] == ' '  || fa_name[fa_len-1] == '\t'))
+                    fa_name[--fa_len] = '\0';
+
+                if (fa_len > 0 && strcasecmp(fa_name, sess->username) == 0) {
+                    fclose(fa);
+                    fprintf(stderr,
+                        "[Chargen] first_admin fast-path: '%s' skipping chargen.\n",
+                        sess->username);
+
+                    /* Set sensible defaults */
+                    Character *ch = &sess->character;
+                    ch->stats.iq  = 10;
+                    ch->stats.me  = 10;
+                    ch->stats.ma  = 10;
+                    ch->stats.ps  = 10;
+                    ch->stats.pp  = 10;
+                    ch->stats.pe  = 10;
+                    ch->stats.pb  = 10;
+                    ch->stats.spd = 10;
+                    ch->level = 1;
+                    ch->xp = 0;
+                    ch->hp = 16;
+                    ch->max_hp = 16;
+                    ch->sdc = 20;
+                    ch->max_sdc = 20;
+                    ch->health_type = HP_SDC;
+                    ch->mdc = 0;
+                    ch->max_mdc = 0;
+                    ch->isp = 0;
+                    ch->max_isp = 0;
+                    ch->ppe = 0;
+                    ch->max_ppe = 0;
+                    ch->attacks_per_round = 2;
+                    ch->lives_remaining = 5;
+                    ch->race = strdup("Human");
+                    ch->occ = strdup("Admin");
+                    ch->alignment = strdup("Principled");
+
+                    /* chargen_complete() handles inventory, gear, first_admin gate,
+                     * orientation room, and STATE_PLAYING transition. */
+                    chargen_complete(sess);
+                    return;
+                }
+            }
+            fclose(fa);
+        }
+    }
+    /* --- End first admin fast-path --- */
+
     sess->chargen_state = CHARGEN_STATS_ROLL;
     sess->chargen_page = 0;
     sess->chargen_temp_choice = 0;
@@ -1199,7 +1258,7 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
             if (choice >= 1 && choice <= num_loaded_races) {
                 ch->race = strdup(loaded_races[choice - 1].name);
 
-                send_to_player(sess, "\nYou selected: %s\n\n", ch->race);
+                send_to_player(sess, "\nYou selected: %s\n", ch->race);
 
                 /* RCC races (dragons, etc.) skip OCC selection */
                 if (loaded_races[choice - 1].is_rcc) {
@@ -1212,25 +1271,37 @@ void chargen_process_input(PlayerSession *sess, const char *input) {
                         ch->occ = strdup(rcc_name);
                     }
                     send_to_player(sess, "As a %s, your class is %s.\n", ch->race, ch->occ);
-                    send_to_player(sess, "Racial Character Classes have innate abilities.\n\n");
-
-                    /* Do not roll here - roll will occur after starting zone selection */
-                    sess->chargen_state = CHARGEN_ZONE_SELECT;
-                    chargen_show_zones(sess);
-                } else {
-                    /* Non-RCC: O.C.C. will be assigned by a wizard later. */
-                    ch->occ = NULL;
-
-                    /* Do not roll yet - proceed to starting zone selection */
-                    sess->chargen_state = CHARGEN_ZONE_SELECT;
-                    chargen_show_zones(sess);
+                    send_to_player(sess, "Racial Character Classes have innate abilities.\n");
                 }
+
+                send_to_player(sess, "Confirm? (yes/no): ");
+                sess->chargen_state = CHARGEN_RACE_CONFIRM;
             } else {
                 send_to_player(sess, "Invalid choice. Please enter 1-%d: ", num_loaded_races);
             }
             break;
 
         /* O.C.C. selection step removed: wizards assign O.C.C. via 'set' command. */
+
+        case CHARGEN_RACE_CONFIRM:
+            if (strncasecmp(input, "yes", 3) == 0 || strncasecmp(input, "y", 1) == 0) {
+                /* If OCC wasn't set (non-RCC), wizard assigns later */
+                if (!ch->occ) {
+                    ch->occ = NULL;
+                }
+                sess->chargen_state = CHARGEN_ZONE_SELECT;
+                chargen_show_zones(sess);
+            } else if (strncasecmp(input, "no", 2) == 0 || strncasecmp(input, "n", 1) == 0) {
+                /* Return to race selection */
+                if (ch->race) { free(ch->race); ch->race = NULL; }
+                if (ch->occ)  { free(ch->occ);  ch->occ  = NULL; }
+                sess->chargen_state = CHARGEN_RACE_SELECT;
+                sess->chargen_page = 0;
+                chargen_show_races(sess);
+            } else {
+                send_to_player(sess, "Please answer 'yes' or 'no': ");
+            }
+            break;
             
         case CHARGEN_STATS_CONFIRM:
             if (strncasecmp(input, "back", 4) == 0 || strncasecmp(input, "b", 1) == 0) {

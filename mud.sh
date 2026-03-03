@@ -298,14 +298,14 @@ rotate_logs() {
 wipe_players() {
     echo "[*] Deleting player saves..."
     # Fix #5: use -- to prevent filenames beginning with "-" being parsed as flags.
-    rm -rf -- "$MUDLIB_DIR/lib/save/players/"* "$MUDLIB_DIR/save/players/"* 2>/dev/null
+    rm -rf -- "$MUDLIB_DIR/lib/save/players/"* 2>/dev/null
     echo "[✓] Player saves wiped"
 }
 
 wipe_wizards() {
     echo "[*] Deleting wizard saves..."
     # Fix #5: pass -- to rm via -exec to guard against "-"-prefixed filenames.
-    find "$MUDLIB_DIR/lib/save/wizard/" "$MUDLIB_DIR/save/wizard/" \
+    find "$MUDLIB_DIR/lib/save/wizard/" \
         -mindepth 1 -type f -exec rm -f -- {} + 2>/dev/null
     echo "[✓] Wizard saves wiped"
 }
@@ -326,8 +326,8 @@ wipe_all() {
     fi
     echo "[*] Deleting all saves..."
     # Fix #5: use -- to prevent filenames beginning with "-" being parsed as flags.
-    rm -rf -- "$MUDLIB_DIR/lib/save/players/"* "$MUDLIB_DIR/save/players/"* \
-              "$MUDLIB_DIR/lib/save/wizard/"*  "$MUDLIB_DIR/save/wizard/"*  2>/dev/null
+    rm -rf -- "$MUDLIB_DIR/lib/save/players/"* \
+              "$MUDLIB_DIR/lib/save/wizard/"* 2>/dev/null
     rm -f "$MUDLIB_DIR/lib/save/first_boot.o"
     echo "[✓] All saves wiped"
 }

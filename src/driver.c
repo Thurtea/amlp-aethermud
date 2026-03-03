@@ -89,7 +89,6 @@ extern void expand_lpc_alias(const char *input, char *output, size_t out_size,
 int server_running = 1;
 VirtualMachine *global_vm = NULL;
 PlayerSession *sessions[MAX_CLIENTS];
-static int first_player_created = 0;  /* Track if first player has logged in */
 
 typedef struct {
     char raw[INPUT_BUFFER_SIZE];
@@ -5638,7 +5637,7 @@ void handle_session_input(PlayerSession *session, const char *input) {
             send_prompt(session);
         } else if (session->state == STATE_CHARGEN) {
             if (strlen(line_start) > 0) {
-                int prev_chargen_state = session->chargen_state;
+                ChargenState prev_chargen_state = session->chargen_state;
                 process_chargen_state(session, line_start);
                 /* If chargen state changed, discard remaining buffered input
                  * to prevent stale lines from being processed in the new state. */

@@ -1236,7 +1236,7 @@ VMValue efun_get_dir(VirtualMachine *vm, VMValue *args, int arg_count) {
 
     /* Separate directory and optional glob suffix (e.g. "*.lpc") */
     char dir_part[PATH_MAX];
-    char glob_suffix[64] = "";
+    char glob_suffix[PATH_MAX] = "";
     snprintf(dir_part, sizeof(dir_part), "%s", p);
 
     /* If the last component contains a wildcard, split it off */
@@ -1249,7 +1249,7 @@ VMValue efun_get_dir(VirtualMachine *vm, VMValue *args, int arg_count) {
         if (dir_part[0] == '\0') snprintf(dir_part, sizeof(dir_part), ".");
     }
 
-    char fs_dir[PATH_MAX];
+    char fs_dir[PATH_MAX * 2];
     snprintf(fs_dir, sizeof(fs_dir), "%s/%s", mudlib, dir_part);
 
     DIR *d = opendir(fs_dir);

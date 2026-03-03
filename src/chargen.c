@@ -3446,3 +3446,18 @@ void cmd_revoke(PlayerSession *sess, const char *args) {
     /* Auto-save target */
     save_character(target);
 }
+
+/* ------------------------------------------------------------------ */
+/*  cmd_disposition — show the player's alignment from the C struct    */
+/* ------------------------------------------------------------------ */
+void cmd_disposition(PlayerSession *sess, const char *args) {
+    (void)args;
+    if (!sess) return;
+
+    Character *ch = &sess->character;
+    if (ch->alignment && ch->alignment[0]) {
+        send_to_player(sess, "Your disposition is: %s\n", ch->alignment);
+    } else {
+        send_to_player(sess, "Your disposition has not been determined yet.\n");
+    }
+}

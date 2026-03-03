@@ -5257,14 +5257,12 @@ more_room_source:
 
             vm_value_release(&call_args[1]);
             vm_value_release(&call_args[2]);
-            /* daemon is a singleton owned by ObjManager - do not release */
-
-            if (cres.type == VALUE_INT && cres.data.int_value) {
-                vm_value_release(&cres);
-                result.type = VALUE_NULL;
-                return result;
-            }
             if (cres.type != VALUE_NULL) vm_value_release(&cres);
+
+            /* Daemon handles all commands including "Unknown command" messages,
+             * so always return here — never fall through to C-level unknown. */
+            result.type = VALUE_NULL;
+            return result;
         } else {
             fprintf(stderr, "[Server] command daemon failed to load\n");
         }

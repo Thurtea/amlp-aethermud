@@ -20,7 +20,8 @@ int main(string args) {
         return 1;
     }
 
-    return tool->cmd_qcs(args);
+    catch { tool->cmd_qcs(args); };
+    return 1;
 }
 
 string query_help() {

@@ -90,14 +90,12 @@ int cmd_qcs(string str) {
     }
 
     // Handle compound commands: qcs create npc goblin
-    parts = explode(str, " ");
-    if (sizeof(parts) >= 2) {
-        subcmd = parts[0];
-        rest = implode(parts[1..], " ");
-        if (subcmd == "create") return route_create(rest);
-        if (subcmd == "modify") return route_modify(rest);
-        if (subcmd == "deploy") return route_deploy(rest);
-        if (subcmd == "list")   return do_list();
+    // Uses strsrch/substring instead of explode/sizeof (VM sizeof bug)
+    if (name_arg != "") {
+        if (first_word == "create") return route_create(name_arg);
+        if (first_word == "modify") return route_modify(name_arg);
+        if (first_word == "deploy") return route_deploy(name_arg);
+        if (first_word == "list")   return do_list();
     }
 
     write("Unknown option. Type 'qcs' for the menu.\n");
@@ -143,19 +141,19 @@ int do_create(string type) {
 
 // Route create command: qcs create npc goblin
 int route_create(string rest) {
-    string *rparts;
     string type;
     string name;
     object cmd;
+    int _sp;
 
-    rparts = explode(rest, " ");
-    if (sizeof(rparts) < 2) {
+    _sp = strsrch(rest, " ");
+    if (_sp < 0) {
         write("Usage: qcs create <type> <name>\n");
         write("Types: room, npc, weapon, armor, item\n");
         return 1;
     }
-    type = rparts[0];
-    name = implode(rparts[1..], " ");
+    type = substring(rest, 0, _sp);
+    name = substring(rest, _sp + 1);
 
     catch { cmd = load_object("/cmds/creator/create"); };
     if (cmd && function_exists("main", cmd)) {

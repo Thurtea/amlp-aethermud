@@ -671,38 +671,18 @@ void chargen_init(PlayerSession *sess) {
                         "[Chargen] first_admin fast-path: '%s' skipping chargen.\n",
                         sess->username);
 
-                    /* Set sensible defaults */
-                    Character *ch = &sess->character;
-                    ch->stats.iq  = 10;
-                    ch->stats.me  = 10;
-                    ch->stats.ma  = 10;
-                    ch->stats.ps  = 10;
-                    ch->stats.pp  = 10;
-                    ch->stats.pe  = 10;
-                    ch->stats.pb  = 10;
-                    ch->stats.spd = 10;
-                    ch->level = 1;
-                    ch->xp = 0;
-                    ch->hp = 16;
-                    ch->max_hp = 16;
-                    ch->sdc = 20;
-                    ch->max_sdc = 20;
-                    ch->health_type = HP_SDC;
-                    ch->mdc = 0;
-                    ch->max_mdc = 0;
-                    ch->isp = 0;
-                    ch->max_isp = 0;
-                    ch->ppe = 0;
-                    ch->max_ppe = 0;
-                    ch->attacks_per_round = 2;
-                    ch->lives_remaining = 5;
-                    ch->race = strdup("Human");
-                    ch->occ = strdup("Admin");
-                    ch->alignment = strdup("Principled");
+                    /* Grant admin privileges before chargen_create_admin()
+                     * so they are included in the auto-save. */
+                    sess->privilege_level = 4;
+                    strncpy(sess->wizard_role, "admin",
+                            sizeof(sess->wizard_role) - 1);
+                    sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
 
-                    /* chargen_complete() handles inventory, gear, first_admin gate,
-                     * orientation room, and STATE_PLAYING transition. */
-                    chargen_complete(sess);
+                    /* Consume the first_admin flag */
+                    remove("lib/etc/first_admin.txt");
+
+                    /* Full admin character setup: workroom, wiz-tools, save */
+                    chargen_create_admin(sess);
                     return;
                 }
             }

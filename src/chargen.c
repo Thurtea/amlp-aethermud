@@ -219,6 +219,16 @@ int create_wizard_workroom(const char *username) {
         "    add_exit(\"out\", \"/domains/new_camelot/town_square\");\n"
         "    set_property(\"light\", 2);\n"
         "    set_property(\"indoors\", 1);\n"
+        "\n"
+        "    /* Spawn Archimedes the owl guide */\n"
+        "    object owl;\n"
+        "    catch { owl = clone_object(\"/npc/archimedes\"); };\n"
+        "    if (owl) {\n"
+        "        if (function_exists(\"move\", owl))\n"
+        "            owl->move(this_object());\n"
+        "        else\n"
+        "            move_object(owl, this_object());\n"
+        "    }\n"
         "}\n",
         username, username);
 

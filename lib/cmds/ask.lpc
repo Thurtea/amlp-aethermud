@@ -1,0 +1,67 @@
+// ask.lpc — "ask <npc> about <topic>" command
+// Finds a matching NPC in the room and calls receive_ask() on it.
+
+int main(string arg) {
+    object player = this_player();
+    if (!player) return 1;
+
+    if (!arg || arg == "") {
+        write("Usage: ask <name> about <topic>\n");
+        return 1;
+    }
+
+    string npc_name, topic;
+    if (sscanf(arg, "%s about %s", npc_name, topic) != 2) {
+        write("Usage: ask <name> about <topic>\n");
+        return 1;
+    }
+
+    npc_name = lower_case(npc_name);
+    topic = lower_case(topic);
+
+    if (!npc_name || npc_name == "" || !topic || topic == "") {
+        write("Usage: ask <name> about <topic>\n");
+        return 1;
+    }
+
+    object env = environment(player);
+    if (!env) {
+        write("You are nowhere.\n");
+        return 1;
+    }
+
+    object *inv = all_inventory(env);
+    object npc = 0;
+    int i = 0;
+    while (i < sizeof(inv)) {
+        if (inv[i] && inv[i] != player) {
+            if (function_exists("id", inv[i]) && inv[i]->id(npc_name)) {
+                npc = inv[i];
+                break;
+            }
+            if (function_exists("query_name", inv[i])) {
+                if (lower_case(inv[i]->query_name()) == npc_name) {
+                    npc = inv[i];
+                    break;
+                }
+            }
+        }
+        i++;
+    }
+
+    if (!npc) {
+        write("There is no '" + npc_name + "' here to ask.\n");
+        return 1;
+    }
+
+    say(player->query_name() + " asks " + npc->query_short() +
+        " about '" + topic + "'.\n");
+
+    if (function_exists("receive_ask", npc)) {
+        npc->receive_ask(player, topic);
+    } else {
+        write(npc->query_short() + " doesn't seem interested in answering.\n");
+    }
+
+    return 1;
+}

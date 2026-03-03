@@ -1,36 +1,286 @@
 // /lib/npc/archimedes.lpc
-// Archimedes the Mentor - orientation guide NPC.
-// Watches for the player saying "done" or "finish" via catch_tell(),
-// then calls complete_promotion() and self-destructs.
+// Archimedes the Owl — Admin guide NPC.
+// Greets new admins on arrival, answers questions about tools via
+// "ask archimedes about <topic>", and clones missing wiz-tools.
+//
+// Preserved: catch_tell() listens for "say done" / "say finish" and
+// calls complete_promotion() on the speaker (legacy orientation hook).
 
-inherit "/std/living";
+inherit "/std/npc";
 
 void create() {
     ::create();
 
     set_name("archimedes");
-    set_id(({ "archimedes", "mentor" }));
-    set_short("a mentor known as Archimedes");
+    set_id("archimedes");
+    add_id("owl");
+    add_id("guide");
+
+    set_short("Archimedes the owl");
     set_long(
-        "A wise, patient figure in robes covered with strange symbols.\n" +
-        "He gestures for you to approach. When you are ready to proceed,\n" +
-        "type: say done\n"
+        "A great horned owl with tawny feathers and piercing amber eyes.\n" +
+        "Archimedes perches on a gnarled staff mounted to the wall, watching\n" +
+        "you with an intelligence that borders on unsettling. A tiny scroll\n" +
+        "case hangs from a leather jess around one talon.\n\n" +
+        "Type: ask archimedes about <topic>\n" +
+        "Topics: tools, wiztool, goto, stat, promote, demote, warmboot,\n" +
+        "        shutdown, grantskill, reequip, setrole, commands, help\n"
     );
 
-    set_gender("male");
-    set_race("human");
-    set_level(1);
+    set_level(99);
+    set_hp(9999);
+    set_aggro(0);
 
     set_property("no_attack", 1);
     set_property("no_follow", 1);
+    set_property("no_kill", 1);
+
+    set_position_text("is perched on a gnarled staff, watching quietly.");
 }
 
+// Immortal — cannot be killed or destructed by combat
+void die(object killer) { return; }
+int take_damage(int amount, int damage_type) { return 0; }
+
 int id(string str) {
-    if (str == "archimedes") return 1;
+    if (str == "archimedes" || str == "owl" || str == "guide") return 1;
     return ::id(str);
 }
 
-// catch_tell pattern matching — intercept say messages in all formats
+// Greet on player arrival
+void init() {
+    ::init();
+    object who = this_player();
+    if (!who) return;
+    if (!function_exists("query_privilege_level", who)) return;
+
+    call_out("greet_player", 1, who);
+}
+
+void greet_player(object who) {
+    if (!who || !environment(who) || environment(who) != environment()) return;
+
+    string name = "traveller";
+    if (function_exists("query_name", who))
+        name = who->query_name();
+
+    tell_object(who,
+        "\nArchimedes ruffles his feathers and fixes you with an amber gaze.\n" +
+        "'Ah, " + name + ". Welcome to your workroom,' the owl says.\n" +
+        "'I am Archimedes. If you need guidance on your tools or duties,\n" +
+        " simply ask archimedes about <topic> — I know a thing or two.'\n\n" +
+        "Topics: tools, wiztool, goto, stat, promote, demote, warmboot,\n" +
+        "        shutdown, grantskill, reequip, setrole, commands, help\n\n");
+}
+
+// Handle "ask archimedes about <topic>"
+void receive_ask(object who, string topic) {
+    if (!who) return;
+    if (!topic || topic == "") {
+        tell_object(who,
+            "Archimedes tilts his head. 'About what, exactly?'\n");
+        return;
+    }
+
+    topic = lower_case(topic);
+    string response = lookup_topic(topic);
+
+    if (response) {
+        tell_object(who, "\nArchimedes clacks his beak thoughtfully.\n" +
+            response + "\n");
+    } else {
+        tell_object(who,
+            "\nArchimedes blinks slowly.\n" +
+            "'I do not know about that. Try: tools, wiztool, goto, stat,\n" +
+            " promote, demote, warmboot, shutdown, grantskill, reequip,\n" +
+            " setrole, commands, or help.'\n\n");
+    }
+}
+
+string lookup_topic(string topic) {
+    if (topic == "help" || topic == "topics") {
+        return
+            "'You may ask me about any of these:'\n" +
+            "  tools      — overview of your wiz-tool inventory items\n" +
+            "  wiztool    — the wizard development tool (eval, cd, ls, clone)\n" +
+            "  goto       — teleport to any room\n" +
+            "  stat       — inspect objects and players\n" +
+            "  promote    — grant wizard privileges to a player\n" +
+            "  demote     — revoke wizard privileges\n" +
+            "  warmboot   — reload all LPC files without restarting\n" +
+            "  shutdown   — shut down the server\n" +
+            "  grantskill — award skills to players (RP reward tool)\n" +
+            "  reequip    — restore your admin wiz-tool items\n" +
+            "  setrole    — change a wizard's role assignment\n" +
+            "  commands   — quick reference of all admin commands\n";
+    }
+
+    if (topic == "tools" || topic == "inventory" || topic == "items") {
+        return
+            "'As an administrator you carry eight wiz-tools. Each is a\n" +
+            " physical item in your inventory — examine them for details.\n\n" +
+            "  wizard staff     — focus spells, compel obedience\n" +
+            "  staff handbook   — policies and procedure guide\n" +
+            "  crystal ball     — remote scrying (observe rooms/players)\n" +
+            "  admin wand       — high-level admin control\n" +
+            "  QCS builder tool — Quick-Construction System for building\n" +
+            "  RP-Wizard tool   — manage player skill assignments\n" +
+            "  admin orb        — server status and player monitoring\n" +
+            "  code tool        — reload, update, inspect live objects\n\n" +
+            " Lost an item? Type: reequip'\n";
+    }
+
+    if (topic == "wiztool" || topic == "wiz" || topic == "eval" ||
+        topic == "cd" || topic == "ls" || topic == "clone") {
+        return
+            "'The wiztool is your development environment. Load it first,\n" +
+            " then use the wiz command to run sub-commands:\n\n" +
+            "  wiz cd <path>       — change directory\n" +
+            "  wiz ls [path]       — list files in a directory\n" +
+            "  wiz pwd             — print working directory\n" +
+            "  wiz cat <file>      — display file contents\n" +
+            "  wiz clone <file>    — create a live instance of an object\n" +
+            "  wiz eval <expr>     — evaluate an LPC expression\n" +
+            "  wiz ed <file>       — open the line editor\n" +
+            "  wiz grep <pat> <p>  — search files for a pattern\n" +
+            "  wiz find <name>     — find files by name\n\n" +
+            " The eval command is especially useful for testing LPC\n" +
+            " expressions and inspecting live game state.'\n";
+    }
+
+    if (topic == "goto" || topic == "teleport") {
+        return
+            "'The goto command teleports you to any loadable room:\n\n" +
+            "  goto <room_path>\n\n" +
+            " Example: goto /domains/new_camelot/town_square\n\n" +
+            " You can also use goto to reach player locations if you\n" +
+            " know the room path. Check the orb for player locations.'\n";
+    }
+
+    if (topic == "stat" || topic == "stats") {
+        return
+            "'The stat command shows object information:\n\n" +
+            "  stat            — stat your current room\n" +
+            "  stat me         — stat yourself\n" +
+            "  stat <path>     — stat a specific object by file path\n\n" +
+            " Shows file path, object ID, short description, and\n" +
+            " environment. Useful for debugging rooms and objects.'\n";
+    }
+
+    if (topic == "promote" || topic == "promotion") {
+        return
+            "'The promote command grants wizard privileges and a role:\n\n" +
+            "  promote <player> <role>\n\n" +
+            " Roles:  rp (level 1), coding (level 2),\n" +
+            "         domain (level 3), admin (level 4)\n\n" +
+            " On first promotion, the player receives a personal workroom,\n" +
+            " a wizkit with tools, and is teleported to their new room.\n" +
+            " The promotion is announced to staff and logged.'\n";
+    }
+
+    if (topic == "demote" || topic == "demotion") {
+        return
+            "'The demote command revokes wizard privileges:\n\n" +
+            "  demote <player>\n\n" +
+            " Sets the player back to privilege level 0 (normal player).\n" +
+            " Their character data, stats, and inventory are preserved\n" +
+            " — only the wiztool is removed.'\n";
+    }
+
+    if (topic == "warmboot" || topic == "warm boot" || topic == "reload") {
+        return
+            "'Warmboot reloads all .lpc files in the lib/ and domains/\n" +
+            " directories without restarting the server:\n\n" +
+            "  warmboot\n\n" +
+            " You will be asked to confirm (y/n). Every reloaded file\n" +
+            " is logged to /log/warmboot.log. Use this after editing\n" +
+            " LPC code to apply changes without disconnecting players.'\n";
+    }
+
+    if (topic == "shutdown" || topic == "shut down") {
+        return
+            "'The shutdown command stops the entire server:\n\n" +
+            "  shutdown\n\n" +
+            " A warning is broadcast to all connected players before\n" +
+            " the server halts. Use with extreme caution — all players\n" +
+            " will be disconnected. Admin-only.'\n";
+    }
+
+    if (topic == "grantskill" || topic == "grant skill" ||
+        topic == "giveskill" || topic == "skill") {
+        return
+            "'Grantskill awards or improves skills for players:\n\n" +
+            "  grantskill <player> <skill> [percentage]\n\n" +
+            " Defaults to 30% if percentage is omitted.\n" +
+            " Special formats: spell:<id> and psi:<id> for magic/psionics.\n\n" +
+            " Examples:\n" +
+            "  grantskill valery pilot_hover_cycle 65\n" +
+            "  grantskill marcus weapon_systems\n\n" +
+            " Actions are logged to /log/wizard/rpwiz.log.'\n";
+    }
+
+    if (topic == "reequip" || topic == "re-equip" || topic == "equip") {
+        return
+            "'If you have lost any of your eight admin wiz-tool items,\n" +
+            " the reequip command restores them all:\n\n" +
+            "  reequip\n\n" +
+            " Restores: staff, handbook, crystal ball, admin wand,\n" +
+            " QCS tool, RP tool, admin orb, and code tool.\n" +
+            " Admin-only.'\n";
+    }
+
+    if (topic == "setrole" || topic == "set role" || topic == "role") {
+        return
+            "'Setrole changes an already-promoted wizard's role:\n\n" +
+            "  setrole <player> <role>\n\n" +
+            " Roles: admin, domain, coding, rp\n\n" +
+            " This adjusts both the role title and the privilege level.\n" +
+            " Use this instead of demote+promote when a wizard is\n" +
+            " switching departments.'\n";
+    }
+
+    if (topic == "commands" || topic == "command" || topic == "list" ||
+        topic == "reference" || topic == "quick reference") {
+        return
+            "'Here is a quick reference of admin-level commands:\n\n" +
+            " Building & Code:\n" +
+            "  wiztool / wiz    — development environment\n" +
+            "  warmboot         — reload all LPC files\n" +
+            "  stat <obj>       — inspect an object\n\n" +
+            " Navigation:\n" +
+            "  goto <path>      — teleport to a room\n" +
+            "  home             — return to your workroom\n\n" +
+            " Staff Management:\n" +
+            "  promote <p> <r>  — grant wizard privileges\n" +
+            "  demote <p>       — revoke wizard privileges\n" +
+            "  setrole <p> <r>  — change wizard role\n\n" +
+            " Player Management:\n" +
+            "  grantskill       — award skills to players\n" +
+            "  reequip          — restore your admin tools\n\n" +
+            " Server:\n" +
+            "  shutdown         — stop the server\n" +
+            "  orb <subcmd>     — server monitoring\n\n" +
+            " Type ask archimedes about <topic> for details on any.'\n";
+    }
+
+    if (topic == "orb" || topic == "admin orb" || topic == "monitor") {
+        return
+            "'The admin orb monitors server status and players:\n\n" +
+            "  orb status       — full system overview\n" +
+            "  orb players      — all online players with stats\n" +
+            "  orb find <name>  — detailed report on a player\n" +
+            "  orb staff        — staff roster with roles\n" +
+            "  orb goto <name>  — teleport to a player\n" +
+            "  orb logs         — recent admin activity logs\n" +
+            "  orb uptime       — server uptime info\n\n" +
+            " Admin-only.'\n";
+    }
+
+    return 0;
+}
+
+// ---- Preserved legacy mechanic: catch_tell / complete_promotion ----
+// Listens for "say done" or "say finish" and triggers promotion completion.
 void catch_tell(string msg) {
     string speaker_name;
     string text;
@@ -41,12 +291,6 @@ void catch_tell(string msg) {
     int i;
 
     if (!msg) return;
-
-    // Try all known formats:
-    // "Name says: text\n"              (say.lpc dispatch / done.lpc)
-    // "Name says (in lang): text\n"    (say.lpc with language)
-    // "Name says 'text'\n"             (alternate format)
-    // "Name says, \"text\" in lang.\n" (native C driver format)
 
     speaker_name = "";
     text = "";
@@ -67,7 +311,6 @@ void catch_tell(string msg) {
 
     speaker_name = lower_case(speaker_name);
 
-    // Find the speaking object in the room
     room = environment(this_object());
     if (!room) return;
 
@@ -87,7 +330,6 @@ void catch_tell(string msg) {
 
     if (!speaker) return;
 
-    // Normalize text
     text = lower_case(text);
     while (strlen(text) > 0) {
         int last;
@@ -103,12 +345,10 @@ void catch_tell(string msg) {
     if (strsrch(text, "done") < 0 && strsrch(text, "finish") < 0) return;
 
     tell_object(speaker,
-        "\nArchimedes nods with quiet approval.\n" +
-        "'Very well. Your journey begins now,' he says.\n" +
-        "He steps back and fades from view.\n\n");
+        "\nArchimedes clacks his beak approvingly.\n" +
+        "'Very well. Your journey begins now,' the owl says,\n" +
+        "settling back on his perch with a satisfied ruffle.\n\n");
 
     if (function_exists("complete_promotion", speaker))
         speaker->complete_promotion();
-
-    destruct(this_object());
 }

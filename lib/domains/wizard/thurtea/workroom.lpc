@@ -14,4 +14,14 @@ void create() {
     add_exit("castle", "/domains/wizard/castle/main_hall");
     set_property("light", 2);
     set_property("indoors", 1);
+
+    /* Spawn Archimedes the owl guide */
+    object owl;
+    catch { owl = clone_object("/npc/archimedes"); };
+    if (owl) {
+        if (function_exists("move", owl))
+            owl->move(this_object());
+        else
+            move_object(owl, this_object());
+    }
 }

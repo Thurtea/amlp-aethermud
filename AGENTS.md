@@ -46,6 +46,17 @@ RULE 6 — Report before changing
 - For any task that will touch more than 3 files, list exactly what you plan to change and wait for explicit confirmation before making changes.
 
 
+RULE 7 — Never remove existing game mechanics
+- If a bug report describes unexpected output (e.g. "players show as A <race>"), diagnose WHY before touching the code.
+- The system producing that output may be an INTENTIONAL game mechanic (e.g. the introduction system where unintroduced players appear as "A <race>").
+- Do NOT remove or gut an existing system just because its output appears in a bug report.
+- First ask: "Is this system supposed to exist? Could the bug be upstream (wrong data, missing sync, privilege level bug)?" 
+- If you are unsure whether a system is intentional, ASK before changing it.
+- Examples of mechanics that must not be removed without explicit instruction:
+  - Introduction system (players appear as "A <race>" until introduced)
+  - Any command, daemon, or LPC object that was present in the codebase before this session
+
+
 Keep edits concise, reversible, and respectful of the engine/game split described above.
 
 

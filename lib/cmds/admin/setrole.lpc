@@ -64,13 +64,13 @@ int main(string args) {
 
     // Adjust privilege level based on role
     if (role == "admin") {
-        target->set_privilege_level(4);   /* PRIV_ADMIN */
+        set_privilege_level(target, 4);   /* PRIV_ADMIN */
     } else if (role == "domain") {
-        target->set_privilege_level(3);   /* PRIV_DOMAIN */
+        set_privilege_level(target, 3);   /* PRIV_DOMAIN */
     } else if (role == "coding") {
-        target->set_privilege_level(2);   /* PRIV_CODING */
+        set_privilege_level(target, 2);   /* PRIV_CODING */
     } else {  /* rp */
-        target->set_privilege_level(1);   /* PRIV_ROLEPLAY */
+        set_privilege_level(target, 1);   /* PRIV_ROLEPLAY */
     }
 
     // Detach old wiztool and attach the appropriate one

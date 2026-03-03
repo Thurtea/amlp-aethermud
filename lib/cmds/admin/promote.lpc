@@ -81,7 +81,7 @@ int main(string arg) {
     string old_title = old_level < sizeof(level_names) ? level_names[old_level] : "Unknown";
 
     /* Apply privilege level + role atomically */
-    target->set_privilege_level(new_level);
+    set_privilege_level(target, new_level);
     if (function_exists("set_property", target))
         target->set_property("wizard_role", role);
 

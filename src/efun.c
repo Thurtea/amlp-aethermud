@@ -2286,6 +2286,37 @@ VMValue efun_debug_mem_stats(VirtualMachine *vm, VMValue *args, int arg_count) {
     return vm_value_create_string(buffer);
 }
 
+/* ========== Privilege level sync efun ========== */
+
+/* set_privilege_level(object player, int level)
+ * Updates both the C session struct (sess->privilege_level) and calls the
+ * LPC set_privilege_level() method so the two layers stay in sync.
+ * Returns 1 on success, 0 if the object or level is invalid.
+ */
+VMValue efun_set_privilege_level(VirtualMachine *vm, VMValue *args, int arg_count) {
+    if (arg_count < 2 || args[0].type != VALUE_OBJECT || args[1].type != VALUE_INT) {
+        return vm_value_create_int(0);
+    }
+    obj_t *po = (obj_t *)args[0].data.object_value;
+    if (!po) return vm_value_create_int(0);
+    int level = (int)args[1].data.int_value;
+    if (level < 0 || level > 4) return vm_value_create_int(0);
+
+    /* Update C session struct so who/orb command reads the new level */
+    PlayerSession *sess = find_session_for_player(po);
+    if (sess) {
+        sess->privilege_level = level;
+    }
+
+    /* Call LPC set_privilege_level() to update title, short name, wiztool, etc. */
+    VMValue lv_arg = vm_value_create_int(level);
+    VMValue res = obj_call_method(vm, po, "set_privilege_level", &lv_arg, 1);
+    vm_value_release(&lv_arg);
+    if (res.type != VALUE_UNINITIALIZED) vm_value_release(&res);
+
+    return vm_value_create_int(1);
+}
+
 /* ========== Terminal dimension efuns ========== */
 
 VMValue efun_query_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count) {
@@ -3066,6 +3097,9 @@ int efun_register_all(EfunRegistry *registry) {
     efun_register(registry, "file_mtime", efun_file_mtime, 1, 1, "int file_mtime(string)");
     /* Player state efun */
     efun_register(registry, "set_resting", efun_set_resting, 1, 1, "int set_resting(int)");
+    /* Privilege level sync: updates C session AND LPC player object atomically */
+    efun_register(registry, "set_privilege_level", efun_set_privilege_level, 2, 2,
+                  "int set_privilege_level(object, int)");
 
     /* Callout efuns */
     efun_register(registry, "call_out", efun_call_out, 2, 10, "int call_out(string, float, ...)");

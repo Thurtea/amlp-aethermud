@@ -173,6 +173,9 @@ VMValue efun_debug_dump_call_stack(VirtualMachine *vm, VMValue *args, int arg_co
 VMValue efun_debug_dump_bytecode(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_debug_mem_stats(VirtualMachine *vm, VMValue *args, int arg_count);
 
+/* Privilege level sync efun */
+VMValue efun_set_privilege_level(VirtualMachine *vm, VMValue *args, int arg_count);
+
 /* Terminal size efuns */
 VMValue efun_query_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count);
 VMValue efun_set_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count);

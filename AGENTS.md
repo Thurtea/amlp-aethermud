@@ -55,6 +55,15 @@ RULE 7 — Never remove existing game mechanics
 - Examples of mechanics that must not be removed without explicit instruction:
   - Introduction system (players appear as "A <race>" until introduced)
   - Any command, daemon, or LPC object that was present in the codebase before this session
+RULE 8 — Never run git commands
+- Do not run git add, git commit, git push, git pull, git rebase, or any other git command.
+- The developer handles all version control operations manually.
+- You may READ git status or git diff for diagnostic purposes only.
+
+RULE 9 — No server management commands
+- Do not run ./mud.sh, start/stop/restart the server, or interact with the running process in any way.
+- The developer starts, stops, and tests the server manually using Mudlet.
+- Your job is to write and fix code only.
 
 
 Keep edits concise, reversible, and respectful of the engine/game split described above.

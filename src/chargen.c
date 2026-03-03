@@ -522,6 +522,14 @@ void chargen_create_admin(PlayerSession *sess) {
     strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role) - 1);
     sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
 
+    /* Sync privilege to LPC player object */
+    if (sess->player_object && global_vm) {
+        VMValue parg = vm_value_create_int(sess->privilege_level);
+        obj_call_method(global_vm, (obj_t *)sess->player_object,
+            "set_privilege_level", &parg, 1);
+        vm_value_release(&parg);
+    }
+
     /* Create wizard workroom and place admin there */
     Room *workroom = setup_wizard_workroom(sess->username, "admin");
     if (workroom) {

@@ -2306,6 +2306,10 @@ VMValue efun_set_privilege_level(VirtualMachine *vm, VMValue *args, int arg_coun
     PlayerSession *sess = find_session_for_player(po);
     if (sess) {
         sess->privilege_level = level;
+        /* Clear wizard_role on demotion to player */
+        if (level == 0) {
+            sess->wizard_role[0] = '\0';
+        }
     }
 
     /* Call LPC set_privilege_level() to update title, short name, wiztool, etc. */

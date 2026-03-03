@@ -60,7 +60,7 @@ int main(string args) {
     }
 
     // Strip privilege and role
-    target->set_privilege_level(0);
+    set_privilege_level(target, 0);
     if (function_exists("set_property", target)) {
         target->set_property("wizard_role", "");
     }

@@ -192,6 +192,7 @@ void chargen_complete(PlayerSession *sess);
 
 /* Commands */
 void cmd_stats(PlayerSession *sess, const char *args);
+void cmd_disposition(PlayerSession *sess, const char *args);
 void cmd_skills(PlayerSession *sess, const char *args);
 void cmd_attack(PlayerSession *sess, const char *args);
 void cmd_strike(PlayerSession *sess, const char *args);

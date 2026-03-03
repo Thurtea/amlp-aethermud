@@ -1225,20 +1225,54 @@ VMValue efun_get_dir(VirtualMachine *vm, VMValue *args, int arg_count) {
     if (args[0].type != VALUE_STRING) return vm_value_create_null();
 
     const char *path = args[0].data.string_value;
-    char resolved[PATH_MAX];
-    if (!resolve_safe_path(path, resolved, sizeof(resolved))) {
-        return vm_value_create_null();
+
+    /* Map LPC path to filesystem path (same logic as load_object).
+     * Strip leading '/', strip 'lib/' prefix, prepend mudlib root. */
+    const char *mudlib = getenv("AMLP_MUDLIB");
+    if (!mudlib || !*mudlib) mudlib = "./lib";
+
+    const char *p_raw = (path[0] == '/') ? path + 1 : path;
+    const char *p = (strncmp(p_raw, "lib/", 4) == 0) ? p_raw + 4 : p_raw;
+
+    /* Separate directory and optional glob suffix (e.g. "*.lpc") */
+    char dir_part[PATH_MAX];
+    char glob_suffix[64] = "";
+    snprintf(dir_part, sizeof(dir_part), "%s", p);
+
+    /* If the last component contains a wildcard, split it off */
+    char *last_slash = strrchr(dir_part, '/');
+    char *check = last_slash ? last_slash + 1 : dir_part;
+    if (strchr(check, '*') || strchr(check, '?')) {
+        snprintf(glob_suffix, sizeof(glob_suffix), "%s", check);
+        *check = '\0';  /* truncate dir_part at the glob */
+        /* Remove trailing slash if dir_part is now empty */
+        if (dir_part[0] == '\0') snprintf(dir_part, sizeof(dir_part), ".");
     }
 
-    DIR *d = opendir(resolved);
+    char fs_dir[PATH_MAX];
+    snprintf(fs_dir, sizeof(fs_dir), "%s/%s", mudlib, dir_part);
+
+    DIR *d = opendir(fs_dir);
     if (!d) return vm_value_create_null();
 
     array_t *arr = array_new(vm->gc, 8);
     if (!arr) { closedir(d); return vm_value_create_null(); }
 
+    /* Simple glob matching: only supports "*.ext" pattern */
+    const char *required_ext = NULL;
+    if (glob_suffix[0] == '*' && glob_suffix[1] == '.') {
+        required_ext = glob_suffix + 1;  /* e.g. ".lpc" */
+    }
+
     struct dirent *ent;
     while ((ent = readdir(d)) != NULL) {
         if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+        if (required_ext) {
+            size_t nlen = strlen(ent->d_name);
+            size_t elen = strlen(required_ext);
+            if (nlen < elen || strcmp(ent->d_name + nlen - elen, required_ext) != 0)
+                continue;
+        }
         VMValue v = vm_value_create_string(ent->d_name);
         array_push(arr, v);
     }

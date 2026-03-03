@@ -609,6 +609,14 @@ void chargen_create_admin(PlayerSession *sess) {
         send_to_player(sess, "Warning: Failed to save character.\n\n");
     }
 
+    /* Sync privilege level to LPC player object */
+    if (sess->player_object && sess->privilege_level > 0) {
+        VMValue parg = vm_value_create_int(sess->privilege_level);
+        obj_call_method(global_vm, sess->player_object,
+            "set_privilege_level", &parg, 1);
+        vm_value_release(&parg);
+    }
+
     /* Show starting room */
     cmd_look(sess, "");
     send_to_player(sess, "\n> ");
@@ -1132,6 +1140,14 @@ void chargen_complete(PlayerSession *sess) {
     }
     /* --- end first_admin.txt gate --- */
 
+    /* Sync privilege level to LPC player object (needed for first_admin gate) */
+    if (sess->player_object && sess->privilege_level > 0) {
+        VMValue parg = vm_value_create_int(sess->privilege_level);
+        obj_call_method(global_vm, sess->player_object,
+            "set_privilege_level", &parg, 1);
+        vm_value_release(&parg);
+    }
+
     /* If first-boot admin, move to orientation room at C level so cmd_look
      * and movement use the correct room.  LPC-level placement is handled
      * separately by _do_first_boot_orientation() in player.lpc. */
@@ -1154,11 +1170,18 @@ void chargen_complete(PlayerSession *sess) {
 
     /* Staff-only: new character creation announcement */
     char staff_msg[256];
-    snprintf(staff_msg, sizeof(staff_msg),
-            "[Staff] %s created a new character (%s %s).\r\n",
-            sess->username,
-            sess->character.race ? sess->character.race : "unknown",
-            sess->character.occ ? sess->character.occ : "Vagabond");
+    const char *race_str = sess->character.race ? sess->character.race : "unknown";
+    const char *occ_str  = sess->character.occ  ? sess->character.occ  : "Pending";
+    /* For RCC races the OCC already contains the race name — show OCC only */
+    if (sess->character.occ && strcasestr(sess->character.occ, race_str)) {
+        snprintf(staff_msg, sizeof(staff_msg),
+                "[Chargen] %s created a new character (%s).\r\n",
+                sess->username, occ_str);
+    } else {
+        snprintf(staff_msg, sizeof(staff_msg),
+                "[Chargen] %s created a new character (%s %s).\r\n",
+                sess->username, race_str, occ_str);
+    }
     staff_message(staff_msg, sess);
 }
 
@@ -1381,6 +1404,22 @@ void cmd_stats(PlayerSession *sess, const char *args) {
     }
     
     chargen_display_stats(sess);
+}
+
+/* Disposition command - shows player alignment */
+void cmd_disposition(PlayerSession *sess, const char *args) {
+    (void)args;
+    if (!sess) return;
+    if (sess->state != STATE_PLAYING) {
+        send_to_player(sess, "You must complete character creation first.\n");
+        return;
+    }
+    Character *ch = &sess->character;
+    if (ch->alignment) {
+        send_to_player(sess, "Your disposition is: %s\n", ch->alignment);
+    } else {
+        send_to_player(sess, "Your disposition has not been set.\n");
+    }
 }
 
 /* Skills command */

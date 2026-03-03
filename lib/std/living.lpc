@@ -658,40 +658,11 @@ int query_introduced(object ob) {
 // Returns actual name if introduced or if observer is admin/wizard
 // Otherwise returns race description like "a human" or "an elf"
 string query_introduction_name(object observer) {
-    // Wizards and admins always see real names
-    if (observer && function_exists("query_wizard_level", observer)) {
-        if (observer->query_wizard_level() > 0) {
-            string n;
-            n = query_real_name();
-            if (!n || n == "") n = query_name();
-            return n;
-        }
-    }
-    
-    // Check if introduced
-    if (observer && introduced_to && introduced_to[observer]) {
-        string n;
-        n = query_real_name();
-        if (!n || n == "") n = query_name();
-        return n;
-    }
-    
-    // Not introduced - show race description
-    string race;
-    race = query_race();
-    if (!race || race == "") race = "creature";
-    
-    // Add article (a/an) based on first letter
-    string first;
-    first = race[0..0];
-    string article;
-    article = "a";
-    if (first == "a" || first == "e" || first == "i" || first == "o" || first == "u" ||
-        first == "A" || first == "E" || first == "I" || first == "O" || first == "U") {
-        article = "an";
-    }
-    
-    return article + " " + race;
+    string n;
+    n = query_real_name();
+    if (!n || n == "") n = query_name();
+    if (!n || n == "") n = "someone";
+    return n;
 }
 
 /**

@@ -2170,6 +2170,12 @@ VMValue execute_command(PlayerSession *session, const char *command) {
         return result;
     }
 
+    if (strcmp(cmd, "disposition") == 0) {
+        cmd_disposition(session, args ? args : "");
+        result.type = VALUE_NULL;
+        return result;
+    }
+
     if (strcmp(cmd, "xp") == 0 || strcmp(cmd, "experience") == 0) {
         int cur_xp = 0, cur_lvl = 0;
         obj_t *lpc_obj = (obj_t *)session->player_object;

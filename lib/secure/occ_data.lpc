@@ -20,14 +20,16 @@ string *query_all_occs() {
 void load_occs() {
     string *files;
     string f;
-    int i;
     object ob;
     files = get_dir("/occs/*.lpc");
     if (!files) return;
+    int i;
+    int len;
+    len = sizeof(files);
     i = 0;
-    while (i < sizeof(files)) {
+    while (i < len) {
         f = files[i];
-        catch { ob = load_object("/occs/" + f); }
-        i++;
+        catch { ob = load_object("/occs/" + f); };
+        i = i + 1;
     }
 }

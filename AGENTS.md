@@ -33,3 +33,8 @@ RULE 6 — Report before changing
 - For any task that will touch more than 3 files, list exactly what you plan to change and wait for explicit confirmation before making changes.
 
 Keep edits concise, reversible, and respectful of the engine/game split described above.
+
+KNOWN VM BUG: sizeof() returns 1 for arrays returned by explode().
+DO NOT use explode() + sizeof() pattern anywhere in LPC.
+Use strsrch() + substring() for string splitting instead.
+See: lib/obj/wiztools/qcs_tool.lpc for working pattern.

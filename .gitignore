@@ -42,8 +42,6 @@ Thumbs.db
 # AI context files (local only, do not commit)
 **/llm_breadcrumb.md
 lib/llm_entries/
-mud-references-deadsouls/
-mud-references/
 scripts/
 /scripts/
 

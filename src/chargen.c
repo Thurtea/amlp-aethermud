@@ -219,16 +219,6 @@ int create_wizard_workroom(const char *username) {
         "    add_exit(\"out\", \"/domains/new_camelot/town_square\");\n"
         "    set_property(\"light\", 2);\n"
         "    set_property(\"indoors\", 1);\n"
-        "\n"
-        "    /* Spawn Archimedes the owl guide */\n"
-        "    object owl;\n"
-        "    catch { owl = clone_object(\"/npc/archimedes\"); };\n"
-        "    if (owl) {\n"
-        "        if (function_exists(\"move\", owl))\n"
-        "            owl->move(this_object());\n"
-        "        else\n"
-        "            move_object(owl, this_object());\n"
-        "    }\n"
         "}\n",
         username, username);
 
@@ -421,8 +411,8 @@ Room* setup_wizard_workroom(const char *username, const char *wizard_role) {
     atm->value = 0;
     container_add_item(chest, atm);
 
-    /* Spawn a Moxim NPC in the workroom so 'rift' command works here */
-    npc_spawn(NPC_MOXIM, workroom->id);
+    /* Spawn Archimedes the owl guide in the workroom */
+    npc_spawn(NPC_ARCHIMEDES, workroom->id);
 
     fprintf(stderr, "[Chargen] Populated workroom for %s (role: %s)\n",
             username, wizard_role ? wizard_role : "none");
@@ -437,23 +427,23 @@ void chargen_create_admin(PlayerSession *sess) {
 
     /* Set race only - no OCC for admin (assign later via 'set') */
     ch->race = strdup("Human");
-    ch->occ = NULL;
+    ch->occ = strdup("Admin");
 
-    /* Solid baseline stats (all 15) */
-    ch->stats.iq = 15;
-    ch->stats.me = 15;
-    ch->stats.ma = 15;
-    ch->stats.ps = 15;
-    ch->stats.pp = 15;
-    ch->stats.pe = 15;
-    ch->stats.pb = 15;
-    ch->stats.spd = 15;
+    /* Solid baseline stats (all 10) */
+    ch->stats.iq = 10;
+    ch->stats.me = 10;
+    ch->stats.ma = 10;
+    ch->stats.ps = 10;
+    ch->stats.pp = 10;
+    ch->stats.pe = 10;
+    ch->stats.pb = 10;
+    ch->stats.spd = 10;
 
     /* Derived pools */
     ch->level = 1;
     ch->xp = 0;
-    ch->hp = ch->stats.pe + roll_1d6();
-    ch->max_hp = ch->hp;
+    ch->hp = 20;
+    ch->max_hp = 20;
     ch->sdc = 20;
     ch->max_sdc = 20;
     ch->health_type = HP_SDC;
@@ -464,7 +454,7 @@ void chargen_create_admin(PlayerSession *sess) {
     ch->ppe = 0;
     ch->max_ppe = 0;
     ch->credits = 1000;
-    ch->alignment = strdup("Scrupulous");
+    ch->alignment = strdup("Principled");
     ch->clan = NULL;
 
     /* Lives */
@@ -526,6 +516,11 @@ void chargen_create_admin(PlayerSession *sess) {
         atm_card->value = 0;
         inventory_add(&ch->inventory, atm_card);
     }
+
+    /* Set admin privilege level and role */
+    sess->privilege_level = 4;
+    strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role) - 1);
+    sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
 
     /* Create wizard workroom and place admin there */
     Room *workroom = setup_wizard_workroom(sess->username, "admin");
@@ -598,7 +593,9 @@ void chargen_create_admin(PlayerSession *sess) {
     /* Welcome message */
     send_to_player(sess, "\n");
     send_to_player(sess, "=========================================\n");
-    send_to_player(sess, "  Welcome, Administrator!\n");
+    send_to_player(sess, "  Welcome, %s.\n", sess->username);
+    send_to_player(sess, "  You are the first administrator\n");
+    send_to_player(sess, "  of this MUD.\n");
     send_to_player(sess, "=========================================\n");
     send_to_player(sess, "\n");
     send_to_player(sess, "Your admin character has been auto-created.\n");

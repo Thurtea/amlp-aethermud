@@ -24,6 +24,7 @@ typedef enum {
     NPC_MOXIM,
     NPC_SPIKE,              /* Wizard Castle dog — friendly, pettable */
     NPC_MAGE,               /* Rogue mage — casts Fireball in combat */
+    NPC_ARCHIMEDES,         /* Admin guide owl — non-aggro, immortal */
     NPC_TEMPLATE_COUNT
 } NpcTemplateId;
 
@@ -48,6 +49,7 @@ typedef struct {
     int can_pet;                /* 1 = responds to "pet <keyword>" */
     const char *long_desc;      /* Shown when examined (NULL = generic stat block) */
     const char *position_text;  /* Shown in room: "lounges by the fire" etc. */
+    const char *lpc_path;       /* LPC object path for VM dispatch (NULL = none) */
 } NpcTemplate;
 
 /* NPC instance (runtime) */

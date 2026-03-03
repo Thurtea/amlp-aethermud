@@ -131,6 +131,29 @@ const NpcTemplate NPC_TEMPLATES[NPC_TEMPLATE_COUNT] = {
             "on the staff gripped in one hand, and an unsettling energy crackles\n"
             "around their fingertips. This one has clearly gone rogue.\n",
         .position_text = "stands here studying a tattered spellbook."
+    },
+    /* Archimedes: admin guide owl — non-aggro, immortal, LPC-backed */
+    {
+        .template_id = NPC_ARCHIMEDES,
+        .name = "Archimedes the owl", .keyword = "archimedes",
+        .level = 99, .health_type = HP_SDC,
+        .hp = 9999, .max_hp = 9999, .sdc = 9999, .max_sdc = 9999, .mdc = 0, .max_mdc = 0,
+        .attacks_per_round = 0, .parries_per_round = 0,
+        .auto_parry = 1, .auto_dodge = 1,
+        .iq = 30, .me = 30, .ma = 30, .ps = 10, .pp = 20, .pe = 30, .pb = 18, .spd = 30,
+        .weapon_dice = 0, .weapon_sides = 0, .weapon_name = "none",
+        .xp_reward = 0, .aggro = 0,
+        .can_pet = 0,
+        .long_desc =
+            "A great horned owl with tawny feathers and piercing amber eyes.\n"
+            "Archimedes perches on a gnarled staff mounted to the wall, watching\n"
+            "you with an intelligence that borders on unsettling. A tiny scroll\n"
+            "case hangs from a leather jess around one talon.\n\n"
+            "Type: ask archimedes about <topic>\n"
+            "Topics: tools, wiztool, goto, stat, promote, demote, warmboot,\n"
+            "        shutdown, grantskill, reequip, setrole, commands, help\n",
+        .position_text = "is perched on a gnarled staff, watching quietly.",
+        .lpc_path = "/npc/archimedes"
     }
 };
 

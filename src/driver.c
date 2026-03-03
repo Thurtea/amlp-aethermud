@@ -4968,6 +4968,97 @@ more_room_source:
         return vm_value_create_string(nomatch);
     }
 
+    /* ASK - Ask an NPC about a topic */
+    if (strcmp(cmd, "ask") == 0) {
+        if (!args || !*args) {
+            return vm_value_create_string(
+                "Usage: ask <npc> about <topic>\r\n");
+        }
+        if (!session->current_room) {
+            return vm_value_create_string("You are nowhere.\r\n");
+        }
+
+        /* Parse "ask <name> about <topic>" */
+        const char *about_ptr = strcasestr(args, " about ");
+        if (!about_ptr) {
+            return vm_value_create_string(
+                "Usage: ask <npc> about <topic>\r\n");
+        }
+
+        /* Extract NPC name */
+        int name_len = (int)(about_ptr - args);
+        char npc_name[64];
+        if (name_len >= (int)sizeof(npc_name)) name_len = (int)sizeof(npc_name) - 1;
+        strncpy(npc_name, args, name_len);
+        npc_name[name_len] = '\0';
+
+        /* Extract topic */
+        const char *topic = about_ptr + 7; /* skip " about " */
+        while (*topic == ' ') topic++;
+        if (!*topic) {
+            return vm_value_create_string(
+                "Usage: ask <npc> about <topic>\r\n");
+        }
+
+        /* Find C NPC in room by keyword */
+        NPC *n = npc_find_in_room(session->current_room, npc_name);
+        if (!n || !n->is_alive) {
+            char nomsg[128];
+            snprintf(nomsg, sizeof(nomsg),
+                "You don't see '%s' here.\r\n", npc_name);
+            return vm_value_create_string(nomsg);
+        }
+
+        /* Check if NPC has an LPC object for dispatch */
+        const NpcTemplate *tmpl = &NPC_TEMPLATES[n->template_id];
+        if (tmpl->lpc_path && global_vm) {
+            /* Load the LPC object and call receive_ask(player, topic) */
+            VMValue path_val = vm_value_create_string(tmpl->lpc_path);
+            VMValue lpc_obj = efun_load_object(global_vm, &path_val, 1);
+            vm_value_release(&path_val);
+
+            if (lpc_obj.type == VALUE_OBJECT && lpc_obj.data.object_value) {
+                obj_t *npc_obj = (obj_t *)lpc_obj.data.object_value;
+
+                /* Build args: (player_object, topic_string) */
+                VMValue ask_args[2];
+                ask_args[0].type = VALUE_NULL; /* player context */
+                if (session->player_object) {
+                    ask_args[0].type = VALUE_OBJECT;
+                    ask_args[0].data.object_value = session->player_object;
+                }
+                ask_args[1] = vm_value_create_string(topic);
+
+                /* Set current session for tell_object efun */
+                set_current_session(session);
+
+                VMValue ask_result = obj_call_method(global_vm,
+                    npc_obj, "receive_ask", ask_args, 2);
+
+                vm_value_release(&ask_args[1]);
+                vm_value_release(&lpc_obj);
+
+                if (ask_result.type == VALUE_STRING &&
+                    ask_result.data.string_value) {
+                    return ask_result;
+                }
+                if (ask_result.type != VALUE_NULL)
+                    vm_value_release(&ask_result);
+
+                /* receive_ask used tell_object directly */
+                result.type = VALUE_NULL;
+                return result;
+            }
+            if (lpc_obj.type != VALUE_NULL) vm_value_release(&lpc_obj);
+        }
+
+        /* No LPC object — generic response */
+        char generic[256];
+        snprintf(generic, sizeof(generic),
+            "%s doesn't seem to know about that.\r\n", n->name);
+        return vm_value_create_string(generic);
+    }
+
     /* POSITION - Set position description */
     if (strcmp(cmd, "position") == 0) {
         if (!args || !*args) {
@@ -5503,6 +5594,33 @@ void process_login_state(PlayerSession *session, const char *input) {
             
             /* Clear password buffer */
             memset(session->password_buffer, 0, sizeof(session->password_buffer));
+
+            /* Check if this is the first admin (bypass chargen) */
+            {
+                FILE *fa = fopen("lib/etc/first_admin.txt", "r");
+                if (fa) {
+                    char fa_name[64];
+                    memset(fa_name, 0, sizeof(fa_name));
+                    if (fgets(fa_name, sizeof(fa_name), fa)) {
+                        int fa_len = (int)strlen(fa_name);
+                        while (fa_len > 0 &&
+                               (fa_name[fa_len-1] == '\n' || fa_name[fa_len-1] == '\r' ||
+                                fa_name[fa_len-1] == ' '  || fa_name[fa_len-1] == '\t')) {
+                            fa_name[--fa_len] = '\0';
+                        }
+                        if (fa_len > 0 && strcasecmp(fa_name, session->username) == 0) {
+                            fclose(fa);
+                            remove("lib/etc/first_admin.txt");
+                            fprintf(stderr,
+                                "[Chargen] first_admin.txt matched '%s' — fast admin path.\n",
+                                session->username);
+                            chargen_create_admin(session);
+                            break;
+                        }
+                    }
+                    fclose(fa);
+                }
+            }
 
                 /* All new players go through normal chargen.
                  * Admin privileges are granted post-chargen via lib/etc/first_admin.txt. */

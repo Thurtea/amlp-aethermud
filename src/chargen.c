@@ -616,7 +616,7 @@ void chargen_create_admin(PlayerSession *sess) {
     /* Staff announcement for admin creation */
     char staff_msg[256];
     snprintf(staff_msg, sizeof(staff_msg),
-             "[Staff] %s created a new Admin character.\r\n", sess->username);
+             "[Chargen] %s created a new Admin character.\r\n", sess->username);
     staff_message(staff_msg, sess);
 }
 
@@ -1068,7 +1068,7 @@ void chargen_complete(PlayerSession *sess) {
                     fa_name[--fa_len] = '\0';
                 }
                 if (fa_len > 0 && strcasecmp(fa_name, sess->username) == 0) {
-                    sess->privilege_level = 2;
+                    sess->privilege_level = 4;
                     strncpy(sess->wizard_role, "admin", sizeof(sess->wizard_role) - 1);
                     sess->wizard_role[sizeof(sess->wizard_role) - 1] = '\0';
                     fclose(fa);
@@ -1109,7 +1109,7 @@ void chargen_complete(PlayerSession *sess) {
     /* Staff-only: new character creation announcement */
     char staff_msg[256];
     snprintf(staff_msg, sizeof(staff_msg),
-            "[Staff] %s created a new character (%s %s).\r\n",
+            "[Chargen] %s created a new character (%s %s).\r\n",
             sess->username,
             sess->character.race ? sess->character.race : "unknown",
             sess->character.occ ? sess->character.occ : "Vagabond");

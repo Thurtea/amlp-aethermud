@@ -123,6 +123,7 @@ void init_commands() {
     commands["wiztool"] = "cmds/admin/wiztool";
     commands["wiz"] = "cmds/admin/wiz";
     commands["goto"] = "cmds/admin/goto";
+    commands["call"] = "cmds/admin/call";
     commands["stat"] = "cmds/admin/stat";
     commands["testskill"] = "cmds/admin/testskill";
     // QCS - Quick Creation System (domain/coding/admin roles)

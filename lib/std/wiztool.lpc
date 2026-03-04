@@ -73,7 +73,6 @@ int process_command(string verb, string args) {
 
         // Development commands
         case "eval":    cmd_eval(args); return 1;
-        case "call":    cmd_call(args); return 1;
         case "ed":      cmd_ed(args); return 1;
         case "trace":   cmd_trace(args); return 1;
         case "errors":  cmd_errors(); return 1;

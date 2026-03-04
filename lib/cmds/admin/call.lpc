@@ -62,9 +62,15 @@ int main(string args) {
     /* ---- Resolve target object ---- */
     if (obj_part == "me")
         target = this_player();
-    else if (obj_part == "here")
-        target = environment(this_player());
-    else {
+    else if (obj_part == "here") {
+        /* query_environment() reads LPC instance variable; environment() reads obj prop.
+         * C-level movement (goto) only updates session->current_room, not the LPC
+         * environment variable. Try both paths. */
+        if (function_exists("query_environment", this_player()))
+            target = this_player()->query_environment();
+        if (!target)
+            target = environment(this_player());
+    } else {
         target = load_object(obj_part);
         if (!target)
             target = find_player(obj_part);

@@ -1,55 +1,214 @@
 // /lib/cmds/admin/call.lpc
-// call - force a player to say something
-// Admin-only command
+// call - invoke a function on an object from the command line
+// Syntax: call <object>-><function>(<args>)
+// Reference: Dead Souls ds3.8.2 lib/secure/cmds/creators/call.c
 
 inherit "/std/cmd";
 
-int query_privilege_required() { return 4; }
+int query_privilege_required() { return 1; }
 
 string query_help() {
-    return "SYNTAX: call <player> <message>\n\n" +
-        "Forces the named online player to say a message.\n" +
-        "Useful for testing NPC speech triggers and response handlers.\n\n" +
-        "The player will emit: <player> says: <message>\n\n" +
-        "Example: call kael Hello there!\n\n" +
-        "See also: promote, setrole, demote\n";
+    return "SYNTAX: call <object>-><function>(<args>)\n\n" +
+        "Calls any function on any object from the command line.\n" +
+        "Object may be 'me', 'here', a file path, or a player name.\n" +
+        "Arguments may be integers, quoted strings, 'me', 'here',\n" +
+        "file paths, or player names. Up to 3 arguments supported.\n\n" +
+        "Examples:\n" +
+        "  call me->query_name()\n" +
+        "  call here->query_short()\n" +
+        "  call /std/room->query_short()\n" +
+        "  call kael->query_privilege_level()\n" +
+        "  call me->set_title(\"Grandmaster\")\n\n" +
+        "Non-admin (priv < 4) calls are logged to /log/wizard/call.log\n\n" +
+        "See also: eval, goto, stat\n";
 }
 
 int main(string args) {
-    string target_name, message;
-    object target;
+    string obj_part, func_part, arg_str, rest2;
+    string arg1_s, arg2_s, arg3_s;
+    string err, result_str, label, caller_name, tv;
+    object target, ob1, ob2, ob3;
+    mixed val, arg1, arg2, arg3;
+    int arrow_pos, paren_pos, comma1, comma2, slen;
+    int arg_count, my_priv;
 
     if (!args || args == "") {
-        write("Usage: call <player> <message>\n");
+        write("Usage: call <object>-><function>(<args>)\n");
         return 1;
     }
 
-    int sp = strsrch(args, " ");
-    if (sp < 0) {
-        write("Usage: call <player> <message>\n");
+    /* ---- Parse <object>-><function>(<args>) ---- */
+    arrow_pos = strsrch(args, "->");
+    if (arrow_pos < 0) {
+        write("Usage: call <object>-><function>(<args>)\n");
         return 1;
     }
+    obj_part  = substring(args, 0, arrow_pos);
+    func_part = substring(args, arrow_pos + 2);
 
-    target_name = lower_case(substring(args, 0, sp));
-    message     = substring(args, sp + 1);
-
-    if (!message || message == "") {
-        write("Usage: call <player> <message>\n");
+    paren_pos = strsrch(func_part, "(");
+    if (paren_pos < 0) {
+        write("Usage: call <object>-><function>(<args>)\n");
         return 1;
     }
+    arg_str   = substring(func_part, paren_pos + 1);
+    func_part = substring(func_part, 0, paren_pos);
 
-    target = find_player(target_name);
+    /* Strip trailing ")" */
+    slen = strlen(arg_str);
+    if (slen > 0 && substring(arg_str, slen - 1) == ")")
+        arg_str = substring(arg_str, 0, slen - 1);
+
+    /* ---- Resolve target object ---- */
+    if (obj_part == "me")
+        target = this_player();
+    else if (obj_part == "here")
+        target = environment(this_player());
+    else {
+        target = load_object(obj_part);
+        if (!target)
+            target = find_player(obj_part);
+    }
+
     if (!target) {
-        write("Player '" + target_name + "' is not online.\n");
+        write("Cannot identify any object as \"" + obj_part + "\".\n");
         return 1;
     }
 
-    if (function_exists("force_me", target)) {
-        target->force_me("say " + message);
-        write("Called " + capitalize(target_name) + ": " + message + "\n");
-    } else {
-        write("Cannot force " + capitalize(target_name) + " (no force_me method).\n");
+    /* ---- Check function exists ---- */
+    if (!function_exists(func_part, target)) {
+        write("Function " + func_part + "() not found in " +
+            file_name(target) + ".\n");
+        return 1;
     }
 
+    /* ---- Log non-admin use ---- */
+    my_priv = 0;
+    if (function_exists("query_privilege_level", this_player()))
+        my_priv = (int)this_player()->query_privilege_level();
+    if (my_priv < 4) {
+        caller_name = "";
+        if (function_exists("query_name", this_player()))
+            caller_name = (string)this_player()->query_name();
+        write_file("/log/wizard/call.log",
+            "[" + ctime() + "] " + caller_name +
+            " (priv " + my_priv + "): call " + args + "\n");
+    }
+
+    /* ---- Parse up to 3 comma-separated arguments ---- */
+    arg_count = 0;
+    arg1_s = ""; arg2_s = ""; arg3_s = "";
+    if (arg_str != "") {
+        comma1 = strsrch(arg_str, ",");
+        if (comma1 < 0) {
+            arg1_s    = arg_str;
+            arg_count = 1;
+        } else {
+            arg1_s = substring(arg_str, 0, comma1);
+            rest2  = substring(arg_str, comma1 + 1);
+            comma2 = strsrch(rest2, ",");
+            if (comma2 < 0) {
+                arg2_s    = rest2;
+                arg_count = 2;
+            } else {
+                arg2_s    = substring(rest2, 0, comma2);
+                arg3_s    = substring(rest2, comma2 + 1);
+                arg_count = 3;
+            }
+        }
+    }
+
+    /* ---- Resolve arg1 ---- */
+    if (arg_count >= 1) {
+        if (strlen(arg1_s) > 0 && substring(arg1_s, 0, 1) == " ")
+            arg1_s = substring(arg1_s, 1);
+        if (arg1_s == "me")
+            arg1 = this_player();
+        else if (arg1_s == "here")
+            arg1 = environment(this_player());
+        else if (strlen(arg1_s) >= 2 &&
+                 substring(arg1_s, 0, 1) == "\"" &&
+                 substring(arg1_s, strlen(arg1_s) - 1) == "\"")
+            arg1 = substring(arg1_s, 1, strlen(arg1_s) - 1);
+        else if (to_int(arg1_s) != 0 || arg1_s == "0")
+            arg1 = to_int(arg1_s);
+        else {
+            ob1  = load_object(arg1_s);
+            arg1 = ob1 ? ob1 : find_player(arg1_s);
+        }
+    }
+
+    /* ---- Resolve arg2 ---- */
+    if (arg_count >= 2) {
+        if (strlen(arg2_s) > 0 && substring(arg2_s, 0, 1) == " ")
+            arg2_s = substring(arg2_s, 1);
+        if (arg2_s == "me")
+            arg2 = this_player();
+        else if (arg2_s == "here")
+            arg2 = environment(this_player());
+        else if (strlen(arg2_s) >= 2 &&
+                 substring(arg2_s, 0, 1) == "\"" &&
+                 substring(arg2_s, strlen(arg2_s) - 1) == "\"")
+            arg2 = substring(arg2_s, 1, strlen(arg2_s) - 1);
+        else if (to_int(arg2_s) != 0 || arg2_s == "0")
+            arg2 = to_int(arg2_s);
+        else {
+            ob2  = load_object(arg2_s);
+            arg2 = ob2 ? ob2 : find_player(arg2_s);
+        }
+    }
+
+    /* ---- Resolve arg3 ---- */
+    if (arg_count >= 3) {
+        if (strlen(arg3_s) > 0 && substring(arg3_s, 0, 1) == " ")
+            arg3_s = substring(arg3_s, 1);
+        if (arg3_s == "me")
+            arg3 = this_player();
+        else if (arg3_s == "here")
+            arg3 = environment(this_player());
+        else if (strlen(arg3_s) >= 2 &&
+                 substring(arg3_s, 0, 1) == "\"" &&
+                 substring(arg3_s, strlen(arg3_s) - 1) == "\"")
+            arg3 = substring(arg3_s, 1, strlen(arg3_s) - 1);
+        else if (to_int(arg3_s) != 0 || arg3_s == "0")
+            arg3 = to_int(arg3_s);
+        else {
+            ob3  = load_object(arg3_s);
+            arg3 = ob3 ? ob3 : find_player(arg3_s);
+        }
+    }
+
+    /* ---- Dispatch the call ---- */
+    if (arg_count == 0)
+        err = catch(val = call_other(target, func_part));
+    else if (arg_count == 1)
+        err = catch(val = call_other(target, func_part, arg1));
+    else if (arg_count == 2)
+        err = catch(val = call_other(target, func_part, arg1, arg2));
+    else
+        err = catch(val = call_other(target, func_part, arg1, arg2, arg3));
+
+    /* ---- Display result ---- */
+    label = file_name(target) + "->" + func_part + "()";
+    if (err) {
+        write(label + " => ERROR: " + err + "\n");
+        return 1;
+    }
+
+    tv = typeof(val);
+    if (tv == "int")
+        result_str = "(int) " + val;
+    else if (tv == "string")
+        result_str = "(string) \"" + val + "\"";
+    else if (tv == "object")
+        result_str = "(object) " + file_name(val);
+    else if (tv == "array")
+        result_str = "(array) size " + sizeof(val);
+    else if (tv == "null")
+        result_str = "(null)";
+    else
+        result_str = "(" + tv + ") " + val;
+
+    write(label + " = " + result_str + "\n");
     return 1;
 }

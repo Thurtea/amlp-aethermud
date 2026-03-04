@@ -5,6 +5,28 @@ These rules are read by AI coding assistants (Copilot, Claude Code, etc.) before
 Follow them strictly.
 
 
+RULE 0 — CHECK THE REFERENCE LIBRARY FIRST
+
+Before implementing ANY of the following, you MUST read the corresponding file from the Dead Souls reference library at:
+  /home/thurtea/amlp-aethermud/mud-references/deadsouls/ds3.8.2/
+
+- Any wizard/admin command (call, eval, goto, stat, cd, ls, clone, etc.)
+  → Check: lib/secure/cmds/creators/<cmd>.c or lib/cmds/creators/<cmd>.c
+
+- Any LPC standard object (room, player, NPC, item, armor, container, vehicle)
+  → Check: lib/std/<type>.c or lib/lib/<type>.c
+
+- Any LPC pattern you are unsure about (efun usage, inheritance, property systems)
+  → Check the fluffos driver source at: fluffos-2.23-ds03/src/
+
+- Any admin system (promote, demote, privilege, roles)
+  → Check: lib/secure/cmds/admins/ and lib/secure/cmds/creators/
+
+You are NOT allowed to invent LPC patterns from scratch. If a reference exists on disk, you read it first, then adapt it to our driver. If no reference exists, say so explicitly before proceeding.
+
+Violating Rule 0 is the same as violating Rule 1. Both result in rejected work.
+
+
 RULE 1 — NO COLOR CODES
 - Do not add ANSI color codes (`\033[`, `\e[`, `\x1b[`) to anything unless explicitly instructed.
 - This includes build scripts, `Makefile`, `mud.sh`, server logs, warmboot output, error messages, help text, admin tool output, and all in-game messages.

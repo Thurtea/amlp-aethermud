@@ -505,19 +505,37 @@ void send_to_player(PlayerSession *session, const char *format, ...) {
 /* Send command prompt based on state */
 void send_prompt(PlayerSession *session) {
     switch (session->state) {
-        case STATE_CONNECTING:
-            send_to_player(session,
-                "\r\n"
-                "=========================================\r\n"
-                "    AMLP Driver - Development Server\r\n"
-                "             Version 0.1.0\r\n"
-                "=========================================\r\n"
-                "\r\n"
-                "Welcome to the AMLP MUD!\r\n"
-                "\r\n"
-                "Enter your name: ");
+        case STATE_CONNECTING: {
+            FILE *_fa = fopen("lib/etc/first_admin.txt", "r");
+            if (_fa) {
+                fclose(_fa);
+                send_to_player(session,
+                    "\r\n"
+                    "=========================================\r\n"
+                    "    AMLP Driver - Development Server\r\n"
+                    "             Version 0.1.0\r\n"
+                    "=========================================\r\n"
+                    "\r\n"
+                    "Welcome to AMLP AetherMUD.\r\n"
+                    "This server has no administrator yet.\r\n"
+                    "Enter your name to claim the admin account.\r\n"
+                    "\r\n"
+                    "Enter your name: ");
+            } else {
+                send_to_player(session,
+                    "\r\n"
+                    "=========================================\r\n"
+                    "    AMLP Driver - Development Server\r\n"
+                    "             Version 0.1.0\r\n"
+                    "=========================================\r\n"
+                    "\r\n"
+                    "Welcome to the AMLP MUD!\r\n"
+                    "\r\n"
+                    "Enter your name: ");
+            }
             session->state = STATE_GET_NAME;
             break;
+        }
             
         case STATE_GET_NAME:
             send_to_player(session, "Enter your name: ");
@@ -2785,7 +2803,9 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 else if (strcmp(role, "domain") == 0)
                     snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
                 else if (strcmp(role, "coding") == 0)
-                    snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Code]\033[0m ");
+                else if (role[0] == '\0')
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Apprentice]\033[0m ");
                 else
                     snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
 
@@ -2836,7 +2856,9 @@ VMValue execute_command(PlayerSession *session, const char *command) {
                 else if (strcmp(role, "domain") == 0)
                     snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Domain]\033[0m ");
                 else if (strcmp(role, "coding") == 0)
-                    snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Code]\033[0m ");
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;34m[Code]\033[0m ");
+                else if (role[0] == '\0')
+                    snprintf(role_tag, sizeof(role_tag), "\033[1;36m[Apprentice]\033[0m ");
                 else
                     snprintf(role_tag, sizeof(role_tag), "\033[1;32m[Roleplay]\033[0m ");
             }

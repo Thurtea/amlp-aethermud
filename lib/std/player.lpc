@@ -404,7 +404,11 @@ void set_privilege_level(int lv) {
     // Update title
     switch (lv) {
         case 0: title = "Player"; break;
-        case 1: title = "Roleplay Wizard"; break;
+        case 1: {
+            string _wr = query_property("wizard_role");
+            title = (_wr && _wr != "") ? "Roleplay Wizard" : "Apprentice";
+            break;
+        }
         case 2: title = "Coding Wizard"; break;
         case 3: title = "Domain Wizard"; break;
         case 4: title = "Admin"; break;
@@ -472,16 +476,18 @@ void set_privilege_level(int lv) {
     }
 
     // 4. Clone and give physical wiz-tool items for new rank
-    //    Rank 1 (Roleplay Wizard): handbook, rp_tool
-    //    Rank 2 (Coding Wizard):   handbook, code_tool, crystal_ball
-    //    Rank 3 (Domain Wizard):   above + qcs_tool, wiz_build
-    //    Rank 4 (Admin):           all tools
-    string *tool_paths = ({ "/wiz/id_card" });
-    if (lv >= 1) tool_paths += ({ "/wiz/rp_tool" });
-    if (lv >= 2) tool_paths += ({ "/wiz/code_tool", "/wiz/crystal_ball" });
-    if (lv >= 3) tool_paths += ({ "/wiz/admin_wand", "/wiz/wizard_staff" });
+    //    Rank 1 (Apprentice/Roleplay): handbook, rp_tool
+    //    Rank 2 (Coding Wizard):       + code_tool, crystal
+    //    Rank 3 (Domain Wizard):       + admin_wand, staff, qcs_tool, wiz_build
+    //    Rank 4 (Admin):               + admin_orb, chest, staff_of_demotion
+    string *tool_paths = ({});
+    if (lv >= 1) tool_paths += ({ "/obj/wiztools/handbook", "/obj/wiztools/rp_tool" });
+    if (lv >= 2) tool_paths += ({ "/obj/wiztools/code_tool", "/obj/wiztools/crystal" });
+    if (lv >= 3) tool_paths += ({ "/obj/wiztools/admin_wand", "/obj/wiztools/staff",
+                                   "/obj/wiztools/qcs_tool", "/obj/wiztools/wiz_build" });
     if (lv >= 4)
-        tool_paths += ({ "/wiz/admin_orb" });
+        tool_paths += ({ "/obj/wiztools/admin_orb", "/obj/wiztools/chest",
+                         "/obj/wiztools/staff_of_demotion" });
     foreach (string tp in tool_paths) {
         object tool;
         catch { tool = clone_object(tp); };

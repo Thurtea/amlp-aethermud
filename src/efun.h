@@ -175,6 +175,8 @@ VMValue efun_debug_mem_stats(VirtualMachine *vm, VMValue *args, int arg_count);
 
 /* Privilege level sync efun */
 VMValue efun_set_privilege_level(VirtualMachine *vm, VMValue *args, int arg_count);
+/* Chargen completion check efun */
+VMValue efun_query_chargen_complete(VirtualMachine *vm, VMValue *args, int arg_count);
 
 /* Terminal size efuns */
 VMValue efun_query_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count);

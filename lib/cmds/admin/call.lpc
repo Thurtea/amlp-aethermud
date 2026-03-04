@@ -1,0 +1,55 @@
+// /lib/cmds/admin/call.lpc
+// call - force a player to say something
+// Admin-only command
+
+inherit "/std/cmd";
+
+int query_privilege_required() { return 4; }
+
+string query_help() {
+    return "SYNTAX: call <player> <message>\n\n" +
+        "Forces the named online player to say a message.\n" +
+        "Useful for testing NPC speech triggers and response handlers.\n\n" +
+        "The player will emit: <player> says: <message>\n\n" +
+        "Example: call kael Hello there!\n\n" +
+        "See also: promote, setrole, demote\n";
+}
+
+int main(string args) {
+    string target_name, message;
+    object target;
+
+    if (!args || args == "") {
+        write("Usage: call <player> <message>\n");
+        return 1;
+    }
+
+    int sp = strsrch(args, " ");
+    if (sp < 0) {
+        write("Usage: call <player> <message>\n");
+        return 1;
+    }
+
+    target_name = lower_case(substring(args, 0, sp));
+    message     = substring(args, sp + 1);
+
+    if (!message || message == "") {
+        write("Usage: call <player> <message>\n");
+        return 1;
+    }
+
+    target = find_player(target_name);
+    if (!target) {
+        write("Player '" + target_name + "' is not online.\n");
+        return 1;
+    }
+
+    if (function_exists("force_me", target)) {
+        target->force_me("say " + message);
+        write("Called " + capitalize(target_name) + ": " + message + "\n");
+    } else {
+        write("Cannot force " + capitalize(target_name) + " (no force_me method).\n");
+    }
+
+    return 1;
+}

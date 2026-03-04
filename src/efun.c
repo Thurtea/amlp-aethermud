@@ -2321,6 +2321,22 @@ VMValue efun_set_privilege_level(VirtualMachine *vm, VMValue *args, int arg_coun
     return vm_value_create_int(1);
 }
 
+/*
+ * efun_query_chargen_complete(object player)
+ * Returns 1 if the player has finished character creation, 0 otherwise.
+ * Used by LPC admin commands to guard against promoting mid-chargen players.
+ */
+VMValue efun_query_chargen_complete(VirtualMachine *vm, VMValue *args, int arg_count) {
+    (void)vm;
+    if (arg_count < 1 || args[0].type != VALUE_OBJECT)
+        return vm_value_create_int(0);
+    obj_t *po = (obj_t *)args[0].data.object_value;
+    if (!po) return vm_value_create_int(0);
+    PlayerSession *sess = find_session_for_player(po);
+    if (!sess) return vm_value_create_int(0);
+    return vm_value_create_int(sess->chargen_state == CHARGEN_COMPLETE ? 1 : 0);
+}
+
 /* ========== Terminal dimension efuns ========== */
 
 VMValue efun_query_terminal_width(VirtualMachine *vm, VMValue *args, int arg_count) {
@@ -3104,6 +3120,9 @@ int efun_register_all(EfunRegistry *registry) {
     /* Privilege level sync: updates C session AND LPC player object atomically */
     efun_register(registry, "set_privilege_level", efun_set_privilege_level, 2, 2,
                   "int set_privilege_level(object, int)");
+    /* Chargen completion check */
+    efun_register(registry, "query_chargen_complete", efun_query_chargen_complete, 1, 1,
+                  "int query_chargen_complete(object)");
 
     /* Callout efuns */
     efun_register(registry, "call_out", efun_call_out, 2, 10, "int call_out(string, float, ...)");
